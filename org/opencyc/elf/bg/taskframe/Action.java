@@ -10,6 +10,8 @@ import org.opencyc.elf.bg.procedure.Procedure;
 //// External Imports
 import java.util.ArrayList;
 
+import java.lang.reflect.*;
+
 /**
  * <P>Action describes the action to be performed and may include a set of modifiers such as
  * priorities, mode, path constraints, acceptable cost, and required conditions
@@ -49,30 +51,6 @@ public class Action {
   
   //// Public Area
   
-  /**
-   * Executes this action's procedure given its parameter list
-   * 
-   * @param inputs the list of parameter values
-   * 
-   * @return the output of the procedure
-   */
-  public Object execute(ArrayList parameterValues) {
-    setParameterValues(parameterValues);
-    return execute();
-  };
-
-  /**
-   * Executes this action's procedure
-   * 
-   * @param inputs the list of parameter values
-   * 
-   * @return the output of the procedure
-   */
-  public Object execute() {
-    //TODO
-    return null;
-  };
-
   /**
    * Gets the action state, including the procedure, parameters and action modifiers
    *
@@ -168,9 +146,9 @@ public class Action {
   }
     
   /**
-   * Sets the action state, including the procedure, parameters and action modifiers
+   * Sets the action state, including the object, method, parameters and action modifiers
    *
-   * @param state the action state, including the procedure, parameters and action modifiers
+   * @param state the action state, including the object, method, parameters and action modifiers
    */
   public void setState (State state) {
     this.state = state;

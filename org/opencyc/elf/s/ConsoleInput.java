@@ -82,7 +82,11 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    * @return a string representation of this object
    */
   public String toString() {
-    return "Console input sensor for " + node.getName();
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ConsoleInput resources: ");
+    stringBuffer.append(resources.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /** 

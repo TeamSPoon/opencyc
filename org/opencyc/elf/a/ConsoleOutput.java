@@ -83,7 +83,11 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    * @return a string representation of this object
    */
   public String toString() {
-    return "ConsoleOutput for " + node.getName();
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ConsoleOutput resources: ");
+    stringBuffer.append(resources.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /** 

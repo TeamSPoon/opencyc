@@ -49,6 +49,15 @@ public class Status {
     return statusDictionary.get(key);
   }
 
+  /** Returns true if the given key has any value in the status dictionary.
+   *
+   * @param key the given key
+   * @return true if the given key has any value in the status dictionary
+   */
+  public boolean isTrue (Object key) {
+    return statusDictionary.get(key) != null;
+  }
+
   /** Puts the given key / value pair into the status dictionary.
    *
    * @param key the given key
@@ -58,10 +67,23 @@ public class Status {
     statusDictionary.put(key, value);
   }
 
+  /** Sets the given key as true in the status dictionary.
+   * 
+   * @param key the given key
+   */
+  public void setTrue (Object key) {
+    statusDictionary.put(key, Boolean.TRUE);
+  }
+  
   /** When present, indicates to the job assigner that the reporting scheduler has finished
    * the assigned schedule.
    */
   public static String SCHEDULE_FINISHED = "schedule finished";
+  
+  /** When present, indicates to the scheduler that the executor encountered an exceptional
+   * condition while processing the current schedule.
+   */
+  public static String EXECUTION_EXCEPTION = "execution exception";
   
   /** When present, indicates to the higher-level executor that the reporting job assigner has 
    * finished the commanded task.

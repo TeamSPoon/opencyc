@@ -52,6 +52,14 @@ public class State {
     return this.stateVariableDictionary.equals(that.stateVariableDictionary);
   }
 
+  /** Returns a hash code value for the object. 
+   *
+   * @return a hash code value for the object
+   */
+  public int hashCode() {
+    return this.stateVariableDictionary.hashCode();
+  }
+  
   /** Returns a string representation of this object.
    * 
    * @return string representation of this object

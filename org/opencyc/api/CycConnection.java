@@ -51,8 +51,8 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Default base tcp port for the OpenCyc server.
      */
-    //public static final int DEFAULT_BASE_PORT = 3600;
-    public static final int DEFAULT_BASE_PORT = 3640;
+    public static final int DEFAULT_BASE_PORT = 3600;
+    //public static final int DEFAULT_BASE_PORT = 3640;
 
     /**
      * HTTP port offset for the OpenCyc server.
@@ -87,7 +87,8 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Parameter that, when true, causes a trace of the messages to and from the server.
      */
-    protected int trace = API_TRACE_NONE;
+    //protected int trace = API_TRACE_NONE;
+    protected int trace = API_TRACE_MESSAGES;
 
     /**
      * Ascii mode connnection to the OpenCyc server.
@@ -122,7 +123,7 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Default messaging mode to the OpenCyc server.
      */
-    public static final int DEFAULT_MESSAGING_MODE = CONCURRENT_MESSAGING_MODE;
+    public static final int DEFAULT_MESSAGING_MODE = SERIAL_MESSAGING_MODE;
 
     /**
      * Messaging mode to the OpenCyc server.
@@ -345,7 +346,6 @@ public class CycConnection implements CycConnectionInterface {
             this.messagingMode = messagingMode;
         this.cycAccess = cycAccess;
         initializeApiConnections();
-        //if (trace >= API_TRACE_NONE) {
         if (trace > API_TRACE_NONE) {
             if (communicationMode == ASCII_MODE)
                 System.out.println("Ascii connection " + asciiSocket);

@@ -121,23 +121,49 @@ public class ImportDaml {
         ontologyNicknames.put("http://www.w3.org/1999/02/22-rdf-syntax-ns", "rdf");
         ontologyNicknames.put("http://www.w3.org/2000/01/rdf-schema", "rdfs");
         ontologyNicknames.put("http://www.w3.org/2000/10/XMLSchema", "xsd");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont", "NS0");
-        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips", "fips");
-        ontologyNicknames.put("http://www.daml.org/2001/10/html/airport-ont", "airport");
-        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont", "ves");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont.daml", "NS0");
+        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips.daml", "fips");
+        ontologyNicknames.put("http://www.daml.org/2001/10/html/airport-ont.daml", "airport");
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml", "ves");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont.daml", "enp");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont", "enp");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/objectives-ont.daml", "obj");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/objectives-ont", "obj");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/social-elements-ont.daml", "soci");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/social-elements-ont", "soci");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/political-elements-ont.daml", "poli");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/political-elements-ont", "poli");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/economic-elements-ont.daml", "econ");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/economic-elements-ont", "econ");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml", "infr");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont", "infr");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/information-elements-ont.daml", "info");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/information-elements-ont", "info");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont.daml", "mil");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont", "mil");
+
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/ona.xsd", "dt");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/location-ont.daml", "loc");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/location-ont", "loc");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/assessment-ont.daml", "assess");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/assessment-ont", "assess");
+
         ontologyNicknames.put("http://www.daml.org/2001/02/geofile/geofile-dt.xsd", "geodt");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/cinc-ont", "cinc");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/CINC-ont.daml", "cinc");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/CINC-ont", "cinc");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/agency-ont.daml", "agent");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/agency-ont", "agent");
     }
 
@@ -166,9 +192,22 @@ public class ImportDaml {
 
         System.out.println("Classes\n");
         iter = damlModel.listDAMLClasses();
+        String localName;
+        String nameSpace;
+        String nickname;
+        String constantName;
         while (iter.hasNext()) {
             DAMLClass damlClass = (DAMLClass)iter.next();
-            System.out.println(damlClass.toString());
+            localName = damlClass.getLocalName();
+            nameSpace = damlClass.getNameSpace();
+            if (localName == null || nameSpace == null) {
+                System.out.println(damlClass.toString());
+            }
+            else {
+                nickname = getOntologyNickname(nameSpace);
+                constantName = nickname + ":" + localName;
+                System.out.println(constantName);
+            }
             Literal literal = damlClass.prop_label().getValue();
             if (literal != null)
                 System.out.println("  label " + literal.toString());
@@ -177,7 +216,22 @@ public class ImportDaml {
                 System.out.println("  comment " + comment.toString());
             Iterator iterSuperClasses = damlClass.getSuperClasses(false);
             while (iterSuperClasses.hasNext()) {
-                System.out.println("  super class " + iterSuperClasses.next().toString());
+                Object superClassObject = iterSuperClasses.next();
+                if (superClassObject instanceof DAMLClass) {
+                    DAMLClass superClass = (DAMLClass) superClassObject;
+                    localName = superClass.getLocalName();
+                    nameSpace = superClass.getNameSpace();
+                    if (localName == null || nameSpace == null) {
+                        System.out.println("  super class " + superClass.toString());
+                    }
+                    else {
+                        nickname = getOntologyNickname(nameSpace);
+                        constantName = nickname + ":" + localName;
+                        System.out.println("  super class " + constantName);
+                    }
+                }
+                else
+                    System.out.println("  super class " + superClassObject);
             }
             Iterator iterInstances = damlClass.getInstances();
             while (iterInstances.hasNext()) {
@@ -187,6 +241,16 @@ public class ImportDaml {
         }
         if (verbosity > 0)
             System.out.println("\nDone importing " + damlPath + "\n");
+    }
+
+    protected String getOntologyNickname (String nameSpace) {
+        int len = nameSpace.length() - 1;
+        String key = nameSpace.substring(0, len);
+        String nickname = (String) ontologyNicknames.get(key);
+        if (nickname == null)
+            throw new RuntimeException("Ontology nickname not found for " + key);
+        return nickname;
+
     }
 
     /**

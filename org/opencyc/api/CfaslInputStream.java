@@ -328,12 +328,17 @@ public class CfaslInputStream extends BufferedInputStream {
      * Reports the unhandled cfasl opcode or throws an exception.
      */
     protected Object reportUnhandledCfaslOpcode (int cfaslOpcode) {
+        String errorMessage;
+        if (cfaslOpcode == -1)
+            errorMessage = "Cyc server closed the connection";
+        else
+            errorMessage = "Unknown cfasl opcode: " + cfaslOpcode;
         if (reportCfaslErrors) {
-            System.out.println("Unknown cfasl opcode: " + cfaslOpcode);
+            System.out.println(errorMessage);
             return Integer.toString(cfaslOpcode);
         }
         else
-            throw  new RuntimeException("Unknown cfasl opcode: " + cfaslOpcode);
+            throw  new RuntimeException(errorMessage);
     }
 
     /**

@@ -603,7 +603,8 @@ public class CycAccess {
         if (not == null)
             not = getKnownConstantByGuid("bd5880fb-9c29-11b1-9dad-c379636f7270");
         if (numericallyEqual == null)
-            numericallyEqual = getKnownConstantByGuid("bd589d90-9c29-11b1-9dad-c379636f7270");
+            //numericallyEqual = getKnownConstantByGuid("bd589d90-9c29-11b1-9dad-c379636f7270");
+            numericallyEqual = getConstantByGuid(new Guid("bd589d90-9c29-11b1-9dad-c379636f7270"));
         if (plusFn == null)
             plusFn = getKnownConstantByGuid("bd5880ae-9c29-11b1-9dad-c379636f7270");
         if (different == null)

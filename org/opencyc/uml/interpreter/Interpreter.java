@@ -163,6 +163,12 @@ public class Interpreter {
             eventDispatcher();
             eventProcessor();
             fireSelectedTransitions();
+            if (currentEvent != null) {
+                if (verbosity > 2)
+                    Log.current.println("Destroying " + currentEvent.toString());
+                stateMachineFactory.destroyEvent(currentEvent);
+                currentEvent = null;
+            }
         }
     }
 
@@ -252,13 +258,20 @@ public class Interpreter {
         Iterator activeStatesIter = activeStates.keySet().iterator();
         while (activeStatesIter.hasNext()) {
             State state = (State) activeStatesIter.next();
+            if (verbosity > 2)
+                Log.current.println("Considering transitions from " + state.toString());
             Iterator transitions = state.getOutgoing().listIterator();
             while (transitions.hasNext()) {
                 Transition transition = (Transition) transitions.next();
-                if (transition.getTrigger().equals(currentEvent)) {
+                if (currentEventEnables(transition)) {
+                    if (verbosity > 2)
+                        Log.current.println("  " + transition.toString() +
+                                            " enabled by " + currentEvent.toString());
                     BooleanExpression guardExpression = transition.getGuard().getexpression();
                     if ((guardExpression == null) ||
                         expressionEvaluator.evaluateBoolean(guardExpression)) {
+                        if (verbosity > 2)
+                            Log.current.println("    selected " + transition.toString());
                         selectedTransitions.add(transition);
                     }
                 }
@@ -267,8 +280,17 @@ public class Interpreter {
     }
 
     /**
-     * Determines whether the given transition can be triggered by the given event.
+     * Determines whether the given transition can be triggered by the current event.
+     *
+     * @param transition the given transition
+     * @return whether the given transition can be triggered by the current event
      */
+    protected boolean currentEventEnables (Transition transition) {
+        Event trigger = transition.getTrigger();
+        if (trigger == null)
+            return true;
+        return trigger.getClass().equals(currentEvent.getClass());
+    }
 
 
     /**
@@ -298,13 +320,6 @@ public class Interpreter {
             Transition transition = (Transition) iter.next();
             transitionExit(transition);
             transitionEnter(transition);
-            Event event = transition.getTrigger();
-            if (event != null) {
-                if (verbosity > 2)
-                    Log.current.println("Destroying " + event.toString());
-                stateMachineFactory.destroyEvent(event);
-                transition.setTrigger(null);
-            }
         }
     }
 
@@ -517,5 +532,14 @@ public class Interpreter {
      */
     public StateMachineFactory getStateMachineFactory () {
         return stateMachineFactory;
+    }
+
+    /**
+     * Gets the dictionary of active states.
+     *
+     * @return the dictionary of active states
+     */
+    public HashMap getActiveStates () {
+        return this.activeStates;
     }
 }

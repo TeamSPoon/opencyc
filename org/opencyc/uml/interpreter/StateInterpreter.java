@@ -173,6 +173,7 @@ public class StateInterpreter extends Thread {
                     interpreter.getActiveStateConfigurationTreeNode(getParentState());
             DefaultMutableTreeNode stateNode = new DefaultMutableTreeNode(state);
             parentStateNode.add(stateNode);
+            interpreter.getActiveStates().put(state, stateNode);
         }
 
         if (state.getEntry() != null)

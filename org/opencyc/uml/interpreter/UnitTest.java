@@ -506,6 +506,7 @@ public class UnitTest extends TestCase {
         System.out.print(interpreter.displayStateConfigurationTree());
         interpreter.eventDispatcher();
         interpreter.eventProcessor();
+        interpreter.fireSelectedTransitions();
 
 
         System.out.println("\n**** testSimpleStateMachine ****");

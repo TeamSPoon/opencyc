@@ -305,7 +305,7 @@ public class CycNart extends CycFort implements Comparable {
         ListIterator iterator = this.getArguments().listIterator();
         while (iterator.hasNext()) {
             result.append(" ");
-            Object object = iterator.next().toString();
+            Object object = iterator.next();
             if (object instanceof String) {
                 result.append("\"");
                 result.append(object.toString());

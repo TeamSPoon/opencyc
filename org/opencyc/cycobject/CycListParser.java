@@ -91,7 +91,6 @@ public class CycListParser  {
         st.wordChars('>', '>');
         st.wordChars('*', '*');
         st.wordChars('/', '/');
-        st.wordChars('.', '.');
         st.wordChars('#', '#');
         st.wordChars(':', ':');
         st.wordChars('!', '!');
@@ -99,10 +98,15 @@ public class CycListParser  {
         st.wordChars('?', '?');
         st.wordChars('%', '%');
         st.wordChars('&', '&');
+        st.wordChars('.', '.');
         st.slashSlashComments(false);
         st.slashStarComments(false);
         st.commentChar(';');
+        st.wordChars('?', '?');
+        st.wordChars('%', '%');
+        st.wordChars('&', '&');
         st.eolIsSignificant(false);
+        st.parseNumbers();
 
         return read(st);
     }

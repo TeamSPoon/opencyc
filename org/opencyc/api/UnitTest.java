@@ -37,7 +37,7 @@ public class UnitTest extends TestCase {
 
     public static final String myAgentName = "Agent2";
     public static final String cycProxyAgentName = "Agent1";
-    public static final int agentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNTITY;
+    public static final int agentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNITY;
 
     /**
      * Indicates the use of a local CycConnection object to connect with
@@ -101,7 +101,7 @@ public class UnitTest extends TestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
         if (connectionMode == REMOTE_CYC_CONNECTION &&
-            agentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNTITY)
+            agentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
             System.exit(0);
     }
 
@@ -373,7 +373,7 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testBinaryCycConnection2 ****");
         CycConnection cycConnection = null;
         try {
-            cycConnection = new CycConnection(null);
+            cycConnection = new CycConnection((CycAccess) null);
             //cycConnection.trace = true;
         }
         catch (Exception e) {

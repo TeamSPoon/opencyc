@@ -65,12 +65,17 @@ public interface AgentCommunityAdapter {
     /**
      * Indicates the CoABS agent community.
      */
-    public static final int COABS_AGENT_COMMUNTITY = 1;
+    public static final int COABS_AGENT_COMMUNITY = 1;
 
     /**
      * Indicates the FIPA-OS agent community.
      */
-    public static final int FIPA_OS_AGENT_COMMUNTITY = 2;
+    public static final int FIPA_OS_AGENT_COMMUNITY = 2;
+
+    /**
+     * Indicates both the FIPA-OS and CoABS agent communities.
+     */
+    public static final int FIPA_OS_AND_COABS_AGENT_COMMUNITIES = 3;
 
     /**
      * Indicates the cyc-api ontology (role).

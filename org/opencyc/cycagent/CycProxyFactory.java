@@ -6,7 +6,6 @@ import  java.io.*;
 import  java.util.Collection;
 import  fipaos.ont.fipa.fipaman.*;
 import  fipaos.ont.fipa.*;
-import  fipaos.parser.*;
 import  org.opencyc.api.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.util.*;
@@ -76,7 +75,8 @@ class CycProxyFactory implements Runnable {
     }
 
     /***
-     * Executes the CycProxyFactory thread.
+     * Executes the CycProxyFactory thread and processes the
+     * the (cyc-to-agent-manager-init <image-id> <base-port>) message.
      */
     public void run () {
         Log.current.println("Begin CycProxyFactory thread");
@@ -89,108 +89,19 @@ class CycProxyFactory implements Runnable {
         }
         CycList cycToAgentManagerInitMessage = null;
         try {
-            cycToAgentManagerInitMessage = (CycList) cycConnection.receiveBinary();
+            Object[] response = cycConnection.receiveBinary();
+            cycToAgentManagerInitMessage = (CycList) response[1];
         }
         catch (Exception e) {
             Log.current.println("Exception reading CycConnection: " + e.getMessage());
             return;
         }
-        /*
-        if (! (fipaTransportMessage instanceof CycList)) {
-            Log.current.println(fipaTransportMessage + "\nfipaTransportMessage is not a CycList");
-            throw new RuntimeException(fipaTransportMessage + "\nfipaTransportMessage is not a CycList");
+        if (! cycToAgentManagerInitMessage.first().equals(CycObjectFactory.makeCycSymbol("cyc-to-agent-manager-init"))) {
+            Log.current.println("Invalid initialization message: " + cycToAgentManagerInitMessage);
+            return;
         }
-        if (((CycList) fipaTransportMessage).size() != 3) {
-            Log.current.println(fipaTransportMessage + "\nfipaTransportMessage has invalid length of " +
-                                ((CycList) fipaTransportMessage).size());
-            throw new RuntimeException(fipaTransportMessage + "\nfipaTransportMessage has invalid length of " +
-                                ((CycList) fipaTransportMessage).size());
-        }
-        if (! (((CycList) fipaTransportMessage).first().equals(CycObjectFactory.makeCycSymbol("FIPA-ENVELOPE")))) {
-            Log.current.println("Invalid cyc message directive " + fipaTransportMessage);
-            throw new RuntimeException("Invalid cyc message directive " + fipaTransportMessage);
-        }
-
-        if (! (((CycList) fipaTransportMessage).second() instanceof CycList)) {
-            Log.current.println(((CycList) fipaTransportMessage).second() +
-                                "\nenvelope is not a CycList");
-            throw new RuntimeException(((CycList) fipaTransportMessage).second() +
-                                       "\nenvelope is not a CycList");
-        }
-        CycList envelope = (CycList) ((CycList) fipaTransportMessage).second();
-        if (! (((CycList) fipaTransportMessage).third() instanceof CycList)) {
-            Log.current.println(((CycList) fipaTransportMessage).third() +
-                                "\npayload is not a CycList");
-            throw new RuntimeException(((CycList) fipaTransportMessage).third() +
-                                       "\npayload is not a CycList");
-        }
-        CycList payload = (CycList) ((CycList) fipaTransportMessage).third();
-        if (! (payload.second() instanceof CycList)) {
-            Log.current.println(payload.second() + "\naclList is not a CycList");
-            throw new RuntimeException(payload.second() + "\naclList is not a CycList");
-        }
-        CycList aclList = (CycList) payload.second();
-        ACL acl = new ACL();
-        acl.setPerformative(aclList.first().toString());
-        Object senderObj = CycObjectFactory.makeCycSymbol(":sender");
-        if (! (senderObj instanceof CycList)) {
-            Log.current.println(senderObj + "\nsenderObj is not a CycList");
-            throw new RuntimeException(senderObj + "\nsenderObj is not a CycList");
-        }
-        AgentID senderAID = null;
-        try {
-            senderAID = new AgentID(((CycList) senderObj).cyclify());
-        }
-        catch (ParserException e) {
-            Log.current.println(e.getMessage() + "\nannot parse sender " + senderObj);
-            throw new RuntimeException(e.getMessage() + "\nannot parse sender " + senderObj);
-        }
-        acl.setSenderAID(senderAID);
-        Object receiverObj = CycObjectFactory.makeCycSymbol(":receiver");
-        if (! (receiverObj instanceof CycList)) {
-            Log.current.println(receiverObj + "\nreceiverObj is not a CycList");
-            throw new RuntimeException(receiverObj + "\nreceiverObj is not a CycList");
-        }
-        AgentID receiverAID = null;
-        try {
-            receiverAID = new AgentID(((CycList) receiverObj).cyclify());
-        }
-        catch (ParserException e) {
-            Log.current.println(e.getMessage() + "\ncannot parse receiver " + receiverObj);
-            throw new RuntimeException(e.getMessage() + "\nannot parse receiver " + receiverObj);
-        }
-        acl.setReceiverAID(receiverAID);
-        Object contentObj = aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":content"));
-        if (! (contentObj instanceof CycList)) {
-            Log.current.println(contentObj + "\ncontentObj is not a CycList");
-            throw new RuntimeException(contentObj + "\ncontentObj is not a CycList");
-        }
-        String contentXml = null;
-        try {
-            contentXml = "\n" + ((CycList) contentObj).toXMLString();
-        }
-        catch (IOException e) {
-            Log.current.println(e.getMessage() +
-                                "\nCannot convert to XML string " + contentObj);
-            throw new RuntimeException(e.getMessage() +
-                                       "\nCannot convert to XML string " + contentObj);
-        }
-        acl.setContentObject(contentXml, ACL.BYTELENGTH_ENCODING);
-        acl.setLanguage(FIPACONSTANTS.XML);
-        acl.setOntology(AgentCommunityAdapter.CYC_API_ONTOLOGY);
-        acl.setReplyWith(AgentManager.agentManager.getAgentCommunityAdapter().nextMessageId());
-
-        if (verbosity > 0)
-            Log.current.println("Processing the message without waiting for the reply");
-
-        try {
-            AgentManager.agentManager.getAgentCommunityAdapter().sendMessage(acl);
-        }
-        catch (Exception e) {
-            Log.current.println("Exception when sending\n" + acl + "\n" + e.getMessage());
-        }
-        */
-
+        String cycImageId = (String) cycToAgentManagerInitMessage.second();
+        int basePort = ((Integer) cycToAgentManagerInitMessage.third()).intValue();
         CycList acknowledgement = new CycList();
         acknowledgement.add(CycObjectFactory.t);
         acknowledgement.add(CycObjectFactory.t);
@@ -202,7 +113,12 @@ class CycProxyFactory implements Runnable {
             Log.current.println("Exception sending acknowledgement: " + e.getMessage());
             return;
         }
-        close();
+        String myAgentName = "cyc-api-service-" + cycImageId;
+        CycProxy cycProxy = new CycProxy(myAgentName, verbosity);
+        cycProxy.agentsCycConnection = cycConnection;
+        CycAgentInfo cycAgentInfo = new CycAgentInfo(basePort, cycImageId, cycProxy);
+        AgentManager.cycAgents.put(myAgentName, cycAgentInfo);
+        cycProxy.handleMessagesFromCyc();
     }
 
     /**

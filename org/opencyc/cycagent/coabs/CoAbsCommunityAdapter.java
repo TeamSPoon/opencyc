@@ -354,7 +354,7 @@ public class CoAbsCommunityAdapter
             }
         }
         if (messageReceiver != null)
-            messageReceiver.messageReceived(acl);
+            messageReceiver.messageReceived(AgentCommunityAdapter.COABS_AGENT_COMMUNITY, acl);
         else
             Log.current.println("no message receiver instance to process\n" + acl);
     }

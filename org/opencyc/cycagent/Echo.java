@@ -42,6 +42,11 @@ public class Echo extends GenericAgent {
     public String echoMessageText = "default echo message";
 
     /**
+     * the interface to either the CoABS or FIPA-OS agent community
+     */
+    protected AgentCommunityAdapter agentCommunityAdapter;
+
+    /**
      * Constructs a new Echo agent object.
      */
     public Echo() {
@@ -61,9 +66,9 @@ public class Echo extends GenericAgent {
         Echo echo = new Echo();
         echo.remoteAgentName = args[0];
         if (args[1].equals("coabs"))
-            echo.remoteAgentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNTITY;
+            echo.remoteAgentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNITY;
         else if (args[1].equals("fipa-os"))
-            echo.remoteAgentCommunity = AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNTITY;
+            echo.remoteAgentCommunity = AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY;
         else {
             Log.current.errorPrintln("remote agent community must be coabs or fipa-os");
             System.exit(1);
@@ -72,6 +77,10 @@ public class Echo extends GenericAgent {
         echo.myAgentName = "EchoAgent";
         echo.setVerbosity(AgentCommunityAdapter.QUIET_VERBOSITY);
         echo.initializeAgentCommunity();
+        if (echo.remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
+            echo.agentCommunityAdapter = echo.coAbsCommunityAdapter;
+        else
+            echo.agentCommunityAdapter = echo.fipaOsCommunityAdapter;
         echo.doEcho();
         echo.agentCommunityAdapter.deregister();
         System.exit(0);
@@ -120,10 +129,11 @@ public class Echo extends GenericAgent {
     /**
      * Notifies my agent that an Agent Communication Language message has been received.
      *
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
      * @param acl the Agent Communication Language message which has been received for my agent
      */
-    public void messageReceived (ACL acl) {
-        super.messageReceived(acl);
+    public void messageReceived (int remoteAgentCommunity, ACL acl) {
+        super.messageReceived(remoteAgentCommunity, acl);
         if (! messageConsumed)
             Log.current.println("Ignoring message\n" + acl);
     }

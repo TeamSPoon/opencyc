@@ -73,12 +73,6 @@ public class AgentManager {
     protected ServerSocket listenerSocket = null;
 
     /**
-     * Singleton thread which listens for requests from Cyc.
-     */
-    protected static CycListener cycListener;
-    protected static Thread cycListenerThread;
-
-    /**
      * Provides the main method.
      */
     public static void main(String[] args) {
@@ -102,9 +96,6 @@ public class AgentManager {
      */
     public AgentManager () {
         cycAgents = new Hashtable();
-        cycListener = new CycListener();
-        cycListenerThread = new Thread(cycListener);
-        cycListenerThread.start();
     }
 
     /**

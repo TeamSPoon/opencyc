@@ -49,7 +49,7 @@ public class FipaOsCycProxy {
      */
     public FipaOsCycProxy (String myAgentName, int verbosity) {
         cycProxy = new CycProxy(myAgentName,
-                                AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNTITY,
+                                AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY,
                                 verbosity);
     }
 
@@ -69,7 +69,7 @@ public class FipaOsCycProxy {
             catch (InterruptedException e) {
                 break;
             }
-        fipaOsCycProxy.cycProxy.getAgentCommunityAdapter().deregister();
+        fipaOsCycProxy.cycProxy.getFipaOsCommunityAdapter().deregister();
         System.exit(0);
     }
 

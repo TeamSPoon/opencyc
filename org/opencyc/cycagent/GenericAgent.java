@@ -4,7 +4,10 @@ import java.io.*;
 import javax.naming.TimeLimitExceededException;
 import fipaos.ont.fipa.*;
 import fipaos.ont.fipa.fipaman.*;
+import org.jdom.*;
 import org.opencyc.util.Timer;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.cycagent.coabs.*;
 import org.opencyc.cycagent.fipaos.*;
 import org.opencyc.xml.*;
@@ -66,9 +69,14 @@ public class GenericAgent implements MessageReceiver {
     protected int remoteAgentCommunity;
 
     /**
-     * the interface for interacting with an agent community such as CoABS or FIPA-OS
+     * the interface for interacting with the CoABS agent community
      */
-    protected AgentCommunityAdapter agentCommunityAdapter;
+    protected CoAbsCommunityAdapter coAbsCommunityAdapter;
+
+    /**
+     * the interface for interacting with the FIPA-OS agent community
+     */
+    protected FipaOsCommunityAdapter fipaOsCommunityAdapter;
 
     /**
      * Indicates whether this class consumed the received message.
@@ -83,7 +91,22 @@ public class GenericAgent implements MessageReceiver {
     }
 
     /**
-     * Constructs a GenericAgent object.
+     * Constructs a GenericAgent object for the given agent on both agent communities.
+     *
+     * @param myAgentName name of the local agent
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
+     * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input
+     */
+    public GenericAgent(String myAgentName, int verbosity) {
+        this.myAgentName = myAgentName;
+        this.remoteAgentCommunity = AgentCommunityAdapter.FIPA_OS_AND_COABS_AGENT_COMMUNITIES;
+        this.verbosity = verbosity;
+        Log.makeLog();
+    }
+
+    /**
+     * Constructs a GenericAgent object for the given agent on the given agent community.
      *
      * @param myAgentName name of the local agent
      * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
@@ -104,18 +127,21 @@ public class GenericAgent implements MessageReceiver {
     public void initializeAgentCommunity() {
         if (verbosity > 0)
             Log.current.println("Initializing the agent community connection");
-        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNTITY) {
+        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY ||
+            remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AND_COABS_AGENT_COMMUNITIES) {
             try {
-                agentCommunityAdapter = new CoAbsCommunityAdapter(this, verbosity);
+                coAbsCommunityAdapter = new CoAbsCommunityAdapter(this, verbosity);
             }
             catch (IOException e) {
                 Log.current.errorPrintln("Error creating CoAbsCommunityAdapter " + e.getMessage());
-                agentCommunityAdapter.deregister();
+                if (coAbsCommunityAdapter != null)
+                    coAbsCommunityAdapter.deregister();
                 System.exit(1);
             }
         }
-        else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNTITY)
-            agentCommunityAdapter = new FipaOsCommunityAdapter(this, verbosity);
+        else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY ||
+            remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AND_COABS_AGENT_COMMUNITIES)
+            fipaOsCommunityAdapter = new FipaOsCommunityAdapter(this, verbosity);
         else
             throw new RuntimeException("Invalid remote agent community " + remoteAgentCommunity);
     }
@@ -123,12 +149,13 @@ public class GenericAgent implements MessageReceiver {
     /**
      * Notifies my agent that an Agent Communication Language message has been received.
      *
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
      * @param acl the Agent Communication Language message which has been received for my agent
      */
-    public void messageReceived (ACL acl) {
+    public void messageReceived (int remoteAgentCommunity, ACL acl) {
         messageConsumed = false;
         if (acl.getOntology().equals(AgentCommunityAdapter.CYC_ECHO_ONTOLOGY)) {
-            processEchoRequest(acl);
+            processEchoRequest(remoteAgentCommunity, acl);
             messageConsumed = true;
         }
     }
@@ -136,9 +163,10 @@ public class GenericAgent implements MessageReceiver {
     /**
      * Processes an echo request from another agent.
      *
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
      * @param echoRequestAcl the echo request Agent Communication Language message
      */
-    public void processEchoRequest (ACL echoRequestAcl) {
+    public void processEchoRequest (int remoteAgentCommunity, ACL echoRequestAcl) {
         ACL echoReplyAcl = (ACL) echoRequestAcl.clone();
         echoReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
         echoReplyAcl.setSenderAID(echoRequestAcl.getReceiverAID());
@@ -146,7 +174,12 @@ public class GenericAgent implements MessageReceiver {
         echoReplyAcl.setReplyWith(null);
         echoReplyAcl.setInReplyTo(echoRequestAcl.getReplyWith());
         try {
-            agentCommunityAdapter.sendMessage(echoReplyAcl);
+            if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
+                coAbsCommunityAdapter.sendMessage(echoReplyAcl);
+            else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY)
+                fipaOsCommunityAdapter.sendMessage(echoReplyAcl);
+            else
+                Log.current.errorPrintln("Invalid remoteAgentCommunity " + remoteAgentCommunity);
         }
         catch (IOException e) {
             Log.current.errorPrintln("Exception " + e.getMessage() +
@@ -169,21 +202,32 @@ public class GenericAgent implements MessageReceiver {
      * @return the agent community name
      */
     public String agentCommunityName () {
-        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNTITY)
+        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
             return "CoABS";
-        else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNTITY)
+        else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY)
             return "FIPA-OS";
+        else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AND_COABS_AGENT_COMMUNITIES)
+            return "FIPA-OS and CoABS";
         else
             throw new RuntimeException("Invalid agent community " + remoteAgentCommunity);
     }
 
     /**
-     * Returns the agent community adapter
+     * Returns the CoABS agent community adapter
      *
-     * @return the agent community adapter
+     * @return the CoABS agent community adapter
      */
-    public AgentCommunityAdapter getAgentCommunityAdapter () {
-        return agentCommunityAdapter;
+    public CoAbsCommunityAdapter getCoAbsCommunityAdapter () {
+        return coAbsCommunityAdapter;
+    }
+
+    /**
+     * Returns the FIPA-OS agent community adapter
+     *
+     * @return the FIPA-OS agent community adapter
+     */
+    public FipaOsCommunityAdapter getFipaOsCommunityAdapter () {
+        return fipaOsCommunityAdapter;
     }
 
     /**
@@ -194,6 +238,59 @@ public class GenericAgent implements MessageReceiver {
     public String getMyAgentName () {
         return myAgentName;
     }
+
+    /**
+     * Returns the CycList FIPA-2001 representation of the given ACL without using CycAccess.
+     *
+     * @param acl the Agent Communication Lanaguage message object.
+     * @return the CycList representation of the given ACL without using CycAccess
+     */
+    public static CycList aclToCycList(ACL acl) throws JDOMException, IOException {
+        CycList aclList = new CycList();
+        aclList.add(CycObjectFactory.makeCycSymbol(acl.getPerformative()));
+        aclList.add(CycObjectFactory.makeCycSymbol(":sender"));
+        CycList senderAID = new CycList();
+        aclList.add(senderAID);
+        senderAID.add(CycObjectFactory.makeCycSymbol("agent-identifier"));
+        senderAID.add(acl.getSenderAID().getName());
+        CycList receiverAIDSet = new CycList();
+        receiverAIDSet.add(CycObjectFactory.makeCycSymbol("set"));
+        CycList receiverAID = new CycList();
+        receiverAIDSet.add(receiverAID);
+        receiverAID.add(CycObjectFactory.makeCycSymbol("agent-identifier"));
+        receiverAID.add(acl.getSenderAID().getName());
+        if (acl.getReplyToAIDs() != null) {
+            aclList.add(CycObjectFactory.makeCycSymbol(":reply-to"));
+            CycList replyToAIDs = new CycList();
+            replyToAIDs.add(CycObjectFactory.makeCycSymbol("set"));
+            for (int i = 0; i < acl.getReplyToAIDs().size(); i++) {
+                CycList replyToAID = new CycList();
+                replyToAIDs.add(replyToAID);
+                replyToAID.add(CycObjectFactory.makeCycSymbol("agent-identifier"));
+                replyToAID.add(((AgentID) replyToAIDs.get(i)).getName());
+            }
+        }
+        aclList.add(CycObjectFactory.makeCycSymbol(":content"));
+        aclList.add((CycList) CycObjectFactory.unmarshall((String) acl.getContentObject()));
+        if (acl.getLanguage() != null) {
+            aclList.add(CycObjectFactory.makeCycSymbol(":language"));
+            aclList.add(acl.getLanguage());
+        }
+        if (acl.getReplyWith() != null) {
+            aclList.add(CycObjectFactory.makeCycSymbol(":reply-with"));
+            aclList.add(acl.getReplyWith());
+        }
+        if (acl.getOntology() != null) {
+            aclList.add(CycObjectFactory.makeCycSymbol(":ontology"));
+            aclList.add(acl.getOntology());
+        }
+        if (acl.getProtocol() != null) {
+            aclList.add(CycObjectFactory.makeCycSymbol(":protocol"));
+            aclList.add(acl.getProtocol());
+        }
+        return aclList;
+    }
+
 
     /**
      * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum

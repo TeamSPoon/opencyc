@@ -30,12 +30,33 @@ package  org.opencyc.cycagent;
 
 class CycAgentInfo {
 
+    /**
+     * The tcp port from which the asciiPort and cfaslPorts are derived.
+     */
     public int basePort;
+
+    /**
+     * The unique name of the Cyc image which hosts the agent.
+     */
     public String cycImageId;
 
-    public CycAgentInfo () {
-        basePort = 0;
-        cycImageId = "";
+    /**
+     * The CycProxy object which manages connections to the Cyc image and connections to the
+     * agent community for this agent.
+     */
+    public CycProxy cycProxy;
+
+    /**
+     * Constructs a new AgentInfo container object given its contents.
+     *
+     * @param basePort tcp port from which the asciiPort and cfaslPorts are derived
+     * @param cycImageId unique name of the Cyc image which hosts the agent
+     * @param cycProxy
+     */
+    public CycAgentInfo (int basePort, String cycImageId, CycProxy cycProxy) {
+        this.basePort = basePort;
+        this.cycImageId = cycImageId;
+        this.cycProxy = cycProxy;
     }
 }
 

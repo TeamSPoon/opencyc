@@ -49,7 +49,7 @@ public class CoAbsCycProxy {
      */
     public CoAbsCycProxy (String myAgentName, int verbosity) {
         cycProxy = new CycProxy(myAgentName,
-                                AgentCommunityAdapter.COABS_AGENT_COMMUNTITY,
+                                AgentCommunityAdapter.COABS_AGENT_COMMUNITY,
                                 verbosity);
     }
 
@@ -69,7 +69,7 @@ public class CoAbsCycProxy {
             catch (InterruptedException e) {
                 break;
             }
-        coAbsCycProxy.cycProxy.getAgentCommunityAdapter().deregister();
+        coAbsCycProxy.cycProxy.getCoAbsCommunityAdapter().deregister();
         System.exit(0);
     }
 

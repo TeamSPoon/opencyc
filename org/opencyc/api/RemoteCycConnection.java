@@ -62,6 +62,11 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
     protected static final long thirtyMinutesDuration = 30 * 60 * 1000;
 
     /**
+     * the interface to either the CoABS or FIPA-OS agent community
+     */
+    protected AgentCommunityAdapter agentCommunityAdapter;
+
+    /**
      * Constructs a new RemoteCycConnection object to the given CycProxyAgent in the given
      * agent community.
      *
@@ -73,6 +78,10 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
                                String remoteAgentName,
                                int remoteAgentCommunity) throws IOException {
         super(myAgentName, remoteAgentCommunity, AgentCommunityAdapter.DEFAULT_VERBOSITY);
+        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
+            agentCommunityAdapter = coAbsCommunityAdapter;
+        else
+            agentCommunityAdapter = fipaOsCommunityAdapter;
         super.remoteAgentName = remoteAgentName;
         super.initializeAgentCommunity();
     }

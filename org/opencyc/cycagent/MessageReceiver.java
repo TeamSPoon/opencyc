@@ -38,8 +38,9 @@ public interface  MessageReceiver {
     /**
      * Notifies my agent that an Agent Communication Language message has been received.
      *
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
      * @param acl the Agent Communication Language message which has been received for my agent
      */
-    public void messageReceived (ACL acl);
+    public void messageReceived (int remoteAgentCommunity, ACL acl);
 
 }

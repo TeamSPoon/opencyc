@@ -44,9 +44,11 @@ public class UnitTest extends TestCase {
      */
     public static void runTests() {
         TestSuite testSuite = new TestSuite(UnitTest.class);
-        testSuite.addTest(new UnitTest("testHelloWorld"));
-        testSuite.addTest(new UnitTest("testRule"));
-        testSuite.addTest(new UnitTest("testConstraintProblem"));
+        //testSuite.addTest(new UnitTest("testHelloWorld"));
+        //testSuite.addTest(new UnitTest("testRule"));
+        //testSuite.addTest(new UnitTest("testBinding"));
+        //testSuite.addTest(new UnitTest("testRuleEvaluator"));
+        //testSuite.addTest(new UnitTest("testConstraintProblem"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
     }
@@ -61,10 +63,53 @@ public class UnitTest extends TestCase {
     }
 
     /**
+     * Tests the <tt>RuleEvaluator</tt> class.
+     */
+    public void testRuleEvaluator() {
+        System.out.println("** testRuleEvaluator **");
+
+        RuleEvaluator ruleEvaluator = new RuleEvaluator(new ConstraintProblem());
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual 1 1)")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$numericallyEqual 2 1)")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$different 2 1)")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$different 2 2)")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$different \"a\" \"b\")")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$different \"a\" \"a\")")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$not (#$different 1 1))")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$not (#$not (#$different 1 1)))")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 3))")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 2) (#$numericallyEqual 3 3))")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 4))")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 3) (#$numericallyEqual 4 4))")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$or (#$numericallyEqual 1 2) (#$numericallyEqual 3 3))")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$or (#$numericallyEqual 1 2) (#$numericallyEqual 3 4))")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual 2 (#$PlusFn 1))")));
+        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual (#$PlusFn 1) 2)")));
+        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$numericallyEqual (#$PlusFn 1) 5)")));
+
+        System.out.println("** testRuleEvaluator OK **");
+    }
+
+    /**
+     * Tests the <tt>Binding</tt> class.
+     */
+    public void testBinding() {
+        System.out.println("** testBinding **");
+
+        Binding binding1 = new Binding(CycVariable.makeCycVariable("?x"), "abc");
+        Assert.assertNotNull(binding1);
+        Assert.assertEquals(CycVariable.makeCycVariable("?x"), binding1.getCycVariable());
+        Assert.assertEquals("abc", binding1.getValue());
+        Assert.assertEquals("x = \"abc\"", binding1.toString());
+
+        System.out.println("** testBinding OK **");
+    }
+
+    /**
      * Tests the <tt>Rule</tt> class.
      */
     public void testRule() {
-        System.out.println("** Rule **");
+        System.out.println("** testRule **");
 
         // Construction
         String ruleAsString = "(#$isa ?x #$Cathedral)";
@@ -94,7 +139,19 @@ public class UnitTest extends TestCase {
         Rule rule3 = (Rule) rules.get(0);
         Assert.assertEquals(ruleExpression.cyclify(), rule3.cyclify());
 
-        //Zebra Puzzle
+        // instantiate
+        Rule rule4 = new Rule("(#$isa ?x #$Cathedral)");
+        Rule rule5 = rule4.instantiate(CycVariable.makeCycVariable("?x"),
+                                       CycConstant.makeCycConstant("#$NotreDame"));
+        Assert.assertEquals("(#$isa #$NotreDame #$Cathedral)", rule5.cyclify());
+
+        // isDifferent
+        Rule rule6 = new Rule("(#$isa ?x #$Cathedral)");
+        Assert.assertTrue(! rule6.isAllDifferent());
+        Rule rule7 = new Rule("(#$different ?x ?y)");
+        Assert.assertTrue(rule7.isAllDifferent());
+
+        //Zebra Puzzle rules
         String zebraPuzzleString =
             "(#$and " +
             "  (#$or " +
@@ -162,7 +219,6 @@ public class UnitTest extends TestCase {
             printWriter.println(((Rule) zebraPuzzleRules.get(i)).cyclify());
         }
         printWriter.close();
-
         System.out.println("** Rule OK **");
     }
 
@@ -231,9 +287,56 @@ public class UnitTest extends TestCase {
         ConstraintProblem zebraProblem = new ConstraintProblem();
         ArrayList solutions = zebraProblem.solve(zebraPuzzleCycList);
         Assert.assertNotNull(solutions);
+
+        // test extractRulesAndDomains()
         Assert.assertEquals(19, zebraProblem.getNbrConstraintRules());
         Assert.assertEquals(25, zebraProblem.getNbrDomainPopulationRules());
+
+        // test gatherVariables()
         Assert.assertEquals(25, zebraProblem.getNbrVariables());
+
+        // test ValueDomains.initializeDomains()
+        Assert.assertEquals(25, zebraProblem.valueDomains.domains.size());
+        Assert.assertEquals(25, zebraProblem.valueDomains.varsDictionary.size());
+        CycVariable blue = CycVariable.makeCycVariable("?blue");
+        Assert.assertNotNull(zebraProblem.valueDomains.varsDictionary.get(blue));
+        Assert.assertTrue(zebraProblem.valueDomains.varsDictionary.get(blue) instanceof ArrayList);
+        ArrayList domainValues = (ArrayList) zebraProblem.valueDomains.varsDictionary.get(blue);
+        Assert.assertEquals(5, domainValues.size());
+        Assert.assertTrue(domainValues.contains(new Long(1)));
+        Assert.assertTrue(domainValues.contains(new Long(2)));
+        Assert.assertTrue(domainValues.contains(new Long(3)));
+        Assert.assertTrue(domainValues.contains(new Long(4)));
+        Assert.assertTrue(domainValues.contains(new Long(5)));
+
+        // test ValueDomains.domainHasValue(CycVariable cycVariable, Object value)
+        Assert.assertTrue(zebraProblem.valueDomains.domainHasValue(blue, new Long(1)));
+        Assert.assertTrue(! (zebraProblem.valueDomains.domainHasValue(blue, new Long(6))));
+
+        // test ValueDomains.getDomainValues(CycVariable cycVariable)
+        ArrayList domainValues2 = zebraProblem.valueDomains.getDomainValues(blue);
+        Assert.assertEquals(domainValues, domainValues2);
+
+        // test ValueDomains.initializeDomainValueMarking()
+        Assert.assertNotNull(zebraProblem.valueDomains.domains.get(blue));
+        Assert.assertTrue((zebraProblem.valueDomains.domains.get(blue)) instanceof HashMap);
+        HashMap domainValueMarks = (HashMap) zebraProblem.valueDomains.domains.get(blue);
+        Assert.assertTrue(domainValueMarks.containsKey(new Long(1)));
+        Assert.assertNull(domainValueMarks.get(new Long(1)));
+
+        // test HighCardinalityDomains
+        Assert.assertTrue(zebraProblem.highCardinalityDomains.highCardinalityDomains.size() == 0);
+
+        // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size() == 2);
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?milk")));
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?norwegian")));
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.allDifferentRules.size() == 5);
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycVariable.makeCycVariable("milk")));
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycVariable.makeCycVariable("norwegian")));
+
+        // test ForwardCheckingSearcher.search()
+
 
         System.out.println("** testConstraintProblem OK **");
     }

@@ -5,6 +5,11 @@ import org.opencyc.cycobject.*;
 
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a constraint problem.<p>
+ * A <tt>ProblemParser</tt> object is created to parse the input constraint problem
+ * representation.<br>
+ * A <tt>ValueDomains</tt> object is created to model the variables and their value domains.<br>
+ * A <tt>HighCardinalityDomains</tt> object is created to model variables whose value domain
+ * cardinality exceeds a threshold for special case processing.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -30,10 +35,44 @@ import org.opencyc.cycobject.*;
 public class ConstraintProblem {
 
     /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
-     * diagnostic input.
+     * <tt>ProblemParser</tt> object for this <tt>ConstraintProblem</tt>.
      */
-    public int verbosity = 3;
+    protected ProblemParser problemParser = new ProblemParser(this);
+
+    /**
+     * <tt>ValueDomains</tt> object for this <tt>ConstraintProblem</tt>.
+     */
+    protected ValueDomains valueDomains = new ValueDomains(this);
+
+    /**
+     * High cardinality domains for this <tt>ConstraintProblem</tt>.
+     */
+    protected HighCardinalityDomains highCardinalityDomains = new HighCardinalityDomains();
+
+    /**
+     * <tt>NodeConsistencyAchiever</tt> for this <tt>ConstraintProblem</tt>.
+     */
+    protected NodeConsistencyAchiever nodeConsistencyAchiever = new NodeConsistencyAchiever(this);
+
+    /**
+     * <tt>RuleEvaluator</tt> for this <tt>ConstraintProblem</tt>.
+     */
+    protected RuleEvaluator ruleEvaluator = new RuleEvaluator(this);
+
+    /**
+     * <tt>ForwardCheckingSearcher</tt> for this <tt>ConstraintProblem</tt>.
+     */
+    protected ForwardCheckingSearcher forwardCheckingSearcher = new ForwardCheckingSearcher(this);
+
+    /**
+     * <tt>Solution</tt> for this <tt>ConstraintProblem</tt>.
+     */
+    protected Solution solution = new Solution(this);
+
+    /**
+     * The OpenCyc microtheory in which the constraint rules should be asked.
+     */
+    public CycConstant mt = CycConstant.makeCycConstant("EverythingPSC");
 
     /**
      * When <tt>true</tt> randomizes the order of the variables and domain values before
@@ -43,16 +82,15 @@ public class ConstraintProblem {
     public boolean randomizeInput = false;
 
     /**
-     * The value of the variable value domain size beyond which the initial values are not
-     * all fetched from the KB using #$isa, rather some other more specific constraint
-     * rule populates the variable domain as needed.
-     */
-    public int domainSizeThreshold = 100;
-
-    /**
      * The number of solutions requested.  When <tt>null</tt>, all solutions are sought.
      */
     public Integer nbrSolutionsRequested = new Integer(1);
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = 9;
 
     /**
      * The input problem <tt>CycList</tt>.
@@ -80,39 +118,9 @@ public class ConstraintProblem {
     protected ArrayList constraintRules = new ArrayList();
 
     /**
-     * Dictionary of dictionaries of integers used to mark domain values
-     * during search.  The purpose of marking is to eliminate values from
-     * the solution.  First key indexes by constraint variable, second key
-     * indexes by domain value for the variable, and the integer represents
-     * the search level at which the variable domain value was marked.
-     */
-    protected HashMap domains = new HashMap();
-
-    /**
-     * variable --> domain populating rule<p>
-     * Dictionary of items describing whether the domain of the key
-     * variable is too large to handle efficiently.  For high cardinality
-     * domains, the domain size is determined from the KB without asking
-     * for all of the values.  For variables not exceeding the <tt>domainSizeThreshold</tt>,
-     * the dictionary contains a value of <tt>null</tt>.
-     */
-    protected HashMap highCardinalityDomains = new HashMap();
-
-    /**
      * Collection of the constraint variables as <tt>CycVariable</tt> objects.
      */
     protected ArrayList variables = new ArrayList();
-
-    /**
-     * Dictionary of variable --> domain value list.
-     */
-    protected HashMap varsDictionary = new HashMap();
-
-    /**
-     * List of solutions where each solution is a list of constraint variable -
-     * domain value bindings which satisfy all the constraint rules.
-     */
-    protected ArrayList solutions = new ArrayList();
 
     /**
      * Number of KB asks performed during the search for solution(s).
@@ -124,11 +132,6 @@ public class ConstraintProblem {
      */
     protected int nbrSteps = 0;
 
-    /**
-     * Number of solutions found by the search.  Will not be more than the
-     * number requested if <tt>nbrSolutionsRequested</tt> is not <tt>null</tt>.
-     */
-    protected int nbrSolutionsFound = 0;
 
     /**
      * Constructs a new <tt>ConstraintProblem</tt> object.
@@ -136,6 +139,33 @@ public class ConstraintProblem {
     public ConstraintProblem() {
     }
 
+    /**
+     * Set the value of the variable value domain size beyond which the initial values
+     * are not all fetched from the KB using #$isa, rather some other more specific
+     * constraint rule populates the variable domain as needed.
+     *
+     * @param domainSizeThreshold an <tt>int</tt> which is the new threshold.
+     */
+    public void setDomainSizeThreshold(int domainSizeThreshold) {
+        highCardinalityDomains.domainSizeThreshold = domainSizeThreshold;
+    }
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+        problemParser.setVerbosity(verbosity);
+        valueDomains.setVerbosity(verbosity);
+        highCardinalityDomains.setVerbosity(verbosity);
+        nodeConsistencyAchiever.setVerbosity(verbosity);
+        ruleEvaluator.setVerbosity(verbosity);
+        forwardCheckingSearcher.setVerbosity(verbosity);
+        solution.setVerbosity(verbosity);
+    }
     /**
      * Solves a constraint problem and return a list of solutions if one or more
      * was found, otherwise returns <tt>null</tt>.
@@ -149,43 +179,17 @@ public class ConstraintProblem {
      */
     public ArrayList solve(CycList problem) {
         this.problem = problem;
-        extractRulesAndDomains();
-        gatherVariables();
+        problemParser.extractRulesAndDomains();
+        problemParser.gatherVariables();
+        problemParser.initializeDomains();
+        nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
+        valueDomains.initializeDomainValueMarking();
+        forwardCheckingSearcher.search(variables, 1);
 
-        return solutions;
+        return solution.solutions;
     }
 
-    /**
-     * Simplifies the input problem into its constituent <tt>Rule</tt> objects,
-     * then divides the input rules into those which populate the variable
-     * domains, and those which subsequently constrain the search for
-     * one or more solutions.
-     */
-    protected void extractRulesAndDomains() {
-        simplifiedRules = Rule.simplifyRuleExpression(problem);
-        for (int i = 0; i < simplifiedRules.size(); i++) {
-            Rule rule = (Rule) simplifiedRules.get(i);
-            if (rule.isVariableDomainPopulatingRule())
-                domainPopulationRules.add(rule);
-            else
-                constraintRules.add(rule);
-        }
-    }
-
-    /**
-     * Gathers the unique variables used in this constraint problem.
-     */
-    protected void gatherVariables() {
-        HashSet uniqueVariables = new HashSet();
-        for (int i = 0; i < simplifiedRules.size(); i++) {
-            Rule rule = (Rule) simplifiedRules.get(i);
-            uniqueVariables.addAll(rule.getVariables());
-        }
-        variables.addAll(uniqueVariables);
-        //System.out.println(variables);
-    }
-
-    /**
+   /**
      * Returns the number of variable domain populating <tt>Rule</tt>
      * objects derived from the input problem.
      *
@@ -215,6 +219,23 @@ public class ConstraintProblem {
         return variables.size();
     }
 
+    /**
+     * Displays the input constraint rules.
+     */
+    public void displayConstraintRules() {
+        System.out.println("Domain Population Rules\n");
+        for (int i = 0; i < domainPopulationRules.size(); i++)
+            System.out.println("  " + domainPopulationRules.get(i));
 
+        System.out.println("\nConstraint Rules\n");
+        for (int i = 0; i < constraintRules.size(); i++)
+            System.out.println("  " + constraintRules.get(i));
+    }
 
+    /**
+     * Displays the variables and their value domains.
+     */
+    public void displayVariablesAndDomains() {
+        valueDomains.displayVariablesAndDomains();
+    }
 }

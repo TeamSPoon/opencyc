@@ -45,6 +45,18 @@ public class Rule {
     protected ArrayList variables;
 
     /**
+     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> <tt>String</tt>
+     * representation.<p>
+     *
+     * @param ruleString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
+     * query represented by a <tt>CycList</tt>.
+     */
+    protected Rule (String ruleString) {
+        rule = new CycList(ruleString);
+        gatherVariables();
+    }
+
+    /**
      * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt>.<p>
      *
      * <pre>
@@ -55,19 +67,19 @@ public class Rule {
      * @param rule the rule's formula, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public Rule (CycList rule) {
+    protected Rule(CycList rule) {
         this.rule = rule;
         gatherVariables();
     }
-
     /**
      * Simplifies a rule expression.<p>
      * (#$and (<rule1> <rule2> ... <ruleN>) becomes <rule1> <rule2> ... <ruleN>
      *
+     * @param cycList the rule expression that is simplified
      * @return an <tt>ArrayList</tt> of <tt>Rule</tt> objects.
      * @see UnitTest#testRule
      */
-    public static ArrayList simplifyRuleExpression(CycList cycList) {
+    protected static ArrayList simplifyRuleExpression(CycList cycList) {
         ArrayList rules = new ArrayList();
         if (cycList.size() < 2)
             throw new RuntimeException("Invalid rule: " + cycList);
@@ -83,7 +95,7 @@ public class Rule {
     /**
      * Gathers the unique variables from the rule's formula.
      */
-    private void gatherVariables() {
+    protected void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
         Enumeration e = rule.cycListVisitor();
         while (true) {
@@ -102,7 +114,7 @@ public class Rule {
      *
      * @return a <tt>CycList</tt> which is the rule's formula.
      */
-    public CycList getRule() {
+    protected CycList getRule() {
         return rule;
     }
 
@@ -112,7 +124,7 @@ public class Rule {
      * @return the <tt>ArrayList</tt> which lists the unique <tt>CycVariables</tt> that are
      * used in the rule's formula.
      */
-    public ArrayList getVariables() {
+    protected ArrayList getVariables() {
         return variables;
     }
 
@@ -123,13 +135,14 @@ public class Rule {
      * @return an <tt>int</tt> which is the number of <tt>CycVariables</tt>
      * in the rule's formula.
      */
-    public int getArity() {
+    protected int getArity() {
         return variables.size();
     }
 
     /**
      * Returns <tt>true</tt> if the object equals this object.
      *
+     * @param object the object for comparison
      * @return <tt>boolean</tt> indicating equality of an object with this object.
      */
     public boolean equals(Object object) {
@@ -145,7 +158,7 @@ public class Rule {
      * @return the predicate <tt>CycConstant</tt> or <tt>CycSymbol</tt>
      * of this <tt>Rule</tt> object
      */
-    public Object getPredicate() {
+    protected Object getPredicate() {
         return (CycConstant) rule.first();
     }
 
@@ -155,15 +168,59 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this is a variable domain populating
      * <tt>Rule</tt>.
      */
-    public boolean isVariableDomainPopulatingRule() {
+    protected boolean isVariableDomainPopulatingRule() {
+        return isIntensionalVariableDomainPopulatingRule() ||
+               isExtensionalVariableDomainPopulatingRule();
+    }
+
+    /**
+     * Returns <tt>true</tt> if this <tt>Rule</tt> is a #$different constraint rule.
+     *
+     * @return <tt>boolean</tt> indicating if this <tt>Rule</tt> is a #$different
+     * constraint rule
+     */
+    protected boolean isAllDifferent() {
+        if (this.getArity() < 2)
+            return false;
+        //TODO make right
+        if (this.getPredicate().toString().equals("different"))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Returns <tt>true</tt> if this is an intensional variable domain populating <tt>Rule</tt>.
+     * An extensional rule is one in which values are queried from the OpenCyc KB.
+     *
+     * @return <tt>boolean</tt> indicating if this is an intensional variable domain populating
+     * <tt>Rule</tt>.
+     */
+    protected boolean isIntensionalVariableDomainPopulatingRule() {
+        if (this.getArity() != 1)
+            // Only unary rules can populate a domain.
+            return false;
+        //TODO make right
+        if (this.getPredicate().toString().equals("isa"))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Returns <tt>true</tt> if this is an extensional variable domain populating <tt>Rule</tt>.
+     * An extensional rule is one in which all the values are listed.
+     *
+     * @return <tt>boolean</tt> indicating if this is an extensional variable domain populating
+     * <tt>Rule</tt>.
+     */
+    protected boolean isExtensionalVariableDomainPopulatingRule() {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
         //TODO put elementOf in the right place
         //if (this.predicate().equals(CycConstant.elementOf))
         if (this.getPredicate().toString().equals("elementOf"))
-            return true;
-        if (this.getPredicate().toString().equals("isa"))
             return true;
         else
             return false;
@@ -184,7 +241,24 @@ public class Rule {
      *
      * @return a cyclified <tt>String</tt>.
      */
-    public String cyclify() {
+    protected String cyclify() {
         return rule.cyclify();
+    }
+
+    /**
+     * Returns a new <tt>Rule</tt> which is the result of substituting the given
+     * <tt>Object</tt> value for the given <tt>CycVariable</tt>.
+     *
+     * @param cycVariable the variable for substitution
+     * @param value the value which is substituted for each occurrance of the variable
+     * @return a new <tt>Rule</tt> which is the result of substituting the given
+     * <tt>Object</tt> value for the given <tt>CycVariable</tt>
+     */
+    protected Rule instantiate(CycVariable cycVariable, Object value) {
+        if (! variables.contains(cycVariable))
+            throw new RuntimeException("Cannot instantiate " + cycVariable +
+                                       " in rule " + this);
+        CycList newRule = rule.subst(value, cycVariable);
+        return new Rule(newRule);
     }
 }

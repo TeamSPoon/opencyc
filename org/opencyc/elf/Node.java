@@ -1,13 +1,20 @@
 package org.opencyc.elf;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+//// Internal Imports
 import org.opencyc.elf.bg.BehaviorGeneration;
+import org.opencyc.elf.bg.Status;
+
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
 import org.opencyc.elf.sp.SensoryPerception;
+
 import org.opencyc.elf.vj.ValueJudgement;
+
 import org.opencyc.elf.wm.WorldModel;
 
+//// External Imports
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Provides the Node container for the Elementary Loop Functioning (ELF).<br>
@@ -33,45 +40,111 @@ import org.opencyc.elf.wm.WorldModel;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Node extends ELFObject {
-  /** the dictionary of nodes by name name --> Node */
-  protected static HashMap nodes = new HashMap();
 
-  /** the purpose description */
-  protected String purpose;
-
-  /** the World Model for this node */
-  protected WorldModel worldModel;
-
-  /** the ValueJudgement for this node */
-  protected ValueJudgement valueJudgement;
-
-  /** the BehaviorGeneration for this node */
-  protected BehaviorGeneration behaviorGeneration;
-
-  /** the SensoryPerception */
-  protected SensoryPerception sensoryPerception;
-
-  /**
-   * The parent node of this node for the task at hand.  The topmost node has
-   * value null for parentNode.
-   */
-  protected Node parentNode;
-
-  /**
-   * The Child nodes of this node for the task at hand.  The lowest level nodes
-   * in the hierarchy have null for childNodes;
-   */
-  protected ArrayList childNodes;
-
-  /** the list of sibling nodes at this ELF resolution level */
-  protected ArrayList siblingNodes;
-
+  //// Constructors
+  
   /**
    * Constructs a new Node object.
    */
   public Node() {
   }
 
+  //// Public Area
+  
+  /**
+   * Performs the commanded task.
+   *
+   * @taskCommand the commanded task
+   */
+  public void doTask (TaskCommand taskCommand) {
+    //TODO
+    //send via channel bg.doTask(taskCommand)
+  }
+  
+  /**
+   * Receives data about an object from Sensory Perception.
+   *
+   * @param obj the perceived object
+   * @param data the sensed data for the perceived object
+   */
+  public void receiveSensoryPerceptionData (Object obj, Object data) {
+    //TODO
+    //receive via channel
+  }
+  
+  /**
+   * Receives status from a subnode.
+   *
+   * @param status the subnode's status
+   */
+  public void receiveSubNodeStatus (Status status) {
+    //TODO
+    //receive via channel
+  }
+    
+  /**
+   * Receives a request for a Knowledge Base object.
+   *
+   * @parm obj the object about which information is requested from the Knowledge Base
+   */
+  public void receiveRequestKBObject (Object obj) {
+    //TODO
+    //receive via channel
+  }
+
+  /**
+   * Receives the requested Knowledge Base object.
+   *
+   * @parm obj the requested Knowledge Base object
+   */
+  public void receiveKBObject (Object obj) {
+    //TODO
+    //receive via channel
+  }
+  
+  /**
+   * Receives operator input.
+   *
+   * @param input the input from the operator
+   */
+  public void operatorInput(String input) {
+    //TODO
+    //receive via channel
+  }
+  
+  /**
+   * Sends Sensory Perception data about a perceived object.
+   *
+   * @param obj the perceived object
+   * @param data the data about the perceived object
+   */
+  public void sendSensoryPerceptionData (Object obj, Object data) {
+    //TODO
+    //send via channel
+  }
+  
+  /**
+   * Sends the given list of controlled resources and the given task command to
+   * a sub node.
+   *
+   * @param controlledResourcesthe given list of controlled resources
+   * @param taskCommnd the given task command
+   */
+  public void doSubTask (ArrayList controlledResources, TaskCommand taskCommnd) {
+    //TODO
+    //send via channel
+  }
+  
+  /**
+   * Forwards a request for a Knowledge Base object.
+   *
+   * @parm obj the object about which information is requested from the Knowledge Base
+   */
+  public void forwardRequestKBObject (Object obj) {
+    //TODO
+    //send via channel
+  }
+  
   /**
    * Returns a string representation of this object.
    * 
@@ -266,4 +339,42 @@ public class Node extends ELFObject {
   public void setSiblingNodes(ArrayList siblingNodes) {
     this.siblingNodes = siblingNodes;
   }
+  
+  //// Protected Area
+  
+  /** the dictionary of nodes by name name --> Node */
+  protected static HashMap nodes = new HashMap();
+
+  /** the purpose description */
+  protected String purpose;
+
+  /** the World Model for this node */
+  protected WorldModel worldModel;
+
+  /** the ValueJudgement for this node */
+  protected ValueJudgement valueJudgement;
+
+  /** the BehaviorGeneration for this node */
+  protected BehaviorGeneration behaviorGeneration;
+
+  /** the SensoryPerception */
+  protected SensoryPerception sensoryPerception;
+
+  /**
+   * The parent node of this node for the task at hand.  The topmost node has
+   * value null for parentNode.
+   */
+  protected Node parentNode;
+
+  /**
+   * The Child nodes of this node for the task at hand.  The lowest level nodes
+   * in the hierarchy have null for childNodes;
+   */
+  protected ArrayList childNodes;
+
+  /** the list of sibling nodes at this ELF resolution level */
+  protected ArrayList siblingNodes;
+  
+  //// Private Area
+  //// Internal Rep
 }

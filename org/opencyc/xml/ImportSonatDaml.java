@@ -57,10 +57,11 @@ public class ImportSonatDaml extends ImportDaml {
         String localHostName = InetAddress.getLocalHost().getHostName();
         Log.current.println("Connecting to Cyc server from " + localHostName);
         if (localHostName.equals("crapgame.cyc.com")) {
-            cycAccess = new CycAccess("localhost",
+            cycAccess = new CycAccess("crapgame.cyc.com",
                                       3620,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);
+            //cycAccess.traceNamesOn();
         }
         else if (localHostName.equals("thinker")) {
             cycAccess = new CycAccess("localhost",
@@ -110,7 +111,7 @@ public class ImportSonatDaml extends ImportDaml {
         kbSubsetCollectionName = "DamlSonatConstant";
 
         //for (int i = 0; i < damlDocInfos.size(); i++) {
-        for (int i = 20; i < 21; i++) {
+        for (int i = 16; i < 17; i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();

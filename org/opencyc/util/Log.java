@@ -96,32 +96,34 @@ public class Log {
         if (current != null) {
             return;
         }
-        String logProperty = System.getProperty("org.opencyc.util.log", "default");
-        if (logProperty.equalsIgnoreCase("default") || logProperty.equalsIgnoreCase("all")) {
-            current = new Log(logName, true, true, true, false);
-            return;
+        boolean writeToFile = true;
+        boolean writeToErr = true;
+        boolean writeToOut = true;
+        try {
+            String logProperty = System.getProperty("org.opencyc.util.log", "default");
+            if (logProperty.equalsIgnoreCase("display")) {
+                writeToFile = false;
+            }
+            else if (logProperty.equalsIgnoreCase("file")) {
+                writeToOut = false;
+            }
+            else if (logProperty.equalsIgnoreCase("errors")) {
+                writeToFile = false;
+                writeToOut = false;
+            }
+            else if (! logProperty.equalsIgnoreCase("default"))
+                System.err.println("Invalid value for property org.opencyc.util.log " +
+                                   logProperty + " substituting default");
         }
-        if (logProperty.equalsIgnoreCase("display")) {
-            current = new Log("", false, true, true, false);
-            return;
+        catch (SecurityException e) {
         }
-        if (logProperty.equalsIgnoreCase("file")) {
-            current = new Log(logName, true, false, false, false);
-            return;
-        }
-        if (logProperty.equalsIgnoreCase("errors")) {
-            current = new Log(logName, true, true, false, false);
-            return;
-        }
-        System.err.println("Invalid value for property org.opencyc.util.log " + logProperty +
-                           " substituting default");
-        current = new Log(logName, true, true, true, false);
+        current = new Log(logName, writeToFile, writeToErr, writeToOut, false);
     }
 
 
     /**
      * Constructs a new Log object.  Display all messages only to
-     * the default log file "agent.log".
+     * the default log file.
      */
     public Log() {
         this(DEFAULT_LOG_FILENAME, false, false, false, false);
@@ -174,6 +176,8 @@ public class Log {
 
     /**
      * Sets the log file path to the specified location.
+     *
+     * @param location the log file path
      */
     public void setStorageLocation(String location) throws IOException {
         if (printWriter != null)

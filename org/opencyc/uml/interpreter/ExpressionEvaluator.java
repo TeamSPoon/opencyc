@@ -264,10 +264,12 @@ public class ExpressionEvaluator {
                                       stateMt);
         }
         else if (cycLObject instanceof CycList) {
-            // TODO non-reifiable function
-            value = cycAccess.getArg2(softwareParameterValue,
-                                      (CycFort) cycLObject,
-                                      stateMt);
+            CycList query = new CycList();
+            query.add(cycAccess.getKnownConstantByName("evaluate"));
+            CycVariable variable = CycObjectFactory.makeCycVariable("?x");
+            query.add(variable);
+            query.add(cycLObject);
+            value = cycAccess.askWithVariable(query, variable, stateMt);
         }
         //TODO handle other kinds of evaluatable objects
         if (verbosity > 2)

@@ -132,6 +132,7 @@ public class UnitTest extends TestCase {
             }
             cycAccess.setCyclist(cycAccess.getKnownConstantByName("Cyc"));
             CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01-ContextMt");
+
             cycAccess.unassertMtContentsWithoutTranscript(stateMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
 
@@ -151,8 +152,35 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(cycAccess.isQueryTrue(query, stateMt));
             Assert.assertEquals(1, cycAccess.getAllAssertionsInMt(stateMt).size());
 
+            queryText =
+                    "(#$evaluate ?X (#$PlusFn 1 2))";
+            query = cycAccess.makeCycList(queryText);
+            CycVariable variable = CycObjectFactory.makeCycVariable("?x");
+            Object answer = cycAccess.askWithVariable(query, variable, stateMt);
+            Assert.assertTrue(answer instanceof CycList);
+            Assert.assertEquals(1, ((CycList) answer).size());
+            answer = ((CycList) answer).first();
+            Assert.assertTrue(answer instanceof Integer);
+            Assert.assertEquals(3, ((Integer) answer).intValue());
+
+
+            queryText =
+                    "(#$evaluate ?X (#$GetParameterValueFn #$TestStateMachine-X))";
+            query = cycAccess.makeCycList(queryText);
+            answer = cycAccess.askWithVariable(query, variable, stateMt);
+            Assert.assertTrue(answer instanceof CycList);
+            System.out.println(((CycList) answer).cyclify());
+            Assert.assertEquals(1, ((CycList) answer).size());
+            answer = ((CycList) answer).first();
+            Assert.assertTrue(answer instanceof Integer);
+            Assert.assertEquals(0, ((Integer) answer).intValue());
+
             cycAccess.unassertMtContentsWithoutTranscript(stateMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
+
+
+            //TODO test #$umlProcedureInputBinding
+
 
             Object body =
                 cycAccess.getArg2("umlBody",

@@ -976,7 +976,7 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(domainValueMarks.get(new Integer(1)));
 
         // test VariableDomainPopulator
-        Assert.assertTrue(zebraProblem.variableDomainPopulator.highCardinalityDomains.size() == 0);
+        Assert.assertTrue(zebraProblem.variableDomainPopulator.variableDomainPopulators.size() == 0);
 
         // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
         Assert.assertEquals(20, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
@@ -1004,7 +1004,8 @@ public class UnitTest extends TestCase {
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         System.out.println(europeanCathedralsString2);
         ConstraintProblem europeanCathedralsProblem2 = new ConstraintProblem();
-        europeanCathedralsProblem2.setVerbosity(1);
+        //europeanCathedralsProblem2.setVerbosity(1);
+        europeanCathedralsProblem2.setVerbosity(9);
         // Request one solution.
         europeanCathedralsProblem2.nbrSolutionsRequested = new Integer(1);
         // Request all solutions.

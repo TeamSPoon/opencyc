@@ -121,7 +121,7 @@ public class ForwardCheckingSearcher {
         CycVariable selectedVariable = selectVariable(variables);
 
         // Handle the atypical case where a high cardinality variable is selected first.
-        if (this.variableDomainPopulator.contains(selectedVariable) &&
+        if (this.variableDomainPopulator.isPostponedHighCardinalityDomain(selectedVariable) &&
             this.variableDomainPopulator.getPopulatingRule(selectedVariable) == null)
             populatePostponedDomain(selectedVariable);
 
@@ -373,7 +373,7 @@ public class ForwardCheckingSearcher {
         if (remainingRuleVariables.size() == 1) {
             CycVariable variable = (CycVariable) remainingRuleVariables.get(0);
             // one variable left to instantiate
-            if (variableDomainPopulator.contains(variable))
+            if (variableDomainPopulator.isPostponedHighCardinalityDomain(variable))
 
                 // The one variable left has a high cardinality domain.
                 if (variableDomainPopulator.getPopulatingRule(variable) == null) {
@@ -435,7 +435,7 @@ public class ForwardCheckingSearcher {
                     variable = binding.getCycVariable();
                     if (! variable.equals(selectedVariable)) {
                         value = binding.getValue();
-                    if ((! variableDomainPopulator.contains(variable)) ||
+                    if ((! variableDomainPopulator.isPostponedHighCardinalityDomain(variable)) ||
                         // initial population of high cardinality domain
                         variableDomainPopulator.isPopulatingRule(currentRule, variable) ||
                         // Other rules cannot extend a high cardinality domain.
@@ -454,7 +454,7 @@ public class ForwardCheckingSearcher {
             // instantiation is not efficient.
             CycVariable variable = (CycVariable) remainingVariables.get(0);
             boolean isHighCardinalityDomain =
-                variableDomainPopulator.contains(variable);
+                variableDomainPopulator.isPostponedHighCardinalityDomain(variable);
             if (verbosity > 2) {
                 System.out.println("Rule instantiation reached singleton " + variable);
                 System.out.println("  high cardinality? --> " + isHighCardinalityDomain);

@@ -47,9 +47,9 @@ public class ConstraintProblem {
     protected ValueDomains valueDomains = new ValueDomains(this);
 
     /**
-     * High cardinality domains for this <tt>ConstraintProblem</tt>.
+     * Variable Domain Populator for this <tt>ConstraintProblem</tt>.
      */
-    protected VariableDomainPopulator variableDomainPopulator = new VariableDomainPopulator();
+    protected VariableDomainPopulator variableDomainPopulator = new VariableDomainPopulator(this);
 
     /**
      * <tt>NodeConsistencyAchiever</tt> for this <tt>ConstraintProblem</tt>.
@@ -242,7 +242,7 @@ public class ConstraintProblem {
                 return new ArrayList();
             }
             problemParser.gatherVariables();
-            problemParser.initializeDomains();
+            variableDomainPopulator.initializeDomains();
             if (variables.size() > 0)
                 nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();

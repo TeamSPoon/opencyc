@@ -79,7 +79,7 @@ public class ValueDomains {
         for (int i = 0; i < orderedVariables.size(); i++) {
             CycVariable cycVariable = (CycVariable) orderedVariables.get(i);
             ArrayList domainValues = getDomainValues(cycVariable);
-            if (constraintProblem.variableDomainPopulator.contains(cycVariable)) {
+            if (constraintProblem.variableDomainPopulator.isPostponedHighCardinalityDomain(cycVariable)) {
                 if (domainValues.size() == 0)
                     System.out.println("  " + cycVariable + "\t... unpopulated high cardinality domain");
                 else
@@ -196,7 +196,7 @@ public class ValueDomains {
         // Special case for high cardinality domains whose complete extent may not yet
         // be known.
         if (unmarkedDomainSize == 0 &&
-            constraintProblem.variableDomainPopulator.contains(cycVariable))
+            constraintProblem.variableDomainPopulator.isPostponedHighCardinalityDomain(cycVariable))
             return constraintProblem.variableDomainPopulator.getDomainSize(cycVariable);
         else
             return unmarkedDomainSize;

@@ -55,11 +55,6 @@ public class ProblemParser {
     protected ArrayList constraintRules;
 
     /**
-     * Reference to the constraint problem's ValueDomains object.
-     */
-    protected ValueDomains valueDomains;
-
-    /**
      * Reference to the constraint problem's ArgumentTypeConstrainer object.
      */
     protected ArgumentTypeConstrainer argumentTypeConstrainer;
@@ -88,7 +83,6 @@ public class ProblemParser {
         constraintRules = constraintProblem.constraintRules;
         argumentTypeConstrainer = constraintProblem.argumentTypeConstrainer;
         variableDomainPopulator = constraintProblem.variableDomainPopulator;
-        valueDomains = constraintProblem.valueDomains;
     }
 
     /**
@@ -122,27 +116,22 @@ public class ProblemParser {
                  constraintProblem.backchainer.maxBackchainDepth) &&
                 (! isRuleSatisfiable(rule)))
                 return false;
+            if (rule.isExtensionalVariableDomainPopulatingRule())
+                // Extensional rules that explicitly define the value domain will rank best.
+                rule.nbrFormulaInstances = 1;
+            else
+                rule.nbrFormulaInstances =
+                    CycAccess.current().countUsingBestIndex(rule.formula, constraintProblem.mt);
             for (int j = 0; j < rule.getVariables().size(); j++) {
                 VariablePopulationItem variablePopulationItem =
                     new VariablePopulationItem((CycVariable) rule.getVariables().get(j),
-                                            rule);
+                                               rule);
                 variableDomainPopulator.add(variablePopulationItem);
             }
         }
+        variableDomainPopulator.populateDomains();
 
-        //TODO having rethought the benefit of argument type constraint additions, -- they are
-        //unary constraints disposed of before the constraint search begins.  Not useful for
-        //domain population because any non-isa/genls rule will be lower cardinality and thus
-        //a better domain population alternative.
-
-        //Simply get all the VariablePopulation objects and rank the rules and populate any variables
-        //below the high cardinality theshold.
-
-
-
-
-
-
+        System.exit(1);
         if (verbosity > 1)
             constraintProblem.displayConstraintRules();
         return true;
@@ -443,89 +432,5 @@ public class ProblemParser {
         constraintProblem.variables.addAll(uniqueVariables);
     }
 
-    /**
-     * Initializes the value domains for each variable.
-     */
-    public void initializeDomains() throws IOException {
 
-        //TODO use iterate over VariablePopulation instead of domain population rules.
-
-        for (int i = 0; i < domainPopulationRules.size(); i++) {
-            Rule rule = (Rule) domainPopulationRules.get(i);
-            if (rule.isExtensionalVariableDomainPopulatingRule()) {
-                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
-                if (valueDomains.domains.containsKey(cycVariable))
-                    throw new RuntimeException("Duplicate domain specifying rule for " +
-                                               cycVariable);
-                valueDomains.domains.put(cycVariable, null);
-                if (valueDomains.varsDictionary.containsKey(cycVariable))
-                    throw new RuntimeException("Duplicate varsDictionary entry for " + cycVariable);
-                CycList theSet =  (CycList) rule.getFormula().third();
-                if (! (theSet.first().toString().equals("TheSet")))
-                    throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
-                ArrayList domainValues = new ArrayList(theSet.rest());
-                valueDomains.varsDictionary.put(cycVariable, domainValues);
-            }
-            else {
-                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
-                if (rule.getPredicate().equals(CycAccess.isa) ||
-                    rule.getPredicate().equals(CycAccess.genls)) {
-                    CycFort collection;
-                    Object object = rule.getArguments().second();
-                    if (object instanceof CycList)
-                        collection = new CycNart((CycList) object);
-                    else
-                        collection = (CycFort) object;
-                    int nbrInstances =
-                        CycAccess.current().countAllInstances_Cached(collection,
-                                                                     constraintProblem.mt);
-                    if (verbosity > 3) {
-                        System.out.println("\nIntensional variable domain populating rule\n" + rule);
-                        System.out.println("  nbrInstances " + nbrInstances);
-                    }
-                    if (nbrInstances > variableDomainPopulator.domainSizeThreshold) {
-                        if (verbosity > 3)
-                            System.out.println("  domain size " + nbrInstances +
-                                               " exceeded high cardinality threshold of " +
-                                               variableDomainPopulator.domainSizeThreshold);
-                        variableDomainPopulator.setDomainSize(cycVariable,
-                                                             new Integer(nbrInstances));
-                        valueDomains.varsDictionary.put(cycVariable, new ArrayList());
-                    }
-                    else
-                        populateDomainViaQuery(rule, cycVariable);
-                }
-                else
-                    populateDomainViaQuery(rule, cycVariable);
-            }
-        }
-        if (verbosity > 1)
-            valueDomains.displayVariablesAndDomains();
-    }
-
-    /**
-     * Populates the domain by asking a query.
-     */
-    protected void populateDomainViaQuery(Rule rule, CycVariable cycVariable) throws IOException {
-        CycList domainValuesCycList =
-            CycAccess.current().askWithVariable (rule.getFormula(),
-                                                 cycVariable,
-                                                 constraintProblem.mt);
-        ArrayList domainValues = new ArrayList();
-        domainValues.addAll(domainValuesCycList);
-
-        if (constraintProblem.backchainer.maxBackchainDepth >
-            constraintProblem.backchainer.backchainDepth) {
-            if (verbosity > 3)
-                System.out.println("maxBackchainDepth " +
-                                   constraintProblem.backchainer.maxBackchainDepth +
-                                   " > " + constraintProblem.backchainer.backchainDepth +
-                                   "\n  for rule\n" + rule);
-            ArrayList backchainDomainValues = constraintProblem.backchainer.backchain(rule);
-            if (verbosity > 3)
-                System.out.println("Adding backchain domain values " + backchainDomainValues +
-                                   "\n  for " + cycVariable);
-        }
-        valueDomains.varsDictionary.put(cycVariable, domainValues);
-    }
 }

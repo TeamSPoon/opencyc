@@ -1,7 +1,9 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
 import java.util.*;
+import java.io.*;
+import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * <tt>VariableDomainPopulator</tt> object to contain information about variables
@@ -36,12 +38,31 @@ import java.util.*;
  * @see UnitTest#testConstraintProblem
  */
 public class VariableDomainPopulator {
+    /**
+     * Reference to the parent <tt>ConstraintProblem</tt> object.
+     */
+    protected ConstraintProblem constraintProblem;
+
+    /**
+     * Reference to the parent <tt>ValueDomains</tt> object.
+     */
+    protected ValueDomains valueDomains;
+
+    /**
+     * Reference to the parent list of domain populating constraint rules.
+     */
+    protected ArrayList domainPopulationRules;
+
+    /**
+     * Reference to the parent list of constraint rules.
+     */
+    protected ArrayList constraintRules;
 
     /**
      * List of <tt>VariablePopulation</tt> objects used to determine the best domain population rule
      * for each variable.
      */
-    protected ArrayList variablePopulations = new ArrayList();
+    protected ArrayList candidateVariablePopulators = new ArrayList();
 
     /**
      * The default value of the variable value domain size beyond which the initial values are not
@@ -56,17 +77,9 @@ public class VariableDomainPopulator {
     protected int domainSizeThreshold = DEFAULT_DOMAIN_SIZE_THRESHOLD;
 
     /**
-     * variable --> item<br>
-     * where item is the object array
-     * {<tt>Integer</tt> domain size, domain populating <tt>Rule</tt>}<p>
-     *
-     * Dictionary of items describing whether the domain of the key
-     * variable is too large to handle efficiently.  For high cardinality
-     * domains, the domain size is determined from the KB without asking
-     * for all of the values.  For variables not exceeding the <tt>domainSizeThreshold</tt>,
-     * the dictionary contains a value of <tt>null</tt>.
+     * variable --> VariableDomainPopulator<br>
      */
-    protected HashMap highCardinalityDomains = new HashMap();
+    protected HashMap variableDomainPopulators = new HashMap();
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -77,44 +90,79 @@ public class VariableDomainPopulator {
     /**
      * Constructs a new <tt>VariableDomainPopulator</tt> object.
      */
-    public VariableDomainPopulator() {
+    public VariableDomainPopulator(ConstraintProblem constraintProblem) {
+        this.constraintProblem = constraintProblem;
+        this.domainPopulationRules = constraintProblem.domainPopulationRules;
+        this.constraintRules = constraintProblem.constraintRules;
+        this.valueDomains = constraintProblem.valueDomains;
     }
 
     /**
      * Adds the given <tt>VariablePopulationItem</tt> object to the list
-     * of variable population items.  Each item contains a variable, an applicable
+     * of variable populator items.  Each item contains a variable, an applicable
      * rule, and the number of values that rule would yield if asked in the KB.
      */
     public void add(VariablePopulationItem variablePopulationItem) {
-        this.variablePopulations.add(variablePopulationItem);
+        this.candidateVariablePopulators.add(variablePopulationItem);
     }
 
-
     /**
-     * Initializes the high cardinality domain item for the given constraint variable.
-     * where item is the object array
-     * {<tt>Integer</tt> domain size, domain populating <tt>Rule</tt>}
-     *
-     * @param cycVariable the variable under consideration
+     * Determines the best domain population rule to populate each constraint problem variable, and populates
+     * those which do not exceed the domain size threshold.
      */
-    public void initialize(CycVariable cycVariable) {
-        Object[] item = {null, null};
-        highCardinalityDomains.put(cycVariable, item);
+    public void populateDomains() throws IOException {
+        Collections.sort(candidateVariablePopulators);
+        for (int i = 0; i < candidateVariablePopulators.size(); i++) {
+            VariablePopulationItem variablePopulationItem =
+                (VariablePopulationItem) candidateVariablePopulators.get(i);
+            if (verbosity > 3)
+                System.out.println("Considering candidate domain population for " +
+                                   variablePopulationItem.cycVariable.cyclify() +
+                                   "\n  " + variablePopulationItem.rule +
+                                   "\n  which has " + variablePopulationItem.getNbrFormulaInstances() + " instances");
+            if (i == 0) {
+                if (verbosity > 3)
+                    System.out.println("  First variable must always be populated");
+                variableDomainPopulators.put(variablePopulationItem.cycVariable, variablePopulationItem);
+                domainPopulationRules.add(variablePopulationItem.rule);
+                valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
+                continue;
+            }
+            if (variableDomainPopulators.containsKey(variablePopulationItem.cycVariable)) {
+                if (verbosity > 3)
+                    System.out.println("  Variable already has the best domain populating rule");
+                constraintRules.add(variablePopulationItem.rule);
+                continue;
+            }
+            if (variablePopulationItem.getNbrFormulaInstances() > domainSizeThreshold) {
+                if (verbosity > 3)
+                    System.out.println("  Rule's domain size exceeds the threshold of " + domainSizeThreshold +
+                                       ", domain population postponed");
+                variablePopulationItem.rule = null;
+                variableDomainPopulators.put(variablePopulationItem.cycVariable, variablePopulationItem);
+                valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
+                continue;
+            }
+            if (verbosity > 3)
+                System.out.println("  Will populate using this rule");
+                domainPopulationRules.add(variablePopulationItem.rule);
+                valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
+        }
     }
 
     /**
-     * Returns <tt>true</tt> iff this variable's domain was specified via an #$isa
-     * domain population rule, and this variables domain is too large for efficient
+     * Returns <tt>true</tt> iff this variable's domain is too large for efficient
      * processing.  The constraint solver will employ other rules to populate
      * domain values via OpenCyc KB queries.
      *
      * @param cycVariable the variable under consideration
-     * @return <tt>true</tt> iff this variable's domain was specified via an #$isa
-     * domain population rule, and this variables domain is too large for efficient
+     * @return <tt>true</tt> iff this variable's domain is too large for efficient
      * processing
      */
-    public boolean contains(CycVariable cycVariable) {
-        boolean answer = highCardinalityDomains.containsKey(cycVariable);
+    public boolean isPostponedHighCardinalityDomain(CycVariable cycVariable) {
+        VariablePopulationItem variablePopulationItem =
+            (VariablePopulationItem) variableDomainPopulators.get(cycVariable);
+        boolean answer = variablePopulationItem.getNbrFormulaInstances() > domainSizeThreshold;
         if (verbosity > 8)
             System.out.println("\nhigh cardinality domain for " + cycVariable + " --> " + answer);
         return answer;
@@ -144,22 +192,6 @@ public class VariableDomainPopulator {
     }
 
     /**
-     * Sets the domain size of the high cardinality variable.
-     *
-     * @param cycVariable the high cardinality variable under consideration
-     * @param size the new domain size of the high cardinality variable
-     */
-    public void setDomainSize(CycVariable cycVariable, Integer size) {
-        if (! contains(cycVariable))
-            this.initialize(cycVariable);
-        Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
-        item[0] = size;
-        if (verbosity > 8)
-            System.out.println("\nset high cardinality domain for " +
-                               cycVariable + " to " + size);
-    }
-
-    /**
      * Sets the domain size threshold, beyond which the population of a
      * variable's domain is typically postponed until the forward checking
      * search.
@@ -177,8 +209,9 @@ public class VariableDomainPopulator {
      * @return <tt>int</tt> the domain size of the high cardinality variable
      */
     public int getDomainSize(CycVariable cycVariable) {
-        Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
-        return ((Integer) item[0]).intValue();
+        VariablePopulationItem variablePopulationItem =
+            (VariablePopulationItem) variableDomainPopulators.get(cycVariable);
+        return variablePopulationItem.getNbrFormulaInstances();
     }
 
     /**
@@ -188,10 +221,9 @@ public class VariableDomainPopulator {
      * @parma rule the domain-populating rule
      */
     public void setPopulatingRule(CycVariable cycVariable, Rule rule) {
-        if (! contains(cycVariable))
-            this.initialize(cycVariable);
-        Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
-        item[1] = rule;
+        VariablePopulationItem variablePopulationItem =
+            (VariablePopulationItem) variableDomainPopulators.get(cycVariable);
+        variablePopulationItem.rule = rule;
         if (verbosity > 8)
             System.out.println("\nset high cardinality populating rule for " +
                                cycVariable.cyclify() + " to " + rule.cyclify());
@@ -204,7 +236,73 @@ public class VariableDomainPopulator {
      * @return the domain-populating <tt>Rule</tt> of the high cardinality variable
      */
     public Rule getPopulatingRule(CycVariable cycVariable) {
-        Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
-        return (Rule) item[1];
+        VariablePopulationItem variablePopulationItem =
+            (VariablePopulationItem) variableDomainPopulators.get(cycVariable);
+        return variablePopulationItem.rule;
     }
+
+    /**
+     * Populates the domain by asking a query.
+     *
+     * @param rule the query to asked in the KB
+     * @param cycVariable the variable whose value domain is to be populated by the results of the query
+     *
+     */
+    protected void populateDomainViaQuery(Rule rule, CycVariable cycVariable) throws IOException {
+        CycList domainValuesCycList =
+            CycAccess.current().askWithVariable (rule.getFormula(),
+                                                 cycVariable,
+                                                 constraintProblem.mt);
+        ArrayList domainValues = new ArrayList();
+        domainValues.addAll(domainValuesCycList);
+
+        if (constraintProblem.backchainer.maxBackchainDepth >
+            constraintProblem.backchainer.backchainDepth) {
+            if (verbosity > 3)
+                System.out.println("maxBackchainDepth " +
+                                   constraintProblem.backchainer.maxBackchainDepth +
+                                   " > " + constraintProblem.backchainer.backchainDepth +
+                                   "\n  for rule\n" + rule);
+            ArrayList backchainDomainValues = constraintProblem.backchainer.backchain(rule);
+            if (verbosity > 3)
+                System.out.println("Adding backchain domain values " + backchainDomainValues +
+                                   "\n  for " + cycVariable);
+        }
+        constraintProblem.valueDomains.varsDictionary.put(cycVariable, domainValues);
+    }
+
+    /**
+     * Initializes the value domains for each variable.
+     */
+    public void initializeDomains() throws IOException {
+        for (int i = 0; i < domainPopulationRules.size(); i++) {
+            Rule rule = (Rule) domainPopulationRules.get(i);
+            if (rule.isExtensionalVariableDomainPopulatingRule()) {
+                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
+                if (valueDomains.domains.containsKey(cycVariable))
+                    throw new RuntimeException("Duplicate domain specifying rule for " +
+                                               cycVariable);
+                valueDomains.domains.put(cycVariable, null);
+                if (valueDomains.varsDictionary.containsKey(cycVariable))
+                    throw new RuntimeException("Duplicate varsDictionary entry for " + cycVariable);
+                CycList theSet =  (CycList) rule.getFormula().third();
+                if (! (theSet.first().toString().equals("TheSet")))
+                    throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
+                ArrayList domainValues = new ArrayList(theSet.rest());
+                valueDomains.varsDictionary.put(cycVariable, domainValues);
+            }
+            else if (rule.getArity() == 1) {
+                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
+                populateDomainViaQuery(rule, cycVariable);
+            }
+            else {
+
+                //TODO handle domain population for arity > 1
+
+            }
+        }
+        if (verbosity > 1)
+            valueDomains.displayVariablesAndDomains();
+    }
+
 }

@@ -13,7 +13,7 @@ import org.opencyc.elf.goal.PredicateExpression;
 import java.util.ArrayList;
 
 /**
- * GoalFactory is designed to create goals.  There is a singleton instance.
+ * GoalFactory is designed to create goals.  There is a singleton instance of goal factory.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -60,15 +60,24 @@ public class GoalFactory {
   }
   
   /**
-   * Makes a new console prompted input goal that achieves a string return value.
+   * Populates the goal library.
    */
-  public Goal makeConsolePromptedInput () {
+  public void populateGoalLibrary() {
+    // get input from user
     Goal goal = new Goal();
+    goal.setGoalName(Goal.GET_USER_INPUT);
     goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
-                                                        StateVariable.CONSOLE_PROMPT));
+                                                        StateVariable.USER_INPUT));
     goal.setImportance(new Importance(Importance.NEUTRAL));
-    return goal;
-  }  
+    GoalLibrary.getInstance().setGoal(goal.getGoalName(), goal);
+    // get console prompted input
+    goal = new Goal();
+    goal.setGoalName(Goal.GET_CONSOLE_PROMPTED_INPUT);
+    goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
+                                                        StateVariable.CONSOLE_INPUT));
+    goal.setImportance(new Importance(Importance.NEUTRAL));
+    GoalLibrary.getInstance().setGoal(goal.getGoalName(), goal);
+  }
   
   //// Protected Area
   

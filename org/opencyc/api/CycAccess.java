@@ -244,6 +244,22 @@ public class CycAccess {
     }
 
     /**
+     * Constructs a new CycAccess object given a host name.
+     *
+     * @param hostName the host name
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycAccess(String hostName)
+        throws IOException, UnknownHostException, CycApiException {
+        this(hostName,
+             CycConnection.DEFAULT_BASE_PORT,
+             CycConnection.DEFAULT_COMMUNICATION_MODE,
+             CycAccess.DEFAULT_CONNECTION);
+    }
+
+    /**
      * Constructs a new CycAccess object given a host name, port, communication mode and persistence indicator.
      *
      * @param hostName the host name
@@ -3992,27 +4008,6 @@ public class CycAccess {
                   nameString);
     }
 
-    /**
-     * Assert a nameString for the specified CycConstant in the specified lexical microtheory.
-     * The operation will be added to the KB transcript for replication and archive.
-     *
-     * @param cycFort the given term
-     * @param nameString the given name string for the term
-     * @param mt the microtheory in which the name string is asserted
-     * @throws UnknownHostException if cyc server host not found on the network
-     * @throws IOException if a data communication error occurs
-     * @throws CycApiException if the api request results in a cyc server error
-     */
-    public void assertNameString (CycFort cycFort,
-                                  String nameString,
-                                  CycFort mt)
-        throws IOException, UnknownHostException, CycApiException {
-        assertGaf(mt,
-                  getKnownConstantByGuid("c0fdf7e8-9c29-11b1-9dad-c379636f7270"),
-                  cycFort,
-                  nameString);
-    }
-
    /**
      * Assert a comment for the specified CycConstant in the specified microtheory MT.  The operation
      * will be added to the KB transcript for replication and archive.
@@ -4035,21 +4030,42 @@ public class CycAccess {
     }
 
     /**
-     * Assert a comment for the specified CycConstant in the specified microtheory MT.  The operation
-     * will be added to the KB transcript for replication and archive.
+     * Assert a comment for the specified CycFort in the specified microtheory.
+     * The operation will be added to the KB transcript for replication and archive.
      *
-     * @param cycConstant the givent term
+     * @param cycFort the given term
      * @param comment the comment string
      * @param mt the comment assertion microtheory
      * @throws UnknownHostException if cyc server host not found on the network
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertComment (CycConstant cycConstant,
+    public void assertComment (CycFort cycFort,
                                String comment,
                                CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        assertGaf(mt, CycAccess.comment, cycConstant, comment);
+        assertGaf(mt, CycAccess.comment, cycFort, comment);
+    }
+
+    /**
+     * Assert a name string for the specified CycFort in the specified microtheory.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param cycFort the given term
+     * @param nameString the name string
+     * @param mt the name string assertion microtheory
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertNameString (CycFort cycFort,
+                                  String nameString,
+                                  CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        assertGaf(mt,
+                  this.getKnownConstantByGuid("c0fdf7e8-9c29-11b1-9dad-c379636f7270"),
+                  cycFort,
+                  nameString);
     }
 
     /**
@@ -4276,6 +4292,50 @@ public class CycAccess {
     }
 
     /**
+     * Assert that the more general predicate is a genlPreds of the more specialized
+     * predicate, asserted in the UniversalVocabularyMt
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param specPredName the name of the more specialized predicate
+     * @param genlPredName the name of the more generalized predicate
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGenlPreds (String specPredName,
+                                 String genlPredName)
+        throws IOException, UnknownHostException, CycApiException {
+        CycConstant genlPreds =
+            getKnownConstantByGuid("bd5b4951-9c29-11b1-9dad-c379636f7270");
+        assertGaf(universalVocabularyMt,
+                  genlPreds,
+                  getKnownConstantByName(specPredName),
+                  getKnownConstantByName(genlPredName));
+    }
+
+    /**
+     * Assert that the more general predicate is a genlPreds of the more specialized
+     * predicate, asserted in the UniversalVocabularyMt
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param specPred the more specialized predicate
+     * @param genlsPred the more generalized predicate
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGenlPreds (CycFort specPred,
+                                 CycFort genlPred)
+        throws IOException, UnknownHostException, CycApiException {
+        CycConstant genlPreds =
+            getKnownConstantByGuid("bd5b4951-9c29-11b1-9dad-c379636f7270");
+        assertGaf(universalVocabularyMt,
+                  genlPreds,
+                  specPred,
+                  genlPred);
+    }
+
+    /**
      * Assert that the more general micortheory is a genlMt of the more specialized
      * microtheory, asserted in the UniversalVocabularyMt
      * The operation will be added to the KB transcript for replication and archive.
@@ -4310,7 +4370,7 @@ public class CycAccess {
                               CycFort genlsMt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(universalVocabularyMt,
-                  genlMt,
+                  this.genlMt,
                   specMt,
                   genlsMt);
     }
@@ -5165,13 +5225,14 @@ public class CycAccess {
      * @param mtName the name of the new collector microtheory
      * @param comment the comment for the new collector microtheory
      * @param genlMts the list of more general microtheories
+     * @return the new microtheory
      */
     public CycConstant createCollectorMt (String mtName,
                                           String comment,
                                           ArrayList genlMts)
         throws IOException, CycApiException {
         CycConstant collectorMt = getKnownConstantByName("CollectorMicrotheory");
-        return this.createMicrotheory(mtName, comment, collectorMt, genlMts);
+        return createMicrotheory(mtName, comment, collectorMt, genlMts);
         }
 
     /**
@@ -5220,6 +5281,7 @@ public class CycAccess {
      * @param comment the comment for the new spindle microtheory
      * @param spindleHeadMtName the name of the spindle head microtheory
      * @param spindleCollectorMtName the name of the spindle head microtheory
+     * @return the new spindle microtheory in the given spindle system
      */
     public CycConstant createSpindleMt (String spindleMtName,
                                         String comment,
@@ -5239,6 +5301,7 @@ public class CycAccess {
      * @param comment the comment for the new spindle microtheory
      * @param spindleHeadMt the spindle head microtheory
      * @param spindleCollectorMt the spindle head microtheory
+     * @return the new spindle microtheory in the given spindle system
      */
     public CycConstant createSpindleMt (String spindleMtName,
                                         String comment,
@@ -5264,6 +5327,7 @@ public class CycAccess {
      *
      * @param constantName the name of the new KB subset collection
      * @param comment the comment for the new KB subset collection
+     * @return the new KB subset collection term
      */
     public CycConstant createKbSubsetCollection (String constantName,
                                                  String comment)
@@ -5282,5 +5346,248 @@ public class CycAccess {
                   baseKB);
         return cycConstant;
         }
+
+    /**
+     * Creates a new collection term.
+     *
+     * @param collectionName the name of the new collection
+     * @param comment the comment for the collection
+     * @param commentMtName the name of the microtheory in which the comment is asserted
+     * @param isaName the name of the collection of which the new collection is an instance
+     * @param genlsName the name of the collection of which the new collection is a subset
+     * @return the new collection term
+     */
+    public CycConstant createCollection (String collectionName,
+                                         String comment,
+                                         String commentMtName,
+                                         String isaName,
+                                         String genlsName)
+        throws IOException, CycApiException {
+        CycConstant collection = findOrCreate(collectionName);
+        assertComment(collection, comment, getKnownConstantByName(commentMtName));
+        assertIsa(collection, getKnownConstantByName(isaName));
+        assertGenls(collection, getKnownConstantByName(genlsName));
+        return collection;
+        }
+
+    /**
+     * Creates a new collection term.
+     *
+     * @param collection the name of the new collection
+     * @param comment the comment for the collection
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new collection is an instance
+     * @param genls the collection of which the new collection is a subset
+     * @return the new collection term
+     */
+    public CycFort createCollection (String collectionName,
+                                     String comment,
+                                     CycFort commentMt,
+                                     CycFort isa,
+                                     CycFort genls)
+        throws IOException, CycApiException {
+        return createCollection(findOrCreate(collectionName),
+                                comment,
+                                commentMt,
+                                isa,
+                                genls);
+        }
+
+    /**
+     * Creates a new collection term.
+     *
+     * @param collection the new collection
+     * @param comment the comment for the collection
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new collection is an instance
+     * @param genls the collection of which the new collection is a subset
+     * @return the new collection term
+     */
+    public CycFort createCollection (CycFort collection,
+                                     String comment,
+                                     CycFort commentMt,
+                                     CycFort isa,
+                                     CycFort genls)
+        throws IOException, CycApiException {
+        assertComment(collection, comment, commentMt);
+        assertIsa(collection, isa);
+        assertGenls(collection, genls);
+        return collection;
+        }
+
+    /**
+     * Creates a new individual-denoting reifiable unary function term.
+     *
+     * @param unaryFunction the new collection
+     * @param comment the comment for the unary function
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new unary function is an instance
+     * @param arg1Isa the kind of objects this unary function takes as its argument
+     * @param resultIsa the kind of object represented by this reified term
+     * @return the new individual-denoting reifiable unary function term
+     */
+    public CycFort createIndivDenotingUnaryFunction (String unaryFunction,
+                                                     String comment,
+                                                     String commentMt,
+                                                     String arg1Isa,
+                                                     String resultIsa)
+        throws IOException, CycApiException {
+        return createIndivDenotingUnaryFunction (
+            findOrCreate(unaryFunction),
+            comment,
+            getKnownConstantByName(commentMt),
+            getKnownConstantByName(arg1Isa),
+            getKnownConstantByName(resultIsa));
+        }
+
+    /**
+     * Creates a new individual-denoting reifiable unary function term.
+     *
+     * @param unaryFunction the new collection
+     * @param comment the comment for the unary function
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new unary function is an instance
+     * @param arg1Isa the kind of objects this unary function takes as its argument
+     * @param resultIsa the kind of object represented by this reified term
+     * @return the new individual-denoting reifiable unary function term
+     */
+    public CycFort createIndivDenotingUnaryFunction (CycFort unaryFunction,
+                                                     String comment,
+                                                     CycFort commentMt,
+                                                     CycFort arg1Isa,
+                                                     CycFort resultIsa)
+        throws IOException, CycApiException {
+        assertComment(unaryFunction, comment, commentMt);
+        // (#$isa unaryFunction #$UnaryFunction)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd58af89-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa unaryFunction #$ReifiableFunction)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd588002-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa unaryFunction #$IndividualDenotingFunction)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd58fad9-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa unaryFunction #$Function-Denotational)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd5c40b0-9c29-11b1-9dad-c379636f7270"));
+        assertArgIsa(unaryFunction, 1, arg1Isa);
+        assertResultIsa(unaryFunction, resultIsa);
+        return unaryFunction;
+        }
+
+    /**
+     * Creates a new collection-denoting reifiable unary function term.
+     *
+     * @param unaryFunction the new collection
+     * @param comment the comment for the unary function
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new unary function is an instance
+     * @param arg1Isa the kind of objects this unary function takes as its argument
+     * @param resultIsa the kind of object represented by this reified term
+     * @return the new collection-denoting reifiable unary function term
+     */
+    public CycFort createCollectionDenotingUnaryFunction (String unaryFunction,
+                                                          String comment,
+                                                          String commentMt,
+                                                          String arg1Isa,
+                                                          String resultIsa)
+        throws IOException, CycApiException {
+        return createCollectionDenotingUnaryFunction (
+            getKnownConstantByName(unaryFunction),
+            comment,
+            getKnownConstantByName(commentMt),
+            getKnownConstantByName(arg1Isa),
+            getKnownConstantByName(resultIsa));
+        }
+
+    /**
+     * Creates a new collection-denoting reifiable unary function term.
+     *
+     * @param unaryFunction the new collection
+     * @param comment the comment for the unary function
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new unary function is an instance
+     * @param arg1Isa the kind of objects this unary function takes as its argument
+     * @param resultIsa the kind of object represented by this reified term
+     * @return the new collection-denoting reifiable unary function term
+     */
+    public CycFort createCollectionDenotingUnaryFunction (CycFort unaryFunction,
+                                                          String comment,
+                                                          CycFort commentMt,
+                                                          CycFort arg1Isa,
+                                                          CycFort resultIsa)
+        throws IOException, CycApiException {
+        assertComment(unaryFunction, comment, commentMt);
+        // (#$isa unaryFunction #$UnaryFunction)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd58af89-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa unaryFunction #$ReifiableFunction)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd588002-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa unaryFunction #$CollectionDenotingFunction)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd58806a-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa unaryFunction #$Function-Denotational)
+        assertIsa(unaryFunction,
+                  getKnownConstantByGuid("bd5c40b0-9c29-11b1-9dad-c379636f7270"));
+        assertArgIsa(unaryFunction, 1, arg1Isa);
+        assertResultIsa(unaryFunction, resultIsa);
+        return unaryFunction;
+        }
+
+    /**
+     * Assert an argument contraint for the given relation and argument position.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param relation the given relation
+     * @param argPosition the given argument position
+     * @param argNIsa the argument constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertArgIsa (CycFort relation,
+                              int argPosition,
+                              CycFort argNIsa)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$argIsa relation argPosition argNIsa)
+        assertGaf(universalVocabularyMt,
+                  getKnownConstantByGuid("bee22d3d-9c29-11b1-9dad-c379636f7270"),
+                  relation,
+                  argNIsa);
+    }
+
+    /**
+     * Assert the result contraint for the given denotational function.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param denotationalFunction the given denotational function
+     * @param resultIsa the function's result constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertResultIsa (CycFort denotationalFunction,
+                                 CycFort resultIsa)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$resultIsa denotationalFunction resultIsa)
+        assertGaf(universalVocabularyMt,
+                  getKnownConstantByGuid("bd5880f1-9c29-11b1-9dad-c379636f7270"),
+                  denotationalFunction,
+                  resultIsa);
+    }
+
+    /**
+     * Returns true if this KB is OpenCyc.
+     *
+     * @return true if this KB is OpenCyc, otherwise false
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public boolean isOpenCyc ()
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(cnot (find-constant \"SteveReed\"))");
+    }
 
 }

@@ -59,7 +59,13 @@ public class ImportSonatDaml {
     /**
      * Constructs a new ImportSonatDaml object.
      */
-    public ImportSonatDaml() {
+    public ImportSonatDaml()
+        throws IOException, UnknownHostException, CycApiException {
+        cycAccess = new CycAccess("MCCARTHY",
+                                  4600,
+                                  CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                  true);
+        initializeDamlVocabulary();
     }
 
     /**
@@ -69,8 +75,9 @@ public class ImportSonatDaml {
      */
     public static void main(String[] args) {
         Log.makeLog();
-        ImportSonatDaml importSonatDaml = new ImportSonatDaml();
+        ImportSonatDaml importSonatDaml;
         try {
+            importSonatDaml = new ImportSonatDaml();
             importSonatDaml.importDaml();
         }
         catch (Exception e) {
@@ -87,14 +94,13 @@ public class ImportSonatDaml {
 
         initializeDocumentsToImport();
         initializeOntologyNicknames();
-        cycAccess = new CycAccess();
         ImportDaml importDaml =
             new ImportDaml(cycAccess,
                            ontologyNicknames,
                            kbSubsetCollectionName);
-        for (int i = 16; i < 17; i++) {
+        //for (int i = 16; i < 17; i++) {
         //for (int i = 0; i < documentsToImport.size(); i++) {
-        //for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 1; i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
@@ -166,6 +172,8 @@ public class ImportSonatDaml {
 
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml", "factbook");
 
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont", "dces");
+
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml", "ves");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont", "ves");
 
@@ -221,6 +229,51 @@ public class ImportSonatDaml {
     }
 
     /**
+     * Initializes the DAML ontology vocabulary if not present.
+     */
+    protected void initializeDamlVocabulary ()
+        throws IOException, UnknownHostException, CycApiException {
+        Log.current.println("Creating DAML vocabulary");
+        if (cycAccess.isOpenCyc()) {
+            cycAccess.setCyclist("CycAdministrator");
+            cycAccess.setKePurpose("OpenCycProject");
+
+            // DamlSonatConstant
+            String term = "DamlSonatConstant";
+            String comment = "The KB subset collection of DAML SONAT terms.";
+            cycAccess.findOrCreate(term);
+            cycAccess.assertComment(term, comment, "BaseKB");
+            cycAccess.assertIsa(term, "VariableOrderCollection");
+            cycAccess.assertGenls(term, "CycLConstant");
+
+            // DamlDatatypeProperty
+            cycAccess.createCollection("DamlDatatypeProperty",
+                                       "The collection of #$Predicates having a " +
+                                       "SubLAtomicTerm as the second argument.",
+                                       "BaseKB",
+                                       "PredicateCategory",
+                                       "IrreflexiveBinaryPredicate");
+            // DamlObjectProperty
+            cycAccess.createCollection("DamlObjectProperty",
+                                       "The collection of #$Predicates not having a " +
+                                       "SubLAtomicTerm as the second argument.",
+                                       "BaseKB",
+                                       "PredicateCategory",
+                                       "BinaryPredicate");
+
+            // URLFn
+            cycAccess.createIndivDenotingUnaryFunction(
+                "URLFn",
+                "An instance of both IndividualDenotingFunction and ReifiableFunction. " +
+                "Given a URL string as its single argument, URLFn returns the correspond " +
+                " instance of UniformResourceLocator.",
+                "BaseKB",
+                "CharacterString",
+                "UniformResourceLocator");
+        }
+    }
+
+    /**
      * Initializes the DAML ontology mt.
      */
     protected void initializeDamlOntologyMt (String mtName)
@@ -229,7 +282,7 @@ public class ImportSonatDaml {
         String comment = "A microtheory to contain imported SONAT DAML assertions.";
         ArrayList genlMts = new ArrayList();
         genlMts.add("BaseKB");
-        String isaMtName = "ApplicationContext";
+        String isaMtName = "SourceMicrotheory";
         cycAccess.createMicrotheory(mtName, comment, isaMtName, genlMts);
     }
 

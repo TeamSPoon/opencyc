@@ -68,7 +68,7 @@ public class BehaviorEngine {
   //// Main
   
   /**
-   * Main method in case tracing is prefered over running JUnit.
+   * Provides the main method for the behavior engine.
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {

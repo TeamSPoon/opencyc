@@ -6090,8 +6090,9 @@ public class CycAccess {
      * @param commentMt the microtheory in which the comment is asserted
      * @param isa the collection of which the new unary function is an instance
      * @param arg1Isa the isa type constraint for the argument
-     * @param arg1Genl the genls type constraint for the argument if it is a collection
-     * @param resultIsa the kind of object represented by this reified term
+     * @param arg1GenlName the genls type constraint for the argument if it is a collection
+     * @param resultIsa the isa object represented by this reified term
+     * @param resultGenlName the genls object represented by this reified term
      * @return the new collection-denoting reifiable unary function term
      */
     public CycFort createCollectionDenotingUnaryFunction (String unaryFunction,
@@ -6099,20 +6100,27 @@ public class CycAccess {
                                                           String commentMt,
                                                           String arg1Isa,
                                                           String arg1GenlName,
-                                                          String resultIsa)
+                                                          String resultIsa,
+                                                          String resultGenlName)
         throws IOException, CycApiException {
         CycFort arg1Genl;
         if (arg1GenlName != null)
             arg1Genl = getKnownConstantByName(arg1GenlName);
         else
             arg1Genl = null;
+        CycFort resultGenl;
+        if (resultGenlName != null)
+            resultGenl = getKnownConstantByName(resultGenlName);
+        else
+            resultGenl = null;
         return createCollectionDenotingUnaryFunction (
             findOrCreate(unaryFunction),
             comment,
             getKnownConstantByName(commentMt),
             getKnownConstantByName(arg1Isa),
             arg1Genl,
-            getKnownConstantByName(resultIsa));
+            getKnownConstantByName(resultIsa),
+            resultGenl);
         }
 
     /**
@@ -6123,7 +6131,8 @@ public class CycAccess {
      * @param commentMt the microtheory in which the comment is asserted
      * @param arg1Isa the isa type constraint for the argument
      * @param arg1Genl the genls type constraint for the argument if it is a collection
-     * @param resultIsa the kind of object represented by this reified term
+     * @param resultIsa the isa object represented by this reified term
+     * @param resultGenl the genls object represented by this reified term
      * @return the new collection-denoting reifiable unary function term
      */
     public CycFort createCollectionDenotingUnaryFunction (CycFort unaryFunction,
@@ -6131,7 +6140,8 @@ public class CycAccess {
                                                           CycFort commentMt,
                                                           CycFort arg1Isa,
                                                           CycFort arg1Genl,
-                                                          CycFort resultIsa)
+                                                          CycFort resultIsa,
+                                                          CycFort resultGenl)
         throws IOException, CycApiException {
         assertComment(unaryFunction, comment, commentMt);
         // (#$isa unaryFunction #$UnaryFunction)
@@ -6150,6 +6160,8 @@ public class CycAccess {
         if (arg1Genl != null)
             assertArg1Genl(unaryFunction, arg1Genl);
         assertResultIsa(unaryFunction, resultIsa);
+        if (resultGenl != null)
+            assertResultGenl(unaryFunction, resultGenl);
         return unaryFunction;
         }
 
@@ -6343,11 +6355,11 @@ public class CycAccess {
     }
 
     /**
-     * Assert the result contraint for the given denotational function.
+     * Assert the isa result contraint for the given denotational function.
      * The operation will be added to the KB transcript for replication and archive.
      *
      * @param denotationalFunction the given denotational function
-     * @param resultIsa the function's result constraint
+     * @param resultIsa the function's isa result constraint
      * @throws UnknownHostException if cyc server host not found on the network
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
@@ -6360,6 +6372,26 @@ public class CycAccess {
                   getKnownConstantByGuid("bd5880f1-9c29-11b1-9dad-c379636f7270"),
                   denotationalFunction,
                   resultIsa);
+    }
+
+    /**
+     * Assert the genls result contraint for the given denotational function.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param denotationalFunction the given denotational function
+     * @param resultGenl the function's genls result constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertResultGenl (CycFort denotationalFunction,
+                                  CycFort resultGenl)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$resultGenl denotationalFunction resultGenls)
+        assertGaf(universalVocabularyMt,
+                  getKnownConstantByGuid("bd58d6ab-9c29-11b1-9dad-c379636f7270"),
+                  denotationalFunction,
+                  resultGenl);
     }
 
     /**
@@ -6612,9 +6644,9 @@ public class CycAccess {
      * @param mt the assertion microtheory
      */
     public void assertSynonymousExternalConcept (CycFort cycTerm,
-                                                    CycFort informationSource,
-                                                    String externalConcept,
-                                                    CycFort mt)
+                                                 CycFort informationSource,
+                                                 String externalConcept,
+                                                 CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList gaf = new CycList();
         // #$synonymousExternalConcept
@@ -6729,6 +6761,26 @@ public class CycAccess {
         return askWithVariable (query,
                                 variable,
                                 mt);
+    }
+
+    /**
+     * Ensures that the given term meets the given isa and genl wff constraints
+     * in the UniversalVocabularyMt.
+     *
+     * @param cycFort the given term
+     * @param isaConstraint the given isa type constraint, or null
+     * @param genlsConstraint the given genls type constraint, or null
+     */
+    public void ensureWffConstraints (CycFort cycFort,
+                                      CycFort isaConstraint,
+                                      CycFort genlsConstraint)
+        throws IOException, UnknownHostException, CycApiException {
+        if (isaConstraint != null &&
+            (! isa(cycFort, isaConstraint, universalVocabularyMt)))
+            assertIsa(cycFort, isaConstraint);
+        if (genlsConstraint != null &&
+            (! isSpecOf(cycFort, isaConstraint, universalVocabularyMt)))
+            assertGenls(cycFort, isaConstraint);
     }
 
 

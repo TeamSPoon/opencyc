@@ -245,7 +245,8 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
             "BaseKB",
             "CharacterString",
             null,
-            "Collection");
+            "Collection",
+            null);
     }
 
     /**

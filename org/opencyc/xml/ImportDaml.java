@@ -1609,10 +1609,10 @@ public abstract class ImportDaml implements StatementHandler {
             cycTerm = cycAccess.findOrCreate(cycTermName);
         if (verbosity > 1)
             Log.current.println("Mapping " + damlTermName + " to " + cycTerm.cyclify());
-        cycAccess.assertSynonymousExternalConcept(cycTermName,
-                                                  "WorldWideWeb-DynamicIndexedInfoSource",
+        cycAccess.assertSynonymousExternalConcept(cycTerm,
+                                                  cycAccess.find("WorldWideWeb-DynamicIndexedInfoSource"),
                                                   damlTermName,
-                                                  mappingMt);
+                                                  cycAccess.find(mappingMt));
         CycFort damlTerm = cycAccess.findOrCreate(damlTermName);
         cycAccess.assertComment(damlTerm,
                                 damlTerm.cyclify() +

@@ -1,7 +1,9 @@
-package org.opencyc.uml.statemachine;
+package org.opencyc.uml.interpreter;
+
+import org.opencyc.uml.commonbehavior.*;
 
 /**
- * CompletionEvent from the UML State_Machine package.
+ * Interprets a procedure of a UML StateMachine.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -25,27 +27,30 @@ package org.opencyc.uml.statemachine;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class CompletionEvent extends Event {
+public class ProcedureInterpreter {
 
     /**
-     * the state issuing this completion event
+     * the procedure to interpret
      */
-    State state;
+    Procedure procedure;
 
     /**
-     * Constructs a new CompletionEvent object.
+     * Constructs a new ProcedureInterpreter object given the procedure
+     * to interpret.
+     *
+     * @param procedure the procedure to interpret
      */
-    public CompletionEvent(State state) {
-        this.state = state;
+    public ProcedureInterpreter(Procedure procedure) {
+        this.procedure = procedure;
     }
 
     /**
-     * Gets the state issuing this completion event.
+     * Gets the procedure to interpret.
      *
-     * @return the state issuing this completion event
+     * @return the procedure to interpret
      */
-    public State getState () {
-        return state;
+    public Procedure getProcedure () {
+        return procedure;
     }
 
 }

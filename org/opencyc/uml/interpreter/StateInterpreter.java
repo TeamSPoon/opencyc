@@ -2,6 +2,7 @@ package org.opencyc.uml.interpreter;
 
 import java.util.*;
 import javax.swing.tree.*;
+import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.statemachine.*;
 
 /**
@@ -82,10 +83,12 @@ public class StateInterpreter extends Thread {
      * @param transition the transistion
      */
     public void interpretTransitionEntry (Transition transition) {
+        Procedure procedure = transition.getEffect();
+        if (procedure != null)
+            new ProcedureInterpreter(procedure);
         state.setIsActive(true);
         if (state.getEntry() != null)
             new ActionInterpreter(state.getEntry());
-
     }
 
     /**
@@ -128,7 +131,8 @@ public class StateInterpreter extends Thread {
         doActivityThread.terminate();
         if (state.getExit() != null)
             new ActionInterpreter(state.getExit());
-
+        CompletionEvent completionEvent = new CompletionEvent(state);
+        interpreter.enqueueEvent(completionEvent);
     }
 
     /**

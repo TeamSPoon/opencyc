@@ -321,7 +321,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   
   /** the direct sensors or lower level sensory perception objects that send sensations to this
    sensory perception */
-  protected List sensors;
+  protected List sensors = new ArrayList();
   
   /** the takable channel from which messages are input */
   protected Takable sensoryPerceptionChannel;

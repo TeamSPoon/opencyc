@@ -28,7 +28,7 @@ import java.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class BehaviorGeneration extends NodeComponent {
+public abstract class BehaviorGeneration extends NodeComponent {
 
     /**
      * the parent node's BehaviorGeneration object.  The

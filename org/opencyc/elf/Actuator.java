@@ -6,7 +6,6 @@ import org.opencyc.uml.interpreter.*;
 /**
  * Provides Actuators for the Elementary Loop Functioning (ELF).<br>
  *
- *
  * @version $Id$
  * @author Stephen L. Reed
  *

@@ -72,6 +72,10 @@ public class Node extends ELFObject {
      */
     protected ArrayList childNodes;
 
+    /**
+     * the list of sibling nodes at this ELF resolution level
+     */
+    protected ArrayList siblingNodes;
 
     /**
      * Constructs a new Node object.
@@ -253,5 +257,23 @@ public class Node extends ELFObject {
      */
     public void setChildNodes (ArrayList childNodes) {
         this.childNodes = childNodes;
+    }
+
+    /**
+     * Gets the list of sibling nodes at this ELF resolution level
+     *
+     * @return the list of sibling nodes at this ELF resolution level
+     */
+    public ArrayList getSiblingNodes () {
+        return siblingNodes;
+    }
+
+    /**
+     * Sets the list of sibling nodes at this ELF resolution level
+     *
+     * @param siblingNodes the list of sibling nodes at this ELF resolution level
+     */
+    public void setSiblingNodes (ArrayList siblingNodes) {
+        this.siblingNodes = siblingNodes;
     }
 }

@@ -205,7 +205,6 @@ public class ExportHtml {
     protected HashSet previouslyExpandedTerms;
     protected String hostname = CycConnection.DEFAULT_HOSTNAME;
     protected int port = CycConnection.DEFAULT_BASE_PORT;
-    //protected int port = 3620;
 
     /**
      * Additional term guids not to appear in the list of direct instances even if
@@ -272,6 +271,8 @@ public class ExportHtml {
         ExportHtml exportHtml = new ExportHtml();
         exportHtml.verbosity = 3;
         try {
+
+            exportHtml.port = 3620;
             exportHtml.cycAccess =
                 new CycAccess(exportHtml.hostname,
                               exportHtml.port,
@@ -1640,11 +1641,12 @@ public class ExportHtml {
         addAllRelations();
         addAllBinaryPredicates();
         addAllActorSlots();
-        addAllTemporalRelations();
         addAllPartonomicPredicates();
         addAllSpecializationsOfAffiliation();
         addAllSpecializationsOfVestedInterest();
         addAllDenotingFunctions();
+        addAllTemporalRelations();
+        addAllScriptedEventTypes();
         addEeldCoreOntology();
         addPublicSharedOntology();
     }
@@ -1733,7 +1735,9 @@ public class ExportHtml {
         category.title = "Terms used to specify the interpretation of the Veridian schema.";
         category.outputPath = "all-schema-mapping-types.html";
         category.queryString =
-            "(#$isa ?TERM #$SKSIConstant)\n";
+            "(#$and \n" +
+            "  (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            "  (#$isa ?TERM #$SKSIConstant))\n";
         category.mt = cycAccess.getKnownConstantByName("#$SKSIMt");
     }
 
@@ -1747,7 +1751,9 @@ public class ExportHtml {
         category.title = "Relations used in representing scripts.";
         category.outputPath = "script-representation-vocabulary.html";
         category.queryString =
-            "(#$isa ?TERM #$SKSIConstant)\n";
+            "(#$and \n" +
+            "  (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            "  (#$isa ?TERM #$ScriptRelation))\n";
         category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
@@ -1907,7 +1913,7 @@ public class ExportHtml {
         category.queryString =
             "(#$and\n" +
             " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            " (#$isa ?TERM #$ComplexTemporalRelation))\n";
+            " (#$isa ?TERM #$ComplexTemporalPredicate))\n";
         category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
@@ -1972,6 +1978,23 @@ public class ExportHtml {
             "(#$and\n" +
             " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             " (#$isa ?TERM #$Function-Denotational))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
+
+    /**
+     * Categorizes all scripted event types.
+     */
+    protected void addAllScriptedEventTypes ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All scripted event types.";
+        category.outputPath = "all-scripted-event-types.html";
+        category.queryString =
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$ScriptedEventType))\n";
         category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 

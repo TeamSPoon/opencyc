@@ -593,7 +593,9 @@ public class CycList extends ArrayList {
             Object object = this.get(i);
             if (object == null)
                 throw new RuntimeException("Invalid null element after " + result);
-            if (object instanceof CycConstant)
+            if (object instanceof CycObject)
+                cyclifiedObject = ((CycObject) object).cyclify();
+            else if (object instanceof CycConstant)
                 cyclifiedObject = ((CycConstant) object).cyclify();
             else if (object instanceof CycNart)
                 cyclifiedObject = ((CycNart) object).cyclify();
@@ -641,7 +643,9 @@ public class CycList extends ArrayList {
             Object object = this.get(i);
             if (object == null)
                 throw new RuntimeException("Invalid null element after " + result);
-            if (object instanceof CycConstant)
+            if (object instanceof CycObject)
+                cyclifiedObject = ((CycObject) object).cyclify();
+            else if (object instanceof CycConstant)
                 cyclifiedObject = ((CycConstant) object).cyclify();
             else if (object instanceof CycNart)
                 cyclifiedObject = ((CycNart) object).cyclify();

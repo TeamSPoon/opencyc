@@ -411,6 +411,20 @@ public class ImportDaml implements StatementHandler {
         CycFort object = cycAccess.getConstantByName(objLitTermInfo.toString());
         if (object == null)
             object = importTerm(objLitTermInfo);
+        CycList arg2Constraints =
+            cycAccess.getArg2Isas((CycConstant) predicate, cycAccess.universalVocabularyMt);
+        arg2Constraints.addAllNew(cycAccess.getInterArgIsa1_2_forArg2((CycConstant) predicate,
+                                                                      subject,
+                                                                      cycAccess.universalVocabularyMt));
+        for (int i = 0; i < arg2Constraints.size(); i++) {
+            CycFort arg2Constraint = (CycFort) arg2Constraints.get(i);
+            if (! cycAccess.isa(object, arg2Constraint)) {
+                cycAccess.assertIsa(object, arg2Constraint, cycAccess.universalVocabularyMt);
+                Log.current.println("*** asserting forward arg constraint " +
+                                    "(#$isa " + object.cyclify() + " " +
+                                    arg2Constraint.cyclify() + ")");
+            }
+        }
         cycAccess.assertGaf(importMt,
                             predicate,
                             subject,
@@ -719,7 +733,7 @@ public class ImportDaml implements StatementHandler {
      */
     protected DamlTermInfo resource(AResource aResource,
                                     DamlTermInfo predicateTermInfo) {
-        DamlTermInfo damlTermInfo = new DamlTermInfo();
+        DamlTermInfo damlTermInfo = new DamlTermInfo(this);
         String localName;
         String nameSpace;
         Resource resource = translateResource(aResource);
@@ -769,7 +783,7 @@ public class ImportDaml implements StatementHandler {
      * @return the DamlTerm info of the given RDF literal
      */
     protected DamlTermInfo literal(ALiteral literal) {
-        DamlTermInfo damlTermInfo = new DamlTermInfo();
+        DamlTermInfo damlTermInfo = new DamlTermInfo(this);
         String literalString = literal.toString();
         if (this.isProbableUri(literalString)) {
             damlTermInfo.isURI = true;
@@ -1111,7 +1125,8 @@ public class ImportDaml implements StatementHandler {
                     predicateTermInfo.toString().equals("rdfs:seeAlso"))
                     return true;
             }
-            if (parent.
+            if (parent.ontologyNicknames.containsKey(uri))
+                return true;
             if (uri.endsWith(".daml") ||
                (uri.indexOf("daml+oil") > -1))
                 return true;

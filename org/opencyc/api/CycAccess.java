@@ -3194,6 +3194,7 @@ public class CycAccess {
      * Gets a list of the argNIsas for a CycConstant predicate.
      *
      * @param predicate the predicate for which argument N contraints are sought.
+     * @param argPosition the argument position of argument N
      * @return the list of the argNIsas for a CycConstant predicate
      * @throws UnknownHostException if cyc server host not found on the network
      * @throws IOException if a data communication error occurs
@@ -3201,23 +3202,136 @@ public class CycAccess {
      */
     public CycList getArgNIsas (CycConstant predicate, int argPosition)
         throws IOException, UnknownHostException, CycApiException {
-        return converseList("(remove-duplicates (with-all-mts (argn-isa " + predicate.stringApiValue() +
-                            " " + argPosition + ")))");
+        String command =
+            "(remove-duplicates \n" +
+            "  (with-all-mts \n" +
+            "    (argn-isa " + predicate.stringApiValue() + " " + Integer.toString(argPosition) + ")))";
+        return converseList(command);
     }
 
     /**
      * Gets the list of the argNIsas for a CycConstant predicate given an mt.
      *
-     * @param predicate the predicate for which argument 1 contraints are sought.
+     * @param predicate the predicate for which argument contraints are sought.
+     * @param argPosition the argument position of argument N
      * @param mt the relevant microtheory
      * @return the list of the arg1Isas for a CycConstant predicate given an mt
      * @throws UnknownHostException if cyc server host not found on the network
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArgNIsas (CycConstant predicate, CycFort mt)
+    public CycList getArgNIsas (CycConstant predicate,
+                                int argPosition,
+                                CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        return converseList("(argn-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
+        String command =
+            "(remove-duplicates \n" +
+            "  (with-all-mts \n" +
+            "    (argn-isa \n" +
+            "      " + predicate.stringApiValue() +
+            "      " + Integer.toString(argPosition) +
+            "      " + mt.stringApiValue() + ")))";
+        return converseList(command);
+    }
+
+    /**
+     * Gets the list of the interArgIsa1-2 isa constraint pairs for
+     * the given predicate.  Each item of the returned list is a pair
+     * (arg1-isa arg2-isa) which means that when (#$isa arg1 arg1-isa) holds,
+     * (#$isa arg2 arg2-isa) must also hold for (predicate arg1 arg2 ..) to
+     * be well formed.
+     *
+     * @param predicate the predicate for interArgIsa1-2 contraints are sought.
+     * @return the list of the interArgIsa1-2 isa constraint pairs for
+     * the given predicate
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycList getInterArgIsa1_2s (CycConstant predicate)
+        throws IOException, UnknownHostException, CycApiException {
+        String command =
+            "(remove-duplicates \n" +
+            "  (with-all-mts \n" +
+            "    (inter-arg-isa1-2 " + predicate.stringApiValue() + ")))";
+        return converseList(command);
+    }
+
+    /**
+     * Gets the list of the interArgIsa1-2 isa constraint pairs for
+     * the given predicate.  Each item of the returned list is a pair
+     * (arg1-isa arg2-isa) which means that when (#$isa arg1 arg1-isa) holds,
+     * (#$isa arg2 arg2-isa) must also hold for (predicate arg1 arg2 ..) to
+     * be well formed.
+     *
+     * @param predicate the predicate for interArgIsa1-2 contraints are sought.
+     * @param mt the relevant inference microtheory
+     * @return the list of the interArgIsa1-2 isa constraint pairs for
+     * the given predicate
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycList getInterArgIsa1_2s (CycConstant predicate, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String command =
+            "(remove-duplicates \n" +
+            "  (with-all-mts \n" +
+            "    (inter-arg-isa1-2 " +
+            "      " + predicate.stringApiValue() +
+            "      " + mt.stringApiValue() + ")))";
+        return converseList(command);
+    }
+
+    /**
+     * Gets the list of the interArgIsa1-2 isa constraints for arg2,
+     * given the predicate and arg1.
+     *
+     * @param predicate the predicate for interArgIsa1-2 contraints are sought.
+     * @param arg1 the argument in position 1
+     * @return the list of the interArgIsa1-2 isa constraints for arg2,
+     * given the predicate and arg1
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycList getInterArgIsa1_2_forArg2 (CycConstant predicate, CycFort arg1)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList result = new CycList();
+        ListIterator constraintPairs = getInterArgIsa1_2s(predicate).listIterator();
+        while (constraintPairs.hasNext()) {
+            CycList pair = (CycList) constraintPairs.next();
+            if (pair.first().equals(arg1))
+                result.add(pair.second());
+        }
+        return result;
+    }
+
+    /**
+     * Gets the list of the interArgIsa1-2 isa constraints for arg2,
+     * given the predicate and arg1.
+     *
+     * @param predicate the predicate for interArgIsa1-2 contraints are sought.
+     * @param arg1 the argument in position 1
+     * @param mt the relevant inference microtheory
+     * @return the list of the interArgIsa1-2 isa constraints for arg2,
+     * given the predicate and arg1
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycList getInterArgIsa1_2_forArg2 (CycConstant predicate,
+                                              CycFort arg1,
+                                              CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList result = new CycList();
+        ListIterator constraintPairs = getInterArgIsa1_2s(predicate, mt).listIterator();
+        while (constraintPairs.hasNext()) {
+            CycList pair = (CycList) constraintPairs.next();
+            if (pair.first().equals(arg1))
+                result.add(pair.second());
+        }
+        return result;
     }
 
     /**

@@ -75,8 +75,14 @@ public class ImportSonatDaml {
         throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Connecting to Cyc server.");
         //cycAccess = new CycAccess();
+        /*
         cycAccess = new CycAccess("localhost",
                                   3620,
+                                  CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                  true);
+                                  */
+        cycAccess = new CycAccess("MCCARTHY",
+                                  4600,
                                   CycConnection.DEFAULT_COMMUNICATION_MODE,
                                   true);
 
@@ -114,16 +120,16 @@ public class ImportSonatDaml {
             new ImportDaml(cycAccess,
                            ontologyNicknames,
                            kbSubsetCollectionName);
-        for (int i = 17; i < 19; i++) {
+        for (int i = 27; i < damlDocInfos.size(); i++) {
         //for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
-            if (cycAccess.isOpenCyc()) {
+            initializeDamlOntologyMt(importMt);
+            if (! cycAccess.isOpenCyc()) {
                 cycAccess.assertGenlMt(importMt, damlSonatSpindleHeadMt);
                 cycAccess.assertGenlMt(damlSonatSpindleCollectorMt, importMt);
             }
-            initializeDamlOntologyMt(importMt);
             importDaml.initialize();
             importDaml.importDaml(damlPath, importMt);
         }
@@ -353,7 +359,7 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-status", "unit-status");
 
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit.daml", "unit");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit.daml", "unit");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit", "unit");
 
         ontologyNicknames.put("http://www.daml.org/2002/09/milservices/milservices-ont", "milsvcs-ont");
 

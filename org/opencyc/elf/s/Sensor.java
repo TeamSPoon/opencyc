@@ -3,7 +3,7 @@ package org.opencyc.elf.s;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
-import org.opencyc.elf.message.SensedObjectMsg;
+import org.opencyc.elf.message.ObservedInputMsg;
 
 //// External Imports
 
@@ -103,7 +103,7 @@ public class Sensor extends NodeComponent {
     public void run () {
       while (true) {
         senseWorld();
-        sendSensedObjectMsg();
+        sendObservedInputMsg();
       }
     }
 
@@ -116,12 +116,12 @@ public class Sensor extends NodeComponent {
     /**
      * Sends the sensed object message.
      */
-    protected void sendSensedObjectMsg () {
-      SensedObjectMsg sensedObjectMsg = new SensedObjectMsg();
-      sensedObjectMsg.setSender(nodeComponent);
-      sensedObjectMsg.setObj(obj);
-      sensedObjectMsg.setData(data);
-      sendMsgToRecipient(sensorChannel, sensedObjectMsg);
+    protected void sendObservedInputMsg () {
+      ObservedInputMsg observedInputMsg = new ObservedInputMsg();
+      observedInputMsg.setSender(nodeComponent);
+      observedInputMsg.setObj(obj);
+      observedInputMsg.setData(data);
+      sendMsgToRecipient(sensorChannel, observedInputMsg);
     }
       
     /**

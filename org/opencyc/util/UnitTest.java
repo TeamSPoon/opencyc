@@ -169,6 +169,24 @@ public class UnitTest extends TestCase {
         System.out.println("** testIsNumeric OK **");
     }
 
+    /**
+     * Tests the StringUtils.wordsToString method.
+     */
+    public void testWordsToString() {
+        System.out.println("** testWordsToString **");
+        Assert.assertTrue(StringUtils.isNumeric("-12345"));
+        ArrayList words = new ArrayList();
+        Assert.assertEquals("", StringUtils.wordsToPhrase(words));
+        words.add("word1");
+        Assert.assertEquals("word1", StringUtils.wordsToPhrase(words));
+        words.add("word2");
+        Assert.assertEquals("word1 word2", StringUtils.wordsToPhrase(words));
+        words.add("word3");
+        Assert.assertEquals("word1 word2 word3", StringUtils.wordsToPhrase(words));
+
+        System.out.println("** testWordsToString OK **");
+    }
+
 
 }
 

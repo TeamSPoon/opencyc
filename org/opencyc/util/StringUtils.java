@@ -1,4 +1,6 @@
 package org.opencyc.util;
+
+import java.util.*;
 import ViolinStrings.*;
 
 /**
@@ -81,4 +83,21 @@ public class StringUtils {
             throw new RuntimeException("Cannot remove delimters from " + string);
         return string.substring(1, length - 1);
     }
+
+    /**
+     * Returns the phrase formed from the given list of words
+     *
+     * @param words the phrase words
+     * @return the phrase formed from the given list of words
+     */
+    public static String wordsToPhrase (List words) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < words.size(); i++) {
+            if (i > 0)
+                stringBuffer.append(" ");
+            stringBuffer.append(words.get(i));
+        }
+        return stringBuffer.toString();
+    }
+
 }

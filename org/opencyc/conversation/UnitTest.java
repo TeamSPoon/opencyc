@@ -327,7 +327,8 @@ public class UnitTest extends TestCase {
 
             CycList words = new CycList();
             words.add("penguins");
-            terms = performer.parseTerms(words);
+            String disambiguationPhrase = StringUtils.wordsToPhrase(words);
+            terms = performer.parseTermsString(disambiguationPhrase);
             // #$Penguin
             Assert.assertTrue(terms.contains(cycAccess.getKnownConstantByGuid("bd58a986-9c29-11b1-9dad-c379636f7270")));
             // #$PittsburghPenguins

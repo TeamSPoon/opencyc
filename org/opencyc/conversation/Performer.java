@@ -158,28 +158,20 @@ public class Performer {
         throws CycApiException, UnknownHostException, IOException {
         ArrayList disambiguationWords =
             (ArrayList) interpreter.getStateAttribute("disambiguation words");
-        CycList terms = parseTerms(disambiguationWords);
+        String disambiguationPhrase = StringUtils.wordsToPhrase(disambiguationWords);
+        CycList terms = parseTermsString(disambiguationPhrase);
+        System.out.println("terms " + terms.cyclify());
 
         // compare maximum disambiguation generated phrases
-
-        System.out.println("terms " + terms.cyclify());
-    }
-
-    /**
-     * Returns the terms whose parse covers the given phrase words.
-     *
-     * @param words the phrase words
-     * @return the terms whose parse covers the given phrase words
-     */
-    protected CycList parseTerms (ArrayList words)
-        throws CycApiException, IOException, UnknownHostException {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < words.size(); i++) {
-            if (i > 0)
-                stringBuffer.append(" ");
-            stringBuffer.append(words.get(i));
+        CycList disambiguationPhraseAndTypes =
+            CycAccess.current().generateDisambiguationPhraseAndTypes(terms);
+        for (int i = 0; i < disambiguationPhraseAndTypes.size(); i++) {
+            CycList disambiguationPhraseAndType = (CycList) disambiguationPhraseAndTypes.get(i);
+            CycFort term = (CycFort) disambiguationPhraseAndType.first();
+            String termString = (String) disambiguationPhraseAndType.second();
+            CycFort type = (CycFort) disambiguationPhraseAndType.third();
+            CycFort typeString = (CycFort) disambiguationPhraseAndType.fourth();
         }
-        return parseTermsString(stringBuffer.toString());
     }
 
     /**

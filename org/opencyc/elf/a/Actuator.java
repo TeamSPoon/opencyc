@@ -1,6 +1,7 @@
 package org.opencyc.elf.a;
 
 //// Internal Imports
+import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
 
@@ -35,6 +36,13 @@ public interface Actuator {
    * @return the name of the actuator
    */
   public String getName();
+  
+  /**
+   * Gets the object acted upon by this actuator.
+   *
+   * @return the object acted upon by this actuator
+   */
+  public Resource getActuatedObject();
   
   /** the console output actuator name */
   public static final String CONSOLE_OUTPUT = "console output";

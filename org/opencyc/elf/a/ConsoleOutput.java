@@ -104,6 +104,15 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
     return name;
   }
   
+  /**
+   * Gets the object acted upon by this actuator.
+   *
+   * @return the object acted upon by this actuator
+   */
+  public Resource getActuatedObject() {
+    return actuatedObject;
+  }
+  
   //// Protected Area
     
   /**
@@ -151,7 +160,6 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
      * @param actuateMsg the given input channel message
      */
     protected void doAction (ActuateMsg actuateMsg) {
-      Object obj = actuateMsg.getObj();
       Object data = actuateMsg.getData();
       System.out.println(data);
       System.out.flush();
@@ -166,7 +174,7 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   protected String name;
   
   /** the object which is acted upon */
-  protected Object actuatedObject;
+  protected Resource actuatedObject;
   
   /** the takable channel from which messages are input */
   protected Takable actuatorChannel = null;

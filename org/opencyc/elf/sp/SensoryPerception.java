@@ -58,17 +58,17 @@ public class SensoryPerception extends NodeComponent {
    *
    * @param sensoryProcessingChannel the takable channel from which messages are input
    * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
-   * @param simulatorPredictorChannel the simulator / predictor channel to which messages are output
+   * @param predictorChannel the predictor channel to which messages are output
    * @param entityEvaluatorChannel the puttable channel to which messages are output for the 
    * entity evaluator node component in value judgement
    */
   public SensoryPerception(Takable sensoryProcessingChannel,
                            Puttable nextHigherLevelSensoryProcessingChannel,
-                           Puttable simulatorPredictorChannel,
+                           Puttable predictorChannel,
                            Puttable entityEvaluatorChannel) {
     consumer = new Consumer(sensoryProcessingChannel,
                             nextHigherLevelSensoryProcessingChannel,
-                            simulatorPredictorChannel,
+                            predictorChannel,
                             entityEvaluatorChannel,
                             this);
     executor = new ThreadedExecutor();
@@ -142,9 +142,9 @@ public class SensoryPerception extends NodeComponent {
     protected final Takable sensoryProcessingChannel;
     
     /**
-     * the simulator / predictor channel to which messages are output
+     * the predictor channel to which messages are output
      */
-    protected final Puttable simulatorPredictorChannel;
+    protected final Puttable predictorChannel;
     
     /**
      * the puttable channel to which messages are output for the entity evaluator node
@@ -168,18 +168,18 @@ public class SensoryPerception extends NodeComponent {
      *
      * @param sensoryProcessingChannel the takable channel from which messages are input
      * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
-     * @param simulatorPredictorChannel the simulator / predictor channel to which messages are output
+     * @param predictorChannel the predictor channel to which messages are output
      * @param entityEvaluatorChannel the puttable channel to which messages are output for the 
      * entity evaluator node component in value judgement
      * @param nodeComponent the parent node component
      */
     protected Consumer (Takable sensoryProcessingChannel,
                         Puttable nextHigherLevelSensoryProcessingChannel,
-                        Puttable simulatorPredictorChannel,
+                        Puttable predictorChannel,
                         Puttable entityEvaluatorChannel,
                         NodeComponent nodeComponent) { 
       this.sensoryProcessingChannel = sensoryProcessingChannel;
-      this.simulatorPredictorChannel = simulatorPredictorChannel;
+      this.predictorChannel = predictorChannel;
       this.entityEvaluatorChannel = entityEvaluatorChannel;
       this.nextHigherLevelSensoryProcessingChannel = nextHigherLevelSensoryProcessingChannel;
       this.nodeComponent = nodeComponent;
@@ -240,7 +240,7 @@ public class SensoryPerception extends NodeComponent {
     }
     
     /**
-     * Sends the output-perceived sensory-input message to (1) the simulator / predictor node
+     * Sends the output-perceived sensory-input message to (1) the predictor node
      * component within the world model, to (2) the entity evaluator node component within value
      * judgement, and to (3) the sensory processing node component at the next highest level.
      */
@@ -254,7 +254,7 @@ public class SensoryPerception extends NodeComponent {
       perceivedSensoryInputMsg.setObj(obj);
       perceivedSensoryInputMsg.setData(data);
       sendMsgToRecipient(nextHigherLevelSensoryProcessingChannel, perceivedSensoryInputMsg);
-      sendMsgToRecipient(simulatorPredictorChannel, perceivedSensoryInputMsg);
+      sendMsgToRecipient(predictorChannel, perceivedSensoryInputMsg);
       sendMsgToRecipient(entityEvaluatorChannel, perceivedSensoryInputMsg);
     }
   }

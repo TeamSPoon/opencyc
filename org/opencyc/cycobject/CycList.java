@@ -2,7 +2,6 @@ package org.opencyc.cycobject;
 
 import java.util.*;
 import java.io.*;
-import java.math.BigDecimal;
 import java.net.*;
 import java.lang.reflect.*;
 import org.opencyc.util.*;
@@ -699,8 +698,7 @@ public class CycList extends ArrayList {
             else if (object instanceof String)
                 cyclifiedObject = "\"" + (String) object + "\"";
             else if (object instanceof Double) {
-                BigDecimal bigDecimal = new BigDecimal(((Double) object).doubleValue());
-                cyclifiedObject = bigDecimal.toString();
+                cyclifiedObject = object.toString();
             }
             else if (object instanceof CycList)
                 cyclifiedObject = ((CycList) object).cyclify();

@@ -1,9 +1,10 @@
-package org.opencyc.conversation;
+package org.opencyc.elf;
 
 import java.util.*;
 
 /**
- * Contains the finite state machine and its state.<p>
+ * Provides Sensory Perception for the Elementary Loop Functioning (ELF).<br>
+ *
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -27,67 +28,38 @@ import java.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class FsmStateInfo {
+public class SensoryPerception {
 
     /**
-     * the fsm
+     * Reference to the ELF Node which contains this object.
      */
-    protected Fsm fsm;
+    protected Node node;
 
     /**
-     * finite state machine current node
+     * Reference to the parent node's SensoryPerception object.  The
+     * topmost SensoryPerception object has a value null here.
      */
-    protected State currentState;
+    protected SensoryPerception parentSensoryPerception;
 
     /**
-     * Dictionary of state attribute and object values.
+     * Reference to the child nodes' SensoryPerception objects.  The
+     * lowest level SensoryPerception object has a value null here.
      */
-    protected HashMap stateAttributes = new HashMap();
+    protected ArrayList childrenSensoryPerception;
 
     /**
-     * Constructs a new FsmStateInfo object given the fsm and
-     * state attributes.
+     * Constructs a new SensoryPerception object.
      */
-    public FsmStateInfo (Fsm fsm,
-                         HashMap stateAttributes) {
-        this.fsm = fsm;
-        this.stateAttributes = stateAttributes;
+    public SensoryPerception() {
     }
 
     /**
-     * Sets the current state.
+     * Returns a string representation of this object.
      *
-     * @param currentState the current state
+     * @return a string representation of this object
      */
-    public void setCurrentState (State currentState) {
-        this.currentState = currentState;
-    }
-
-    /**
-     * Returns the current state.
-     *
-     * @return the current state
-     */
-    public State getCurrentState () {
-        return currentState;
-    }
-
-    /**
-     * Returns the fsm.
-     *
-     * @return the fsm
-     */
-    public Fsm getFsm () {
-        return fsm;
-    }
-
-    /**
-     * Returns the state attributes.
-     *
-     * @return the state attributes
-     */
-    public HashMap getStateAttributes () {
-        return stateAttributes;
+    public String toString() {
+        return "SensoryPerception for " + node.name;
     }
 
 }

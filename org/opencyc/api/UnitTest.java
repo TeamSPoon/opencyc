@@ -102,6 +102,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess11"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess12"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess13"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
 
         return testSuite;
@@ -4278,6 +4279,48 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.toString());
         }
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the binary api connection.
+     */
+    public void testBinaryCycAccess13 () {
+        System.out.println("\n**** testBinaryCycAccess 13 ****");
+        CycAccess cycAccess = null;
+        try {
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.DEFAULT_MESSAGING_MODE);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        try {
+            cycAccess.traceOn();
+            Object answer =
+                cycAccess.converseObject(
+                "(generate-phrase-for-java " +
+                "  (nart-substitute '(#$isa #$AtlanticOcean #$BodyOfWater)) " +
+                "  :any " +
+                "  :declarative " +
+                "  #$RKF-GenerationInteractionContext " +
+                "  #$RKF-InteractionContext)");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+
+        }
+        cycAccess.close();
+        System.out.println("**** testBinaryCycAccess 13 OK ****");
     }
 
 

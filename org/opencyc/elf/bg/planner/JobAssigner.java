@@ -73,6 +73,8 @@ public class JobAssigner extends BufferedNodeComponent {
                       Takable jobAssignerChannel,
                       Puttable executorChannel) {
     setNode(node);
+    node.getBehaviorGeneration().setJobAssigner(this);
+    System.out.println("");
     getLogger().info("Creating JobAssigner");
     this.jobAssignerChannel = jobAssignerChannel;
     consumer = new Consumer(jobAssignerChannel,

@@ -71,6 +71,12 @@ public class UnitTest extends TestCase {
   public void testOperatorExpression() {
     System.out.println("\n*** testOperatorExpression ***");
     State state = new State();
+    StateVariable testStateVariable1 = new StateVariable(Hashtable.class, 
+                                                         "test-state-variable1", 
+                                                         "test state variable 1");
+    StateVariable testStateVariable2 = new StateVariable(String.class, 
+                                                         "test-state-variable2", 
+                                                         "test state variable 2");
     
     // TheEmptyDictionary
     new TheEmptyDictionary();
@@ -92,6 +98,16 @@ public class UnitTest extends TestCase {
     Assert.assertEquals("(dictionary-enter \"key\" \"value\" {})", operatorExpression1.toString());
     Assert.assertEquals("key", operatorExpression1.evaluate(state));
     Assert.assertTrue(dictionary.containsKey("key"));
+    state.setStateValue(testStateVariable1, new Hashtable());
+    state.setStateValue(testStateVariable2, "a string value");
+    operatorExpression1 = new OperatorExpression(dictionaryEnter, 
+                                                 "key", 
+                                                 testStateVariable2, 
+                                                 testStateVariable1);
+    Assert.assertEquals("(dictionary-enter \"key\" test-state-variable2 test-state-variable1)", 
+                        operatorExpression1.toString());
+    Assert.assertEquals("key", operatorExpression1.evaluate(state));
+    Assert.assertTrue(dictionary.containsKey("key"));
     
     // DictionaryLookup
     new DictionaryLookup();
@@ -101,12 +117,17 @@ public class UnitTest extends TestCase {
     Assert.assertEquals("value", operatorExpression1.evaluate(state));
     operatorExpression1 = new OperatorExpression(dictionaryLookup, new Integer(0), dictionary);
     Assert.assertEquals(null, operatorExpression1.evaluate(state));
+    dictionary.put("0", "zero");
+    state.setStateValue(testStateVariable1, dictionary);
+    state.setStateValue(testStateVariable2, "0");
+    operatorExpression1 = new OperatorExpression(dictionaryLookup, testStateVariable2, testStateVariable1);
+    Assert.assertEquals("zero", operatorExpression1.evaluate(state));
     
     // DictionaryRemove
     new DictionaryRemove();
     Operator dictionaryRemove = DictionaryRemove.getInstance();
     operatorExpression1 = new OperatorExpression(dictionaryRemove, "key", dictionary);
-    Assert.assertEquals("(dictionary-remove \"key\" {key=value})", operatorExpression1.toString());
+    Assert.assertEquals("(dictionary-remove \"key\" {key=value, 0=zero})", operatorExpression1.toString());
     Assert.assertEquals("key", operatorExpression1.evaluate(state));
     Assert.assertTrue(! dictionary.containsKey("key"));
     

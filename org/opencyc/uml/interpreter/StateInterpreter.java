@@ -98,8 +98,10 @@ public class StateInterpreter extends Thread {
     public void interpretTransitionEntry (Transition transition) {
         if (verbosity > 2)
             Log.current.println(transition.toString() + " entering " + state.toString());
-        performEntryActions(transition);
         performTransitionEffect(transition);
+        if (interpreter.isTerminated)
+            return;
+        performEntryActions(transition);
     }
 
     /**
@@ -139,7 +141,6 @@ public class StateInterpreter extends Thread {
             procedureInterpreter.interpret(procedure);
         }
         if (state instanceof FinalState) {
-            exit();
             state.getContainer().getStateInterpreter().complete();
             return;
         }
@@ -247,7 +248,7 @@ public class StateInterpreter extends Thread {
         interpreter.getActiveStates().remove(state);
         if (state.equals(interpreter.getStateMachine().getTop()))
             interpreter.setStateConfiguration((DefaultTreeModel) null);
-            stateNode.removeFromParent();
+        stateNode.removeFromParent();
         CompletionEvent completionEvent = new CompletionEvent(state);
         interpreter.enqueueEvent(completionEvent);
     }

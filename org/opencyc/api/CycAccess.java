@@ -527,7 +527,7 @@ public class CycAccess {
             if (response[1] instanceof CycList)
                 responseString = ((CycList) response[1]).cyclify();
             else if (response[1] instanceof CycFort)
-                responseString = ((CycList) response[1]).cyclify();
+                responseString = ((CycFort) response[1]).cyclify();
             else
                 responseString = response[1].toString();
             Log.current.println("cyc --> " + responseString);

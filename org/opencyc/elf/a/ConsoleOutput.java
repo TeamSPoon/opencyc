@@ -40,7 +40,7 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConsoleOutput extends NodeComponent implements Actuator {
+public class ConsoleOutput extends DirectActuator {
   
   //// Constructors
 
@@ -55,9 +55,7 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   public ConsoleOutput(String name, 
                        List resources, 
                        List actionCapabilities) {
-    this.name = name;
-    this.resources = resources;
-    this.actionCapabilities = actionCapabilities;
+    super(name, resources, actionCapabilities);
   }
   
   //// Public Area
@@ -79,58 +77,6 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
       e.printStackTrace();
       System.exit(1);
     }
-  }
-  
-  /**
-   * Returns a string representation of this object.
-   * 
-   * @return a string representation of this object
-   */
-  public String toString() {
-    StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[ConsoleOutput resources: ");
-    stringBuffer.append(resources.toString());
-    stringBuffer.append("]");
-    return stringBuffer.toString();
-  }
-  
-  /** 
-   * Gets the puttable channel for this node component to which other node
-   * components can send messages.
-   *
-   * @return the puttable channel for this node component to which other node
-   * components can send messages
-   *
-   */
-  public Puttable getChannel() {
-    return (Puttable) actuatorChannel;
-  }
-  
-  /** 
-   * Gets the name of the actuator.
-   *
-   * @return the name of the actuator
-   */
-  public String getName() {
-    return name;
-  }
-  
-  /**
-   * Gets the resources requried by this actuator.
-   *
-   * @return the resources requried by this actuator
-   */
-  public List getResources() {
-    return resources;
-  }
-  
-  /**
-   * Gets the actions that this actuator or virtual actuator (job assigner) can accomplish.
-   *
-   * @return the actions that this actuator or virtual actuator (job assigner) can accomplish
-   */
-  public List getActionCapabilities() {
-    return actionCapabilities;
   }
   
   //// Protected Area
@@ -179,26 +125,13 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
     }
   
   }
+  
   //// Private Area
   
   //// Internal Rep
 
-  /** the name of the actuator */
-  protected String name;
-  
-  /** the names of actions that this actuator can accomplish */
-  protected List actionCapabilities;
-  
-  /** the resources requried by this actuator */
-  protected List resources;
-  
-  /** the takable channel from which messages are input */
-  protected Takable actuatorChannel = null;
-    
   /** the thread which processes the input channel of messages */
   protected Consumer consumer;
 
-  /** the executor of the consumer thread */
-  protected Executor executor;
   
 }

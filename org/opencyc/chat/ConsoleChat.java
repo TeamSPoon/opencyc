@@ -5,7 +5,7 @@ import org.opencyc.api.*;
 import org.opencyc.util.*;
 
 /**
- * Provides a console chat system for the Cyc ChatterBot.<p>
+ * Provides a console chat application using the Cyc ChatterBot.<p>
  *
  * The chat conversation is in the form of a text conversation using
  * asynchronous receiving and sending of messages.

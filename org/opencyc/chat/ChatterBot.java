@@ -4,16 +4,17 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import org.opencyc.api.*;
-import org.opencyc.conversation.*;
+import org.opencyc.uml.statemachine.*;
+import org.opencyc.uml.interpreter.*;
 
 /**
  * Provides a chat conversation interface to Cyc.<p>
  *
  * The chat conversation is in the form of a text conversation using
  * asynchronous receiving and sending of messages.  This class intializes
- * the Cyc server connection, and initializes the fsm interpreter,
+ * the Cyc server connection, and initializes the chat interpreter,
  * for each chat partner, then delegates the conversation understanding and
- * responses to the chat partner's fsm interpreter.
+ * responses to the chat partner's chat interpreter.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -49,21 +50,15 @@ public class ChatterBot {
     protected HashMap chatUserModels = new HashMap();
 
     /**
+     * Dictionary of chat interpreters, chatUserUniqueId --> ChatInterpreter
+     */
+    protected HashMap chatInterpreters = new HashMap();
+
+    /**
      * Provides wrappers for the Cyc API and manages the connection
      * to the Cyc server.
      */
     protected CycAccess cycAccess;
-
-    /**
-     * Makes Fsm objects for interpretation.
-     */
-    public FsmFactory fsmFactory;
-
-    /**
-     * Dictionary of fsm finite state machine interpreters.
-     * chatPartner --> fsmFsmInterpreter
-     */
-    protected HashMap interpreters = new HashMap();
 
     /**
      * Creates a new ChatterBot object, given a ChatSender.
@@ -84,32 +79,27 @@ public class ChatterBot {
                                     ChatException {
         chatSender.sendChatMessage("I am initializing");
         cycAccess = new CycAccess();
-        fsmFactory = new FsmFactory();
-        fsmFactory.initialize();
         chatSender.sendChatMessage("I am ready to chat");
     }
 
     /**
-     * Makes a new fsm finite state machine interpreter object for
+     * Makes a new chat interpreter object for
      * a new chat partner, and stores it in the dictionary for later lookup.
      *
      * @param chatUserNickname the preferred name (possibly not unique) of the
      * chat partner
      * @param chatUserUniqueId the unique id assigned to the user by the chat
      * system
-     * @return the new fsm finite state machine interpreter
+     * @return the new chat interpreter
      */
-    protected Interpreter makeInterpreter (String chatUserNickname,
-                                           String chatUserUniqueId) {
-        Fsm chat = fsmFactory.getFsm("chat");
-        Interpreter interpreter =
-            new Interpreter(this,
-                            chatUserNickname,
-                            chatUserUniqueId,
-                            "initial",
-                            chat);
-        interpreters.put(chatUserUniqueId, interpreter);
-        return interpreter;
+    protected ChatInterpreter makeCharInterpreter (String chatUserNickname,
+                                                   String chatUserUniqueId) {
+        ChatInterpreter chatInterpreter = new ChatInterpreter();
+
+        //TODO add proper initialization
+
+        chatInterpreters.put(chatUserUniqueId, chatInterpreter);
+        return chatInterpreter;
     }
 
     /**
@@ -126,8 +116,8 @@ public class ChatterBot {
 
     /**
      * Receives the given chat message from the given chat partner.  Delegates
-     * the message understanding and fsmal response to the
-     * fsmFsmInterpreter object.
+     * the message understanding and response to the
+     * chat interpreter.
      *
      * @param chatUserNickname the preferred name (possibly not unique) of the
      * chat partner
@@ -142,11 +132,9 @@ public class ChatterBot {
                IOException,
                UnknownHostException,
                ChatException {
-        Interpreter interpreter =
-            (Interpreter) interpreters.get(chatUserUniqueId);
-        if (interpreter == null)
-            interpreter = makeInterpreter(chatUserNickname, chatUserUniqueId);
-        interpreter.receiveChatMessage(chatMessage);
+        ChatInterpreter chatInterpreter =
+            (ChatInterpreter) chatInterpreters.get(chatUserUniqueId);
+        chatInterpreter.receiveChatMessage(chatUserNickname, chatMessage);
     }
 
     /**
@@ -160,7 +148,7 @@ public class ChatterBot {
 
     /**
      * Returns the chat user model for the given chat partner.  If not
-     * cached, retreives the stored user model from the KB, or creates
+     * cached, retrieves the stored user model from the KB, or creates
      * a new one if the chat partner is new.
      *
      * @param chatUserUniqueId the unique id assigned to the user by the chat

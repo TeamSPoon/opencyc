@@ -12,6 +12,8 @@ import org.opencyc.elf.bg.taskframe.Action;
 import java.util.ArrayList;
 import java.util.List;
 
+import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
+
 /** ActuatorFactory is designed to create actuators.  There is a singleton instance of actuator factory.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
@@ -61,7 +63,9 @@ public class ActuatorFactory {
   public void populateActuatorPool() {
     List resources = new ArrayList();
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources);
+    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, 
+                                                    resources,
+                                                    new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY));
     ActuatorPool.getInstance().setActuator(consoleOutput.getName(), consoleOutput);
   }
   

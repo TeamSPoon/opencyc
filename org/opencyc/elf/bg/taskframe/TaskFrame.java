@@ -3,12 +3,15 @@ package org.opencyc.elf.bg.taskframe;
 //// Internal Imports
 import org.opencyc.elf.a.Actuator;
 
+import org.opencyc.elf.bg.planner.ConditionalScheduleSet;
 import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.goal.Goal;
 
 import org.opencyc.elf.s.Sensor;
+
+import org.opencyc.elf.wm.ActuatorPool;
 
 //// External Imports
 import java.util.ArrayList;
@@ -61,13 +64,13 @@ public class TaskFrame {
   public Object clone () {
     TaskFrame taskFrame = new TaskFrame();
     taskFrame.setTaskName(taskName);
-    List clonedScheduleInfos = new ArrayList();
-    Iterator iter = scheduleInfos.iterator();
+    List clonedConditionalScheduleSets = new ArrayList();
+    Iterator iter = conditionalScheduleSets.iterator();
     while (iter.hasNext()) {
-      ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
-      clonedScheduleInfos.add((ScheduleInfo) scheduleInfo.clone());
+      ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) iter.next();
+      clonedConditionalScheduleSets.add((ConditionalScheduleSet) conditionalScheduleSet.clone());
     }
-    taskFrame.setScheduleInfos(clonedScheduleInfos);
+    taskFrame.setConditionalScheduleSets(clonedConditionalScheduleSets);
     taskFrame.setTaskAction((Action) taskAction.clone());
     taskFrame.setTaskGoal(taskGoal);    
     return taskFrame;
@@ -110,24 +113,7 @@ public class TaskFrame {
    * @return the task name which is either an action name or a goal name
    */
   public String getTaskName () {
-    if (taskName.length() != 0)
-      return taskName;
-    HashSet scheduleNames = new HashSet();
-    Iterator scheduleInfoIterator = scheduleInfos.iterator();
-    while (scheduleInfoIterator.hasNext()) {
-      TaskFrame.ScheduleInfo scheduleInfo = 
-        (TaskFrame.ScheduleInfo) scheduleInfoIterator.next();
-      scheduleNames.add(scheduleInfo.getSchedule().getName());
-    }
-    StringBuffer stringBuffer = new StringBuffer();
-    Iterator scheduleNameIterator = scheduleNames.iterator();
-    while (scheduleNameIterator.hasNext()) {
-      stringBuffer.append(scheduleNameIterator.next().toString());
-      stringBuffer.append(" / ");
-    }
-    if (stringBuffer.length() > 0)
-      stringBuffer.deleteCharAt(stringBuffer.length() - 1);
-    return stringBuffer.toString();
+    return taskName;
   }
 
   /**
@@ -233,36 +219,43 @@ public class TaskFrame {
   }
 
   /**
-   * Gets all the actuators that are responsible for carrying out the task
+   * Gets all names of the actuators that are responsible for carrying out the task
    * 
-   * @return all the actuators that are responsible for carrying
-   *         out the task
+   * @return all names of the actuators that are responsible for carrying out the task
    */
-  public List getActuators () {
-    List actuators = new ArrayList();
-    Iterator iter = scheduleInfos.iterator();
-    while (iter.hasNext()) {
-      ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
-      if (! actuators.contains(scheduleInfo.actuator))
-        actuators.add(scheduleInfo.actuator);
+  public List getActuatorNames () {
+    List actuatorNames = new ArrayList();
+    Iterator conditionalScheduleSetIterator = conditionalScheduleSets.iterator();
+    while (conditionalScheduleSetIterator.hasNext()) {
+      ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) conditionalScheduleSetIterator.next();
+      Iterator actuatorNameIterator = conditionalScheduleSet.getActuatorNames().iterator();
+      while (actuatorNameIterator.hasNext()) {
+        String actuatorName = (String) actuatorNameIterator.next();
+        if (! actuatorNames.contains(actuatorName))
+          actuatorNames.add(actuatorName);
+      }
     }
-    return actuators;
+    return actuatorNames;
   }
 
   /**
-   * Gets all the sensors that are responsible for sensing phenomena related to the task
+   * Gets all the names of the sensors that are responsible for sensing phenomena related to the task
    * 
-   * @return all the sensors that are responsible for sensing phenomena related to the task
+   * @return all the names of the sensors that are responsible for sensing phenomena related to the task
    */
-  public List getSensors () {
-    List sensors = new ArrayList();
-    Iterator iter = scheduleInfos.iterator();
-    while (iter.hasNext()) {
-      ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
-      if (! sensors.contains(scheduleInfo.sensor))
-        sensors.add(scheduleInfo.sensor);
+  public List getSensorNames () {
+    List sensorNames = new ArrayList();
+    Iterator conditionalScheduleSetIterator = conditionalScheduleSets.iterator();
+    while (conditionalScheduleSetIterator.hasNext()) {
+      ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) conditionalScheduleSetIterator.next();
+      Iterator sensorNameIterator = conditionalScheduleSet.getSensorNames().iterator();
+      while (sensorNameIterator.hasNext()) {
+        String sensorName = (String) sensorNameIterator.next();
+        if (! sensorNames.contains(sensorName))
+          sensorNames.add(sensorName);
+      }
     }
-    return sensors;
+    return sensorNames;
   }
 
   /**
@@ -272,10 +265,11 @@ public class TaskFrame {
    */
   public List getTaskResources () {
     List taskResources = new ArrayList();
-    Iterator scheduleIterator = scheduleInfos.iterator();
-    while (scheduleIterator.hasNext()) {
-      ScheduleInfo scheduleInfo = (ScheduleInfo) scheduleIterator.next();
-      Iterator resourceIterator = scheduleInfo.getResources().iterator();
+    Iterator actuatorNameIterator = getActuatorNames().iterator();
+    while (actuatorNameIterator.hasNext()) {
+      String actuatorName = (String) actuatorNameIterator.next();
+      Actuator actuator = ActuatorPool.getInstance().getActuator(actuatorName);
+      Iterator resourceIterator = actuator.getResources().iterator();
       while (resourceIterator.hasNext()) {
         Resource resource = (Resource) resourceIterator.next();
         if (! taskResources.contains(resource))
@@ -304,149 +298,37 @@ public class TaskFrame {
   }
 
   /**
-   * Gets the plans for accomplishing the task, or procedures for generating
-   * plans, organized as a dictionary of execeptional states and associated
-   * procedures for handling them
+   * Gets the schedule set condition list that associates a predicate expression with the set
+   * of schedules to carry out
    * 
-   * @return the plans for accomplishing the task, or procedures
-   *         for generating plans, organized as a dictionary of execeptional
-   *         states and associated procedures for handling them
+   * @return the schedule set condition list that associates a predicate expression with the set
+   * of schedules to carry out
    */
-  public List getScheduleInfos () {
-    return scheduleInfos;
+  public List getConditionalScheduleSets () {
+    return conditionalScheduleSets;
   }
-
+ 
   /**
-   * Sets the plans for accomplishing the task, or procedures for generating
-   * plans, organized as a dictionary of execeptional states and associated
-   * procedures for handling them
-   * 
-   * @param schedule the schedule of actions
-   * @param actuator the actuator or virtual actuators(a lower level ELF) that achieves or accomplishes the schedule
-   * @param sensor the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
-   * of the schedule
+   * Adds a conditional schedule set to the list which is evaluated in order by the
+   * job assigner to find the schedule set to assign.
+   *
+   * @param conditionalScheduleSet the given conditional schedule set to add
    */
-  public void addScheduleInfo (Schedule schedule,
-                               Actuator actuator,
-                               Sensor sensor) {
-    ScheduleInfo scheduleInfo = new ScheduleInfo (schedule, actuator, sensor);
-    scheduleInfos.add(scheduleInfo);
-  }
-
-  /**
-   * ScheduleInfo contains the information about one schedule that contributes to achieving the
-   * task goal or to accomplishing the task action.
-   */
-  public class ScheduleInfo {
-    
-    /**
-     * Constructs a new ScheduleInfo object given the schedule, resources and actuators.
-     *
-     * @param schedule the schedule of actions
-     * @param actuator the actuator or virtual actuators(a lower level ELF) that achieves or accomplishes the schedule
-     * @param sensor the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
-     * of the schedule
-     */
-    protected ScheduleInfo (Schedule schedule,
-                  Actuator actuator,
-                  Sensor sensor) {
-      this.schedule = schedule;
-      this.actuator = actuator;
-      this.sensor = sensor;
-    }
-    
-    /** Creates and returns a copy of this object. */
-    public Object clone () {
-      return new ScheduleInfo((Schedule) schedule.clone(),
-                              actuator,
-                              sensor);
-    }
-  
-    /**
-     * Gets the schedule of actions
-     *
-     * @return the schedule of actions
-     */
-    public Schedule getSchedule () {
-      return schedule;
-    }
-
-    /**
-     * Gets the resources required by the schedule
-     *
-     * @return the resources required by the schedule
-     */
-    public List getResources () {
-      List resources = new ArrayList();
-      resources.add(actuator.getResources());
-      Iterator iter = sensor.getResources().iterator();
-      while (iter.hasNext()) {
-        Resource resource = (Resource) iter.next();
-        if (! resources.contains(resource))
-          resources.add(resource);
-      }
-      return resources;
-    }
-
-    /**
-     * Gets the actuator or virtual actuators (a lower level ELF) that achieves or accomplishes the schedule
-     *
-     * @return the actuatorsor virtual actuators (a lower level ELF) that achieves or accomplishes the schedule
-     */
-    public Actuator getActuator () {
-      return actuator;
-    }
-    
-    /**
-     * Gets the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
-     * of the schedule
-     *
-     * @return the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
-     * of the schedule
-     */
-    public Sensor getSensor () {
-      return sensor;
-    }
-    
-    /**
-     * Returns a string representation of this object.
-     *
-     * @return a string representation of this object
-     */
-    public String toString() {
-      StringBuffer stringBuffer = new StringBuffer();
-      stringBuffer.append("[ScheduleInfo schedule: ");
-      stringBuffer.append(schedule.toString());
-      stringBuffer.append(" actuator: ");
-      stringBuffer.append(actuator.toString());
-      stringBuffer.append(" sensor: ");
-      stringBuffer.append(sensor.toString());
-      stringBuffer.append("]");
-      return stringBuffer.toString();
-    }
-    
-    /** the schedule of actions */
-    protected Schedule schedule;
-    
-    /** the actuator or virtual actuator (a lower level ELF) that achieves or accomplishes the schedule */
-    protected Actuator actuator;
-    
-    /** 
-     * the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
-     * of the schedule 
-     */
-    protected Sensor sensor;
+  public void addConditionalScheduleSet(ConditionalScheduleSet conditionalScheduleSet) {
+    conditionalScheduleSets.add(conditionalScheduleSet);
   }
   
   //// Protected Area
 
   /**
-   * Sets the schedule info objects, each containing a schedule, resources, actuator and sensor
+   * Sets the schedule set condition list that associates a predicate expression with the set
+   * of schedules to carry out.
    *
-   * @param scheduleInfos the schedule info objects, each containing a schedule, resources, actuator and sensor
+   * @param conditionalScheduleSets the schedule set condition list that associates a predicate expression with the set
+   * of schedules to carry out
    */
-  protected void setScheduleInfos (List scheduleInfos) {
-    this.scheduleInfos = scheduleInfos;
+  protected void setConditionalScheduleSets (List conditionalScheduleSets) {
+    this.conditionalScheduleSets = conditionalScheduleSets;
   }
   
   //// Private Area
@@ -474,7 +356,11 @@ public class TaskFrame {
   /** the constraints upon the performance of the task */
   protected List taskConstraints = new ArrayList();
 
-  /** the schedule info objects, each containing a schedule, resources and actuator */
-  protected List scheduleInfos = new ArrayList();
+  /** 
+   * The schedule set condition list associates a predicate expression with the set
+   * of schedules to carry out.  The job  assigner iterates over this list and takes action 
+   * on the first element whose predicate expression evaluates to true.
+   */
+  protected List conditionalScheduleSets = new ArrayList();
 
 }

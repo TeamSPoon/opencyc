@@ -317,7 +317,7 @@ public class Scheduler extends BufferedNodeComponent {
         Schedule schedule = (Schedule) scheduleIterator.next();
         PredicateExpression predicateExpression = schedule.getPredicateExpression();
         if (predicateExpression != null &&
-            predicateExpression.evaluate(thisScheduler.getNode().getWorldModel().getState())) {
+            predicateExpression.evaluate(thisScheduler.getNode().getWorldModel().getState()).equals(Boolean.TRUE)) {
           ExecuteScheduleMsg executeScheduleMsg = new ExecuteScheduleMsg(thisScheduler, schedule, controlledResources);
           thisScheduler.sendMsgToRecipient(executor.getChannel(), executeScheduleMsg);
           return;

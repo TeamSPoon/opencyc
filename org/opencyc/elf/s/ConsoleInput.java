@@ -66,11 +66,8 @@ public class ConsoleInput extends DirectSensor {
    *
    * @param sensoryPerceptionChannel the puttable channel to which messages are output
    */
-  public void initialize(Puttable sensoryPerceptionChannel, Takable sensorChannel) {
-    producer = new Producer(sensoryPerceptionChannel, this);
-  }
-  
   public void initialize(Puttable sensoryPerceptionChannel) {
+    producer = new Producer(sensoryPerceptionChannel, this);
   }
   
   //// Protected Area

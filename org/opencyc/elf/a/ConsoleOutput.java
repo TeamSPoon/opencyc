@@ -125,5 +125,6 @@ public class ConsoleOutput extends DirectActuator {
   /** the thread which processes the input channel of messages */
   protected Consumer consumer;
 
+  //// Main
   
 }

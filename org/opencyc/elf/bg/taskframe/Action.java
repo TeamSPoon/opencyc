@@ -60,17 +60,21 @@ public class Action {
     stringBuffer.append("(");
     for (int i = 0; i < getParameterNames().size(); i++) {
       String parameterName = (String) getParameterNames().get(i);
-      Object parameterValue = getParameterValues().get(i);
       stringBuffer.append(" ");
       stringBuffer.append(parameterName);
       stringBuffer.append(": ");
-      if (parameterValue instanceof String) {
-        stringBuffer.append('"');
-        stringBuffer.append(parameterValue.toString());
-        stringBuffer.append('"');
+      if (getParameterValues() != null) {
+        Object parameterValue = getParameterValues().get(i);
+        if (parameterValue instanceof String) {
+          stringBuffer.append('"');
+          stringBuffer.append(parameterValue.toString());
+          stringBuffer.append('"');
+        }
+        else
+          stringBuffer.append(parameterValue.toString());
       }
       else
-        stringBuffer.append(parameterValue.toString());
+        stringBuffer.append("null");
     }
     stringBuffer.append(")]");
     return stringBuffer.toString();

@@ -1459,6 +1459,21 @@ public class CycAccess {
     /**
      * Gets the imprecise paraphrase for a Cyc assertion.
      *
+     * @param assertionString the assertion formula
+     * @return the imprecise paraphrase for a Cyc assertion
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public String getImpreciseParaphrase (String assertionString)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList assertion = this.makeCycList(assertionString);
+        return converseString("(with-precise-paraphrase-off (generate-phrase '" + assertion.cyclify() + "))");
+    }
+
+    /**
+     * Gets the imprecise paraphrase for a Cyc assertion.
+     *
      * @param assertion the assertion formula
      * @return the imprecise paraphrase for a Cyc assertion
      * @throws UnknownHostException if cyc server host not found on the network

@@ -291,6 +291,8 @@ public class CycExtractor {
             return Class.forName("org.opencyc.uml.statemachine.PrimitiveInt");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLPrimitiveLong")))
             return Class.forName("org.opencyc.uml.statemachine.PrimitiveLong");
+        if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLString")))
+            return Class.forName("java.lang.String");
         //TODO add other types as required
         throw new RuntimeException("Unhandled typeTerm " + typeTerm.cyclify());
     }

@@ -507,7 +507,13 @@ public class UnitTest extends TestCase {
      */
     protected void interpretStateMachine (StateMachine stateMachine) {
         int verbosity = 3;
-        Interpreter interpreter = new Interpreter(stateMachine, verbosity);
+        Interpreter interpreter = null;
+        try {
+            interpreter = new Interpreter(stateMachine, null, verbosity);
+        }
+        catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
         Assert.assertNotNull(interpreter);
         Assert.assertTrue(interpreter instanceof Interpreter);
         Assert.assertTrue(interpreter.eventQueue.isEmpty());

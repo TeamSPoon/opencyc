@@ -186,10 +186,10 @@ public class StateMachineReport {
     protected void reportTransitionDetails (Transition transition, String description) {
         if (transition.getSource().equals(transition.getTarget()))
             Log.current.print("  " + description + ": " +
-                              transition.toString() + "\n   ");
+                              transition.toString());
         else
             Log.current.print("  " + description + ": " +
-                              transition.toString() + " to " + transition.getTarget().toString() + "\n   ");
+                              transition.toString() + " to " + transition.getTarget().toString());
         if (transition.getGuard() != null) {
             Log.current.print(" when " +
                               transition.getGuard().getexpression().getBody());

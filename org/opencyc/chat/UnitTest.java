@@ -1,9 +1,15 @@
 package org.opencyc.chat;
 
+import java.net.*;
+import java.io.*;
 import junit.framework.*;
 import java.util.*;
 import org.opencyc.api.*;
+import org.opencyc.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.uml.core.*;
+import org.opencyc.uml.statemachine.*;
+import org.opencyc.uml.interpreter.*;
 
 /**
  * Provides a unit test suite for the <tt>org.opencyc.chat</tt> package<p>
@@ -61,8 +67,75 @@ public class UnitTest extends TestCase {
      */
     public void testChatterBot () {
         System.out.println("\n**** testChatterBot ****");
+        Log.makeLog("unit-test.log");
 
+        try {
+            String localHostName = InetAddress.getLocalHost().getHostName();
+            CycAccess cycAccess;
+            if (localHostName.equals("crapgame.cyc.com")) {
+                cycAccess = new CycAccess("localhost",
+                                          3620,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+                //cycAccess.traceNamesOn();
+            }
+            else if (localHostName.equals("thinker")) {
+                cycAccess = new CycAccess("localhost",
+                                          3600,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+            }
+            else
+                cycAccess = new CycAccess();
+            CycExtractor cycExtractor = new CycExtractor(cycAccess);
+            StateMachine stateMachine = cycExtractor.extract("ChatterBotStateMachine");
+            Assert.assertTrue(stateMachine instanceof StateMachine);
+            Assert.assertTrue(stateMachine.getNamespace() instanceof Namespace);
+            Assert.assertEquals("ChatterBotStateMachineNamespace", stateMachine.getNamespace().getName());
+            Assert.assertTrue(stateMachine.getNamespace().getOwnedElement().contains(stateMachine));
+            Assert.assertEquals("ChatterBotStateMachine", stateMachine.getName());
+            Assert.assertTrue(stateMachine.getComment() instanceof Comment);
+            Assert.assertEquals("This is the #$UMLStateMachine used by #$CognitiveCyc to " +
+                                "implement #$ChatterBot behavior.",
+                                stateMachine.getComment().getBody());
+            Assert.assertEquals(stateMachine, stateMachine.getComment().getAnnotatedElement());
+
+            StateMachineReport stateMachineReport = new StateMachineReport(stateMachine);
+            stateMachineReport.report();
+
+            interpretStateMachine(stateMachine, cycAccess);
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
         System.out.println("**** testChatterBot OK ****");
     }
+
+    /**
+     * Tests the given instantiated state machine
+     *
+     * @param stateMachine the given instantiated state machine
+     * @param cycAccess the cyc access instance
+     */
+    protected void interpretStateMachine (StateMachine stateMachine, CycAccess cycAccess) {
+        int verbosity = 3;
+        Interpreter interpreter = null;
+        try {
+            interpreter = new Interpreter(stateMachine, cycAccess, verbosity);
+        }
+        catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        Assert.assertNotNull(interpreter);
+        Assert.assertTrue(interpreter instanceof Interpreter);
+        Assert.assertNull(interpreter.getCurrentEvent());
+        Assert.assertEquals(stateMachine, interpreter.getStateMachine());
+        interpreter.interpret();
+        if (verbosity > 2)
+            System.out.print(interpreter.displayStateConfigurationTree());
+    }
+
 
 }

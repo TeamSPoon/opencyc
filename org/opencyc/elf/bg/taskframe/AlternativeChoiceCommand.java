@@ -36,7 +36,7 @@ import java.util.List;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @version $Id$
  */
-public class AlternativeChoiceCommand implements Command {
+public class AlternativeChoiceCommand extends ChoiceCommand implements Command {
   
   //// Constructors
   
@@ -47,9 +47,9 @@ public class AlternativeChoiceCommand implements Command {
    * @param relevantStateVariables the list of relevant state variables
    */
   public AlternativeChoiceCommand(String name, List alternativeCommands, List relevantStateVariables) {
+    super(relevantStateVariables);
     this.name = name;
     this.alternativeCommands = alternativeCommands;
-    this.relevantStateVariables = relevantStateVariables;
   }
   
   //// Public Area
@@ -93,14 +93,6 @@ public class AlternativeChoiceCommand implements Command {
     return alternativeCommands;
   }
 
-  /** Gets the list of relevant state variables.
-   *
-   * @return the list of relevant state variables
-   */
-  public List getRelevantStateVariables () {
-    return relevantStateVariables;
-  }
-
   //// Protected Area
   
   //// Private Area
@@ -112,9 +104,6 @@ public class AlternativeChoiceCommand implements Command {
   
   /** the alternative commands */
   protected List alternativeCommands;
-  
-  /** the list of relevant state variables */
-  protected List relevantStateVariables;
   
   //// Main
   

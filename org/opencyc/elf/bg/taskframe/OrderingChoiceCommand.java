@@ -36,7 +36,7 @@ import java.util.List;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @version $Id$
  */
-public class OrderingChoiceCommand implements Command {
+public class OrderingChoiceCommand extends ChoiceCommand implements Command {
   
   //// Constructors
   
@@ -47,9 +47,9 @@ public class OrderingChoiceCommand implements Command {
    * @param relevantStateVariables the list of relevant state variables
    */
   public OrderingChoiceCommand(String name, List unorderedCommands, List relevantStateVariables) {
+    super(relevantStateVariables);
     this.name = name;
     this.unorderedCommands = unorderedCommands;
-    this.relevantStateVariables = relevantStateVariables;
   }
   
   //// Public Area
@@ -93,14 +93,6 @@ public class OrderingChoiceCommand implements Command {
     return unorderedCommands;
   }
 
-  /** Gets the list of relevant state variables.
-   *
-   * @return the list of relevant state variables
-   */
-  public List getRelevantStateVariables () {
-    return relevantStateVariables;
-  }
-
   //// Protected Area
   
   //// Private Area
@@ -112,9 +104,6 @@ public class OrderingChoiceCommand implements Command {
   
   /** the commands to be ordered during scheduling */
   protected List unorderedCommands;
-  
-  /** the list of relevant state variables */
-  protected List relevantStateVariables;
   
   //// Main
   

@@ -36,7 +36,7 @@ import java.util.List;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @version $Id$
  */
-public class SubsetChoiceCommand implements Command {
+public class SubsetChoiceCommand extends ChoiceCommand implements Command {
   
   //// Constructors
   
@@ -47,9 +47,9 @@ public class SubsetChoiceCommand implements Command {
    * @param relevantStateVariables the list of relevant state variables
    */
   public SubsetChoiceCommand(String name, List availableCommands, List relevantStateVariables) {
+    super(relevantStateVariables);
     this.name = name;
     this.availableCommands = availableCommands;
-    this.relevantStateVariables = relevantStateVariables;
   }
   
   //// Public Area
@@ -93,14 +93,6 @@ public class SubsetChoiceCommand implements Command {
     return availableCommands;
   }
 
-  /** Gets the list of relevant state variables.
-   *
-   * @return the list of relevant state variables
-   */
-  public List getRelevantStateVariables () {
-    return relevantStateVariables;
-  }
-
   //// Protected Area
   
   //// Private Area
@@ -112,9 +104,6 @@ public class SubsetChoiceCommand implements Command {
   
   /** the available commands from which a subset is chosen during scheduling */
   protected List availableCommands;
-  
-  /** the list of relevant state variables */
-  protected List relevantStateVariables;
   
   //// Main
   

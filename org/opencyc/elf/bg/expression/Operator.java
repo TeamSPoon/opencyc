@@ -42,7 +42,21 @@ public abstract class Operator {
   
   //// Public Area
   
-  //// Protected Area
+  /** Gets the singleton instance of operator.
+   *
+   * @return the singleton instance of operator
+   */
+  public static Operator getInstance () {
+    return operator;
+  }
+  
+  /** Evaluates the given arguments within the given state and returns the result.  The semantics
+   * of the operator are defined by each implementing class.
+   *
+   * @param arguments the given arguments to evaluate
+   * @param state the given state
+   */
+  public abstract Object evaluate (List arguments, State state);
   
   /** Returns a string representation of this operator given
    * the arguments.
@@ -51,6 +65,42 @@ public abstract class Operator {
    * @return a string representation of this object
    */
   public abstract String toString(List arguments);
+  
+  /** Performs type conversion on the given numeric arguments and returns the numeric
+   * objects having the same type in an array.
+   *
+   * @param arg1Num the first numeric argument
+   * @param arg2Num the second numeric argument
+   * @ return the converted numeric objects in an array
+   */
+  public Number[] convertNumericArguments(Number arg1Num, Number arg2Num) {
+    Number[] result = {arg1Num, arg2Num};
+    if (! arg1Num.getClass().equals(arg2Num.getClass())) {
+      if (arg1Num instanceof Integer) {
+        if (arg2Num instanceof Long)
+          result[0] = new Long(arg1Num.longValue());
+        else {
+          result[0] = new Double(arg1Num.doubleValue());
+          result[1] = new Double(arg2Num.doubleValue());
+        }
+      }
+      else if (arg1Num instanceof Long) {
+        if (arg2Num instanceof Integer)
+          result[1] = new Long(arg2Num.longValue());
+        else {
+          result[0] = new Double(arg1Num.doubleValue());
+          result[1] = new Double(arg2Num.doubleValue());
+        }
+      }
+      else {
+        result[0] = new Double(arg1Num.doubleValue());
+        result[1] = new Double(arg2Num.doubleValue());
+      }
+    }
+    return result;
+  }
+  
+  //// Protected Area
   
   /** Dereferences the given argument within the given state if the argument is a state 
    * variable.

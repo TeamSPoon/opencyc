@@ -50,7 +50,7 @@ public class OperatorExpression implements Expression {
     arguments = new ArrayList();
   }
   
-  /**  Creates a new instance of a unary OperatorExpression given the
+  /** Creates a new instance of a unary OperatorExpression given the
    * operator and single argument.
    *
    * @param operator the unary operator

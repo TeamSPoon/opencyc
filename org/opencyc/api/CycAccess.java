@@ -75,6 +75,11 @@ public class CycAccess {
      */
     public boolean persistentConnection;
 
+    /**
+     * Parameter indicating the serial or concurrent messaging mode to the OpenCyc server.
+     */
+    public int messagingMode = CycConnection.DEFAULT_MESSAGING_MODE;
+
     protected String hostName;
     protected int port;
     protected int communicationMode;
@@ -240,7 +245,10 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycAccess(String hostName, int basePort, int communicationMode, boolean persistentConnection)
+    public CycAccess(String hostName,
+                     int basePort,
+                     int communicationMode,
+                     boolean persistentConnection)
         throws IOException, UnknownHostException, CycApiException {
         this.hostName = hostName;
         this.port = basePort;
@@ -273,8 +281,12 @@ public class CycAccess {
         throws IOException, UnknownHostException, CycApiException {
         this.hostName = hostName;
         this.port = basePort;
+        if (messagingMode == CycConnection.CONCURRENT_MESSAGING_MODE)
+            if (persistentConnection != PERSISTENT_CONNECTION)
+                throw new CycApiException("Concurrent Messaging requires Persistent Connections");
         this.communicationMode = communicationMode;
         this.persistentConnection = persistentConnection;
+        this.messagingMode = messagingMode;
         if (persistentConnection)
             cycConnection = new CycConnection(hostName,
                                               port,
@@ -408,7 +420,11 @@ public class CycAccess {
         throws IOException, UnknownHostException, CycApiException {
         Object [] response = {null, null};
         if (! persistentConnection) {
-            cycConnection = new CycConnection(hostName, port, communicationMode, this);
+            cycConnection = new CycConnection(hostName,
+                                              port,
+                                              communicationMode,
+                                              messagingMode,
+                                              this);
             cycConnection.setTrace(saveTrace);
         }
         response = cycConnection.converse(command);

@@ -75,37 +75,34 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testAsciiCycConnection"));
-        /*
+
+        //testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
-        testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess9"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess9"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess10"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess11"));
-        */
         /*
+        testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess9"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess9"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess10"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess11"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
-        */
-
+*/
         return testSuite;
     }
 
@@ -174,6 +171,7 @@ public class UnitTest extends TestCase {
             //cycConnection.trace = true;
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
 
@@ -270,7 +268,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION) {
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
                 //System.out.println("RemoteCycConnection created");
@@ -533,7 +532,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.TRANSIENT_CONNECTION);
+                                          CycAccess.TRANSIENT_CONNECTION,
+                                          CycConnection.SERIAL_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -689,7 +689,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -1017,7 +1018,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -1423,7 +1425,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -1699,7 +1702,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -2019,7 +2023,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -2053,7 +2058,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.getConstantByName("genlMt"), CycAccess.genlMt);
             Assert.assertEquals(cycAccess.getConstantByName("genls"), CycAccess.genls);
             Assert.assertEquals(cycAccess.getConstantByName("isa"), CycAccess.isa);
-            Assert.assertEquals(cycAccess.getConstantByName("numericallyEqual"), CycAccess.numericallyEqual);
+            Assert.assertEquals(cycAccess.getConstantByName("numericallyEquals"), CycAccess.numericallyEqual);
             Assert.assertEquals(cycAccess.getConstantByName("or"), CycAccess.or);
             Assert.assertEquals(cycAccess.getConstantByName("PlusFn"), CycAccess.plusFn);
         }
@@ -2304,7 +2309,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -3552,7 +3558,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -3640,6 +3647,7 @@ public class UnitTest extends TestCase {
 
         }
         catch (Exception e) {
+            e.printStackTrace();
             CycAccess.current().close();
             Assert.fail(e.toString());
         }
@@ -3689,7 +3697,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -3874,7 +3883,8 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
-                                          CycAccess.PERSISTENT_CONNECTION);
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.CONCURRENT_MESSAGING_MODE);
             else if (connectionMode == REMOTE_CYC_CONNECTION)
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
@@ -3972,41 +3982,11 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Tests a portion of the CycAccess methods using the ascii api connection.
-     */
-    public void testAsciiCycAccess11 () {
-        if (performOnlyBinaryApiModeTests ||
-            (connectionMode == REMOTE_CYC_CONNECTION))
-            return;
-        System.out.println("\n**** testAsciiCycAccess 11 ****");
-        CycAccess cycAccess = null;
-        try {
-
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION,
-                                      CycConnection.CONCURRENT_MESSAGING_MODE);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail(e.toString());
-        }
-
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-        //cycAccess.traceOn();
-        doTestCycAccess11(cycAccess);
-
-        cycAccess.close();
-        System.out.println("**** testAsciiCycAccess 11 OK ****");
-    }
-
-
-    /**
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess11 () {
         System.out.println("\n**** testBinaryCycAccess 11 ****");
+        CycObjectFactory.resetCaches();
         CycAccess cycAccess = null;
         try {
             if (connectionMode == LOCAL_CYC_CONNECTION)
@@ -4021,10 +4001,10 @@ public class UnitTest extends TestCase {
                 Assert.fail("Invalid connection mode " + connectionMode);
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-        //cycAccess.traceOn();
+        //cycAccess.traceOnDetailed();
         doTestCycAccess11(cycAccess);
 
         cycAccess.close();
@@ -4039,15 +4019,151 @@ public class UnitTest extends TestCase {
         try {
             String script = "(+ 1 2)";
             int answer = cycAccess.converseInt(script);
+            Assert.assertEquals(3, answer);
         }
         catch (Exception e) {
             CycAccess.current().close();
             e.printStackTrace();
             Assert.fail(e.toString());
         }
+        System.out.println("Concurrent API requests.");
+        ArrayList apiRequestors = new ArrayList();
 
+        ApiRequestor apiRequestor = new ApiRequestor("Long",
+                                                     1,
+                                                     "10000000",
+                                                     cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short1",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short2",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short3",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short4",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short5",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short6",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short7",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        apiRequestor = new ApiRequestor("Short8",
+                                        5,
+                                        "700000",
+                                        cycAccess);
+        apiRequestor.start();
+        apiRequestors.add(apiRequestor);
+
+        while (true) {
+            boolean apiRequestorTheadRunning = false;
+            try {
+                Thread.sleep(3000);
+            }
+            catch (InterruptedException e) {
+                break;
+            }
+            for (int i = 0; i < apiRequestors.size(); i++) {
+                apiRequestor = (ApiRequestor) apiRequestors.get(i);
+                if (! apiRequestor.done) {
+                    apiRequestorTheadRunning = true;
+                    System.out.println("  " + apiRequestor.name + " is still running");
+                    break;
+                    }
+            }
+            if (! apiRequestorTheadRunning)
+                break;
+        }
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+    }
+
+    /**
+     * Class ApiRequestor.
+     */
+    protected class ApiRequestor extends Thread {
+
+
+        private CycAccess cycAccess;
+        public String name;
+        private int repeatCount;
+        private String durationFactor;
+        public boolean done = false;
+
+        /**
+         * Constructs a ApiRequestor object.
+         */
+        public ApiRequestor(String name,
+                            int repeatCount,
+                            String durationFactor,
+                            CycAccess cycAccess) {
+            this.name = name;
+            this.repeatCount = repeatCount;
+            this.durationFactor = durationFactor;
+            this.cycAccess = cycAccess;
+        }
+
+        /**
+         * Makes some API requests.
+         */
+        public void run() {
+            System.out.println("ApiRequestor " + name + " starting.");
+            try {
+                for (int i = 0; i < repeatCount; i++) {
+                    String testPhrase = name + "-" +Integer.toString(i + 1);
+                    String script = "(progn (cdotimes (x " + durationFactor + "))\n" +
+                                    " \"" + testPhrase + "\")";
+                    String answer = cycAccess.converseString(script);
+                    System.out.println(name + " iteration " + answer + " done.");
+                    if (! answer.equals(testPhrase))
+                        throw new RuntimeException(testPhrase + " not equal to " + answer);
+                }
+
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+            System.out.println("ApiRequestor " + name + " done.");
+            done = true;
+        }
     }
 }
 

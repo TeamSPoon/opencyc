@@ -161,6 +161,19 @@ public class CycObjectFactory {
     public static int getCycSymbolCacheSize() {
         return cycSymbolCache.size();
     }
+
+    /**
+     * Resets all the caches.
+     */
+    public static void resetCaches() {
+        resetAssertionCache();
+        resetCycConstantCaches();
+        resetCycNartCache();
+        resetCycSymbolCache();
+        resetCycVariableCache();
+        resetGuidCache();
+    }
+
     /**
      * Resets the Cyc constant caches.
      */

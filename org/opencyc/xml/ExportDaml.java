@@ -210,6 +210,7 @@ public class ExportDaml {
     public static void main (String[] args) {
         ExportDaml exportDaml = new ExportDaml();
         exportDaml.verbosity = ExportDaml.DEFAULT_VERBOSITY;
+
         String choice = "eeld-core";
         if (args.length > 0)
             choice = args[0];
@@ -389,6 +390,12 @@ public class ExportDaml {
                           CycConnection.DEFAULT_BASE_PORT,
                           CycConnection.DEFAULT_COMMUNICATION_MODE,
                           CycAccess.DEFAULT_CONNECTION);
+            /*
+            new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                          3620,
+                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                          CycAccess.DEFAULT_CONNECTION);
+                          */
         if (exportCommand == ExportDaml.EXPORT_ENTIRE_KB) {
             includeUpwardClosure = false;
             if (verbosity > 1)

@@ -609,7 +609,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         else if (o instanceof byte[])
             writeByteArray((byte[]) o);
         else
-            throw  new RuntimeException("No cfasl opcode for " + o);
+            writeString(o.toString());
     }
 }
 

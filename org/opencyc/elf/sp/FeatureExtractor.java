@@ -6,7 +6,7 @@ import org.opencyc.elf.NodeComponent;
 //// External Imports
 
 /**
- * Provides the FeatureExtractor for ELF SensoryPerception.<br>
+ * Provides the FeatureExtractor for ELF SensoryPerception.
  * 
  * @version $Id: FeatureExtractor.java,v 1.1 2002/11/19 02:42:53 stephenreed
  *          Exp $

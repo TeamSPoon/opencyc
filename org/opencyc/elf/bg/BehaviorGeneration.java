@@ -17,7 +17,7 @@ import org.opencyc.elf.Result;
 //// External Imports
 
 /**
- * Provides Behavior Generation for the Elementary Loop Functioning (ELF).<br>
+ * Provides Behavior Generation for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  

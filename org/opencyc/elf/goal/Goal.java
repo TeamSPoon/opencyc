@@ -1,8 +1,6 @@
 package org.opencyc.elf.goal;
 
 //// Internal Imports
-import org.opencyc.elf.ELFObject;
-
 import org.opencyc.elf.bg.predicate.Predicate;
 
 import org.opencyc.elf.goal.PredicateExpression;
@@ -33,7 +31,7 @@ import java.util.ArrayList;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Goal extends ELFObject {
+public class Goal {
   //// Constructors
   /**
    * Constructs a new Goal object.

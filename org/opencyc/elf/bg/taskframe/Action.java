@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * <P>Action describes the action to be performed and may include a set of modifiers such as
- * priorities, mode, path constraints, acceptable cost, and required conditions
+ * Action describes the action to be performed and may include a set of modifiers such as
+ * priorities, mode, path constraints, acceptable cost, and required conditions.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -35,7 +35,6 @@ import java.util.Iterator;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * @date August 11, 2003, 2:57 PM
  * @version $Id$
  */
 public class Action {
@@ -119,7 +118,7 @@ public class Action {
   /**
    * Sets the parameter values for this action.
    *
-   * @param parameterNames the parameter values for this action
+   * @param parameterValues the parameter values for this action
    */
   public void setParameterValues (ArrayList parameterValues) {
     if (parameterValues.size() != getParameterTypes().size())

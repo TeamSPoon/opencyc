@@ -68,7 +68,7 @@ public class ObservedInputMsg extends GenericMsg {
   /**
    * Sets the observed data associated with the object
    *
-   * @param observed data the data associated with the object
+   * @param data the data associated with the object
    */
   public void setData (Object data) {
     this.data = data;

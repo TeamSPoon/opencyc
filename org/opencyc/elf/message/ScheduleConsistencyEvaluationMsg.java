@@ -9,7 +9,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import java.util.ArrayList;
 
 /**
- * <P>Contains the schedule consistency evaluation message which is sent from one
+ * Contains the schedule consistency evaluation message which is sent from one
  * scheduler to the requesting peer scheduler in a node, in response to the
  * schedule consistency request message.
  *
@@ -97,7 +97,7 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
   /**
    * Sets the node's commanded task
    *
-   * @param taskCommandthe node's commanded task
+   * @param taskCommand the node's commanded task
    */
   public void setTaskCommand (TaskCommand taskCommand) {
     this.taskCommand = taskCommand;

@@ -7,7 +7,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 import java.util.ArrayList;
 
 /**
- * <P>JobAssignment contains non-temporal (e.g. spatial) task decompositions
+ * JobAssignment contains non-temporal (for example spatial) task decompositions
  * among agents and resources.
  *
  * </p>

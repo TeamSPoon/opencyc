@@ -1,7 +1,7 @@
 package org.opencyc.elf.goal;
 
 /**
- * Provides the Value container for the Elementary Loop Functioning (ELF).<br>
+ * Provides the Value container for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  

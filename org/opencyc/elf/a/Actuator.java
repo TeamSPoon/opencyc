@@ -13,7 +13,7 @@ import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
- * Provides Actuators for the Elementary Loop Functioning (ELF).<br>
+ * Provides Actuators for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  

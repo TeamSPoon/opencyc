@@ -5,7 +5,7 @@ package org.opencyc.elf.goal;
 //// External Imports
 
 /**
- * <P>GoalTime contains the goal achievement time and tolerance.
+ * GoalTime contains the goal achievement time and tolerance.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -27,7 +27,7 @@ package org.opencyc.elf.goal;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class GoalTime extends org.opencyc.elf.ELFObject {
+public class GoalTime {
   
   //// Constructors
   
@@ -78,7 +78,7 @@ public class GoalTime extends org.opencyc.elf.ELFObject {
   /**
    * Sets the goal achievement tolerance in milliseconds
    *
-   * @param xxx the goal achievement tolerance in milliseconds
+   * @param goalToleranceMilliseconds the goal achievement tolerance in milliseconds
    */
   public void setGoalToleranceMilliseconds (long goalToleranceMilliseconds) {
     this.goalToleranceMilliseconds = goalToleranceMilliseconds;

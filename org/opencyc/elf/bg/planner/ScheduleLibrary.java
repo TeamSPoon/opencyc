@@ -9,10 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * <P>
  * ScheduleLibrary provides the timing specification for a plan given the job to
  * perform.  There is a singleton instance.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -73,7 +71,7 @@ public class ScheduleLibrary {
   /**
    * Gets the list of schedules that accomplish the given action name.
    *
-   * @param action the given action name
+   * @param actionName the given action name
    * @return the list of schedules that accomplish the given action name
    */
   public ArrayList getSchedules (String actionName) {
@@ -89,7 +87,7 @@ public class ScheduleLibrary {
   /**
    * Sets the list of schedules that accomplish the given action name.
    *
-   * @param action the given action name
+   * @param actionName the given action name
    * @param schedules the list of schedules that accomplish the given action name
    */
   protected void setSchedules (String actionName, ArrayList schedules) {
@@ -99,7 +97,7 @@ public class ScheduleLibrary {
   /**
    * Adds a schedule to the list of schedules that accomplish the given action name.
    *
-   * @param action the given action name
+   * @param actionName the given action name
    * @param schedule the schedule that accomplishes the given action name
    */
   protected void addSchedule (String actionName, Schedule schedule) {

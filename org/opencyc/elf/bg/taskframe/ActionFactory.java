@@ -7,7 +7,7 @@ import org.opencyc.elf.bg.state.State;
 import java.util.ArrayList;
 
 /**
- * <P>ActionFactory creates named instances of Action for subsequent elaboration
+ * ActionFactory creates named instances of Action for subsequent elaboration
  * by behavior generation sub components.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
@@ -32,7 +32,6 @@ import java.util.ArrayList;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * @date August 11, 2003, 2:57 PM
  * @version $Id$
  */
 public class ActionFactory {

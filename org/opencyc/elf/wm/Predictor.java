@@ -6,7 +6,7 @@ import org.opencyc.elf.NodeComponent;
 //// External Imports
 
 /**
- * Provides the predictor for the ELF WorldModel.<br>
+ * Provides the predictor for the ELF WorldModel.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -9,7 +9,7 @@ import org.opencyc.elf.bg.state.StateVariable;
 import java.util.ArrayList;
 
 /**
- * <P>GoalFactory is designed to create goals.  There is a singleton instance.
+ * GoalFactory is designed to create goals.  There is a singleton instance.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -33,7 +33,6 @@ import java.util.ArrayList;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * @date August 11, 2003, 2:57 PM
  * @version $Id$
  */
 public class GoalFactory {

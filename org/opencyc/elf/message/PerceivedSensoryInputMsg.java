@@ -70,7 +70,7 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
   /**
    * Sets the perceived data associated with the object
    *
-   * @param perceived data the data associated with the object
+   * @param data the data associated with the object
    */
   public void setData (Object data) {
     this.data = data;

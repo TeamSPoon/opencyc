@@ -10,7 +10,7 @@ import org.opencyc.elf.message.ObservedInputMsg;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
- * Provides Sensors for the Elementary Loop Functioning (ELF).<br>
+ * Provides Sensors for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -89,7 +89,7 @@ public class Sensor extends NodeComponent {
      * Creates a new instance of Consumer
      *
      * @param sensoryPerceptionChannel the puttable channel to which messages are output
-     * @nodeComponent the parent node component
+     * @param nodeComponent the parent node component
      */
     protected Producer (Puttable sensoryPerceptionChannel,
                         NodeComponent nodeComponent) { 

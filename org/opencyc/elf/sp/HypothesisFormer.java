@@ -6,7 +6,7 @@ import org.opencyc.elf.NodeComponent;
 //// External Imports
 
 /**
- * Provides the HypothesisFormer for ELF SensoryPerception.<br>
+ * Provides the HypothesisFormer for ELF SensoryPerception.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -1,7 +1,6 @@
 package org.opencyc.elf.bg.state;
 
 //// Internal Imports
-import org.opencyc.elf.ELFObject;
 
 //// External Imports
 
@@ -29,7 +28,7 @@ import org.opencyc.elf.ELFObject;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class StateVariable extends ELFObject {
+public class StateVariable {
   
   //// Constructors
   

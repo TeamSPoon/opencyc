@@ -2,8 +2,6 @@ package org.opencyc.elf.experience;
 
 
 //// Internal Imports
-import org.opencyc.elf.ELFObject;
-
 import org.opencyc.elf.bg.state.State;
 
 import org.opencyc.elf.goal.Goal;
@@ -16,7 +14,7 @@ import java.util.ArrayList;
 
 /**
  * Provides the Experience container for the Elementary Loop Functioning
- * (ELF).<br>
+ * (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -38,8 +36,10 @@ import java.util.ArrayList;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Experience extends ELFObject {
-
+public class Experience {
+  
+  //// Constructors
+  
   /**
    * Constructs a new experience object.
    */

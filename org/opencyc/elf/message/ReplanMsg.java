@@ -100,7 +100,7 @@ public class ReplanMsg extends GenericMsg {
   /**
    * Sets the node's commanded task
    *
-   * @param taskCommandthe node's commanded task
+   * @param taskCommand the node's commanded task
    */
   public void setTaskCommand (TaskCommand taskCommand) {
     this.taskCommand = taskCommand;

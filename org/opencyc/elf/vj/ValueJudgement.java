@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 
 /**
- * Provides Value Judgement for the Elementary Loop Functioning (ELF).<br>
+ * Provides Value Judgement for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -9,10 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * <P>
- * JobAssignmentLibrary provides a library of non-temporal (e.g. spatial) task decompositions
+ * JobAssignmentLibrary provides a library of non-temporal (for example spatial) task decompositions
  * among agents and resources.  There is a singleton instance.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -75,7 +73,7 @@ public class JobAssignmentLibrary {
   /**
    * Gets the job assignment that accomplishes the given action name.
    *
-   * @param action the given action name
+   * @param actionName the given action name
    * @return the job assignment that accomplishes the given action name
    */
   public JobAssignment getJobAssignment (String actionName) {
@@ -87,7 +85,7 @@ public class JobAssignmentLibrary {
   /**
    * Sets the job assignment that accomplishes the given action name.
    *
-   * @param action the given action name
+   * @param actionName the given action name
    * @param jobAssignment the job assignment that accomplishes the given action name
    */
   public void setJobAssignment (String actionName, JobAssignment jobAssignment) {

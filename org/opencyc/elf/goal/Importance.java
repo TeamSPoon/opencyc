@@ -6,7 +6,7 @@ package org.opencyc.elf.goal;
 
 /**
  * Provides the Importance container for the Elementary Loop Functioning
- * (ELF).<br>
+ * (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -41,7 +41,7 @@ public class Importance {
   /**
    * Constructs a new Importance object given the importance.
    *
-   * @importance the importance
+   * @param importance the importance
    */
   public Importance(float importance) {
     setImportance(importance);

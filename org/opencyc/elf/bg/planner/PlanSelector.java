@@ -12,11 +12,10 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import java.util.ArrayList;
 
 /**
- * <P>PlanSelector selects the best plan from alternatives.
+ * PlanSelector selects the best plan from alternatives.
  *
  * @version $Id$
  * @author Stephen L. Reed  
- * @date August 12, 2003, 4:59 PM
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>

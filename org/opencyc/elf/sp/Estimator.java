@@ -6,7 +6,7 @@ import org.opencyc.elf.NodeComponent;
 //// External Imports
 
 /**
- * Provides the Estimator for ELF SensoryPerception.<br>
+ * Provides the Estimator for ELF SensoryPerception.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -11,7 +11,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import java.util.ArrayList;
 
 /**
- * Provides the plan simulator for the ELF WorldModel.<br>
+ * Provides the plan simulator for the ELF WorldModel.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -18,7 +18,7 @@ import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
- * Provides Sensory Perception for the Elementary Loop Functioning (ELF).<br>
+ * Provides Sensory Perception for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -201,7 +201,7 @@ public class SensoryPerception extends NodeComponent {
   /**
    * Sets the hypothesis former node component
    *
-   * @param xxx the hypothesis former node component
+   * @param hypothesisFormer the hypothesis former node component
    */
   public void setHypothesisFormer (HypothesisFormer hypothesisFormer) {
     this.hypothesisFormer = hypothesisFormer;

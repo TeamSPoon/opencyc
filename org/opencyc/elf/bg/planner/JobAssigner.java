@@ -25,10 +25,8 @@ import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
- * <P>
- * JobAssigner performs the non-temporal (e.g. spatial) task decomposition
+ * JobAssigner performs the non-temporal (for example spatial) task decomposition
  * among the available agents and resources.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  

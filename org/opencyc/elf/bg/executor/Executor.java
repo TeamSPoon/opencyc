@@ -15,7 +15,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import java.util.ArrayList;
 
 /**
- * Provides the Executor for ELF BehaviorGeneration.<br>
+ * Provides the Executor for ELF BehaviorGeneration.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

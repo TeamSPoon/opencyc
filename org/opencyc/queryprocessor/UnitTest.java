@@ -206,7 +206,7 @@ public class UnitTest extends TestCase {
         queryLiterals.add(queryLiteral3);
         queryLiterals.add(queryLiteral4);
         LiteralAsker literalAsker = new LiteralAsker();
-        literalAsker.setVerbosity(9);
+        literalAsker.setVerbosity(5);
         ArrayList bindingSets = null;
         try {
             bindingSets = literalAsker.ask(queryLiterals, mt);
@@ -217,7 +217,7 @@ public class UnitTest extends TestCase {
         }
 
         HashJoiner hashJoiner = new HashJoiner();
-        hashJoiner.setVerbosity(9);
+        hashJoiner.setVerbosity(5);
         BindingSet joinedBindingSets = null;
         try {
             joinedBindingSets = hashJoiner.join(bindingSets);

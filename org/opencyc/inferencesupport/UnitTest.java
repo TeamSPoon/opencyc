@@ -102,6 +102,8 @@ public class UnitTest extends TestCase {
 
         QueryLiteral queryLiteral1 = null;
         CycFort mt = null;
+        BindingSet bindingSet1 = null;
+        BindingSet bindingSet2 = null;
         try {
             String queryLiteralAsString = "(#$isa ?x #$Cathedral)";
             queryLiteral1 = new QueryLiteral(cycAccess.makeCycList(queryLiteralAsString));
@@ -111,12 +113,12 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(queryLiteralAsString, cycList.cyclify());
             Assert.assertEquals(queryLiteralAsString, queryLiteral1.cyclify());
             mt = CycAccess.baseKB;
+            bindingSet1 = new BindingSet(queryLiteral1, mt);
+            bindingSet2 = new BindingSet(queryLiteral1, mt);
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
-        BindingSet bindingSet1 = new BindingSet(queryLiteral1, mt);
-        BindingSet bindingSet2 = new BindingSet(queryLiteral1, mt);
         Assert.assertEquals(bindingSet1, bindingSet2);
 
         try {

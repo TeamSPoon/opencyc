@@ -84,21 +84,18 @@ public class HashJoiner {
         BindingSet joinedBindingSet = (BindingSet) remainingBindingSets.get(0);
         remainingBindingSets.remove(0);
         if (verbosity > 3)
-            System.out.println("Starting binding set for join is \n" + joinedBindingSet +
-                               " " + joinedBindingSet.getNbrInstances() + " instances");
+            System.out.println("Starting binding set for join is \n" + joinedBindingSet);
         while (remainingBindingSets.size() > 0) {
             // In case there are no variables in common, choose the lowest cardinality binding set candidate.
             int index = 0;
             for (int i = 1; i < remainingBindingSets.size(); i++) {
         if (verbosity > 3)
-            System.out.println("Starting binding set for join is \n" + joinedBindingSet +
-                               " " + joinedBindingSet.getNbrInstances() + " instances");
+            System.out.println("Starting binding set for join is \n" + joinedBindingSet);
                 BindingSet remainingBindingSet = (BindingSet) remainingBindingSets.get(i);
                 ArrayList joinedBindingSetVariables = joinedBindingSet.getVariables();
                 ArrayList remainingBindingSetVariables = remainingBindingSet.getVariables();
                 if (verbosity > 3)
-                    System.out.println("  candidate binding set \n  " + remainingBindingSet +
-                                       " " + remainingBindingSet.getNbrInstances() + " instances");
+                    System.out.println("  candidate binding set \n  " + remainingBindingSet);
                 if (OcCollectionUtils.hasIntersection(joinedBindingSetVariables,
                                                       remainingBindingSetVariables)) {
                     index = i;
@@ -122,7 +119,8 @@ public class HashJoiner {
      * @param bindingSet2 another binding set to be joined
      * @return the binding set which is the result of the join operation
      */
-    public BindingSet join(BindingSet bindingSet1, BindingSet bindingSet2) {
+    public BindingSet join(BindingSet bindingSet1, BindingSet bindingSet2)
+        throws IOException {
         if (verbosity > 3)
             System.out.println("Joining \n  " + bindingSet1 + "\n  " + bindingSet2);
         if (bindingSet1.size() < bindingSet2.size())
@@ -138,7 +136,8 @@ public class HashJoiner {
      * @param bindingSet2 the binding set which is probed against the build binding set
      * @return the binding set which is the result of the join operation
      */
-    public BindingSet joinBuildProbe(BindingSet buildBindingSet, BindingSet probeBindingSet) {
+    public BindingSet joinBuildProbe(BindingSet buildBindingSet, BindingSet probeBindingSet)
+        throws IOException {
         this.buildBindingSet = buildBindingSet;
         this.probeBindingSet = probeBindingSet;
         if (verbosity > 3)
@@ -175,7 +174,7 @@ public class HashJoiner {
                     key.add(bindingValueList.get(j));
             }
             hashMap.put(key, bindingValueList);
-            if (verbosity > 3)
+            if (verbosity > 7)
                 System.out.println("  indexing " + bindingValueList.cyclify() + "\n  key " + key.cyclify());
         }
         // Probe step.
@@ -190,8 +189,12 @@ public class HashJoiner {
                     key.add(bindingValueList.get(j));
             }
             boolean keyFound = hashMap.containsKey(key);
-            if (verbosity > 3)
-                System.out.println("  probing " + bindingValueList.cyclify() + "\n  key " + key.cyclify() + " --> " + keyFound);
+            if (verbosity > 7)
+                System.out.println("  probing " + bindingValueList.cyclify() + "\n  key " +
+                                   key.cyclify() + " --> " + keyFound);
+            else if (verbosity > 3 && keyFound)
+                System.out.println("  probing " + bindingValueList.cyclify() + "\n  key " +
+                                   key.cyclify() + " --> " + keyFound);
         }
 
         return joinedBindingSet;

@@ -241,9 +241,9 @@ public class CycNart extends CycFort implements Comparable {
         throws IOException {
         xmlWriter.printXMLStartTag(natXMLtag, indent, relative);
         xmlWriter.printXMLStartTag(functorXMLtag, indentLength, true);
-        this.functor.toXML(xmlWriter, indentLength, true);
+        this.getFunctor().toXML(xmlWriter, indentLength, true);
         xmlWriter.printXMLEndTag(functorXMLtag, -indentLength, true);
-        ListIterator iterator = arguments.listIterator();
+        ListIterator iterator = this.getArguments().listIterator();
         Object arg;
         while (iterator.hasNext()) {
             xmlWriter.printXMLStartTag(argXMLtag, 0, true);
@@ -264,11 +264,9 @@ public class CycNart extends CycFort implements Comparable {
      * @return a <tt>String</tt> representation of the OpenCyc NART.
      */
     public String toString() {
-        if (functor == null)
-            return "nart-with-id:" + getId();
         StringBuffer result = new StringBuffer("(");
-        result.append(this.functor.toString());
-        ListIterator iterator = arguments.listIterator();
+        result.append(this.getFunctor().toString());
+        ListIterator iterator = this.getArguments().listIterator();
         while (iterator.hasNext()) {
             result.append(" ");
             result.append(iterator.next().toString());
@@ -284,8 +282,8 @@ public class CycNart extends CycFort implements Comparable {
      */
     public String cyclify() {
         StringBuffer result = new StringBuffer("(");
-        result.append(this.functor.cyclify());
-        ListIterator iterator = arguments.listIterator();
+        result.append(this.getFunctor().cyclify());
+        ListIterator iterator = this.getArguments().listIterator();
         while (iterator.hasNext()) {
             Object object = iterator.next();
             String cyclifiedObject = null;
@@ -360,8 +358,9 @@ public class CycNart extends CycFort implements Comparable {
     public String metaName() {
         String functorName =
             (this.functor instanceof CycConstant ?
-                ((CycConstant)this.functor).getName() : ((CycNart)this.functor).metaName());
-        ListIterator iterator = this.arguments.listIterator();
+                ((CycConstant)this.getFunctor()).getName() :
+                ((CycNart) this.getFunctor()).metaName());
+        ListIterator iterator = this.getArguments().listIterator();
         StringBuffer result = new StringBuffer("(");
         result.append(functorName);
         Object arg;
@@ -381,7 +380,7 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     public int hashCode() {
-        return this.cyclify().hashCode();
+        return this.getId().hashCode();
     }
 
     /**

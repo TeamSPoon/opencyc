@@ -39,13 +39,19 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   
   //// Constructors
 
+  /** Creates a new instance of ConsoleOutput. */
+  public ConsoleOutput() {
+  }
+  
+  //// Public Area
+  
   /** 
-   * Creates a new instance of ConsoleOutput with the given
-   * input message channel.
+   * Initializes this console output actuator with the given input message channel and
+   * starts the message consumer.
    *
    * @param actuatorChannel the takable channel from which messages are input
    */
-  public ConsoleOutput(Takable actuatorChannel) {
+  public void initialize(Takable actuatorChannel) {
     this.actuatorChannel = actuatorChannel;
     consumer = new Consumer(actuatorChannel, this);
     executor = new ThreadedExecutor();
@@ -57,8 +63,6 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
       System.exit(1);
     }
   }
-
-  //// Public Area
   
   /**
    * Returns a string representation of this object.
@@ -123,13 +127,15 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
     }
 
     /**
-     * Performs the action on the given object using the command and parameters
-     * given by the actuation data.
+     * Outputs the data that is contained in the actuator message to the console.
      *
      * @param actuateMsg the given input channel message
      */
     protected void doAction (ActuateMsg actuateMsg) {
-      //TODO
+      Object obj = actuateMsg.getObj();
+      Object data = actuateMsg.getData();
+      System.out.print(data.toString());
+      System.out.flush();
     }
   
   }

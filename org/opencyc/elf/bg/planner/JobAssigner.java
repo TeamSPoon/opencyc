@@ -30,8 +30,7 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * among the available agents and resources.
  * </p>
  * 
- * @version $Id: BehaviorGeneration.java,v 1.3 2002/11/19 02:42:53 stephenreed
- *          Exp $
+ * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>

@@ -39,8 +39,13 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   
   //// Constructors
 
-  /** Creates a new instance of ConsoleOutput. */
-  public ConsoleOutput() {
+  /** 
+   * Creates a new instance of ConsoleOutput given its name. 
+   *
+   * @param name the actuator name
+   */
+  public ConsoleOutput(String name) {
+    this.name = name;
   }
   
   //// Public Area
@@ -83,6 +88,15 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    */
   public Puttable getChannel() {
     return (Puttable) actuatorChannel;
+  }
+  
+  /** 
+   * Gets the name of the actuator.
+   *
+   * @return the name of the actuator
+   */
+  public String getName() {
+    return name;
   }
   
   //// Protected Area
@@ -143,19 +157,16 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   
   //// Internal Rep
 
-  /**
-   * the takable channel from which messages are input
-   */
+  /** the name of the actuator */
+  protected String name;
+  
+  /** the takable channel from which messages are input */
   protected Takable actuatorChannel = null;
     
-  /**
-   * the thread which processes the input channel of messages
-   */
+  /** the thread which processes the input channel of messages */
   protected Consumer consumer;
 
-  /**
-   * the executor of the consumer thread
-   */
+  /** the executor of the consumer thread */
   protected Executor executor;
   
 }

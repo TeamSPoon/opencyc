@@ -336,7 +336,7 @@ public class UnitTest extends TestCase {
             nartCycList3.add(new Integer(1));
             narts.add(new CycNart(nartCycList3));
             Collections.sort(narts);
-            Assert.assertEquals("[(ArityRelationFn 1), (TransportFn Person), (YearFn 2000)]",
+            Assert.assertEquals("[(ArityRelationFn 1), (ConveyFn Person), (YearFn 2000)]",
                                 narts.toString());
 
             // hasFunctorAndArgs
@@ -631,7 +631,11 @@ public class UnitTest extends TestCase {
             CycList cycList18 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals("(APPLY (FUNCTION +) (QUOTE (1 2 3)))",
                                 cycList18.toString());
-
+            listAsString = "(1 2 \n" +
+                           " ;; a comment \n" +
+                           " 3 4 5)";
+            CycList cycList19 = cycAccess.makeCycList(listAsString);
+            Assert.assertEquals(cycList13, cycList19);
         }
         catch (Exception e) {
             e.printStackTrace();

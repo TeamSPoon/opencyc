@@ -1304,7 +1304,7 @@ public class CycAccess {
      */
     public boolean isGenlPredOf (CycFort genlPred, CycFort specPred, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(genl-pred? " + specPred.stringApiValue() +
+        return converseBoolean("(genl-predicate? " + specPred.stringApiValue() +
                                " " + genlPred.stringApiValue() +
                                " " + mt.stringApiValue() + ")");
     }
@@ -1319,7 +1319,7 @@ public class CycAccess {
      */
     public boolean isGenlPredOf (CycFort genlPred, CycFort specPred)
         throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(with-all-mts (genl-pred? " + specPred.stringApiValue() +
+        return converseBoolean("(with-all-mts (genl-predicate? " + specPred.stringApiValue() +
                                " " + genlPred.stringApiValue() + "))");
     }
 
@@ -1686,7 +1686,7 @@ public class CycAccess {
      */
     public CycList getAllSpecPreds (CycFort cycFort, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        return converseList("(all-spec-preds " + cycFort.stringApiValue() +
+        return converseList("(all-spec-predicates " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
     }
 
@@ -1700,7 +1700,7 @@ public class CycAccess {
      */
     public CycList getAllSpecPreds (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
-        return converseList("(remove-duplicates (with-all-mts (all-spec-preds " +
+        return converseList("(remove-duplicates (with-all-mts (all-spec-predicates " +
                             cycFort.stringApiValue() + ")))");
     }
 

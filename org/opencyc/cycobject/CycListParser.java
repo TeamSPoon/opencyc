@@ -73,32 +73,33 @@ public class CycListParser  {
      * @return the corresponding <tt>CycList</tt>
      */
     public CycList read (String string) throws CycApiException {
-        String tempString = Strings.change(string, '\r', ' ');
-        tempString = Strings.change(tempString, '\n', ' ');
-        StringReader stringReader = new StringReader(tempString);
+        StringReader stringReader = new StringReader(string);
         StreamTokenizer st = new StreamTokenizer(stringReader);
-        st.commentChar( ';' );
-        st.ordinaryChar( '(' );
-        st.ordinaryChar( ')' );
-        st.ordinaryChar( '\'' );
-        st.ordinaryChar( '`' );
-        st.ordinaryChar( '.' );
-        st.wordChars( '=', '=' );
-        st.wordChars( '+', '+' );
-        st.wordChars( '-', '-' );
-        st.wordChars( '_', '_' );
-        st.wordChars( '<', '<' );
-        st.wordChars( '>', '>' );
-        st.wordChars( '*', '*' );
-        st.wordChars( '/', '/' );
-        st.wordChars( '.', '.' );
-        st.wordChars( '#', '#' );
-        st.wordChars( ':', ':' );
-        st.wordChars( '!', '!' );
-        st.wordChars( '$', '$' );
-        st.wordChars( '?', '?' );
-        st.wordChars( '%', '%' );
-        st.wordChars( '&', '&' );
+        st.ordinaryChar('(');
+        st.ordinaryChar(')');
+        st.ordinaryChar('\'');
+        st.ordinaryChar('`');
+        st.ordinaryChar('.');
+        st.wordChars('=', '=');
+        st.wordChars('+', '+');
+        st.wordChars('-', '-');
+        st.wordChars('_', '_');
+        st.wordChars('<', '<');
+        st.wordChars('>', '>');
+        st.wordChars('*', '*');
+        st.wordChars('/', '/');
+        st.wordChars('.', '.');
+        st.wordChars('#', '#');
+        st.wordChars(':', ':');
+        st.wordChars('!', '!');
+        st.wordChars('$', '$');
+        st.wordChars('?', '?');
+        st.wordChars('%', '%');
+        st.wordChars('&', '&');
+        st.slashSlashComments(false);
+        st.slashStarComments(false);
+        st.commentChar(';');
+        st.eolIsSignificant(false);
 
         return read(st);
     }

@@ -40,7 +40,7 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Default host name for the OpenCyc server.
      */
-    public static final String DEFAULT_HOSTNAME = "localhost";
+    public static String DEFAULT_HOSTNAME = "localhost";
 
     /**
      * Default base tcp port for the OpenCyc server.
@@ -347,6 +347,11 @@ public class CycConnection implements CycConnectionInterface {
                     e.printStackTrace();
                     System.out.println("Error quitting the api connection " + e.getMessage());
                 }
+                try {
+                    out.flush();
+                }
+                catch (Exception e) {
+                }
             }
             if (in != null) {
                 try {
@@ -377,6 +382,11 @@ public class CycConnection implements CycConnectionInterface {
                 catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("Error quitting the api connection " + e.getMessage());
+                }
+                try {
+                    cfaslOutputStream.flush();
+                }
+                catch (Exception e) {
                 }
             }
             if (cfaslInputStream != null) {

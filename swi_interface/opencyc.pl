@@ -1105,5 +1105,3 @@ atom_junct2([],[]).
 atom_junct2([W|S],[A,Mark|Words]):- member(Mark,['.',',','?']),atom_concat(A,Mark,W),not(A=''),!,atom_junct2(S,Words).
 atom_junct2([W|S],[Mark,A|Words]):- member(Mark,['.',',','?']),atom_concat(Mark,A,W),not(A=''),!,atom_junct2(S,Words).
 atom_junct2([W|S],[W|Words]):-atom_junct2(S,Words).
-
-

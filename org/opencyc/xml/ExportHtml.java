@@ -501,17 +501,21 @@ public class ExportHtml {
         htmlFontElement.appendChild(htmlAnchorElement);
         Node collectionTextNode = htmlDocument.createTextNode(cycConstant.cyclify());
         htmlAnchorElement.appendChild(collectionTextNode);
-        processRewriteOf(cycConstant, htmlFontElement);
-        String generatedPhrase;
-        if (cycAccess.isCollection(cycConstant))
-            generatedPhrase = cycAccess.getPluralGeneratedPhrase(cycConstant);
-        else
-            generatedPhrase = cycAccess.getSingularGeneratedPhrase(cycConstant);
-        if (generatedPhrase.endsWith("(unclassified term)"))
-            generatedPhrase = generatedPhrase.substring(0, generatedPhrase.length() - 20);
-        Element italicsGeneratedPhraseElement = italics(htmlAnchorElement);
-        Node generatedPhraseNode = htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
-        italicsGeneratedPhraseElement.appendChild(generatedPhraseNode);
+        boolean hasRewrite = processRewriteOf(cycConstant, htmlFontElement);
+        if (! hasRewrite) {
+            // If no rewriteOf text, then output the generated phrase.
+            String generatedPhrase;
+            if (cycAccess.isCollection(cycConstant))
+                generatedPhrase = cycAccess.getPluralGeneratedPhrase(cycConstant);
+            else
+                generatedPhrase = cycAccess.getSingularGeneratedPhrase(cycConstant);
+            if (generatedPhrase.endsWith("(unclassified term)"))
+                generatedPhrase = generatedPhrase.substring(0, generatedPhrase.length() - 20);
+            Element italicsGeneratedPhraseElement = italics(htmlAnchorElement);
+            Node generatedPhraseNode =
+                htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
+            italicsGeneratedPhraseElement.appendChild(generatedPhraseNode);
+        }
         Element blockquoteElement = htmlDocument.createElement("blockquote");
         htmlBodyElement.appendChild(blockquoteElement);
         createCommentNodes(cycConstant, blockquoteElement);
@@ -540,8 +544,9 @@ public class ExportHtml {
      *
      * @param cycConstant the given CycConstant for processing if a #$rewriteOf
      * @param parentElement the parent HTML element for inserting rewriteOf text
+     * @return true iff there is in fact a rewrite term
      */
-    protected void processRewriteOf(CycConstant cycConstant,
+    protected boolean processRewriteOf(CycConstant cycConstant,
                                     Element parentElement)
         throws UnknownHostException, IOException, CycApiException {
         CycList query = new CycList();
@@ -565,11 +570,11 @@ public class ExportHtml {
         query3.add(fortVariable);
         CycList cycForts = cycAccess.askWithVariable(query, fortVariable, inferencePSC);
         if (cycForts.size() == 0)
-            return;
+            return false;
         if (! (cycForts.get(0) instanceof CycFort)) {
             Log.current.errorPrintln("\nError, rewriteOf " + cycConstant.cyclify() +
                                      "\n " + cycForts.get(0) + "\nis not a CycFort\n");
-            return;
+            return false;
         }
         CycFort cycFort = (CycFort) cycForts.get(0);
         Node rewriteOfTextNode = htmlDocument.createTextNode("  is the atomic form of ");
@@ -584,6 +589,7 @@ public class ExportHtml {
         }
         else
             parentElement.appendChild(cycFortTextNode);
+        return true;
     }
 
     /**

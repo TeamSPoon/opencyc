@@ -60,7 +60,41 @@
 	 writel/2,
 	 atomSplit/2,
 	 list_to_term/2,
-	 testOpenCyc/0]).
+	 testOpenCyc/0,
+	 
+	 createPrologServerThread/1,
+	 xmlPrologServer/1,
+	 read_line_with_nl/3,
+	 decodeRequest/2,
+	 invokePrologCommandRDF/6,
+	 serviceAcceptedClientSocketAtThread/1,
+
+	 servantProcessCreate/1,
+	 servantProcessCreate/3,
+	 servantProcessCreate/4,
+	 servantProcessCreate/5,
+	 isCycProcess/2,
+	 isCycProcess/5,
+	 createProcessedGoal/1,
+	 servantProcessSelfClean/0,
+	 showCycStatisticsHTML/0,
+	 cleanOldProcesses/0,
+	 showCycProcessHTML/0,
+
+
+	 writeDebug/1,
+	 writeDebug/2,
+	 writeDebugFast/1,
+	 logOnFailureIgnore/1,
+	 sendNote/1,
+	 sendNote/4,
+	 writeFailureLog/2,
+	 debugOnFailure/2,
+	 writeObject/2,
+	 writeObject/3,
+	 writeObject_conj/2
+	 
+	 ]).
 
 :- style_check(-singleton).
 :- style_check(-discontiguous).
@@ -81,7 +115,7 @@
 :-dynamic(cycChatMode/1).
 
 
-cycBaseJavaClass('logiccyc.SwiCyc').
+cycBaseJavaClass('org.opencyc.prolog.JavaRt').
 
 :-use_module(library(system)).
 :-use_module(library(shlib)).
@@ -144,7 +178,7 @@ unsetCycOption_thread(Name,Value):-
 getCycOption_nearest_thread(Name,Value):-
 	getCycOption_thread(Name,Value),!.
 getCycOption_nearest_thread(Name,Value):-
-	'$CycOption'(_,Name,Value),!.
+      '$CycOption'(_,Name,Value),!.
 getCycOption_nearest_thread(_Name,_Value):-!.
 
 
@@ -192,7 +226,7 @@ setCycOptionDefaults:-
              setCycOption(cb_error='off'),
              setCycOption(cb_result_each='off'),
 
-% User Agent Defaults for Blank Variables
+% User Agent Defaults for 
              setCycOption(opt_cxt_request='#$BaseKB'),
              setCycOption(opt_ctx_assert='#$BaseKB'),
              setCycOption(opt_tracking_number='generate'),
@@ -236,6 +270,8 @@ setCycOptionDefaults:-
 % Cyc initialization - call cycInit. once and this fiule will be loaded if not already
 % ===================================================================
 cycInit.
+
+:-setCycOptionDefaults.
 
 :-setCycOption(cycServer,'127.0.0.1':3601).
 :-setCycOption(query(backchains),1).
@@ -1640,9 +1676,10 @@ invokePrologCommand(Session,In,Out,PrologGoal,ToplevelVars,Returns):-
 
 serviceCycApiRequest(In,Out):-
        readCycL(In,Trim), 
-       isDebug(format('"~s"~n',[Trim])),
+       isDebug(format(user_error,'remote API Call "~s"~n',[Trim])),
        serviceCycApiRequestSubP(In,Trim,Out).
    
+      
 serviceCycApiRequestSubP(In,Trim,Out):-
        getSurfaceFromChars(Trim,[Result],ToplevelVars),!,
        balanceBinding(Result,PrologGoal),
@@ -2132,10 +2169,9 @@ write_e(C):-put_code(C),!.
 % ==========================================================
 %  Sending Notes
 % ==========================================================
-writeDebug(T):-!.  writeDebug(C,T):-!.
  
-%writeDebug(T):-(isCycOption(opt_debug=off)),!.
-%writeDebug(C,T):-(isCycOption(opt_debug=off)),!.
+writeDebug(T):-(isCycOption(opt_debug=off)),!.
+writeDebug(C,T):-(isCycOption(opt_debug=off)),!.
 
 logOnFailureIgnore(X):-ignore(logOnFailure(X)),!.
 
@@ -2321,9 +2357,6 @@ writeObject(OBJ,Vars):- isCycOption(client=atomata),!,
 writeObject(OBJ,Vars):- isCycOption(client=console),!,
 		((toMarkUp(cycl,OBJ,Vars,Chars),write(Chars))),!.
 
-writeObject(OBJ,Vars):- isCycOption(client=consultation),!,
-		(say(OBJ,Vars)),!.
-
 writeObject(OBJ,Vars):- !,
 		((toMarkUp(cycl,OBJ,Vars,Chars),write(Chars))),!.
 
@@ -2460,8 +2493,8 @@ Where <cr> indicates a carriage return or some other suitable delimiter.
 
 /*
 :-module(cyc_threads,
-      [ thread_self/1,
-	 servantProcessCreate/1,
+      [ 
+      	 servantProcessCreate/1,
 	 servantProcessCreate/3,
 	 servantProcessCreate/4,
 	 servantProcessCreate/5,
@@ -2545,10 +2578,6 @@ handleProcessStatus(Id,exited(complete)):-!,prolog_thread_join(Id,_),!.
 handleProcessStatus(Id,true):-!, writeSTDERR('% Process ~w complete.\n',[Id]),!,prolog_thread_join(Id,_),!.
 handleProcessStatus(Id,exception(Error)):-!, writeSTDERR('% Process ~w exited with exceptions: ~q \n',[Id,Error]),!,prolog_thread_join(Id,_),!.
 handleProcessStatus(Id,O):-!, writeSTDERR('% Process ~w exited "~q". \n',[Id,O]),!,prolog_thread_join(Id,_),!.
-
-
-
-
 
 mutex_call(Goal,Id):-
                         mutex_create(Id),

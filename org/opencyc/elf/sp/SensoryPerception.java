@@ -53,7 +53,7 @@ public class SensoryPerception extends NodeComponent {
   }
 
   /** 
-   * Creates a new instance of KnowledgeBase with the given
+   * Creates a new instance of SensoryPerception with the given
    * input message channel.
    *
    * @param sensoryProcessingChannel the takable channel from which messages are input

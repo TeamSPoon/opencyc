@@ -86,21 +86,12 @@ public class Action {
   }
 
   /**
-   * Gets the action state, including the parameters and action modifiers
-   *
-   * @return the action state, including the parameters and action modifiers
-   */
-  public State getState () {
-    return state;
-  }
-  
-  /**
    * Gets the parameter names for this action.
    *
    * @return the parameter names for this action
    */
   public ArrayList getParameterNames () {
-    return (ArrayList) state.getStateValue(State.PARAMETER_NAMES);
+    return parameterNames;
   }
    
   /**
@@ -109,7 +100,7 @@ public class Action {
    * @return the parameter types for this action
    */
   public ArrayList getParameterTypes () {
-    return (ArrayList) state.getStateValue(State.PARAMETER_TYPES);
+    return parameterTypes;
   }
     
   /**
@@ -118,7 +109,7 @@ public class Action {
    * @return the parameter values for this action
    */
   public ArrayList getParameterValues () {
-    return (ArrayList) state.getStateValue(State.PARAMETER_VALUES);
+    return parameterValues;
   }
   
   /**
@@ -140,7 +131,7 @@ public class Action {
                                parameterType + ")");
       }
     }
-    state.setStateValue(State.PARAMETER_VALUES, parameterValues);
+    this.parameterValues = parameterValues;
   }
   
   /**
@@ -149,7 +140,7 @@ public class Action {
    * @return the output type for this action
    */
   public Class getOutputType () {
-    return (Class) state.getStateValue(State.OUTPUT_TYPE);
+    return outputType;
    }
   
   /**
@@ -158,7 +149,7 @@ public class Action {
    * @return the parameter values for this (completed) action
    */
   public Object getOutputValue () {
-    return state.getStateValue(State.OUTPUT_VALUE);
+    return outputValue;
   }
     
   
@@ -179,7 +170,7 @@ public class Action {
    * @param parameterNames the parameter names for this action
    */
   public void setParameterNames (ArrayList parameterNames) {
-    state.setStateValue(State.PARAMETER_NAMES, parameterNames);
+    this.parameterNames = parameterNames;
   }
    
   /**
@@ -188,7 +179,7 @@ public class Action {
    * @param parameterTypes the parameter types for this action
    */
   public void setParameterTypes (ArrayList parameterTypes) {
-    state.setStateValue(State.PARAMETER_TYPES, parameterTypes);
+    this.parameterTypes = parameterTypes;
   }
    
   /**
@@ -196,19 +187,18 @@ public class Action {
    *
    * @param outputType the output type for this action
    */
-  public void setOutpuType (Class outputType) {
-    state.setStateValue(State.OUTPUT_TYPE, outputType);
+  public void setOutputType (Class outputType) {
+    this.outputType = outputType;
+  }
+   /**
+   * Sets the output value for this action.
+   *
+   * @param outputValue the output valuefor this action
+   */
+  public void setOutputValue (Object outputValue) {
+    this.outputValue = outputValue;
   }
    
-  /**
-   * Sets the action state.
-   *
-   * @param state the action state
-   */
-  public void setState (State state) {
-    this.state = state;
-  }
-
   /**
    * the abort action name
    */
@@ -237,16 +227,36 @@ public class Action {
   //// Private Area
   
   //// Internal Rep
-  
-  /**
-   * the action state
-   */
-  protected State state;
-  
+    
   /**
    * the name of the action
    */
   protected String name;
+  
+  /**
+   * the parameter names for this action
+   */
+  protected ArrayList parameterNames;
+  
+  /**
+   * the parameter types for this action
+   */
+  protected ArrayList parameterTypes;
+  
+  /**
+   * the parameter values for this action
+   */
+  protected ArrayList parameterValues;
+  
+  /**
+   * the output type for this action
+   */
+  protected Class outputType;
+  
+  /**
+   * the output value for this (completed) action
+   */
+  protected Object outputValue;
   
   //// Main
   

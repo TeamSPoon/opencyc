@@ -114,32 +114,32 @@ public class Schedule {
    *
    * @return the name of the actuator or virtual actuator that achieves or accomplishes the schedule
    */
-  public String getActuatorName () {
-    return actuatorName;
+  public String getDirectActuatorName () {
+    return directActuatorName;
   }
 
-  /** Sets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+  /** Sets the name of the direct actuator that achieves or accomplishes the schedule
    *
-   * @param actuatorName the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+   * @param directActuatorName the name of the direct actuator that achieves or accomplishes the schedule
    */
-  public void setActuatorName (String actuatorName) {
-    this.actuatorName = actuatorName;
+  public void setDirectActuatorName (String directActuatorName) {
+    this.directActuatorName = directActuatorName;
   }
 
   /** Gets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
    *
    * @return the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
    */
-  public String getSensorName () {
-    return sensorName;
+  public String getDirectSensorName () {
+    return directSensorName;
   }
 
-  /** Sets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+  /** Sets the name of the direct sensor that senses the achievements or accomplishments of the schedule
    *
-   * @param sensorName the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+   * @param directSensorName the name of the direct sensor that senses the achievements or accomplishments of the schedule
    */
-  public void setSensorName (String sensorName) {
-    this.sensorName = sensorName;
+  public void setDirectSensorName (String sensorName) {
+    this.directSensorName = directSensorName;
   }
 
   /** Returns a string representation of this object.
@@ -150,10 +150,10 @@ public class Schedule {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[Schedule ");
     stringBuffer.append(plannedActions.toString());
-    stringBuffer.append(" actuator: ");
-    stringBuffer.append(actuatorName);
-    stringBuffer.append(" sensor: ");
-    stringBuffer.append(sensorName);
+    stringBuffer.append(" direct actuator: ");
+    stringBuffer.append(directActuatorName);
+    stringBuffer.append(" direct sensor: ");
+    stringBuffer.append(directSensorName);
     stringBuffer.append("]");
     return stringBuffer.toString();
   }
@@ -193,9 +193,9 @@ public class Schedule {
    */
   protected List plannedGoalTimeMilliseconds = new ArrayList();
 
-  /** the name of the actuator or virtual actuator that achieves or accomplishes the schedule */
-  protected String actuatorName = "";
+  /** the name of the direct actuator that achieves or accomplishes the schedule */
+  protected String directActuatorName = "";
 
-  /** the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule */
-  protected String sensorName = "";
+  /** the name of the direct sensor that senses the achievements or accomplishments of the schedule */
+  protected String directSensorName = "";
 }

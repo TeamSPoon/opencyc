@@ -81,8 +81,8 @@ public class TaskFrameFactory {
     List plannedActions = new ArrayList();
     action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
     schedule.setPlannedActions(plannedActions);
-    schedule.setSensorName(Sensor.CONSOLE_INPUT);
-    schedule.setActuatorName(Actuator.CONSOLE_OUTPUT);
+    schedule.setDirectSensorName(Sensor.CONSOLE_INPUT);
+    schedule.setDirectActuatorName(Actuator.CONSOLE_OUTPUT);
     True truePredicate = new True();
     PredicateExpression predicateExpression = new PredicateExpression(truePredicate);
     List scheduleSet = new ArrayList();

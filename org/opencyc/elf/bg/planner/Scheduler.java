@@ -75,6 +75,7 @@ public class Scheduler extends NodeComponent {
    * job assigner
    */
   public void initialize(Puttable jobAssignerChannel) {
+    getLogger().info("Initializing Scheduler");
     consumer = new Consumer(schedulerChannel,
                             jobAssignerChannel,
                             this);
@@ -93,8 +94,12 @@ public class Scheduler extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[Scheduler ");
+    if (schedule != null)
+      stringBuffer.append(schedule.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
 
   /** Gets the executor for this sceduler
@@ -150,12 +155,6 @@ public class Scheduler extends NodeComponent {
     /** the node's controlled resources */
     protected List controlledResources;
     
-    /** the node's commanded task */
-    protected TaskCommand taskCommand;
-        
-    /** the schedule which is planned to accomplish the commanded task */
-    protected Schedule schedule;
-    
     /** Creates a new instance of Consumer.
      *
      * @param schedulerChannel the takable channel from which messages are input
@@ -166,6 +165,7 @@ public class Scheduler extends NodeComponent {
     protected Consumer (Takable schedulerChannel,
                         Puttable jobAssignerChannel,
                         NodeComponent nodeComponent) { 
+      getLogger().info("Creating Scheduler.Consumer");
       this.schedulerChannel = schedulerChannel;
       this.jobAssignerChannel = jobAssignerChannel;
       this.nodeComponent = nodeComponent;
@@ -181,8 +181,6 @@ public class Scheduler extends NodeComponent {
       catch (InterruptedException ex) {}
     }
      
-    //TODO think about conversations and thread safety
-    
     /** Dispatches the given input channel message by type.
      *
      * @param genericMsg the given input channel message
@@ -196,6 +194,8 @@ public class Scheduler extends NodeComponent {
         processExecutorStatusMsg((ExecutorStatusMsg) genericMsg); 
       else if (genericMsg instanceof ScheduleConsistencyRequestMsg)
         processScheduleConsistencyRequestMsg((ScheduleConsistencyRequestMsg) genericMsg); 
+      else
+        throw new RuntimeException("Unhandled message " + genericMsg);
     }
   
     /** Processes the schedule job message.
@@ -203,8 +203,10 @@ public class Scheduler extends NodeComponent {
      * @param scheduleJobMsg the schedule job message
      */
     protected void processScheduleJobMsg (ScheduleJobMsg scheduleJobMsg) {
+      getLogger().info("Scheduler proccessing " + scheduleJobMsg);
+      schedule = scheduleJobMsg.getSchedule();
       taskCommand = scheduleJobMsg.getTaskCommand();
-      //TODO
+      
     }
                 
     /** Processes the replan message.
@@ -294,5 +296,12 @@ public class Scheduler extends NodeComponent {
   protected EDU.oswego.cs.dl.util.concurrent.Executor consumerExecutor;
   
   /** the executor for this scheduler */
-  org.opencyc.elf.bg.executor.Executor executor;
+  protected org.opencyc.elf.bg.executor.Executor executor;
+  
+  /** the node's commanded task */
+  protected TaskCommand taskCommand;
+
+  /** the schedule which is planned to accomplish the commanded task */
+  protected Schedule schedule;
+    
 }

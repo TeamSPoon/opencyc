@@ -41,6 +41,21 @@ public class ScheduleJobMsg extends GenericMsg {
   
   //// Public Area
   
+  /** Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ScheduleJobMsg ");
+    if (taskCommand != null)
+      stringBuffer.append(taskCommand.toString());
+    if (schedule != null)
+      stringBuffer.append(schedule.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
+
   /** Gets the commanded task for scheduling in case the schedule is not explicitly given
    *
    * @return the commanded task for scheduling in case the schedule is not explicitly given

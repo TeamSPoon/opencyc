@@ -118,8 +118,12 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[JobAssigner ");
+    if (taskCommand != null)
+      stringBuffer.append(taskCommand.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /** Gets the list of scheduler infos for this job assigner
@@ -182,9 +186,6 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
     
     /** the parent node component */
     protected NodeComponent nodeComponent;
-    
-    /** the node's commanded task */
-    protected TaskCommand taskCommand;
     
     /** the task frame for the current task command */
     protected TaskFrame taskFrame;
@@ -313,8 +314,8 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       while (scheduleIterator.hasNext()) {
         boolean foundMatchingScheduler = false;
         Schedule schedule = (Schedule) scheduleIterator.next();
-        if (schedule.getActuatorName() == null &&
-            schedule.getSensorName() == null) {
+        if (schedule.getDirectActuatorName() == null &&
+            schedule.getDirectSensorName() == null) {
          
           passTwoSchedules.add(schedule);
           continue;
@@ -325,12 +326,12 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
           if (! schedulerInfo.isAssigned)
             continue;
           Schedule previousSchedule = schedulerInfo.schedule;
-          if ((schedule.getActuatorName() != null &&
-               previousSchedule.getActuatorName() != null &&
-               schedule.getActuatorName().equals(previousSchedule.getActuatorName())) ||
-              (schedule.getSensorName() != null &&
-               previousSchedule.getSensorName() != null &&
-               schedule.getSensorName().equals(previousSchedule.getSensorName()))) {
+          if ((schedule.getDirectActuatorName() != null &&
+               previousSchedule.getDirectActuatorName() != null &&
+               schedule.getDirectActuatorName().equals(previousSchedule.getDirectActuatorName())) ||
+              (schedule.getDirectSensorName() != null &&
+               previousSchedule.getDirectSensorName() != null &&
+               schedule.getDirectSensorName().equals(previousSchedule.getDirectSensorName()))) {
             getLogger().info("matching scheduler:" + schedulerInfo.scheduler + " schedule: " + schedule);
             schedulerInfo.isAssigned = false;
             schedulerInfo.schedule = schedule;
@@ -544,6 +545,9 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   /** the executor of the consumer thread */
   protected Executor executor;
   
+  /** the node's commanded task */
+  protected TaskCommand taskCommand;
+    
   /** the list of scheduler infos for this job assigner */
   protected List schedulerInfos = new ArrayList();
   

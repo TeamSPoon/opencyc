@@ -96,34 +96,34 @@ public class ConditionalScheduleSet {
     return scheduleSet;
   }
 
-  /** Gets all names of the actuators that are responsible for carrying out the task
+  /** Gets all names of the direct actuators that are responsible for carrying out the task
    * 
-   * @return all names of the actuators that are responsible for carrying out the task
+   * @return all names of the direct actuators that are responsible for carrying out the task
    */
-  public List getActuatorNames () {
-    List actuatorNames = new ArrayList();
+  public List getDirectActuatorNames () {
+    List directActuatorNames = new ArrayList();
     Iterator iter = scheduleSet.iterator();
     while (iter.hasNext()) {
       Schedule schedule = (Schedule) iter.next();
-      if (! actuatorNames.contains(schedule.getActuatorName()))
-        actuatorNames.add(schedule.getActuatorName());
+      if (! directActuatorNames.contains(schedule.getDirectActuatorName()))
+        directActuatorNames.add(schedule.getDirectActuatorName());
     }
-    return actuatorNames;
+    return directActuatorNames;
   }
 
-  /** Gets all the names of the sensors that are responsible for sensing phenomena related to the task
+  /** Gets all the names of the direct sensors that are responsible for sensing phenomena related to the task
    * 
-   * @return all the names of the sensors that are responsible for sensing phenomena related to the task
+   * @return all the names of the direct sensors that are responsible for sensing phenomena related to the task
    */
-  public List getSensorNames () {
-    List sensorNames = new ArrayList();
+  public List getDirectSensorNames () {
+    List directSensorNames = new ArrayList();
     Iterator iter = scheduleSet.iterator();
     while (iter.hasNext()) {
       Schedule schedule = (Schedule) iter.next();
-      if (! sensorNames.contains(schedule.getSensorName()))
-        sensorNames.add(schedule.getSensorName());
+      if (! directSensorNames.contains(schedule.getDirectSensorName()))
+        directSensorNames.add(schedule.getDirectSensorName());
     }
-    return sensorNames;
+    return directSensorNames;
   }
 
   //// Protected Area

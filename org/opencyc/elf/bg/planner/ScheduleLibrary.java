@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.taskframe.ActionFactory;
 
 //// External Imports
 import java.util.ArrayList;
@@ -58,6 +59,12 @@ public class ScheduleLibrary {
   public void initialize() {
     // 
     Schedule schedule = new Schedule();
+    ActionFactory actionFactory = new ActionFactory();
+    // console prompted input
+    ArrayList plannedActions = new ArrayList();
+    plannedActions.add(actionFactory.makeConsolePromptedInput());
+    schedule.setPlannedActions(plannedActions);
+    ArrayList plannedGoals = new ArrayList();
   }
   
   /**
@@ -74,13 +81,15 @@ public class ScheduleLibrary {
       return schedules;
   }
   
+  //// Protected Area
+   
   /**
    * Sets the list of schedules that accomplish the given action name.
    *
    * @param action the given action name
    * @param schedules the list of schedules that accomplish the given action name
    */
-  public void setSchedules (String actionName, ArrayList schedules) {
+  protected void setSchedules (String actionName, ArrayList schedules) {
     scheduleDictionary.put(actionName, schedules);
   }
 
@@ -90,7 +99,7 @@ public class ScheduleLibrary {
    * @param action the given action name
    * @param schedule the schedule that accomplishes the given action name
    */
-  public void addSchedule (String actionName, Schedule schedule) {
+  protected void addSchedule (String actionName, Schedule schedule) {
     ArrayList schedules = (ArrayList) scheduleDictionary.get(actionName);
     if (schedules == null)
       schedules = new ArrayList();
@@ -98,8 +107,6 @@ public class ScheduleLibrary {
     scheduleDictionary.put(actionName, schedules);
   }
 
-  //// Protected Area
-   
   //// Private Area
   
   //// Internal Rep

@@ -21,6 +21,10 @@ import org.opencyc.elf.message.ExecuteScheduleMsg;
 import org.opencyc.elf.message.ExecutorStatusMsg;
 import org.opencyc.elf.message.GenericMsg;
 
+import org.opencyc.elf.s.DirectSensor;
+
+import org.opencyc.elf.sp.SensoryPerception;
+
 import org.opencyc.elf.wm.ActuatorPool;
 import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.SensorPool;
@@ -178,8 +182,18 @@ public class Executor extends BufferedNodeComponent {
         else
           initializeLowerLevelNode();
       }
-      //TODO obtain direct sensor?
-      //TODO attach the sensor or virtual sensor to sensory perception
+      if (executor.schedule.getDirectSensorName() != null) {
+        if (directSensor == null) {
+          //TODO get the sensor and attach it to sensory perception
+        }
+        else if (! directSensor.getName().equals(executor.schedule.getDirectSensorName())) {
+          //TODO release the current sensor and get the new one, attaching it
+          // to sensory perception
+        }
+      }
+      else if (directSensor != null) {
+        //TODO release the previous sensor
+      }
       scheduleSequencer = new ScheduleSequencer();
       scheduleSequencerExecutor = new ThreadedExecutor();
       try {
@@ -191,7 +205,6 @@ public class Executor extends BufferedNodeComponent {
       }
     }
     
-    
     /** Connects this node to the new lower level node by initializing the lower level job assigner
      * and sensory perception.
      */
@@ -202,9 +215,10 @@ public class Executor extends BufferedNodeComponent {
       JobAssigner lowerLevelJobAssigner = lowerLevelNode.getBehaviorGeneration().getJobAssigner();
       lowerLevelJobAssigner.initialize(executor.getChannel());
       executor.actuator = lowerLevelJobAssigner;
-      //TODO connect sensory perception
+      SensoryPerception lowerLevelSensoryPerception = lowerLevelNode.getSensoryPerception();
+      executor.getNode().getSensoryPerception().addSensor(lowerLevelSensoryPerception);
+      lowerLevelSensoryPerception.initialize(executor.getNode().getSensoryPerception().getChannel());
     }
-    
   }
   
   /** Interruptable thread which executes the input schedule. */
@@ -267,5 +281,8 @@ public class Executor extends BufferedNodeComponent {
 
   /** the actuator to which this executor sends commands */
   protected Actuator actuator;
+  
+  /** the direct sensor required by the current schedule */
+  protected DirectSensor directSensor;
   
 }

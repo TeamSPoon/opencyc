@@ -3,6 +3,8 @@ package org.opencyc.elf.s;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+import org.opencyc.elf.sp.SensoryPerception;
+
 //// External Imports
 import java.util.List;
 

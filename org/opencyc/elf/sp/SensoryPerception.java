@@ -106,40 +106,26 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return "SensoryPerception for " + node.getName();
   }
 
-  /** Gets the parent node's SensoryPerception object.
-   * 
-   * @return the parent node's SensoryPerception object
+  /** Adds the given sensor to the list of sensors reporting to this sensory
+   * perception.
+   *
+   * @param sensor the given direct sensor or lower level sensory perception to be 
+   * removed 
    */
-  public SensoryPerception getParentSensoryPerception() {
-    return parentSensoryPerception;
-  }
-
-  /** Sets the parent node's SensoryPerception object.
-   * 
-   * @param parentSensoryPerception the parent node's SensoryPerception object
-   */
-  public void setParentSensoryPerception(SensoryPerception parentSensoryPerception) {
-    this.parentSensoryPerception = parentSensoryPerception;
-  }
-
-  /** Gets the child nodes' SensoryPerception objects.
-   * 
-   * @return the child nodes' SensoryPerception objects
-   */
-  public ArrayList getChildrenSensoryPerception() {
-    return childrenSensoryPerception;
-  }
-
-  /** Sets the child nodes' SensoryPerception objects.
-   * 
-   * @param childrenSensoryPerception the child nodes' SensoryPerception
-   *        objects
-   */
-  public void setChildrenSensoryPerception(ArrayList childrenSensoryPerception) {
-    this.childrenSensoryPerception = childrenSensoryPerception;
+  public void addSensor (Sensor sensor) {
+    sensors.add(sensor);
   }
   
-
+  /** Removes the given sensor from the list of sensors reporting to this sensory
+   * perception.
+   *
+   * @param sensor the given direct sensor or lower level sensory perception to be 
+   * removed 
+   */
+  public void removeSensor (Sensor sensor) {
+    sensors.remove(sensor);
+  }
+  
   /** Gets the estimator node component
    *
    * @return the estimator node component
@@ -229,7 +215,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   public List getSensationCapabilities() {
     return sensationCapabilities;
   }
-  
+   
   //// Protected Area
     
   /** Thread which processes the input message channel. */
@@ -333,11 +319,9 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   /** the hypothesis former node component */
   protected HypothesisFormer hypothesisFormer;
   
-  /** the parent sensory perception node component */
-  protected SensoryPerception parentSensoryPerception;
-  
-  /** the children sensory perception node compontents */
-  protected ArrayList childrenSensoryPerception;
+  /** the direct sensors or lower level sensory perception objects that send sensations to this
+   sensory perception */
+  protected List sensors;
   
   /** the takable channel from which messages are input */
   protected Takable sensoryPerceptionChannel;

@@ -5,6 +5,7 @@ import  java.math.BigInteger;
 import  java.util.HashMap;
 import  java.lang.reflect.*;
 import  org.opencyc.cycobject.*;
+import  org.opencyc.util.*;
 
 /**
  * A CFASL translating input stream.  All Java-native types which have logical
@@ -169,6 +170,8 @@ public class CfaslInputStream extends BufferedInputStream {
     public CfaslInputStream (InputStream in) {
         super(in, DEFAULT_READ_LIMIT);
         initializeOpcodeDescriptions();
+        if (Log.current == null)
+            Log.makeLog("cyc-api.log");
     }
 
     /**
@@ -183,12 +186,12 @@ public class CfaslInputStream extends BufferedInputStream {
         int cfaslOpcode = read();
         Object o = null;
         if (trace == API_TRACE_DETAILED)
-            System.out.println("reading opcode = " + cfaslOpcode + " (" +
+            Log.current.println("reading opcode = " + cfaslOpcode + " (" +
                                cfaslOpcodeDescriptions.get(new Integer(cfaslOpcode)) +")");
         if (cfaslOpcode >= CFASL_IMMEDIATE_FIXNUM_OFFSET) {
             o = new Integer(cfaslOpcode - CFASL_IMMEDIATE_FIXNUM_OFFSET);
             if (trace == API_TRACE_DETAILED)
-                System.out.println("Reading Immediate Fixnum: " + o);
+                Log.current.println("Reading Immediate Fixnum: " + o);
         }
         else {
             switch (cfaslOpcode) {
@@ -253,11 +256,11 @@ public class CfaslInputStream extends BufferedInputStream {
                     while (off < len) {
                         off += read(s, off, len - off);
                     }
-                    o = new String(s);
+                    //o = new String(s);
                     /**
                      * Enable when/if UTF-8 is supported by Cyc
                      */
-                    //o = new String(s, "UTF-8");
+                    o = new String(s, "UTF-8");
                     break;
                 case CFASL_CHARACTER:
                     o = new Character((char)read());
@@ -318,11 +321,11 @@ public class CfaslInputStream extends BufferedInputStream {
             try {
                 // If object o understands the safeToString method, then use it.
                 Method safeToString = o.getClass().getMethod("safeToString", null);
-                System.out.println("readObject = " + safeToString.invoke(o, null) +
+                Log.current.println("readObject = " + safeToString.invoke(o, null) +
                                    " (" + o.getClass() + ")");
             }
             catch (Exception e) {
-                System.out.println("readObject = " + o + " (" + o.getClass() + ")");
+                Log.current.println("readObject = " + o + " (" + o.getClass() + ")");
             }
         }
         return  o;
@@ -338,7 +341,7 @@ public class CfaslInputStream extends BufferedInputStream {
         else
             errorMessage = "Unknown cfasl opcode: " + cfaslOpcode;
         if (reportCfaslErrors) {
-            System.out.println(errorMessage);
+            Log.current.println(errorMessage);
             return Integer.toString(cfaslOpcode);
         }
         else
@@ -433,14 +436,14 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     private int readFixnumBody (int nBytes, int sign) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readFixnumBody sign=" + sign + " length=" + nBytes);
+            Log.current.println("readFixnumBody sign=" + sign + " length=" + nBytes);
         if (nBytes > 4)
             throw  new ArithmeticException("Cannot fit " + nBytes + " bytes into an int");
         int num = 0;
         for (int i = 0; i < nBytes; i++) {
             int j = read();
             if (trace == API_TRACE_DETAILED)
-                System.out.println("\t" + j);
+                Log.current.println("\t" + j);
             num |= (j << (8*i));
         }
         // num should always be positive here.  Negatives indicate overflows.
@@ -459,12 +462,12 @@ public class CfaslInputStream extends BufferedInputStream {
     private BigInteger readBignumBody (int sign) throws IOException {
         int length = readInt();
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readBignumBody sign=" + sign + " length=" + length);
+            Log.current.println("readBignumBody sign=" + sign + " length=" + length);
         byte b[] = new byte[length];
         for (int i = length - 1; i >= 0; i--) {
             int j = readInt();
             if (trace == API_TRACE_DETAILED)
-                System.out.println("\t" + j);
+                Log.current.println("\t" + j);
             b[i] = (byte)j;
         }
         return  new BigInteger(sign, b);
@@ -481,7 +484,7 @@ public class CfaslInputStream extends BufferedInputStream {
     private double readFloatBody (int sign) throws IOException {
         long signif, exp;
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readFloatBody sign=" + sign);
+            Log.current.println("readFloatBody sign=" + sign);
         Object obj = readObject();
         if (obj instanceof BigInteger) {
             BigInteger bi = (BigInteger)obj;
@@ -494,7 +497,7 @@ public class CfaslInputStream extends BufferedInputStream {
             signif = ((Number)obj).longValue();
         exp = readInt();
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readFloatBody sign=" + sign + " signif=" + signif + " exp= " + exp);
+            Log.current.println("readFloatBody sign=" + sign + " signif=" + signif + " exp= " + exp);
         return  ((double)sign*(double)signif*Math.pow(2.0, exp));
     }
 
@@ -531,7 +534,7 @@ public class CfaslInputStream extends BufferedInputStream {
     public Guid readGuid () throws IOException {
         Guid guid = CycObjectFactory.makeGuid((String)readObject());
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readGuid: " + guid);
+            Log.current.println("readGuid: " + guid);
         return guid;
     }
 
@@ -560,13 +563,13 @@ public class CfaslInputStream extends BufferedInputStream {
     public CycList readCycList () throws IOException {
         int size = readInt();
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readCycList.size: " + size);
+            Log.current.println("readCycList.size: " + size);
         CycList cycList = new CycList();
         for (int i = 0; i < size; i++) {
             cycList.add(readObject());
         }
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readCycList.readObject: " + cycList.safeToString());
+            Log.current.println("readCycList.readObject: " + cycList.safeToString());
         return  cycList;
     }
 
@@ -579,21 +582,21 @@ public class CfaslInputStream extends BufferedInputStream {
     public CycList readCons () throws IOException {
         int size = readInt();
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readCons.size: " + size);
+            Log.current.println("readCons.size: " + size);
         CycList cycList = new CycList();
         //for (int i = 0; i < (size - 1); i++) {
         for (int i = 0; i < size; i++) {
             Object consObject = readObject();
             if (trace == API_TRACE_DETAILED)
-                System.out.println("readCons.consObject: " + consObject);
+                Log.current.println("readCons.consObject: " + consObject);
             cycList.add(consObject);
         }
         Object cdrObject = readObject();
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readCons.cdrObject: " + cdrObject);
+            Log.current.println("readCons.cdrObject: " + cdrObject);
         cycList.setDottedElement(cdrObject);
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readCons.readCons: " + cycList);
+            Log.current.println("readCons.readCons: " + cycList);
         return  cycList;
     }
 
@@ -606,7 +609,7 @@ public class CfaslInputStream extends BufferedInputStream {
         CycConstant cycConstant = new CycConstant();
         cycConstant.setId(new Integer(readInt()));
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readConstant: " + cycConstant.safeToString());
+            Log.current.println("readConstant: " + cycConstant.safeToString());
         return  cycConstant;
     }
 
@@ -619,7 +622,7 @@ public class CfaslInputStream extends BufferedInputStream {
         CycVariable cycVariable = new CycVariable();
         cycVariable.id = new Integer(readInt());
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readVariable: " + cycVariable.safeToString());
+            Log.current.println("readVariable: " + cycVariable.safeToString());
         return  cycVariable;
     }
 
@@ -632,7 +635,7 @@ public class CfaslInputStream extends BufferedInputStream {
         CycNart cycNart = new CycNart();
         cycNart.setId(new Integer(readInt()));
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readNart: " + cycNart.safeToString());
+            Log.current.println("readNart: " + cycNart.safeToString());
         return  cycNart;
     }
 
@@ -644,7 +647,7 @@ public class CfaslInputStream extends BufferedInputStream {
     public CycAssertion readAssertion () throws IOException {
         CycAssertion cycAssertion = new CycAssertion(new Integer(readInt()));
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readAssertion: " + cycAssertion.safeToString());
+            Log.current.println("readAssertion: " + cycAssertion.safeToString());
         return cycAssertion;
     }
 

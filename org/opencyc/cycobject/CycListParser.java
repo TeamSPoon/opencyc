@@ -9,7 +9,8 @@ import org.opencyc.api.*;
 
 /**
  * Provides a parser that reads a <tt>String</tt> representation and constructs
- * the corresponding <tt>CycList</tt>.
+ * the corresponding <tt>CycList</tt>.  Has a weakness in that quoted strings must
+ * not contain embedded newlines.
  *
  * @version $0.1$
  * @author Stephen L. Reed
@@ -165,7 +166,8 @@ public class CycListParser  {
                             break;
                         default:
                             throw new RuntimeException("Invalid symbol: " + st.toString() +
-                                                       " token: " + tok);
+                                                       " token: " + tok +
+                                                       "\nstring: " + currentString);
                     }
                 }
                 if ((readStack.sp > 0) && (parenLevel == 0)) {

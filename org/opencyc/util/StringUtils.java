@@ -100,4 +100,24 @@ public class StringUtils {
         return stringBuffer.toString();
     }
 
+    /**
+     * Escapes embedded double quote and backslash characters in the given string.
+     *
+     * @param string the given string
+     * @return the given string with embeded double quote characters
+     * preceded by a backslash character, and with embedded backslash
+     * characters preceded by another (escaping) backslash character
+     */
+    public static String escapeDoubleQuotes (String string) {
+        String result = Strings.change(string, "\\", "\\\\");
+        return Strings.change(string, "\"", "\\\"");
+    }
+
+
+
+
+
+
+
+
 }

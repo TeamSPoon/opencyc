@@ -49,6 +49,19 @@ public class CycAccess {
     public static CycAccess sharedCycAccessInstance = null;
 
     /**
+     * When true performs tracing of binary mode messages with constant names displayed,
+     * which involves recursive api requests.
+     */
+    //public boolean traceWithNames = false;
+    public boolean traceWithNames = true;
+
+    /**
+     * Stack to prevent tracing of recursive api calls whose sole purpose is to obtain
+     * names for traceWithNames.
+     */
+    protected Stack traceWithNamesStack = new Stack();
+
+    /**
      * Value indicating that the OpenCyc api socket is created and then closed for each api call.
      */
     public static final boolean TRANSIENT_CONNECTION = false;
@@ -329,6 +342,8 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     protected  void commonInitialization() throws IOException, CycApiException {
+        if (Log.current == null)
+            Log.makeLog("cyc-api.log");
         cycAccessInstances.put(Thread.currentThread(), this);
         if (sharedCycAccessInstance == null)
             sharedCycAccessInstance = this;
@@ -395,6 +410,22 @@ public class CycAccess {
     }
 
     /**
+     * Turns on the diagnostic trace of messages with constant names
+     * looked up via recursive api request.
+     */
+    public void traceNamesOn()  {
+        traceWithNames = true;
+    }
+
+    /**
+     * Turns on the diagnostic trace of messages with constant names
+     * looked up via recursive api request.
+     */
+    public void traceNamesOff() {
+        traceWithNames = false;
+    }
+
+    /**
      * Returns the CycConnection object.
      *
      * @return the CycConnection object
@@ -432,6 +463,15 @@ public class CycAccess {
         return communicationMode;
     }
 
+    protected class TraceWithNamesInfo {
+        public boolean traceWithNames;
+        public boolean bypassConstantNameRequest;
+
+        public TraceWithNamesInfo() {
+        }
+    }
+
+
     /**
      * Converses with Cyc to perform an API command.  Creates a new connection for this command
      * if the connection is not persistent.
@@ -445,6 +485,27 @@ public class CycAccess {
     protected Object [] converse(Object command)
         throws IOException, UnknownHostException, CycApiException {
         Object [] response = {null, null};
+
+        // stack discipline is required to prevent tracing of recursive
+        // name-seeking api requests.
+        TraceWithNamesInfo traceWithNamesInfo = new TraceWithNamesInfo();
+        boolean bypassConstantNameRequest = false;
+        if (traceWithNames) {
+            traceWithNamesInfo.traceWithNames = true;
+            CycList commandCyclist;
+            if (command instanceof String)
+                commandCyclist = this.makeCycList((String) command);
+            else
+                commandCyclist = (CycList) command;
+
+            if (commandCyclist.first().equals(CycObjectFactory.makeCycSymbol("constant-name")))
+                bypassConstantNameRequest = true;
+            else
+                Log.current.println(commandCyclist.cyclify() + " --> cyc");
+            traceWithNames = false;
+        }
+        traceWithNamesStack.push(traceWithNamesInfo);
+
         if (! persistentConnection) {
             cycConnection = new CycConnection(hostName,
                                               port,
@@ -457,6 +518,19 @@ public class CycAccess {
         if (! persistentConnection) {
             saveTrace = cycConnection.getTrace();
             cycConnection.close();
+        }
+        traceWithNamesInfo = (TraceWithNamesInfo) traceWithNamesStack.pop();
+        traceWithNames = traceWithNamesInfo.traceWithNames;
+        bypassConstantNameRequest = traceWithNamesInfo.bypassConstantNameRequest;
+        if (traceWithNames && ! bypassConstantNameRequest) {
+            String responseString;
+            if (response[1] instanceof CycList)
+                responseString = ((CycList) response[1]).cyclify();
+            else if (response[1] instanceof CycFort)
+                responseString = ((CycList) response[1]).cyclify();
+            else
+                responseString = response[1].toString();
+            Log.current.println("cyc --> " + responseString);
         }
         return response;
     }
@@ -2392,7 +2466,7 @@ public class CycAccess {
 
         for (int i = 0; i < listAnswer.size(); i++) {
             CycList assertion = (CycList) ((CycList) listAnswer.get(i)).first();
-            //System.out.println("assertion: " + assertion);
+            //Log.current.println("assertion: " + assertion);
             answerPhrases.add(getParaphrase(assertion));
         }
 
@@ -2428,7 +2502,7 @@ public class CycAccess {
 
         for (int i = 0; i < listAnswer.size(); i++) {
             CycList assertion = (CycList) ((CycList) listAnswer.get(i)).first();
-            //System.out.println("assertion: " + assertion);
+            //Log.current.println("assertion: " + assertion);
             answerPhrases.add(getParaphrase(assertion));
         }
 
@@ -3509,7 +3583,7 @@ public class CycAccess {
                                   cycFort.stringApiValue() + " ?X) #$EverythingPSC nil nil 120)");
         }
         catch (IOException e) {
-            System.out.println("getCoExtensionals - ignoring:\n" + e.getMessage());
+            Log.current.println("getCoExtensionals - ignoring:\n" + e.getMessage());
             return new CycList();
         }
         answer.remove(cycFort);
@@ -3536,7 +3610,7 @@ public class CycAccess {
                                   " nil nil 120)");
         }
         catch (IOException e) {
-            System.out.println("getCoExtensionals - ignoring:\n" + e.getMessage());
+            Log.current.println("getCoExtensionals - ignoring:\n" + e.getMessage());
             return new CycList();
         }
         answer.remove(cycFort);

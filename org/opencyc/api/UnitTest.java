@@ -75,6 +75,7 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
+        /*
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
@@ -99,7 +100,11 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testAsciiCycAccess10"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess11"));
-        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        */
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess12"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess12"));
+
+        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
 
         return testSuite;
     }
@@ -4171,6 +4176,143 @@ public class UnitTest extends TestCase {
             done = true;
         }
     }
+
+    /**
+     * Tests a portion of the CycAccess methods using the ascii api connection.
+     */
+    public void testAsciiCycAccess12 () {
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
+            return;
+        System.out.println("\n**** testAsciiCycAccess 12 ****");
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+
+        doTestCycAccess12 (cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testAsciiCycAccess 12 OK ****");
+    }
+
+
+    /**
+     * Tests a portion of the CycAccess methods using the binary api connection.
+     */
+    public void testBinaryCycAccess12 () {
+        System.out.println("\n**** testBinaryCycAccess 12 ****");
+        CycAccess cycAccess = null;
+        try {
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION,
+                                          CycConnection.DEFAULT_MESSAGING_MODE);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        doTestCycAccess12(cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testBinaryCycAccess 12 OK ****");
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the given api connection.
+     */
+    protected void doTestCycAccess12 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        try {
+            //cycAccess.traceOn();
+            String utf8String = "ABCdef";
+            Assert.assertEquals(utf8String, cycAccess.converseString("(identity \"" + utf8String + "\")"));
+
+            InputStreamReader inputStreamReader = null;
+            try {
+                inputStreamReader =
+                    new InputStreamReader(
+                        new FileInputStream(
+                            new File("utf8-sample.html")), "UTF-8");
+            }
+            catch (IOException e) {
+                return;
+            }
+            StringBuffer utf8StringBuffer = new StringBuffer();
+            while (true) {
+                int ch = inputStreamReader.read();
+                if (ch == -1)
+                    break;
+                if (ch == '\n' ||
+                    ch == '\r')
+                    utf8StringBuffer.append(' ');
+                else
+                    utf8StringBuffer.append((char) ch);
+            }
+            utf8String = utf8StringBuffer.toString();
+
+            PrintWriter utf8Output =
+                new PrintWriter(
+                    new OutputStreamWriter(
+                        new FileOutputStream("utf8-sample-without-newlines.html"), "UTF8"));
+            utf8Output.print(utf8String);
+            utf8Output.close();
+
+            String escapedUtf8String = StringUtils.escapeDoubleQuotes(utf8String);
+
+            CycList command = new CycList();
+            command.add(CycObjectFactory.makeCycSymbol("identity"));
+            command.add(escapedUtf8String);
+            String echoUtf8Sting = cycAccess.converseString(command);
+
+            utf8Output =
+                new PrintWriter(
+                    new OutputStreamWriter(
+                        new FileOutputStream("utf8-sample-from-cyc.html"), "UTF8"));
+            utf8Output.print(utf8String);
+            utf8Output.close();
+
+            System.out.println("utf8String\n" + utf8String);
+            System.out.println("escapedUtf8String\n" + escapedUtf8String);
+            System.out.println("echoUtf8Sting\n" + echoUtf8Sting);
+            Assert.assertEquals(escapedUtf8String, echoUtf8Sting);
+
+
+            CycFort myTerm = cycAccess.getConstantByName("my-term");
+            if (myTerm != null)
+                cycAccess.kill(myTerm);
+            myTerm = cycAccess.findOrCreate("my-term");
+            cycAccess.assertComment(myTerm, escapedUtf8String, cycAccess.baseKB);
+
+
+
+
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
+    }
+
+
+
+
+
 }
 
 

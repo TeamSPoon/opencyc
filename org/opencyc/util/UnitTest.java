@@ -186,6 +186,29 @@ public class UnitTest extends TestCase {
         System.out.println("** testWordsToString OK **");
     }
 
+    /**
+     * Tests the StringUtils.escapeDoubleQuotes method.
+     */
+    public void testEscapeDoubleQuotes() {
+        System.out.println("** testEscapeDoubleQuotes **");
+        String string = "";
+        Assert.assertEquals(string, StringUtils.escapeDoubleQuotes(string));
+        string = "1 2 3";
+        Assert.assertEquals(string, StringUtils.escapeDoubleQuotes(string));
+        string = "'1' '2' '3'";
+        Assert.assertEquals(string, StringUtils.escapeDoubleQuotes(string));
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("\"");
+        stringBuffer.append("abc");
+        stringBuffer.append("\"");
+        string = stringBuffer.toString();
+        String expectedString = "\\\"abc\\\"";
+        String escapedString = StringUtils.escapeDoubleQuotes(string);
+        Assert.assertEquals(expectedString, escapedString);
+
+        System.out.println("** testEscapeDoubleQuotes OK **");
+    }
+
 
 }
 

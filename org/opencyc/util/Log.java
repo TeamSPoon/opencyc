@@ -215,6 +215,22 @@ public class Log {
      *
      * @param object the object whose string representation is to be logged.
      */
+    public void print(char c) {
+        if (ignore)
+            return;
+        if (writeToOut)
+            System.out.print(c);
+        if (writeToFile) {
+            printWriter.print(c);
+            printWriter.flush();
+        }
+    }
+
+    /**
+     * Writes the object's string representation to the log.
+     *
+     * @param object the object whose string representation is to be logged.
+     */
     public void print(Object object) {
         print(object.toString());
     }

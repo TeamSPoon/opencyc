@@ -349,9 +349,9 @@ public class CycConnection implements CycConnectionInterface {
         initializeApiConnections();
         if (trace > API_TRACE_NONE) {
             if (communicationMode == ASCII_MODE)
-                System.out.println("Ascii connection " + asciiSocket);
+                Log.current.println("Ascii connection " + asciiSocket);
             else
-                System.out.println("Binary connection " + cfaslSocket);
+                Log.current.println("Binary connection " + cfaslSocket);
         }
         if (this.messagingMode == CONCURRENT_MESSAGING_MODE)
             initializeConcurrentProcessing();
@@ -362,6 +362,8 @@ public class CycConnection implements CycConnectionInterface {
      */
     private void initializeApiConnections () throws IOException,
         UnknownHostException {
+        if (Log.current == null)
+            Log.makeLog("cyc-api.log");
         if (communicationMode == ASCII_MODE) {
             asciiSocket = new Socket(hostName, asciiPort);
             in = new BufferedReader(new InputStreamReader(asciiSocket.getInputStream()));
@@ -426,8 +428,8 @@ public class CycConnection implements CycConnectionInterface {
                     out.write("(API-QUIT)\n");
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error quitting the api connection " + e.getMessage());
+                    Log.current.printStackTrace(e);
+                    Log.current.println("Error quitting the api connection " + e.getMessage());
                 }
                 try {
                     out.flush();
@@ -440,8 +442,8 @@ public class CycConnection implements CycConnectionInterface {
                     in.close();
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                    Log.current.printStackTrace(e);
+                    Log.current.println("Error finalizing the api connection " + e.getMessage());
                 }
             }
             if (asciiSocket != null) {
@@ -449,8 +451,8 @@ public class CycConnection implements CycConnectionInterface {
                     asciiSocket.close();
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error closing the api connection " + e.getMessage());
+                    Log.current.printStackTrace(e);
+                    Log.current.println("Error closing the api connection " + e.getMessage());
                 }
             }
         }
@@ -475,8 +477,8 @@ public class CycConnection implements CycConnectionInterface {
                     cfaslOutputStream.writeObject(command);
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error quitting the api connection " + e.getMessage());
+                    Log.current.printStackTrace(e);
+                    Log.current.println("Error quitting the api connection " + e.getMessage());
                 }
                 try {
                     cfaslOutputStream.flush();
@@ -489,8 +491,8 @@ public class CycConnection implements CycConnectionInterface {
                     cfaslInputStream.close();
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                    Log.current.printStackTrace(e);
+                    Log.current.println("Error finalizing the api connection " + e.getMessage());
                 }
             }
             if (cfaslSocket != null) {
@@ -498,8 +500,8 @@ public class CycConnection implements CycConnectionInterface {
                     cfaslSocket.close();
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Error closing the api connection " + e.getMessage());
+                    Log.current.printStackTrace(e);
+                    Log.current.println("Error closing the api connection " + e.getMessage());
                 }
             }
         }
@@ -738,11 +740,11 @@ public class CycConnection implements CycConnectionInterface {
     public synchronized void sendBinary (Object message) throws IOException {
         if (trace > API_TRACE_NONE) {
             if (message instanceof CycList)
-                System.out.println(((CycList) message).safeToString() + " --> cyc");
+                Log.current.println(((CycList) message).safeToString() + " --> cyc");
             else if (message instanceof CycFort)
-                System.out.println(((CycFort) message).safeToString() + " --> cyc");
+                Log.current.println(((CycFort) message).safeToString() + " --> cyc");
             else
-                System.out.println(message + " --> cyc");
+                Log.current.println(message + " --> cyc");
         }
         cfaslOutputStream.writeObject(message);
         cfaslOutputStream.flush();
@@ -772,7 +774,7 @@ public class CycConnection implements CycConnectionInterface {
                     responseString = ((CycFort) response).safeToString();
                 else
                     responseString = response.toString();
-                System.out.println("received error = (" + status + ") " + responseString);
+                Log.current.println("received error = (" + status + ") " + responseString);
             }
             return answer;
         }
@@ -791,7 +793,7 @@ public class CycConnection implements CycConnectionInterface {
                 responseString = ((CycFort) response).safeToString();
             else
                 responseString = response.toString();
-            System.out.println("cyc --> (" + answer[0] + ") " + responseString);
+            Log.current.println("cyc --> (" + answer[0] + ") " + responseString);
         }
         return  answer;
     }
@@ -806,7 +808,7 @@ public class CycConnection implements CycConnectionInterface {
         CycApiException {
         CycList apiRequest = (CycList) cfaslInputStream.readObject();
         if (trace > API_TRACE_NONE) {
-            System.out.println("cyc --> (api-request) " + apiRequest.safeToString());
+            Log.current.println("cyc --> (api-request) " + apiRequest.safeToString());
         }
         return apiRequest;
     }
@@ -827,7 +829,7 @@ public class CycConnection implements CycConnectionInterface {
                 messageString = ((CycFort) message).safeToString();
             else
                 messageString = message.toString();
-            System.out.println("(" + CycObjectFactory.t + ") " + messageString + " --> cyc");
+            Log.current.println("(" + CycObjectFactory.t + ") " + messageString + " --> cyc");
         }
         CycList apiResponse = new CycList();
         apiResponse.add(CycObjectFactory.t);
@@ -931,16 +933,16 @@ public class CycConnection implements CycConnectionInterface {
                                                   Timer timeout)
         throws IOException, CycApiException, TimeOutException {
         if (trace > API_TRACE_NONE)
-            System.out.println(message + " --> cyc");
+            Log.current.println(message + " --> cyc");
         out.write(message);
         if (! message.endsWith("\n"))
             out.newLine();
         out.flush();
         if (trace > API_TRACE_NONE)
-            System.out.print("cyc --> ");
+            Log.current.print("cyc --> ");
         Object[] answer = readAsciiCycResponse(timeout);
         if (trace > API_TRACE_NONE)
-            System.out.println();
+            Log.current.println();
         return  answer;
     }
 
@@ -959,7 +961,7 @@ public class CycConnection implements CycConnectionInterface {
                 timeout.checkForTimeOut();
             int ch = in.read();
             if (trace > API_TRACE_NONE)
-                System.out.print((char)ch);
+                Log.current.print((char)ch);
             if (ch == ' ')
                 break;
             responseCodeDigits.append((char)ch);
@@ -989,7 +991,7 @@ public class CycConnection implements CycConnectionInterface {
         // Read the terminating newline.
         ch = in.read();
         if (trace > API_TRACE_NONE)
-            System.out.print((char)ch);
+            Log.current.print((char)ch);
         return  answer;
     }
 
@@ -1004,13 +1006,13 @@ public class CycConnection implements CycConnectionInterface {
         StringBuffer result = new StringBuffer();
         int ch = in.read();
         if (trace > API_TRACE_NONE)
-            System.out.print((char)ch);
+            Log.current.print((char)ch);
         parenLevel++;
         result.append((char)ch);
         while (parenLevel != 0) {
             ch = in.read();
             if (trace > API_TRACE_NONE)
-                System.out.print((char)ch);
+                Log.current.print((char)ch);
             if (ch == '"')
                 if (isQuotedString)
                     isQuotedString = false;
@@ -1036,12 +1038,12 @@ public class CycConnection implements CycConnectionInterface {
         StringBuffer result = new StringBuffer();
         int ch = in.read();
         if (trace > API_TRACE_NONE)
-            System.out.print((char)ch);
+            Log.current.print((char)ch);
         boolean escapedChar = false;
         while (true) {
             ch = in.read();
             if (trace > API_TRACE_NONE)
-                System.out.print((char)ch);
+                Log.current.print((char)ch);
             if ((ch == '"')  && (! escapedChar))
                 return  "\"" + result.toString() + "\"";
             if (escapedChar)
@@ -1063,7 +1065,7 @@ public class CycConnection implements CycConnectionInterface {
             in.mark(1);
             int ch = in.read();
             if (trace > API_TRACE_NONE)
-                System.out.print((char)ch);
+                Log.current.print((char)ch);
             if (ch == '\r')
                 break;
             if (ch == '\n')
@@ -1214,7 +1216,7 @@ public class CycConnection implements CycConnectionInterface {
                 listenerSocket.close();
             }
             catch (IOException e) {
-                e.printStackTrace();
+                Log.current.printStackTrace(e);
                 System.exit(1);
             }
 
@@ -1229,15 +1231,15 @@ public class CycConnection implements CycConnectionInterface {
                 catch (Exception e) {
                     if (taskProcessingEnded) {
                         if (trace > API_TRACE_NONE)
-                            System.out.println("Ending binary mode task processor handler.");
+                            Log.current.println("Ending binary mode task processor handler.");
                         return;
                     }
-                    System.err.println(e.getMessage());
-                    e.printStackTrace();
+                    Log.current.errorPrintln(e.getMessage());
+                    Log.current.printStackTrace(e);
                 }
                 if (trace > API_TRACE_NONE) {
                     String responseString = null;
-                    System.out.println("cyc --> (" + status + ") " +
+                    Log.current.println("cyc --> (" + status + ") " +
                                        taskProcessorResponse.safeToString());
                 }
                 if (taskProcessorResponse.equals(ignoreMessage))

@@ -5,6 +5,7 @@ import  java.math.BigInteger;
 import  java.util.*;
 import  java.lang.reflect.*;
 import  org.opencyc.cycobject.*;
+import  org.opencyc.util.*;
 
 /**
  * A CFASL translating buffered output stream.  All Java-native types which have logical
@@ -114,6 +115,8 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public CfaslOutputStream (OutputStream out) {
         super(out);
+        if (Log.current == null)
+            Log.makeLog("cyc-api.log");
     }
 
     /**
@@ -125,6 +128,8 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public CfaslOutputStream (OutputStream out, int size) {
         super(out, size);
+        if (Log.current == null)
+            Log.makeLog("cyc-api.log");
     }
 
     /**
@@ -135,7 +140,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeBoolean (boolean v) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeBoolean = " + v);
+            Log.current.println("writeBoolean = " + v);
         if (v)
             writeSymbol(CycObjectFactory.t);
         else
@@ -150,7 +155,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeChar (char v) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeChar = " + v);
+            Log.current.println("writeChar = " + v);
         write(CFASL_CHARACTER);
         write(v);
     }
@@ -164,7 +169,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeInt (long v) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeInt = " + v);
+            Log.current.println("writeInt = " + v);
         if (-2147483648L < v && v < 2147483648L)
             writeFixnum((int)v);
         else
@@ -180,13 +185,13 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     protected void writeFixnum (int v) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("* writeFixnum(long " + v + ")");
+            Log.current.println("* writeFixnum(long " + v + ")");
         int numBytes;
         if (v >= 0) {
             if (v < CFASL_IMMEDIATE_FIXNUM_CUTOFF) {
                 // We have a special way of transmitting very small positive integers
                 if (trace == API_TRACE_DETAILED)
-                    System.out.println("Writing Immediate Fixnum: " + v);
+                    Log.current.println("Writing Immediate Fixnum: " + v);
                 write((int)v + CFASL_IMMEDIATE_FIXNUM_OFFSET);
                 numBytes = 0;
             }
@@ -229,7 +234,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         // Transmit the bytes of the Fixnum in little-endian order (LSB first)
         for (int i = 0; i < numBytes; i++) {
             if (trace == API_TRACE_DETAILED)
-                System.out.println("f\t" + ((v >>> (8*i)) & 0xFF));
+                Log.current.println("f\t" + ((v >>> (8*i)) & 0xFF));
             write(v >>> (8*i));
         }
     }
@@ -243,7 +248,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     protected void writeBignum (long v) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("* writeBignum(long " + v + ")");
+            Log.current.println("* writeBignum(long " + v + ")");
         // Determine the sign, transmit the opcode, and take the absolute value
         if (v < 0) {
             write(CFASL_N_BIGNUM);
@@ -264,7 +269,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         // Transmit the bytes of the Bignum in little-endian order (LSB first)
         for (int i = 0; i < numBytes; i++) {
             if (trace == API_TRACE_DETAILED)
-                System.out.println("b\t" + parts[i]);
+                Log.current.println("b\t" + parts[i]);
             // It sure seems dumb to send each byte as a fixnum instead of as
             // a raw byte.  But that is the way the CFASL protocol was written.
             writeFixnum(parts[i]);
@@ -280,7 +285,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeBigInteger (BigInteger v) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeBigInteger = " + v);
+            Log.current.println("writeBigInteger = " + v);
         // If the absolute value of the BigInteger is less than 2^31, it can to be
         // transmitted as a CFASL Fixnum.  Why do we use v.abs().bitLength()
         // instead of just v.bitLength()?  There is exactly 1 case that is
@@ -303,7 +308,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         writeFixnum(parts.length);
         // Transmit the bytes of the Bignum in little-endian order (LSB first)
         for (int i = parts.length - 1; i >= 0; i--) {
-            // System.out.println("b\t" + (parts[i] & 0x00FF));
+            // Log.current.println("b\t" + (parts[i] & 0x00FF));
             // It sure seems dumb to send each byte as a fixnum instead of as
             // a raw byte.  But that is the way the CFASL protocol was written.
             writeFixnum(parts[i] & 0x00FF);
@@ -320,7 +325,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeDouble (double v) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeDouble = " + v);
+            Log.current.println("writeDouble = " + v);
         if (Double.isNaN(v)) {
             throw  new RuntimeException("Tried to send a NaN floating-point");
         }
@@ -331,11 +336,11 @@ public class CfaslOutputStream extends BufferedOutputStream {
             if (v < 0.0) {
                 write(CFASL_N_FLOAT);
                 v = -v;
-                // System.out.print("writeDouble sign=-1");
+                // Log.current.print("writeDouble sign=-1");
             }
             else {
                 write(CFASL_P_FLOAT);
-                // System.out.print("writeDouble sign=+1");
+                // Log.current.print("writeDouble sign=+1");
             }
             int exp = 0;
             double sig = v;
@@ -347,7 +352,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
                 sig = sig*2.0;
                 exp--;
             }
-            // System.out.println(" signif=" + (long)Math.floor(sig) + " exp=" + exp);
+            // Log.current.println(" signif=" + (long)Math.floor(sig) + " exp=" + exp);
             writeInt((long)Math.floor(sig));
             writeInt(exp);
         }
@@ -360,14 +365,11 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeString (String s) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeString = \"" + s + "\"");
+            Log.current.println("writeString = \"" + s + "\"");
         write(CFASL_STRING);
-        writeInt(s.length());
-        write(s.getBytes());
-        /**
-         * Enable when/if UTF-8 is supported by Cyc
-         */
-        //write(s.getBytes("UTF-8"));
+        byte [] bytes = s.getBytes("UTF-8");
+        writeInt(bytes.length);
+        write(bytes);
     }
 
     /**
@@ -377,7 +379,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeByteArray (byte[] bytes) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeByteArray = \"" + bytes + "\"");
+            Log.current.println("writeByteArray = \"" + bytes + "\"");
         write(CFASL_BYTE_VECTOR);
         writeInt(bytes.length);
         write(bytes);
@@ -395,10 +397,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
         }
         if (trace == API_TRACE_DETAILED) {
             if (list instanceof CycList)
-                System.out.println("writeList = " + ((CycList) list).safeToString() +
+                Log.current.println("writeList = " + ((CycList) list).safeToString() +
                                    "\n  of size " + list.size());
             else
-                System.out.println("writeList = " + list +
+                Log.current.println("writeList = " + list +
                                    "\n  of size " + list.size());
         }
         write(CFASL_LIST);
@@ -415,7 +417,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeDottedList (CycList dottedList) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeDottedList = " + dottedList.safeToString() +
+            Log.current.println("writeDottedList = " + dottedList.safeToString() +
                                "\n  proper elements size " + dottedList.size());
         write(CFASL_DOTTED);
         writeInt(dottedList.size());
@@ -427,10 +429,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
             try {
                 // If object dottedElement understands the safeToString method, then use it.
                 Method safeToString = dottedElement.getClass().getMethod("safeToString", null);
-                System.out.println("writeDottedList.cdr = " + safeToString.invoke(dottedElement, null));
+                Log.current.println("writeDottedList.cdr = " + safeToString.invoke(dottedElement, null));
             }
             catch (Exception e) {
-                System.out.println("writeDottedList.cdr = " + dottedElement);
+                Log.current.println("writeDottedList.cdr = " + dottedElement);
             }
         }
         writeObject(dottedElement);
@@ -443,7 +445,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeList (Object[] list) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeList(Array) = " + list + "\n  of size " + list.length);
+            Log.current.println("writeList(Array) = " + list + "\n  of size " + list.length);
         write(CFASL_LIST);
         writeInt(list.length);
         for (int i = 0; i < list.length; i++) {
@@ -458,7 +460,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeGuid (Guid guid) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeGuid = " + guid);
+            Log.current.println("writeGuid = " + guid);
         write(CFASL_GUID);
         writeString(guid.toString());
     }
@@ -470,14 +472,14 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeSymbol (CycSymbol cycSymbol) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeSymbol = " + cycSymbol);
+            Log.current.println("writeSymbol = " + cycSymbol);
         if (cycSymbol.isKeyword()) {
             writeKeyword(cycSymbol);
             return;
         }
         if (cycSymbol.equals(CycObjectFactory.nil)) {
             if (trace == API_TRACE_DETAILED)
-                System.out.println("writing CFASL_NIL");
+                Log.current.println("writing CFASL_NIL");
             write(CFASL_NIL);
         }
         else {
@@ -493,7 +495,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeKeyword (CycSymbol cycSymbol) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeKeyword = " + cycSymbol);
+            Log.current.println("writeKeyword = " + cycSymbol);
         write(CFASL_KEYWORD);
         writeString(cycSymbol.toString().toUpperCase());
     }
@@ -505,7 +507,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeVariable (CycVariable cycVariable) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeVariable = " + cycVariable.safeToString());
+            Log.current.println("writeVariable = " + cycVariable.safeToString());
         //write(CFASL_VARIABLE);
         write(CFASL_SYMBOL);
         writeString(cycVariable.toString().toUpperCase());
@@ -518,7 +520,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeConstant (CycConstant cycConstant) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeConstant = " + cycConstant.safeToString());
+            Log.current.println("writeConstant = " + cycConstant.safeToString());
         write(CFASL_CONSTANT);
         writeInt(cycConstant.getId().intValue());
     }
@@ -530,7 +532,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeNart (CycNart cycNart) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeNart = " + cycNart.safeToString());
+            Log.current.println("writeNart = " + cycNart.safeToString());
         write(CFASL_NART);
         writeInt(cycNart.getId().intValue());
     }
@@ -542,7 +544,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeAssertion (CycAssertion cycAssertion) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeAssertion = " + cycAssertion.safeToString());
+            Log.current.println("writeAssertion = " + cycAssertion.safeToString());
         write(CFASL_ASSERTION);
         writeInt(cycAssertion.getId().intValue());
     }
@@ -557,16 +559,16 @@ public class CfaslOutputStream extends BufferedOutputStream {
         if (trace == API_TRACE_DETAILED) {
             try {
                 if (o == null)
-                    System.out.println("writeObject = null");
+                    Log.current.println("writeObject = null");
                 else {
                     // If object o understands the safeToString method, then use it.
                     Method safeToString = o.getClass().getMethod("safeToString", null);
-                    System.out.println("writeObject = " + safeToString.invoke(o, null) +
+                    Log.current.println("writeObject = " + safeToString.invoke(o, null) +
                                        " (" + o.getClass() + ")");
                 }
             }
             catch (Exception e) {
-                System.out.println("writeObject = " + o + " (" + o.getClass() + ")");
+                Log.current.println("writeObject = " + o + " (" + o.getClass() + ")");
             }
         }
         if (o == null)

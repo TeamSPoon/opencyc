@@ -14,8 +14,10 @@ import java.util.List;
  * as a time-labeled or event-labeled sequence of actitivies or events.  The scheduler
  * processes its current job assignment by evaluating alternative schedule sets and choosing
  * the best set.  Each schedule in the schedule set has an associated predicate expression.
- * The scheduler passes to the executor the first schedule found that has its expression 
- * evaluate true.  In the event of replanning, this process is repeated.
+ * The scheduler passes to the executor the first schedule found that has a predicate expression 
+ * of null.  In the event that the executor sends an exception status message back to the scheduler, 
+ * the scheduler evaluates the non-null predicate expressions in turn and sends to the executor
+ * the schedule whose associated predicate expression evaluates true. 
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -107,6 +107,7 @@ public class CycApi extends DirectActuatorSensor {
      * @param actuateMsg the given input channel message
      */
     protected void doAction (ActuateMsg actuateMsg) {
+      //TODO add CycAccess 
       Object obj = actuateMsg.getObj();
       Object data = actuateMsg.getData();
       System.out.println(data);

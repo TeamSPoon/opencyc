@@ -1,8 +1,11 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
+import org.opencyc.elf.bg.predicate.PredicateExpression;
+
 
 //// External Imports
+import java.util.List;
 
 /** RewardCommand is a type of command which references a preceding choice command by name.  The 
  * executor applies the reward associated with the first predicate expressions that evaluates true.
@@ -37,7 +40,10 @@ public class RewardCommand implements Command {
   //// Constructors
   
   /** Creates a new instance of RewardCommand. */
-  public RewardCommand() {
+  public RewardCommand(String name, String choiceCommandName, List rewardInfos) {
+    this.name = name;
+    this.choiceCommandName = choiceCommandName;
+    this.rewardInfos = rewardInfos;
   }
   
   //// Public Area
@@ -55,8 +61,7 @@ public class RewardCommand implements Command {
   
   /** Creates and returns a copy of this object. */
   public Object clone() {
-
-    return new RewardCommand();
+    return new RewardCommand(name, choiceCommandName, rewardInfos);
   }
   
   public String getName() {
@@ -64,6 +69,46 @@ public class RewardCommand implements Command {
   }
   
   //// Protected Area
+  
+  /** Contains the reward amount for a given eligibility condition. */
+  class RewardInfo {
+    
+    /** Constructs a new RewardInfo object. 
+     *
+     * @param eligibilityExpression the reward eligibility expression that when true indicates that the award amount is
+     * to be awarded to the named choice given the state at the time of the choice
+     * @param amount the reward amount
+     */
+    public RewardInfo(PredicateExpression eligibilityExpression, int amount) {
+      this.eligibilityExpression = eligibilityExpression;
+      this.amount = amount;
+    }
+    
+    /** Gets the reward eligibility expression that when true indicates that the award amount is
+     * to be awarded to the named choice given the state at the time of the choice.
+     *
+     * @return the reward eligibility expression that when true indicates that the award amount is
+     * to be awarded to the named choice given the state at the time of the choice
+     */
+    public PredicateExpression getEligibilityExpression () {
+      return eligibilityExpression;
+    }
+    
+    /** Gets the reward amount.
+     *
+     * @return the reward amount
+     */
+    public int getAmount () {
+      return amount;
+    }
+
+    /** the reward eligibility expression that when true indicates that the award amount is
+     * to be awarded to the named choice given the state at the time of the choice. */
+    protected PredicateExpression eligibilityExpression;
+    
+    /** the reward amount */
+    protected int amount;
+  }
   
   //// Private Area
   
@@ -74,4 +119,9 @@ public class RewardCommand implements Command {
   /** the name of this reward command */
   protected String name;
   
+  /** the name of the choice command to which the reward applies */
+  protected String choiceCommandName;
+  
+  /** the list of eligibility expressions and associated reward amounts */
+  protected List rewardInfos;
 }

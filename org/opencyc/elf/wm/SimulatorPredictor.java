@@ -1,5 +1,7 @@
 package org.opencyc.elf.wm;
 
+import org.opencyc.elf.NodeComponent;
+
 /**
  * Provides the simulator-predictor for the ELF WorldModel.<br>
  * 
@@ -24,7 +26,7 @@ package org.opencyc.elf.wm;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class SimulatorPredictor {
+public class SimulatorPredictor extends NodeComponent {
   /** the world model which owns this simulator-predictor */
   protected WorldModel worldModel;
 

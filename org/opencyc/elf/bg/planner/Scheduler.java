@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
+
 import org.opencyc.elf.bg.Status;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
@@ -34,7 +36,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Scheduler {
+public class Scheduler extends NodeComponent {
   //// Constructors
 
   /**

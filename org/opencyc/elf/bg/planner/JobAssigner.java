@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
+
 import org.opencyc.elf.bg.Status;
 
 import org.opencyc.elf.bg.taskframe.TaskFrame;
@@ -36,7 +38,7 @@ import java.util.ArrayList;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class JobAssigner {
+public class JobAssigner extends NodeComponent {
   //// Constructors
 
   /**

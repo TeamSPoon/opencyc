@@ -1,5 +1,7 @@
 package org.opencyc.elf.sp;
 
+import org.opencyc.elf.NodeComponent;
+
 /**
  * Provides the FeatureExtractor for ELF SensoryPerception.<br>
  * 
@@ -24,7 +26,7 @@ package org.opencyc.elf.sp;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class FeatureExtractor {
+public class FeatureExtractor extends NodeComponent {
   /** the sensory perception instance which owns this feature extractor */
   protected SensoryPerception sensoryPerception;
 

@@ -1,6 +1,7 @@
 <html><head><title>Oracle->OpenCyc Interface Documentation</title></head>
 <body>
-<h1>This is VERY INITIAL version!! Expect procedures and parameters to change.</h1>
+<h1>Oracle->OpenCyc interface</h1>
+<b>This is a VERY INITIAL version!! Expect procedures and parameters to change.</b>
 <p>author: Yeb Havinga, date: June 5 2002<br>
 This document contains information on how to install and use the Oracle->OpenCyc interface.</p>
 <h1>Introduction</h1>
@@ -188,9 +189,6 @@ the package specification:
 <pre>
 bash$ sqlplus cyctest/cyctest @cyc.pks
 </pre>
-On the first time, it tries to drop the non existent type <tt>cyclist_type</tt>. Ignore
-the error that the type doesn't exists. If you're unsure, try the same command again and all
-goes well.<br>
 Now load the package body:
 <pre>
 bash$ sqlplus cyctest/cyctest @cyc.pkb

@@ -7,8 +7,8 @@
 -- 
 -- Please note: Oracle is case insensitive.
 ----------------------------------------------------------------
-DROP TYPE cyclist_type;
-CREATE TYPE cyclist_type AS TABLE OF VARCHAR2(200);
+CREATE OR REPLACE TYPE cyclist_type
+AS TABLE OF VARCHAR2(200);
 /
 ----------------------------------------------------------------
 -- Create the package specification.

@@ -233,15 +233,19 @@ public class CycExtractor {
         Iterator iter = procedureTerms.iterator();
         while (iter.hasNext()) {
             CycConstant procedureTerm = (CycConstant) iter.next();
+            CycFort procedureDefinitionMt =
+                (CycFort) cycAccess.getArg2("umlProcedureDefinition",
+                                            procedureTerm,
+                                            mtTerm);
             String commentString = cycAccess.getComment(procedureTerm);
             String language =
                 (String) cycAccess.getArg2("umlLanguage",
                                            procedureTerm,
-                                           mtTerm).toString();
+                                           procedureDefinitionMt).toString();
             Object body =
                 cycAccess.getArg2("umlBody",
                                   procedureTerm,
-                                  mtTerm);
+                                  procedureDefinitionMt);
             boolean isList =
                 cycAccess.isa(procedureTerm, "UMLProcedure-IsList");
             Procedure procedure =
@@ -251,7 +255,7 @@ public class CycExtractor {
                                                   body,
                                                   isList);
             procedureDictionary.put(procedureTerm, procedure);
-            getArgumentAndResultTerms(procedureTerm);
+            getArgumentAndResultTerms(procedureTerm, procedureDefinitionMt);
             Iterator iter2 = argumentTerms.iterator();
             while (iter2.hasNext()) {
                 CycConstant argumentTerm = (CycConstant) iter2.next();
@@ -321,14 +325,16 @@ public class CycExtractor {
      * Gets the argument and result terms for the given procedure term.
      *
      * @param procedureTerm the given procedure term
+     * @param procedureDefinitionMt the given procedure definition microtheory
      */
-    protected void getArgumentAndResultTerms (CycConstant procedureTerm)
+    protected void getArgumentAndResultTerms (CycConstant procedureTerm,
+                                              CycFort procedureDefinitionMt)
         throws IOException, CycApiException {
         argumentTerms = new CycList();
         CycList candidateArgumentTerms =
             cycAccess.getArg1s(cycAccess.getKnownConstantByName("umlProcedureLink"),
                                procedureTerm,
-                               mtTerm);
+                               procedureDefinitionMt);
         Iterator iter = candidateArgumentTerms.iterator();
         while (iter.hasNext()) {
             CycConstant term = (CycConstant) iter.next();

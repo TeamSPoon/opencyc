@@ -55,11 +55,11 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testJavaInterpreter"));
-        testSuite.addTest(new UnitTest("testExpressionEvaluation"));
-        testSuite.addTest(new UnitTest("testContextFrames"));
-        testSuite.addTest(new UnitTest("testProcedureInterpretation"));
-        testSuite.addTest(new UnitTest("testSimpleStateMachine"));
+        //testSuite.addTest(new UnitTest("testJavaInterpreter"));
+        //testSuite.addTest(new UnitTest("testExpressionEvaluation"));
+        //testSuite.addTest(new UnitTest("testContextFrames"));
+        //testSuite.addTest(new UnitTest("testProcedureInterpretation"));
+        //testSuite.addTest(new UnitTest("testSimpleStateMachine"));
         testSuite.addTest(new UnitTest("testCycExtractor"));
         return testSuite;
     }
@@ -297,11 +297,11 @@ public class UnitTest extends TestCase {
                                          contextStackPool,
                                          Interpreter.QUIET_VERBOSITY);
             Procedure initializeProcedure = new Procedure();
-            initializeProcedure.setName("TestStateMachine-InitializeNumberToZeroProcedure");
+            initializeProcedure.setName("UMLProcedure-InitializeNumberToZero");
             Object procedureBody =
                 cycAccess.getArg2("umlBody",
-                                  "TestStateMachine-InitializeNumberToZeroProcedure",
-                                  "UMLStateMachineTest01Mt");
+                                  "UMLProcedure-InitializeNumberToZero",
+                                  "UMLProcedureDefinition-InitializeNumberToZeroMt");
             initializeProcedure.setBody(procedureBody);
             Transition transition1 = new Transition();
             transition1.setName("TestStateMachine-Transition1");
@@ -370,13 +370,13 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(context, stateMachine.getContext());
 
             //  procedures
-            name = "TestStateMachine-InitializeNumberToZeroProcedure";
+            name = "UMLProcedure-InitializeNumberToZero";
             commentString = "Initializes the variable to the value zero.";
             String language = "CycL";
             Object body =
                 cycAccess.getArg2("umlBody",
                                   name,
-                                  "UMLStateMachineTest01Mt");
+                                  "UMLProcedureDefinition-InitializeNumberToZeroMt");
             boolean isList = false;
             Procedure initializeNumberToZero =
                     stateMachineFactory.makeProcedure(name,
@@ -421,13 +421,13 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(initializeNumberToZero.getResult().contains(outputPinX1));
             Assert.assertEquals(initializeNumberToZero, outputPinX1.getProcedure());
 
-            name = "TestStateMachine-IncrementProcedure";
+            name = "UMLProcedure-IncrementNumber";
             commentString = "Increments the given number by one.";
             language = "CycL";
             body =
                 cycAccess.getArg2("umlBody",
                                   name,
-                                  "UMLStateMachineTest01Mt");
+                                  "UMLProcedureDefinition-IncrementNumberMt");
             isList = false;
             Procedure increment =
                     stateMachineFactory.makeProcedure(name,

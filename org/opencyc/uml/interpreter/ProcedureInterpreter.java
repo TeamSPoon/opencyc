@@ -73,7 +73,12 @@ public class ProcedureInterpreter {
     /**
      * the state machine definition microtheory
      */
-    protected CycFort definitionMt;
+    protected CycFort stateMachineDefinitionMt;
+
+    /**
+     * the procedure definition microtheory
+     */
+    protected CycFort procedureDefinitionMt;
 
     /**
      * the context stack pool
@@ -145,17 +150,17 @@ public class ProcedureInterpreter {
      *
      * @param cycAccess the reference to the parent CycAccess object which provides Cyc api
      * services
-     * @param definitionMt the state machine definition microtheory
+     * @param stateMachineDefinitionMt the state machine definition microtheory
      * @param contextStackPool the context frame pool
      * @param verbosity the output verbosity for this object
      */
     public ProcedureInterpreter(CycAccess cycAccess,
-                                CycFort definitionMt,
+                                CycFort stateMachineDefinitionMt,
                                 ContextStackPool contextStackPool,
                                 int verbosity)
         throws IOException, CycApiException {
         this.cycAccess = cycAccess;
-        this.definitionMt = definitionMt;
+        this.stateMachineDefinitionMt = stateMachineDefinitionMt;
         this.contextStackPool = contextStackPool;
         this.verbosity = verbosity;
         initialize();
@@ -178,7 +183,7 @@ public class ProcedureInterpreter {
         softwareParameterFromSyntaxFn = cycAccess.getKnownConstantByName("SoftwareParameterFromSyntaxFn");
         if (verbosity > 2)
             Log.current.println("Creating ProcedureInterpreter for " +
-                                "\n  definitionMt: " + definitionMt.cyclify());
+                                "\n  stateMachineDefinitionMt: " + stateMachineDefinitionMt.cyclify());
     }
 
 
@@ -213,11 +218,11 @@ public class ProcedureInterpreter {
         query2.add(cycAccess.getKnownConstantByName(procedure.toString()));
         query.add(query2);
         CycList queryResult =
-            cycAccess.askWithVariable(query, cycVariable, definitionMt);
+            cycAccess.askWithVariable(query, cycVariable, stateMachineDefinitionMt);
         procedureBinding = (CycFort) queryResult.first();
         contextFrame =
             contextStackPool.allocateProcedureContextFrame(parentContextFrame,
-                                                           definitionMt,
+                                                           stateMachineDefinitionMt,
                                                            procedureTerm);
         interpretProcedure();
         contextStackPool.deallocateContextFrame(contextFrame);
@@ -243,7 +248,7 @@ public class ProcedureInterpreter {
         CycFort procedureTerm = cycAccess.getKnownConstantByName(procedure.getName());
         contextFrame =
             contextStackPool.allocateProcedureContextFrame(parentContextFrame,
-                                                           definitionMt,
+                                                           stateMachineDefinitionMt,
                                                            procedureTerm);
         procedureBinding =
             (CycFort) cycAccess.getArg1(umlProcedureBinding_Procedure,
@@ -296,9 +301,9 @@ public class ProcedureInterpreter {
         if (verbosity > 2)
             Log.current.println("procedureBinding: " + procedureBinding.cyclify());
         // clear interpretation context
+        cycAccess.unassertMtContentsWithoutTranscript(contextFrame);
         if (verbosity > 2)
             Log.current.println("contextFrame: " + contextFrame.cyclify());
-        cycAccess.unassertMtContentsWithoutTranscript(contextFrame);
         // bind input values
         CycList gatherArgs = new CycList();
         gatherArgs.add(new Integer(2));
@@ -308,7 +313,7 @@ public class ProcedureInterpreter {
                                                   umlProcedureInputBinding,
                                                   1,
                                                   gatherArgs,
-                                                  definitionMt);
+                                                  stateMachineDefinitionMt);
         if (verbosity > 2)
             Log.current.println("Input binding tuples: " + inputBindingTuples.cyclify());
         Iterator iter = inputBindingTuples.iterator();
@@ -339,7 +344,7 @@ public class ProcedureInterpreter {
                                                   umlProcedureOutputBinding,
                                                   1,
                                                   gatherArgs,
-                                                  definitionMt);
+                                                  stateMachineDefinitionMt);
         if (verbosity > 2)
             Log.current.println("Output binding tuples: " + outputBindingTuples.cyclify());
         iter = outputBindingTuples.iterator();

@@ -1,7 +1,7 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
-import org.opencyc.elf.ELFException;
+import org.opencyc.elf.BehaviorEngineException;
 
 import org.opencyc.elf.wm.state.State;
 
@@ -129,16 +129,16 @@ public class Action implements Command {
    */
   public void setParameterValues (List parameterValues) {
     if (parameterValues.size() != getParameterTypes().size())
-      throw new ELFException("Number of parameter values (" + parameterValues.size() +
-                             ") does not match the number of parameter types (" +
-                             getParameterTypes().size() + ")");
+      throw new BehaviorEngineException("Number of parameter values (" + parameterValues.size() +
+                                        ") does not match the number of parameter types (" +
+                                        getParameterTypes().size() + ")");
     for (int i = 0; i < parameterValues.size(); i++) {
       Object parameterValue = parameterValues.get(i);
       Class parameterType = (Class) getParameterTypes().get(i);
       if (! (parameterType.isInstance(parameterValue))) {
-        throw new ELFException("parameter values (" + parameterValue +
-                               ") is not an instance of parameter type (" +
-                               parameterType + ")");
+        throw new BehaviorEngineException("parameter values (" + parameterValue +
+                                          ") is not an instance of parameter type (" +
+                                          parameterType + ")");
       }
     }
     this.parameterValues = parameterValues;

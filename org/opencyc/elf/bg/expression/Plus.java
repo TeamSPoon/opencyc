@@ -41,6 +41,8 @@ public class Plus extends Operator {
     super();
   }
   
+  //// Public Area
+  
   /** Evaluates the given arguments within the given state and returns the sum.
    *
    * @param arguments the given arguments to evaluate
@@ -74,8 +76,6 @@ public class Plus extends Operator {
     stringBuffer.append(")");
     return stringBuffer.toString();
   }
-  
-  //// Public Area
   
   //// Protected Area
   

@@ -11,7 +11,8 @@ import org.opencyc.elf.bg.taskframe.TaskFrame;
 import java.util.ArrayList;
 
 /**
- * Provides the World Model for the Elementary Loop Functioning (ELF).
+ * Provides the World Model for the Elementary Loop Functioning (ELF).  There is one instance of
+ * world model for each node.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

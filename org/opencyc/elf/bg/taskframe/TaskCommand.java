@@ -186,6 +186,10 @@ public class TaskCommand {
 
   //// Protected Area
   
+  //// Private Area
+  
+  //// Internal Rep
+  
   /**
    * the action command plus modifiers
    */
@@ -216,6 +220,4 @@ public class TaskCommand {
    */
   protected GoalTime nextGoalTime;
   
-  //// Private Area
-  //// Internal Rep
 }

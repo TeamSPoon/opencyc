@@ -261,12 +261,6 @@ public class ImportSonatDaml {
         // 32
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/09/milservices/us",
                                          "DamlSonatUSMilitaryServicesInstancesMt"));
-        // 33
-        damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory.daml",
-                                         "OpenDirectoryStructureMt"));
-        // 34
-        damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory-structure.daml",
-                                         "OpenDirectoryStructureMt"));
     }
 
     /**
@@ -289,19 +283,6 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.w3.org/2001/08/rdfweb", "rdfweb");
         ontologyNicknames.put("http://purl.org/dc/elements/1.1", "dublincore");
         ontologyNicknames.put("http://purl.org/dc/elements/1.0/", "dublincore");
-
-        ontologyNicknames.put("http://dmoz.org/rdf", "dmoz");
-        ontologyNicknames.put("http://dmoz.org/rdf/structure.example.txt", "dmoz");
-
-        ontologyNicknames.put("file:///H:/OpenCyc/open-directory-structure.daml", "dmoz");
-
-        ontologyNicknames.put("file:/H:/OpenCyc/open-directory-structure.daml", "dmoz");
-        ontologyNicknames.put("file:/H:/OpenCyc/open-directory-structure", "dmoz");
-        ontologyNicknames.put("http://opencyc.sourceforge.net/open-directory", "dmoz");
-
-        ontologyNicknames.put("file:///H:/OpenCyc/open-directory.daml", "dmoz");
-        ontologyNicknames.put("file:/H:/OpenCyc", "dmoz");
-        ontologyNicknames.put("file:/H:/OpenCyc/open-directory.daml", "dmoz");
 
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2", "drc-dc");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2", "ves");

@@ -32,6 +32,8 @@ import org.opencyc.elf.wm.Predictor;
 import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
+import java.util.ArrayList;
+
 import java.util.logging.Logger;
 
 import junit.framework.*;
@@ -182,7 +184,11 @@ public class UnitTest extends TestCase {
     HypothesisFormer hypothesisFormer = sensoryPerception.getHypothesisFormer();
     Assert.assertEquals(node, hypothesisFormer.getNode());
     
-    
+    try {
+      Thread.sleep(2000);
+    }
+    catch (InterruptedException e) {
+    }
     System.out.println("*** testELFFactory OK ***");
   }
 
@@ -190,11 +196,6 @@ public class UnitTest extends TestCase {
    * Tests BehaviorGeneration object behavior.
    */
   public void testBehaviorGeneration() {
-    try {
-      Thread.sleep(4000);
-    }
-    catch (InterruptedException e) {
-    }
     System.out.println("\n*** testBehaviorGeneration ***");
     
     logger.info("Testing behavior generation");
@@ -203,10 +204,33 @@ public class UnitTest extends TestCase {
     
     ActionFactory actionFactory = new ActionFactory();
     Action converseWithUserAction = actionFactory.makeConverseWithUser();
+    ArrayList parameterValues = new ArrayList();
+    parameterValues.add(">");
+    converseWithUserAction.setParameterValues(parameterValues);
+    
     Assert.assertEquals("converse with user", converseWithUserAction.getName());
     Assert.assertEquals("prompt", converseWithUserAction.getParameterNames().get(0));
+    Assert.assertEquals("[Action: converse with user( prompt: \">\")]", 
+                        converseWithUserAction.toString());
     
     //jobAssigner generates consolePromptedInput action for the ConsoleActuator
+    TaskCommand taskCommand = new TaskCommand();
+    taskCommand.setActionCommand(converseWithUserAction);
+    DoTaskMsg doTaskMsg = new DoTaskMsg();
+    doTaskMsg.setTaskCommand(taskCommand);
+    Assert.assertEquals("[TaskCommand: [Action: converse with user( prompt: \">\")]]", 
+                        taskCommand.toString());
+    try {
+      node.getBehaviorGeneration().getJobAssigner().getChannel().put(doTaskMsg);
+    }
+    catch (InterruptedException e) {
+      Assert.fail(e.getMessage());
+    }
+    try {
+      Thread.sleep(2000);
+    }
+    catch (InterruptedException e) {
+    }
     
     
     

@@ -5,7 +5,7 @@ import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.planner.Resource;
 
-import org.opencyc.elf.message.ActuateMsg;
+import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.message.ObservedInputMsg;
 import org.opencyc.elf.message.ReleaseMsg;
 
@@ -95,7 +95,7 @@ public class CycApi extends DirectActuatorSensor {
     public void run () {
       try {
         while (true) { 
-          doAction((ActuateMsg) actuatorSensorChannel.take()); 
+          doAction((DoTaskMsg) actuatorSensorChannel.take()); 
         }
       }
       catch (InterruptedException ex) {}
@@ -104,14 +104,12 @@ public class CycApi extends DirectActuatorSensor {
     /** Outputs the data that is contained in the actuator message to the connected
      * Cyc server as an API function request.
      *
-     * @param actuateMsg the given input channel message
+     * @param doTaskMsg the given input channel message
      */
-    protected void doAction (ActuateMsg actuateMsg) {
+    protected void doAction (DoTaskMsg doTaskMsg) {
       //TODO add CycAccess 
-      Object obj = actuateMsg.getObj();
-      Object data = actuateMsg.getData();
-      System.out.println(data);
-      System.out.flush();
+      Object obj = null;
+      Object data = null;
       ObservedInputMsg observedInputMsg = 
         new ObservedInputMsg(sender, new Sensation(Sensation.CYC_API_RESPONSE, obj, data));
       sendMsgToRecipient(sensoryPerceptionChannel, observedInputMsg);

@@ -2,16 +2,14 @@ package org.opencyc.elf.a;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
-
 import org.opencyc.elf.bg.planner.Resource;
-
-import org.opencyc.elf.message.ActuateMsg;
-
+import org.opencyc.elf.bg.taskframe.Command;
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
 import java.util.List;
-
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
@@ -62,6 +60,7 @@ public class ConsoleOutput extends DirectActuator {
    * starts the message consumer.
    */
   public void initialize() {
+    getLogger().info("Initializing ConsoleOutput " + name);
     consumer = new Consumer(actuatorChannel, this);
     executor = new ThreadedExecutor();
     try {
@@ -97,9 +96,10 @@ public class ConsoleOutput extends DirectActuator {
 
     /** Reads messages from the input queue and processes them. */
     public void run () {
+      getLogger().info("Waiting for commanded actions");
       try {
         while (true) { 
-          doAction((ActuateMsg) actuatorChannel.take()); 
+          doAction((DoTaskMsg) actuatorChannel.take()); 
         }
       }
       catch (InterruptedException ex) {}
@@ -107,13 +107,16 @@ public class ConsoleOutput extends DirectActuator {
 
     /** Outputs the data that is contained in the actuator message to the console.
      *
-     * @param actuateMsg the given input channel message
+     * @param doTaskMsg the message from the input channel
      */
-    protected void doAction (ActuateMsg actuateMsg) {
-      Object obj = actuateMsg.getObj();
-      Object data = actuateMsg.getData();
-      System.out.println(data);
-      System.out.flush();
+    protected void doAction (DoTaskMsg doTaskMsg) {
+      nodeComponent.getLogger().info("Received " + doTaskMsg);
+      TaskCommand taskCommand = doTaskMsg.getTaskCommand();
+      Command command = taskCommand.getCommand();
+      getLogger().info("Command: " + command.toString());
+      //TODO
+      //System.out.println(data);
+      //System.out.flush();
     }
   
   }

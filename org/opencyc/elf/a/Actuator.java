@@ -1,12 +1,13 @@
 package org.opencyc.elf.a;
 
 //// Internal Imports
+import org.opencyc.elf.Node;
 import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.logging.Logger;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /** Actuator defines the actuator interface for the Elementary Loop Functioning (ELF).
@@ -53,4 +54,21 @@ public interface Actuator {
    */
   public Puttable getChannel();
   
+  /** Gets the ELF Node that contains this object.
+   * 
+   * @return the ELF Node that contains this object
+   */
+  public Node getNode();
+
+  /** Sets the ELF Node that contains this object.
+   * 
+   * @param node the ELF Node that contains this object
+   */
+  public void setNode(Node node);
+  
+  /** Gets the logger for this node.
+   *
+   * @return the logger for this node
+   */
+  public Logger getLogger ();
 }

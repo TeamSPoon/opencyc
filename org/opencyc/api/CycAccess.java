@@ -2420,7 +2420,10 @@ public class CycAccess {
                                    String mtName) throws IOException, CycApiException {
         CycList command = new CycList();
         command.add(CycObjectFactory.makeCycSymbol("convert-netowl-sexpr-to-cycl-assertions"));
-        command.add(mucExpression.cycListApiValue());
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycObjectFactory.quote);
+        command1.add(mucExpression.cycListApiValue());
         command.add(mtName);
         //this.traceOn();
         return this.converseInt(command);

@@ -42,11 +42,10 @@ public class NotNull extends Predicate {
   //// Public Area
     
   /** 
-   * Evaluates the given arguments and returns the result.  The semantics
-   * of the predicate are defined by each implementing class.
+   * Evaluates the given arguments and returns true if the first is not null.
    *
    * @param arguments the given arguments to evaluate
-   *
+   * @return true if the first argument is not null
    */
    public boolean evaluate (List arguments) {
     return arguments.get(0)!= null;

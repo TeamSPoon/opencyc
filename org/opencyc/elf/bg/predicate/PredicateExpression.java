@@ -82,19 +82,28 @@ public class PredicateExpression {
   
   //// Public Area
   
-  /**
-   * Gets the goal predicate
+  /** 
+   * Evaluates the predicate and arguments returning the result.
    *
-   * @return the goal predicate
+   * @return the result of evaluating the predicate and arguments
+   */
+  public boolean evaluate() {
+    return predicate.evaluate(arguments);
+  }
+  
+  /**
+   * Gets the predicate
+   *
+   * @return the predicate
    */
   public Predicate getPredicate () {
     return predicate;
   }
 
   /**
-   * Sets the goal predicate
+   * Sets the predicate
    *
-   * @param predicate the goal predicate
+   * @param predicate the predicate
    */
   public void setPredicate (Predicate predicate) {
     this.predicate = predicate;
@@ -144,7 +153,7 @@ public class PredicateExpression {
  
   //// Protected Area
   
-  /** the goal predicate */
+  /** the predicate */
   protected Predicate predicate;
 
   /** the argument list */

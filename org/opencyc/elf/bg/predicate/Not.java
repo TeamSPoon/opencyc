@@ -3,15 +3,16 @@ package org.opencyc.elf.bg.predicate;
 //// Internal Imports
 
 //// External Imports
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * Predicatedefines the behavior for objects that evaluate
- * arguments and return a boolean result.  The arguments can be objects or
- * state variables.
- * 
+ * Not is a predicate of arity one that returns true if its argument predicate 
+ * expressions evaluates to true, otherwise it returns false.
+ *
  * @version $Id$
- * @author Stephen L. Reed  
+ * @author  reed
+ *
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
@@ -30,44 +31,42 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class Predicate {
+public class Not extends Predicate {
   
   //// Constructors
-
-  /**
-   * Constructs a new Predicate object.
-   */
-  public Predicate() {
-    predicate = this;
+  
+  /** Creates a new instance of Not */
+  public Not() {
+    super();
   }
   
   //// Public Area
-    
-  /**
-   * Gets the singleton instance of predicate.
+  
+  /** 
+   * Evaluates the given argument predicate expression and returns the result.
    *
-   * @return the singleton instance of predicate
+   * @param arguments the given predicate expressions to evaluate
+   * @return the result of evaluating the given predicate expressions
    */
-  public static Predicate getInstance () {
-    return predicate;
+  public boolean evaluate(List arguments) {
+    PredicateExpression predicateExpression = (PredicateExpression) arguments.get(0);
+    return ! predicateExpression.evaluate();
   }
   
-  /**
-   * Evaluates the given arguments and returns the result.  The semantics
-   * of the predicate are defined by each implementing class.
-   *
-   * @param arguments the given arguments to evaluate
-   */
-  public abstract boolean evaluate (List arguments);
-  
-  /**
+  /** 
    * Returns a string representation of this predicate given
    * the arguments.
    *
    * @param arguments the given arguments to evaluate
    * @return a string representation of this object
    */
-  public abstract String toString(List arguments);
+  public String toString(List arguments) {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("(or ");
+    stringBuffer.append(arguments.get(0).toString());
+    stringBuffer.append(")");
+    return stringBuffer.toString();
+  }
   
  /**
    * Returns true if the given object equals this object.
@@ -75,18 +74,13 @@ public abstract class Predicate {
    * @param obj the given object
    * @return true if the given object equals this object
    */
-  public abstract boolean equals(Object obj);
-  
+  public boolean equals(Object obj) {
+    return obj instanceof Not;
+  }
   //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
-
-  /**
-   * the singleton instance of predicate
-   */
-  protected static Predicate predicate;
   
-  //// Main
 }

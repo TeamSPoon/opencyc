@@ -1,5 +1,7 @@
 package org.opencyc.uml.interpreter;
 
+import java.util.*;
+import javax.swing.tree.*;
 import org.opencyc.uml.statemachine.*;
 
 /**
@@ -98,9 +100,33 @@ public class StateInterpreter extends Thread {
      * Exits the active substates of the interpreted composite state.
      */
     protected void exitActiveSubstates() {
-        //interpreter
+        DefaultMutableTreeNode treeNode = interpreter.getActiveSubstates(state);
+        ArrayList activeSubstateList = new ArrayList();
+        Stack treeNodeStack = new Stack();
+        treeNodeStack.push(treeNode);
+        while (! treeNodeStack.isEmpty()) {
+            treeNode = (DefaultMutableTreeNode) treeNodeStack.pop();
+            activeSubstateList.add(treeNode.getUserObject());
+            Enumeration children = treeNode.children();
+            while (children.hasMoreElements())
+                treeNodeStack.push(children.nextElement());
+        }
+        for (int i = activeSubstateList.size() - 1; i > -1; i--)
+            exitActiveSubstate((State) activeSubstateList.get(i));
     }
 
+    /**
+     * Exits the active substate of the given state.
+     *
+     * @param state the given state to exit
+     */
+    protected void exitActiveSubstate (State state) {
+        DoActivity doActivityThread = state.getDoActivityThread();
+        doActivityThread.terminate();
+        if (state.getExit() != null)
+            new ActionInterpreter(state.getExit());
+
+    }
 
     /**
      * Gets the interpreted active state

@@ -74,7 +74,7 @@ public class State extends StateVertex {
     /**
      * the do activity thread for this state
      */
-    protected Thread doActivityThread;
+    protected DoActivity doActivityThread;
 
     /**
      * Constructs a new State object.
@@ -201,7 +201,7 @@ public class State extends StateVertex {
      *
      * @return the do activity thread for this state
      */
-    public Thread getDoActivityThread () {
+    public DoActivity getDoActivityThread () {
         return doActivityThread;
     }
 
@@ -210,7 +210,7 @@ public class State extends StateVertex {
      *
      * @param doActivityThread the do activity thread for this state
      */
-    public void setDoActivityThread (Thread doActivityThread) {
+    public void setDoActivityThread (DoActivity doActivityThread) {
         this.doActivityThread = doActivityThread;
     }
 

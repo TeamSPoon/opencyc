@@ -70,6 +70,12 @@ public class Interpreter {
     protected DefaultTreeModel stateConfiguration;
 
     /**
+     * a dictionary associating active states with tree nodes in the active
+     * state configuration
+     */
+    protected HashMap activeStates;
+
+    /**
      * The list of selected transitions for firing.  Each of these has an
      * active source state, a matching trigger event and a guard expression
      * which evaluates true.
@@ -134,25 +140,17 @@ public class Interpreter {
      */
     protected void eventProcessor () {
         selectedTransitions = new ArrayList();
-        Stack stateNodeStack = new Stack();
-        stateNodeStack.push(stateConfiguration.getRoot());
-        while (! stateNodeStack.empty()) {
-            DefaultMutableTreeNode stateNode = (DefaultMutableTreeNode) stateNodeStack.pop();
-            Enumeration containedStates = stateNode.children();
-            while (containedStates.hasMoreElements()) {
-                DefaultMutableTreeNode containedState =
-                        (DefaultMutableTreeNode) containedStates.nextElement();
-                stateNodeStack.push(containedState);
-                State state = (State) containedState.getUserObject();
-                Iterator transitions = state.getOutgoing().listIterator();
-                while (transitions.hasNext()) {
-                    Transition transition = (Transition) transitions.next();
-                    if (transition.getTrigger().equals(currentEvent)) {
-                        BooleanExpression guardExpression = transition.getGuard().getexpression();
-                        if ((guardExpression == null) ||
-                            expressionEvaluator.evaluateBoolean(guardExpression)) {
-                            selectedTransitions.add(transition);
-                        }
+        Iterator activeStatesIter = activeStates.keySet().iterator();
+        while (activeStatesIter.hasNext()) {
+            State state = (State) activeStatesIter.next();
+            Iterator transitions = state.getOutgoing().listIterator();
+            while (transitions.hasNext()) {
+                Transition transition = (Transition) transitions.next();
+                if (transition.getTrigger().equals(currentEvent)) {
+                    BooleanExpression guardExpression = transition.getGuard().getexpression();
+                    if ((guardExpression == null) ||
+                        expressionEvaluator.evaluateBoolean(guardExpression)) {
+                        selectedTransitions.add(transition);
                     }
                 }
             }
@@ -246,7 +244,14 @@ public class Interpreter {
      * @return the sub tree of active states rooted at the given active state
      */
     public DefaultMutableTreeNode getActiveSubstates (State state) {
-        //DefaultMutableTreeNode substateTreeNode
+        Iterator activeStatesIter = activeStates.keySet().iterator();
+        while (activeStatesIter.hasNext()) {
+            State activeState = (State) activeStatesIter.next();
+            if (state.equals(activeState)) {
+                return (DefaultMutableTreeNode) activeStates.get(activeState);
+            }
+        }
+        return null;
     }
 
 

@@ -1,9 +1,9 @@
 package org.opencyc.uml.interpreter;
 
-import org.opencyc.uml.commonbehavior.*;
+import org.opencyc.uml.statemachine.*;
 
 /**
- * Interprets an action in the UML State_Machines package.
+ * Provides do-activity behavior for a state in the UML State_Machines package.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -27,17 +27,31 @@ import org.opencyc.uml.commonbehavior.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ActionInterpreter {
+public class DoActivity extends Thread {
 
     /**
-     * the action to be interpreted
+     * the state whose do-activity is performed
      */
-    Action action;
+    protected State state;
 
     /**
-     * Constructs a new ActionInterpreter object.
+     * Constructs a new DoActivity object
      */
-    public ActionInterpreter(Action action) {
-        this.action = action;
+    public DoActivity(State state) {
+        this.state = state;
     }
+
+    /**
+     * Performs the do-activity of the associated state.
+     */
+    public void run () {
+    }
+
+    /**
+     * Terminates this do-activity.
+     */
+    public void terminate () {
+    }
+
+
 }

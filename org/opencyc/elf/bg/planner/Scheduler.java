@@ -230,7 +230,9 @@ public class Scheduler extends BufferedNodeComponent {
       job = scheduleJobMsg.getJob();
       Command command = job.getCommand();
       List scheduleSets = ScheduleLibrary.getInstance().getScheduleSets(command.getName());
+      getLogger().info("schedule sets for " + command.getName() + " are " + scheduleSets);
       List schedules = determineBestScheduleSet(scheduleSets);
+      getLogger().info("schedules " + schedules);
       Schedule schedule = determineEligibleSchedule(schedules);
       if (executor == null)
         createExecutor(schedule);

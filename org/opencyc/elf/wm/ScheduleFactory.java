@@ -78,7 +78,9 @@ public class ScheduleFactory {
                                      plannedTimeMilliseconds, 
                                      DirectActuator.CONSOLE_OUTPUT, 
                                      DirectSensor.CONSOLE_INPUT);
-    ScheduleLibrary.getInstance().addSchedule(Action.CONSOLE_PROMPTED_INPUT, schedule);
+    List scheduleSet = new ArrayList();
+    scheduleSet.add(schedule);
+    ScheduleLibrary.getInstance().addScheduleSet(Action.CONSOLE_PROMPTED_INPUT, scheduleSet);
   }
     
   //// Protected Area

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 
-/** ScheduleLibrary provides a store in which schedules sets can be retrieved
+/** ScheduleLibrary provides a store in which schedule sets can be retrieved
  * by name.  It is initially populated by the schedule factory.  There is a singleton 
  * instance of schedule libary.
  *
@@ -51,28 +51,28 @@ public class ScheduleLibrary {
     return scheduleLibrary;
   }
   
-  /** Gets the schedules associated with the given job name.
+  /** Gets the schedule sets associated with the given job name.
    *
    * @param jobName the given job name
-   * @return the schedules associated with the given job name
+   * @return the schedule sets associated with the given job name
    */
-  public List getSchedules (String jobName) {
+  public List getScheduleSets (String jobName) {
     return (List) scheduleDictionary.get(jobName);
   }
 
   //// Protected Area
   
-  /** Adds the given schedule to the set of schedules associated with the given job name.
+  /** Adds the given schedule set to alternative schedule sets associated with the given job name.
    *
    * @param jobName the given action name
-   * @param action the given action
+   * @param scheduleSet the given action
    */
-  protected void addSchedule (String jobName, Schedule schedule) {
-    List schedules = (List) scheduleDictionary.get(schedule);
-    if (schedules == null)
-      schedules = new ArrayList();
-    schedules.add(schedule);
-    scheduleDictionary.put(jobName, schedules);
+  protected void addScheduleSet (String jobName, List scheduleSet) {
+    List scheduleSets = (List) scheduleDictionary.get(jobName);
+    if (scheduleSets == null)
+      scheduleSets = new ArrayList();
+    scheduleSets.add(scheduleSet);
+    scheduleDictionary.put(jobName, scheduleSets);
   }
   
   //// Private Area

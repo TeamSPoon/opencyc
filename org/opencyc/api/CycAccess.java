@@ -989,6 +989,12 @@ public class CycAccess {
 
     /**
      * Returns true if CycConstant BINARYPREDICATE relates CycFort ARG1 and CycFort ARG2.
+     *
+     * @param binaryPredicate the predicate
+     * @param arg1 the first argument related by the predicate
+     * @param arg2 the second argument related by the predicate
+     * @return true if CycConstant BINARYPREDICATE relates CycFort ARG1 and CycFort ARG2
+     * otherwise false
      */
     public boolean predicateRelates (CycConstant binaryPredicate,
                                      CycFort arg1,
@@ -999,6 +1005,40 @@ public class CycAccess {
             binaryPredicate.stringApiValue() + " " +
             arg1.stringApiValue() + " " +
             arg2.stringApiValue() + ")";
+        response = converse(command);
+        if (response[0].equals(Boolean.TRUE)) {
+            if (response[1] == null)
+                return false;
+            else if (response[1].toString().equals("T"))
+                return true;
+            else
+                return false;
+        }
+        else
+            throw new CycApiException(response[1].toString());
+    }
+
+    /**
+     * Returns true if CycConstant BINARYPREDICATE relates CycFort ARG1 and CycFort ARG2.
+     *
+     * @param binaryPredicate the predicate
+     * @param arg1 the first argument related by the predicate
+     * @param arg2 the second argument related by the predicate
+     * @param mt the relevant mt
+     * @return true if CycConstant BINARYPREDICATE relates CycFort ARG1 and CycFort ARG2
+     * otherwise false
+     */
+    public boolean predicateRelates (CycConstant binaryPredicate,
+                                     CycFort arg1,
+                                     CycFort arg2,
+                                     CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        Object [] response = {null, null};
+        String command = "(pred-u-v-holds " +
+            binaryPredicate.stringApiValue() + " " +
+            arg1.stringApiValue() + " " +
+            arg2.stringApiValue() + " " +
+            mt.stringApiValue() + ")";
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
             if (response[1] == null)
@@ -1633,6 +1673,11 @@ public class CycAccess {
 
     /**
      * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are asserted coextensional.
+     *
+     * @param collection1 the first collection
+     * @param collection2 the second collection
+     * @return true if CycFort COLLECION1 and CycFort COLLECTION2 are asserted coextensional
+     * otherwise false
      */
     public boolean areAssertedCoextensional (CycFort collection1, CycFort collection2)
         throws IOException, UnknownHostException, CycApiException {
@@ -1646,11 +1691,54 @@ public class CycAccess {
     }
 
     /**
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are asserted coextensional.
+     *
+     * @param collection1 the first collection
+     * @param collection2 the second collection
+     * @param mt the relevant mt
+     * @return true if CycFort COLLECION1 and CycFort COLLECTION2 are asserted coextensional
+     * otherwise false
+     */
+    public boolean areAssertedCoextensional (CycFort collection1,
+                                             CycFort collection2,
+                                             CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycConstant coExtensional = this.getKnownConstantByGuid("bd59083a-9c29-11b1-9dad-c379636f7270");
+        if (predicateRelates(coExtensional, collection1, collection2, mt))
+            return true;
+        else if (predicateRelates(coExtensional, collection2, collection1, mt))
+            return true;
+        else
+            return false;
+    }
+
+    /**
      * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 intersect with regard to all-specs.
+     *
+     * @param collection1 the first collection
+     * @param collection2 the second collection
+     * @return true if CycFort COLLECION1 and CycFort COLLECTION2 intersect with regard to all-specs
+     * otherwise false
      */
     public boolean areIntersecting (CycFort collection1, CycFort collection2)
         throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(with-all-mts (collections-intersect? " + collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
+        return converseBoolean("(with-all-mts (collections-intersect? " + collection1.stringApiValue() + " " +
+                               collection2.stringApiValue() + "))");
+    }
+
+    /**
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 intersect with regard to all-specs.
+     *
+     * @param collection1 the first collection
+     * @param collection2 the second collection
+     * @param mt the relevant mt
+     * @return true if CycFort COLLECION1 and CycFort COLLECTION2 intersect with regard to all-specs
+     * otherwise false
+     */
+    public boolean areIntersecting (CycFort collection1, CycFort collection2, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(collections-intersect? " + collection1.stringApiValue() + " " +
+                               collection2.stringApiValue() + ")");
     }
 
     /**

@@ -71,7 +71,7 @@ public class Action {
    * @return the parameter names for this action
    */
   public ArrayList getParameterNames () {
-    return (ArrayList) state.getStateValue(State.PARAMETER_TYPES);
+    return (ArrayList) state.getStateValue(State.PARAMETER_NAMES);
   }
    
   /**

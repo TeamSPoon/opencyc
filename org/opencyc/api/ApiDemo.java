@@ -55,7 +55,7 @@ public class ApiDemo {
      * Interacts with the user to perform specified demos.
      */
     protected void demoInteraction() {
-        Log.current.println("Ready.  Enter demo number 1 ... 17, or exit");
+        Log.current.println("Ready.  Enter demo number 1 ... 14, or exit");
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         try {
             while (true) {
@@ -114,15 +114,6 @@ public class ApiDemo {
                     case 14:
                         demo14();
                         break;
-                    case 15:
-                        demo15();
-                        break;
-                    case 16:
-                        demo16();
-                        break;
-                    case 17:
-                        demo17();
-                        break;
                     default:
                         Log.current.println("Not a valid demo number");
                 }
@@ -147,7 +138,7 @@ public class ApiDemo {
      */
     protected void demo1 () throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Demonstrating getKnownConstantByName api function.\n");
-        CycFort snowSkiing = cycAccess.getKnownConstantByName("SnowSkiing");
+        CycFort snowSkiing = cycAccess.getKnownConstantByName("HoldingAnObject");
         Log.current.println("\nThe obtained constant is " + snowSkiing.cyclify());
     }
 
@@ -174,7 +165,7 @@ public class ApiDemo {
      */
     protected void demo4 () throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Demonstrating getIsas api function.\n");
-        CycList isas = cycAccess.getIsas(cycAccess.getKnownConstantByName("BillClinton"));
+        CycList isas = cycAccess.getIsas(cycAccess.getKnownConstantByName("Brazil"));
         Log.current.println("\nThe obtained isas are:\n" + isas.cyclify());
     }
 
@@ -256,23 +247,13 @@ public class ApiDemo {
     }
 
     /**
-     * Demonstrates usage of CycNart and getInstanceSiblings api function.
-     */
-    protected void demo12 () throws IOException, UnknownHostException, CycApiException {
-        Log.current.println("Demonstrating CycNart and getInstanceSiblings api function.\n");
-        CycNart usGovernment = new CycNart(cycAccess.getKnownConstantByName("GovernmentFn"),
-                                           cycAccess.getKnownConstantByName("UnitedStatesOfAmerica"));
-        CycList siblings = cycAccess.getInstanceSiblings(usGovernment);
-        Log.current.println("\nThe obtained instance sibling terms of " + usGovernment + "\nare:\n" + siblings.cyclify());
-    }
-
-    /**
      * Demonstrates usage of isQueryTrue api function.
      */
-    protected void demo13 () throws IOException, UnknownHostException, CycApiException {
+    protected void demo12 () throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Demonstrating isQueryTrue api function.\n");
-        CycList gaf = cycAccess.makeCycList("(#$likesAsFriend #$BillClinton #$AlbertGore)");
-        CycFort mt = cycAccess.getKnownConstantByName("PeopleDataMt");
+        CycList gaf =
+            cycAccess.makeCycList("(#$relationAllInstance #$languageSpoken #$UnitedStatesPerson #$EnglishLanguage)");
+        CycFort mt = cycAccess.getKnownConstantByName("PeopleMt");
         boolean isQueryTrue = cycAccess.isQueryTrue(gaf, mt);
         if (isQueryTrue)
             Log.current.println("\nThe assertion\n" + gaf + "\nis true in the " + mt.cyclify());
@@ -283,49 +264,21 @@ public class ApiDemo {
     /**
      * Demonstrates usage of the assertGaf api function.
      */
-    protected void demo14 () throws IOException, UnknownHostException, CycApiException {
+    protected void demo13 () throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Demonstrating usage of the assertGaf api function.\n");
-        CycFort mt = cycAccess.getKnownConstantByName("PeopleDataMt");
-        CycList gaf = cycAccess.makeCycList("(#$likesAsFriend #$BillClinton #$AlbertGore)");
+        CycFort mt = cycAccess.getKnownConstantByName("PeopleMt");
+        CycList gaf = cycAccess.makeCycList("(#$relationAllInstance #$languageSpoken #$UnitedStatesPerson #$LivingLanguage)");
         cycAccess.assertGaf(gaf, mt);
     }
 
     /**
      * Demonstrates usage of the unassertGaf api function.
      */
-    protected void demo15 () throws IOException, UnknownHostException, CycApiException {
+    protected void demo14 () throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Demonstrating usage of the unassertGaf api function.\n");
-        CycFort mt = cycAccess.getKnownConstantByName("PeopleDataMt");
-        CycList gaf = cycAccess.makeCycList("(#$likesAsFriend #$BillClinton #$AlbertGore)");
+        CycFort mt = cycAccess.getKnownConstantByName("PeopleMt");
+        CycList gaf = cycAccess.makeCycList("(#$relationAllInstance #$languageSpoken #$UnitedStatesPerson #$LivingLanguage)");
         cycAccess.unassertGaf(gaf, mt);
-    }
-
-    /**
-     * Demonstrates usage of the rkfPhraseReader api function.
-     */
-    protected void demo16 () throws IOException, UnknownHostException, CycApiException {
-        Log.current.println("Demonstrating usage of the rkfPhraseReader api function.\n");
-        String phrase = "penguins";
-            CycFort inferencePsc =
-                cycAccess.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
-            CycFort rkfEnglishLexicalMicrotheoryPsc =
-                cycAccess.getKnownConstantByGuid("bf6df6e3-9c29-11b1-9dad-c379636f7270");
-        CycList parsingExpression = cycAccess.rkfPhraseReader(phrase,
-                                                              rkfEnglishLexicalMicrotheoryPsc,
-                                                              inferencePsc);
-        Log.current.println("the result of parsing the phrase \"" + phrase + "\" is\n" + parsingExpression);
-    }
-
-    /**
-     * Demonstrates usage of the generateDisambiguationPhraseAndTypes api function.
-     */
-    protected void demo17 () throws IOException, UnknownHostException, CycApiException {
-        Log.current.println("Demonstrating usage of the generateDisambiguationPhraseAndTypes api function.\n");
-        CycFort mt = cycAccess.getKnownConstantByName("PeopleDataMt");
-        CycList objects = cycAccess.makeCycList("(#$Penguin #$PittsburghPenguins)");
-        CycList disambiguationExpression = cycAccess.generateDisambiguationPhraseAndTypes(objects);
-        Log.current.println("the result of disambiguating the objects \"" + objects.cyclify() + "\" is\n" +
-            disambiguationExpression);
     }
 
 }

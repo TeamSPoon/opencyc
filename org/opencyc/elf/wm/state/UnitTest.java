@@ -1,13 +1,19 @@
-package org.opencyc.elf.bg.state;
+package org.opencyc.elf.wm.state;
 
 //// Internal Imports
 import org.opencyc.elf.wm.StateVariableFactory;
 import org.opencyc.elf.wm.StateVariableLibrary;
 
 //// External Imports
-import java.util.*;
+import java.util.Iterator;
 
-import junit.framework.*;
+import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import junit.textui.TestRunner;
+
 
 /**
  * Provides a suite of JUnit test cases for the org.opencyc.elf.bg.state
@@ -116,6 +122,6 @@ public class UnitTest extends TestCase {
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {
-    junit.textui.TestRunner.run(suite());
+    TestRunner.run(suite());
   }
 }

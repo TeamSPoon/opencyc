@@ -1,4 +1,4 @@
-package org.opencyc.elf.bg.state;
+package org.opencyc.elf.wm.state;
 
 //// Internal Imports
 

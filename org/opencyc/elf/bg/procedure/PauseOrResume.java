@@ -33,8 +33,6 @@ import java.util.ArrayList;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @date August 11, 2003, 4:24 PM
  * @version $Id$
- * @date August 11, 2003, 4:34 PM
- * @version $Id$
  */
 public class PauseOrResume extends org.opencyc.elf.bg.procedure.Procedure {
   
@@ -51,12 +49,12 @@ public class PauseOrResume extends org.opencyc.elf.bg.procedure.Procedure {
     super(namespace, name, parameterTypes, outputType);
   }
   
+  //// Public Area
+  
   public Object execute(java.util.ArrayList inputs) {
     //TODO
     return null;
   }
-  
-  //// Public Area
   
   //// Protected Area
   

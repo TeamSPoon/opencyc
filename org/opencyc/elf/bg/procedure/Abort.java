@@ -29,8 +29,6 @@ import java.util.ArrayList;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @date August 11, 2003, 4:24 PM
  * @version $Id$
- * @date August 11, 2003, 4:43 PM
- * @version $Id$
  */
 public class Abort extends org.opencyc.elf.bg.procedure.Procedure {
   

@@ -1,4 +1,4 @@
-package org.opencyc.uml.core;e
+package org.opencyc.uml.core;
 
 import org.opencyc.uml.statemachine.*;
 
@@ -62,16 +62,6 @@ public class Operation extends BehavioralFeature {
      * (Extension) the state machine implementing this Operation
      */
     public StateMachine stateMachine;
-
-    /**
-     * (Extension) the state machine implementing this Operation
-     */
-    public StateMachine stateMachine;
-
-    /**
-     * (Extension) evaluatable expression implementing this Operation
-     */
-    public EvaluatableExpression evaluatableExpression;
 
     /**
      * Constructs a new Operation object.

@@ -1,6 +1,7 @@
 package org.opencyc.uml.core;
 
 import org.opencyc.uml.core.*;
+import org.opencyc.uml.commonbehavior.*;
 
 /**
  * Parameter from the UML Core package.

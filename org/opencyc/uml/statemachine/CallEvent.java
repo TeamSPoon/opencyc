@@ -1,5 +1,7 @@
 package org.opencyc.uml.statemachine;
 
+import org.opencyc.uml.core.*;
+
 /**
  * SignalEvent from the UML State_Machine package.
  *

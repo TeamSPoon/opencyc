@@ -29,7 +29,7 @@ public class StubState {
     /**
      * reference state for this stub state
      */
-    String referenceState;
+    public String referenceState;
 
     /**
      * Constructs a new StubState object.

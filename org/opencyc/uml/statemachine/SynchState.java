@@ -30,7 +30,7 @@ public class SynchState extends StateVertex {
     /**
      * bound of this synch state
      */
-    long bound;
+    public long bound;
 
     /**
      * Constructs a new SynchState object.

@@ -40,7 +40,7 @@ public abstract class ModelElement extends Element {
     /**
      * model element comment
      */
-    String comment;
+    Comment comment;
 
     /**
      * Constructs a new Element object.

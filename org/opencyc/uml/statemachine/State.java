@@ -1,6 +1,7 @@
 package org.opencyc.uml.statemachine;
 
 import java.util.*;
+import org.opencyc.uml.commonbehavior.*;
 
 /**
  * State from the UML State_Machines package.
@@ -32,27 +33,27 @@ public class State {
     /**
      * entry action for this state
      */
-    Action entry;
+    public Action entry;
 
     /**
      * exit action for this state
      */
-    Action exit;
+    public Action exit;
 
     /**
      * deferrable events for this state
      */
-    ArrayList deferrableEvent = new ArrayList();
+    public ArrayList deferrableEvent = new ArrayList();
 
     /**
      * do activity for this state
      */
-    Action doActivity;
+    public Action doActivity;
 
     /**
      * state machine for this state (if top)
      */
-    StateMachine stateMachine;
+    public StateMachine stateMachine;
 
 
     /**

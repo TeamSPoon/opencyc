@@ -30,7 +30,16 @@ public class PseudoState extends StateVertex {
     /**
      * kind of PseudoState
      */
-    int kind;
+    public int kind;
+
+    public static final int PK_CHOICE = 1;
+    public static final int PK_DEEPHISTORY = 2;
+    public static final int PK_FORK = 3;
+    public static final int PK_INITIAL = 4;
+    public static final int PK_JOIN = 5;
+    public static final int PK_JUNCTION = 6;
+    public static final int PK_SHALLOWHISTORY = 7;
+
 
     /**
      * Constructs a new StateVertex object.

@@ -3,7 +3,6 @@ package org.opencyc.uml.statemachine;
 import java.util.*;
 import org.opencyc.uml.core.*;
 
-
 /**
  * StateMachine from the UML State_Machines package.
  *
@@ -49,9 +48,7 @@ public class StateMachine extends ModelElement {
     /**
      * submachine state for this state machine
      */
-    public SubMachineState submachineState;
-
-
+    public SubmachineState submachineState;
 
     /**
      * Constructs a new StateMachine object.

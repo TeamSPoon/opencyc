@@ -90,6 +90,8 @@ public class SensoryPerception extends NodeComponent {
   
   //// Protected Area
   
+  //commented reference to Senso_Output (?Data) ||> SP.SP_RCV_Observed_input (?Data)
+  
   /**
    * Receives the predicted intput message from ?.
    */
@@ -109,23 +111,32 @@ public class SensoryPerception extends NodeComponent {
   }
   
   /**
-   * receives the sensory perception data message from ?.
+   * receives the sensory perception data message from the node, which previously 
+   * received it from the next lowest level node's sensory perception.
    */
   protected void sensoryPerceptionReceiveSensoryPerceptionData () {
     //TODO
-    // received via channel from ?
+    // received via channel from node
     // Object obj
     // Object data
   }
   
   /**
-   * Sends the sensory perception update message to ?.
+   * Sends the sensory perception update message to the node, which in turn sends it
+   * to the next highest level node, ultimately destined for sensory perception at
+   * the next highest level from this level. Also sends the sensory perception update
+   * message to value judgement and to world model
    */
   protected void sensoryPerceptionSendUpdate () {
     //TODO
-    // sent via channel to ?
+    // sent via channel to next higher level node's sensory perception 
+    // sent via channel to value judgement 
+    // sent via channel to value world model 
     // Object obj
     // Object data
+    // send sendSensoryPerceptionData(obj, data) to (this level) node
+    // send receiveUpdate(obj, data) to valueJudgement
+    // send receiveUpdate(obj, data) to valueJudgement
   }
 
   //// Private Area

@@ -55,129 +55,119 @@ public class BehaviorGeneration extends NodeComponent {
   //// Public Area
   
   /**
-   * Performs the commanded task.
-   *
-   * @taskCommand the commanded task
+   * Receives the do task command message from the node.  The message contains the
+   * task command to be performed.  Subsequently the doTask message is sent to job assigner.
+   * Sub tasks may ultimately result from this activity.  
    */
-  public void doTask (TaskCommand taskCommand) {
+  public void doTask () {
     //TODO
+    //receive via channel from node
+    // TaskCommand taskCommand
+    // send doTask(taskCommand) to jobAssigner
+    // may trigger forwardDoSubTask(controlledResources, taskCommand)
   }
   
   /**
-   * Receives the task command and task frame.
-   * 
-   * @param taskCommand the task command
-   * @param taskFrame the task frame
+   * Receives the task frame message forwarded from world model.
    */
-  public void receiveTaskFrame (TaskCommand taskCommand, TaskFrame taskFrame) {
+  public void receiveTaskFrame () {
     //TODO
+    //receive via channel from world model
+    // TaskCommand taskCommand
+    // TaskFrame taskFrame
   }
   
   /**
-   * Receives the value judgement result for the given schedule, controlled resources and task
-   * frame.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param taskFrame the given task frame
-   * @param schedule the given schedule
-   * @param result the received value judgement result
+   * Receives the schedule evaluation message from ?.
    */
-  public void receiveScheduleEvaluation (ArrayList controlledResources,
-                                         TaskFrame taskFrame,
-                                         Schedule schedule,
-                                         Result result) {
+  public void receiveScheduleEvaluation () {
     //TODO
-    // receive via channel
+    // receive via channel from ?
+    // ArrayList controlledResources
+    // TaskFrame taskFrame
+    // Schedule schedule
+    // Result result
   }
   
   /**
-   * Receives a task command failure notification.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param taskCommand the given task command
+   * Receives the failure notification message forwarded from world model.
    */
-  public void failureNotification (ArrayList controlledResources,
-                                   TaskCommand taskCommand) {
+  public void failureSimulationNotification () {
     //TODO
-    // receive via channel
+    // receive via channel from ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
   }
   
   /**
-   * Receives the status from value judgement with regard to the given list of controlled
-   * resources, task frame and schedule.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param taskFrame the given task frame
-   * @param schedule the given schedule
-   * @param status the received value judgement status
+   * Receives the value judgement status message from value judgement.
    */
-  public void receiveValueJudgementStatus (ArrayList controlledResources,
-                                           TaskFrame taskFrame,
-                                           Schedule schedule,
-                                           Status status) {
+  public void receiveValueJudgementStatus () {
     //TODO
-    // receive via channel
+    // receive via channel from value judgement
+    // ArrayList controlledResources
+    // TaskFrame taskFrame
+    // Schedule schedule
+    // Status status
   }
   
   /**
-   * Forwards a request for the task frame associated with the given task command.
-   *
-   * @param taskCommand the task command
+   * Forwards the fetch task frame message from job assigner to world model.
    */
-  public void forwardFetchTaskFrame (TaskCommand taskCommand) {
+  public void forwardFetchTaskFrame () {
     //TODO
-    // send via channel
+    // receive via channel from job assigner
+    // send via channel to world model
+    // TaskCommand taskCommand
+    // send receiveFetchTaskFrame(taskCommand) to worldModel
   }
   
   /**
-   * Forwards the schedule corresponding to the given controlled resources and
-   * task command.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param taskCommand the given task command
-   * @param schedule the schedule
+   * Forwards the simulate schedule message to world model.
    */
-  public void forwardSchedule (ArrayList controlledResources,
-                               TaskCommand taskCommand,
-                               Schedule schedule) {
+  public void forwardSimulateSchedule () {
     //TODO
-    // send via channel
+    // send via channel to world model
+    // ArrayList controlledResources
+    // TaskFrame taskFrame
+    // Schedule schedule
+    // send receiveSimulateSchedule(controlledResources, taskFrame, schedule) to worldModel
   }
   
   /**
-   * Forwards the schedule corresponding to the given controlled resources and
-   * task command.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param taskCommand the given task command
-   * @param schedule the schedule
+   * Forwards the post schedule message to world model.
    */
   public void forwardPostSchedule (ArrayList controlledResources,
                                   TaskCommand taskCommand,
                                   Schedule schedule) {
     //TODO
-    // send via channel
+    // send via channel to world model
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // send receivePostSchedule(controlledResources, taskCommand, schedule) to worldModel
   }
   
   /**
-   * Commands a subnode to perform the given task command using the given
-   * controlled resources.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param taskCommand the given task command
+   * Forwards the do subtask message to the node.
    */
-  public void doSubTask (ArrayList controlledResources,
-                         TaskCommand taskCommand) {
+  public void forwardDoSubTask () {
     //TODO
+    // send via channel to node
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // send doSubTask(controlledResources, taskCommand) to node
   }
   
   /**
-   * Gets the behavior generation status.
-   *
-   * @param status the behavior generation status
+   * Sends the behavior generation status message to the node.  Receipt of this message by
+   * the node subsequently causes the node to send the status message to ?.
    */
-  public void behaviorGenerationStatus (Status status) {
+  public void behaviorGenerationStatus () {
     //TODO
+    // send via channel to node (receiver not specified)
+    // Status status
+    // send status(status) message to node (receiver not specified)
   }
   
   /**

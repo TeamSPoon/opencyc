@@ -49,69 +49,70 @@ public class JobAssigner extends NodeComponent {
   //// Public Area
 
   /**
-   * Performs job assignment for the given task command.
-   *
-   * @param taskCommand the given task command
+   * Receives the do task message from behavior generation.
    */
-  public void doTask (TaskCommand taskCommand) {
+  public void doTask () {
+    //TODO
+    // received via channel from behavior generation
+    // TaskCommand taskCommand
   }
   
   /**
-   * Receives the task command and task frame.
-   * 
-   * @param taskCommand the task command
-   * @param taskFrame the task frame
+   * Receives the receive task frame message from ?
    */
-  public void receiveTaskFrame (TaskCommand taskCommand, TaskFrame taskFrame) {
+  public void receiveTaskFrame () {
     //TODO
+    // received via channel from ?
+    // TaskCommand taskCommand
+    // TaskFrame taskFrame
   }
 
   /**
-   * Sets the scheduler status given the list of controlled resources.
-   *
-   * @param status the scheduler status
+   * receives the scheduler status message from ?
    */
-  public void schedulerStatus (ArrayList controlledResources,
-                               Status status) {
+  public void schedulerStatus () {
+    //TODO
+    // received via channel from ?
+    // ArrayList controlledResources
+    // Status status
   }
   
   /**
-   * Schedules the given task command
-   * 
-   * @param taskCommand the given task command for scheduling
+   * Receives the schedule job message from ?
    */
   public void ScheduleJob (TaskCommand taskCommand) {
     //TODO
+    // received via channel from ?
+    // TaskCommand taskCommand
   }
   
   /**
-   * Requests the task frame associated with the given task command.
-   *
-   * @param taskCommand the task command
+   * Sends the fetch task frame message to behavior generation
    */
-  public void fetchTaskFrame (TaskCommand taskCommand) {
+  public void fetchTaskFrame () {
     //TODO
-    // send via channel
+    // send via channel to behavior generation
+    // TaskCommand taskCommand
+    // send forwardFetchTaskFrame(taskCommand) to behaviorGeneration
   }
   
   /**
-   * Decomposes the given task frame, returning a list of Scheduler/Job pairs.
-   *
-   * @param the given task frame
+   * Sends the decompose task frame message to ?.
    */
   public void decomposeTaskFrame (TaskFrame taskFrame) {
     //TODO
+    // send via channel to ?
+    // TaskCommand taskCommand
   }
   
   /**
-   * Gets the job assigner status.
-   *
-   * @param status the job assigner status
+   * Sends the job assigner status message to ?
    */
-  public void JobAssignerStatus (Status status) {
+  public void JobAssignerStatus () {
     //TODO
+    // send via channel to ?
+    // Status status
   }
-  
   
   /**
    * Returns true if the given object equals this object.

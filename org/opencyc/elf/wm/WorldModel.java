@@ -57,23 +57,24 @@ public class WorldModel extends NodeComponent {
   //// Protected Area
   
   /**
-   * Receives the fetch task frame message from ?, which contains the task command
-   * identifying the task frame.
+   * Receives the fetch task frame message forwarded from behavior genertion.  The message contains 
+   * the task command identifying the task frame.
    */
   protected void receiveFetchTaskFrame () {
     //TODO
-    // received via channel from ?
+    // received via channel from behavior generation
     // TaskCommand taskCommand
   }
   
   /**
-   * Forwards the task frame message ?, which was received from ?.
+   * Forwards the task frame message from ? to behavior generation.
    */
   protected void forwardTaskFrame () {
     //TODO
-    // send via channel to ?
+    // send via channel to behavior generation 
     // TaskCommand taskCommand
     // TaskFrame taskFrame
+    // send receiveTaskFrame(taskCommand, taskFrame) to behaviorGeneration
   }
   
   /**
@@ -113,46 +114,50 @@ public class WorldModel extends NodeComponent {
   }
   
   /**
-   * Receives an update KB object message from ?
+   * Receives an update KB object message from sensory perception
    */
   protected void receiveUpdate () {
     //TODO
-    // received via channel from ?
+    // received via channel from sensory perception
     // Object obj
     // Object data
   }
   
   /**
-   * Receives a post schedule message from ?
+   * Receives a post schedule message forwarded from behavior generation.
    */
   protected void receivePostSchedule () {
     //TODO
-    // received via channel from ?
+    // received via channel from behavior generation
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
   }
   
   /**
-   * Forwards the request evaluate schedule message from ? to ?.
+   * Forwards the request evaluate schedule message from ? to  value judgement.
    */
   protected void forwardRequestEvaluateSchedule () {
     //TODO
-    // send via channel to ?
+    // send via channel to value judgement
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // Send receiveEvaluateSchedule(controlledResources, taskCommand, schedule) to
+    // value judgement
   }
 
   /**
-   * Forwards the simulation failure notification message from ? to ?.
+   * Forwards the simulation failure notification message from ? to behavior generation.
    */
   protected void forwardSimulationFailureNotification () {
     //TODO
-    // send via channel to ?
+    // send via channel to behavior generation
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // send receiveSimulationFailureNotification(controlledResources, taskCommand, schedule)
+    // to behaviorGeneration
   }
   
   /**
@@ -164,7 +169,16 @@ public class WorldModel extends NodeComponent {
     // Object obj
   }
   
-  
+  /**
+   * Receives the simulate schedule message forwarded from behavior generation.
+   */
+  protected void receiveSimulateSchedule () {
+    //TODO
+    // receive via channel from behavior generation
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
   
   
   

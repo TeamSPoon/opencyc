@@ -62,9 +62,19 @@ public class BindingSet implements Comparable {
     public BindingSet(QueryLiteral queryLiteral, CycFort mt) throws IOException {
         this.queryLiteral = queryLiteral;
         this.mt = mt;
-        if (queryLiteral.nbrFormulaInstances == -1)
-            queryLiteral.nbrFormulaInstances =
-                CycAccess.current().countUsingBestIndex(queryLiteral.formula, mt);
+        if (queryLiteral.nbrFormulaInstances == -1) {
+            CycList formula;
+            if (queryLiteral.formula.first().equals(CycAccess.current().getKnownConstantByName("assertedSentence")) ||
+                queryLiteral.formula.first().equals(CycAccess.current().getKnownConstantByName("knownSentence")))
+                formula = (CycList) queryLiteral.formula.second();
+            else
+                formula = formula = queryLiteral.formula;
+            if (formula.first() instanceof CycVariable)
+                queryLiteral.nbrFormulaInstances = Integer.MAX_VALUE;
+            else
+                queryLiteral.nbrFormulaInstances =
+                    CycAccess.current().countUsingBestIndex(formula, mt);
+        }
     }
 
     /**

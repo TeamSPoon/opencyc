@@ -390,12 +390,16 @@ public class CycNart extends CycFort implements Comparable {
      * @return equals <tt>boolean</tt> value indicating equality or non-equality.
      */
     public boolean equals(Object object) {
-    if (! (object instanceof CycNart))
-        return false;
-    CycNart thatNart = (CycNart) object;
-    if (! this.functor.equals(thatNart.functor))
-        return false;
-    return this.arguments.equals(thatNart.arguments);
+        if (! (object instanceof CycNart))
+            return false;
+        Integer thisId = super.getId();
+        Integer thatId = ((CycFort) object).getId();
+        if ((thisId != null) && (thatId != null))
+            return thisId.equals(thatId);
+        CycNart thatNart = (CycNart) object;
+        if (! this.functor.equals(thatNart.functor))
+            return false;
+        return this.arguments.equals(thatNart.arguments);
     }
 
     /**

@@ -70,7 +70,8 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testQueryProcessor7"));
             //testSuite.addTest(new UnitTest("testQueryProcessor8"));
             //testSuite.addTest(new UnitTest("testQueryProcessor9"));
-            testSuite.addTest(new UnitTest("testQueryProcessor10"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor10"));
+            testSuite.addTest(new UnitTest("testQueryProcessor11"));
             //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
             //testSuite.addTest(new UnitTest("testBackchainer3"));
@@ -582,6 +583,47 @@ public class UnitTest extends TestCase {
 
         System.out.println("** testQueryProcessor10 OK **");
     }
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor11() {
+        System.out.println("** testQueryProcessor11 **");
+
+        String problemString =
+            "(#$and " +
+            "  (#$assertedSentence " +
+            "    (#$isa ?COUNTRY #$WesternEuropeanCountry)) " +
+            "  (#$assertedSentence " +
+            "    (#$isa ?CATHEDRAL #$Cathedral)) " +
+            "  (#$assertedSentence " +
+            "    (#$countryOfCity ?COUNTRY ?CITY)) " +
+            "  (#$assertedSentence  " +
+            "    (#$objectFoundInLocation ?CATHEDRAL ?CITY)))";
+            //"  (#$genlPreds ?OBJECT-SPEC #$objectFoundInLocation) " +
+            //"  (#$assertedSentence  " +
+            //"    (?OBJECT-SPEC ?CATHEDRAL ?CITY)))";
+        System.out.println(problemString);
+        QueryProcessor problem = new QueryProcessor();
+        problem.setVerbosity(1);
+        // Request all solutions.
+        problem.nbrSolutionsRequested = null;
+        try {
+            problem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = problem.ask(problemString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor11 OK **");
+    }
+
+
     /**
      * Tests the <tt>Backchainer</tt> class.
      */

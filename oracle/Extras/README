@@ -1,0 +1,13 @@
+This directory contains addons to the Oracle OpenCyc Interface.
+
+auto-connect.sql adds an after logon trigger to the schema that
+automatically connects to OpenCyc.
+Usage:
+sqlplus <oracleusername>/<password> @ auto-connect.sql
+
+auto-write-image.sql adds a jobs that converses (write-image "now.world") to
+OpenCyc each our. The script assumes that a connection with OpenCyc exists;
+use in conjunction with 'auto-connect.sql'
+! Be careful ! Each time this sql script is run, it will create a NEW job!
+Usage:
+sqlplus <oracleusername>/<password> @ auto-write-image.sql

@@ -89,6 +89,11 @@ public class Actuator extends NodeComponent {
   
   //// Protected Area
   
+  
+  //TODO think about moving execution logic here via an action look-up table
+  // Action will contain an actionName and the parameter list
+  
+  
   /**
    * Thread which processes the input channel of messages.
    */

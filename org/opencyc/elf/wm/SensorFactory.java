@@ -7,6 +7,7 @@ import org.opencyc.elf.s.Sensor;
 import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  *  SensorFactory is designed to create actuators.  There is a singleton instance of sensor factory.
@@ -57,8 +58,9 @@ public class SensorFactory {
     
   /** Populates the sensor pool. */
   public void populateSensorPool() {
-    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, 
-                                                    ResourcePool.getInstance().getResource(Resource.CONSOLE));
+    ArrayList resources = new ArrayList();
+    resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
+    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources);
     SensorPool.getInstance().setSensor(consoleInput.getName(), consoleInput);
   }
   //// Protected Area

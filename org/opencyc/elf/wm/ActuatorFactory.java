@@ -7,6 +7,7 @@ import org.opencyc.elf.a.ConsoleOutput;
 import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  *  ActuatorFactory is designed to create actuators.  There is a singleton instance of actuator factory.
@@ -57,8 +58,9 @@ public class ActuatorFactory {
     
   /** Populates the actuator pool. */
   public void populateActuatorPool() {
-    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, 
-                                                    ResourcePool.getInstance().getResource(Resource.CONSOLE));
+    ArrayList resources = new ArrayList();
+    resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
+    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources);
     ActuatorPool.getInstance().setActuator(consoleOutput.getName(), consoleOutput);
   }
   

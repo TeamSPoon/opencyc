@@ -58,12 +58,58 @@ public class ValueJudgement extends NodeComponent {
   public String toString() {
     return "ValueJudgement for " + node.getName();
   }
+
+  /**
+   * Gets the plan evaluator
+   *
+   * @return the plan evaluator
+   */
+  public PlanEvaluator getPlanEvaluator () {
+    return planEvaluator;
+  }
+
+  /**
+   * Sets the plan evaluator
+   *
+   * @param planEvaluator the plan evaluator
+   */
+  public void setPlanEvaluator (PlanEvaluator planEvaluator) {
+    this.planEvaluator = planEvaluator;
+  }
+
+  /**
+   * Gets the entity evaluator
+   *
+   * @return the entity evaluator
+   */
+  public EntityEvaluator getEntityEvaluator () {
+    return entityEvaluator;
+  }
+
+  /**
+   * Sets the entity evaluator
+   *
+   * @param entityEvaluator the entity evaluator
+   */
+  public void setEntityEvaluator (EntityEvaluator entityEvaluator) {
+    this.entityEvaluator = entityEvaluator;
+  }
   
   //// Protected Area
     
   //// Private Area
   
   //// Internal Rep
+  
+  /**
+   * the plan evaluator
+   */
+  protected PlanEvaluator planEvaluator;
+  
+  /**
+   * the entity evaluator
+   */
+  protected EntityEvaluator entityEvaluator;
   
   //// Main
 }

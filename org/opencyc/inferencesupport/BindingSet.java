@@ -42,7 +42,14 @@ public class BindingSet implements Comparable {
     protected CycFort mt;
 
     /**
-     * The list of binding value lists associated with each variable.
+     * The set of binding sets comprising a cartesian product join, which is not actually
+     * instantiatiated to save space.
+     */
+    protected ArrayList cartesianProductBindingSets;
+
+    /**
+     * The list of binding value lists associated with each variable, which is not used for
+     * cartesian product joins.
      */
     protected ArrayList bindingValues;
 
@@ -145,6 +152,15 @@ public class BindingSet implements Comparable {
      * @return the size of the binding set for this literal
      */
     public int size() {
+        if (this.isCartesianProduct()) {
+            int maxSize = 0;
+            for (int i = 0; i < cartesianProductBindingSets.size(); i++) {
+                int size = ((BindingSet) cartesianProductBindingSets.get(i)).size();
+                if (maxSize < size)
+                    maxSize = size;
+            }
+            return maxSize;
+        }
         if (bindingValues == null)
             return this.getNbrInstances();
         else
@@ -226,4 +242,35 @@ public class BindingSet implements Comparable {
         else
             return queryLiteral.cyclify() + " with estimated size " + this.getNbrInstances();
     }
+
+    /**
+     * Returns <tt>true</tt> iff the binding set has the form of an uninstantiated cartesian
+     * product.
+     *
+     * @return  <tt>true</tt> iff the binding set has the form of an uninstantiated cartesian
+     * product
+     */
+    public boolean isCartesianProduct() {
+        return cartesianProductBindingSets != null;
+    }
+
+    /**
+     * Returns the set of binding sets comprising a cartesian product join, which is not actually
+     * instantiatiated to save space.
+     *
+     * @return the set of binding sets comprising a cartesian product join
+     */
+    public ArrayList getCartesianProductBindingSets() {
+        return cartesianProductBindingSets;
+    }
+
+    /**
+     * Sets the set of binding sets comprising a cartesian product join.
+     *
+     * @param cartesianProductBindingSets the set of binding sets comprising a cartesian product join
+     */
+    public void setCartesianProductBindingSets(ArrayList cartesianProductBindingSets) {
+        this.cartesianProductBindingSets = cartesianProductBindingSets;
+    }
+
 }

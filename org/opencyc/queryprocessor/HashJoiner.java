@@ -80,9 +80,9 @@ public class HashJoiner {
         remainingBindingSets.remove(0);
         if (verbosity > 4)
             System.out.println("Starting binding set for join is \n" + joinedBindingSet);
+        int index;
         while (remainingBindingSets.size() > 0) {
-            // In case there are no variables in common, choose the lowest cardinality binding set candidate.
-            int index = 0;
+            index = -1;
             for (int i = 1; i < remainingBindingSets.size(); i++) {
                 BindingSet remainingBindingSet = (BindingSet) remainingBindingSets.get(i);
                 ArrayList joinedBindingSetVariables = joinedBindingSet.getVariables();
@@ -95,11 +95,21 @@ public class HashJoiner {
                     break;
                 }
             }
-            BindingSet bestBindingSetForJoin = (BindingSet) remainingBindingSets.get(index);
+            BindingSet bestBindingSetForJoin;
+            if (index == -1) {
+                index = 0;
+                bestBindingSetForJoin = (BindingSet) remainingBindingSets.get(index);
+                if (verbosity > 4)
+                    System.out.println("  no binding set has variables in common");
+                joinedBindingSet = joinCartesianProduct(joinedBindingSet, bestBindingSetForJoin);
+            }
+            else {
+                bestBindingSetForJoin = (BindingSet) remainingBindingSets.get(index);
+                if (verbosity > 4)
+                    System.out.println("  best binding set for join \n  " + bestBindingSetForJoin);
+                joinedBindingSet = join(joinedBindingSet, bestBindingSetForJoin);
+            }
             remainingBindingSets.remove(index);
-            if (verbosity > 4)
-                System.out.println("  best binding set for join \n  " + bestBindingSetForJoin);
-            joinedBindingSet = join(joinedBindingSet, bestBindingSetForJoin);
         }
         if (joinedBindingSet.isBindingPostponed())
             // Ensure that a single literal query gets asked.
@@ -138,6 +148,40 @@ public class HashJoiner {
     }
 
     /**
+     * Joins two given binding sets that have no variables in common.
+     *
+     * @param bindingSet1 the first binding set
+     * @param bindingSet2 the second binding set
+     * @return the binding set which is the result of the product join operation
+     */
+    public BindingSet joinCartesianProduct(BindingSet bindingSet1,
+                                           BindingSet bindingSet2) throws IOException {
+        if (verbosity > 4)
+            System.out.println("Joining (cartesian product)\n  first " +
+                               bindingSet1 +
+                               "\n    with variables " + bindingSet1.getVariables() +
+                               "\n  uninstantiated " + bindingSet2 +
+                               "\n    with variables " + bindingSet2.getVariables());
+
+        QueryLiteral joinedQueryLiteral = QueryLiteral.conjoin(bindingSet1.getQueryLiteral(),
+                                                               bindingSet2.getQueryLiteral());
+        if (verbosity > 4)
+            System.out.println("  joined query \n  " + joinedQueryLiteral.cyclify() +
+                               "\n    with variables " + joinedQueryLiteral.getVariables());
+        BindingSet joinedBindingSet = new BindingSet(joinedQueryLiteral, bindingSet1.getMt());
+        ArrayList cartesianProduct = new ArrayList();
+        if (bindingSet1.isCartesianProduct())
+            cartesianProduct.add(bindingSet1.getCartesianProductBindingSets());
+        else
+            cartesianProduct.add(bindingSet1);
+        if (bindingSet2.isCartesianProduct())
+            cartesianProduct.add(bindingSet2.getCartesianProductBindingSets());
+        else
+            cartesianProduct.add(bindingSet2);
+        return joinedBindingSet;
+    }
+
+    /**
      * Joins a smaller instantiated binding set with a larger uninstantiated binding set, by
      * asking individual partial instantiations of the joined literal.
      *
@@ -160,13 +204,19 @@ public class HashJoiner {
             System.out.println("  joined query \n  " + joinedQueryLiteral.cyclify() +
                                "\n    with variables " + joinedQueryLiteral.getVariables());
         BindingSet joinedBindingSet = new BindingSet(joinedQueryLiteral, smallerBindingSet.getMt());
-        ArrayList bindingLists = null;
-        for (int i = 0; i < smallerBindingSet.size(); i++)
-            joinedBindingSet.addAll(literalAsker.ask(joinedQueryLiteral,
-                                                     uninstantiatedBindingSet.getQueryLiteral(),
-                                                     smallerBindingSet.getVariables(),
-                                                     (ArrayList) smallerBindingSet.getBindingValues().get(i),
-                                                     smallerBindingSet.getMt()));
+
+        if (smallerBindingSet.isCartesianProduct()) {
+            //TODO
+        }
+        else {
+            ArrayList bindingLists = null;
+            for (int i = 0; i < smallerBindingSet.size(); i++)
+                joinedBindingSet.addAll(literalAsker.ask(joinedQueryLiteral,
+                                                         uninstantiatedBindingSet.getQueryLiteral(),
+                                                         smallerBindingSet.getVariables(),
+                                                         (ArrayList) smallerBindingSet.getBindingValues().get(i),
+                                                         smallerBindingSet.getMt()));
+            }
         if (verbosity > 3) {
             System.out.println();
             joinedBindingSet.displayBindingSet();
@@ -205,6 +255,8 @@ public class HashJoiner {
 
         int intersectingVariablesSize = intersectingVariables.size();
         if (intersectingVariablesSize == 0)
+            // TODO
+
             throw new RuntimeException("product not yet implemented for \n" + buildBindingSet +
                                        "\n" + probeBindingSet);
         // Build step.

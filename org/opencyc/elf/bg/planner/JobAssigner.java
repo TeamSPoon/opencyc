@@ -221,8 +221,6 @@ public class JobAssigner extends BufferedNodeComponent {
       this.executorChannel = executorChannel;
     }
     
-    //TODO think about conversations and thread safety
-    
     /**
      * Dispatches the given input channel message by type.
      *
@@ -244,8 +242,13 @@ public class JobAssigner extends BufferedNodeComponent {
       getLogger().info("JobAssigner proccessing " + doTaskMsg);
       taskCommand = doTaskMsg.getTaskCommand();
       getLogger().info("Do task: " + taskCommand);
-      
       //TODO
+      //get the task frame and figure out what is in it wrt Goal, TaskCommand and Action
+      
+      // find agents that can collectively execute the task
+      
+      // find the best schedule for each agent
+      
     }
                 
     /**
@@ -254,8 +257,8 @@ public class JobAssigner extends BufferedNodeComponent {
      * @param schedulerStatusMsg he schedule status message
      */
     protected void processSchedulerStatusMsg (SchedulerStatusMsg schedulerStatusMsg) {
-      //TODO
       Status status = schedulerStatusMsg.getStatus();
+      //TODO
     }
     
     /**

@@ -166,23 +166,23 @@ public class TaskFrame {
   }
 
   /**
-   * Gets the agents that are responsible for carrying out the task
+   * Gets the actuators that are responsible for carrying out the task
    * 
-   * @return agents the agents that are responsible for carrying
+   * @return actuators the actuators that are responsible for carrying
    *         out the task
    */
-  public ArrayList getAgents() {
-    return agents;
+  public ArrayList getActuators() {
+    return actuators;
   }
 
   /**
-   * Sets the agents that are responsible for carrying out the task
+   * Sets the actuators that are responsible for carrying out the task
    * 
-   * @param agents the agents that are responsible for carrying out
+   * @param actuators the actuators that are responsible for carrying out
    *        the task
    */
-  public void setAgents(ArrayList agents) {
-    this.agents = agents;
+  public void setActuators(ArrayList actuators) {
+    this.actuators = actuators;
   }
 
   /**
@@ -253,6 +253,10 @@ public class TaskFrame {
 
   //// Protected Area
 
+  //// Private Area
+  
+  //// Internal Rep
+  
   /** the task name */
   protected String taskName;
 
@@ -270,8 +274,8 @@ public class TaskFrame {
   /** the parameters that specify or modulate how the task should be performed */
   protected ArrayList taskParameters;
 
-  /** the agents (actuators) that are responsible for carrying out the task */
-  protected ArrayList agents = new ArrayList();
+  /** the actuators (actuators) that are responsible for carrying out the task */
+  protected ArrayList actuators = new ArrayList();
 
   /**
    * the tools, resources, conditions and state information, aside from task
@@ -289,6 +293,4 @@ public class TaskFrame {
    */
   protected ArrayList schedules;
 
-  //// Private Area
-  //// Internal Rep
 }

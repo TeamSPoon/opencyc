@@ -1,8 +1,13 @@
-package org.opencyc.cycagent;
+package org.opencyc.cycagent.fipaos;
 
 /**
- * Provides a test agent that exercises the Cyc API service within the CoABS
- * grid agent community.
+ * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
+ *
+ * An instance of this class is created for each unique cyc agent which makes
+ * itself known to the agent manager.  A cyc image can host one or more cyc
+ * agents.  Each message envelope from a cyc agent contains a parameter to
+ * indicate which agent agent community processes the messge - either the CoABS
+ * grid (Darpa & gov) or the FIPA-OS platform (OpenCyc).
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -26,18 +31,8 @@ package org.opencyc.cycagent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class CycApiTestCoAbsAgent {
+public class FipaOsProxy {
 
-    /**
-     * Constructs a new CycApiTestCoAbsAgent object.
-     */
-    public CycApiTestCoAbsAgent() {
-    }
-
-    /**
-     * Provides the main method for the CycApiTestCoAbsAgent.
-     */
-    public static void main(String[] args) {
-        CycApiTestCoAbsAgent cycApiTestCoAbsAgent = new CycApiTestCoAbsAgent();
+    public FipaOsProxy() {
     }
 }

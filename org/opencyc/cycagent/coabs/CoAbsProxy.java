@@ -1,4 +1,4 @@
-package org.opencyc.cycagent;
+package org.opencyc.cycagent.coabs;
 
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
@@ -31,8 +31,8 @@ package org.opencyc.cycagent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class FipaOsProxy {
+public class CoAbsProxy {
 
-    public FipaOsProxy() {
+    public CoAbsProxy() {
     }
 }

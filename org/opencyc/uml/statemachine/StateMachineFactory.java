@@ -282,10 +282,10 @@ public class StateMachineFactory {
         setNamespaceNameComment(timeEvent,
                                 name,
                                 commentString);
-        TimeExpression timeExpression = new TimeExpression();
-        timeExpression.setLanguage(language);
-        timeExpression.setBody(body);
-        timeEvent.setTimeExpression(timeExpression);
+        TimeExpression when = new TimeExpression();
+        when.setLanguage(language);
+        when.setBody(body);
+        timeEvent.setWhen(when);
         return timeEvent;
     }
 
@@ -443,14 +443,14 @@ public class StateMachineFactory {
      * @param source the source state of this transition
      * @param target the target state of this transition
      */
-    public State makeTransition (String name,
-                                 String commentString,
-                                 String guardExpressionLanguage,
-                                 String guardExpressionBody,
-                                 Procedure effect,
-                                 Event trigger,
-                                 StateVertex source,
-                                 StateVertex target) {
+    public Transition makeTransition (String name,
+                                      String commentString,
+                                      String guardExpressionLanguage,
+                                      String guardExpressionBody,
+                                      Procedure effect,
+                                      Event trigger,
+                                      StateVertex source,
+                                      StateVertex target) {
         Transition transition = new Transition();
         setNamespaceNameComment(transition,
                                 name,

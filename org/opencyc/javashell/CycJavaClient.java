@@ -36,7 +36,7 @@ import java.lang.*;
 import java.net.*;
 
 public class CycJavaClient extends Thread {
-    private CycJavaShell jshell = null;
+    private CycJavaShell privJshell = null;
     private Socket clientSocket = null;
     private Hashtable clientPeers = null;
     private InputStream in = null;
@@ -45,19 +45,15 @@ public class CycJavaClient extends Thread {
     private static CycSymbol QUIT_COMMAND = new CycSymbol("API-QUIT");
     
     public CycJavaClient(Socket client,CycJavaShell jshell) throws IOException {
-	this.jshell = jshell;
+	privJshell = jshell;
 	clientSocket = client; 
 	in = client.getInputStream();
 	out = client.getOutputStream();
-	cycAccess = new CycAccess(client.getInetAddress().getHostAddress(),
-				  CycConnection.DEFAULT_BASE_PORT,CycConnection.DEFAULT_COMMUNICATION_MODE,CycAccess.DEFAULT_CONNECTION);                   
-	jshell.ensureClientSupportsShell(cycAccess);
-
     }
 
     public void run() {
 	PrintStream outstream = new PrintStream(out);
-	CycListParser cyclp = CycListParser(cycAccess); 
+	CycListParser cyclp = new CycListParser(cycAccess); 
 	while( !this.interrupted() && in!=null && out!=null ) {
 	    StreamTokenizer st = new StreamTokenizer(in);
 	    st.commentChar( ';' ); st.ordinaryChar( '(' ); st.ordinaryChar( ')' ); st.ordinaryChar( '\'' ); st.ordinaryChar( '`' ); st.ordinaryChar( '.' );
@@ -66,9 +62,18 @@ public class CycJavaClient extends Thread {
 	    st.wordChars( '$', '$' ); st.wordChars( '?', '?' ); st.wordChars( '%', '%' ); st.wordChars( '&', '&' );
 	    try {
 	    CycList todo = cyclp.read(st);
-	    if(todo.first().equals(QUIT_COMMAND)) return;
-		CycList result = jshell.invoke(cycAccess,todo);        
-		outstream.println("200 "+result.stringApiValue());
+	    if(todo.first().equals(QUIT_COMMAND)) {
+		// Do client goodbyes
+		return;
+	    }
+		Object result = privJshell.invoke(todo);        
+		if(result instanceof CycObject) {
+		    outstream.println("200 "+((CycObject)result).cyclify(());
+		} else if(result instanceof String) {
+		    outstream.println("200 \""+result+"\"");
+		} else {
+		    outstream.println("200 "+result);
+		}
 	    } catch (Exception e){
 		outstream.println("500 \""+e+"\"");
 	    }

@@ -26,20 +26,38 @@ package org.opencyc.javashell;
  */
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.lang.Thread;
 
 
 public class CycJavaServer extends Thread {
-    private static CycJavaShell jshell = null;
-    private Socket serverSocket = null;
+    private ServerSocket serverSocket = null;
+    private HashMap allShells = new HashMap();
     public CycJavaServer(CycJavaShell jshell, int port) throws IOException {
 	this.jshell = jshell;
+	allShells.add("localhost",jshell);
 	serverSocket = new ServerSocket(port);
     }
     public void run() {
 	while( !this.interrupted() ) {
-	    CycJavaClient client = new CycJavaClient(serverSocket.accept(),jshell);
-	    client.start();
+	    try {
+		Socket clientSock = new CycJavaClient(serverSocket.accept();
+		String clientKey = clientSock.getInetAddress();
+		CycJavaShell clientJshell = allShells.get(clientKey);
+		if(clientJshell==null) {
+		    cycAccess = new CycAccess(client.getInetAddress().getHostAddress(),
+					      CycConnection.DEFAULT_BASE_PORT,CycConnection.DEFAULT_COMMUNICATION_MODE,CycAccess.DEFAULT_CONNECTION);                   
+		    clientJshell = new CycJavaShell();
+		    clientJshell.ensureClientSupportsShell(cycAccess);
+		    allShells.put(clientKey,clientJshell);
+		}
+		CycJavaClient client = CycJavaClient(clientSock,clientJshell);
+		client.start();
+	    } catch( Exception e ) {
+		e.printStackTrace();
+	    }
 	}
 
     }

@@ -82,9 +82,7 @@ public class PlanSimulator extends NodeComponent {
     }
   }
   
-  public Puttable getChannel() {
-  }
-  
+ 
   //// Public Area
   
   //// Protected Area

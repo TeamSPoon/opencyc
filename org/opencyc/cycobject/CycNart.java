@@ -2,7 +2,7 @@ package org.opencyc.cycobject;
 
 import java.io.*;
 import java.util.*;
-import org.opencyc.xml.XMLPrintWriter;
+import org.opencyc.xml.XMLWriter;
 import org.opencyc.api.*;
 
 /**
@@ -153,7 +153,7 @@ public class CycNart extends CycFort implements Comparable {
             try {
                 cycNart = CycAccess.current().completeCycNart(this);
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 throw new RuntimeException(e.getMessage());
             }
             functor = cycNart.functor;
@@ -182,7 +182,7 @@ public class CycNart extends CycFort implements Comparable {
             try {
                 cycNart = CycAccess.current().completeCycNart(this);
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 throw new RuntimeException(e.getMessage());
             }
             functor = cycNart.functor;
@@ -201,7 +201,7 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
-     * Prints the XML representation of the <ttt>CycNart</tt> to an <tt>XMLPrintWriter</tt>
+     * Prints the XML representation of the <ttt>CycNart</tt> to an <tt>XMLWriter</tt>
      * It is supposed to look like this:<p>
      * <pre>
      * <nat>
@@ -230,7 +230,7 @@ public class CycNart extends CycFort implements Comparable {
      * of the xml_writer object, relative = true.
      *
      */
-    public void toXML (XMLPrintWriter xmlWriter, int indent, boolean relative)
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException {
         xmlWriter.printXMLStartTag(natXMLtag, indent, relative);
         xmlWriter.printXMLStartTag(functorXMLtag, indentLength, true);
@@ -284,8 +284,6 @@ public class CycNart extends CycFort implements Comparable {
                 cyclifiedObject = ((CycConstant) object).cyclify();
             else if (object instanceof CycNart)
                 cyclifiedObject = ((CycNart) object).cyclify();
-            else if (object instanceof CycList)
-                cyclifiedObject = ((CycList) object).cyclify();
             else
                 cyclifiedObject = object.toString();
             result .append(" ");

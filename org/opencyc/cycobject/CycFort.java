@@ -1,7 +1,7 @@
 package org.opencyc.cycobject;
 
 import java.io.*;
-import org.opencyc.xml.XMLPrintWriter;
+import org.opencyc.xml.XMLWriter;
 
 /**
  * This class implements a Cyc Fort (First Order Reified Term).
@@ -45,9 +45,9 @@ public abstract class CycFort implements Serializable {
     public abstract String cyclify();
 
     /**
-     * Prints the XML representation of the CycFort to an <tt>XMLPrintWriter</tt>
+     * Prints the XML representation of the CycFort to an <tt>XMLWriter</tt>
      */
-    public abstract void toXML (XMLPrintWriter xml_writer, int indent, boolean relative)
+    public abstract void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException;
 
     /**

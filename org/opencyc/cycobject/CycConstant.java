@@ -100,7 +100,7 @@ public class CycConstant extends CycFort implements Comparable {
             }
             return super.getId();
         }
-        catch (Exception e) {
+        catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -120,7 +120,7 @@ public class CycConstant extends CycFort implements Comparable {
             }
             return name;
         }
-        catch (Exception e) {
+        catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -148,7 +148,7 @@ public class CycConstant extends CycFort implements Comparable {
             }
             return guid;
         }
-        catch (Exception e) {
+        catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -165,14 +165,14 @@ public class CycConstant extends CycFort implements Comparable {
     /**
      * Prints the XML representation of the CycConstant to an <code>XMLWriter</code>
      *
-     * @param xmlWriter a com.cyc.xml.XMLWriter
+     * @param xmlWriter an <tt>XMLWriter</tt>
      * @param indent an int that specifies by how many spaces to indent
      * @param relative a boolean; if true indentation is relative, otherwise absolute
      */
     /**
-     * Prints the XML representation of the CycFort to an <tt>XMLPrintWriter</tt>
+     * Prints the XML representation of the CycFort to an <tt>XMLWriter</tt>
      */
-    public void toXML (XMLPrintWriter xmlWriter, int indent, boolean relative)
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws java.io.IOException {
         xmlWriter.printXMLStartTag(constantXMLTag, indent, relative, true);
         xmlWriter.printXMLStartTag(guidXMLTag, indentLength, true, false);

@@ -32,7 +32,7 @@ public class Namespace extends ModelElement {
     /**
      * the set of model elements owned by this namespace
      */
-    protected ArrayList ownedElement;
+    protected ArrayList ownedElement= new ArrayList();
 
     /**
      * Constructs a new Namespace object.

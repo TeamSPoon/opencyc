@@ -2,6 +2,7 @@ package org.opencyc.uml.interpreter;
 
 import java.util.*;
 import javax.swing.tree.*;
+import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.statemachine.*;
@@ -54,6 +55,11 @@ public class StateInterpreter extends Thread {
      * the interpreted active state
      */
     protected State state;
+
+    /**
+     * the log of state transitions and actions
+     */
+    protected ArrayList log = new ArrayList();
 
     /**
      * Constructs a new StateInterpreter object given the
@@ -211,4 +217,12 @@ public class StateInterpreter extends Thread {
         this.verbosity = verbosity;
     }
 
+    /**
+     * Displays the state machine log.
+     */
+    public void displayLog () {
+        Iterator logItems = log.iterator();
+        while (logItems.hasNext())
+            Log.current.println(logItems.next().toString());
+    }
 }

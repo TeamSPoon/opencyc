@@ -122,11 +122,12 @@ public class StateMachineFactory {
      * @param procedure the given procedure to which the input pin is to
      * be added
      * @param type the Class of the input pin (variable)
+     * @return the added input pin for the given procedure
      */
-    public void addInputPinToProcedure(String name,
-                                       String commentString,
-                                       Procedure procedure,
-                                       Class type) {
+    public InputPin addInputPinToProcedure(String name,
+                                           String commentString,
+                                           Procedure procedure,
+                                           Class type) {
         InputPin inputPin = new InputPin();
         setNamespaceNameComment(inputPin,
                                 name,
@@ -134,6 +135,7 @@ public class StateMachineFactory {
         inputPin.setType(type);
         inputPin.setProcedure(procedure);
         procedure.getArgument().add(inputPin);
+        return inputPin;
     }
 
     /**
@@ -144,11 +146,12 @@ public class StateMachineFactory {
      * @param procedure the given procedure to which the output pin is to
      * be added
      * @param type the Class of the output pin (variable)
+     * @return the added output pin for the given procedure
      */
-    public void addOutputPinToProcedure(String name,
-                                        String commentString,
-                                        Procedure procedure,
-                                        Class type) {
+    public OutputPin addOutputPinToProcedure(String name,
+                                             String commentString,
+                                             Procedure procedure,
+                                             Class type) {
         OutputPin outputPin = new OutputPin();
         setNamespaceNameComment(outputPin,
                                 name,
@@ -156,6 +159,7 @@ public class StateMachineFactory {
         outputPin.setType(type);
         outputPin.setProcedure(procedure);
         procedure.getResult().add(outputPin);
+        return outputPin;
     }
 
     /**
@@ -297,11 +301,12 @@ public class StateMachineFactory {
      * @param event the given event to which the parameter is to
      * be added
      * @param type the Class of the parameter
+     * @return the adeded parameter for the given event
      */
-    public void addParameterToEvent(String name,
-                                    String commentString,
-                                    Event event,
-                                    Class type) {
+    public Parameter addParameterToEvent(String name,
+                                         String commentString,
+                                         Event event,
+                                         Class type) {
         Parameter parameter = new Parameter();
         setNamespaceNameComment(parameter,
                                 name,
@@ -309,6 +314,7 @@ public class StateMachineFactory {
         if (event instanceof CallEvent)
             parameter.setBehavioralFeature(((CallEvent) event).getOperation());
         parameter.setType(type);
+        return parameter;
     }
 
     /**
@@ -383,6 +389,30 @@ public class StateMachineFactory {
         compositeState.setDoActivity(doActivity);
         compositeState.setIsConcurrent(isConcurrent);
         return compositeState;
+    }
+
+    /**
+     * Makes a new pseudo state object.
+     *
+     * @param name the identifier for the pseudo state within its containing
+     * namespace
+     * @param commentString the comment for this pseudo state
+     * @param container the container of this pseudo state
+     * @param kind the kind of PseudoState
+     * @return the new pseudo state object
+     */
+    public PseudoState makePseudoState (String name,
+                                        String commentString,
+                                        CompositeState container,
+                                        int kind) {
+        PseudoState pseudoState = new PseudoState();
+        setNamespaceNameComment(pseudoState,
+                                name,
+                                commentString);
+        pseudoState.setContainer(container);
+        container.getSubVertex().add(pseudoState);
+        pseudoState.setKind(kind);
+        return pseudoState;
     }
 
     /**

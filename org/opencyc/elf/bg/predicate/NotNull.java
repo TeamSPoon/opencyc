@@ -6,7 +6,7 @@ package org.opencyc.elf.bg.predicate;
 import java.util.List;
 
 /**
- * <P>NotNull is a predicate of arity one that returns true if its argument
+ * NotNull is a predicate of arity one that returns true if its argument
  * is not null.
  *
  * @version $Id$

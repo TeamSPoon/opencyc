@@ -1,10 +1,14 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
+import org.opencyc.elf.ELFException;
 
 import org.opencyc.elf.bg.state.State;
 
+import org.opencyc.elf.bg.procedure.Procedure;
+
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * <P>Action describes the action to be performed and may include a set of modifiers such as
@@ -55,6 +59,93 @@ public class Action {
     return state;
   }
 
+  /**
+   * Gets the procedure to be performed for this action.
+   *
+   * @return he procedure to be performed for this action
+   */
+  public Procedure getProcedure () {
+    return (Procedure) state.getStateValue(State.PROCEDURE);
+  }
+  
+  /**
+   * Sets the procedure to be performed for this action.
+   *
+   * @param procedure the procedure to be performed for this action
+   */
+  public void setProcedure (Procedure procedure) {
+    state.setStateValue(State.PROCEDURE, procedure);
+  }
+  
+  /**
+   * Gets the procedure parameter names for this action.
+   *
+   * @return the procedure parameter names for this action
+   */
+  public ArrayList getParameterNames () {
+    return (ArrayList) state.getStateValue(State.PARAMETER_NAMES);
+  }
+  
+  /**
+   * Sets the procedure parameter names for this action.
+   *
+   * @param parameterNames the procedure parameter names for this action
+   */
+  public void setParameterNames (ArrayList parameterNames) {
+    state.setStateValue(State.PARAMETER_NAMES, parameterNames);
+  }
+  
+  /**
+   * Gets the procedure parameter types for this action.
+   *
+   * @return the procedure parameter types for this action
+   */
+  public ArrayList getParameterTypes () {
+    return (ArrayList) state.getStateValue(State.PARAMETER_TYPES);
+  }
+  
+  /**
+   * Sets the procedure parameter types for this action.
+   *
+   * @param parameterNames the procedure parameter types for this action
+   */
+  public void setParameterTypes (ArrayList parameterTypes) {
+    state.setStateValue(State.PARAMETER_TYPES, parameterTypes);
+  }
+  
+  /**
+   * Gets the procedure parameter values for this action.
+   *
+   * @return the procedure parameter values for this action
+   */
+  public ArrayList getParameterValues () {
+    return (ArrayList) state.getStateValue(State.PARAMETER_VALUES);
+  }
+  
+  /**
+   * Sets the procedure parameter values for this action.
+   *
+   * @param parameterNames the procedure parameter values for this action
+   */
+  public void setParameterValues (ArrayList parameterValues) {
+    if (parameterValues.size() != getParameterTypes().size())
+      throw new ELFException("Number of parameter values (" + parameterValues.size() +
+                             ") does not match the number of parameter types (" +
+                             getParameterTypes().size() + ")");
+    for (int i = 0; i < parameterValues.size(); i++) {
+      Object parameterValue = parameterValues.get(i);
+      Class parameterType = (Class) getParameterTypes().get(i);
+      if (! (parameterType.isInstance(parameterValue))) {
+        throw new ELFException("parameter values (" + parameterValue +
+                               ") is not an instance of parameter type (" +
+                               parameterType + ")");
+      }
+    }
+    state.setStateValue(State.PARAMETER_VALUES, parameterValues);
+  }
+  
+  
+  
   /**
    * Sets the action state, including the procedure, parameters and action modifiers
    *

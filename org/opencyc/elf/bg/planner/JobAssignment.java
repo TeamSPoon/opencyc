@@ -99,6 +99,21 @@ public class JobAssignment {
     this.actionForScheduling = actionForScheduling;
   }
 
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[JobAssignment for ");
+    stringBuffer.append(requiredResources.toString());
+    stringBuffer.append(" action: ");
+    stringBuffer.append(actionName);
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
+  
   //// Protected Area
   
   //// Private Area

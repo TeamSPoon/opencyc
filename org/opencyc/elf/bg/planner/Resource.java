@@ -65,10 +65,10 @@ public class Resource {
    */
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[Resource ");
+    stringBuffer.append("[Resource: ");
     stringBuffer.append(resourceName);
     stringBuffer.append("]");
-    return resourceName;
+    return stringBuffer.toString();
   }
 
   /**

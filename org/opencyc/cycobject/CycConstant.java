@@ -86,6 +86,25 @@ public class CycConstant extends CycFort implements Comparable {
     }
 
     /**
+     * Constructs a CycConstant from the given xml databinding object.
+     *
+     * @pararm cycConstantXmlDataBinding the xml databinding object
+     */
+    public CycConstant makeCycConstant (CycConstantXmlDataBinding cycConstantXmlDataBinding) {
+        CycConstant cycConstant =
+            CycObjectFactory.getCycConstantCacheByGuid(cycConstantXmlDataBinding.getGuid());
+        if (cycConstant != null)
+            return cycConstant;
+        cycConstant = new CycConstant(cycConstantXmlDataBinding.getName(),
+                                      cycConstantXmlDataBinding.getGuid(),
+                                      cycConstantXmlDataBinding.getId());
+        CycObjectFactory.addCycConstantCacheByName(cycConstant);
+        CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
+        CycObjectFactory.addCycConstantCacheById(cycConstant);
+        return cycConstant;
+    }
+
+    /**
      * Gets the id.
      *
      * @return the id
@@ -96,7 +115,6 @@ public class CycConstant extends CycFort implements Comparable {
                 if (name == null)
                     throw new RuntimeException("Invalid CycConstant - no name to obtain id");
                     super.setId(CycAccess.current().getConstantId(name));
-                //addCacheById(this);
             }
             return super.getId();
         }
@@ -119,7 +137,6 @@ public class CycConstant extends CycFort implements Comparable {
                 if (super.getId() == null)
                     throw new RuntimeException("Invalid CycConstant - no id to obtain name");
                     name = CycAccess.current().getConstantName(super.getId());
-                //CycObjectFactory.addCycConstantCacheByName(this);
             }
             return name;
         }
@@ -293,4 +310,17 @@ public class CycConstant extends CycFort implements Comparable {
         return answer;
     }
 
+    /**
+     * Returns the CycConstantXmlDataBinding object which contains this CycConstant.  The
+     * xml databinding object can be subsequently serialized into xml.
+     *
+     * @return the CycConstantXmlDataBinding object which contains this CycConstant
+     */
+    public CycConstantXmlDataBinding toCycConstantXmlDataBinding () {
+        CycConstantXmlDataBinding cycConstantXmlDataBinding = new CycConstantXmlDataBinding();
+        cycConstantXmlDataBinding.setId(this.getId());
+        cycConstantXmlDataBinding.setName(name);
+        cycConstantXmlDataBinding.setGuid(guid);
+        return cycConstantXmlDataBinding;
+    }
 }

@@ -125,6 +125,21 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
+     * Constructs a CycNart from the given xml databinding object.
+     *
+     * @pararm cycNartXmlDataBinding the xml databinding object
+     */
+    public CycNart (CycNartXmlDataBinding cycNartXmlDataBinding) {
+        setId(cycNartXmlDataBinding.getId());
+        if (cycNartXmlDataBinding.getFunctor() instanceof CycConstantXmlDataBinding)
+            functor =
+                CycConstant.makeCycConstant((CycConstantXmlDataBinding)cycNartXmlDataBinding.getFunctor());
+        else
+            functor = new CycNart((CycNartXmlDataBinding) cycNartXmlDataBinding.getFunctor());
+        arguments = new CycList(cycNartXmlDataBinding.getArgumentList());
+    }
+
+    /**
      * Returns the given object if it is a <tt>CycNart</tt>, otherwise the object is expected to be
      * a <tt>CycList</tt> and a <tt>CycNart</tt> object is returned using the given
      * CycList representation.
@@ -416,6 +431,22 @@ public class CycNart extends CycFort implements Comparable {
         return this.toString().compareTo(object.toString());
      }
 
+    /**
+     * Returns the CycNartXmlDataBinding object which contains this CycNart.  The
+     * xml databinding object can be subsequently serialized into xml.
+     *
+     * @return the CycNartXmlDataBinding object which contains this CycConstant
+     */
+    public CycNartXmlDataBinding toCycNartXmlDataBinding () {
+        CycNartXmlDataBinding cycNartXmlDataBinding = new CycNartXmlDataBinding();
+        cycNartXmlDataBinding.setId(this.getId());
+        if (functor instanceof CycConstant)
+            cycNartXmlDataBinding.setFunctor(((CycConstant) functor).toCycConstantXmlDataBinding());
+        else
+            cycNartXmlDataBinding.setFunctor(((CycNart) functor).toCycNartXmlDataBinding());
+        cycNartXmlDataBinding.setArgumentList(arguments.toCycListXmlDataBinding());
+        return cycNartXmlDataBinding;
+    }
 
 }
 

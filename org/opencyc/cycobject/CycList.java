@@ -89,6 +89,43 @@ public class CycList extends ArrayList {
     }
 
     /**
+     * Constructs a CycList from the given xml databinding object.
+     *
+     * @pararm cycListXmlDataBinding the xml databinding object
+     */
+    public CycList (CycListXmlDataBinding cycListXmlDataBinding) {
+        for (int i = 0; i < cycListXmlDataBinding.getElementList(); i++) {
+            Object element = cycListXmlDataBinding.elementList.get(i);
+            if (element instanceof CycConstantXmlDataBinding)
+                this.add(new CycConstant((CycConstantXmlDataBinding) element));
+            else if (element instanceof CycNartXmlDataBinding)
+                this.add(new CycNart((CycNartXmlDataBinding) element));
+            else if (element instanceof CycSymbolXmlDataBinding)
+                this.add(new CycSymbol((CycSymbolXmlDataBinding) element));
+            else if (element instanceof CycVariableXmlDataBinding)
+                this.add(new CycVariable((CycVariableXmlDataBinding) element));
+            else if (element instanceof GuidXmlDataBinding)
+                this.add(new CycVariable((GuidXmlDataBinding) element));
+            else
+                this.add(element);
+        }
+        this.addAll(cycListXmlDataBinding.elementList);
+        this.isProperList = cycListXmlDataBinding.getIsProperListIndicator();
+        if (element instanceof CycConstantXmlDataBinding)
+            this.dottedElement = new CycConstant((CycConstantXmlDataBinding) element);
+        else if (element instanceof CycNartXmlDataBinding)
+            this.dottedElement = new CycNart((CycNartXmlDataBinding) element);
+        else if (element instanceof CycSymbolXmlDataBinding)
+            this.dottedElement = new CycSymbol((CycSymbolXmlDataBinding) element);
+        else if (element instanceof CycVariableXmlDataBinding)
+            this.dottedElement = new CycVariable((CycVariableXmlDataBinding) element);
+        else if (element instanceof GuidXmlDataBinding)
+            this.dottedElement = new CycVariable((GuidXmlDataBinding) element);
+        else
+            this.dottedElement = element;
+    }
+
+    /**
      * Constructs a CycList using the semantics of Lisp symbolic expressions.<br>
      * 1.  construct(a, NIL) --> (a)<br>
      * 2.  construct(a, b) --> (a . b)<br>
@@ -537,6 +574,8 @@ public class CycList extends ArrayList {
         String cyclifiedObject = null;
         for (int i = 0; i < this.size(); i++) {
             Object object = this.get(i);
+            if (object == null)
+                throw new RuntimeException("Invalid null element after " + result);
             if (object instanceof CycConstant)
                 cyclifiedObject = ((CycConstant) object).cyclify();
             else if (object instanceof CycNart)
@@ -625,5 +664,25 @@ public class CycList extends ArrayList {
                 return false;
         }
         return false;
+    }
+
+    /**
+     * Returns the CycListXmlDataBinding object which contains this CycList.  The
+     * xml databinding object can be subsequently serialized into xml.
+     *
+     * @return the CycListXmlDataBinding object which contains this CycList
+     */
+    public CycListXmlDataBinding toCycListXmlDataBinding () {
+        CycListXmlDataBinding cycListXmlDataBinding = new CycListXmlDataBinding();
+        ArrayList elementList = new ArrayList();
+        for (int i = 0; i < this.size(); i++) {
+            Object element = this.get(i);
+            if (element instanceof CycConstant)
+
+        }
+        cycListXmlDataBinding.setElementList(new ArrayList(this));
+        cycListXmlDataBinding.setIsProperListIndicator(this.isProperList);
+        cycListXmlDataBinding.setDottedElement(this.dottedElement);
+        return cycListXmlDataBinding;
     }
 }

@@ -226,16 +226,13 @@ public class UnitTest extends TestCase {
     public void testInterpreter () {
         System.out.println("\n**** testInterpreter ****");
 
-        Interpreter interpreter = new Interpreter();
-        interpreter.initialize();
-        Assert.assertNotNull(interpreter);
         ConversationFactory.reset();
         ConversationFactory conversationFactory = new ConversationFactory();
         conversationFactory.initialize();
-
         Conversation chat = conversationFactory.makeChat();
-
-        interpreter.setCurrentState(chat.getInitialState());
+        Interpreter interpreter = new Interpreter();
+        interpreter.initialize("initial", chat);
+        Assert.assertNotNull(interpreter);
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         String chatMessage = "xxxx";
         ParseResults parseResults = interpreter.templateParser.parse(chatMessage);
@@ -246,7 +243,7 @@ public class UnitTest extends TestCase {
         interpreter.transitionState(arc);
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
 
-        interpreter.setCurrentState(chat.getInitialState());
+        interpreter.initialize("initial", chat);
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         chatMessage = "quit";
         parseResults = interpreter.templateParser.parse(chatMessage);
@@ -257,7 +254,7 @@ public class UnitTest extends TestCase {
         interpreter.transitionState(arc);
         Assert.assertEquals("final", interpreter.currentState.getStateId());
 
-        interpreter.setCurrentState(chat.getInitialState());
+        interpreter.initialize("initial", chat);
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         chatMessage = "what do you know about penguins?";
         parseResults = interpreter.templateParser.parse(chatMessage);

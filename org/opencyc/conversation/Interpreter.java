@@ -12,9 +12,10 @@ import org.opencyc.util.*;
  * Contains the attributes and behavior of a chat conversation interpreter.<p>
  *
  * The chat conversation is in the form of a text conversation using
- * asynchronous receiving and sending of messages. This interpreter contains
- * all the possible finite state machine actions and interprets the
- * actions required for a state transition.
+ * asynchronous receiving and sending of messages. This interpreter models the
+ * chat interaction with nested conversations in a stack.  Mixed initiative is
+ * supported by a dictionary of conversation stacks, one of which is active,
+ * and the rest suspended.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -50,6 +51,22 @@ public class Interpreter {
      * information, persisted in the Cyc KB.
      */
     protected ChatUserModel chatUserModel;
+
+    /**
+     * dictionary of conversation stacks
+     * conversationStackId --> conversation stack
+     */
+    protected HashMap conversationStacks;
+
+    /**
+     * reference to the current conversation stack
+     */
+    protected StackWithPointer conversationStack;
+
+    /**
+     * reference to the active conversation
+     */
+    protected Conversation conversation;
 
     /**
      * finite state machine current node
@@ -95,11 +112,14 @@ public class Interpreter {
      */
     public Interpreter(ChatterBot chatterBot,
                        String chatUserNickname,
-                       String chatUserUniqueId) {
+                       String chatUserUniqueId,
+                       String conversationStackId,
+                       Conversation conversation
+                       ) {
         Log.makeLog();
         this.chatterBot = chatterBot;
         chatUserModel = chatterBot.getChatUserModel(chatUserUniqueId);
-        initialize();
+        initialize(conversationStackId, conversation);
     }
 
     /**
@@ -159,25 +179,26 @@ public class Interpreter {
     }
 
     /**
-     * Initializes the fsm interpreter
+     * Initializes the fsm interpreter.
+     *
+     * @param conversationStackId provides an id for the first
+     * conversation stack
+     * @param conversation the initial conversation, which is also the
+     * sole object on the conversation stack
      */
-    public void initialize () {
+    public void initialize (String conversationStackId,
+                            Conversation conversation) {
         templateFactory = new TemplateFactory();
         templateFactory.makeAllTemplates();
         templateParser = new TemplateParser();
         templateParser.initialize();
         performer = new Performer(this);
-
-    }
-
-    /**
-     * Sets the current state of the fsm interpreter.  Used to set the initial
-     * state only.
-     *
-     * @param currentState the current state
-     */
-    public void setCurrentState (State currentState) {
-        this.currentState = currentState;
+        conversationStack = new StackWithPointer();
+        this.conversation = conversation;
+        conversationStack.push(conversation);
+        conversationStacks = new HashMap();
+        conversationStacks.put(conversationStackId, conversationStack);
+        currentState = conversation.getInitialState();
     }
 
     /**

@@ -101,11 +101,13 @@ public class ChatterBot {
      */
     protected Interpreter makeInterpreter (String chatUserNickname,
                                            String chatUserUniqueId) {
-        Interpreter interpreter =
-            new Interpreter(this, chatUserNickname, chatUserUniqueId);
-        interpreter.initialize();
         Conversation chat = conversationFactory.makeChat();
-        interpreter.setCurrentState(chat.getInitialState());
+        Interpreter interpreter =
+            new Interpreter(this,
+                            chatUserNickname,
+                            chatUserUniqueId,
+                            "initial",
+                            chat);
         interpreters.put(chatUserUniqueId, interpreter);
         return interpreter;
     }

@@ -72,7 +72,8 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
     public RemoteCycConnection(String myAgentName,
                                String remoteAgentName,
                                int remoteAgentCommunity) throws IOException {
-        super(myAgentName, remoteAgentCommunity, AgentCommunityAdapter.DEFAULT_VERBOSITY);
+        //super(myAgentName, remoteAgentCommunity, AgentCommunityAdapter.DEFAULT_VERBOSITY);
+        super(myAgentName, remoteAgentCommunity, AgentCommunityAdapter.MAX_VERBOSITY);
         super.remoteAgentName = remoteAgentName;
         super.initializeAgentCommunity();
     }
@@ -121,7 +122,7 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
         acl.setPerformative(FIPACONSTANTS.REQUEST);
         AgentID senderAid = getAID(remoteAgentCommunity);
         acl.setSenderAID(senderAid);
-        AgentID receiverAid = this.makeAID(remoteAgentName, remoteAgentCommunity);
+        AgentID receiverAid = makeAID(remoteAgentName, remoteAgentCommunity);
         acl.addReceiverAID(receiverAid);
         CycList apiRequest = null;
         String apiRequestXml;

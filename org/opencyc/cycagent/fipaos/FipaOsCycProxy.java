@@ -63,6 +63,7 @@ public class FipaOsCycProxy {
         }
         FipaOsCommunityAdapter.platform_profile = args[0];
         FipaOsCycProxy fipaOsCycProxy =
+             //new FipaOsCycProxy(args[1], AgentCommunityAdapter.QUIET_VERBOSITY);
              new FipaOsCycProxy(args[1], AgentCommunityAdapter.MAX_VERBOSITY);
         fipaOsCycProxy.cycProxy.initializeAgentCommunity();
         while (true)

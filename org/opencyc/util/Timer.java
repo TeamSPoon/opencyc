@@ -65,7 +65,7 @@ public class Timer {
         this.start = new Date();
     }
 
-    /**
+    /*
      * Restarts this timer with the same timeout it had previously.
      */
     public void start () {
@@ -132,6 +132,10 @@ public class Timer {
         }
     }
 }
+
+
+
+
 
 
 

@@ -179,7 +179,7 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
             String inReplyTo = acl.getInReplyTo();
             Thread waitingForReply = (Thread) this.waitingReplyThreads.get(inReplyTo);
             if (waitingForReply != null) {
-                this.replyMessages.put(inReplyTo, acl);
+                replyMessages.put(inReplyTo, acl);
                 waitingForReply.interrupt();
                 return;
             }
@@ -207,10 +207,15 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
         if (verbosity > 2)
             Log.current.println("converseMessage sending\n" + acl);
         try {
+            long remainingMilliSeconds = timer.getRemainingMilliSeconds();
+            // Handle different timer behavior between org.opencyc.util.Timer and FIPA-OS.
+            if (remainingMilliSeconds >
+                (Long.MAX_VALUE / 1024))
+                remainingMilliSeconds = Long.MAX_VALUE / 1024;
             result =
                 SynchronousTask.executeTask(_tm,
                                             new RequestTask(acl),
-                                            timer.getRemainingMilliSeconds());
+                                            remainingMilliSeconds);
             if (verbosity > 2)
                 Log.current.println("result:\n" + result);
 
@@ -453,6 +458,9 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
                     break;
                 }
             ACL replyAcl = (ACL) replyMessages.get(requestAcl.getReplyWith());
+            replyAcl.setSenderAID(getAID());
+            if (verbosity > 0)
+                Log.current.println("\nSending inform acl\n" + replyAcl);
             forward(replyAcl);
             done();
         }

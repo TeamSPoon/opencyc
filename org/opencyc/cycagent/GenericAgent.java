@@ -48,7 +48,8 @@ public class GenericAgent implements MessageReceiver {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 1;
+    //public static final int DEFAULT_VERBOSITY = AgentCommunityAdapter.QUIET_VERBOSITY;
+    public static final int DEFAULT_VERBOSITY = AgentCommunityAdapter.MAX_VERBOSITY;
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -201,8 +202,7 @@ public class GenericAgent implements MessageReceiver {
         ACL echoReplyAcl = (ACL) echoRequestAcl.clone();
         echoReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
         echoReplyAcl.setSenderAID(getAID(remoteAgentCommunity));
-        echoReplyAcl.setReceiverAID(makeAID(echoRequestAcl.getSenderAID().getName(),
-                                    remoteAgentCommunity));
+        echoReplyAcl.setReceiverAID(echoRequestAcl.getSenderAID());
         echoReplyAcl.setReplyWith(null);
         echoReplyAcl.setInReplyTo(echoRequestAcl.getReplyWith());
         if (verbosity > 0)

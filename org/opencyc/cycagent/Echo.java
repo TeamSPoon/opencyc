@@ -71,7 +71,7 @@ public class Echo extends GenericAgent {
         }
         echo.echoMessageText = args[2];
         echo.myAgentName = "EchoAgent";
-        echo.setVerbosity(AgentCommunityAdapter.MAX_VERBOSITY);
+        echo.setVerbosity(AgentCommunityAdapter.QUIET_VERBOSITY);
         echo.initializeAgentCommunity();
         echo.doEcho();
         echo.agentCommunityAdapter.deregister();

@@ -35,9 +35,10 @@ import org.opencyc.util.*;
  */
 public class UnitTest extends TestCase {
 
-    public static final String myAgentName = "Agent2";
-    public static final String cycProxyAgentName = "Agent1";
-    public static final int agentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNITY;
+    public static final String myAgentName = "ApiTestAgent";
+    public static final String cycProxyAgentName = "CycProxyAgent";
+    //public static final int agentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNITY;
+    public static final int agentCommunity = AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY;
 
     /**
      * Indicates the use of a local CycConnection object to connect with

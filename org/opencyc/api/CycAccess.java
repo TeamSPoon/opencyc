@@ -287,7 +287,7 @@ public class CycAccess {
      *
      * @param command the command string or CycList
      */
-    private Object [] converse(Object command)
+    protected Object [] converse(Object command)
         throws IOException, UnknownHostException, CycApiException {
         Object [] response = {null, null};
         if (! persistentConnection) {

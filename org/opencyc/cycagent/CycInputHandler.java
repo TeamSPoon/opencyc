@@ -171,7 +171,7 @@ class CycInputHandler implements Runnable {
     }
 
     /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input

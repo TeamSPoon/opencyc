@@ -80,6 +80,11 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
     protected String agentName;
 
     /**
+     * The Cyc Api Service Agent name.
+     */
+    String cycApiServiceAgentName = "BalrogCycApiService-3600";
+
+    /**
      * the CoABS AgentRestrationHelper object.
      */
     protected AgentRegistrationHelper regHelper;
@@ -259,6 +264,27 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
      * Sends the Cyc API request message.
      */
     public void sendCycApiRequest() {
+        String command = "(remove-duplicates (with-all-mts (isa #$Dog)))";
+        String requestMessageText = "(request :\n" +
+                                    "  sender: " + agentName + "\n" +
+                                    "  receiver: " + cycApiServiceAgentName + "\n" +
+                                    "  content: " + command + "\n" +
+                                    ")";
+        Message requestMessage = new BasicMessage(cycApiServiceAgentName,
+                                                  regHelper.getAgentRep(),
+                                                  "FIPA-ACL",
+                                                  requestMessageText);
+        if (verbosity > 2)
+            Log.current.println("\nRequesting " + requestMessage.toString());
+        forward(requestMessage);
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
     }
 
     /**

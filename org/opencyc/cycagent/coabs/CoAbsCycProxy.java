@@ -299,9 +299,9 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
                                   "  content: " + ((CycList) response[1]).cyclify() + "\n" +
                                   ")";
         Message replyMessage = new BasicMessage(fromAgentName,
-                                        regHelper.getAgentRep(),
-                                        message.getACL(),
-                                        replyMessageText);
+                                                regHelper.getAgentRep(),
+                                                message.getACL(),
+                                                replyMessageText);
         if (verbosity > 2)
             Log.current.println("\nReplying with " + replyMessage.toString());
         forward(replyMessage);

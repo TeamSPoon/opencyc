@@ -3833,12 +3833,13 @@ public class CycAccess {
         // (predicate <CycFort> <CycFort>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.stringApiValue() + " " +
-            arg1.stringApiValue() + " " +
-            arg2.stringApiValue() + ")" +
-            mt.stringApiValue() + "))";
+            gafApiValue(predicate) + " " +
+            gafApiValue(arg1) + " " +
+            gafApiValue(arg2) + ")" +
+            gafApiValue(mt) + "))";
         converseVoid(command);
     }
+
     /**
      * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
      * will be added to the KB transcript for replication and archive.
@@ -3859,12 +3860,13 @@ public class CycAccess {
         // (predicate <CycFort> <String>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.stringApiValue() + " " +
-            arg1.stringApiValue() + " " +
+            gafApiValue(predicate) + " " +
+            gafApiValue(arg1) + " " +
             "\"" + arg2 + "\")" +
-            mt.stringApiValue() + "))";
+            gafApiValue(mt) + "))";
         converseVoid(command);
     }
+
     /**
      * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
      * will be added to the KB transcript for replication and archive.
@@ -3885,12 +3887,13 @@ public class CycAccess {
         // (predicate <CycFort> <List>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.stringApiValue() + " " +
-            arg1.stringApiValue() + " " +
-            arg2.stringApiValue() + ")" +
-            mt.stringApiValue() + "))";
+            gafApiValue(predicate) + " " +
+            gafApiValue(arg1) + " " +
+            arg2.cyclify() + ")" +
+            gafApiValue(mt) + "))";
         converseVoid(command);
     }
+
     /**
      * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
      * will be added to the KB transcript for replication and archive.
@@ -3911,10 +3914,10 @@ public class CycAccess {
         // (predicate <CycFort> <int>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.stringApiValue() + " " +
-            arg1.stringApiValue() + " " +
+            gafApiValue(predicate) + " " +
+            gafApiValue(arg1) + " " +
             arg2 + ")" +
-            mt.stringApiValue() + "))";
+            gafApiValue(mt) + "))";
         converseVoid(command);
     }
 
@@ -3940,13 +3943,28 @@ public class CycAccess {
         // (predicate <CycFort> <CycFort> <CycFort>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.stringApiValue() + " " +
-            arg1.stringApiValue() + " " +
-            arg2.stringApiValue() + " " +
-            arg3.stringApiValue() + ")" +
-            mt.stringApiValue() + "))";
+            gafApiValue(predicate) + " " +
+            gafApiValue(arg1) + " " +
+            gafApiValue(arg2) + " " +
+            gafApiValue(arg3) + ")" +
+            gafApiValue(mt) + "))";
         converseVoid(command);
     }
+
+
+    /**
+     * Returns a string form of the given term that is used in gaf assertions.
+     *
+     * @param cycFort the given term used in a gaf assertion
+     * @return the string form of the given term that is used in gaf assertions
+     */
+    protected String gafApiValue (CycFort cycFort) {
+        if (cycFort instanceof CycConstant)
+            return cycFort.cyclify();
+        else
+            return cycFort.toString();
+    }
+
 
     /**
      * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
@@ -3978,7 +3996,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public void unassertGaf (CycList gaf,
-                           CycFort mt)
+                            CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         String command = withBookkeepingInfo() +
             "(cyc-unassert '" +

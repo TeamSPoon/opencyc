@@ -74,7 +74,7 @@ public class ExportDaml {
      * The default verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected static final int DEFAULT_VERBOSITY = 3;
+    protected static final int DEFAULT_VERBOSITY = 9;
 
     /**
      * Sets verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
@@ -386,16 +386,17 @@ public class ExportDaml {
         createDamlOntologyNode();
         createCycGuidNode();
         cycAccess =
+            /*
             new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                           CycConnection.DEFAULT_BASE_PORT,
                           CycConnection.DEFAULT_COMMUNICATION_MODE,
                           CycAccess.DEFAULT_CONNECTION);
-            /*
+            */
             new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                           3620,
                           CycConnection.DEFAULT_COMMUNICATION_MODE,
                           CycAccess.DEFAULT_CONNECTION);
-                          */
+
         if (exportCommand == ExportDaml.EXPORT_ENTIRE_KB) {
             includeUpwardClosure = false;
             if (verbosity > 1)
@@ -739,14 +740,23 @@ public class ExportDaml {
      * of more general cycConstants for cycNarts
      */
     protected CycList substituteGenlConstantsForNarts (CycList cycForts)
-    throws UnknownHostException, IOException, CycApiException {
+    throws UnknownHostException, IOException {
         CycList result = new CycList();
         for (int i = 0; i < cycForts.size(); i++) {
             CycFort cycFort = (CycFort) cycForts.get(i);
             if (cycFort instanceof CycConstant)
                 result.add(cycFort);
             else {
-                CycList genls = cycAccess.getGenls(cycFort);
+                try {
+                    cycAccess.traceOn();
+                    CycList genls = cycAccess.getGenls(cycFort);
+                }
+                catch (CycApiException e) {
+                    Log.current.println("Cannot get genls for " + cycFort);
+                    Log.current.printStackTrace(e);
+                }
+                cycAccess.traceOff();
+
                 if (verbosity > 0)
                     Log.current.println(" substituting genls " + genls + " for " + cycFort);
                 result.addAllNew(genls);

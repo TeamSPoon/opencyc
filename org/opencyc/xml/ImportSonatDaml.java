@@ -62,10 +62,13 @@ public class ImportSonatDaml {
     public ImportSonatDaml()
         throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Connecting to Cyc server.");
+        cycAccess = new CycAccess();
+        /*
         cycAccess = new CycAccess("MCCARTHY",
                                   4600,
                                   CycConnection.DEFAULT_COMMUNICATION_MODE,
                                   true);
+                                  */
         initializeDamlVocabulary();
     }
 
@@ -277,7 +280,9 @@ public class ImportSonatDaml {
     protected void initializeDamlVocabulary ()
         throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Creating DAML vocabulary");
-        if (cycAccess.isOpenCyc()) {
+        if (cycAccess.isOpenCyc()
+            //TODO
+            || true) {
             cycAccess.setCyclist("CycAdministrator");
             cycAccess.setKePurpose("OpenCycProject");
 

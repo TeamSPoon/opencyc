@@ -378,8 +378,7 @@ public class CycNart extends CycFort implements Comparable {
      * @return this object in a form suitable for use as an <tt>String</tt> api expression value
      */
     public String stringApiValue() {
-        //return "(quote " + cyclify() + ")";
-        return cyclify();
+        return "(quote " + cyclify() + ")";
     }
 
     /**
@@ -388,13 +387,10 @@ public class CycNart extends CycFort implements Comparable {
      * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
      */
     public Object cycListApiValue() {
-        return this;
-        /*
         CycList apiValue = new CycList();
         apiValue.add(CycObjectFactory.quote);
         apiValue.add(this);
         return apiValue;
-        */
     }
 
     /**

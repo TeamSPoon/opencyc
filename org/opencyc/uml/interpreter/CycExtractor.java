@@ -148,6 +148,7 @@ public class CycExtractor {
         this.stateMachineName = stateMachineName;
         stateMachine = extractStateMachine();
         extractProcedures();
+        extractStates();
         return stateMachine;
     }
 
@@ -169,7 +170,6 @@ public class CycExtractor {
                                                     commentString,
                                                     context);
     }
-
 
     /**
      * Extracts the procedures for the state machine from Cyc.
@@ -240,7 +240,6 @@ public class CycExtractor {
                                                             type);
             }
         }
-
     }
 
     /**
@@ -290,6 +289,94 @@ public class CycExtractor {
                 resultTerms.add(term);
             }
         }
+    }
+
+    /**
+     * Extracts the states for the state machine from Cyc.
+     */
+    protected void extractStates ()
+            throws IOException, CycApiException, ClassNotFoundException {
+        Iterator iter = stateVertexTerms.iterator();
+        while (iter.hasNext()) {
+            CycConstant stateVertexTerm = (CycConstant) iter.next();
+            if (cycAccess.isa(stateVertexTerm,
+                              cycAccess.getKnownConstantByName("UMLCompositeState")))
+                extractCompositeState(stateVertexTerm);
+            else if (cycAccess.isa(stateVertexTerm,
+                                   cycAccess.getKnownConstantByName("UMLPseudoState")))
+                extractPseudoState(stateVertexTerm);
+            else if (cycAccess.isa(stateVertexTerm,
+                                   cycAccess.getKnownConstantByName("UMLSimpleState")))
+                extractSimpleState(stateVertexTerm);
+            else if (cycAccess.isa(stateVertexTerm,
+                                   cycAccess.getKnownConstantByName("UMLFinalState")))
+                extractFinalState(stateVertexTerm);
+            else
+                throw new RuntimeException("Unhandled stateVertexTerm " +
+                                           stateVertexTerm.cyclify());
+        }
+    }
+
+    /**
+     * Extracts a composite state from Cyc given its Cyc term
+     *
+     * @param compositeStateTerm the given composite state term
+     */
+    protected void extractCompositeState (CycConstant compositeStateTerm)
+        throws IOException, CycApiException {
+        String name = compositeStateTerm.toString();
+        String commentString =
+            cycAccess.getComment(compositeStateTerm);
+        CompositeState container = null;
+        Procedure entry = null;
+        Procedure exit = null;
+        Procedure doActivity = null;
+        boolean isConcurrent = false;
+
+        CompositeState topState =
+            stateMachineFactory.makeCompositeState(name,
+                                                   commentString,
+                                                   container,
+                                                   entry,
+                                                   exit,
+                                                   doActivity,
+                                                   isConcurrent);
+    }
+
+    /**
+     * Extracts a pseudo state from Cyc given its Cyc term
+     *
+     * @param pseuodStateTerm the given pseudo state term
+     */
+    protected void extractPseudoState (CycConstant pseudoStateTerm)
+        throws IOException, CycApiException {
+        String name = pseudoStateTerm.toString();
+        String commentString =
+            cycAccess.getComment(pseudoStateTerm);
+    }
+
+    /**
+     * Extracts a simple state from Cyc given its Cyc term
+     *
+     * @param simpleStateTerm the given state vertex term
+     */
+    protected void extractSimpleState (CycConstant simpleStateTerm)
+        throws IOException, CycApiException {
+        String name = simpleStateTerm.toString();
+        String commentString =
+            cycAccess.getComment(simpleStateTerm);
+    }
+
+    /**
+     * Extracts a final state from Cyc given its Cyc term
+     *
+     * @param finalStateTerm the given state vertex term
+     */
+    protected void extractFinalState (CycConstant finalStateTerm)
+        throws IOException, CycApiException {
+        String name = finalStateTerm.toString();
+        String commentString =
+            cycAccess.getComment(finalStateTerm);
     }
 
     /**
@@ -345,7 +432,6 @@ public class CycExtractor {
                     Log.current.println("Extracted transition " + modelElementTerm.cyclify());
             }
         }
-
     }
 
     /**
@@ -401,8 +487,6 @@ public class CycExtractor {
                     Log.current.println("Extracted procedure " + effectProcedureTerm.cyclify());
             }
         }
-
-
     }
 
     /**

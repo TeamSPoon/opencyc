@@ -76,19 +76,39 @@ public class Status {
   }
   
   /** When present, indicates to the job assigner that the reporting scheduler has finished
-   * the assigned schedule.
+   * the assigned job.
+   */
+  public static String JOB_FINISHED = "job finished";
+  
+  /** When present, indicates to the job assigner that the reporting scheduler has stopped
+   * the assigned job as directed.
+   */
+  public static String JOB_STOPPED = "job stopped";
+  
+  /** When present, indicates to the scheduler that the reporting executor has finished
+   * executing the schedule.
    */
   public static String SCHEDULE_FINISHED = "schedule finished";
   
-  /** When present, indicates to the scheduler that the executor encountered an exceptional
-   * condition while processing the current schedule.
+  /** When present, indicates to the scheduler that the reporting executor has stopped
+   * the current schedule as directed.
    */
-  public static String EXECUTION_EXCEPTION = "execution exception";
+  public static String SCHEDULE_STOPPED = "schedule stopped";
   
-  /** When present, indicates to the higher-level executor that the reporting job assigner has 
-   * finished the commanded task.
+  /** When present, indicates to the higher-level executor that the reporting job assigner 
+   * or actuator has finished the commanded task.
    */
-  public static String TASK_FINISHED = "task finished";
+  public static String COMMAND_FINISHED = "command finished";
+  
+  /** When present, indicates to the higher-level executor that the reporting job assigner 
+   * or actuator has stopped the commanded task as directed.
+   */
+  public static String COMMAND_STOPPED = "command stopped";
+  
+  /** When present, indicates to the receiver that the sender directly or indirectly
+   * detected an exceptional condition without handling it.
+   */
+  public static String EXCEPTION = "exception";
   
   //// Protected Area
   

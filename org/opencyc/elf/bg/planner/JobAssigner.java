@@ -436,7 +436,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       else {
         getLogger().info("The commanded task " + taskCommand + " is done");
         Status status = new Status();
-        status.setValue(Status.TASK_FINISHED, Boolean.TRUE);
+        status.setValue(Status.COMMAND_FINISHED, Boolean.TRUE);
         JobAssignerStatusMsg jobAssignerStatusMsg = new JobAssignerStatusMsg(sender, status);
         sender.sendMsgToRecipient(executorChannel, jobAssignerStatusMsg);
       }

@@ -274,7 +274,7 @@ public class Scheduler extends BufferedNodeComponent {
      */
     protected void createExecutor(Schedule schedule) {
       Channel executorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
-      executor = new org.opencyc.elf.bg.executor.Executor(getNode(), executorChannel, (Scheduler) thisScheduler);
+      executor = new org.opencyc.elf.bg.executor.Executor(getNode(), executorChannel);
       executor.initialize((Puttable) schedulerChannel);
       getLogger().info("Created new executor: " + executor + " for schedule: " + schedule);
     }
@@ -299,7 +299,7 @@ public class Scheduler extends BufferedNodeComponent {
         SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(thisScheduler, status);
         thisScheduler.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
       }
-      else if (status.isTrue(Status.EXECUTION_EXCEPTION)) 
+      else if (status.isTrue(Status.EXCEPTION)) 
         handleExecutorException(status);
       else
         throw new BehaviorEngineException("Executor status not handled " + status); 

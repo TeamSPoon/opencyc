@@ -4,13 +4,14 @@ package org.opencyc.elf.bg.executor;
 import org.opencyc.elf.BufferedNodeComponent;
 import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
+import org.opencyc.elf.Status;
 
 import org.opencyc.elf.bg.BehaviorGeneration;
 
 import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.planner.Scheduler;
 
-import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.message.ExecuteScheduleMsg;
@@ -19,6 +20,7 @@ import org.opencyc.elf.message.GenericMsg;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
@@ -56,14 +58,12 @@ public class Executor extends BufferedNodeComponent {
    * @param node the containing ELF node
    * @param executorChannel the takable channel from which messages are input from the
    * associated scheduler
-   * @param scheduler the scheduler whose plans this executor executes
    */
   public Executor (Node node,
-                   Takable executorChannel,
-                   Scheduler scheduler) {
+                   Takable executorChannel) {
     setNode(node);
-    this.executorChannel = executorChannel;         
-    this.scheduler = scheduler;
+    this.executorChannel = executorChannel;
+    this.executor = this;
   }
 
   //// Public Area
@@ -154,7 +154,9 @@ public class Executor extends BufferedNodeComponent {
      * 
      * @param executeSceduleMsg the execute schedule message
      */
-    protected void processExecutorScheduleMsg(ExecuteScheduleMsg executeSceduleMsg) {
+    protected void processExecutorScheduleMsg(ExecuteScheduleMsg executeScheduleMsg) {
+      executor.schedule = executeScheduleMsg.getSchedule();
+      controlledResources = executeScheduleMsg.getControlledResources();
       scheduleSequencer = new ScheduleSequencer();
       scheduleSequencerExecutor = new ThreadedExecutor();
       try {
@@ -172,12 +174,25 @@ public class Executor extends BufferedNodeComponent {
     
     /** Constructs a new ScheduleExecutor object */
     ScheduleSequencer() {
+      executor.stopSchedule = false;
     }
     
     /** Executes the input schedule. */
     public void run() {
-    }
-    
+      Command command = null;
+      Command nextCommand = null;
+      Iterator commandIterator = executor.schedule.getPlannedCommands().iterator();
+      while (true) {
+        //TODO
+        if (executor.stopSchedule) {
+          Status status = new Status();
+          
+          return;
+        }
+        command = (Command) commandIterator.next();
+        TaskCommand taskCommand = new TaskCommand(command, nextCommand);
+      }
+    }    
   }
   
   /** Receives the update schedule message from ? */
@@ -242,15 +257,13 @@ public class Executor extends BufferedNodeComponent {
   /** the schedule sequencer thread executor */
   protected EDU.oswego.cs.dl.util.concurrent.Executor scheduleSequencerExecutor;
   
-  /** the executor for this scheduler */
+  /** the executor for this schedule */
   protected org.opencyc.elf.bg.executor.Executor executor;
-  
+    
   /** the schedule to execute */
-  protected Schedule scheduleToExecute;
+  protected Schedule schedule;
+  
+  /** when true, indicates that the schedule sequencer is to stop processing the schedule */
+  protected boolean stopSchedule = false;
 
-  /** the behavior generation instance which owns this executor */
-  protected BehaviorGeneration behaviorGeneration;
-
-  /** the scheduler whose plans this executor executes */
-  protected Scheduler scheduler;
 }

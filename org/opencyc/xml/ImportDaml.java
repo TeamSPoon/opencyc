@@ -170,6 +170,8 @@ public class ImportDaml implements StatementHandler {
 
             equivalentDamlCycTerms.put("xsd:string", "CharacterString");
 
+            equivalentDamlCycTerms.put("xsd:anyURI", "UniformResourceLocator");
+
             // Binary predicates
             equivalentDamlCycTerms.put("daml:subClassOf", "genls");
             equivalentDamlCycTerms.put("rdfs:subClassOf", "genls");
@@ -265,23 +267,21 @@ public class ImportDaml implements StatementHandler {
      * @param object the RDF Triple Object
      */
     public void statement(AResource subject, AResource predicate, AResource object) {
-        if (subject.isAnonymous()) {
-            processRestrictionSubject(subject, predicate, object);
-            Log.current.println();
-            return;
-        }
-        if (object.isAnonymous()) {
-            processRestrictionObject(subject, predicate, object);
-            Log.current.println();
-        return;
-        }
-        DamlTermInfo subjectTermInfo = resource(subject, null);
-        DamlTermInfo predicateTermInfo = resource(predicate, null);
-        DamlTermInfo objectTermInfo = resource(object, predicateTermInfo);
-        displayTriple(subjectTermInfo,
-                      predicateTermInfo,
-                      objectTermInfo);
         try {
+            if (subject.isAnonymous()) {
+                processRestrictionSubject(subject, predicate, object);
+                return;
+            }
+            if (object.isAnonymous()) {
+                processRestrictionObject(subject, predicate, object);
+                return;
+            }
+            DamlTermInfo subjectTermInfo = resource(subject, null);
+            DamlTermInfo predicateTermInfo = resource(predicate, null);
+            DamlTermInfo objectTermInfo = resource(object, predicateTermInfo);
+            displayTriple(subjectTermInfo,
+                          predicateTermInfo,
+                          objectTermInfo);
             importTriple(subjectTermInfo,
                          predicateTermInfo,
                          objectTermInfo);
@@ -289,7 +289,6 @@ public class ImportDaml implements StatementHandler {
         catch (Exception e) {
             Log.current.printStackTrace(e);
             System.exit(1);
-
         }
     }
 
@@ -301,28 +300,27 @@ public class ImportDaml implements StatementHandler {
      * @param literal the RDF Triple Literal
      */
     public void statement(AResource subject, AResource predicate, ALiteral literal) {
-        if (subject.isAnonymous()) {
-            processRestrictionSubject(subject, predicate, literal);
-        }
-        else {
-            DamlTermInfo subjectTermInfo = resource(subject, null);
-            DamlTermInfo predicateTermInfo = resource(predicate, null);
-            DamlTermInfo literalTermInfo = literal(literal);
-            displayTriple(subjectTermInfo,
-                          predicateTermInfo,
-                          literalTermInfo);
+        try {
+            if (subject.isAnonymous()) {
+                processRestrictionSubject(subject, predicate, literal);
+            }
+            else {
+                DamlTermInfo subjectTermInfo = resource(subject, null);
+                DamlTermInfo predicateTermInfo = resource(predicate, null);
+                DamlTermInfo literalTermInfo = literal(literal);
+                displayTriple(subjectTermInfo,
+                              predicateTermInfo,
+                              literalTermInfo);
 
-            try {
                 importTriple(subjectTermInfo,
                              predicateTermInfo,
                              literalTermInfo);
+                }
             }
             catch (Exception e) {
                 Log.current.printStackTrace(e);
                 System.exit(1);
-
             }
-        }
     }
 
     /**
@@ -484,6 +482,8 @@ public class ImportDaml implements StatementHandler {
                                     DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         importTerm(subjectTermInfo);
+        if (objectTermInfo.cycFort == null)
+            importTerm(objectTermInfo);
         cycAccess.assertEqualSymbols(subjectTermInfo.toString(),
                                      objectTermInfo.toString());
         Log.current.println("(#$equalSymbols " +
@@ -651,7 +651,8 @@ public class ImportDaml implements StatementHandler {
      */
     protected CycFort importTerm (DamlTermInfo damlTermInfo)
         throws IOException, UnknownHostException, CycApiException {
-        if (previousDamlTermInfo != null &&
+        if (damlTermInfo.cycFort != null &&
+            previousDamlTermInfo != null &&
             previousDamlTermInfo.equals(damlTermInfo))
             return previousDamlTermInfo.cycFort;
 
@@ -811,7 +812,8 @@ public class ImportDaml implements StatementHandler {
      */
     protected void processRestrictionSubject(AResource subject,
                                              AResource predicate,
-                                             AResource object) {
+                                             AResource object)
+        throws IOException, UnknownHostException, CycApiException {
         DamlTermInfo subjectTermInfo = resource(subject, null);
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo objectTermInfo = resource(object, null);
@@ -825,21 +827,21 @@ public class ImportDaml implements StatementHandler {
         }
         else if (damlRestriction == null) {
             // Not a Restriction, but an anonymous Class.
-            try {
-                importTriple(subjectTermInfo,
-                             predicateTermInfo,
-                             objectTermInfo);
-            }
-            catch (Exception e) {
-                Log.current.printStackTrace(e);
-                System.exit(1);
-            }
+            importTriple(subjectTermInfo,
+                         predicateTermInfo,
+                         objectTermInfo);
             return;
         }
-        else if (predicateTermInfo.toString().equals("daml:onProperty"))
-            damlRestriction.property = objectTermInfo.toString();
-        else if (predicateTermInfo.toString().equals("daml:toClass"))
-            damlRestriction.toClasses.add(objectTermInfo.toString());
+        else if (predicateTermInfo.toString().equals("daml:onProperty")) {
+            if (objectTermInfo.cycFort == null)
+                importTerm(objectTermInfo);
+            damlRestriction.property = objectTermInfo.cycFort;
+        }
+        else if (predicateTermInfo.toString().equals("daml:toClass")) {
+            if (objectTermInfo.cycFort == null)
+                importTerm(objectTermInfo);
+            damlRestriction.toClasses.add(objectTermInfo.cycFort);
+        }
         else
             throw new RuntimeException("Unexpected restriction property " +
                                        predicateTermInfo.toString());
@@ -854,7 +856,8 @@ public class ImportDaml implements StatementHandler {
      */
     protected void processRestrictionSubject(AResource subject,
                                              AResource predicate,
-                                             ALiteral literal) {
+                                             ALiteral literal)
+        throws IOException, UnknownHostException, CycApiException {
         DamlTermInfo subjectTermInfo = resource(subject, null);
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo literalTermInfo = literal(literal);
@@ -863,21 +866,20 @@ public class ImportDaml implements StatementHandler {
                       literalTermInfo);
         if (damlRestriction == null) {
             // Not a Restriction, but an anonymous Class.
-            try {
-                importTriple(subjectTermInfo,
-                             predicateTermInfo,
-                             literalTermInfo);
-            }
-            catch (Exception e) {
-                Log.current.printStackTrace(e);
-                System.exit(1);
-            }
+            importTriple(subjectTermInfo,
+                         predicateTermInfo,
+                         literalTermInfo);
             return;
         }
-        throw new RuntimeException("Unexpected restriction triple \n" +
-                                   subjectTermInfo.toString() + " " +
-                                   predicateTermInfo.toString() + " " +
-                                   literalTermInfo.toString());
+        if (predicateTermInfo.toString().equals("daml:maxCardinality") ||
+            predicateTermInfo.toString().equals("daml:cardinality"))
+            damlRestriction.maxCardinality = new Integer(literalTermInfo.literalValue());
+        else
+            //TODO
+            Log.current.println("\n*** unimplemented restriction triple \n    " +
+                                subjectTermInfo.toString() + " " +
+                                predicateTermInfo.toString() + " " +
+                                literalTermInfo.toString() + "\n");
     }
 
     /**
@@ -889,7 +891,8 @@ public class ImportDaml implements StatementHandler {
      */
     protected void processRestrictionObject(AResource subject,
                                             AResource predicate,
-                                            AResource object) {
+                                            AResource object)
+        throws IOException, UnknownHostException, CycApiException {
         DamlTermInfo subjectTermInfo = resource(subject, null);
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo objectTermInfo = resource(object, null);
@@ -909,21 +912,32 @@ public class ImportDaml implements StatementHandler {
             }
             return;
         }
-        if (predicateTermInfo.toString().equals("genls"))
-            damlRestriction.fromClass = subjectTermInfo.toString();
+        if (predicateTermInfo.toString().equals("genls")) {
+            if (subjectTermInfo.cycFort == null)
+                importTerm(subjectTermInfo);
+            damlRestriction.fromClass = subjectTermInfo.cycFort;
+        }
         else
             throw new RuntimeException("Unexpected restriction property " +
                                        predicateTermInfo.toString());
         try {
-            damlRestriction.formInterArgIsaConstraint();
-            cycAccess.assertGaf(damlRestriction.interArgIsaConstraint,
-                                importMt);
+            damlRestriction.formInterArgConstraints();
+            if (damlRestriction.interArgIsaConstraint != null) {
+                cycAccess.assertGaf(damlRestriction.interArgIsaConstraint,
+                                    importMt);
+                Log.current.println(damlRestriction.interArgIsaConstraint.cyclify());
+            }
+            if (damlRestriction.interArgFormatConstraint != null) {
+                cycAccess.assertGaf(damlRestriction.interArgFormatConstraint,
+                                    importMt);
+                Log.current.println(damlRestriction.interArgFormatConstraint.cyclify());
+            }
+            Log.current.println();
         }
         catch (Exception e) {
             Log.current.printStackTrace(e);
             System.exit(1);
         }
-        Log.current.println("\n" + damlRestriction.interArgIsaConstraint.cyclify());
         damlRestriction = null;
     }
 
@@ -1100,7 +1114,7 @@ public class ImportDaml implements StatementHandler {
 
     /**
      * Records property use restrictions which get imported
-     * as Cyc interArgIsa1-2 assertions.
+     * as Cyc interArgIsa1-2 or interArgFormat1-2 assertions.
      */
     protected class DamlRestriction {
 
@@ -1118,12 +1132,12 @@ public class ImportDaml implements StatementHandler {
         /**
          * The domain (Cyc arg1) class whose intstances are the subject of the property.
          */
-        public String fromClass;
+        public CycFort fromClass;
 
         /**
          * The property (Cyc predicate arg0) which relates the subject and predicate instances.
          */
-        public String property;
+        public CycFort property;
 
         /**
          * The range (Cyc arg2) classes whose instances may be objects of the property in the
@@ -1132,9 +1146,19 @@ public class ImportDaml implements StatementHandler {
         public ArrayList toClasses = new ArrayList();
 
         /**
-         * The interArgIsa1-2 constraint sentence.
+         * the maxCardinality restriction
+         */
+        public Integer maxCardinality;
+
+        /**
+         * the interArgIsa constraint sentence
          */
         public CycList interArgIsaConstraint;
+
+        /**
+         * the interArgFormat constraint sentence
+         */
+        public CycList interArgFormatConstraint;
 
         /**
          * Constructs a new DamlRestriction object.
@@ -1143,20 +1167,54 @@ public class ImportDaml implements StatementHandler {
             this.importDaml = importDaml;
         }
 
-        public CycList formInterArgIsaConstraint()
+        /**
+         * Forms the restriction constraints.
+         */
+        protected void formInterArgConstraints()
+            throws IOException, UnknownHostException, CycApiException {
+            if (maxCardinality != null)
+                formInterArgFormatConstraint();
+            if (toClasses.size() > 0)
+                formInterArgIsaConstraint();
+        }
+
+        /**
+         * Forms the interArgIsa1-2 constraint.
+         */
+        protected void formInterArgIsaConstraint()
             throws IOException, UnknownHostException, CycApiException {
             if (toClasses.size() == 1) {
+                CycFort toClass = (CycFort) toClasses.get(0);
                 String interArgIsaConstraintString =
-                    "(#$interArgIsa1-2 #$" + property +
-                    " #$" + fromClass +
-                    " #$" + toClasses.get(0) + ")";
+                    "(#$interArgIsa1-2 " +
+                    property.cyclify() + " " +
+                    fromClass.cyclify() + " " +
+                    toClass.cyclify() + ")";
                 interArgIsaConstraint = cycAccess.makeCycList(interArgIsaConstraintString);
             }
             else
                 //TODO
-                throw new RuntimeException("Unhandled restriction case: " +
+                throw new RuntimeException("Unhandled interArgIsa restriction case: " +
                                            toClasses.toString());
-            return interArgIsaConstraint;
+        }
+
+        /**
+         * Forms the interArgFormat1-2 constraint.
+         */
+        protected void formInterArgFormatConstraint()
+            throws IOException, UnknownHostException, CycApiException {
+            if (this.maxCardinality.intValue() == 1) {
+                String interArgFormatConstraintString =
+                    "(#$interArgFormat1-2 " +
+                    property.cyclify() + " " +
+                    fromClass.cyclify() + " " +
+                    "#$SingleEntry)";
+                interArgFormatConstraint = cycAccess.makeCycList(interArgFormatConstraintString);
+            }
+            else
+                //TODO
+                throw new RuntimeException("Unhandled maxCardinality restriction case: " +
+                                           maxCardinality.toString());
         }
 
         /**

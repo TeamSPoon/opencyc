@@ -43,14 +43,6 @@ public class ResourcePool {
   //// Public Area
   
   /**
-   * Initializes the resource pool.
-   */
-  public void initialize () {
-    ResourceFactory resourceFactory = new ResourceFactory();
-    resourceFactory.makeResources();
-  }
-  
-  /**
    * Gets the singleton resource pool instance.
    *
    * @return the singleton resource pool instance

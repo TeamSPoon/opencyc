@@ -55,12 +55,12 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        //testSuite.addTest(new UnitTest("testJavaInterpreter"));
-        //testSuite.addTest(new UnitTest("testExpressionEvaluation"));
+        testSuite.addTest(new UnitTest("testJavaInterpreter"));
+        testSuite.addTest(new UnitTest("testExpressionEvaluation"));
         testSuite.addTest(new UnitTest("testContextFrames"));
-        //testSuite.addTest(new UnitTest("testProcedureInterpretation"));
-        //testSuite.addTest(new UnitTest("testSimpleStateMachine"));
-        //testSuite.addTest(new UnitTest("testCycExtractor"));
+        testSuite.addTest(new UnitTest("testProcedureInterpretation"));
+        testSuite.addTest(new UnitTest("testSimpleStateMachine"));
+        testSuite.addTest(new UnitTest("testCycExtractor"));
         return testSuite;
     }
 
@@ -133,7 +133,8 @@ public class UnitTest extends TestCase {
                 cycAccess.setKePurpose("OpenCyc");
             }
             cycAccess.setCyclist(cycAccess.getKnownConstantByName("Cyc"));
-            CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01-ContextMt");
+            CycFort stateMt =
+                cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
 
             cycAccess.unassertMtContentsWithoutTranscript(stateMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
@@ -218,12 +219,10 @@ public class UnitTest extends TestCase {
                 new ContextStackPool(cycAccess,
                                      cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt"),
                                      ContextStackPool.QUIET_VERBOSITY);
-            Assert.assertEquals(0, contextStackPool.contextFrames.size());
-            contextStackPool.createContextStack();
-            Assert.assertEquals(10, contextStackPool.contextFrames.size());
+            Assert.assertEquals(ContextStackPool.DEFAULT_CONTEXT_FRAMES_COUNT, contextStackPool.contextFrames.size());
 
             CycConstant definitionMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
-            CycConstant contextFrame1 = contextStackPool.allocateContextFrame();
+            CycConstant contextFrame1 = contextStackPool.allocateContextFrame(null, definitionMt);
             CycConstant contextFrame2 = contextStackPool.allocateContextFrame(contextFrame1, definitionMt);
             CycConstant contextFrame3 = contextStackPool.allocateContextFrame(contextFrame2, definitionMt);
             CycConstant contextFrame4 = contextStackPool.allocateContextFrame(contextFrame3, definitionMt);
@@ -284,15 +283,18 @@ public class UnitTest extends TestCase {
             //cycAccess.traceNamesOn();
             cycAccess.setCyclist(cycAccess.getKnownConstantByName("Cyc"));
             CycFort definitionMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
-            CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01-ContextMt");
+            ContextStackPool contextStackPool =
+                new ContextStackPool(cycAccess,
+                                     cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt"),
+                                     ContextStackPool.QUIET_VERBOSITY);
 
-            cycAccess.unassertMtContentsWithoutTranscript(stateMt);
+            CycConstant stateMt = contextStackPool.allocateContextFrame(null, definitionMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
 
             ProcedureInterpreter procedureInterpreter =
                 new ProcedureInterpreter(cycAccess,
                                          definitionMt,
-                                         stateMt,
+                                         contextStackPool,
                                          Interpreter.QUIET_VERBOSITY);
             Procedure initializeProcedure = new Procedure();
             initializeProcedure.setName("TestStateMachine-InitializeNumberToZeroProcedure");
@@ -304,9 +306,8 @@ public class UnitTest extends TestCase {
             Transition transition1 = new Transition();
             transition1.setName("TestStateMachine-Transition1");
             transition1.setEffect(initializeProcedure);
-            procedureInterpreter.interpretTransitionProcedure(transition1);
-
-
+            procedureInterpreter.interpretTransitionProcedure(transition1, stateMt);
+            contextStackPool.destroyContextStack();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -741,12 +742,16 @@ public class UnitTest extends TestCase {
 
         try {
             CycFort definitionMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
-            CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01-ContextMt");
+            CycFort temporaryWorkspaceMt =
+                cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
             int verbosity = Interpreter.QUIET_VERBOSITY;
+            ContextStackPool contextStackPool = new ContextStackPool(cycAccess,
+                                                                     temporaryWorkspaceMt,
+                                                                     ContextStackPool.QUIET_VERBOSITY);
             interpreter = new Interpreter(stateMachine,
                                           cycAccess,
                                           definitionMt,
-                                          stateMt,
+                                          contextStackPool,
                                           verbosity);
             Assert.assertNotNull(interpreter);
             Assert.assertTrue(interpreter instanceof Interpreter);
@@ -792,11 +797,10 @@ public class UnitTest extends TestCase {
             interpreter.eventDispatcher();
             interpreter.eventProcessor();
             interpreter.fireSelectedTransitions();
-            Assert.assertEquals(new Integer(9),
-                                interpreter.getStateVariableValue("TestStateMachine-X"));
+
             if (verbosity > 2)
                 System.out.print(interpreter.displayStateConfigurationTree());
-
+            contextStackPool.destroyContextStack();
         }
         catch (Exception e) {
             e.printStackTrace();

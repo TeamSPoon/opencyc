@@ -79,7 +79,7 @@ public class StateInterpreter extends Thread {
         this.state = state;
         procedureInterpreter = new ProcedureInterpreter(interpreter.getCycAccess(),
                                                         interpreter.getDefinitionMt(),
-                                                        interpreter.getStateMt(),
+                                                        interpreter.getContextStackPool(),
                                                         verbosity);
     }
 
@@ -147,7 +147,8 @@ public class StateInterpreter extends Thread {
         if (procedure != null) {
             if (verbosity > 2)
                 Log.current.println("Evaluating effect " + procedure.toString());
-            procedureInterpreter.interpretTransitionProcedure(transition);
+            procedureInterpreter.interpretTransitionProcedure(transition,
+                                                              interpreter.getStateMt());
         }
         if (state instanceof FinalState) {
             state.getContainer().getStateInterpreter().complete();
@@ -214,7 +215,7 @@ public class StateInterpreter extends Thread {
         }
 
         if (state.getEntry() != null)
-            procedureInterpreter.interpretStateEntryProcedure(state);
+            procedureInterpreter.interpretStateEntryProcedure(state, interpreter.getStateMt());
         if (state.getDoActivity() != null)
             new DoActivity(state);
     }

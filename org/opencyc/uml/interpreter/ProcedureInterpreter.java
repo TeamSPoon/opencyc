@@ -76,19 +76,24 @@ public class ProcedureInterpreter {
     protected CycFort definitionMt;
 
     /**
+     * the context stack pool
+     */
+    protected ContextStackPool contextStackPool;
+
+    /**
      * the expression evaluation state context
      */
-    protected CycFort stateMt;
+    protected CycConstant contextFrame;
+
+    /**
+     * the parent expression evaluation state context
+     */
+    protected CycConstant parentContextFrame;
 
     /**
      * the procedure CycFort
      */
     protected CycFort procedureTerm;
-
-    /**
-     * #$umlProcedureEvaluationContext
-     */
-    protected CycConstant umlProcedureEvaluationContext;
 
     /**
      * #$umlProcedureBinding-CalledByStateEntry
@@ -141,20 +146,27 @@ public class ProcedureInterpreter {
      * @param cycAccess the reference to the parent CycAccess object which provides Cyc api
      * services
      * @param definitionMt the state machine definition microtheory
-     * @param stateMt the expression evaluation state context
+     * @param contextStackPool the context frame pool
      * @param verbosity the output verbosity for this object
      */
     public ProcedureInterpreter(CycAccess cycAccess,
                                 CycFort definitionMt,
-                                CycFort stateMt,
+                                ContextStackPool contextStackPool,
                                 int verbosity)
         throws IOException, CycApiException {
         this.cycAccess = cycAccess;
         this.definitionMt = definitionMt;
-        this.stateMt = stateMt;
+        this.contextStackPool = contextStackPool;
         this.verbosity = verbosity;
+        initialize();
+    }
+
+    /**
+     * Initializes this procedure interpreter.
+     */
+    protected void initialize ()
+    throws IOException, CycApiException {
         expressionEvaluator = new ExpressionEvaluator(cycAccess, verbosity);
-        umlProcedureEvaluationContext = cycAccess.getKnownConstantByName("umlProcedureEvaluationContext");
         umlProcedureBinding_CalledByStateEntry = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateEntry");
         umlProcedureBinding_CalledByStateDoActivity = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateDoActivity");
         umlProcedureBinding_CalledByStateExit = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateExit");
@@ -166,22 +178,25 @@ public class ProcedureInterpreter {
         softwareParameterFromSyntaxFn = cycAccess.getKnownConstantByName("SoftwareParameterFromSyntaxFn");
         if (verbosity > 2)
             Log.current.println("Creating ProcedureInterpreter for " +
-                                "\n  definitionMt: " + definitionMt.cyclify() +
-                                "\n  stateMt: " + stateMt.cyclify());
+                                "\n  definitionMt: " + definitionMt.cyclify());
     }
+
 
     /**
      * Interprets the procedure which is called from the calling transition.
      *
      * @param transition the transition which called the procedure to be interpreted
+     * @param parentContextFrame the parent context frame
      */
-    public void interpretTransitionProcedure (Transition transition)
+    public void interpretTransitionProcedure (Transition transition,
+                                              CycConstant parentContextFrame)
         throws IOException, CycApiException, ExpressionEvaluationException {
+        this.parentContextFrame = parentContextFrame;
         procedure = transition.getEffect();
         if (verbosity > 2)
             Log.current.println("Interpreting " + procedure.toString() +
                                 " at " + transition.toString() +
-                                "\n  " + procedure.getBody());
+                                "\n  body: " + procedure.getBody());
         // get procedure binding term
         procedureTerm = cycAccess.getKnownConstantByName(procedure.getName());
         CycList query = new CycList();
@@ -198,9 +213,14 @@ public class ProcedureInterpreter {
         query2.add(cycAccess.getKnownConstantByName(procedure.toString()));
         query.add(query2);
         CycList queryResult =
-            cycAccess.askWithVariable(query, cycVariable, stateMt);
+            cycAccess.askWithVariable(query, cycVariable, definitionMt);
         procedureBinding = (CycFort) queryResult.first();
+        contextFrame =
+            contextStackPool.allocateProcedureContextFrame(parentContextFrame,
+                                                           definitionMt,
+                                                           procedureTerm);
         interpretProcedure();
+        contextStackPool.deallocateContextFrame(contextFrame);
     }
 
     /**
@@ -208,9 +228,12 @@ public class ProcedureInterpreter {
      * entry action.
      *
      * @param state the state whose entry action called the procedure
+     * @param parentContextFrame the parent context frame
      */
-    public void interpretStateEntryProcedure (State state)
+    public void interpretStateEntryProcedure (State state,
+                                              CycConstant parentContextFrame)
         throws IOException, CycApiException, ExpressionEvaluationException {
+        this.parentContextFrame = parentContextFrame;
         procedure = state.getEntry();
         if (verbosity > 2)
             Log.current.println("Interpreting " + procedure.toString() +
@@ -218,11 +241,16 @@ public class ProcedureInterpreter {
                                 "\n  " + procedure.getBody());
         // get procedure binding term
         CycFort procedureTerm = cycAccess.getKnownConstantByName(procedure.getName());
+        contextFrame =
+            contextStackPool.allocateProcedureContextFrame(parentContextFrame,
+                                                           definitionMt,
+                                                           procedureTerm);
         procedureBinding =
             (CycFort) cycAccess.getArg1(umlProcedureBinding_Procedure,
                                         procedureTerm,
-                                        stateMt);
+                                        contextFrame);
         interpretProcedure();
+        contextStackPool.deallocateContextFrame(contextFrame);
     }
 
     /**
@@ -230,8 +258,10 @@ public class ProcedureInterpreter {
      * entry action.
      *
      * @param state the state whose doActivity called the procedure
+     * @param parentContextFrame the parent context frame
      */
-    public void interpretStateDoActivityProcedure (State state)
+    public void interpretStateDoActivityProcedure (State state,
+                                                   CycConstant parentContextFrame)
         throws IOException, CycApiException, ExpressionEvaluationException {
         procedure = state.getDoActivity();
         if (verbosity > 2)
@@ -266,13 +296,9 @@ public class ProcedureInterpreter {
         if (verbosity > 2)
             Log.current.println("procedureBinding: " + procedureBinding.cyclify());
         // clear interpretation context
-        CycFort evaluationContext =
-            (CycFort) cycAccess.getArg2(umlProcedureEvaluationContext,
-                                        procedureTerm,
-                                        definitionMt);
         if (verbosity > 2)
-            Log.current.println("evaluationContext: " + evaluationContext.cyclify());
-        cycAccess.unassertMtContentsWithoutTranscript(evaluationContext);
+            Log.current.println("contextFrame: " + contextFrame.cyclify());
+        cycAccess.unassertMtContentsWithoutTranscript(contextFrame);
         // bind input values
         CycList gatherArgs = new CycList();
         gatherArgs.add(new Integer(2));
@@ -294,18 +320,18 @@ public class ProcedureInterpreter {
             Object value =
                 cycAccess.getArg2(softwareParameterValue,
                                   stateVariable,
-                                  stateMt);
+                                  parentContextFrame);
             CycList softwareParameterValueSentence = new CycList();
             softwareParameterValueSentence.add(softwareParameterValue);
             softwareParameterValueSentence.add(inputPinParameter);
             softwareParameterValueSentence.add(value);
             cycAccess.assertWithBookkeepingAndWithoutTranscript(softwareParameterValueSentence,
-                                                                evaluationContext);
+                                                                contextFrame);
         }
 
         // evaluate the procedure body
         expressionEvaluator.evaluateCycLExpression(procedure.getBody(),
-                                                   evaluationContext);
+                                                   contextFrame);
 
         // bind output values
         CycList outputBindingTuples =
@@ -325,19 +351,19 @@ public class ProcedureInterpreter {
             Object value =
                 cycAccess.getArg2(softwareParameterValue,
                                   outputPinParameter,
-                                  evaluationContext);
+                                  contextFrame);
             CycList softwareParameterValueSentence = new CycList();
             softwareParameterValueSentence.add(softwareParameterValue);
             softwareParameterValueSentence.add(stateVariable);
             softwareParameterValueSentence.add(value);
             cycAccess.unassertMatchingAssertionsWithoutTranscript(softwareParameterValue,
                                                                   stateVariable,
-                                                                  stateMt);
+                                                                  parentContextFrame);
             if (verbosity > 0)
                 Log.current.println("asserting " + softwareParameterValueSentence +
-                                    " in " + stateMt);
+                                    " in " + parentContextFrame);
             cycAccess.assertWithBookkeepingAndWithoutTranscript(softwareParameterValueSentence,
-                                                                stateMt);
+                                                                parentContextFrame);
         }
     }
 

@@ -85,9 +85,35 @@ public class ContextStackPool {
     protected Stack freeContextFrames = new Stack();
 
     /**
+     * dictionary of context frames and their associated temporary
+     * definitional assertion info objects
+     */
+    protected HashMap contextFrameDefinitionalAssertions = new HashMap();
+
+    /**
      * #$umlStateMachineInterpetationContextStackParent
      */
     protected CycConstant umlStateMachineInterpetationContextStackParent;
+
+    /**
+     * #$UMLStateMachine-StateMicrotheory
+     */
+    protected CycConstant umlStateMachine_StateMicrotheory;
+
+    /**
+     * #$UMLProcedureEvaluationMicrotheory
+     */
+    protected CycConstant umlProcedureEvaluationMicrotheory;
+
+    /**
+     * #$umlStateMachineInterpretationContext
+     */
+    protected CycConstant umlStateMachineInterpretationContext;
+
+    /**
+     * #$umlProcedureEvaluationContext
+     */
+    protected CycConstant umlProcedureEvaluationContext;
 
     /**
      * Constructs a new ContextStackPool object.
@@ -121,6 +147,15 @@ public class ContextStackPool {
         throws IOException, CycApiException, ExpressionEvaluationException {
         umlStateMachineInterpetationContextStackParent =
             cycAccess.getKnownConstantByName("umlStateMachineInterpetationContextStackParent");
+        umlStateMachine_StateMicrotheory =
+            cycAccess.getKnownConstantByName("UMLStateMachine-StateMicrotheory");
+        umlProcedureEvaluationMicrotheory =
+            cycAccess.getKnownConstantByName("UMLProcedureEvaluationMicrotheory");
+        umlStateMachineInterpretationContext =
+            cycAccess.getKnownConstantByName("umlStateMachineInterpretationContext");
+        umlProcedureEvaluationContext =
+            cycAccess.getKnownConstantByName("umlProcedureEvaluationContext");
+        createContextStack();
     }
 
     /**
@@ -141,6 +176,7 @@ public class ContextStackPool {
             sentence.add(contextFrame);
             sentence.add(cycAccess.getKnownConstantByName("UMLStateMachineContextFrame"));
             cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence, cycAccess.baseKB);
+            contextFrameDefinitionalAssertions.put(contextFrame, new ArrayList());
         }
 
     }
@@ -160,6 +196,79 @@ public class ContextStackPool {
         }
         contextFrames = null;
         freeContextFrames = null;
+        contextFrameDefinitionalAssertions = null;
+    }
+
+    /**
+     * Allocates a state machine context frame from the free list, given its parent context
+     * frame
+     *
+     * @param parentContextFrame the parent context frame in the calling
+     * state machine interpretation thread
+     * @param definitionMt the state machine definition mt
+     * @param the state machine term
+     * @return the allocated context frame
+     */
+    public CycConstant allocateStateMachineContextFrame (CycConstant parentContextFrame,
+                                                         CycFort definitionMt,
+                                                         CycFort stateMachineTerm)
+        throws IOException, CycApiException, ExpressionEvaluationException {
+        if (verbosity > 2)
+            Log.current.println("Allocating context frame for state machine term " + stateMachineTerm);
+        CycConstant contextFrame = allocateContextFrame(parentContextFrame, definitionMt);
+        ArrayList definitionalAssertions =
+            (ArrayList) contextFrameDefinitionalAssertions.get(contextFrame);
+        CycList sentence = new CycList();
+        sentence.add(cycAccess.isa);
+        sentence.add(contextFrame);
+        sentence.add(umlStateMachine_StateMicrotheory);
+        cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence,
+                                                            temporaryWorkspaceMt);
+        definitionalAssertions.add(new DefinitionalAssertionInfo(sentence, temporaryWorkspaceMt));
+        sentence = new CycList();
+        sentence.add(umlStateMachineInterpretationContext);
+        sentence.add(stateMachineTerm);
+        sentence.add(contextFrame);
+        cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence,
+                                                            temporaryWorkspaceMt);
+        definitionalAssertions.add(new DefinitionalAssertionInfo(sentence, temporaryWorkspaceMt));
+        return contextFrame;
+    }
+
+    /**
+     * Allocates a procedure context frame from the free list, given its parent context
+     * frame
+     *
+     * @param parentContextFrame the parent context frame in the calling
+     * state machine interpretation thread
+     * @param definitionMt the state machine definition mt
+     * @param the procedure term
+     * @return the allocated context frame
+     */
+    public CycConstant allocateProcedureContextFrame (CycConstant parentContextFrame,
+                                                      CycFort definitionMt,
+                                                      CycFort procedureTerm)
+        throws IOException, CycApiException, ExpressionEvaluationException {
+        if (verbosity > 2)
+            Log.current.println("Allocating context frame for procedure term " + procedureTerm);
+        CycConstant contextFrame = allocateContextFrame(parentContextFrame, definitionMt);
+        ArrayList definitionalAssertions =
+            (ArrayList) contextFrameDefinitionalAssertions.get(contextFrame);
+        CycList sentence = new CycList();
+        sentence.add(cycAccess.isa);
+        sentence.add(contextFrame);
+        sentence.add(umlProcedureEvaluationMicrotheory);
+        cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence,
+                                                            temporaryWorkspaceMt);
+        definitionalAssertions.add(new DefinitionalAssertionInfo(sentence, temporaryWorkspaceMt));
+        sentence = new CycList();
+        sentence.add(umlProcedureEvaluationContext);
+        sentence.add(procedureTerm);
+        sentence.add(contextFrame);
+        cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence,
+                                                            temporaryWorkspaceMt);
+        definitionalAssertions.add(new DefinitionalAssertionInfo(sentence, temporaryWorkspaceMt));
+        return contextFrame;
     }
 
     /**
@@ -171,38 +280,39 @@ public class ContextStackPool {
      * @param definitionMt the state machine definition mt
      * @return the allocated context frame
      */
-    public CycConstant allocateContextFrame (CycConstant parentContextFrame,
-                                             CycConstant definitionMt)
+    protected synchronized CycConstant allocateContextFrame (CycConstant parentContextFrame,
+                                                CycFort definitionMt)
         throws IOException, CycApiException, ExpressionEvaluationException {
         if (freeContextFrames.empty())
             throw new RuntimeException("Context frames exhausted");
-        CycConstant contextFrame = allocateContextFrame();
-        CycList sentence = new CycList();
-        sentence.add(cycAccess.getKnownConstantByName("umlStateMachineInterpetationContextStackParent"));
-        sentence.add(contextFrame);
-        sentence.add(parentContextFrame);
-        cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence, temporaryWorkspaceMt);
+        CycConstant contextFrame = (CycConstant) freeContextFrames.pop();
+        ArrayList definitionalAssertions =
+            (ArrayList) contextFrameDefinitionalAssertions.get(contextFrame);
+        CycList sentence;
+        if (parentContextFrame != null) {
+            sentence = new CycList();
+            sentence.add(cycAccess.getKnownConstantByName("umlStateMachineInterpetationContextStackParent"));
+            sentence.add(contextFrame);
+            sentence.add(parentContextFrame);
+            cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence, temporaryWorkspaceMt);
+            definitionalAssertions.add(new DefinitionalAssertionInfo(sentence, temporaryWorkspaceMt));
+            if (verbosity > 2)
+                Log.current.println(contextFrame.cyclify() +
+                                    "\n allocated with parent " + parentContextFrame +
+                                    "\n with definitionMt " + definitionMt);
+        }
+        else {
+            if (verbosity > 2)
+                Log.current.println(contextFrame.cyclify() +
+                                    "\n allocated with definitionMt " + definitionMt);
+        }
         sentence = new CycList();
         sentence.add(cycAccess.genlMt);
         sentence.add(contextFrame);
         sentence.add(definitionMt);
         cycAccess.assertWithBookkeepingAndWithoutTranscript(sentence, cycAccess.baseKB);
-        if (verbosity > 2)
-            Log.current.println(contextFrame.cyclify() +
-                                "\n allocated with parent " + parentContextFrame +
-                                "\n with definitionMt " + definitionMt);
+        definitionalAssertions.add(new DefinitionalAssertionInfo(sentence, definitionMt));
         return contextFrame;
-    }
-
-    /**
-     * Allocates a parentless context frame from the free list.
-     *
-     * @return the allocated context frame
-     */
-    public synchronized CycConstant allocateContextFrame () {
-        if (freeContextFrames.empty())
-            throw new RuntimeException("Context frames exhausted");
-        return (CycConstant) freeContextFrames.pop();
     }
 
     /**
@@ -213,13 +323,18 @@ public class ContextStackPool {
      */
     public synchronized void deallocateContextFrame (CycConstant contextFrame)
         throws IOException, CycApiException, ExpressionEvaluationException {
+        if (verbosity > 2)
+            Log.current.println("deallocating " + contextFrame.cyclify());
         cycAccess.unassertMtContentsWithoutTranscript(contextFrame);
         freeContextFrames.push(contextFrame);
-        cycAccess.unassertMatchingAssertionsWithoutTranscript(umlStateMachineInterpetationContextStackParent,
-                                                              contextFrame,
-                                                              temporaryWorkspaceMt);
-        if (verbosity > 2)
-            Log.current.println(contextFrame.cyclify() + " deallocated ");
+        ArrayList definitionalAssertions =
+            (ArrayList) contextFrameDefinitionalAssertions.get(contextFrame);
+        Iterator iter = definitionalAssertions.iterator();
+        while (iter.hasNext()) {
+            DefinitionalAssertionInfo definitionalAssertionInfo =
+                (DefinitionalAssertionInfo) iter.next();
+            definitionalAssertionInfo.unassert();
+        }
     }
 
     /**
@@ -310,6 +425,48 @@ public class ContextStackPool {
      */
     public void setCycAccess (CycAccess cycAccess) {
         this.cycAccess = cycAccess;
+    }
+
+
+    /**
+     * Contains the sentence and microtheory for a temporary
+     * context frame definitional assertion which will be deleted
+     * when the context is deallocated.
+     */
+    protected class DefinitionalAssertionInfo {
+
+        /**
+         * the temporary defining assertion
+         */
+        CycList sentence;
+
+        /**
+         * the temporary defining assertion's microtheory
+         */
+        CycFort mt;
+
+        /**
+         * Constructs a new definitionalAssertionInfo object given
+         * the temporary defining assertion and its microtheory.
+         *
+         * @param sentence the given temporary defining assertion
+         * @param mt the given assertion microtheory
+         */
+        public DefinitionalAssertionInfo (CycList sentence, CycFort mt) {
+            this.sentence = sentence;
+            this.mt = mt;
+        }
+
+        /**
+         * Unasserts this temporary defining assertion from this microtheory
+         */
+        public void unassert ()
+        throws IOException, CycApiException {
+            cycAccess.unassertWithBookkeepingAndWithoutTranscript(sentence, mt);
+            if (verbosity > 2)
+                Log.current.println("unasserting temporary definitional assertion\n  from mt: " + mt +
+                                    "\n  " + sentence.cyclify());
+        }
     }
 
 }

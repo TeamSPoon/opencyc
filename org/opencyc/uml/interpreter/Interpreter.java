@@ -123,7 +123,7 @@ public class Interpreter {
     /**
      * the expression evaluation state context
      */
-    protected CycFort stateMt;
+    protected CycConstant stateMt;
 
     /**
      * the global temporary interpreter workspace
@@ -141,6 +141,11 @@ public class Interpreter {
     protected boolean isTerminated = false;
 
     /**
+     * the context stack pool
+     */
+    protected ContextStackPool contextStackPool;
+
+    /**
      * Constructs a new Interpreter object.
      */
     public Interpreter() {
@@ -153,17 +158,17 @@ public class Interpreter {
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
      * @param definitionMt the state machine definition microtheory
-     * @param stateMt the expression evaluation state context
+     * @param contextStatePool the context state pool
      */
     public Interpreter(StateMachine stateMachine,
                        CycAccess cycAccess,
                        CycFort definitionMt,
-                       CycFort stateMt)
-        throws IOException, CycApiException {
+                       ContextStackPool contextStackPool)
+        throws IOException, CycApiException, ExpressionEvaluationException {
         this(stateMachine,
              cycAccess,
-             stateMt,
              definitionMt,
+             contextStackPool,
              Interpreter.DEFAULT_VERBOSITY);
     }
 
@@ -174,20 +179,20 @@ public class Interpreter {
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
      * @param definitionMt the state machine definition microtheory
-     * @param stateMt the expression evaluation state context
+     * @param contextStatePool the context state pool
      * @param verbosity indicates the verbosity of the interpreter's
      * diagnostic output - 9 = maximum, 0 = quiet
      */
     public Interpreter(StateMachine stateMachine,
                        CycAccess cycAccess,
                        CycFort definitionMt,
-                       CycFort stateMt,
+                       ContextStackPool contextStackPool,
                        int verbosity)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         this.stateMachine = stateMachine;
         this.cycAccess = cycAccess;
         this.definitionMt = definitionMt;
-        this.stateMt = stateMt;
+        this.contextStackPool = contextStackPool;
         this.verbosity = verbosity;
         initialize();
         if (verbosity > 2)
@@ -197,13 +202,18 @@ public class Interpreter {
     /**
      * Initializes this object.
      */
-    protected void initialize () throws IOException, CycApiException {
+    protected void initialize ()
+        throws IOException, CycApiException, ExpressionEvaluationException {
         Log.makeLog("state-machine-interpreter.log");
         expressionEvaluator = new ExpressionEvaluator(cycAccess,
                                                       verbosity);
         stateMachineFactory = new StateMachineFactory();
         stateMachineFactory.setStateMachine(stateMachine);
         stateMachineFactory.setNamespace(stateMachine.getNamespace());
+        CycFort stateMachineTerm = cycAccess.getKnownConstantByName(stateMachine.getName());
+        stateMt = contextStackPool.allocateStateMachineContextFrame(null,
+                                                                    definitionMt,
+                                                                    stateMachineTerm);
         cycAccess.unassertMtContentsWithoutTranscript(stateMt);
     }
 
@@ -227,10 +237,12 @@ public class Interpreter {
     /**
      * Terminates the interpretation of the state machine.
      */
-    public void terminate () {
+    public void terminate ()
+        throws IOException, CycApiException, ExpressionEvaluationException  {
         if (verbosity > 2)
             Log.current.println("Terminating " + stateMachine.toString());
         isTerminated = true;
+        contextStackPool.deallocateContextFrame(stateMt);
     }
 
     /**
@@ -238,6 +250,9 @@ public class Interpreter {
      */
     public void interpret ()
         throws IOException, CycApiException, ExpressionEvaluationException {
+        if (verbosity > 2)
+            Log.current.println("Interpreting UML state machine " + stateMachine.getName() +
+                                "\n  with evaluation context " + stateMt);
         formAllStatesConfiguration();
         formInitialStateConfiguration();
         while (! isTerminated) {
@@ -573,17 +588,8 @@ public class Interpreter {
      *
      * @return the expression evaluation state context
      */
-    public CycFort getStateMt () {
+    public CycConstant getStateMt () {
         return stateMt;
-    }
-
-    /**
-     * Sets the expression evaluation state context
-     *
-     * @param stateMt the expression evaluation state context
-     */
-    public void setStateMt (CycFort stateMt) {
-        this.stateMt = stateMt;
     }
 
     /**
@@ -771,6 +777,24 @@ public class Interpreter {
      */
     public void setTemporaryWorkspaceMt (CycFort temporaryWorkspaceMt) {
         this.temporaryWorkspaceMt = temporaryWorkspaceMt;
+    }
+
+    /**
+     * Gets the context stack pool
+     *
+     * @return the context stack pool
+     */
+    public ContextStackPool getContextStackPool () {
+        return contextStackPool;
+    }
+
+    /**
+     * Sets the context stack pool
+     *
+     * @param ContextStackPool
+     */
+    public void setContextStackPool (ContextStackPool contextStackPool) {
+        this.contextStackPool = contextStackPool;
     }
 
 }

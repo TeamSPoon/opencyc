@@ -4218,7 +4218,10 @@ public class CycAccess {
             "    (cyc-assert\n" +
             "      '" + sentence + "\n" +
             "      " + mt.cyclify() + ")))";
-        converseVoid(command);
+        boolean statusOk = converseBoolean(command);
+        if (! statusOk)
+            throw new CycApiException("Assertion failed in mt: " + mt.cyclify() +
+                                      "\n" + sentence);
     }
 
 
@@ -4235,10 +4238,13 @@ public class CycAccess {
     public void unassertWithBookkeepingAndWithoutTranscript (CycList sentence, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         String command = withBookkeepingInfo() +
-            "(ke-unassert-now '" +
+            "(cyc-unassert '" +
             sentence.stringApiValue() +
             mt.stringApiValue() + "))";
-        converseVoid(command);
+        boolean unassertOk = converseBoolean(command);
+        if (! unassertOk)
+            throw new CycApiException("Could not unassert from mt: " + mt +
+                                      "\n  " + sentence.cyclify());
     }
 
     /**
@@ -7369,7 +7375,7 @@ public class CycAccess {
      * Unasserts all assertions from the given mt having the given predicate and arg1,
      * without a transcript record of the unassert operation.
      *
-     * @param predicate the given predicate
+     * @param predicate the given predicate or null to match all predicates
      * @param arg1 the given arg1
      * @param mt the microtheory from which to delete the matched assertions
      */
@@ -7384,8 +7390,11 @@ public class CycAccess {
             CycList sentence = assertion.getFormula();
             if (sentence.size() < 2)
                 continue;
-            if ((! (predicate.equals(sentence.first()))) ||
-                (! (arg1.equals(sentence.second()))))
+            if (! (arg1.equals(sentence.second())))
+                continue;
+
+            if ((predicate != null) &&
+                (! (predicate.equals(sentence.first()))))
                 continue;
             String command =
                 "(cyc-unassert '" +
@@ -7394,17 +7403,6 @@ public class CycAccess {
             converseVoid(command);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

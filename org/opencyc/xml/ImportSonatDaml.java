@@ -114,9 +114,8 @@ public class ImportSonatDaml {
             new ImportDaml(cycAccess,
                            ontologyNicknames,
                            kbSubsetCollectionName);
-        //for (int i = 2; i < 3; i++) {
-        //for (int i = 0; i < 1; i++) {
-        for (int i = 0; i < damlDocInfos.size(); i++) {
+        for (int i = 17; i < 19; i++) {
+        //for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
@@ -134,58 +133,108 @@ public class ImportSonatDaml {
      * Initializes the documents to import.
      */
     protected void initializeDocumentsToImport () {
+        // 0
         damlDocInfos.add(new DamlDocInfo("http://xmlns.com/foaf/0.1/",
                                          "DamlSonatFoafOntologyMt"));
+        // 1
         damlDocInfos.add(new DamlDocInfo("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont.daml",
                                          "DamlSonatDrcDcesOntologyMt"));
+        // 2
         damlDocInfos.add(new DamlDocInfo("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml",
                                          "DamlSonatDrcVesOntologyMt"));
+        // 3
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/10/html/airport-ont.daml",
                                          "DamlSonatAirportOntologyMt"));
+        // 4
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips-10-4-ont",
                                          "DamlSonatFips10-4OntologyMt"));
+        // 5
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips.daml",
                                          "DamlSonatFipsOntologyMt"));
+        // 6
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/iso-3166-ont",
+                                         "DamlSonatISOCountriesOntologyMt"));
+        // 7
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/02/chiefs/chiefs-ont.daml",
                                          "DamlSonatChiefsOntologyMt"));
+        // 8
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/02/chiefs/af.daml",
                                          "DamlSonatChiefsAfOntologyMt"));
+        // 9
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/12/factbook/factbook-ont.daml",
                                          "DamlSonatCiaFactbookOntologyMt"));
+        // 10
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/12/factbook/internationalOrganizations.daml",
                                          "DamlSonatCiaFactbookOrganizationOntologyMt"));
+        // 11
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/agency-ont.daml",
                                          "DamlSonatAgencyOntologyMt"));
+        // 12
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/CINC-ont.daml",
                                          "DamlSonatCincOntologyMt"));
-        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/af-a.daml",
-                                         "DamlSonatAfghanistanAOntologyMt"));
+        // 13
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/assessment-ont.daml",
                                          "DamlSonatAssessmentOntologyMt"));
+        // 14
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/economic-elements-ont.daml",
                                          "DamlSonatEconomicElementsOntologyMt"));
+        // 15
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/elements-ont.daml",
                                          "DamlSonatElementsOfNationalPowerOntologyMt"));
+//new
+        // 16
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/enp-characteristics.daml",
+                                         "DamlSonatENPCharacteristicsOntologyMt"));
+        // 17
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/entity-ont.daml",
+                                         "DamlSonatMilitaryEntityOntologyMt"));
+        // 18
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/entity.daml",
+                                         "DamlSonatMilitaryEntityInstancesMt"));
+
+        // 19
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/information-elements-ont.daml",
                                          "DamlSonatInformationElementsOntologyMt"));
+        // 20
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                                          "DamlSonatInfrastructureElementsOntologyMt"));
+        // 21
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/location-ont.daml",
                                          "DamlSonatLocationOntologyMt"));
+        // 22
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/military-elements-ont.daml",
                                          "DamlSonatMilitaryElementsOntologyMt"));
+        // 23
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/objectives-ont.daml",
                                          "DamlSonatObjectivesOntologyMt"));
+        // 24
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/operation-ont.daml",
                                          "DamlSonatOperationOntologyMt"));
+        // 25
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/political-elements-ont.daml",
                                          "DamlSonatPoliticalElementsOntologyMt"));
+        // 26
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/social-elements-ont.daml",
                                          "DamlSonatSocialElementsOntologyMt"));
-        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/example1.daml",
-                                         "DamlSonatExample1OntologyMt"));
-        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/example2.daml",
-                                         "DamlSonatExample2OntologyMt"));
+//new
+        // 27
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/target-ont.daml",
+                                         "DamlSonatTargetOntologyMt"));
+        // 28
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/unit-ont.daml",
+                                         "DamlSonatMilitaryUnitOntologyMt"));
+        // 29
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/unit-status.daml",
+                                         "DamlSonatMilitaryUnitStatusOntologyMt"));
+        // 30
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/unit.daml",
+                                         "DamlSonatMilitaryUnitInstancesMt"));
+        // 31
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/09/milservices/milservices-ont",
+                                         "DamlSonatMilitaryServicesOntologyMt"));
+        // 32
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/09/milservices/us",
+                                         "DamlSonatUSMilitaryServicesInstancesMt"));
     }
 
     /**
@@ -238,6 +287,8 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips.daml", "fips");
         ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips", "fips");
 
+        ontologyNicknames.put("http://www.daml.org/2001/09/countries/iso-3166-ont", "iso3166");
+
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont.daml", "enp");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont", "enp");
 
@@ -262,6 +313,16 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont.daml", "mil");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont", "mil");
 
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/enp-characteristics.daml", "enp-char");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/enp-characteristics", "enp-char");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity-ont.daml", "entity-ont");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity-ont", "entity-ont");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity.daml", "entity");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity", "entity");
+
+
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/ona.xsd", "dt");
 
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/location-ont.daml", "loc");
@@ -282,11 +343,21 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont.daml", "oper");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont", "oper");
 
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example1.daml", "daml-exmpl1");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example1", "daml-exmpl1");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/target-ont.daml", "target-ont");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/target-ont", "target-ont");
 
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example2.daml", "daml-exmpl2");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example2", "daml-exmpl2");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-ont.daml", "unit-ont");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-ont", "unit-ont");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-status.daml", "unit-status");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-status", "unit-status");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit.daml", "unit");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit.daml", "unit");
+
+        ontologyNicknames.put("http://www.daml.org/2002/09/milservices/milservices-ont", "milsvcs-ont");
+
+        ontologyNicknames.put("http://www.daml.org/2002/09/milservices/us", "milsvcs-us");
     }
 
     /**

@@ -999,6 +999,7 @@ public class ImportDaml implements StatementHandler {
      * Records the DAML term information for Cyc import.
      */
     protected class DamlTermInfo {
+        ImportDaml parent;
         boolean isAnonymous = false;
         boolean isURI = false;
         boolean isLiteral = false;
@@ -1015,7 +1016,8 @@ public class ImportDaml implements StatementHandler {
         /**
          * Constructs a new DamlTermInfo object.
          */
-        public DamlTermInfo() {
+        public DamlTermInfo(ImportDaml parent) {
+            this.parent = parent;
         }
 
         /**
@@ -1109,6 +1111,7 @@ public class ImportDaml implements StatementHandler {
                     predicateTermInfo.toString().equals("rdfs:seeAlso"))
                     return true;
             }
+            if (parent.
             if (uri.endsWith(".daml") ||
                (uri.indexOf("daml+oil") > -1))
                 return true;

@@ -76,18 +76,29 @@ public class Log {
     /**
      * Default file name for the log file.
      */
-    protected static final String DEFAULT_LOG_FILENAME = "cyc.log";
+    protected static final String DEFAULT_LOG_FILENAME = "cyc-api.log";
 
     /**
-     * Constructs a new Log object and store a reference to it at the Log class.
+     * Constructs a new Log object according to java properties and store a reference
+     * to it at the Log class.
      */
     public static void makeLog() {
+        makeLog(DEFAULT_LOG_FILENAME);
+    }
+
+    /**
+     * Constructs a new Log object according to java properties and store a reference
+     * to it at the Log class.
+     *
+     * @param logName the pathname of the log file
+     */
+    public static void makeLog(String logName) {
         if (current != null) {
             return;
         }
         String logProperty = System.getProperty("org.opencyc.util.log", "default");
         if (logProperty.equalsIgnoreCase("default") || logProperty.equalsIgnoreCase("all")) {
-            current = new Log("agent.log", true, true, true, false);
+            current = new Log(logName, true, true, true, false);
             return;
         }
         if (logProperty.equalsIgnoreCase("display")) {
@@ -95,15 +106,16 @@ public class Log {
             return;
         }
         if (logProperty.equalsIgnoreCase("file")) {
-            current = new Log("agent.log", true, false, false, false);
+            current = new Log(logName, true, false, false, false);
             return;
         }
         if (logProperty.equalsIgnoreCase("errors")) {
-            current = new Log("agent.log", true, true, false, false);
+            current = new Log(logName, true, true, false, false);
             return;
         }
-        System.err.println("Invalid value for property org.opencyc.util.log " + logProperty + " substituting default");
-        current = new Log("agent.log", true, true, true, false);
+        System.err.println("Invalid value for property org.opencyc.util.log " + logProperty +
+                           " substituting default");
+        current = new Log(logName, true, true, true, false);
     }
 
 

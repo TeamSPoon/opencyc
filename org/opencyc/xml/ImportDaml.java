@@ -323,11 +323,13 @@ public class ImportDaml implements StatementHandler {
             importEqualSymbols(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:domain")) {
+        else if (damlPredicate.equals("rdfs:domain") ||
+                 damlPredicate.equals("daml:domain")) {
             importArg1Isa(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:range")) {
+        else if (damlPredicate.equals("rdfs:range") ||
+                 damlPredicate.equals("daml:range")) {
             importArg2Isa(subjectTermInfo, objLitTermInfo);
             return;
         }

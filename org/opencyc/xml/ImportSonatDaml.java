@@ -75,7 +75,7 @@ public class ImportSonatDaml {
      * @param args ignored.
      */
     public static void main(String[] args) {
-        Log.makeLog();
+        Log.makeLog("import-sonat-daml.log");
         Log.current.println("Import DAML starting");
         ImportSonatDaml importSonatDaml;
         try {
@@ -194,6 +194,8 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml", "factbook");
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont", "factbook");
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook", "factbook");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/af.daml", "factbook");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology", "daml-experiment");
 
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/internationalOrganizations.daml", "factbkorg");
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/internationalOrganizations", "factbkorg");
@@ -261,6 +263,12 @@ public class ImportSonatDaml {
 
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont.daml", "oper");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont", "oper");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example1.daml", "daml-exmpl1");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example1", "daml-exmpl1");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example2.daml", "daml-exmpl2");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/example2", "daml-exmpl2");
     }
 
     /**

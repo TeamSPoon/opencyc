@@ -1,12 +1,14 @@
 package org.opencyc.uml.interpreter;
 
 import java.util.*;
+import java.net.*;
 import java.io.*;
 import junit.framework.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.parser.wrapper.*;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.action.*;
 import org.opencyc.uml.commonbehavior.*;
@@ -494,7 +496,7 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(source.getOutgoing().contains(transition3));
         Assert.assertTrue(target.getIncoming().contains(transition3));
 
-        int verbosity = 3;
+        int verbosity = 0;
         Interpreter interpreter = new Interpreter(stateMachine, verbosity);
         Assert.assertNotNull(interpreter);
         Assert.assertTrue(interpreter instanceof Interpreter);
@@ -554,11 +556,37 @@ public class UnitTest extends TestCase {
      */
     public void testCycExtractor () {
         System.out.println("\n**** testCycExtractor ****");
+        Log.makeLog("unit-test.log");
 
         try {
-            CycAccess cycAccess = new CycAccess();
+            String localHostName = InetAddress.getLocalHost().getHostName();
+            CycAccess cycAccess;
+            if (localHostName.equals("crapgame.cyc.com")) {
+                cycAccess = new CycAccess("localhost",
+                                          3620,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+                //cycAccess.traceNamesOn();
+            }
+            else if (localHostName.equals("thinker")) {
+                cycAccess = new CycAccess("localhost",
+                                          3600,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+            }
+            else
+                cycAccess = new CycAccess();
             CycExtractor cycExtractor = new CycExtractor(cycAccess);
-            StateMachine stateMachine = cycExtractor.extract("UMLStateMachine-Test01");
+            StateMachine stateMachine = cycExtractor.extract("TestStateMachine");
+            Assert.assertTrue(stateMachine instanceof StateMachine);
+            Assert.assertTrue(stateMachine.getNamespace() instanceof Namespace);
+            Assert.assertEquals("TestStateMachineNamespace", stateMachine.getNamespace().getName());
+            Assert.assertTrue(stateMachine.getNamespace().getOwnedElement().contains(stateMachine));
+            Assert.assertEquals("TestStateMachine", stateMachine.getName());
+            Assert.assertTrue(stateMachine.getComment() instanceof Comment);
+            Assert.assertEquals("This is a test individual #$UMLStateMachine.",
+                                stateMachine.getComment().getBody());
+            Assert.assertEquals(stateMachine, stateMachine.getComment().getAnnotatedElement());
         }
         catch (Exception e) {
             e.printStackTrace();

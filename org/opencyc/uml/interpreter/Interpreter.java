@@ -40,7 +40,7 @@ public class Interpreter {
      * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    public static final int DEFAULT_VERBOSITY = 0;
 
     /**
      * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum

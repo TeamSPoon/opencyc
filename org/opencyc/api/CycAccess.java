@@ -6817,13 +6817,13 @@ public class CycAccess {
      * @return the list of arg2 terms from gafs having the specified
      * predicate and arg1 values
      */
-    public CycList getArg2sForPredArg1 (String predicate,
-                                        String arg1,
-                                        String mt)
+    public CycList getArg2s (String predicate,
+                             String arg1,
+                             String mt)
         throws IOException, UnknownHostException, CycApiException {
-        return getArg2sForPredArg1(getKnownConstantByName(predicate),
-                                   getKnownConstantByName(arg1),
-                                   getKnownConstantByName(mt));
+        return getArg2s(getKnownConstantByName(predicate),
+                        getKnownConstantByName(arg1),
+                        getKnownConstantByName(mt));
     }
 
     /**
@@ -6836,9 +6836,9 @@ public class CycAccess {
      * @return the list of arg2 terms from gafs having the specified
      * predicate and arg1 values
      */
-    public CycList getArg2sForPredArg1 (CycFort predicate,
-                                        CycFort arg1,
-                                        CycFort mt)
+    public CycList getArg2s (CycFort predicate,
+                             CycFort arg1,
+                             CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList query = new CycList();
         query.add(predicate);
@@ -6858,11 +6858,11 @@ public class CycAccess {
      * @return the first arg2 term from gafs having the specified
      * predicate and arg1 values or null if none
      */
-    public Object getArg2ForPredArg1 (String predicate,
-                                      String arg1,
-                                      String mt)
+    public Object getArg2 (String predicate,
+                           String arg1,
+                           String mt)
         throws IOException, UnknownHostException, CycApiException {
-        return getArg2ForPredArg1(getKnownConstantByName(predicate),
+        return getArg2(getKnownConstantByName(predicate),
                                   getKnownConstantByName(arg1),
                                   getKnownConstantByName(mt));
     }
@@ -6877,9 +6877,9 @@ public class CycAccess {
      * @return the first arg2 term from gafs having the specified
      * predicate and arg1 values or null if none
      */
-    public Object getArg2ForPredArg1 (CycFort predicate,
-                                      CycFort arg1,
-                                      CycFort mt)
+    public Object getArg2 (CycFort predicate,
+                           CycFort arg1,
+                           CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList query = new CycList();
         query.add(predicate);
@@ -6893,6 +6893,47 @@ public class CycAccess {
             return null;
     }
 
+
+    /**
+     * Returns the list of arg1 terms from gafs having the specified
+     * predicate and arg2 values.
+     *
+     * @param predicate the given predicate
+     * @param arg2 the given arg2 term
+     * @param mt the inference microtheory
+     * @return the list of arg1 terms from gafs having the specified
+     * predicate and arg2 values
+     */
+    public CycList getArg1s (String predicate,
+                             String arg2,
+                             String mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getArg1s(getKnownConstantByName(predicate),
+                        getKnownConstantByName(arg2),
+                        getKnownConstantByName(mt));
+    }
+
+    /**
+     * Returns the list of arg1 terms from gafs having the specified
+     * predicate and arg2 values.
+     *
+     * @param predicate the given predicate
+     * @param arg2 the given arg2 term
+     * @param mt the inference microtheory
+     * @return the list of arg1 terms from gafs having the specified
+     * predicate and arg2 values
+     */
+    public CycList getArg1s (CycFort predicate,
+                             CycFort arg2,
+                             CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList query = new CycList();
+        query.add(predicate);
+        CycVariable variable = CycObjectFactory.makeCycVariable("?arg1");
+        query.add(variable);
+        query.add(arg2);
+        return askWithVariable(query, variable, mt);
+    }
 
 
 

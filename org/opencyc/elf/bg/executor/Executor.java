@@ -5,31 +5,18 @@ import org.opencyc.elf.BufferedNodeComponent;
 import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
-
 import org.opencyc.elf.a.Actuator;
 import org.opencyc.elf.a.DirectActuator;
-
 import org.opencyc.elf.bg.BehaviorGeneration;
-
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.planner.Scheduler;
-
 import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
-
 import org.opencyc.elf.goal.Goal;
-
-import org.opencyc.elf.message.DoTaskMsg;
-import org.opencyc.elf.message.ExecuteScheduleMsg;
-import org.opencyc.elf.message.ExecutorStatusMsg;
-import org.opencyc.elf.message.GenericMsg;
-import org.opencyc.elf.message.ReleaseMsg;
-
+import org.opencyc.elf.message.*;
 import org.opencyc.elf.s.DirectSensor;
-
 import org.opencyc.elf.sp.SensoryPerception;
-
 import org.opencyc.elf.wm.ActuatorPool;
 import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.SensorPool;
@@ -225,8 +212,8 @@ public class Executor extends BufferedNodeComponent {
       String directActuatorName = executor.schedule.getDirectActuatorName();
       getLogger().info("Obtaining the actuator named " + directActuatorName);
       executor.actuator = ActuatorPool.getInstance().getActuator(directActuatorName);
+      executor.actuator.setNode(executor.getNode());
       executor.actuatorChannel = executor.actuator.getChannel();
-      executor.actuatorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
       ((DirectActuator) executor.actuator).initialize();
     }
     
@@ -259,6 +246,7 @@ public class Executor extends BufferedNodeComponent {
       String directSensorName = executor.schedule.getDirectSensorName();
       getLogger().info("Obtaining the sensor named " + directSensorName);
       executor.directSensor = SensorPool.getInstance().getSensor(directSensorName);
+      executor.directSensor.setNode(executor.getNode());
       executor.getNode().getSensoryPerception().addSensor(executor.directSensor);
       executor.directSensor.initialize((Puttable) executor.getNode().getSensoryPerception().getChannel());      
     }
@@ -322,6 +310,7 @@ public class Executor extends BufferedNodeComponent {
         command = (Command) commandIterator.next();
         TaskCommand taskCommand = new TaskCommand(command, nextCommand);
         DoTaskMsg doTaskMsg = new DoTaskMsg(executor, taskCommand);
+        getLogger().info("Sending the command " + taskCommand.toString());
         executor.sendMsgToRecipient(executor.actuatorChannel, doTaskMsg);
       }
     }    

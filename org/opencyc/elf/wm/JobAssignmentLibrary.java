@@ -4,7 +4,9 @@ package org.opencyc.elf.wm;
 import org.opencyc.elf.bg.planner.JobAssignment;
 
 //// External Imports
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * JobAssignmentLibrary provides a library of non-temporal (for example spatial) task decompositions
@@ -49,24 +51,28 @@ public class JobAssignmentLibrary {
     return jobAssignmentLibrary;
   }
 
-  /** Gets the job assignment that accomplishes the given action name.
+  /** Gets the job assignments that accomplishes the given action name.
    *
    * @param actionName the given action name
-   * @return the job assignment that accomplishes the given action name
+   * @return the job assignments that accomplishes the given action name
    */
-  public JobAssignment getJobAssignment (String actionName) {
-    return (JobAssignment) jobAssignmentDictionary.get(actionName);
+  public List getJobAssignment (String actionName) {
+    return (List) jobAssignmentDictionary.get(actionName);
   }
   
   //// Protected Area
   
-  /** Sets the job assignment that accomplishes the given action name.
+  /** Adds the job assignment that accomplishes the given action name.
    *
    * @param actionName the given action name
    * @param jobAssignment the job assignment that accomplishes the given action name
    */
-  public void setJobAssignment (String actionName, JobAssignment jobAssignment) {
-    jobAssignmentDictionary.put(actionName, jobAssignment);
+  public void addJobAssignment (String actionName, JobAssignment jobAssignment) {
+    List jobAssignments = (List) jobAssignmentDictionary.get(actionName);
+    if (jobAssignments == null)
+      jobAssignments = new ArrayList();
+    jobAssignments.add(jobAssignment);
+    jobAssignmentDictionary.put(actionName, jobAssignments);
   }
   
   //// Private Area

@@ -1,9 +1,10 @@
 package org.opencyc.elf.sp;
 
-import java.util.ArrayList;
-
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+//// External Imports
+import java.util.ArrayList;
 
 /**
  * Provides Sensory Perception for the Elementary Loop Functioning (ELF).<br>
@@ -30,24 +31,17 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class SensoryPerception extends NodeComponent {
-  /**
-   * Reference to the parent node's SensoryPerception object.  The topmost
-   * SensoryPerception object has a value null here.
-   */
-  protected SensoryPerception parentSensoryPerception;
-
-  /**
-   * Reference to the child nodes' SensoryPerception objects.  The lowest level
-   * SensoryPerception object has a value null here.
-   */
-  protected ArrayList childrenSensoryPerception;
-
+  
+  //// Constructors
+  
   /**
    * Constructs a new SensoryPerception object.
    */
   public SensoryPerception() {
   }
 
+  //// Public Area
+  
   /**
    * Returns a string representation of this object.
    * 
@@ -93,4 +87,63 @@ public class SensoryPerception extends NodeComponent {
   public void setChildrenSensoryPerception(ArrayList childrenSensoryPerception) {
     this.childrenSensoryPerception = childrenSensoryPerception;
   }
+  
+  //// Protected Area
+  
+  /**
+   * Receives the predicted intput message from ?.
+   */
+  protected void predictedInput () {
+    //TODO
+    // received via channel from ?
+    // Object data
+  }
+  
+  /**
+   * Receives the observed intput message from ?.
+   */
+  protected void observedInput () {
+    //TODO
+    // received via channel from ?
+    // Object data
+  }
+  
+  /**
+   * receives the sensory perception data message from ?.
+   */
+  protected void sensoryPerceptionReceiveSensoryPerceptionData () {
+    //TODO
+    // received via channel from ?
+    // Object obj
+    // Object data
+  }
+  
+  /**
+   * Sends the sensory perception update message to ?.
+   */
+  protected void sensoryPerceptionSendUpdate () {
+    //TODO
+    // sent via channel to ?
+    // Object obj
+    // Object data
+  }
+
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /**
+   * Reference to the parent node's SensoryPerception object.  The topmost
+   * SensoryPerception object has a value null here.
+   */
+  protected SensoryPerception parentSensoryPerception;
+
+  /**
+   * Reference to the child nodes' SensoryPerception objects.  The lowest level
+   * SensoryPerception object has a value null here.
+   */
+  protected ArrayList childrenSensoryPerception;
+
+  //// Main
+  
 }

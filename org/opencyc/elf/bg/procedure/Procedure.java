@@ -41,10 +41,10 @@ public abstract class Procedure {
 
   /**
    * Creates a new instance of Procedure.
-   * @param namespace DOCUMENT ME!
-   * @param name DOCUMENT ME!
-   * @param parameterTypes DOCUMENT ME!
-   * @param outputType DOCUMENT ME!
+   * @param namespace the procedure namespace
+   * @param name the procedure name
+   * @param parameterTypes the types of the procedure parameters
+   * @param outputType the type of the procedure output
    */
   public Procedure(String namespace, String name, ArrayList parameterTypes, Class outputType) {
     this.namespace = namespace;
@@ -107,6 +107,6 @@ public abstract class Procedure {
     return true;
   }
 
-  /** DOCUMENT ME! */
+  /** the procedure state */
   protected State state;
 }

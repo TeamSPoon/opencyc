@@ -37,32 +37,7 @@ import  org.opencyc.cycagent.fipaos.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class RemoteCycConnection implements CycConnectionInterface {
-
-    /**
-     * name of the local agent
-     */
-    protected String myAgentName;
-
-    /**
-     * name of the cyc proxy agent
-     */
-    protected String cycProxyAgentName;
-
-    /**
-     * Indicates the CoABS agent community.
-     */
-    public static final int COABS_AGENT_COMMUNTITY = 1;
-
-    /**
-     * Indicates the FIPA-OS agent community.
-     */
-    public static final int FIPA_OS_AGENT_COMMUNTITY = 2;
-
-    /**
-     * agent community to which the cyc proxy agent belongs
-     */
-    protected int agentCommunity;
+public class RemoteCycConnection extends GenericAgent implements CycConnectionInterface {
 
     /**
      * No api trace.
@@ -84,11 +59,6 @@ public class RemoteCycConnection implements CycConnectionInterface {
      */
     protected int trace = API_TRACE_NONE;
 
-    /**
-     * the interface for interacting with an agent community such as CoABS or FIPA-OS
-     */
-    protected AgentCommunityAdapter agentCommunityAdapter;
-
     protected static final long thirtyMinutesDuration = 30 * 60 * 1000;
 
     /**
@@ -96,21 +66,16 @@ public class RemoteCycConnection implements CycConnectionInterface {
      * agent community.
      *
      * @param myAgentName the name of the local agent
-     * @param cycProxyAgentName the name of the cyc proxy agent
+     * @param remoteAgentName the name of the cyc proxy agent
      * @param agentCommunity the agent community to which the cyc proxy agent belongs
      */
     public RemoteCycConnection(String myAgentName,
-                               String cycProxyAgentName,
-                               int agentCommunity) throws IOException {
-        this.myAgentName = myAgentName;
-        this.cycProxyAgentName = cycProxyAgentName;
-        this.agentCommunity = agentCommunity;
-        if (agentCommunity == COABS_AGENT_COMMUNTITY)
-            agentCommunityAdapter = new CoAbsCommunityAdapter(myAgentName);
-        else if (agentCommunity == FIPA_OS_AGENT_COMMUNTITY)
-            agentCommunityAdapter = new FipaOsCommunityAdapter(myAgentName);
-        else
-            throw new IOException("Invalid agent community " + agentCommunity);
+                               String remoteAgentName,
+                               int remoteAgentCommunity) throws IOException {
+        super.myAgentName = myAgentName;
+        super.remoteAgentName = remoteAgentName;
+        super.remoteAgentCommunity = remoteAgentCommunity;
+        super.initializeAgentCommunity(AgentCommunityAdapter.DEFAULT_VERBOSITY);
     }
 
     /**
@@ -159,7 +124,7 @@ public class RemoteCycConnection implements CycConnectionInterface {
         senderAid.setName(myAgentName);
         acl.setSenderAID(senderAid);
         AgentID receiverAid = new AgentID();
-        receiverAid.setName(cycProxyAgentName);
+        receiverAid.setName(remoteAgentName);
         acl.addReceiverAID(receiverAid);
         CycList apiRequest = null;
         String apiRequestXml;
@@ -177,7 +142,7 @@ public class RemoteCycConnection implements CycConnectionInterface {
         }
         acl.setContentObject(apiRequestXml, ACL.BYTELENGTH_ENCODING);
         acl.setLanguage(FIPACONSTANTS.XML);
-        acl.setOntology("cyc-api");
+        acl.setOntology(AgentCommunityAdapter.CYC_API_ONTOLOGY);
         acl.setReplyWith(agentCommunityAdapter.nextMessageId());
 
         ACL replyAcl = null;
@@ -267,22 +232,9 @@ public class RemoteCycConnection implements CycConnectionInterface {
      * @return connection information, suitable for diagnostics
      */
     public String connectionInfo () {
-        return "cyc proxy agent " + cycProxyAgentName +
-               ", agent community " + agentCommunityName();
+        return "cyc proxy agent " + remoteAgentName +
+               ", agent community " + super.agentCommunityName();
     }
 
-    /**
-     * Returns the agent community name.
-     *
-     * @return the agent community name
-     */
-    public String agentCommunityName () {
-        if (agentCommunity == this.COABS_AGENT_COMMUNTITY)
-            return "CoABS";
-        else if (agentCommunity == this.FIPA_OS_AGENT_COMMUNTITY)
-            return "FIPA-OS";
-        else
-            throw new RuntimeException("Invalid agent community");
-    }
 
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import javax.naming.TimeLimitExceededException;
 import fipaos.ont.fipa.*;
 import org.opencyc.cycagent.*;
-import org.opencyc.util.Timer;
+import org.opencyc.util.*;
 
 /**
  * Provides the interface for interacting with the FIPA-OS agent community.<p>
@@ -39,21 +39,32 @@ public class FipaOsCommunityAdapter implements AgentCommunityAdapter {
     public int msgSerialNumber = 0;
 
     /**
-     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
-     * name of my agent
+     * reference to the name of my agent
      */
-    protected String agentName;
+    protected String myAgentName;
 
     /**
-     * Constructs a new FipaOsCommunityAdapter object given my agent's name.
+     * The parent agent object which implements the MessageReceiver interface.
      */
-    public FipaOsCommunityAdapter(String agentName) {
-        this.agentName = agentName;
+    MessageReceiver messageReceiver;
+
+    /**
+     * Constructs a new FipaOsCommunityAdapter object for the given agent, with the given verbosity.
+     *
+     * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input
+     */
+    public FipaOsCommunityAdapter(MessageReceiver messageReceiver, int verbosity) {
+        myAgentName = messageReceiver.getMyAgentName();
+        this.verbosity = verbosity;
+        if (Log.current == null)
+            Log.makeLog();
     }
 
     /**
@@ -62,14 +73,6 @@ public class FipaOsCommunityAdapter implements AgentCommunityAdapter {
      * @param acl the Agent Communication Language message to be sent
      */
     public void sendMessage (ACL acl) {
-    }
-
-    /**
-     * Notifies my agent that an Agent Communication Language message has been received.
-     *
-     * @param acl the Agent Communication Language message which has been received for my agent
-     */
-    public void messageReceived (ACL acl) {
     }
 
     public static final long WAIT_FOREVER = Long.MAX_VALUE;
@@ -109,5 +112,15 @@ public class FipaOsCommunityAdapter implements AgentCommunityAdapter {
      * Terminate this agent.
      */
     public void terminate() {
+    }
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 }

@@ -7,6 +7,7 @@ import org.jdom.*;
 import org.jdom.input.*;
 import org.opencyc.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.xml.*;
 
 /**
  * Provides the way to create cyc objects and reuse previously cached instances.<br>
@@ -503,7 +504,7 @@ public class CycObjectFactory {
         else if (elementName.equals("list"))
             return unmarshallCycList(element, document);
         else if (elementName.equals("string"))
-            return element.getText();
+            return TextUtil.undoEntityReference(element.getText());
         else if (elementName.equals("integer"))
             return new Integer(element.getTextTrim());
         else if (elementName.equals("double"))
@@ -537,7 +538,7 @@ public class CycObjectFactory {
      * @return the CycSymbol or cached reference to an existing CycSymbol object
      */
     protected static CycSymbol unmarshallCycSymbol (Element cycSymbolElement) {
-        String symbolName = cycSymbolElement.getTextTrim();
+        String symbolName = TextUtil.undoEntityReference(cycSymbolElement.getTextTrim());
         CycSymbol cycSymbol = getCycSymbolCache(symbolName);
         if (cycSymbol != null)
             return cycSymbol;
@@ -566,7 +567,7 @@ public class CycObjectFactory {
      * @return the CycVariable or cached reference to an existing CycVariable object
      */
     protected static CycVariable unmarshallCycVariable (Element cycVariableElement) {
-        String name = cycVariableElement.getTextTrim();
+        String name = TextUtil.undoEntityReference(cycVariableElement.getTextTrim());
         CycVariable cycVariable = getCycVariableCache(name);
         if (cycVariable != null)
             return cycVariable;
@@ -594,7 +595,7 @@ public class CycObjectFactory {
         String name = null;
         Element nameElement = cycConstantElement.getChild("name");
         if (nameElement != null) {
-            name = nameElement.getTextTrim();
+            name = TextUtil.undoEntityReference(nameElement.getTextTrim());
             cycConstant = getCycConstantCacheByName(name);
             if (cycConstant != null)
                 return cycConstant;

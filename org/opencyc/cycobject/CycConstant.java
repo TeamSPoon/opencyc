@@ -192,7 +192,7 @@ public class CycConstant extends CycFort implements Comparable {
         }
         if (name != null) {
             xmlWriter.printXMLStartTag(nameXMLTag, subIndent, true, false);
-            xmlWriter.print(this.getName());
+            xmlWriter.print(TextUtil.doEntityReference(this.getName()));
             xmlWriter.printXMLEndTag(nameXMLTag);
             if (subIndent == indentLength)
                 subIndent = 0;

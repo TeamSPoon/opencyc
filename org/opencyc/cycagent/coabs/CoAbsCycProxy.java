@@ -18,6 +18,13 @@ import org.opencyc.util.*;
 import org.opencyc.xml.*;
 import org.opencyc.cycagent.*;
 
+
+
+
+
+
+
+
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
  *
@@ -376,7 +383,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         else {
             try {
                 //cycConnection.traceOnDetailed();
-                cycConnection.traceOn();
+                //cycConnection.traceOn();
                 response = cycConnection.converse(apiRequest);
             }
             catch (Exception e) {

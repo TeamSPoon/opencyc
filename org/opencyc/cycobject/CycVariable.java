@@ -166,7 +166,7 @@ public class CycVariable implements Comparable {
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException {
         xmlWriter.printXMLStartTag(cycVariableXMLTag, indent, relative, false);
-        xmlWriter.print(name);
+        xmlWriter.print(TextUtil.doEntityReference(name));
         xmlWriter.printXMLEndTag(cycVariableXMLTag);
     }
 

@@ -48,15 +48,15 @@ public class CoAbsCommunityAdapter
     public int msgSerialNumber = 0;
 
     /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
-     * name of my agent
+     * reference to the name of my agent
      */
-    protected String agentName;
+    protected String myAgentName;
 
     /**
      * the CoABS AgentRestrationHelper object.
@@ -80,17 +80,25 @@ public class CoAbsCommunityAdapter
 
     /**
      * Cached AgentRep objects which reduce lookup overhead.
-     * agentName --> agentRep
+     * myAgentName --> agentRep
      */
     protected static Hashtable agentRepCache = new Hashtable();
 
     /**
-     * Constructs a new CoAbsCommunityAdapter for the given CoAbs agent name.
-     *
-     * @param agentName the name of my agent in the CoAbs community.
+     * The parent agent object which implements the MessageReceiver interface.
      */
-    public CoAbsCommunityAdapter(String agentName) throws IOException {
-        this.agentName = agentName;
+    MessageReceiver messageReceiver;
+
+    /**
+     * Constructs a new CoAbsCommunityAdapter for the given CoAbs agent, with the given verbosity.
+     *
+     * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input
+     */
+    public CoAbsCommunityAdapter(MessageReceiver messageReceiver, int verbosity) throws IOException {
+        myAgentName = messageReceiver.getMyAgentName();
+        this.messageReceiver = messageReceiver;
+        this.verbosity = verbosity;
         if (Log.current == null)
             Log.makeLog();
         register();
@@ -101,17 +109,17 @@ public class CoAbsCommunityAdapter
      */
     protected void register() throws IOException {
         if (verbosity > 1)
-            Log.current.println("Starting CoAbsCommunityAdapter for " + agentName);
-        regHelper = new AgentRegistrationHelper(agentName);
+            Log.current.println("Starting CoAbsCommunityAdapter for " + myAgentName);
+        regHelper = new AgentRegistrationHelper(myAgentName);
         regHelper.addMessageListener(this);
-        //Entry[] entries = {new AMSAgentDescription(agentName)};
+        //Entry[] entries = {new AMSAgentDescription(myAgentName)};
         //regHelper.addAdvertisedCapabilities(entries);
         ShutdownHandler.addHook(this);
         conversationState = "register";
         if (verbosity > 2)
-            Log.current.println(agentName +
+            Log.current.println(myAgentName +
                                 " calling AgentRegistrationHelper.registerAgent()...");
-        String filename = agentName + "ServiceIDFile";
+        String filename = myAgentName + "ServiceIDFile";
         try {
             regHelper.readServiceIDFromFile(filename);
             if (verbosity > 2)
@@ -137,22 +145,27 @@ public class CoAbsCommunityAdapter
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
             }
-        long tenSecondsDuration = 10000;
-        org.opencyc.util.Timer timer = new org.opencyc.util.Timer(tenSecondsDuration);
+        long oneMinuteDuration = 60000;
+        org.opencyc.util.Timer timer = new org.opencyc.util.Timer(oneMinuteDuration);
         waitingReplyThreads.put(registrationMessageId, Thread.currentThread());
         while (true)
             try {
-                Thread.sleep(500);
+                Thread.sleep(2000);
+                if (verbosity > 0)
+                    System.out.print(".");
                 if (timer.isTimedOut()) {
                     Log.current.errorPrintln("Time limit exceeded while awaiting CoABS registration");
                     throw new IOException("Time limit exceeded while awaiting CoABS registration");
                 }
+                if (this.lookupAgentRep(myAgentName) != null)
+                    break;
             }
             catch (InterruptedException e) {
-                break;
+                if (this.lookupAgentRep(myAgentName) != null)
+                    break;
             }
         if (verbosity > 2)
-            Log.current.println(agentName + " registered with CoABS grid");
+            Log.current.println(myAgentName + " registered with CoABS grid");
         waitingReplyThreads.remove(registrationMessageId);
         replyMessages.remove(registrationMessageId);
     }
@@ -249,16 +262,6 @@ public class CoAbsCommunityAdapter
     }
 
     /**
-     * Notifies my agent that an Agent Communication Language message has been received.
-     *
-     * @param acl the Agent Communication Language message which has been received for my agent
-     */
-    public void messageReceived (ACL acl){
-        if (verbosity > 2)
-            Log.current.println("\nIgnoring " + acl);
-    }
-
-    /**
      * Sends an Agent Communication Language message and returns the reply.
      *
      * @param acl the Agent Communication Language message to be sent
@@ -313,7 +316,7 @@ public class CoAbsCommunityAdapter
         if (agentRep != null)
             fromAgentName = agentRep.getName();
         if (verbosity > 2) {
-            Log.current.println("\n" + agentName + " received:\n" + message.toString());
+            Log.current.println("\n" + myAgentName + " received:\n" + message.toString());
             if (verbosity > 3)
                 Log.current.println("  ACL: " + message.getACL() +
                                     "\n  Time message received: " + time +
@@ -321,11 +324,14 @@ public class CoAbsCommunityAdapter
                                     "\n  From: " + fromAgentName);
         }
         ACL acl = null;
+        String fixedText = null;
         try {
-            acl = new ACL(fixSenderReceiver(message.getRawText()));
+            fixedText = fixSenderReceiver(message.getRawText());
+            acl = new ACL(fixedText);
         }
-        catch (ParserException e) {
-            Log.current.errorPrintln(e.getMessage());
+        catch (Exception e) {
+            e.printStackTrace();
+            Log.current.errorPrintln(e.getMessage() + "\n in message:\n" + fixedText);
             return;
         }
         if (acl.getPerformative().equals(FIPACONSTANTS.INFORM)) {
@@ -337,7 +343,10 @@ public class CoAbsCommunityAdapter
                 return;
             }
         }
-        messageReceived(acl);
+        if (messageReceiver != null)
+            messageReceiver.messageReceived(acl);
+        else
+            Log.current.println("no message receiver instance to process\n" + acl);
     }
 
     /**
@@ -371,6 +380,8 @@ public class CoAbsCommunityAdapter
      * @return the AgentRep object for the given agent name
      */
     protected AgentRep lookupAgentRep(String agentName) throws IOException {
+        if (verbosity > 2)
+            Log.current.println("directory lookup for " + agentName);
         AgentRep agentRep = (AgentRep) agentRepCache.get(agentName);
         if (agentRep != null)
             return agentRep;
@@ -380,8 +391,12 @@ public class CoAbsCommunityAdapter
         for (int i = 0; i < items.length; i++) {
             ServiceItem si = items[i];
             Object service =  si.service;
+            if (verbosity > 2)
+                Log.current.println("  directory service " + service);
             if (service instanceof AgentRep) {
                 agentRep = (AgentRep) service;
+                if (verbosity > 2)
+                    Log.current.println("    directory agent " + agentRep.getName());
                 if (agentName.equals(agentRep.getName())) {
                     agentRepCache.put(agentName, agentRep);
                     if (verbosity > 2)
@@ -390,7 +405,7 @@ public class CoAbsCommunityAdapter
                 }
             }
         }
-        throw new IOException("Agent not found " + agentName);
+        return null;
     }
 
 
@@ -434,7 +449,7 @@ public class CoAbsCommunityAdapter
      */
     public void deregister() {
         if (verbosity > 2)
-            Log.current.println(agentName +
+            Log.current.println(myAgentName +
                                 " calling AgentRegistrationHelper.deregisterAgent()...");
         try {
             regHelper.deregisterAgent(regHelper.getAgentRep(),
@@ -454,4 +469,15 @@ public class CoAbsCommunityAdapter
             deregister();
         regHelper.terminate();
     }
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+    }
+
 }

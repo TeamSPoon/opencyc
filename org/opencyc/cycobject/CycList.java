@@ -760,7 +760,7 @@ public class CycList extends ArrayList {
         }
         else if (object instanceof String) {
             xmlWriter.printXMLStartTag(stringXMLTag, indentLength, true, false);
-            xmlWriter.print((String) object);
+            xmlWriter.print(TextUtil.doEntityReference((String) object));
             xmlWriter.printXMLEndTag(stringXMLTag);
         }
         else if (object instanceof Double) {

@@ -137,7 +137,7 @@ public class CycSymbol implements Comparable {
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException {
         xmlWriter.printXMLStartTag(cycSymbolXMLTag, indent, relative, false);
-        xmlWriter.print(symbolName);
+        xmlWriter.print(TextUtil.doEntityReference(symbolName));
         xmlWriter.printXMLEndTag(cycSymbolXMLTag);
     }
 }

@@ -6,6 +6,7 @@ import java.net.*;
 import java.io.*;
 import java.text.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.cycagent.*;
 import org.opencyc.util.*;
 
 /**
@@ -34,25 +35,30 @@ import org.opencyc.util.*;
  */
 public class UnitTest extends TestCase {
 
-    protected static final String myAgentName = "Agent2";
-    protected static final String cycProxyAgentName = "Agent1";
-    protected static final int agentCommunity = RemoteCycConnection.COABS_AGENT_COMMUNTITY;
+    public static final String myAgentName = "Agent2";
+    public static final String cycProxyAgentName = "Agent1";
+    public static final int agentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNTITY;
 
     /**
      * Indicates the use of a local CycConnection object to connect with
      * a Cyc server.
      */
-    protected static final int LOCAL_CYC_CONNECTION = 1;
+    public static final int LOCAL_CYC_CONNECTION = 1;
 
     /**
      * Indicates the use of a local RemoteCycConnection object to connect with
      * a remote CycConnection object via a CoABS grid or FIPA-OS agent community.
      * The remote CycConnection has a connection with a Cyc server.
      */
-    protected static final int REMOTE_CYC_CONNECTION = 2;
+    public static final int REMOTE_CYC_CONNECTION = 2;
 
-    protected static int connectionMode = REMOTE_CYC_CONNECTION;
-    //protected static int connectionMode = LOCAL_CYC_CONNECTION;
+    public static int connectionMode = REMOTE_CYC_CONNECTION;
+    //public static int connectionMode = LOCAL_CYC_CONNECTION;
+
+    /**
+     * Indicates whether unit tests should be performed only in binary api mode.
+     */
+    public static boolean performOnlyBinaryApiModeTests = true;
 
     /**
      * Creates a <tt>UnitTest</tt> object with the given name.
@@ -68,24 +74,24 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        //testSuite.addTest(new UnitTest("testAsciiCycConnection"));
-        //testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
-        //testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
+        testSuite.addTest(new UnitTest("testAsciiCycConnection"));
+        testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
+        testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
-        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
 
@@ -95,7 +101,7 @@ public class UnitTest extends TestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
         if (connectionMode == REMOTE_CYC_CONNECTION &&
-            agentCommunity == RemoteCycConnection.COABS_AGENT_COMMUNTITY)
+            agentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNTITY)
             System.exit(0);
     }
 
@@ -470,7 +476,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess1 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
             return;
         System.out.println("\n**** testAsciiCycAccess 1 ****");
         CycAccess cycAccess = null;
@@ -513,7 +520,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        cycAccess.traceOnDetailed();
+        //cycAccess.traceOnDetailed();
         doTestCycAccess1(cycAccess);
 
         cycAccess.close();
@@ -611,7 +618,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess2 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
             return;
         System.out.println("\n**** testAsciiCycAccess 2 ****");
         CycAccess cycAccess = null;
@@ -655,7 +663,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        cycAccess.traceOnDetailed();
+        //cycAccess.traceOnDetailed();
         doTestCycAccess2(cycAccess);
 
         cycAccess.close();
@@ -938,7 +946,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess3 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
             return;
         System.out.println("\n**** testAsciiCycAccess 3 ****");
         CycAccess cycAccess = null;
@@ -980,7 +989,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        cycAccess.traceOnDetailed();
+        //cycAccess.traceOnDetailed();
         doTestCycAccess3(cycAccess);
 
         cycAccess.close();
@@ -1315,7 +1324,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess4 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
             return;
         System.out.println("\n**** testAsciiCycAccess 4 ****");
         CycAccess cycAccess = null;
@@ -1357,7 +1367,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        cycAccess.traceOnDetailed();
+        //cycAccess.traceOnDetailed();
         doTestCycAccess4(cycAccess);
 
         cycAccess.close();
@@ -1605,7 +1615,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess5 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
             return;
         System.out.println("\n**** testAsciiCycAccess 5 ****");
         CycAccess cycAccess = null;
@@ -1647,7 +1658,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        cycAccess.traceOnDetailed();
+        //cycAccess.traceOnDetailed();
         doTestCycAccess5(cycAccess);
 
         cycAccess.close();
@@ -1660,7 +1671,7 @@ public class UnitTest extends TestCase {
     protected void doTestCycAccess5 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
         CycObjectFactory.resetCycConstantCaches();
-        cycAccess.traceOn();
+        //cycAccess.traceOn();
         // createNewPermanent.
         CycConstant cycConstant = null;
         try {
@@ -1902,7 +1913,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess6 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
             return;
         System.out.println("\n**** testAsciiCycAccess 6 ****");
         CycAccess cycAccess = null;
@@ -1944,7 +1956,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        cycAccess.traceOnDetailed();
+        //cycAccess.traceOnDetailed();
         doTestCycAccess6(cycAccess);
 
         cycAccess.close();
@@ -2198,7 +2210,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess7 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
             return;
         System.out.println("\n**** testAsciiCycAccess 7 ****");
         CycAccess cycAccess = null;
@@ -2237,7 +2250,7 @@ public class UnitTest extends TestCase {
             else
                 Assert.fail("Invalid connection mode " + connectionMode);
 
-            cycAccess.traceOnDetailed();
+            //cycAccess.traceOnDetailed();
 
             // Java ByteArray  and SubL byte-vector are used only in the binary api.
             // turn on api if not on.

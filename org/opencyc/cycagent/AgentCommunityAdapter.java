@@ -36,7 +36,27 @@ public interface AgentCommunityAdapter {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 1;
+    public static final int DEFAULT_VERBOSITY = 0;
+
+    /**
+     * Indicates the CoABS agent community.
+     */
+    public static final int COABS_AGENT_COMMUNTITY = 1;
+
+    /**
+     * Indicates the FIPA-OS agent community.
+     */
+    public static final int FIPA_OS_AGENT_COMMUNTITY = 2;
+
+    /**
+     * Indicates the cyc-api ontology (role).
+     */
+    public static final String CYC_API_ONTOLOGY = "cyc-api";
+
+    /**
+     * Indicates the cyc-echo ontology (role).
+     */
+    public static final String CYC_ECHO_ONTOLOGY = "cyc-echo";
 
     /**
      * Sends an Agent Communication Language message.
@@ -44,13 +64,6 @@ public interface AgentCommunityAdapter {
      * @param acl the Agent Communication Language message to be sent
      */
     public void sendMessage (ACL acl) throws IOException;
-
-    /**
-     * Notifies my agent that an Agent Communication Language message has been received.
-     *
-     * @param acl the Agent Communication Language message which has been received for my agent
-     */
-    public void messageReceived (ACL acl);
 
     /**
      * Sends an Agent Communication Language message and returns the reply.
@@ -82,4 +95,13 @@ public interface AgentCommunityAdapter {
      * Terminate this agent.
      */
     public void terminate();
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity);
+
 }

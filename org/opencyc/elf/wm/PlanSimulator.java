@@ -4,9 +4,20 @@ package org.opencyc.elf.wm;
 import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.planner.Schedule;
+
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
+import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.message.EvaluateScheduleMsg;
+import org.opencyc.elf.message.SimulateScheduleMsg;
+
 //// External Imports
+
+import EDU.oswego.cs.dl.util.concurrent.Executor;
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
+import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
+
 import java.util.ArrayList;
 
 /**
@@ -43,87 +54,133 @@ public class PlanSimulator extends NodeComponent {
   public PlanSimulator() {
   }
 
-  //// Public Area
+  /** 
+   * Creates a new instance of PlanSimulator with the given
+   * input and output message channels.
+   *
+   * @param planSimulationChannel the takable channel from which messages are input
+   * @param planEvaluationChannel the puttable channel to which messages are output
+   */
+  public PlanSimulator (Takable planSimulationChannel,
+                        Puttable planEvaluatorChannel) {
+    consumer = new Consumer(planSimulationChannel,
+                            planEvaluatorChannel,
+                            this);
+    executor = new ThreadedExecutor();
+    try {
+      executor.execute(consumer);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
   
-  /**
-   * Gets the world model which owns this simulator-predictor
-   * 
-   * @return the world model which owns this simulator-predictor
-   */
-  public WorldModel getWorldModel() {
-    return worldModel;
-  }
-
-  /**
-   * Sets the world model which owns this simulator-predictor
-   * 
-   * @param worldModel the world model which owns this simulator-predictor
-   */
-  public void setWorldModel(WorldModel worldModel) {
-    this.worldModel = worldModel;
-  }
+  //// Public Area
   
   //// Protected Area
   
   /**
-   * Sends the request evaluate schedule message to the world model, which forwards it
-   * to value judgement.
+   * Thread which processes the input message channel.
    */
-  protected void requestEvaluateSchedule () {
-    //TODO
-    // send via channel to world model
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // send forwardRequestEvaluateSchedule(controlledResources, taskCommand, schedule)
-    // to worldModel
+  protected class Consumer implements Runnable {
+    
+    /**
+     * the takable channel from which messages are input
+     */
+    protected final Takable planSimulationChannel;
+    
+    /**
+     * the puttable channel to which messages are output for the plan evaluator
+     */
+    protected final Puttable planEvaluatorChannel;
+    
+    /**
+     * the parent node component
+     */
+    protected NodeComponent nodeComponent;
+    
+    /**
+     * the resources controlled by this node
+     */
+    protected ArrayList controlledResources;
+    
+    /**
+     * the node's commanded task
+     */
+    protected TaskCommand taskCommand;
+    
+    /**
+     * the proposed schedule for evaluation
+     */
+    protected Schedule schedule;
+      
+    /**
+     * Creates a new instance of Consumer.
+     *
+     * @param planSimulationChannel the takable channel from which messages are input
+     * @param planEvaluatorChannel the puttable channel to which messages are output
+     * @param nodeComponent the parent node component
+     */
+    protected Consumer (Takable planSimulationChannel,
+                        Puttable planEvaluatorChannel,
+                        NodeComponent nodeComponent) { 
+      this.planSimulationChannel = planSimulationChannel;
+      this.planEvaluatorChannel = planEvaluatorChannel;
+      this.nodeComponent = nodeComponent;
+    }
+
+    /**
+     * Reads messages from the input queue and processes them.
+     */
+    public void run () {
+      try {
+        while (true) { 
+          processSimulateScheduleMsg((SimulateScheduleMsg) planSimulationChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+      
+    /**
+     * Simulates the schedule from an executor and sends the result to the plan evaluator. 
+     */
+    protected void processSimulateScheduleMsg(SimulateScheduleMsg simulateScheduleMsg) {
+      controlledResources =  simulateScheduleMsg.getControlledResources();
+      taskCommand =  simulateScheduleMsg.getTaskCommand();
+      schedule =  simulateScheduleMsg.getSchedule();
+      //TODO
+    }
+    
+    /**
+     * Sends the evaluate schedule message to the plan evaluator.
+     */
+    protected void sendEvaluateScheduleMsg() {
+      //TODO
+      Object result = null;
+      
+      EvaluateScheduleMsg evaluateScheduleMsg = new EvaluateScheduleMsg();
+      evaluateScheduleMsg.setSender(nodeComponent);
+      evaluateScheduleMsg.setControlledResources(controlledResources);
+      evaluateScheduleMsg.setTaskCommand(taskCommand);
+      evaluateScheduleMsg.setSchedule(schedule);
+      sendMsgToRecipient(planEvaluatorChannel, evaluateScheduleMsg);
+    }
   }
-  
-  /**
-   * Receives the simulate schedule message from the world model.
-   */
-  protected void receiveSimulateSchedule () {
-    //TODO
-    // receive via channel from world model
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-  }
-  
-  /**
-   * Sends the simulation failure notification message to the world model.
-   */
-  protected void sendSimulationFailureNotification () {
-    //TODO
-    // send via channel to the world model
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // send forwardSimulationFailureNotification(controlledResources, taskCommand, schedule)
-    // to worldModel
-  }
-  
-  /**
-   * Sends the predicted input message to ?.
-   */
-  protected void sendPredictedInput () {
-    //TODO
-    // send via channel to ?
-    // Object obj
-  }
-  
-  public void run() {
-  }  
-  
-  
-  
   
   //// Private Area
   
   //// Internal Rep
   
-  /** the world model which owns this simulator-predictor */
-  protected WorldModel worldModel;
-
+  /**
+   * the thread which processes the input channel of messages
+   */
+  Consumer consumer;
+  
+  /**
+   * the executor of the consumer thread
+   */
+  Executor executor;
+  
   //// Main
 }

@@ -5,7 +5,7 @@ package org.opencyc.elf;
 //// External Imports
 
 /**
- * Provides common behavior and attributes for all Elementary Loop Functioning
+ * Provides common behavior and attributes for all named Elementary Loop Functioning
  * (ELF) objects.<br>
  * 
  * @version $Id$
@@ -29,9 +29,9 @@ package org.opencyc.elf;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public abstract class ELFObject {
-  /** the unique name of this ELF object */
-  protected String name;
-
+  
+  //// Constructors
+  
   /**
    * Constructs a new ELFObject object.
    */
@@ -71,6 +71,9 @@ public abstract class ELFObject {
   
   //// Internal Rep
     
+  /** the unique name of this ELF object */
+  protected String name;
+
   //// Main
   
 }

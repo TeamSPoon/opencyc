@@ -363,63 +363,64 @@ public class ImportDaml implements StatementHandler {
         throws IOException, UnknownHostException, CycApiException {
         if (! actuallyImport)
             return;
-        if (predicateTermInfo.isURI) {
+        if (predicateTermInfo.isURI)
             predicateTermInfo.coerceToNamespace();
-        }
         String damlPredicate = predicateTermInfo.toString();
-        if (damlPredicate.equals("isa")) {
-            importIsa(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        if (damlPredicate.equals("genls")) {
-            importGenls(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("daml:versionInfo")) {
-            importVersionInfo(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("daml:imports")) {
-            importImports(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("comment")) {
-            importComment(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("nameString")) {
-            importNameString(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("equalSymbols")) {
-            importEqualSymbols(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("arg1Isa")) {
-            importArg1Isa(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("arg2Isa")) {
-            importArg2Isa(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("conceptuallyRelated")) {
-            importConceptuallyRelated(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("containsInformationAbout")) {
-            importContainsInformationAbout(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (damlPredicate.equals("genlPreds")) {
-            importGenlPreds(subjectTermInfo, objLitTermInfo);
-            return;
-        }
-        else if (predicateTermInfo.ontologyNickname.equals("daml") ||
-                 predicateTermInfo.ontologyNickname.equals("rdfs") ||
-                 predicateTermInfo.ontologyNickname.equals("rdf")) {
-            Log.current.println("\n\nUnhandled predicate: " + damlPredicate + "\n");
-            return;
+        if (! subjectTermInfo.hasEquivalentCycTerm()) {
+            if (damlPredicate.equals("isa")) {
+                importIsa(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("genls")) {
+                importGenls(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("daml:versionInfo")) {
+                importVersionInfo(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("daml:imports")) {
+                importImports(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("comment")) {
+                importComment(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("nameString")) {
+                importNameString(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("equalSymbols")) {
+                importEqualSymbols(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("arg1Isa")) {
+                importArg1Isa(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("arg2Isa")) {
+                importArg2Isa(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("conceptuallyRelated")) {
+                importConceptuallyRelated(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("containsInformationAbout")) {
+                importContainsInformationAbout(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (damlPredicate.equals("genlPreds")) {
+                importGenlPreds(subjectTermInfo, objLitTermInfo);
+                return;
+            }
+            if (predicateTermInfo.ontologyNickname.equals("daml") ||
+                predicateTermInfo.ontologyNickname.equals("rdfs") ||
+                predicateTermInfo.ontologyNickname.equals("rdf")) {
+                Log.current.println("\n\nUnhandled predicate: " + damlPredicate + "\n");
+                return;
+            }
         }
         CycFort subject = importTerm(subjectTermInfo);
         CycFort predicate = cycAccess.getConstantByName(damlPredicate);
@@ -561,6 +562,15 @@ public class ImportDaml implements StatementHandler {
                               DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
+        cycAccess.assertGaf(importMt,
+                            cycAccess.getKnownConstantByName("damlOntology"),
+                            term,
+                            damlOntologyDefiningURL);
+        cycAccess.assertGaf(importMt,
+                            cycAccess.getKnownConstantByName("damlURI"),
+                            term,
+                            new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                                        subjectTermInfo.uri));
         if (objectTermInfo.constantName.equals("daml:UnambiguousProperty")) {
             cycAccess.assertArg1FormatSingleEntry(subjectTermInfo.cycFort);
             Log.current.println("(#$arg1Format " +
@@ -574,10 +584,6 @@ public class ImportDaml implements StatementHandler {
         }
         cycAccess.assertIsa(term,
                             collection);
-        cycAccess.assertGaf(importMt,
-                            cycAccess.getKnownConstantByName("damlOntology"),
-                            term,
-                            damlOntologyDefiningURL);
         Log.current.println("(#$isa " +
                             term.cyclify() + " " +
                             collection.cyclify() + ")\n");
@@ -875,6 +881,7 @@ public class ImportDaml implements StatementHandler {
         String localName;
         String nameSpace;
         Resource resource = translateResource(aResource);
+        damlTermInfo.uri = resource.toString();
         if (aResource.isAnonymous()) {
             damlTermInfo.isAnonymous = true;
             damlTermInfo.anonymousId = aResource.getAnonymousID();
@@ -888,7 +895,6 @@ public class ImportDaml implements StatementHandler {
         }
         else if (! hasUriNamespaceSyntax(aResource.getURI())) {
             damlTermInfo.isURI = true;
-            damlTermInfo.uri = resource.toString();
             if (! damlTermInfo.mustBeUri(predicateTermInfo))
                 damlTermInfo.coerceToNamespace();
             return damlTermInfo;
@@ -1273,6 +1279,15 @@ public class ImportDaml implements StatementHandler {
                (uri.indexOf("daml+oil") > -1))
                 return true;
             return false;
+        }
+
+        /**
+         * Returns true if this term has an equivalent existing Cyc term.
+         *
+         * @return true if this term has an equivalent existing Cyc term
+         */
+        public boolean hasEquivalentCycTerm () {
+            return equivalentDamlCycTerm != null;
         }
     }
 

@@ -432,7 +432,7 @@ public class ImportSonatDaml {
                                         // comment
                                         "A predicate relating an imported DAML (Darpa " +
                                         "Agent Markup Language) concept with its source" +
-                                        "URL.",
+                                        "URL document.",
                                         // arg1Isa
                                         "Thing",
                                         // arg2Isa
@@ -444,6 +444,30 @@ public class ImportSonatDaml {
                                         genlPreds,
                                         // genFormatString
                                         "~a's DAML ontology URL is ~a",
+                                        // genFormatList
+                                        "()"
+                                        );
+        // #$damlURI
+        genlPreds = null;
+        cycAccess.createBinaryPredicate("damlURI",
+                                        // predicate type
+                                        null,
+                                        // comment
+                                        "A predicate relating an imported DAML (Darpa " +
+                                        "Agent Markup Language) concept with its source" +
+                                        "Uniform Resource Identifier.",
+                                        // arg1Isa
+                                        "Thing",
+                                        // arg2Isa
+                                        "UniformResourceLocator",
+                                        // arg1Format
+                                        null,
+                                        // arg2Format
+                                        "SingleEntry",
+                                        // genlPreds
+                                        "damlOntology",
+                                        // genFormatString
+                                        "~a's DAML URI is ~a",
                                         // genFormatList
                                         "()"
                                         );

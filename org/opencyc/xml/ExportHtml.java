@@ -602,14 +602,25 @@ public class ExportHtml {
             parentElement.appendChild(functorAnchorElement);
             functorAnchorElement.appendChild(htmlDocument.createTextNode(functor.cyclify()));
         }
+        else
+            parentElement.appendChild(htmlDocument.createTextNode(functor.cyclify()));
         for (int i = 0; i < cycNart.getArguments().size(); i++) {
-            CycFort argument = (CycFort) cycNart.getArguments().get(i);
+            Object argument = cycNart.getArguments().get(i);
             parentElement.appendChild(htmlDocument.createTextNode(" "));
-            HTMLAnchorElement argumentAnchorElement =
-                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-            argumentAnchorElement.setHref("#" + argument.cyclify());
-            parentElement.appendChild(argumentAnchorElement);
-            argumentAnchorElement.appendChild(htmlDocument.createTextNode(argument.cyclify()));
+            if (argument instanceof CycFort) {
+                CycFort argumentCycFort = (CycFort) argument;
+                if (selectedCycForts.contains(argumentCycFort)) {
+                    HTMLAnchorElement argumentAnchorElement =
+                        new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+                    argumentAnchorElement.setHref("#" + argumentCycFort.cyclify());
+                    parentElement.appendChild(argumentAnchorElement);
+                    argumentAnchorElement.appendChild(htmlDocument.createTextNode(argumentCycFort.cyclify()));
+                }
+                else
+                parentElement.appendChild(htmlDocument.createTextNode(argumentCycFort.cyclify()));
+            }
+            else
+                parentElement.appendChild(htmlDocument.createTextNode(argument.toString()));
         }
         Node rightParenTextNode = htmlDocument.createTextNode(")");
         parentElement.appendChild(rightParenTextNode);

@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
- * Provides the Node container for the Elementary Loop Functioning (ELF).<br>
+ * Provides the Node container for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Node extends ELFObject {
+public class Node {
 
   //// Constructors
   
@@ -276,7 +276,10 @@ public class Node extends ELFObject {
 
   //// Internal Rep
   
-  /** the dictionary of nodes by name name --> Node */
+  /** the node name */
+  protected String name;
+  
+  /** the dictionary of nodes by name, name --> Node */
   protected static HashMap nodes = new HashMap();
 
   /** the purpose description */

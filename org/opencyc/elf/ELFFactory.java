@@ -33,7 +33,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 
 /**
- * Factory that instantiates an Elementary Loop Functioning (ELF) node.<br>
+ * Factory that instantiates an Elementary Loop Functioning (ELF) node.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

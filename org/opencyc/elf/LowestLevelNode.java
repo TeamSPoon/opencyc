@@ -8,7 +8,7 @@ import org.opencyc.elf.s.Sensor;
 
 /**
  * Provides the lowest level Node container for the Elementary Loop Functioning
- * (ELF).<br>
+ * (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 /**
- * Provides a concise formatter for java logging output.<br>
+ * Provides a concise formatter for java logging output.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -2,6 +2,7 @@ package  org.opencyc.cycagent;
 
 import java.net.*;
 import java.util.*;
+import java.io.*;
 import fipaos.ont.fipa.*;
 import org.opencyc.api.*;
 import org.opencyc.util.*;
@@ -34,6 +35,18 @@ import org.opencyc.util.*;
 public class AgentManager {
 
     /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
      * singleton instance of AgentManager
      */
     public static AgentManager agentManager;
@@ -43,6 +56,21 @@ public class AgentManager {
      * cyc agent name -> CycAgentInfo
      */
     public static Hashtable cycAgents;
+
+    /**
+     * Well known port where the Agent Manager listens for requests from cyc clients.
+     */
+    public static final int LOCAL_CLIENT_LISTENER_PORT = 4444;
+
+    /**
+     * Maximum number of local cyc clients supported by this listener.
+     */
+    public static final int MAX_LOCAL_CLIENT_CLIENTS = 50;
+
+    /**
+     * The socket which listens for new connections.
+     */
+    protected ServerSocket listenerSocket = null;
 
     /**
      * Singleton thread which listens for requests from Cyc.
@@ -65,13 +93,7 @@ public class AgentManager {
         agentManager = new AgentManager();
         if (agentManager.verbosity > 1)
             Log.current.print("Agent manager started at " + localHostName);
-        while (true)
-            // Keep root thread running with minimal resource consumption.
-            try {
-                Thread.sleep(1000);
-            }
-            catch (InterruptedException e) {
-            }
+        agentManager.listenForCycServers();
     }
 
     /**
@@ -86,14 +108,35 @@ public class AgentManager {
     }
 
     /**
-     * Notifies my agent that an Agent Communication Language message has been received.
-     *
-     * @param acl the Agent Communication Language message which has been received for my agent
+     * Handles connecting Cyc servers.
      */
-    public void messageReceived (ACL acl) {
-        super.messageReceived(acl);
-        if (messageConsumed)
-            return;
+    protected void listenForCycServers () {
+        try {
+            listenerSocket = new ServerSocket(LOCAL_CLIENT_LISTENER_PORT, MAX_LOCAL_CLIENT_CLIENTS);
+            while (true) {
+                if (verbosity > 2)
+                    Log.current.println("Listening on port " + LOCAL_CLIENT_LISTENER_PORT);
+                Socket cycSocket = listenerSocket.accept();
+                if (verbosity > 2)
+                    Log.current.println("Cyc Connection accepted " + cycSocket);
+                // Spawn child thread to read from the socket.
+                CycProxyFactory cycProxyFactory =
+                    new CycProxyFactory(cycSocket);
+                Thread cycProxyFactoryThread = new Thread(cycProxyFactory);
+                cycProxyFactoryThread.start();
+            }
+        }
+        catch (IOException e) {
+            Log.current.println("Failed I/O: " + e);
+            System.exit(1);
+        }
+        finally {
+            try {
+                listenerSocket.close();
+            }
+            catch (IOException e) {
+            }
+        }
     }
 }
 

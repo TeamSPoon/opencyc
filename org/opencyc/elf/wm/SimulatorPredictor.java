@@ -112,6 +112,8 @@ public class SimulatorPredictor extends NodeComponent {
     // Object obj
   }
   
+  public void run() {
+  }  
   
   
   

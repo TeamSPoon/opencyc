@@ -55,4 +55,8 @@ public class HypothesisFormer extends NodeComponent {
   public void setSensoryPerception(SensoryPerception sensoryPerception) {
     this.sensoryPerception = sensoryPerception;
   }
+  
+  public void run() {
+  }
+  
 }

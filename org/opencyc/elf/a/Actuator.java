@@ -63,4 +63,8 @@ public class Actuator extends NodeComponent {
   public void setCommandedAction(Procedure commandedAction) {
     this.commandedAction = commandedAction;
   }
+  
+  public void run() {
+  }
+  
 }

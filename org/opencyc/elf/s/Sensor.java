@@ -41,4 +41,8 @@ public class Sensor extends NodeComponent {
   public String toString() {
     return "Sensor for " + node.getName();
   }
+  
+  public void run() {
+  }
+  
 }

@@ -191,12 +191,9 @@ public class WorldModel extends NodeComponent {
     // to simulatorPredictor
   }
   
-  
-  
-  
-  
-  
-  
+  public void run() {
+  }  
+ 
   //// Private Area
   
   //// Internal Rep

@@ -202,6 +202,9 @@ public class Scheduler extends NodeComponent {
     // send schedulerStatus(controlledResources, status) to jobAssigner
   }
   
+  public void run() {
+  }
+  
   //// Private Area
   //// Internal Rep
 }

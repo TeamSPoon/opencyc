@@ -149,6 +149,9 @@ public class Executor extends NodeComponent {
     // send receiveExecutorStatus(taskCommand, schedule, status) to (its) scheduler
   }
   
+  public void run() {
+  }
+  
   //// Private Area
   
   //// Internal Rep

@@ -54,4 +54,8 @@ public class Estimator extends NodeComponent {
   public void setSensoryPerception(SensoryPerception sensoryPerception) {
     this.sensoryPerception = sensoryPerception;
   }
+  
+  public void run() {
+  }
+  
 }

@@ -1,5 +1,7 @@
 package org.opencyc.elf.wm;
 
+import EDU.oswego.cs.dl.util.concurrent.Takable;
+
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
@@ -8,7 +10,13 @@ import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
 
+import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.message.KBObjectPutMsg;
+import org.opencyc.elf.message.KBObjectRequestMsg;
+import org.opencyc.elf.message.KBObjectResponseMsg;
+
 //// External Imports
+import java.util.Hashtable;
 
 /**
  * <P>Knowledge Base contains the known entities and their attributes.
@@ -44,88 +52,88 @@ public class KnowledgeBase extends NodeComponent {
   
   //// Public Area
   
+  /**
+   * Provides the method to be executed when the thread is started.
+   */  
+  public void run() {
+  }
+  
   //// Protected Area
   
   /**
-   * Receives the fetch task frame message from world model.
+   * Thread which processes the input channel of messages.
    */
-  protected void receiveFetchTaskFrame () {
-    //TODO
-    // receive via channel from world model
-    // TaskCommand taskCommand
+  protected class Consumer implements Runnable {
+    
+    /**
+     * the takable channel from which messages are input
+     */
+    protected final Takable knowledgeBaseChannel;
+
+    /**
+     * Creates a new instance of Consumer
+     */
+    protected Consumer (Takable knowledgeBaseChannel) { 
+      this.knowledgeBaseChannel = knowledgeBaseChannel; 
+    }
+
+    /**
+     * Reads messages from the input queue and processes them.
+     */
+    public void run () {
+      try {
+        while (true) { 
+          dispatchMsg((GenericMsg) knowledgeBaseChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+
+    /**
+     * Dispatches the given input channel message by type.
+     *
+     * @param genericMsg the given input channel message
+     */
+    void dispatchMsg (GenericMsg genericMsg) {
+      if (genericMsg instanceof KBObjectRequestMsg)
+        processKBObjectRequestMsg((KBObjectRequestMsg) genericMsg);
+      else if (genericMsg instanceof KBObjectPutMsg)
+        processKBObjectPutMsg((KBObjectPutMsg) genericMsg);
+    }
   }
   
   /**
-   * Sends the task frame to the world model.
+   * Processes the knowledge base object request message.
    */
-  protected void sendTaskFrame () {
-    //TODO
-    // send via channel to the world model
-    // TaskCommand taskCommand
-    // TaskFrame taskFrame
-    // send forwardTaskFrame(taskCommand, taskFrame) to worldModel
+  protected void processKBObjectRequestMsg(KBObjectRequestMsg kbObjectRequestMsg) {
+    KBObjectResponseMsg kbObjectResponseMsg = new KBObjectResponseMsg();
+    kbObjectResponseMsg.setSender(this);
+    kbObjectResponseMsg.setInReplyToMsg(kbObjectRequestMsg);
+    Object obj = kbObjectRequestMsg.getObj();
+    kbObjectResponseMsg.setObj(obj);
+    Object data = kbCache.get(obj);
+    kbObjectResponseMsg.setData(data);
+    sendMsgToRecipient(kbObjectRequestMsg.getReplyToChannel(), kbObjectResponseMsg);
   }
   
   /**
-   * Receives a request KB object message from ?.
+   * Processes the knowledge base object put message.
    */
-  protected void receiveRequestKBObject () {
-    //TODO
-    // receive via channel from ?
-    // Object obj
-  }
-  
-  /**
-   * Sends a request KB object message to ?.
-   */
-  protected void requestKBObject () {
-    //TODO
-    // send via channel to ?
-    // Object obj
-  }
-  
-  /**
-   * Sends a KB object message to ?.
-   */
-  protected void sendKBObject () {
-    //TODO
-    // send via channel to ?
-    // Object obj
-  }
-  
-  /**
-   * Receives a KB object message from ?.
-   */
-  protected void receiveKBObject () {
-    //TODO
-    // receive via channel from ?
-    // Object obj
-  }
-  
-  /**
-   * Receives an update message from ?.
-   */
-  protected void receiveUpdate () {
-    //TODO
-    // receive via channel from ?
-    // Object obj
-    // Object data
-  }
-  
-  /**
-   * Receives the post schedule message from ?
-   */
-  protected void receivePostSchedule () {
-    //TODO
-    // receive via channel from ?
-    // TaskCommand taskCommand
-    // Schedule schedule
+  protected void processKBObjectPutMsg(KBObjectPutMsg kbObjectPutMsg) {
+    Object obj = kbObjectPutMsg.getObj();
+    Object data = kbObjectPutMsg.getData();
+    kbCache.put(obj, data);
   }
   
   //// Private Area
   
   //// Internal Rep
   
+  /**
+   * the knowledge base cache associating obj --> data
+   */
+  protected Hashtable kbCache = new Hashtable();
+    
   //// Main
   
 }

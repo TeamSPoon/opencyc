@@ -142,6 +142,9 @@ public abstract class Planner extends NodeComponent {
     this.procedureToExecute = procedureToExecute;
   }
 
+  public void run() {
+  }
+  
   //// Protected Area
 
   /** the commanded goal for generated behavior to achieve */

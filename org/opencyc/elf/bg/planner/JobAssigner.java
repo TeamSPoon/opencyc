@@ -161,6 +161,9 @@ public class JobAssigner extends NodeComponent {
     // send behaviorGenerationStatus(status) to behaviorGeneration
   }
   
+  public void run() {
+  }
+  
   //// Private Area
   //// Internal Rep
 }

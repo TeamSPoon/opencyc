@@ -254,6 +254,9 @@ public class BehaviorGeneration extends NodeComponent {
     // send status(status) message to node (receiver not specified)
   }
 
+  public void run() {
+  }
+  
   //// Private Area
   //// Internal Rep
   

@@ -121,6 +121,8 @@ public class ValueJudgement extends NodeComponent {
     // to behaviorGeneration
   }
   
+  public void run() {
+  }  
   
   
   //// Private Area

@@ -108,6 +108,9 @@ public class PlanSelector extends NodeComponent {
     // send receiveExecuteSchedule(taskCommand, schedule) to (appropriate) executor
   }
   
+  public void run() {
+  }
+  
   //// Private Area
   
   //// Internal Rep

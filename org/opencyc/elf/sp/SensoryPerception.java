@@ -138,6 +138,9 @@ public class SensoryPerception extends NodeComponent {
     // send receiveUpdate(obj, data) to valueJudgement
   }
 
+  public void run() {
+  }
+  
   //// Private Area
   
   //// Internal Rep

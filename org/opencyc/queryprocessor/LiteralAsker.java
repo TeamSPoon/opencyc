@@ -119,26 +119,26 @@ public class LiteralAsker {
      * a list of value binding lists for all the variables in the given query literal, otherwise if
      * no bindings are found, returns an empty list.
      *
-     * @param queryLiteral the query literal to be asked
-     * @param variables the list of instaniated variables
+     * @param joinedQueryLiteral the joined query literal which contains the uninstantiated query literal
+     * @param uninstantiatedQueryLiteral the literal which will be partially instantiated and asked
+     * @param variables the list of instantiated variables
      * @param valueBindingList the list of values corresponding in position to the variables
-     * @return a list of value binding lists for all the variables in the given query literal, otherwise if
+     * @return a list of value binding lists for all the variables in the given joined query literal, otherwise if
      * no bindings are found, returns an empty list
      */
-    public ArrayList ask(QueryLiteral queryLiteral,
+    public ArrayList ask(QueryLiteral joinedQueryLiteral,
+                         QueryLiteral uninstantiatedQueryLiteral,
                          ArrayList variables,
                          ArrayList bindingValues,
-                         QueryLiteral entireQueryLiteral,
                          CycFort mt)  throws IOException {
         if (verbosity > 3)
-            System.out.println("Asking about " + queryLiteral.cyclify() +
+            System.out.println("Asking about " + uninstantiatedQueryLiteral.cyclify() +
                                "\n  with bound variables " + variables +
                                "\n  with bound values " + bindingValues);
-        CycList partiallyInstantiatedFormula = (CycList) queryLiteral.getFormula().clone();
+        CycList partiallyInstantiatedFormula = (CycList) uninstantiatedQueryLiteral.getFormula().clone();
         for (int i = 0; i < variables.size(); i++) {
             partiallyInstantiatedFormula =
-                partiallyInstantiatedFormula.subst(bindingValues.get(i),
-                                                   variables.get(i));
+                partiallyInstantiatedFormula.subst(bindingValues.get(i), variables.get(i));
         }
         QueryLiteral partiallyInstantiatedQueryLiteral = new QueryLiteral(partiallyInstantiatedFormula);
         if (verbosity > 3)
@@ -152,15 +152,15 @@ public class LiteralAsker {
         CycList result = new CycList();
         for (int i = 0; i < bindingLists.size(); i++) {
             CycList partiallyInstantiatedBindingValues = (CycList) bindingLists.get(i);
-            CycList entireBindingValueList = new CycList();
-            for (int j = 0; j < entireQueryLiteral.getVariables().size(); j++) {
-                CycVariable queryLiteralVariable = (CycVariable) entireQueryLiteral.getVariables().get(j);
+            CycList joinedBindingValueList = new CycList();
+            for (int j = 0; j < joinedQueryLiteral.getVariables().size(); j++) {
+                CycVariable queryLiteralVariable = (CycVariable) joinedQueryLiteral.getVariables().get(j);
                 boolean foundValue = false;
                 for (int k = 0; k < variables.size(); k++) {
                     if (queryLiteralVariable.equals(variables.get(k))) {
                         // found in the input variables
                         foundValue = true;
-                        entireBindingValueList.add(bindingValues.get(k));
+                        joinedBindingValueList.add(bindingValues.get(k));
                         break;
                     }
                 }
@@ -169,17 +169,17 @@ public class LiteralAsker {
                         if (queryLiteralVariable.equals(partiallyInstantiatedQueryLiteral.getVariables().get(k))) {
                             // found in the asked variables
                             foundValue = true;
-                            entireBindingValueList.add(partiallyInstantiatedBindingValues.get(k));
+                            joinedBindingValueList.add(partiallyInstantiatedBindingValues.get(k));
                             break;
                         }
                     }
                 }
                 if (! foundValue)
-                    throw new RuntimeException("Expected variable not found in " + queryLiteral.cyclify());
+                    throw new RuntimeException("Expected variable not found in " + joinedQueryLiteral.cyclify());
             }
             if (verbosity > 3)
-                System.out.println("  entire binding list " + entireBindingValueList);
-            result.add(entireBindingValueList);
+                System.out.println("  joined binding list " + joinedBindingValueList);
+            result.add(joinedBindingValueList);
         }
          return bindingLists;
     }

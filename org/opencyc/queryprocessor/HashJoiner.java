@@ -160,9 +160,10 @@ public class HashJoiner {
         ArrayList bindingLists = null;
         for (int i = 0; i < smallerBindingSet.size(); i++)
             joinedBindingSet.addAll(literalAsker.ask(joinedQueryLiteral,
-                                            smallerBindingSet.getVariables(),
-                                            (ArrayList) smallerBindingSet.getBindingValues().get(i),
-                                            smallerBindingSet.getMt());
+                                                     uninstantiatedBindingSet.getQueryLiteral(),
+                                                     smallerBindingSet.getVariables(),
+                                                     (ArrayList) smallerBindingSet.getBindingValues().get(i),
+                                                     smallerBindingSet.getMt()));
         if (verbosity > 3) {
             System.out.println();
             joinedBindingSet.displayBindingSet();
@@ -170,12 +171,6 @@ public class HashJoiner {
         }
         return joinedBindingSet;
     }
-
-    protected ArrayList assembleBindingValueLists(ArrayList bindingLists,
-                                                  QueryLiteral entireQueryLiteral,
-                                                  QueryLiteral partiallyInstantiatedQueryLiteral) {
-   }
-
 
     /**
      * Joins a probe binding set with a build binding set.

@@ -372,10 +372,7 @@ public class CycConnection {
             answer[0] = Boolean.FALSE;
         else
             answer[0] = Boolean.TRUE;
-        answer[1] = cfaslInputStream.readObject();
-        if (answer[1] instanceof CycList)
-            // Get constant names and guids for any constants in the CycList.
-            cycAccess.completeCycList((CycList) answer[1]);
+        answer[1] = cycAccess.completeObject(cfaslInputStream.readObject());
         if (trace)
             System.out.println("receive = (" + answer[0] + ") " + answer[1]);
         return  answer;
@@ -501,9 +498,6 @@ public class CycConnection {
                     parenLevel--;
             }
             result.append((char)ch);
-            if ((!isQuotedString) && (result.length() > 3) && (result.toString().endsWith(" . ")))
-                // Convert lists of the form ( x y . z) into (x y z).
-                result.setLength(result.length() - 2);
         }
         return  result.toString();
     }

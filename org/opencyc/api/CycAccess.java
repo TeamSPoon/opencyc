@@ -287,6 +287,9 @@ public class CycAccess {
         Object [] response = {null, null};
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
+            if (! (response[1] instanceof String))
+                throw new RuntimeException("Expected String but received (" + response[1].getClass() + ") " +
+                                           response[1] + "\n in response to command " + command);
             return (String) response[1];
         }
         else
@@ -540,141 +543,145 @@ public class CycAccess {
     }
 
     /**
-     * Completes the instantiation of <tt>CycConstant</tt> object contained in the given <tt>CycList</tt>. The
-     * binary api sends only constant ids, and the constant names and guids must be retreived if the constant is
+     * Completes the instantiation of objects contained in the given <tt>CycList</tt>. The
+     * binary api sends only constant ids, and the constant names and guids must be retrieved if the constant is
+     * not cached.
+     *
+     * @param object the <tt>CycConstant</tt> to be completed, or the <tt>Object</tt> whose
+     * embedded constants are to be completed
+     * @return the completed object, or a reference to a cached instance
+     */
+    public Object completeObject (Object object) throws IOException, UnknownHostException {
+        if (object instanceof CycConstant)
+            return completeCycConstant((CycConstant) object);
+        else if (object instanceof CycList)
+            return completeCycList((CycList) object);
+        else if (object instanceof CycNart)
+            return completeCycNart((CycNart) object);
+        else if (object instanceof CycAssertion)
+            return completeCycAssertion((CycAssertion) object);
+        else
+            return object;
+    }
+
+    /**
+     * Completes the instantiation of <tt>CycConstant</tt> returned by the binary api. The
+     * binary api sends only constant ids, and the constant names and guids must be retrieved
+     * if the constant is not cached.
+     *
+     * @param cycConstant the <tt>CycConstant</tt> whose name and guid are to be completed
+     * @return the completed <tt>CycConstant</tt> object, or a reference to the previously cached instance
+     */
+    public CycConstant completeCycConstant (CycConstant cycConstant) throws IOException, UnknownHostException {
+        cycConstant.name = getConstantName(cycConstant.id);
+        CycConstant cachedConstant = CycConstant.getCache(cycConstant.name);
+        if (cachedConstant == null) {
+            cycConstant.guid = getConstantGuid(cycConstant.id);
+            CycConstant.addCache(cycConstant);
+            return cycConstant;
+        }
+        else
+            return cachedConstant;
+    }
+
+    /**
+     * Completes the instantiation of objects contained in the given <tt>CycList</tt>. The
+     * binary api sends only constant ids, and the constant names and guids must be retrieved if the constant is
      * not cached.
      *
      * @param cycList the <tt>CycList</tt> whose constants are to be completed
+     * @param the completed <tt>CycList</tt> object
      */
-    public void completeCycList (CycList cycList) throws IOException, UnknownHostException {
+    public CycList completeCycList (CycList cycList) throws IOException, UnknownHostException {
         for (int i = 0; i < cycList.size(); i++) {
             Object element = cycList.get(i);
             if (element instanceof CycList)
                 completeCycList((CycList) element);
-            else if (element instanceof CycConstant) {
-                CycConstant cycConstant = (CycConstant) element;
-                cycConstant.name = getConstantName(cycConstant.id);
-                CycConstant cachedConstant = CycConstant.getCache(cycConstant.name);
-                if (cachedConstant == null) {
-                    cycConstant.guid = getConstantGuid(cycConstant.id);
-                    CycConstant.addCache(cycConstant);
-                }
-                else
-                    cycList.set(i, cachedConstant);
-            }
+            else if (element instanceof CycConstant)
+                // Replace element with the completed constant, which might be previously cached.
+                cycList.set(i, completeCycConstant((CycConstant) element));
+            else
+                completeObject(element);
         }
+        return cycList;
+    }
+
+    /**
+     * Completes the instantiation of a <tt>CycNart</tt> returned by the binary api. The
+     * binary api sends only constant ids, and the constant names and guids must be retrieved
+     * if the constant is not cached.
+     *
+     * @param cycNart the <tt>CycNart</tt> whose constants are to be completed
+     * @param the completed <tt>CycNart</tt> object
+     */
+    public CycNart completeCycNart (CycNart cycNart) throws IOException, UnknownHostException {
+        return getCycNartById(cycNart.id);
+    }
+
+    /**
+     * Completes the instantiation of a <tt>CycAssertion</tt> returned by the binary api. The
+     * binary api sends only constant ids, and the constant names and guids must be retrieved
+     * if the constant is not cached.
+     *
+     * @param cycAssertion the <tt>CycAssertion</tt> whose constants are to be completed
+     * @param the completed <tt>CycAssertion</tt> object
+     */
+    public CycAssertion completeCycAssertion (CycAssertion cycAssertion) throws IOException, UnknownHostException {
+        return getAssertionById(cycAssertion.getId());
     }
 
     /**
      * Gets a CycNart by using its id.
      */
     public CycNart getCycNartById (Integer id)  throws IOException, UnknownHostException {
-        CycNart answer = CycNart.getCache(id);
-        if (answer != null) {
-            return answer;
+        CycNart cycNart = CycNart.getCache(id);
+        if (cycNart != null) {
+            return cycNart;
         }
         else {
-            answer = new CycNart();
-            answer.id = id;
+            cycNart = new CycNart();
+            cycNart.id = id;
         }
-            /*
-        String command = "(assertion-formula (find-assertion-by-id " + id + "))";
-        answer.setFormula(converseList(command));
-        */
-        return answer;
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("nart-el-formula"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("find-nart-by-id"));
+        command1.add(id);
+        CycList formula = converseList(command);
+        cycNart.setFunctor((CycFort) formula.first());
+        cycNart.setArguments(formula.rest());
+        return cycNart;
     }
 
     /**
      * Gets a CycAssertion by using its id.
      */
     public CycAssertion getAssertionById (Integer id)  throws IOException, UnknownHostException {
-        CycAssertion answer = CycAssertion.getCache(id);
-        if (answer != null) {
-            if (answer.getFormula() != null)
-                return answer;
+        CycAssertion cycAssertion = CycAssertion.getCache(id);
+        if (cycAssertion != null) {
+            if (cycAssertion.getFormula() != null)
+                return cycAssertion;
         }
         else
-            answer = new CycAssertion(id);
-        String command = "(assertion-formula (find-assertion-by-id " + id + "))";
-        answer.setFormula(converseList(command));
-        return answer;
+            cycAssertion = new CycAssertion(id);
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("assertion-formula"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("find-assertion-by-id"));
+        command1.add(id);
+        cycAssertion.setFormula(converseList(command));
+        return cycAssertion;
     }
 
     /**
      * Gets a CycNart object from a Cons object that lists the names of
      * its functor and its arguments.
      */
-
     public CycNart getCycNartFromCons(CycList elCons) {
         return new CycNart(elCons);
     }
-
-    /*
-        throws java.net.UnknownHostException, java.io.IOException, java.lang.IllegalArgumentException {
-        LinkedList arguments = new LinkedList();
-        ListIterator iterator = elCons.toLinkedList().listIterator();
-        Object functorObject = iterator.next();
-        CycFort functor = null;
-    String functorString = null;
-    if (functorObject instanceof java.lang.String) {
-      functorString = (String)functorObject;
-    }
-    else if (functorObject instanceof com.cyc.util.Atom) {
-      functorString = functorObject.toString();
-    }
-        if (functorString instanceof java.lang.String) {
-      try {
-            functor = getConstantByName(functorString);
-      }
-      catch (IOException e) {
-        System.err.println(functorString + " is not a constant!");
-      }
-    }
-        else if (functorObject instanceof CycList) {
-            functor = getCycNartFromCons((Cons)functorObject);
-    }
-        while (iterator.hasNext()) {
-            Object argObject = iterator.next();
-        String argString = null;
-        if (argObject instanceof java.lang.String) {
-          argString = (String)argObject;
-        }
-        else if (argObject instanceof com.cyc.util.Atom) {
-          argString = argObject.toString();
-        }
-        Object preArg = null;
-        Object arg = null;
-        if (argString instanceof java.lang.String && argString.startsWith("#$")) {
-          try {
-        preArg = getConstantByName(argString);
-          }
-          catch (IOException e) {
-        System.err.println(argString + " is not a constant!");
-          }
-        }
-        if (preArg instanceof com.cyc.util.CycConstant) {
-          arg = preArg;
-        }
-        else if (argString instanceof java.lang.String) {
-          System.err.println("Warning: String argument: " + argString);
-          arg = argString;
-        }
-        else if (argObject instanceof CycList) {
-          arg = getCycNartFromCons((Cons)argObject);
-        }
-        if (arg != null) {
-          arguments.add(arg);
-        }
-        else {
-          throw new IllegalArgumentException("Could not construct FORT argument from " + argObject);
-        }
-        }
-    if (functor == null || arguments.isEmpty()) {
-      throw new IllegalArgumentException(elCons.toString());
-    }
-    return new CycNart(functor, arguments);
-    }
-    */
 
     /**
      * Returns true if CycConstant BINARYPREDICATE relates CycConstant ARG1 and CycConstant ARG2.
@@ -691,7 +698,7 @@ public class CycAccess {
         if (response[0].equals(Boolean.TRUE)) {
             if (response[1] == null)
                 return false;
-            else if (response[1].equals("T"))
+            else if (response[1].toString().equals("T"))
                 return true;
             else
                 return false;
@@ -1305,7 +1312,7 @@ public class CycAccess {
             name = name.substring(2);
         String command = withBookkeepingInfo() +
             "(cyc-create-new-permanent \"" + name + "\"))";
-        converseString(command);
+        converseVoid(command);
         return getConstantByName(name);
     }
 
@@ -1560,8 +1567,14 @@ public class CycAccess {
      */
     public boolean isQueryTrue (CycList query,
                                 CycConstant mt)  throws IOException, UnknownHostException {
-        CycList response = converseList("(removal-ask '" + query.cyclify() + " " + mt.cyclify() +
-                                        ")");
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("removal-ask"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.quote);
+        command1.add(query);
+        command.add(mt);
+        CycList response = converseList(command);
         return response.size() > 0;
     }
 

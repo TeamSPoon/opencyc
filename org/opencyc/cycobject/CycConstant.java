@@ -157,7 +157,10 @@ public class CycConstant extends CycFort implements Comparable {
      * Returns a String representation of the <tt>CycConstant</tt>.
      */
     public String toString() {
-        return name;
+        if (name == null)
+            return "constant-with-id:" + id;
+        else
+            return name;
     }
 
     public String cyclify() {

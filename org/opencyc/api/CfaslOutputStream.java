@@ -343,7 +343,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeString (String s) throws IOException {
         if (cycConnection.trace)
-            System.out.println("writeString = " + s);
+            System.out.println("writeString = \"" + s + "\"");
         write(CFASL_STRING);
         writeInt(s.length());
         write(s.getBytes());
@@ -356,7 +356,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeList (List list) throws IOException {
         if (cycConnection.trace)
-            System.out.println("writeList = " + list);
+            System.out.println("writeList = " + list + "\n  of size " + list.size());
         write(CFASL_LIST);
         writeInt(list.size());
         for (int i = 0; i < list.size(); i++) {
@@ -371,7 +371,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeList (Object[] list) throws IOException {
         if (cycConnection.trace)
-            System.out.println("writeList = " + list);
+            System.out.println("writeList(Array) = " + list + "\n  of size " + list.length);
         write(CFASL_LIST);
         writeInt(list.length);
         for (int i = 0; i < list.length; i++) {

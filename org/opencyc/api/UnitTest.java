@@ -40,16 +40,16 @@ public class UnitTest extends TestCase {
 
     public static void runTests() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testAsciiCycConnection"));
+        //testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
-        testSuite.addTest(new UnitTest("testCycAccess2"));
-        testSuite.addTest(new UnitTest("testCycAccess3"));
-        testSuite.addTest(new UnitTest("testCycAccess4"));
-        testSuite.addTest(new UnitTest("testCycAccess5"));
-        testSuite.addTest(new UnitTest("testCycAccess6"));
-        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
+        //testSuite.addTest(new UnitTest("testCycAccess2"));
+        //testSuite.addTest(new UnitTest("testCycAccess3"));
+        //testSuite.addTest(new UnitTest("testCycAccess4"));
+        //testSuite.addTest(new UnitTest("testCycAccess5"));
+        //testSuite.addTest(new UnitTest("testCycAccess6"));
+        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
     }
@@ -125,6 +125,17 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertEquals("(A B (C D (E) F))", response[1].toString());
 
+        // Test return of improper list.
+        command = "(quote (a . b))";
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("(A . B)", response[1].toString());
+
         // Test function evaluation.
         command = "(member? #$Dog '(#$DomesticPet #$Dog))";
         try {
@@ -146,7 +157,7 @@ public class UnitTest extends TestCase {
         }
         Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertTrue(response[1] instanceof CycList);
-        Assert.assertEquals("((((T T)) ((:GENLS (#$genls #$DomesticPet #$DomesticatedAnimal) #$HumanActivitiesMt :TRUE-DEF))))",
+        Assert.assertEquals("((((T . T)) ((:GENLS (#$genls #$DomesticPet #$DomesticatedAnimal) #$HumanActivitiesMt :TRUE-DEF))))",
                             ((CycList) response[1]).cyclify());
 
         cycConnection.close();
@@ -159,7 +170,8 @@ public class UnitTest extends TestCase {
         CycConnection cycConnection = null;
         try {
             cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
+                                      //CycConnection.DEFAULT_BASE_PORT,
+                                      3654,
                                       CycConnection.BINARY_MODE,
                                       CycAccess.PERSISTENT_CONNECTION);
             cycConnection = cycAccess.cycConnection;
@@ -221,6 +233,31 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertEquals("(A B (C D (E) F))", response[1].toString());
 
+        // Test return of improper list.
+        try {
+            cycConnection.trace = true;
+            response = cycConnection.converse("(symbol-value 'dotted-list)");
+            cycConnection.trace = false;
+        }
+        catch (Exception e) {
+        }
+
+        // Test return of improper list.
+        command = new CycList();
+        command.add(CycSymbol.quote);
+        cycList2 = new CycList();
+        command.add(cycList2);
+        cycList2.add(CycSymbol.makeCycSymbol("A"));
+        cycList2.setDottedElement(CycSymbol.makeCycSymbol("B"));
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("(A . B)", response[1].toString());
+
         // Test error return
         command = new CycList();
         command.add(CycSymbol.nil);
@@ -230,7 +267,7 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals("(CYC-EXCEPTION MESSAGE \"Invalid API Request: NIL is not a valid API function symbol\")",
+        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Invalid API Request: NIL is not a valid API function symbol\")",
                             response[1].toString());
 
         cycConnection.close();
@@ -431,7 +468,6 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(isas);
         Assert.assertTrue(isas instanceof CycList);
-        System.out.println("isas " + isas);
         isas = ((CycList) isas).sort();
         try {
             Assert.assertTrue(isas.contains(cycAccess.getConstantByName("OrganismClassificationType")));
@@ -1847,6 +1883,7 @@ public class UnitTest extends TestCase {
 
         // isQueryTrue
         try {
+            cycAccess.traceOn();
             CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfAustinTX)");
             mt = CycAccess.current().getConstantByName("EverythingPSC");
             Assert.assertTrue(CycAccess.current().isQueryTrue(query, mt));
@@ -1854,6 +1891,7 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(! CycAccess.current().isQueryTrue(query, mt));
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
 

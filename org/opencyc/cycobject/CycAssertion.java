@@ -80,7 +80,10 @@ public class CycAssertion {
      * @return a <tt>String</tt> representation of the <tt>CycAssertion</tt>
      */
     public String toString () {
-        return formula.cyclify();
+        if (formula == null)
+            return "assertion-with-id:" + id;
+        else
+            return formula.cyclify();
     }
 
     /**

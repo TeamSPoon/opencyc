@@ -56,7 +56,7 @@ public class CycNart extends CycFort implements Comparable {
     /**
      * The list of the arguments of the <ttt>CycNart</tt> object.
      */
-    protected List arguments = new ArrayList();
+    protected CycList arguments = new CycList();
 
     /**
      * Least Recently Used Cache of CycNarts, so that a reference to an existing <tt>CycNart</tt>
@@ -76,10 +76,10 @@ public class CycNart extends CycFort implements Comparable {
      *
      * @param functor a <tt>CycFort</tt> which is the functor of this
      * <tt>CycNart</tt> object.
-     * @param arguments a <tt>List</tt> of the functor's arguments which
-     * are of type <tt>Object</tt>
+     * @param arguments a <tt>CycList</tt> of the functor's arguments which
+     * are cyc objects
      */
-    public CycNart (CycFort functor, List arguments) {
+    public CycNart (CycFort functor, CycList arguments) {
         this.functor = functor;
         this.arguments = arguments;
     }
@@ -140,12 +140,30 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
+     * Sets the functor of the <tt>CycNart</tt>.
+     *
+     * @param functor the <tt>CycFort</tt> functor object of the <tt>CycNart</tt>
+     */
+    public void setFunctor(CycFort functor) {
+        this.functor = functor;
+    }
+
+    /**
      * Returns the arguments of the <tt>CycNart</tt>.
      *
      * @return the arguments of the <tt>CycNart</tt>
      */
     public List getArguments() {
         return arguments;
+    }
+
+    /**
+     * Sets the arguments of the <tt>CycNart</tt>.
+     *
+     * @param arguments the arguments of the <tt>CycNart</tt>
+     */
+    public void setArguments(CycList arguments) {
+        this.arguments = arguments;
     }
 
     /**
@@ -205,6 +223,8 @@ public class CycNart extends CycFort implements Comparable {
      * @return a <tt>String</tt> representation of the OpenCyc NART.
      */
     public String toString() {
+        if (functor == null)
+            return "nart-with-id:" + id;
         StringBuffer result = new StringBuffer("(");
         result.append(this.functor.toString());
         ListIterator iterator = arguments.listIterator();

@@ -2,6 +2,7 @@ package  org.opencyc.api;
 
 import  java.io.*;
 import  java.math.BigInteger;
+import  java.util.HashMap;
 import  org.opencyc.cycobject.*;
 
 
@@ -78,6 +79,57 @@ public class CfaslInputStream extends BufferedInputStream {
     protected static final int DEFAULT_READ_LIMIT = 1024;
     protected CycConnection cycConnection;
 
+    static HashMap cfaslOpcodeDescriptions = null;
+
+    /**
+     * Initializes the opcode descriptions used in trace output.
+     */
+    protected void initializeOpcodeDescriptions() {
+        cfaslOpcodeDescriptions = new HashMap();
+        cfaslOpcodeDescriptions.put(new Integer(128), "CFASL_IMMEDIATE_FIXNUM_CUTOFF");
+        cfaslOpcodeDescriptions.put(new Integer(256 - CFASL_IMMEDIATE_FIXNUM_CUTOFF),
+                                    "CFASL_IMMEDIATE_FIXNUM_OFFSET");
+        cfaslOpcodeDescriptions.put(new Integer(0), "CFASL_P_8BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(1), "CFASL_N_8BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(2), "CFASL_P_16BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(3), "CFASL_N_16BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(4), "CFASL_P_24BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(5), "CFASL_N_24BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(6), "CFASL_P_32BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(7), "CFASL_N_32BIT_INT");
+        cfaslOpcodeDescriptions.put(new Integer(8), "CFASL_P_FLOAT");
+        cfaslOpcodeDescriptions.put(new Integer(9), "CFASL_N_FLOAT");
+        cfaslOpcodeDescriptions.put(new Integer(10), "CFASL_KEYWORD");
+        cfaslOpcodeDescriptions.put(new Integer(11), "CFASL_SYMBOL");
+        cfaslOpcodeDescriptions.put(new Integer(12), "CFASL_NIL");
+        cfaslOpcodeDescriptions.put(new Integer(13), "CFASL_LIST");
+        cfaslOpcodeDescriptions.put(new Integer(17), "CFASL_DOTTED");
+        cfaslOpcodeDescriptions.put(new Integer(14), "CFASL_VECTOR");
+        cfaslOpcodeDescriptions.put(new Integer(15), "CFASL_STRING");
+        cfaslOpcodeDescriptions.put(new Integer(16), "CFASL_CHARACTER");
+        cfaslOpcodeDescriptions.put(new Integer(18), "CFASL_HASHTABLE");
+        cfaslOpcodeDescriptions.put(new Integer(19), "CFASL_BTREE_LOW_HIGH");
+        cfaslOpcodeDescriptions.put(new Integer(20), "CFASL_BTREE_LOW");
+        cfaslOpcodeDescriptions.put(new Integer(21), "CFASL_BTREE_HIGH");
+        cfaslOpcodeDescriptions.put(new Integer(22), "CFASL_BTREE_LEAF");
+        cfaslOpcodeDescriptions.put(new Integer(23), "CFASL_P_BIGNUM");
+        cfaslOpcodeDescriptions.put(new Integer(24), "CFASL_N_BIGNUM");
+        cfaslOpcodeDescriptions.put(new Integer(25), "CFASL_GUID");
+        cfaslOpcodeDescriptions.put(new Integer(30), "CFASL_CONSTANT");
+        cfaslOpcodeDescriptions.put(new Integer(31), "CFASL_NART");
+        cfaslOpcodeDescriptions.put(new Integer(33), "CFASL_ASSERTION");
+        cfaslOpcodeDescriptions.put(new Integer(34), "CFASL_ASSERTION_SHELL");
+        cfaslOpcodeDescriptions.put(new Integer(35), "CFASL_ASSERTION_DEF");
+        cfaslOpcodeDescriptions.put(new Integer(36), "CFASL_SOURCE");
+        cfaslOpcodeDescriptions.put(new Integer(37), "CFASL_SOURCE_DEF");
+        cfaslOpcodeDescriptions.put(new Integer(38), "CFASL_AXIOM");
+        cfaslOpcodeDescriptions.put(new Integer(39), "CFASL_AXIOM_DEF");
+        cfaslOpcodeDescriptions.put(new Integer(40), "CFASL_VARIABLE");
+        cfaslOpcodeDescriptions.put(new Integer(41), "CFASL_INDEX");
+        cfaslOpcodeDescriptions.put(new Integer(50), "CFASL_SPECIAL_OBJECT");
+        cfaslOpcodeDescriptions.put(new Integer(-1), "CFASL_SERVER_DEATH");
+    }
+
     /**
      * Creates a new CfaslInputStream to read data from the
      * specified underlying input stream.
@@ -88,6 +140,7 @@ public class CfaslInputStream extends BufferedInputStream {
     public CfaslInputStream (InputStream in, CycConnection cycConnection) {
         super(in, DEFAULT_READ_LIMIT);
         this.cycConnection = cycConnection;
+        initializeOpcodeDescriptions();
     }
 
     /**
@@ -102,7 +155,8 @@ public class CfaslInputStream extends BufferedInputStream {
         int cfaslOpcode = read();
         Object o = null;
         if (cycConnection.trace)
-            System.out.println("opcode = " + cfaslOpcode);
+            System.out.println("reading opcode = " + cfaslOpcode + " (" +
+                               cfaslOpcodeDescriptions.get(new Integer(cfaslOpcode)) +")");
         if (cfaslOpcode >= CFASL_IMMEDIATE_FIXNUM_OFFSET) {
             o = new Integer(cfaslOpcode - CFASL_IMMEDIATE_FIXNUM_OFFSET);
             if (cycConnection.trace)
@@ -222,11 +276,12 @@ public class CfaslInputStream extends BufferedInputStream {
                     throw  new RuntimeException("Unknown cfasl opcode: " + cfaslOpcode);
             }
         }
-        if (cycConnection.trace)
+        if (cycConnection.trace) {
             if (o == null)
                 System.out.println("readObject = nil/null");
             else
                 System.out.println("readObject = " + o + " (" + o.getClass() + ")");
+            }
         return  o;
     }
 
@@ -396,7 +451,7 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return the keyword <tt>CycSymbol</tt> read
      */
     public CycSymbol readKeyword () throws IOException {
-        return  CycSymbol.makeCycSymbol((String)readObject());
+        return  CycSymbol.makeCycSymbol(":" + (String)readObject());
     }
 
     /**
@@ -427,6 +482,8 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public CycList readCycList () throws IOException {
         int size = readInt();
+        if (cycConnection.trace)
+            System.out.println("CycList.size: " + size);
         CycList cycList = new CycList();
         for (int i = 0; i < size; i++) {
             cycList.add(readObject());

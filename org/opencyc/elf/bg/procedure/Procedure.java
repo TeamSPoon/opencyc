@@ -12,7 +12,9 @@ import org.opencyc.elf.bg.state.State;
 
 /**
  * <P>
- * Procedure contains the procedure framework that specific procedures extend.
+ * Procedure contains the procedure framework that specific procedures extend.  Procedures
+ * are not directly executable, they provide the source code for the action that
+ * interprets the procedure.
  * </p>
  * 
  * @version $Id$
@@ -54,16 +56,6 @@ public abstract class Procedure {
   }
 
   //// Public Area
-
-  /**
-   * Executes this procedure given its parameter list
-   * 
-   * @param inputs the list of parameter values
-   * 
-   * @return the output of the procedure
-   */
-  public abstract Object execute(ArrayList inputs);
-
 
   /**
    * Returns true if the given object equals this procedure.

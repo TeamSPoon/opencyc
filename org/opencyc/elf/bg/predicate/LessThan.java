@@ -56,7 +56,7 @@ public class LessThan extends Operator implements Predicate {
     if (arguments.size() != 2)
       throw new BehaviorEngineException("Wrong number of arguments " + arguments);
     Number arg1Obj = (Number) evaluateArgument(arguments.get(0), state);
-    Number arg2Obj = (Number) evaluateArgument(arguments.get(0), state);
+    Number arg2Obj = (Number) evaluateArgument(arguments.get(1), state);
     Number[] args = convertNumericArguments(arg1Obj, arg2Obj);
     return evaluate(args[0], args[1]);
   }
@@ -92,11 +92,11 @@ public class LessThan extends Operator implements Predicate {
    * numeric argument
    */
   protected Boolean evaluate(Number arg1, Number arg2) {
-    if (arg1 instanceof Integer && arg2 instanceof Integer)
+    if (arg1 instanceof Integer)
       return new Boolean(((Integer) arg1).compareTo(arg2) < 0);
-    if (arg1 instanceof Long && arg2 instanceof Long)
+    if (arg1 instanceof Long)
       return new Boolean(((Long) arg1).compareTo(arg2) < 0);
-    if (arg1 instanceof Float && arg2 instanceof Float)
+    if (arg1 instanceof Float)
       return new Boolean(((Float) arg1).compareTo(arg2) < 0);
     else
       return new Boolean(((Double) arg1).compareTo(arg2) < 0);

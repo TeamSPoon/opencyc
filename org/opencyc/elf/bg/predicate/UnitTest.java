@@ -67,20 +67,26 @@ public class UnitTest extends TestCase {
   public void testPredicateExpression() {
     System.out.println("\n*** testPredicateExpression ***");
     State state = new State();
+    
     // True
     True true1 = new True();
     PredicateExpression predicateExpression1 = new PredicateExpression(true1);
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    Assert.assertEquals("TRUE", predicateExpression1.toString());
+    
     // NotNull
     NotNull notNull = new NotNull();
     predicateExpression1 = new PredicateExpression(notNull, "abc");
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    Assert.assertEquals("", predicateExpression1.toString());
     predicateExpression1 = new PredicateExpression(notNull, null);
     Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    
     // Equals
     Equals equals = new Equals();
     predicateExpression1 = new PredicateExpression(equals, "abc", "abc");
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    Assert.assertEquals("", predicateExpression1.toString());
     predicateExpression1 = new PredicateExpression(equals, "abc", "def");
     Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
     predicateExpression1 = new PredicateExpression(equals, new Integer(100), new Integer(100));
@@ -89,14 +95,17 @@ public class UnitTest extends TestCase {
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
     predicateExpression1 = new PredicateExpression(equals, "abc", null);
     Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    
     // Different
     Different different = new Different();
     predicateExpression1 = new PredicateExpression(different, new Integer(100), "abc");
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    Assert.assertEquals("", predicateExpression1.toString());
     predicateExpression1 = new PredicateExpression(different, null, "abc");
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
     predicateExpression1 = new PredicateExpression(equals, "abc", "abc");
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    
     // using state variables
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
@@ -105,20 +114,24 @@ public class UnitTest extends TestCase {
     StateVariable consolePromptStateVariable = 
       StateVariableLibrary.getInstance().getStateVariable(StateVariable.CONSOLE_PROMPT);
     predicateExpression1 = new PredicateExpression(equals, consoleInputStateVariable, consolePromptStateVariable);
+    Assert.assertEquals("", predicateExpression1.toString());
     state.setStateValue(consoleInputStateVariable, "abc");
     Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
     state.setStateValue(consolePromptStateVariable, "abc");
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
     state.setStateValue(consolePromptStateVariable, "def");
     Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    
     // Not
     Not not = new Not();
     predicateExpression1 = new PredicateExpression(true1);
     Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    Assert.assertEquals("", predicateExpression1.toString());
     PredicateExpression predicateExpression2 = new PredicateExpression(not, predicateExpression1);
     Assert.assertEquals(Boolean.FALSE, predicateExpression2.evaluate(state));
     PredicateExpression predicateExpression3 = new PredicateExpression(not, predicateExpression2);
     Assert.assertEquals(Boolean.TRUE, predicateExpression3.evaluate(state));
+    
     // And
     And and = new And();
     predicateExpression1 = new PredicateExpression(true1);
@@ -132,6 +145,7 @@ public class UnitTest extends TestCase {
                               predicateExpression2, 
                               predicateExpression3);
     Assert.assertEquals(Boolean.TRUE, predicateExpression4.evaluate(state));
+    Assert.assertEquals("", predicateExpression4.toString());
     predicateExpression2 = new PredicateExpression(equals, "abc", "def");
     predicateExpression4 = 
       new PredicateExpression(and, 
@@ -139,18 +153,108 @@ public class UnitTest extends TestCase {
                               predicateExpression2, 
                               predicateExpression3);
     Assert.assertEquals(Boolean.FALSE, predicateExpression4.evaluate(state));
+    
     // Or
     Or or = new Or();
     predicateExpression1 = new PredicateExpression(true1);
     predicateExpression2 = new PredicateExpression(true1);
     predicateExpression3 = new PredicateExpression(or, predicateExpression1, predicateExpression2);
     Assert.assertEquals(Boolean.TRUE, predicateExpression3.evaluate(state));
+    Assert.assertEquals("", predicateExpression3.toString());
     predicateExpression1 = new PredicateExpression(equals, "abc", "def");
     predicateExpression3 = new PredicateExpression(or, predicateExpression1, predicateExpression2);
     Assert.assertEquals(Boolean.TRUE, predicateExpression3.evaluate(state));
     predicateExpression2 = new PredicateExpression(equals, "abc", "def");
     predicateExpression3 = new PredicateExpression(or, predicateExpression1, predicateExpression2);
     Assert.assertEquals(Boolean.FALSE, predicateExpression3.evaluate(state));
+    
+    // LessThan
+    LessThan lessThan = new LessThan();
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(1), new Integer(2));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    Assert.assertEquals("", predicateExpression1.toString());
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(1), new Long(2L));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(1), new Float(2.0));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(1), new Double(2.0d));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(1L), new Integer(2));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(1L), new Long(2L));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(1L), new Float(2.0));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(1L), new Double(2.0d));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(1.0), new Integer(2));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(1.0), new Long(2L));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(1.0), new Float(2.0));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(1.0), new Double(2.0d));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(1.0d), new Integer(2));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(1.0d), new Long(2L));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(1.0d), new Float(2.0));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(1.0d), new Double(2.0d));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(3), new Integer(2));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(3), new Long(2L));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(3), new Float(2.0));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(3), new Double(2.0d));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(3L), new Integer(2));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(3L), new Long(2L));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(3L), new Float(2.0));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Long(3L), new Double(2.0d));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(3.0), new Integer(2));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(3.0), new Long(2L));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(3.0), new Float(2.0));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Float(3.0), new Double(2.0d));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(3.0d), new Integer(2));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(3.0d), new Long(2L));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(3.0d), new Float(2.0));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    predicateExpression1 = new PredicateExpression(lessThan, new Double(3.0d), new Double(2.0d));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    
+    StateVariable testStateVariable1 = new StateVariable(Integer.class, "test-state-variable1", "test state variable 1");
+    predicateExpression1 = new PredicateExpression(lessThan, new Integer(99), testStateVariable1);
+    Assert.assertEquals("", predicateExpression1.toString());
+    state.setStateValue(testStateVariable1, new Integer(100));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
+    state.setStateValue(testStateVariable1, new Integer(-100));
+    Assert.assertEquals(Boolean.FALSE, predicateExpression1.evaluate(state));
+    StateVariable testStateVariable2 = new StateVariable(Integer.class, "test-state-variable2", "test state variable 2");
+    predicateExpression1 = new PredicateExpression(lessThan, testStateVariable1, testStateVariable2);
+    state.setStateValue(testStateVariable1, new Integer(-100));
+    state.setStateValue(testStateVariable2, new Integer(-99));
+    Assert.assertEquals(Boolean.TRUE, predicateExpression1.evaluate(state));
     
     System.out.println("*** testPredicateExpression OK ***");
   }

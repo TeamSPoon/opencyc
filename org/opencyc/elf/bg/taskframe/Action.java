@@ -7,6 +7,7 @@ import org.opencyc.elf.bg.state.State;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * <P>Action describes the action to be performed and may include a set of modifiers such as
@@ -47,6 +48,34 @@ public class Action {
   
   //// Public Area
 
+  /**
+   * Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString () {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[Action: ");
+    stringBuffer.append(name);
+    stringBuffer.append("(");
+    for (int i = 0; i < getParameterNames().size(); i++) {
+      String parameterName = (String) getParameterNames().get(i);
+      Object parameterValue = getParameterValues().get(i);
+      stringBuffer.append(" ");
+      stringBuffer.append(parameterName);
+      stringBuffer.append(": ");
+      if (parameterValue instanceof String) {
+        stringBuffer.append('"');
+        stringBuffer.append(parameterValue.toString());
+        stringBuffer.append('"');
+      }
+      else
+        stringBuffer.append(parameterValue.toString());
+    }
+    stringBuffer.append(")]");
+    return stringBuffer.toString();
+  }
+  
   /**
    * Gets the name of the action
    *

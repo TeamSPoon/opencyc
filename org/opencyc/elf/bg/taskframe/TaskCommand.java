@@ -65,8 +65,14 @@ public class TaskCommand {
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[TaskCommand: ");
+    if (actionCommand != null)
+      stringBuffer.append(actionCommand.toString());
+    if (goalCommand != null)
+      stringBuffer.append(goalCommand.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
 
   /**

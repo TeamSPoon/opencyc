@@ -71,9 +71,8 @@ public class Echo extends GenericAgent {
         echo.echoMessageText = args[2];
         echo.myAgentName = "EchoAgent";
         System.out.println("Initializing the agent community connection");
-        echo.initializeAgentCommunity(3);
+        echo.initializeAgentCommunity(AgentCommunityAdapter.QUIET_VERBOSITY);
         echo.doEcho();
-        echo.agentCommunityAdapter.setVerbosity(AgentCommunityAdapter.QUIET_VERBOSITY);
         echo.agentCommunityAdapter.deregister();
         System.exit(0);
     }

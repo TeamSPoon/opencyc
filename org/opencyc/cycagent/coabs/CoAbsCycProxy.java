@@ -79,7 +79,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    public static final int DEFAULT_VERBOSITY = 1;
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -90,7 +90,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
     /**
      * the agent name.
      */
-    protected String agentName = "Agent1";
+    protected String myAgentName = "Agent1";
 
     /**
      * the CoABS AgentRestrationHelper object.
@@ -109,13 +109,13 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
 
     /**
      * Cached AgentRep objects which reduce lookup overhead.
-     * agentName --> AgentRep instance
+     * myAgentName --> AgentRep instance
      */
     protected static Hashtable agentRepCache = new Hashtable();
 
     /**
      * Cached CycConnection objects which preserve Cyc session state.
-     * agentName --> CycConnection instance
+     * myAgentName --> CycConnection instance
      */
     protected static Hashtable cycConnectionCache = new Hashtable();
 
@@ -126,10 +126,10 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * This object then makes itself a messageListener to the queue, adds an
      * agent advertisement and registers itself.
      *
-     * @param agentName the unique name of this Cyc proxy agent.
+     * @param myAgentName the unique name of this Cyc proxy agent.
      */
-    public CoAbsCycProxy(String agentName) throws IOException {
-        this.agentName = agentName;
+    public CoAbsCycProxy(String myAgentName) throws IOException {
+        this.myAgentName = myAgentName;
         execute();
     }
 
@@ -149,10 +149,10 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      */
     protected void execute() throws IOException {
         if (verbosity > 1)
-            Log.current.println("Starting CoAbsCycProxy " + agentName);
-        regHelper = new AgentRegistrationHelper(agentName);
+            Log.current.println("Starting CoAbsCycProxy " + myAgentName);
+        regHelper = new AgentRegistrationHelper(myAgentName);
         regHelper.addMessageListener(this);
-        //Entry[] entries = {new AMSAgentDescription(agentName)};
+        //Entry[] entries = {new AMSAgentDescription(myAgentName)};
         //regHelper.addAdvertisedCapabilities(entries);
         count = 1;
         conversationState = "register";
@@ -199,11 +199,11 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * Register this agent.
      * Tests registry.registerAgent()
      */
-    public void register() {
+    public void register() throws IOException {
         if (verbosity > 2)
-            Log.current.println(agentName +
+            Log.current.println(myAgentName +
                                 " calling AgentRegistrationHelper.registerAgent()...");
-        String filename = agentName + "ServiceIDFile";
+        String filename = myAgentName + "ServiceIDFile";
         try {
             regHelper.readServiceIDFromFile(filename);
             if (verbosity > 2)
@@ -230,6 +230,24 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
             }
+        long oneMinuteDuration = 60000;
+        org.opencyc.util.Timer timer = new org.opencyc.util.Timer(oneMinuteDuration);
+        while (true)
+            try {
+                Thread.sleep(10000);
+                if (verbosity > 0)
+                    System.out.print(".");
+                if (timer.isTimedOut()) {
+                    Log.current.errorPrintln("Time limit exceeded while awaiting CoABS registration");
+                    throw new IOException("Time limit exceeded while awaiting CoABS registration");
+                }
+                if (this.lookupAgentRep(myAgentName) != null)
+                    break;
+            }
+            catch (InterruptedException e) {
+            }
+        if (verbosity > 2)
+            Log.current.println(myAgentName + " registered with CoABS grid");
     }
 
     /**
@@ -261,7 +279,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      */
     public void deregister() {
         if (verbosity > 2)
-            Log.current.println(agentName +
+            Log.current.println(myAgentName +
                                 " calling AgentRegistrationHelper.deregisterAgent()...");
         try {
             regHelper.deregisterAgent(regHelper.getAgentRep(),
@@ -288,7 +306,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         if (agentRep != null)
             fromAgentName = agentRep.getName();
         if (verbosity > 2)
-            Log.current.println("\n" + agentName + " received:\n" + message.toString() +
+            Log.current.println("\n" + myAgentName + " received:\n" + message.toString() +
                                 "\n  ACL: " + message.getACL() +
                                 "\n  Time message received: " + time +
                                 "\n  Sender AgentRep: " + agentRep +
@@ -314,7 +332,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         }
 
         if (! conversationState.equals("api ready")) {
-            Log.current.errorPrintln("Conversation state not api ready" + conversationState);
+            Log.current.errorPrintln("Conversation state not api ready: " + conversationState);
             return;
         }
         try {
@@ -364,7 +382,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         try {
             if (apiRequest.equals(CycObjectFactory.END_CYC_CONNECTION)) {
                 if (verbosity > 0)
-                    Log.current.print("ending cyc connection for " + senderName);
+                    Log.current.println("ending cyc connection for " + senderName);
                     cycConnection.close();
                 cycConnectionCache.remove(senderName);
                 cycConnectionEnded = true;
@@ -435,26 +453,34 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * @return the AgentRep object for the given agent name
      */
     protected AgentRep lookupAgentRep(String agentName) throws IOException {
+        if (verbosity > 2)
+            Log.current.println("directory lookup for " + agentName);
         AgentRep agentRep = (AgentRep) agentRepCache.get(agentName);
         if (agentRep != null)
             return agentRep;
         // create a Directory to use for lookups
         Directory directory = new Directory();
         ServiceItem[] items = directory.lookup((net.jini.core.lookup.ServiceTemplate) null);
+        if (verbosity > 0)
+            Log.current.println("searching through " + items.length + " directory items for " + agentName);
         for (int i = 0; i < items.length; i++) {
             ServiceItem si = items[i];
             Object service =  si.service;
+            if (verbosity > 0)
+                Log.current.println("  directory service " + service);
             if (service instanceof AgentRep) {
                 agentRep = (AgentRep) service;
+                if (verbosity > 0)
+                    Log.current.println("    directory agent " + agentRep.getName());
                 if (agentName.equals(agentRep.getName())) {
                     agentRepCache.put(agentName, agentRep);
-                    if (verbosity > 2)
-                        Log.current.print("cached AgentRep for " + agentName);
+                    if (verbosity > 0)
+                        Log.current.println("\ncached AgentRep for " + agentName);
                     return agentRep;
                 }
             }
         }
-        throw new IOException("Agent not found " + agentName);
+        return null;
     }
 
 

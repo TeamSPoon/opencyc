@@ -90,6 +90,11 @@ public class CoAbsCommunityAdapter
     MessageReceiver messageReceiver;
 
     /**
+     * CoABS Directory helper.
+     */
+    Directory directory;
+
+    /**
      * Constructs a new CoAbsCommunityAdapter for the given CoAbs agent, with the given verbosity.
      *
      * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
@@ -108,7 +113,7 @@ public class CoAbsCommunityAdapter
      * Registers the CoABS agent on the grid.
      */
     protected void register() throws IOException {
-        if (verbosity > 1)
+        if (verbosity > 0)
             Log.current.println("Starting CoAbsCommunityAdapter for " + myAgentName);
         regHelper = new AgentRegistrationHelper(myAgentName);
         regHelper.addMessageListener(this);
@@ -150,7 +155,7 @@ public class CoAbsCommunityAdapter
         waitingReplyThreads.put(registrationMessageId, Thread.currentThread());
         while (true)
             try {
-                Thread.sleep(2000);
+                Thread.sleep(10000);
                 if (verbosity > 0)
                     System.out.print(".");
                 if (timer.isTimedOut()) {
@@ -283,7 +288,10 @@ public class CoAbsCommunityAdapter
                                 "\n  receiver: " + requestMessage.getReceiver());
         String replyWith = acl.getReplyWith();
         waitingReplyThreads.put(replyWith, Thread.currentThread());
-        AgentRep receivingAgentRep = this.lookupAgentRep(acl.getReceiverAID().getName());
+        String receiverName = acl.getReceiverAID().getName();
+        AgentRep receivingAgentRep = this.lookupAgentRep(receiverName);
+        if (receivingAgentRep == null)
+            throw new IOException("Receiving agent " + receiverName + " not found");
         receivingAgentRep.addMessage(requestMessage);
         waitingReplyThreads.put(replyWith, Thread.currentThread());
         while (true)
@@ -323,6 +331,8 @@ public class CoAbsCommunityAdapter
                                     "\n  Sender AgentRep: " + agentRep +
                                     "\n  From: " + fromAgentName);
         }
+        if (agentRep != agentRepCache.get(fromAgentName))
+            agentRepCache.put(fromAgentName, agentRep);
         ACL acl = null;
         String fixedText = null;
         try {
@@ -385,23 +395,35 @@ public class CoAbsCommunityAdapter
         AgentRep agentRep = (AgentRep) agentRepCache.get(agentName);
         if (agentRep != null)
             return agentRep;
-        // create a Directory to use for lookups
+        ServiceTemplate serviceTemplate = new ServiceTemplate(null, null, null);
         Directory directory = new Directory();
-        ServiceItem[] items = directory.lookup((net.jini.core.lookup.ServiceTemplate) null);
-        for (int i = 0; i < items.length; i++) {
-            ServiceItem si = items[i];
-            Object service =  si.service;
-            if (verbosity > 2)
-                Log.current.println("  directory service " + service);
-            if (service instanceof AgentRep) {
-                agentRep = (AgentRep) service;
-                if (verbosity > 2)
-                    Log.current.println("    directory agent " + agentRep.getName());
-                if (agentName.equals(agentRep.getName())) {
-                    agentRepCache.put(agentName, agentRep);
-                    if (verbosity > 2)
-                        Log.current.print("cached AgentRep for " + agentName);
-                    return agentRep;
+        if (verbosity > 0)
+            Log.current.println("Getting service registrars from directory " + directory);
+        ServiceRegistrar[] serviceRegistrars = directory.getServiceRegistrars();
+        for (int i = 0; i < serviceRegistrars.length; i++) {
+            ServiceRegistrar serviceRegistrar = (ServiceRegistrar) serviceRegistrars[i];
+            if (verbosity > 0)
+                Log.current.println("Using service registrar " + serviceRegistrar);
+            ServiceMatches serviceMatches =
+                serviceRegistrar.lookup(serviceTemplate, Integer.MAX_VALUE);
+            ServiceItem[] items = serviceMatches.items;
+            if (verbosity > 0)
+                Log.current.println("searching through " + items.length + " directory items for " + agentName);
+            for (int j = 0; j < items.length; j++) {
+                ServiceItem si = items[j];
+                Object service =  si.service;
+                if (verbosity > 0)
+                    Log.current.println("  registered service " + service);
+                if (service instanceof AgentRep) {
+                    agentRep = (AgentRep) service;
+                    if (verbosity > 0)
+                        Log.current.println("    registered agent " + agentRep.getName());
+                    if (agentName.equals(agentRep.getName())) {
+                        agentRepCache.put(agentName, agentRep);
+                        if (verbosity > 0)
+                            Log.current.println("\ncached AgentRep for " + agentName);
+                        return agentRep;
+                    }
                 }
             }
         }

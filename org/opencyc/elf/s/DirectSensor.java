@@ -45,13 +45,11 @@ public abstract class DirectSensor extends NodeComponent  implements Sensor {
    *
    * @param name the sensor name
    * @param resources the resources required by this sensor
-   * @param sensationCapabilities the names of sensations that this sensor can sense
    * @param sensorChannel the takable channel from which messages are input
    */
-  public DirectSensor (String name, List resources, List sensationCapabilities, Takable sensorChannel) {
+  public DirectSensor (String name, List resources, Takable sensorChannel) {
     this.name = name;
     this.resources = resources;
-    this.sensationCapabilities = sensationCapabilities;
     this.sensorChannel = sensorChannel;
     logger = Logger.getLogger("org.opencyc.elf");
   }
@@ -94,14 +92,6 @@ public abstract class DirectSensor extends NodeComponent  implements Sensor {
     return resources;
   }
   
-  /** Gets the names of sensations that this sensor can sense.
-   *
-   * @return the names of sensations that this sensor can sense
-   */
-  public List getSensationCapabilities() {
-    return sensationCapabilities;
-  }
-  
   /** Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
@@ -123,9 +113,6 @@ public abstract class DirectSensor extends NodeComponent  implements Sensor {
   
   /** the name of the sensor */
   protected String name;
-  
-  /** the names of sensations that this sensor can sense */
-  protected List sensationCapabilities;
   
   /** the resources required by this sensor */
   protected List resources;

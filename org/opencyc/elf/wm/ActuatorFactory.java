@@ -3,6 +3,7 @@ package org.opencyc.elf.wm;
 //// Internal Imports
 import org.opencyc.elf.a.Actuator;
 import org.opencyc.elf.a.ConsoleOutput;
+import org.opencyc.elf.a.DirectActuator;
 
 import org.opencyc.elf.bg.planner.Resource;
 
@@ -63,7 +64,7 @@ public class ActuatorFactory {
   public void populateActuatorPool() {
     List resources = new ArrayList();
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, 
+    ConsoleOutput consoleOutput = new ConsoleOutput(DirectActuator.CONSOLE_OUTPUT, 
                                                     resources,
                                                     new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY));
     ActuatorPool.getInstance().setActuator(consoleOutput.getName(), consoleOutput);

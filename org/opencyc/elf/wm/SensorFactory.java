@@ -2,6 +2,7 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.s.ConsoleInput;
+import org.opencyc.elf.s.DirectSensor;
 import org.opencyc.elf.s.Sensation;
 import org.opencyc.elf.s.Sensor;
 
@@ -62,11 +63,8 @@ public class SensorFactory {
   public void populateSensorPool() {
     List resources = new ArrayList();
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    List sensationCapabilities = new ArrayList();
-    sensationCapabilities.add(Sensation.CONSOLE_INPUT);
-    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, 
+    ConsoleInput consoleInput = new ConsoleInput(DirectSensor.CONSOLE_INPUT, 
                                                  resources, 
-                                                 sensationCapabilities, 
                                                  new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY));
     SensorPool.getInstance().setSensor(consoleInput.getName(), consoleInput);
   }

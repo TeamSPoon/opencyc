@@ -53,6 +53,4 @@ public interface Actuator {
    */
   public Puttable getChannel();
   
-  /** the console output actuator name */
-  public static final String CONSOLE_OUTPUT = "console output";
 }

@@ -2,6 +2,7 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.a.Actuator;
+import org.opencyc.elf.a.DirectActuator;
 
 import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
@@ -12,6 +13,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 
 import org.opencyc.elf.goal.Goal;
 
+import org.opencyc.elf.s.DirectSensor;
 import org.opencyc.elf.s.Sensor;
 
 import org.opencyc.elf.wm.state.StateVariable;
@@ -222,9 +224,9 @@ public class UnitTest extends TestCase {
     System.out.println("\n*** testActuatorPool ***");
     new ActuatorPool();
     (new ActuatorFactory()).getInstance().populateActuatorPool();
-    Assert.assertNotNull(ActuatorPool.getInstance().getActuator(Actuator.CONSOLE_OUTPUT));
+    Assert.assertNotNull(ActuatorPool.getInstance().getActuator(DirectActuator.CONSOLE_OUTPUT));
     Assert.assertEquals("[ConsoleOutput resources: [[Resource: console]]]", 
-                        ActuatorPool.getInstance().getActuator(Actuator.CONSOLE_OUTPUT).toString());
+                        ActuatorPool.getInstance().getActuator(DirectActuator.CONSOLE_OUTPUT).toString());
     System.out.println("*** testActuatorPool OK ***");
   }
   
@@ -233,9 +235,9 @@ public class UnitTest extends TestCase {
     System.out.println("\n*** testSensorPool ***");
     new SensorPool();
     (new SensorFactory()).getInstance().populateSensorPool();
-    Assert.assertNotNull(SensorPool.getInstance().getSensor(Sensor.CONSOLE_INPUT));
+    Assert.assertNotNull(SensorPool.getInstance().getSensor(DirectSensor.CONSOLE_INPUT));
     Assert.assertEquals("[DirectSensor resources: [[Resource: console]]]", 
-                        SensorPool.getInstance().getSensor(Sensor.CONSOLE_INPUT).toString());
+                        SensorPool.getInstance().getSensor(DirectSensor.CONSOLE_INPUT).toString());
     System.out.println("*** testSensorPool OK ***");
   }
   

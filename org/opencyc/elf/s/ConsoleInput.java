@@ -53,11 +53,10 @@ public class ConsoleInput extends DirectSensor {
    *
    * @param name the sensor name
    * @param resources the resources required by this sensor
-   * @param sensationCapabilities the names of sensations that this sensor can sense
    * @param sensorChannel the takable channel from which messages are input
    */
-  public ConsoleInput (String name, List resources, List sensationCapabilities, Takable sensorChannel) {
-    super(name, resources, sensationCapabilities, sensorChannel);
+  public ConsoleInput (String name, List resources, Takable sensorChannel) {
+    super(name, resources, sensorChannel);
     consoleInput = this;
   }
 

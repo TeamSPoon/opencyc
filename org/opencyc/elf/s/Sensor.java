@@ -46,12 +46,6 @@ public interface Sensor {
    */
   public List getResources();
   
-  /** Gets the names of sensations that this sensor or virtual sensor (sensory perception) can sense.
-   *
-   * @return the names of sensations that this sensor or virtual sensor (sensory perception) can sense
-   */
-  public List getSensationCapabilities ();
-  
   /** Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
@@ -60,6 +54,4 @@ public interface Sensor {
    */
   public Puttable getChannel();
 
-  /** the console input sensor name */
-  public static final String CONSOLE_INPUT = "console input";
 }

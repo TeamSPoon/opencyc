@@ -89,43 +89,6 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Constructs a CycList from the given xml databinding object.
-     *
-     * @pararm cycListXmlDataBindingImpl the xml databinding object
-     */
-    public CycList (CycListXmlDataBindingImpl cycListXmlDataBindingImpl) {
-        for (int i = 0; i < cycListXmlDataBindingImpl.getElementList().size(); i++) {
-            Object element = cycListXmlDataBindingImpl.getElementList().get(i);
-            if (element instanceof CycConstantXmlDataBindingImpl)
-                this.add(CycObjectFactory.makeCycConstant((CycConstantXmlDataBindingImpl) element));
-            else if (element instanceof CycNartXmlDataBindingImpl)
-                this.add(CycObjectFactory.makeCycNart((CycNartXmlDataBindingImpl) element));
-            else if (element instanceof CycSymbolXmlDataBindingImpl)
-                this.add(CycObjectFactory.makeCycSymbol((CycSymbolXmlDataBindingImpl) element));
-            else if (element instanceof CycVariableXmlDataBindingImpl)
-                this.add(CycObjectFactory.makeCycConstant((CycConstantXmlDataBindingImpl) element));
-            else if (element instanceof GuidXmlDataBindingImpl)
-                this.add(CycObjectFactory.makeGuid((GuidXmlDataBindingImpl) element));
-            else
-                this.add(element);
-        }
-        this.addAll(cycListXmlDataBindingImpl.getElementList());
-        this.isProperList = cycListXmlDataBindingImpl.getIsProperListIndicator();
-        if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycConstantXmlDataBindingImpl)
-            this.dottedElement = CycObjectFactory.makeCycConstant((CycConstantXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycNartXmlDataBindingImpl)
-            this.dottedElement = CycObjectFactory.makeCycNart((CycNartXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycSymbolXmlDataBindingImpl)
-            this.dottedElement = CycObjectFactory.makeCycSymbol((CycSymbolXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycVariableXmlDataBindingImpl)
-            this.dottedElement = CycObjectFactory.makeCycVariable((CycVariableXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof GuidXmlDataBindingImpl)
-            this.dottedElement = CycObjectFactory.makeGuid((GuidXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
-        else
-            this.dottedElement = cycListXmlDataBindingImpl.getDottedElement();
-    }
-
-    /**
      * Constructs a CycList using the semantics of Lisp symbolic expressions.<br>
      * 1.  construct(a, NIL) --> (a)<br>
      * 2.  construct(a, b) --> (a . b)<br>

@@ -99,6 +99,45 @@ public class CycObjectFactory {
     protected static Cache guidCache = new CacheLRU(500);
 
     /**
+     * Constructs a CycList from the given xml databinding object.
+     *
+     * @pararm cycListXmlDataBindingImpl the xml databinding object
+     */
+    public static CycList makeCycList (CycListXmlDataBindingImpl cycListXmlDataBindingImpl) {
+        CycList cycList = new CycList();
+        for (int i = 0; i < cycListXmlDataBindingImpl.getElementList().size(); i++) {
+            Object element = cycListXmlDataBindingImpl.getElementList().get(i);
+            if (element instanceof CycConstantXmlDataBindingImpl)
+                cycList.add(makeCycConstant((CycConstantXmlDataBindingImpl) element));
+            else if (element instanceof CycNartXmlDataBindingImpl)
+                cycList.add(makeCycNart((CycNartXmlDataBindingImpl) element));
+            else if (element instanceof CycSymbolXmlDataBindingImpl)
+                cycList.add(makeCycSymbol((CycSymbolXmlDataBindingImpl) element));
+            else if (element instanceof CycVariableXmlDataBindingImpl)
+                cycList.add(makeCycConstant((CycConstantXmlDataBindingImpl) element));
+            else if (element instanceof GuidXmlDataBindingImpl)
+                cycList.add(makeGuid((GuidXmlDataBindingImpl) element));
+            else
+                cycList.add(element);
+        }
+        if (cycListXmlDataBindingImpl.getDottedElement() == null)
+            return cycList;
+        if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycConstantXmlDataBindingImpl)
+            cycList.setDottedElement(makeCycConstant((CycConstantXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycNartXmlDataBindingImpl)
+            cycList.setDottedElement(makeCycNart((CycNartXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycSymbolXmlDataBindingImpl)
+            cycList.setDottedElement(makeCycSymbol((CycSymbolXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycVariableXmlDataBindingImpl)
+            cycList.setDottedElement(makeCycVariable((CycVariableXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof GuidXmlDataBindingImpl)
+            cycList.setDottedElement(makeGuid((GuidXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
+        else
+            cycList.setDottedElement(cycListXmlDataBindingImpl.getDottedElement());
+        return cycList;
+    }
+
+    /**
      * Constructs a new <tt>CycSymbol</tt> object.
      *
      * @param symbolName a <tt>String</tt> name.
@@ -302,7 +341,7 @@ public class CycObjectFactory {
             cycNart.setFunctor(makeCycConstant((CycConstantXmlDataBindingImpl)cycNartXmlDataBindingImpl.getFunctor()));
         else
              cycNart.setFunctor(makeCycNart((CycNartXmlDataBindingImpl) cycNartXmlDataBindingImpl.getFunctor()));
-        cycNart.setArguments(new CycList(cycNartXmlDataBindingImpl.getArgumentList()));
+        cycNart.setArguments(makeCycList(cycNartXmlDataBindingImpl.getArgumentList()));
         return cycNart;
     }
 

@@ -3,8 +3,6 @@ package org.opencyc.cycobject;
 import junit.framework.*;
 import java.io.*;
 import java.util.*;
-import fipaos.util.*;
-import org.jdom.*;
 import org.opencyc.api.*;
 
 /**
@@ -37,7 +35,7 @@ public class UnitTest extends TestCase {
      * Main method in case tracing is prefered over running JUnit.
      */
     public static void main(String[] args) {
-        runTests();
+        junit.textui.TestRunner.run(suite());
     }
     /**
      * Construct a new UnitTest object.
@@ -50,7 +48,7 @@ public class UnitTest extends TestCase {
     /**
      * Runs the unit tests
      */
-    public static void runTests() {
+    public static Test suite() {
         TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testGuid"));
         testSuite.addTest(new UnitTest("testCycSymbol"));
@@ -59,8 +57,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testCycNart"));
         testSuite.addTest(new UnitTest("testCycList"));
         testSuite.addTest(new UnitTest("testCycListVisitor"));
-        TestResult testResult = new TestResult();
-        testSuite.run(testResult);
+        return testSuite;
     }
 
     /**
@@ -94,7 +91,7 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(guid.equals(guid4));
         String guidXml = null;
         try {
-            guidXml = XMLDataBinding.marshall(guidXmlDataBindingImpl);
+            guidXml = XMLDataBinding.zeusMarshall(guidXmlDataBindingImpl);
         }
         catch (IOException e) {
             System.out.println(e.getMessage());
@@ -104,7 +101,7 @@ public class UnitTest extends TestCase {
         System.out.println("guidXml\n" + guidXml);
         Object object = null;
         try {
-            object = XMLDataBinding.unmarshall(guidXml);
+            object = XMLDataBinding.zeusUnmarshall(guidXml, "org.opencyc.cycobject");
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
@@ -174,7 +171,7 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(cycSymbol7 == cycSymbol8);
         String cycSymbolXml = null;
         try {
-            cycSymbolXml = XMLDataBinding.marshall(cycSymbolXmlDataBindingImpl);
+            cycSymbolXml = XMLDataBinding.zeusMarshall(cycSymbolXmlDataBindingImpl);
         }
         catch (IOException e) {
             System.out.println(e.getMessage());
@@ -184,7 +181,7 @@ public class UnitTest extends TestCase {
         System.out.println("cycSymbolXml\n" + cycSymbolXml);
         Object object = null;
         try {
-            object = XMLDataBinding.unmarshall(cycSymbolXml);
+            object = XMLDataBinding.zeusUnmarshall(cycSymbolXml, "org.opencyc.cycobject");
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
@@ -278,7 +275,7 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(cycConstant4, cycConstant5);
         String cycConstantXml = null;
         try {
-            cycConstantXml = XMLDataBinding.marshall(cycConstantXmlDataBindingImpl);
+            cycConstantXml = XMLDataBinding.zeusMarshall(cycConstantXmlDataBindingImpl);
         }
         catch (IOException e) {
             System.out.println(e.getMessage());
@@ -288,7 +285,7 @@ public class UnitTest extends TestCase {
         System.out.println("cycConstantXml\n" + cycConstantXml);
         Object object = null;
         try {
-            object = XMLDataBinding.unmarshall(cycConstantXml);
+            object = XMLDataBinding.zeusUnmarshall(cycConstantXml, "org.opencyc.cycobject");
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
@@ -394,6 +391,34 @@ public class UnitTest extends TestCase {
         cycList4.add(appleTree2);
         Assert.assertEquals(cycNart2, CycNart.coerceToCycNart(cycList4));
 
+        CycNartXmlDataBindingImpl cycNartXmlDataBindingImpl = cycNart4.toCycNartXmlDataBindingImpl();
+        CycNart cycNart5 = CycObjectFactory.makeCycNart(cycNartXmlDataBindingImpl);
+        Assert.assertEquals(cycNart4, cycNart5);
+        String cycNartXml = null;
+        try {
+            cycNartXml = XMLDataBinding.zeusMarshall(cycNartXmlDataBindingImpl);
+        }
+        catch (IOException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("cycNartXml\n" + cycNartXml);
+        Object object = null;
+        try {
+            object = XMLDataBinding.zeusUnmarshall(cycNartXml, "org.opencyc.cycobject");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+        Assert.assertTrue(object instanceof CycNartXmlDataBindingImpl);
+        CycNartXmlDataBindingImpl cycNartXmlDataBindingImpl2 =
+            (CycNartXmlDataBindingImpl) object;
+        CycNart cycNart6 = CycObjectFactory.makeCycNart(cycNartXmlDataBindingImpl2);
+        Assert.assertEquals(cycNart4, cycNart6);
+
         System.out.println("** testCycNart OK **");
     }
 
@@ -446,7 +471,7 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(cycVariable4 == cycVariable5);
         String cycVariableXml = null;
         try {
-            cycVariableXml = XMLDataBinding.marshall(cycVariableXmlDataBindingImpl);
+            cycVariableXml = XMLDataBinding.zeusMarshall(cycVariableXmlDataBindingImpl);
         }
         catch (IOException e) {
             System.out.println(e.getMessage());
@@ -456,7 +481,7 @@ public class UnitTest extends TestCase {
         System.out.println("cycVariableXml\n" + cycVariableXml);
         Object object = null;
         try {
-            object = XMLDataBinding.unmarshall(cycVariableXml);
+            object = XMLDataBinding.zeusUnmarshall(cycVariableXml, "org.opencyc.cycobject");
         }
         catch (Exception e) {
             System.out.println(e.getMessage());

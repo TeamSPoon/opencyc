@@ -49,7 +49,7 @@ public abstract class NodeComponent {
 
   /** Sets the ELF Node that contains this object.
    * 
-   * @param node the ELF Node thatcontains this object
+   * @param node the ELF Node that contains this object
    */
   public void setNode(Node node) {
     this.node = node;

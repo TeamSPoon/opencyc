@@ -59,7 +59,8 @@ public class WebServer extends Thread {
     /**
      * Default directory to serve files from on Windows.
      */
-    protected static String DEFAULT_WIN_DIR = "C:\\";
+    //protected static String DEFAULT_WIN_DIR = "C:\\";
+    protected static String DEFAULT_WIN_DIR = "k:\\opencyc\\run\\httpd\\htdocs";
 
     /**
      * File cache capacity.
@@ -102,11 +103,17 @@ public class WebServer extends Thread {
     protected int port;
 
     /**
+     * Cyc HTML host.
+     */
+    //protected String cycHost = "locahost";
+    protected String cycHost = "mccarthy";
+
+    /**
      * Cyc HTML port.
      */
     protected int cycPort;
 
-    /**
+     /**
      * Expand jar tress.
      */
     protected boolean trees;
@@ -395,7 +402,7 @@ public class WebServer extends Thread {
             String request = sock.getInetAddress().getHostName() + "&" + cycPath + "#";
             ArrayList bytes = new ArrayList(10000);
             try {
-                cycHtmlSocket = new Socket("localhost", cycPort);
+                cycHtmlSocket = new Socket(cycHost, cycPort);
                 BufferedReader cycIn = new BufferedReader(new InputStreamReader(cycHtmlSocket.getInputStream()));
                 PrintWriter cycOut = new PrintWriter(cycHtmlSocket.getOutputStream(), true);
                 cycOut.println(request);

@@ -189,7 +189,7 @@ public class CycNart extends CycFort implements Comparable {
         while (iterator.hasNext()) {
             xmlWriter.printXMLStartTag(argXMLtag, 0, true);
             arg = iterator.next();
-            if (arg instanceof com.cyc.util.CycFort) {
+            if (arg instanceof CycFort) {
                 ((CycFort) arg).toXML(xmlWriter, indentLength, true);
             }
             else

@@ -9,6 +9,8 @@ import  org.opencyc.cycobject.*;
  * Provides a binary connection and an ascii connection to the OpenCyc server.  The ascii connection is
  * legacy and its use is deprecated.<p>
  *
+ * Collaborates with the <tt>CycAccess</tt> class which wraps the api functions.
+ *
  * @version $Id$
  * @author Stephen L. Reed
  *
@@ -75,7 +77,7 @@ public class CycConnection {
     /**
      * Default communication mode connnection to the OpenCyc server.
      */
-    public static final int DEFAULT_COMMUNICATION_MODE = ASCII_MODE;
+    public static final int DEFAULT_COMMUNICATION_MODE = BINARY_MODE;
 
     /**
      * Indicator for whether to use the binary or acsii connection with OpenCyc.
@@ -201,13 +203,76 @@ public class CycConnection {
     }
 
     /**
-     * Close the cyc api sockets.
+     * Ensures that the api socket connections are closed when this object is garbage collected.
      */
-    public void close () throws IOException {
-        if (asciiSocket != null)
-            asciiSocket.close();
-        if (cfaslSocket != null)
-            cfaslSocket.close();
+    protected void finalize() {
+        close();
+    }
+
+    /**
+     * Close the api sockets and streams.
+     */
+    public void close () {
+        if (asciiSocket != null) {
+            if (out != null) {
+                try {
+                    out.write("(API-QUIT)\n");
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                }
+            }
+            if (asciiSocket != null) {
+                try {
+                    asciiSocket.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                }
+            }
+        }
+        if (cfaslSocket != null) {
+            if (cfaslOutputStream != null) {
+                CycList command = new CycList();
+                command.add(CycSymbol.makeCycSymbol("API-QUIT"));
+                try {
+                    cfaslOutputStream.writeObject(command);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                }
+            }
+            if (cfaslInputStream != null) {
+                try {
+                    cfaslInputStream.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                }
+            }
+            if (cfaslSocket != null) {
+                try {
+                    cfaslSocket.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                }
+            }
+        }
     }
 
     /**
@@ -308,6 +373,9 @@ public class CycConnection {
         else
             answer[0] = Boolean.TRUE;
         answer[1] = cfaslInputStream.readObject();
+        if (answer[1] instanceof CycList)
+            // Get constant names and guids for any constants in the CycList.
+            cycAccess.completeCycList((CycList) answer[1]);
         if (trace)
             System.out.println("receive = (" + answer[0] + ") " + answer[1]);
         return  answer;

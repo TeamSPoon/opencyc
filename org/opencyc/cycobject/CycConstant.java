@@ -184,6 +184,10 @@ public class CycConstant extends CycFort implements Comparable {
      * Adds the <tt>CycConstant<tt> to the cache.
      */
     public static void addCache(CycConstant cycConstant) {
+        if ((cycConstant.name == null) ||
+            (cycConstant.id == null) ||
+            (cycConstant.guid == null))
+            throw new RuntimeException("Invalid constant for caching " + cycConstant);
         cache.addElement(cycConstant.name, cycConstant);
     }
 

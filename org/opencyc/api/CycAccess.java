@@ -10,6 +10,8 @@ import org.opencyc.util.*;
 /**
  * Provides wrappers for the OpenCyc API.<p>
  *
+ * Collaborates with the <tt>CycConnection</tt> class which manages the api connections.
+ *
  * @version $Id$
  * @author Stephen L. Reed
  *
@@ -265,10 +267,11 @@ public class CycAccess {
         Object [] response = {null, null};
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
-
-            //TODO make sure constants are complete
-
-            return (CycList) response[1];
+            if (response[1] == null)
+                // Do not coerce empty lists to the symbol nil, instead return a list of size zero.
+                return new CycList();
+            else
+                return (CycList) response[1];
         }
         else
             throw new IOException(response[1].toString());
@@ -300,7 +303,10 @@ public class CycAccess {
         Object [] response = {null, null};
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
-            if (response[1].toString().equals("T"))
+            if (response[1] == null)
+                // Do not conflate null with the symbol NIL.
+                return false;
+            else if (response[1].toString().equals("T"))
                 return true;
             else
                 return false;
@@ -457,19 +463,67 @@ public class CycAccess {
     }
 
     /**
+     * Gets the Guid for the given constant id.
+     *
+     * @param id the id of the <tt>CycConstant</tt> whose guid is sought
+     * @return the Guid for the given CycConstant
+     */
+    public Guid getConstantGuid (Integer id)
+        throws IOException, UnknownHostException {
+        // Optimized for the binary api.
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("guid-to-string"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("constant-guid"));
+        CycList command2 = new CycList();
+        command1.add(command2);
+        command2.add(CycSymbol.makeCycSymbol("find-constant-by-id"));
+        command2.add(id);
+        return Guid.makeGuid(converseString(command));
+    }
+
+    /**
      * Gets a <tt>CycConstant</tt> by using its ID.
      *
      * @param id the id of the <tt>CycConstant</tt> sought
      * @return the <tt>CycConstant</tt> if found or <tt>null</tt> if not found
      */
     public CycConstant getConstantById (Integer id)  throws IOException, UnknownHostException {
-        String command = "(boolean (find-constant-by-id " + id + "))";
+        // Optimized for the binary api.
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("boolean"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("find-constant-by-id"));
+        command1.add(id);
         boolean constantExists = converseBoolean(command);
         if (! constantExists)
             return null;
-        command = "(constant-name (find-constant-by-id " + id + "))";
-        String constantName = this.converseString(command);
-        return this.getConstantByName(constantName);
+        CycConstant answer = new CycConstant();
+        answer.name = getConstantName(id);
+        answer.id = id;
+        answer.guid = getConstantGuid(id);
+        CycConstant.addCache(answer);
+        return answer;
+    }
+
+    /**
+     * Gets the name for the given constant id.
+     *
+     * @param id the id of the constant object for which the name is sought
+     * @return the Guid for the given CycConstant
+     */
+    public String getConstantName (Integer id)
+        throws IOException, UnknownHostException {
+        // Optimized for the binary api.
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("constant-name"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("find-constant-by-id"));
+        command1.add(id);
+        return converseString(command);
     }
 
     /**
@@ -483,6 +537,32 @@ public class CycAccess {
         command = "(constant-name (find-constant-by-guid (string-to-guid \"" + guid + "\")))";
         String constantName = this.converseString(command);
         return this.getConstantByName(constantName);
+    }
+
+    /**
+     * Completes the instantiation of <tt>CycConstant</tt> object contained in the given <tt>CycList</tt>. The
+     * binary api sends only constant ids, and the constant names and guids must be retreived if the constant is
+     * not cached.
+     *
+     * @param cycList the <tt>CycList</tt> whose constants are to be completed
+     */
+    public void completeCycList (CycList cycList) throws IOException, UnknownHostException {
+        for (int i = 0; i < cycList.size(); i++) {
+            Object element = cycList.get(i);
+            if (element instanceof CycList)
+                completeCycList((CycList) element);
+            else if (element instanceof CycConstant) {
+                CycConstant cycConstant = (CycConstant) element;
+                cycConstant.name = getConstantName(cycConstant.id);
+                CycConstant cachedConstant = CycConstant.getCache(cycConstant.name);
+                if (cachedConstant == null) {
+                    cycConstant.guid = getConstantGuid(cycConstant.id);
+                    CycConstant.addCache(cycConstant);
+                }
+                else
+                    cycList.set(i, cachedConstant);
+            }
+        }
     }
 
     /**
@@ -609,7 +689,9 @@ public class CycAccess {
             arg2.cycName() + ")";
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
-            if (response[1].equals("T"))
+            if (response[1] == null)
+                return false;
+            else if (response[1].equals("T"))
                 return true;
             else
                 return false;

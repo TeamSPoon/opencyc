@@ -6,6 +6,8 @@ import org.opencyc.elf.a.ConsoleOutput;
 
 import org.opencyc.elf.bg.planner.Resource;
 
+import org.opencyc.elf.bg.taskframe.Action;
+
 //// External Imports
 import java.util.ArrayList;
 
@@ -60,7 +62,9 @@ public class ActuatorFactory {
   public void populateActuatorPool() {
     ArrayList resources = new ArrayList();
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources);
+    ArrayList actionCapabilities = new ArrayList();
+    actionCapabilities.add(Action.CONSOLE_PROMPTED_INPUT);
+    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources, actionCapabilities);
     ActuatorPool.getInstance().setActuator(consoleOutput.getName(), consoleOutput);
   }
   

@@ -47,9 +47,9 @@ public class BehaviorEngine {
    */
   public void initialize () {
     logger.info("Initializing BehaviorEngine");
+    (new ResourcePool()).getInstance().initialize();
     (new JobAssignmentLibrary()).getInstance().initialize();
     (new ScheduleLibrary()).getInstance().initialize();
-    (new ResourcePool()).getInstance().initialize();
     
     //TODO
   }

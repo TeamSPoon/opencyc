@@ -10,8 +10,7 @@ import org.opencyc.elf.s.Sensor;
  * Provides the lowest level Node container for the Elementary Loop Functioning
  * (ELF).<br>
  * 
- * @version $Id: LowestLevelNode.java,v 1.4 2003/01/17 14:56:44 stephenreed Exp
- *          $
+ * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>

@@ -49,6 +49,29 @@ public class Action {
   
   //// Public Area
   
+  /**
+   * Executes this action's procedure given its parameter list
+   * 
+   * @param inputs the list of parameter values
+   * 
+   * @return the output of the procedure
+   */
+  public Object execute(ArrayList parameterValues) {
+    setParameterValues(parameterValues);
+    return execute();
+  };
+
+  /**
+   * Executes this action's procedure
+   * 
+   * @param inputs the list of parameter values
+   * 
+   * @return the output of the procedure
+   */
+  public Object execute() {
+    //TODO
+    return null;
+  };
 
   /**
    * Gets the action state, including the procedure, parameters and action modifiers
@@ -83,36 +106,18 @@ public class Action {
    * @return the procedure parameter names for this action
    */
   public ArrayList getParameterNames () {
-    return (ArrayList) state.getStateValue(State.PARAMETER_NAMES);
+    return (ArrayList) getProcedure().getParameterNames();
   }
-  
-  /**
-   * Sets the procedure parameter names for this action.
-   *
-   * @param parameterNames the procedure parameter names for this action
-   */
-  public void setParameterNames (ArrayList parameterNames) {
-    state.setStateValue(State.PARAMETER_NAMES, parameterNames);
-  }
-  
+   
   /**
    * Gets the procedure parameter types for this action.
    *
    * @return the procedure parameter types for this action
    */
   public ArrayList getParameterTypes () {
-    return (ArrayList) state.getStateValue(State.PARAMETER_TYPES);
+    return (ArrayList) getProcedure().getParameterTypes();
   }
-  
-  /**
-   * Sets the procedure parameter types for this action.
-   *
-   * @param parameterNames the procedure parameter types for this action
-   */
-  public void setParameterTypes (ArrayList parameterTypes) {
-    state.setStateValue(State.PARAMETER_TYPES, parameterTypes);
-  }
-  
+    
   /**
    * Gets the procedure parameter values for this action.
    *
@@ -144,8 +149,24 @@ public class Action {
     state.setStateValue(State.PARAMETER_VALUES, parameterValues);
   }
   
+  /**
+   * Gets the output type for this action.
+   *
+   * @return the output type for this action
+   */
+  public Class getOutputType () {
+    return getProcedure().getOutputType();
+  }
   
-  
+  /**
+   * Gets the procedure output value for this (completed) action.
+   *
+   * @return the procedure parameter values for this (completed) action
+   */
+  public Object getOutputValue () {
+    return state.getStateValue(State.PROCEDURE_OUTPUT_VALUE);
+  }
+    
   /**
    * Sets the action state, including the procedure, parameters and action modifiers
    *

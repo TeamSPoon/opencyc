@@ -1,15 +1,12 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
-import org.opencyc.elf.bg.planner.Schedule;
-
-import org.opencyc.elf.bg.taskframe.TaskCommand;
+import org.opencyc.elf.bg.planner.JobAssignment;
 
 //// External Imports
 
 /** Provides the container for the schedule job message, that is sent from the job assigner to
- * the scheduler.  If the schedule is not included, then the scheduler must determine its
- * own schedule using the task command.
+ * the scheduler.  
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -48,45 +45,27 @@ public class ScheduleJobMsg extends GenericMsg {
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[ScheduleJobMsg ");
-    if (taskCommand != null)
-      stringBuffer.append(taskCommand.toString());
-    if (schedule != null)
-      stringBuffer.append(schedule.toString());
+    stringBuffer.append(jobAssignment.toString());
     stringBuffer.append("]");
     return stringBuffer.toString();
   }
 
-  /** Gets the commanded task for scheduling in case the schedule is not explicitly given
+  /** Gets the job assignment
    *
-   * @return the commanded task for scheduling in case the schedule is not explicitly given
+   * @return the job assignment
    */
-  public TaskCommand getTaskCommand () {
-    return taskCommand;
+  public JobAssignment getJobAssignment () {
+    return jobAssignment;
   }
 
-  /** Sets the commanded task for scheduling in case the schedule is not explicitly given
+  /** Sets the job assignment
    *
-   * @param taskCommand the commanded task for scheduling in case the schedule is not explicitly given
+   * @param jobAssignment the job assignment
    */
-  public void setTaskCommand (TaskCommand taskCommand) {
-    this.taskCommand = taskCommand;
+  public void setJobAssignment (JobAssignment jobAssignment) {
+    this.jobAssignment = jobAssignment;
   }
 
-  /** Gets the schedule
-   *
-   * @return the schedule
-   */
-  public Schedule getSchedule () {
-    return schedule;
-  }
-
-  /** Sets the schedule
-   *
-   * @param schedule the schedule
-   */
-  public void setSchedule (Schedule schedule) {
-    this.schedule = schedule;
-  }
 
   //// Protected Area
   
@@ -94,13 +73,9 @@ public class ScheduleJobMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /** the schedule */
-  protected Schedule schedule;
-  
-  /** the commanded task for scheduling in case the schedule is not explicitly given */
-  protected TaskCommand taskCommand;
+  /** the job assignment */
+  protected JobAssignment jobAssignment;
   
   //// Main
-  
-  
+    
 }

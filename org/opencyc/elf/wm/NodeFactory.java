@@ -43,8 +43,7 @@ import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 
-/**
- * Factory that instantiates an Elementary Loop Functioning (ELF) node.  There is a singleton 
+/** Factory that instantiates an Elementary Loop Functioning (ELF) node.  There is a singleton 
  * instance.
  * 
  * @version $Id$
@@ -79,8 +78,7 @@ public class NodeFactory {
   
   //// Public Area
   
-  /**
-   * Gets the factory singleton instance.
+  /** Gets the factory singleton instance.
    * 
    * @return the factory singleton instance
    */
@@ -88,8 +86,7 @@ public class NodeFactory {
     return nodeFactory;
   }
   
-  /**
-   * Makes a node given the set of task frames that it must process.
+  /** Makes a node given the set of task frames that it must process.
    *
    * @param taskFrames the set of task frames that it must process
    */
@@ -113,8 +110,7 @@ public class NodeFactory {
     return node;
   }
   
-  /**
-   * Makes a shell node.
+  /** Makes a shell node.
    *
    * @param name the node name
    * @return a shell node
@@ -125,11 +121,14 @@ public class NodeFactory {
     return node;
   }
    
+  /** the maximum number of items that can be put into an inter-process
+   * communications channel
+   */
+  public static int CHANNEL_CAPACITY = 100;
+  
   //// Protected Area
   
-  /**
-   * Assembles the given node.
-   */
+  /** Assembles the given node. */
   protected void assembleNode () {
     makeBehaviorGenerationShell();
     makeWorldModelShell();
@@ -140,9 +139,7 @@ public class NodeFactory {
     node.setSensoryPerception(sensoryPerception);
   }
   
-  /**
-   * Makes a behavior generation shell.
-   */
+  /** Makes a behavior generation shell. */
   protected void makeBehaviorGenerationShell () {
     behaviorGeneration = new BehaviorGeneration(node);
     List actionCapabilities = new ArrayList();
@@ -154,9 +151,7 @@ public class NodeFactory {
     behaviorGeneration.setPlanSelector(planSelector);
   }
   
-  /**
-   * Makes world model shell.
-   */
+  /** Makes world model shell. */
   protected void makeWorldModelShell() {
     worldModel = new WorldModel();
     worldModel.setNode(node);
@@ -171,9 +166,7 @@ public class NodeFactory {
     predictor.setNode(node);
   }
   
-  /**
-   * Makes a value judgement shell.
-   */
+  /** Makes a value judgement shell. */
   protected void makeValueJudgementShell () {
     valueJudgement = new ValueJudgement();
     valueJudgement.setNode(node);
@@ -185,9 +178,7 @@ public class NodeFactory {
     planEvaluator.setNode(node);
   }
   
-  /**
-   * Makes a sensory perception shell.
-   */
+  /** Makes a sensory perception shell. */
   protected void makeSensoryPerceptionShell () {
     List sensationCapabilities = new ArrayList();
     sensationCapabilities.add(Sensation.CONSOLE_INPUT);
@@ -215,9 +206,7 @@ public class NodeFactory {
   
   //// Internal Rep
     
-  /**
-   * the logger
-   */
+  /** the logger */
   protected Logger logger;
   
   /** the Elementary Loop Functioning (ELF) node */
@@ -273,12 +262,6 @@ public class NodeFactory {
   
   /** a sensor node component */
   protected Sensor sensor;
-  
-  /**
-   * the maximum number of items that can be put into an inter-process
-   * communications channel
-   */
-  protected int CHANNEL_CAPACITY = 100;
   
   /** the node factory singleton instance */
   protected static NodeFactory nodeFactory;

@@ -60,14 +60,22 @@ public class Scheduler extends NodeComponent {
    *
    * @param node the containing ELF node
    * @param schedulerChannel the takable channel from which messages are input
-   * @param jobAssignerChannel the puttable channel to which messages are output to the
    * job assigner
    */
   public Scheduler (Node node,
-                    Takable schedulerChannel,
-                    Puttable jobAssignerChannel) {
+                    Takable schedulerChannel) {
     setNode(node);
     this.schedulerChannel = schedulerChannel;           
+  }
+
+  //// Public Area
+
+  /** Initializes the schedule and begins consuming schedules.
+   *
+   * @param jobAssignerChannel the puttable channel to which messages are output to the
+   * job assigner
+   */
+  public void initialize(Puttable jobAssignerChannel) {
     consumer = new Consumer(schedulerChannel,
                             jobAssignerChannel,
                             this);
@@ -80,9 +88,8 @@ public class Scheduler extends NodeComponent {
       System.exit(1);
     }
   }
-
-  //// Public Area
-
+  
+  
   /** Returns true if the given object equals this object.
    * 
    * @param obj the given object

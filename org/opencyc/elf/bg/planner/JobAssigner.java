@@ -21,6 +21,7 @@ import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
 
 import org.opencyc.elf.wm.ActionLibrary;
+import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.TaskFrameLibrary;
 import org.opencyc.elf.wm.state.State;
 
@@ -31,6 +32,8 @@ import java.util.List;
 
 import java.util.logging.Logger;
 
+import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
+import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
@@ -262,7 +265,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       List conditionalScheduleSets = determineBestScheduleSet(taskFrame);
       List scheduleSet = determineScheduleSet(conditionalScheduleSets);
       assignSchedulesToSchedulers(scheduleSet);
-      
+      //sendSchedulesToSchedulers();
       
       
     }
@@ -291,6 +294,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         if (conditionalScheduleSet.getPredicateExpression().evaluate(state))
           return conditionalScheduleSet.getScheduleSet();
       }
+      getLogger().severe("no valid schedule for " + taskFrame);
       throw new RuntimeException("no valid schedule for " + taskFrame);
     }
     
@@ -312,14 +316,18 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         schedulerInfo.isAvailable = true;
       }
       // pass one to assign matching direct schedules to existing direct schedulers
+      List passTwoSchedules = new ArrayList();
       List unmatchedDirectSchedules = new ArrayList();
       Iterator scheduleIterator = scheduleSet.iterator();
       while (scheduleIterator.hasNext()) {
         boolean foundMatchingScheduler = false;
         Schedule schedule = (Schedule) scheduleIterator.next();
         if (schedule.getActuatorName() == null &&
-            schedule.getSensorName() == null)
+            schedule.getSensorName() == null) {
+         
+          passTwoSchedules.add(schedule);
           continue;
+        }
         Iterator schedulerIterator = schedulerInfos.iterator();
         while (schedulerIterator.hasNext()) {
           JobAssigner.SchedulerInfo schedulerInfo = (JobAssigner.SchedulerInfo) schedulerIterator.next();
@@ -332,6 +340,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
               (schedule.getSensorName() != null &&
                previousSchedule.getSensorName() != null &&
                schedule.getSensorName().equals(previousSchedule.getSensorName()))) {
+            getLogger().info("matching scheduler:" + schedulerInfo.scheduler + " schedule: " + schedule);
             schedulerInfo.isAvailable = false;
             schedulerInfo.schedule = schedule;
             foundMatchingScheduler = true;
@@ -343,10 +352,47 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       }
       Iterator unmatchedDirectScheduleIterator = unmatchedDirectSchedules.iterator();
       while (unmatchedDirectScheduleIterator.hasNext()) {
-        
-        //Scheduler scheduler = new Scheduler(getNode(), schedulerChannel, jobAssignerChannel);
+        Schedule schedule = (Schedule) unmatchedDirectScheduleIterator.next();
+        createScheduler(schedule);
       }
       // pass two to assign remaining schedules to existing schedulers
+      scheduleIterator = passTwoSchedules.iterator();
+      Iterator schedulerIterator = schedulerInfos.iterator();
+      while (scheduleIterator.hasNext()) {
+        Schedule schedule = (Schedule) scheduleIterator.next();
+        boolean scheduleAssigned = false;
+        while (schedulerIterator.hasNext()) {
+          JobAssigner.SchedulerInfo schedulerInfo = 
+            (JobAssigner.SchedulerInfo) schedulerIterator.next();
+  
+          
+          if (schedulerInfo.isAvailable) {
+            schedulerInfo.isAvailable = false;
+            schedulerInfo.schedule = schedule;
+            scheduleAssigned = true;
+            getLogger().info("Using scheduler: " + schedulerInfo.scheduler + 
+                             " for schedule: " + schedule);
+            break;
+          }
+        }
+        if (! scheduleAssigned)
+          createScheduler(schedule);
+      }
+    }
+    
+    /** Creates a new scheduler for the given schedule.
+     *
+     * @param schedule the given schedule
+     */
+    protected void createScheduler(Schedule schedule) {
+      Channel schedulerChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
+      Scheduler scheduler = new Scheduler(getNode(), schedulerChannel);
+      JobAssigner.SchedulerInfo schedulerInfo = new JobAssigner.SchedulerInfo();
+      schedulerInfo.isAvailable = false;
+      schedulerInfo.schedule = schedule;
+      schedulerInfo.scheduler = scheduler;
+      schedulerInfos.add(schedulerInfo);
+      getLogger().info("Created new scheduler: " + scheduler + " for schedule: " + schedule);
     }
     
     /** Processes the schedule status message.

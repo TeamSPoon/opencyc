@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.IOException;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
+import org.opencyc.inferencesupport.*;
 
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a query processor.<p>
@@ -39,17 +40,22 @@ public class QueryProcessor {
     /**
      * <tt>Backchainer</tt> for this <tt>QueryProcessor</tt>.
      */
-    protected Backchainer backchainer = new Backchainer(this);
+    protected Backchainer backchainer;
+
+    /**
+     * <tt>LiteralAsker</tt> for this <tt>QueryProcessor</tt>.
+     */
+    protected LiteralAsker literalAsker;
 
     /**
      * <tt>Solution</tt> for this <tt>QueryProcessor</tt>.
      */
-    protected Solution solution = new Solution(this);
+    protected Solution solution;
 
     /**
      * The OpenCyc microtheory in which the query should be asked.
      */
-    public CycConstant mt;
+    public CycFort mt;
 
     /**
      * The number of solutions requested.  When <tt>null</tt>, all solutions are sought.
@@ -77,6 +83,11 @@ public class QueryProcessor {
      * <tt>ProblemParser</tt> object for this <tt>QueryProcessor</tt>.
      */
     protected QueryParser queryParser = new QueryParser(this);
+
+    /**
+     * <tt>HashJoiner</tt> object for this <tt>QueryProcessor</tt>.
+     */
+    protected HashJoiner hashJoiner;
 
     /**
      * Collection of the query variables as <tt>CycVariable</tt> objects.
@@ -138,6 +149,7 @@ public class QueryProcessor {
             System.out.println("Cannot access OpenCyc server " + e.getMessage());
             System.exit(1);
         }
+        hashJoiner = new HashJoiner();
     }
 
     /**
@@ -156,7 +168,7 @@ public class QueryProcessor {
     }
 
     /**
-     * Solves a query and return a list of solutions if one or more
+     * Asks the input query and returns a list of solutions if one or more
      * was found, otherwise returns <tt>null</tt>.
      *
      * @param query a query in the form of an OpenCyc <tt>CycList</tt> object
@@ -166,11 +178,12 @@ public class QueryProcessor {
      * element is the <tt>CycVariable</tt> and the second element is the bound value
      * <tt>Object</tt>.
      */
-    public ArrayList solve(CycList query) {
+    public ArrayList ask(CycList query) {
         long startMilliseconds = System.currentTimeMillis();
         this.query = query;
+        solution = new Solution(this.nbrSolutionsRequested);
         try {
-            if (! queryParser.extractLiterals()) {
+            if (! queryParser.extractQueryLiterals()) {
                 long endMilliseconds = System.currentTimeMillis();
                 if (verbosity > 0) {
                     System.out.println("No solution because an input literal cannot be satisfied");
@@ -192,8 +205,8 @@ public class QueryProcessor {
                 else
                     System.out.println("Asking for " + nbrSolutionsRequested + " solutions");
             }
-            literalAsker = new LiteralAsker(this);
-            literalAsker.ask();
+            literalAsker = new LiteralAsker();
+            literalAsker.ask(queryLiterals, mt);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -204,7 +217,7 @@ public class QueryProcessor {
         if (verbosity > 0)
             System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
 
-        return solution.solutions;
+        return solution.getSolutions();
     }
 
     /**
@@ -251,7 +264,10 @@ public class QueryProcessor {
      * Displays the literals and their binding set.
      */
     public void displayLiteralsAndBindings() {
-        literalBindings.displayLiteralsAndBindings();
+        System.out.println("Query Literals and Bindings");
+        for (int i = 0; i < queryLiterals.size(); i++) {
+            System.out.println(queryLiterals.get(i));
+        }
     }
 
     /**
@@ -263,7 +279,6 @@ public class QueryProcessor {
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
         queryParser.setVerbosity(verbosity);
-        literalBindings.setVerbosity(verbosity);
         backchainer.setVerbosity(verbosity);
         hashJoiner.setVerbosity(verbosity);
         literalAsker.setVerbosity(verbosity);
@@ -278,7 +293,16 @@ public class QueryProcessor {
      * queries
      */
     public void setMaxBackchainDepth(int maxBackchainDepth) {
-        backchainer.setMaxBackchainDepth(maxBackchainDepth);
+        backchainer.maxBackchainDepth = maxBackchainDepth;
+    }
+
+    /**
+     * Sets the current depth of backchaining from an input query.
+     *
+     * @param backchainDepth the current depth of backchaining from an input query
+     */
+    public void setBackchainDepth(int backchainDepth) {
+        backchainer.backchainDepth = backchainDepth;
     }
 
     /**

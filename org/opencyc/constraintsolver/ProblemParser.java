@@ -3,6 +3,7 @@ package org.opencyc.constraintsolver;
 import java.util.*;
 import java.io.IOException;
 import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 import org.opencyc.api.*;
 
 /**
@@ -107,7 +108,7 @@ public class ProblemParser {
      * otherwise return <tt>true</tt>
      */
     public boolean extractRulesAndDomains() throws IOException {
-        simplifiedRules.addAll(ConstraintRule.simplifyRuleExpression(constraintProblem.problem));
+        simplifiedRules.addAll(ConstraintRule.simplifyConstraintRuleExpression(constraintProblem.problem));
         // Sort by ascending arity to find likely unsatisfiable facts first.
         Collections.sort(simplifiedRules);
         for (int i = 0; i < simplifiedRules.size(); i++) {
@@ -116,12 +117,12 @@ public class ProblemParser {
                  constraintProblem.backchainer.maxBackchainDepth) &&
                 (! isRuleSatisfiable(rule)))
                 return false;
-            if (rule.isExtensionalVariableDomainPopulatingRule())
+            if (rule.isExtensionalVariableDomainPopulatingConstraintRule())
                 // Extensional rules that explicitly define the value domain will rank best.
                 rule.nbrFormulaInstances = 1;
             else
                 rule.nbrFormulaInstances =
-                    CycAccess.current().countUsingBestIndex(rule.formula, constraintProblem.mt);
+                    CycAccess.current().countUsingBestIndex(rule.getFormula(), constraintProblem.mt);
             for (int j = 0; j < rule.getVariables().size(); j++) {
                 VariablePopulationItem variablePopulationItem =
                     new VariablePopulationItem((CycVariable) rule.getVariables().get(j),

@@ -30,11 +30,27 @@ package org.opencyc.queryprocessor;
 public class HashJoiner {
 
     /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+
+    public static final int DEFAULT_VERBOSITY = 3;
+    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
+    protected int verbosity = DEFAULT_VERBOSITY;
 
     public HashJoiner() {
+    }
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 }

@@ -1,8 +1,9 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
 import java.util.*;
 import java.io.IOException;
+import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 
 /**
  * Main program for a finite domain constraint solver optimized to work with the
@@ -99,7 +100,7 @@ public class Main {
         CycList zebraPuzzleCycList = zebraProblem.cycAccess.makeCycList(zebraPuzzleString);
         ArrayList zebraPuzzleRules = null;
         try {
-            zebraPuzzleRules = ConstraintRule.simplifyRuleExpression(zebraPuzzleCycList);
+            zebraPuzzleRules = ConstraintRule.simplifyConstraintRuleExpression(zebraPuzzleCycList);
         }
         catch (IOException e) {
             e.printStackTrace();

@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.IOException;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
+import org.opencyc.inferencesupport.*;
 
 /**
  * <tt>QueryParser</tt> object to model the attributes and behavior of
@@ -74,59 +75,39 @@ public class QueryParser {
 
     /**
      * Simplifies the input problem into its constituent <tt>QueryLiteral</tt> objects,
-     * then divides the input rules into those which populate the variable
-     * domains, and those which subsequently constrain the search for
-     * one or more solutions.  Obtains additional argument type constraints for the constraint
-     * rules.  If a ground fact discovered among the rule set is proven false, then immediately
-     * return the value false.  If a rule has no instances, then immediately return the value false
+     * If a ground fact discovered among the query literals is proven false, then immediately
+     * return the value false.  If a query literal has no bindings, then immediately return the value false
      *
-     * @return <tt>false</tt> if no further backchaining is possible and a rule cannot be satisfied,
+     * @return <tt>false</tt> if no further backchaining is possible and a query literal cannot be satisfied,
      * otherwise return <tt>true</tt>
      */
-    public boolean extractRulesAndDomains() throws IOException {
-        simplifiedRules.addAll(Rule.simplifyRuleExpression(queryProcessor.problem));
+    public boolean extractQueryLiterals() throws IOException {
+        queryLiterals.addAll(QueryLiteral.simplifyQueryLiteralExpression(queryProcessor.query));
         // Sort by ascending arity to find likely unsatisfiable facts first.
-        Collections.sort(simplifiedRules);
-        for (int i = 0; i < simplifiedRules.size(); i++) {
-            Rule rule = (Rule) simplifiedRules.get(i);
+        Collections.sort(queryLiterals);
+        for (int i = 0; i < queryLiterals.size(); i++) {
+            QueryLiteral queryLiteral = (QueryLiteral) queryLiterals.get(i);
             if ((queryProcessor.backchainer.backchainDepth ==
                  queryProcessor.backchainer.maxBackchainDepth) &&
-                (! isRuleSatisfiable(rule)))
+                (! isQueryLiteralSatisfiable(queryLiteral)))
                 return false;
-            if (rule.isExtensionalVariableDomainPopulatingRule())
-                // Extensional rules that explicitly define the value domain will rank best.
-                rule.nbrFormulaInstances = 1;
-            else
-                rule.nbrFormulaInstances =
-                    CycAccess.current().countUsingBestIndex(rule.formula, queryProcessor.mt);
-            for (int j = 0; j < rule.getVariables().size(); j++) {
-                VariablePopulationItem variablePopulationItem =
-                    new VariablePopulationItem((CycVariable) rule.getVariables().get(j),
-                                               rule);
-                variableDomainPopulator.add(variablePopulationItem);
-            }
         }
-        variableDomainPopulator.populateDomains();
         if (verbosity > 1)
-            queryProcessor.displayConstraintRules();
+            queryProcessor.displayQueryLiterals();
         return true;
     }
 
     /**
-     * Returns <tt>true</tt> iff the rule cannot be satisfied.
+     * Returns <tt>true</tt> iff the queryLiteral cannot be satisfied.
      *
-     * @param rule the rule to check in the KB
-     * @return <tt>true</tt> iff the rule cannot be satisfied
+     * @param queryLiteral the query literal to check in the KB
+     * @return <tt>true</tt> iff the queryLiteral cannot be satisfied
      */
-    protected boolean isRuleSatisfiable(Rule rule) throws IOException {
-        if (rule.isGround()) {
+    protected boolean isQueryLiteralSatisfiable(QueryLiteral queryLiteral) throws IOException {
+        if (queryLiteral.isGround()) {
             if (verbosity > 3)
-                System.out.println("Ground fact with no backchaining possible\n" + rule);
-            boolean isTrueFact;
-            if (rule.isEvaluatable())
-                isTrueFact = Rule.evaluateConstraintRule(rule.getFormula());
-            else
-                isTrueFact = CycAccess.current().isQueryTrue(rule.getFormula(), queryProcessor.mt);
+                System.out.println("Ground fact with no backchaining possible\n" + queryLiteral);
+            boolean isTrueFact = CycAccess.current().isQueryTrue(queryLiteral.getFormula(), queryProcessor.mt);
             if (verbosity > 3)
                 System.out.println("  --> " + isTrueFact);
             if (! isTrueFact)
@@ -134,8 +115,8 @@ public class QueryParser {
         }
         CycConstant term = null;
         Integer argumentPostion = null;
-        for (int j = 0; j < rule.getArguments().size(); j++) {
-            Object argument = rule.getArguments().get(j);
+        for (int j = 0; j < queryLiteral.getArguments().size(); j++) {
+            Object argument = queryLiteral.getArguments().get(j);
             if (argument instanceof CycConstant) {
                 term = (CycConstant) argument;
                 argumentPostion = new Integer(j + 1);
@@ -144,13 +125,13 @@ public class QueryParser {
         }
         if (term != null) {
             boolean someInstancesExist =
-                CycAccess.current().hasSomePredicateUsingTerm(rule.getPredicate(),
+                CycAccess.current().hasSomePredicateUsingTerm(queryLiteral.getPredicate(),
                                                               term,
                                                               argumentPostion,
                                                               queryProcessor.mt);
             if (! someInstancesExist) {
                 if (verbosity > 3)
-                    System.out.println("No instances exist and with no backchaining possible\n" + rule);
+                    System.out.println("No instances exist and with no backchaining possible\n" + queryLiteral);
                 return false;
             }
         }
@@ -162,9 +143,9 @@ public class QueryParser {
      */
     public void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
-        for (int i = 0; i < queryProcessor.simplifiedRules.size(); i++) {
-            Rule rule = (Rule) queryProcessor.simplifiedRules.get(i);
-            uniqueVariables.addAll(rule.getVariables());
+        for (int i = 0; i < queryProcessor.queryLiterals.size(); i++) {
+            QueryLiteral queryLiteral = (QueryLiteral) queryProcessor.queryLiterals.get(i);
+            uniqueVariables.addAll(queryLiteral.getVariables());
         }
         queryProcessor.variables.addAll(uniqueVariables);
     }

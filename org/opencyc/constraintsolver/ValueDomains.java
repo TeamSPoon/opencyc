@@ -1,6 +1,7 @@
 package org.opencyc.constraintsolver;
 
 import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 import java.util.*;
 
 /**

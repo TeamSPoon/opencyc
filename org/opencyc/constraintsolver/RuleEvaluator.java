@@ -1,8 +1,9 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
 import java.util.*;
 import java.io.IOException;
+import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 import org.opencyc.api.*;
 
 /**

@@ -3,6 +3,7 @@ package org.opencyc.constraintsolver;
 import java.util.*;
 import java.io.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 import org.opencyc.api.*;
 
 /**
@@ -275,7 +276,10 @@ public class VariableDomainPopulator {
                                    constraintProblem.backchainer.maxBackchainDepth +
                                    " > " + constraintProblem.backchainer.backchainDepth +
                                    "\n  for rule\n" + rule);
-            ArrayList backchainDomainValues = constraintProblem.backchainer.backchain(rule);
+            ArrayList backchainDomainValues =
+                constraintProblem.backchainer.backchain(rule,
+                                                        constraintProblem.variables,
+                                                        constraintProblem.mt);
             if (verbosity > 3)
                 System.out.println("Adding backchain domain values " + backchainDomainValues +
                                    "\n  for " + cycVariable);
@@ -295,7 +299,7 @@ public class VariableDomainPopulator {
         if (valueDomains.domains.containsKey(cycVariable))
             throw new RuntimeException("Duplicate domain specifying rule for " +
                                        cycVariable);
-        if (rule.isExtensionalVariableDomainPopulatingRule()) {
+        if (rule.isExtensionalVariableDomainPopulatingConstraintRule()) {
             valueDomains.domains.put(cycVariable, null);
             CycList theSet =  (CycList) rule.getFormula().third();
             if (! (theSet.first().toString().equals("TheSet")))
@@ -308,8 +312,10 @@ public class VariableDomainPopulator {
         }
         else {
             CycList resultSet =
-                CycAccess.current().askWithVariables(rule.formula, rule.variables, constraintProblem.mt);
-            for (int i = 0; i < rule.variables.size(); i++) {
+                CycAccess.current().askWithVariables(rule.getFormula(),
+                                                     rule.getVariables(),
+                                                     constraintProblem.mt);
+            for (int i = 0; i < rule.getVariables().size(); i++) {
                 if (rule.getVariables().get(i).equals(cycVariable)) {
                     ArrayList domainValues = new ArrayList();
                     for (int k = 0; k < resultSet.size(); k++) {
@@ -339,11 +345,11 @@ public class VariableDomainPopulator {
         ArrayList permittedValues = null;
         if (rule.getArity() == 1)
             permittedValues =
-                CycAccess.current().askWithVariable(rule.formula, variable, constraintProblem.mt);
+                CycAccess.current().askWithVariable(rule.getFormula(), variable, constraintProblem.mt);
         else {
             CycList resultSet =
-                CycAccess.current().askWithVariables(rule.formula, rule.variables, constraintProblem.mt);
-            for (int i = 0; i < rule.variables.size(); i++) {
+                CycAccess.current().askWithVariables(rule.getFormula(), rule.getVariables(), constraintProblem.mt);
+            for (int i = 0; i < rule.getVariables().size(); i++) {
                 if (rule.getVariables().get(i).equals(variable)) {
                     permittedValues = new ArrayList();
                     for (int k = 0; k < resultSet.size(); k++) {

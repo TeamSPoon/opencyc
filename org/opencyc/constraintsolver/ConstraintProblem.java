@@ -70,12 +70,12 @@ public class ConstraintProblem {
     /**
      * <tt>Backchainer</tt> for this <tt>ConstraintProblem</tt>.
      */
-    protected Backchainer backchainer = new Backchainer(this);
+    protected Backchainer backchainer = new Backchainer();
 
     /**
      * <tt>Solution</tt> for this <tt>ConstraintProblem</tt>.
      */
-    protected Solution solution = new Solution(this);
+    protected Solution solution;
 
     /**
      * <tt>ForwardCheckingSearcher</tt> for this <tt>ConstraintProblem</tt>.
@@ -85,7 +85,7 @@ public class ConstraintProblem {
     /**
      * The OpenCyc microtheory in which the constraint rules should be asked.
      */
-    public CycConstant mt;
+    public CycFort mt;
 
     /**
      * When <tt>true</tt> randomizes the order of the variables and domain values before
@@ -233,6 +233,7 @@ public class ConstraintProblem {
     public ArrayList solve(CycList problem) {
         long startMilliseconds = System.currentTimeMillis();
         this.problem = problem;
+        solution = new Solution(nbrSolutionsRequested);
         try {
             if (! problemParser.extractRulesAndDomains()) {
                 long endMilliseconds = System.currentTimeMillis();
@@ -271,7 +272,7 @@ public class ConstraintProblem {
         if (verbosity > 0)
             System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
 
-        return solution.solutions;
+        return solution.getSolutions();
     }
 
    /**
@@ -373,7 +374,7 @@ public class ConstraintProblem {
      * constraint rules
      */
     public void setMaxBackchainDepth(int maxBackchainDepth) {
-        backchainer.setMaxBackchainDepth(maxBackchainDepth);
+        backchainer.maxBackchainDepth = maxBackchainDepth;
     }
 
     /**

@@ -4,6 +4,7 @@ import org.apache.commons.collections.*;
 import java.util.*;
 import java.io.IOException;
 import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 import org.opencyc.util.*;
 import org.opencyc.api.*;
 
@@ -147,19 +148,19 @@ public class ForwardCheckingSearcher {
                                    solution.getCurrentSolution());
             if (variables.size() == 1) {
                 // Trivial case where the last variable is under consideration.
-                solution.nbrSolutionsFound++;
+                solution.setNbrSolutionsFound(solution.getNbrSolutionsFound() + 1);
                 if (verbosity > 0) {
-                    if (solution.nbrSolutionsFound == 1)
+                    if (solution.getNbrSolutionsFound() == 1)
                         System.out.println("\nFound a solution\n");
                     else
                         System.out.println("\nFound solution " +
-                                           solution.nbrSolutionsFound + "\n");
+                                           solution.getNbrSolutionsFound() + "\n");
                     solution.displaySolution(solution.getCurrentSolution());
                     System.out.println();
                 }
                 // The last variable is solved, have all the solutions requested been found?
                 if (constraintProblem.nbrSolutionsRequested != null)
-                    if (constraintProblem.nbrSolutionsRequested.intValue() == solution.nbrSolutionsFound)
+                    if (constraintProblem.nbrSolutionsRequested.intValue() == solution.getNbrSolutionsFound())
                         // Done and stop the search.
                         return true;
                 // More solutions are needed, record this solution.

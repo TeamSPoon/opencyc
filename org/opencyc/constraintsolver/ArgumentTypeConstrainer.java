@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 import org.opencyc.api.*;
 
 /**
@@ -84,7 +85,7 @@ public class ArgumentTypeConstrainer {
     public ArrayList retrieveArgumentTypeConstraintRules(ConstraintRule rule) throws IOException {
         if (verbosity > 3)
             System.out.println("Gathering type constraints for\n" + rule.cyclify());
-        return gatherPredicateVariableArgConstaints(rule.formula);
+        return gatherPredicateVariableArgConstaints(rule.getFormula());
     }
 
     /**

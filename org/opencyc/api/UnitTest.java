@@ -1238,6 +1238,7 @@ public class UnitTest extends TestCase {
         // getWhyGenlParaphrase.
         ArrayList whyGenlParaphrase = null;
         try {
+            //cycAccess.traceOn();
             whyGenlParaphrase = cycAccess.getWhyGenlParaphrase(cycAccess.getConstantByName("Dog"),
                                                                cycAccess.getConstantByName("Animal"));
         }
@@ -1248,7 +1249,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(whyGenlParaphrase);
-        String oneExpectedGenlParaphrase = "if ?OBJ is a non-human animal, then ?OBJ is a sentient animal";
+        String oneExpectedGenlParaphrase = "every non-human animal is a sentient animal";
         /*
         for (int i = 0; i < whyGenlParaphrase.size(); i++) {
             System.out.println(whyGenlParaphrase.get(i));
@@ -1293,7 +1294,7 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(whyCollectionsIntersectParaphrase);
         String oneExpectedCollectionsIntersectParaphrase =
-            "if ?OBJ is a domesticated animal (tame animal), then ?OBJ is a tame animal";
+            "every domesticated animal (tame animal) is a tame animal";
         //System.out.println(whyCollectionsIntersectParaphrase);
         Assert.assertTrue(whyCollectionsIntersectParaphrase.contains(oneExpectedCollectionsIntersectParaphrase));
 

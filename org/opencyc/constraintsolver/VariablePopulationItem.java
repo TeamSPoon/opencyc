@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import java.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
 
 /**
  * <tt>VariablePopulationItem</tt> object to model the attributes of constraint variable value population by

@@ -1,7 +1,13 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.Status;
+
+import org.opencyc.elf.bg.taskframe.TaskFrame;
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * <P>
@@ -41,6 +47,71 @@ public class JobAssigner {
 
   //// Public Area
 
+  /**
+   * Performs job assignment for the given task command.
+   *
+   * @param taskCommand the given task command
+   */
+  public void doTask (TaskCommand taskCommand) {
+  }
+  
+  /**
+   * Receives the task command and task frame.
+   * 
+   * @param taskCommand the task command
+   * @param taskFrame the task frame
+   */
+  public void receiveTaskFrame (TaskCommand taskCommand, TaskFrame taskFrame) {
+    //TODO
+  }
+
+  /**
+   * Sets the scheduler status given the list of controlled resources.
+   *
+   * @param status the scheduler status
+   */
+  public void schedulerStatus (ArrayList controlledResources,
+                               Status status) {
+  }
+  
+  /**
+   * Schedules the given task command
+   * 
+   * @param taskCommand the given task command for scheduling
+   */
+  public void ScheduleJob (TaskCommand taskCommand) {
+    //TODO
+  }
+  
+  /**
+   * Requests the task frame associated with the given task command.
+   *
+   * @param taskCommand the task command
+   */
+  public void fetchTaskFrame (TaskCommand taskCommand) {
+    //TODO
+    // send via channel
+  }
+  
+  /**
+   * Decomposes the given task frame, returning a list of Scheduler/Job pairs.
+   *
+   * @param the given task frame
+   */
+  public void decomposeTaskFrame (TaskFrame taskFrame) {
+    //TODO
+  }
+  
+  /**
+   * Gets the job assigner status.
+   *
+   * @param status the job assigner status
+   */
+  public void JobAssignerStatus (Status status) {
+    //TODO
+  }
+  
+  
   /**
    * Returns true if the given object equals this object.
    * 

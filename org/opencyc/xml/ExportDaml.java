@@ -763,6 +763,8 @@ public class ExportDaml {
         arg1Isas = filterSelectedConstants(arg1Isas);
         if (arg1Isas.size() > 0)
             arg1Isa = (CycConstant)arg1Isas.first();
+        else
+            arg1Isa = null;
     }
 
     /**
@@ -775,6 +777,8 @@ public class ExportDaml {
         arg2Isas = filterSelectedConstants(arg2Isas);
         if (arg2Isas.size() > 0)
             arg2Isa = (CycConstant)arg2Isas.first();
+        else
+            arg2Isa = null;
     }
 
     /**

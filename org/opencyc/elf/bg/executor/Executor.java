@@ -6,8 +6,11 @@ import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
 
+import org.opencyc.elf.a.Actuator;
+
 import org.opencyc.elf.bg.BehaviorGeneration;
 
+import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.planner.Scheduler;
 
@@ -17,6 +20,10 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.message.ExecuteScheduleMsg;
 import org.opencyc.elf.message.ExecutorStatusMsg;
 import org.opencyc.elf.message.GenericMsg;
+
+import org.opencyc.elf.wm.ActuatorPool;
+import org.opencyc.elf.wm.NodeFactory;
+import org.opencyc.elf.wm.SensorPool;
 
 //// External Imports
 import java.util.ArrayList;
@@ -96,6 +103,13 @@ public class Executor extends BufferedNodeComponent {
     return "Executor for " + node.getName();
   }
   
+  /** returns the input channel for this buffered node component. 
+   *
+   * @return the input channel for this buffered node component
+   */
+  public Puttable getChannel() {
+    return (Puttable) executorChannel;
+  }
   //// Protected Area
   
   /** Thread which processes the input message channel. */
@@ -157,6 +171,15 @@ public class Executor extends BufferedNodeComponent {
     protected void processExecutorScheduleMsg(ExecuteScheduleMsg executeScheduleMsg) {
       executor.schedule = executeScheduleMsg.getSchedule();
       controlledResources = executeScheduleMsg.getControlledResources();
+      if (executor.actuator == null) {
+        String directActuatorName = executor.schedule.getDirectActuatorName();
+        if (directActuatorName != null)
+          executor.actuator = ActuatorPool.getInstance().getActuator(directActuatorName);
+        else
+          initializeLowerLevelNode();
+      }
+      //TODO obtain direct sensor?
+      //TODO attach the sensor or virtual sensor to sensory perception
       scheduleSequencer = new ScheduleSequencer();
       scheduleSequencerExecutor = new ThreadedExecutor();
       try {
@@ -167,6 +190,21 @@ public class Executor extends BufferedNodeComponent {
         System.exit(1);
       }
     }
+    
+    
+    /** Connects this node to the new lower level node by initializing the lower level job assigner
+     * and sensory perception.
+     */
+    protected void initializeLowerLevelNode () {
+      Node lowerLevelNode = NodeFactory.getInstance().makeNodeShell(null);
+      executor.getNode().addChildNode(lowerLevelNode);
+      executor.getNode().setParentNode(executor.getNode());
+      JobAssigner lowerLevelJobAssigner = lowerLevelNode.getBehaviorGeneration().getJobAssigner();
+      lowerLevelJobAssigner.initialize(executor.getChannel());
+      executor.actuator = lowerLevelJobAssigner;
+      //TODO connect sensory perception
+    }
+    
   }
   
   /** Interruptable thread which executes the input schedule. */
@@ -181,63 +219,24 @@ public class Executor extends BufferedNodeComponent {
     public void run() {
       Command command = null;
       Command nextCommand = null;
+      // TODO for now ignore timing
       Iterator commandIterator = executor.schedule.getPlannedCommands().iterator();
       while (true) {
-        //TODO
         if (executor.stopSchedule) {
           Status status = new Status();
-          
+          status.setTrue(Status.SCHEDULE_FINISHED);
+          ExecutorStatusMsg executorStatusMsg = new ExecutorStatusMsg(executor, status);
           return;
         }
         command = (Command) commandIterator.next();
         TaskCommand taskCommand = new TaskCommand(command, nextCommand);
+        
+        
+        // send task command to the actuator
       }
     }    
   }
-  
-  /** Receives the update schedule message from ? */
-  protected void receiveUpdateSchedule () {
-    // TODO
-    // receive via channel from ?
-    // TaskCommnd taskCommand
-    // Schedule schedule
-  }
-
-  /** Receives the execute schedule message from plan selector. 
-   * (scheduler should be the intermediary)
-   */
-  protected void receiveExecuteSchedule () {
-    // TODO
-    // receive via channel from ?
-    // TaskCommnd taskCommand
-    // Schedule schedule
-  }
-  
-  /** Sends the do subtask message to behavior generation, for subsequent forwarding to
-   * the next highest level node
-   */
-  protected void doSubTask () {
-    // TODO
-    // send via channel to ?
-    // ArrayList controlledResources
-    // TaskCommnd taskCommand
-  }
-  
-  /** Sends the executor status to its scheduler. */
-  protected void sendExecutorStatus () {
-    // TODO
-    // send via channel to ?
-    // ArrayList controlledResources
-    // TaskCommnd taskCommand
-    // Schedule schedule
-    // Status status
-    // send receiveExecutorStatus(taskCommand, schedule, status) to (its) scheduler
-  }
     
-  public Puttable getChannel() {
-    return (Puttable) executorChannel;
-  }
-  
   //// Private Area
   
   //// Internal Rep
@@ -266,4 +265,7 @@ public class Executor extends BufferedNodeComponent {
   /** when true, indicates that the schedule sequencer is to stop processing the schedule */
   protected boolean stopSchedule = false;
 
+  /** the actuator to which this executor sends commands */
+  protected Actuator actuator;
+  
 }

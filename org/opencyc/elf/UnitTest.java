@@ -5,6 +5,8 @@ import org.opencyc.elf.a.Actuator;
 
 import org.opencyc.elf.bg.BehaviorGeneration;
 
+import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.ActionFactory;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.bg.planner.JobAssigner;
@@ -198,6 +200,13 @@ public class UnitTest extends TestCase {
     logger.info("Testing behavior generation");
     ELFFactory elfFactory = new ELFFactory();
     Node node = elfFactory.makeNodeShell("test-node");
+    
+    ActionFactory actionFactory = new ActionFactory();
+    Action converseWithUserAction = actionFactory.makeConverseWithUser();
+    Assert.assertEquals("converse with user", converseWithUserAction.getName());
+    Assert.assertEquals("prompt", converseWithUserAction.getParameterNames().get(0));
+    
+    //jobAssigner generates consolePromptedInput action for the ConsoleActuator
     
     
     

@@ -16,36 +16,34 @@
 % ===================================================================
 % Connecter to Cyc TCP Server
 % ===================================================================
-:-dynamic(cycConnection/4).
+:-dynamic(cycConnection/3).
+:-dynamic(cycConnectionUsed/3).
 :-dynamic(cycMutex/2).
 :-dynamic(cycChatMode/1).
 
-cycConnection(SocketId,OutStream,InStream):-
-      thread_self(Self),
-      cycConnection(Self,SocketId,OutStream,InStream),!.
+getCycConnection(SocketId,OutStream,InStream):-
+      retract(cycConnection(SocketId,OutStream,InStream)),
+      assertz(cycConnectionUsed(SocketId,OutStream,InStream)),!.
 
-
-establishConnection:-cycConnection(_,_,_),!.
-establishConnection:-
-      thread_self(Self),
-      cycConnection(SomeOne,SocketId,_,_),
-      not(cycMutex(SomeOne,SocketId)),!.
-
-establishConnection:-
+getCycConnection(SocketId,OutStream,InStream):-
       tcp_socket(SocketId),
       tcp_connect(SocketId,'127.0.0.1':3601),
       tcp_open_socket(SocketId, InStream, OutStream),!,
-      thread_self(Self),
-      %format(user_error,'Connected to Cyc TCP Server {~w,~w}\n',[InStream,OutStream]),
-      flush_output(user_error),
-      assert(cycConnection(Self,SocketId,OutStream,InStream)),!.
+      format(user_error,'Connected to Cyc TCP Server {~w,~w}\n',[InStream,OutStream]),
+      assertz(cycConnectionUsed(SocketId,OutStream,InStream)),!,
+      flush_output(user_error).
 
+finishCycConnection(SocketId,OutStream,InStream):-
+      (at_end_of_stream(InStream);read_line_with_nl(InStream, Receive)),
+      retractall(cycConnectionUsed(SocketId,OutStream,InStream)),
+      asserta(cycConnection(SocketId,OutStream,InStream)),!.
+      
+      
 
-discontinueConnection:-
-      thread_self(Self),
-      retract(cycConnection(Self,SocketId,OutStream,InStream)),
-      tcp_close_socket(SocketId),!.
-discontinueConnection:-!.
+cc:-
+   listing(cycConnection),
+   listing(cycConnectionUsed).
+
 
 % ===================================================================
 % Invoke SubL
@@ -66,8 +64,11 @@ invokeSubL(Send,Receive):-
       
 
 invokeSubLRaw(Send,Receive):-
-      printSubL(Send),
-      readSubL([A,B,C,D|Receive]),!,
+      getCycConnection(SocketId,OutStream,InStream),
+      printSubL(OutStream,Send),
+      trace,
+      readSubL(InStream,[A,B,C,D|Receive]),!,
+      finishCycConnection(SocketId,OutStream,InStream),!,
       checkSubLError(Send,[A,B,C,D|Receive]).
 
 checkSubLError(Send,[53,48,48,32|Info]):- %Error "500 "
@@ -75,28 +76,25 @@ checkSubLError(Send,[53,48,48,32|Info]):- %Error "500 "
       throw(cyc_error(ErrorMsg,Send)).
 checkSubLError(_,_).
 
-
-
-printSubL(Send):-
-      establishConnection,
+printSubL(OutStream,Send):-
       var(Send) ->
 	 throw(cyc_error('Unbound SubL message',Send));
          is_list(Send) ->
-	    formatCyc('~s~n',[Send]);
-            atom(Send) -> formatCyc('~w~n',[Send]);
+	    formatCyc(OutStream,'~s~n',[Send]);
+	       atom(Send) -> formatCyc(OutStream,'~w~n',[Send]);
 	       compound(Send) ->
-      	       (toCycApiExpression(Send,[],STerm),formatCyc('~w~n',[STerm]));
-	       throw(cyc_error('SubL message type not supported',Send)).
+      	       (toCycApiExpression(Send,[],STerm),formatCyc(OutStream,'~w~n',[STerm]));
+%	       throw(cyc_error('SubL message type not supported',Send)),
+	       	       formatCyc(OutStream,'~w~n',[Send]).
 
-formatCyc(Format,Args):-
-      cycConnection(_SocketId,OutStream,_InStream),!,
+
+formatCyc(OutStream,Format,Args):-
       format(OutStream,Format,Args),
       isDebug(format(user_error,Format,Args)),
       flush_output(OutStream),!.
 
-readSubL(Receive):-
-      cycConnection(SocketId,OutStream,InStream),!,
-      read_line_with_nl(InStream, Receive),!.
+readSubL(InStream,Receive):-
+	 read_line_with_nl(InStream, Receive),!.
 
 
 :-dynamic(isDebug).
@@ -110,6 +108,7 @@ read_line_with_nl(Fd, Codes, Tail) :-
 read_line_with_nl(end_of_file, _, Tail, Tail) :- !.
 read_line_with_nl(-1, _, Tail, Tail) :- !.
 read_line_with_nl(10, _, [10|Tail], Tail) :- !.
+read_line_with_nl(13, _, [10|Tail], Tail) :- !.
 read_line_with_nl(C, Fd, [C|T], Tail) :-
         get_code(Fd, C2),
         read_line_with_nl(C2, Fd, T, Tail).
@@ -122,6 +121,9 @@ receiveCodes(ReceiveCodes,Receive):-atom_codes(Receive,ReceiveCodes).
 toCycApiExpression(Prolog,Vars,Chars):-var(Prolog),!,toCycVar(Prolog,Vars,Chars).
 toCycApiExpression(Prolog,Vars,Prolog):-(atom(Prolog);number(Prolog)),!.
 toCycApiExpression(Prolog,Vars,Chars):-is_string(Prolog),!,sformat(Chars,'"~s"',[Prolog]).
+toCycApiExpression([P|List],Vars,Chars):-
+			toCycApiExpression_l([P|List],Vars,Term),
+			sformat(Chars,'\(~w)',[Term]).
 toCycApiExpression(quote(List),Vars,Chars):-
 			toCycApiExpression(List,Vars,Term),
 			sformat(Chars,'\'~w',[Term]).
@@ -131,9 +133,6 @@ toCycApiExpression(Prolog,Vars,Chars):-compound(Prolog),!,
 			(P = holds ->
 			   sformat(Chars,'(~w)',[Term]);
 			   sformat(Chars,'(~w ~w)',[P,Term])).
-toCycApiExpression([P|List],Vars,Chars):-
-			toCycApiExpression_l([P|List],Vars,Term),
-			sformat(Chars,'\'(~w)',[Term]).
 
 toCycApiExpression_l([],Vars,''):-!.
 toCycApiExpression_l([A],Vars,Chars):-toCycApiExpression(A,Vars,Chars),!.
@@ -159,7 +158,8 @@ cycReset:-discontinueConnection.
 % ===================================================================
 
 cycAssert(CycL,Mt):-
-      cyclify(CycL,CycLGood),
+      retractall(cached_query(_,_)),
+      cyclifyNew(CycL,CycLGood),
       cyclify(Mt,MtGood),
       invokeSubL('CYC-ASSERT'(quote(CycLGood),MtGood)).
 
@@ -167,34 +167,59 @@ cycAssert(CycL,Mt):-
 %  Cyc Query
 % ===================================================================
      
+isDebug.
 
 cycQuery(CycL):-cycQuery(CycL,'#$EverythingPSC',Result).
 cycQuery(CycL,Mt):-cycQuery(CycL,Mt,Result).
 
 cycQuery(CycL,Mt,Result):-
-      cycReset,
+      copy_term(CycL,Copy),
+      numbervars(Copy,'$VAR',0,_),!,
+      cycQuery(Copy,CycL,Mt,Result).
+
+:-dynamic(cachable_query/1).
+:-dynamic(cached_query/2).
+
+cachable_query(isa(_,_)).
+
+cycQuery(Copy,CycL,Mt,Result):-cached_query(Copy,Results),!,
+      member(CycL,Results).
+cycQuery(Copy,CycL,Mt,Result):-cachable_query(Copy),!,
+      findall(CycL,cycQueryReal(CycL,Mt,Result),Save),
+      asserta(cached_query(CycL,Save)),!,
+      member(CycL,Save).
+cycQuery(Copy,CycL,Mt,Result):-
+      cycQueryReal(CycL,Mt,Result).
+
+cycQueryReal(CycL,Mt,Result):-
+      getCycConnection(SocketId,OutStream,InStream),
       cyclify(CycL,CycLGood),
       cyclify(Mt,MtGood),
-      printSubL('CYC-QUERY'(quote(CycLGood),MtGood)),
-      cycConnection(SocketId,OutStream,InStream),!,
+      printSubL(OutStream,'CYC-QUERY'(quote(CycLGood),MtGood)),
+      get_code(InStream,A),
+      get_code(InStream,B),
+      get_code(InStream,C),
+      get_code(InStream,D),
       free_variables(CycLGood,Vars),
-      iterateResult(InStream,Result),
-      syncCycLVars(Result,Vars).
+      get_code(InStream,E),!,% Takes the first paren
+      repeat,
+      (peek_code(InStream,PCode), 
+      isDebug(format('PCODE (~q)~n',[PCode])),
+      ((PCode=35,finishCycConnection(SocketId,OutStream,InStream),!,fail);true), % 35 is No
+      ((PCode=78,finishCycConnection(SocketId,OutStream,InStream),!);(    % 78 is Yes
+      readCycL(InStream,Trim),
+      peek_code(InStream,Code), 
+      isDebug(format('"~s" (~q)~n',[Trim,Code])),
+      ((Code\=32,!,finishCycConnection(SocketId,OutStream,InStream));(true)),
+      getSurfaceFromChars(Trim,IResult,_),
+      IResult=[Result],
+      syncCycLVars(Result,Vars)))).
 
 syncCycLVars(_,[]).
 syncCycLVars([[_, '.', Binding]|T],[Binding|VV]):-syncCycLVars(T,VV),!.
+syncCycLVars([[_|Binding]|T],[Binding|VV]):-syncCycLVars(T,VV),!.
 
-iterateResult(InStream,Result):-
-      getResult(InStream,RS,OVars),
-      member(Result,RS).
    
-
-getResult(InStream,RS,Vars):-
-      read_line_with_nl(InStream, [A,B,C,D|Result]),!,
-      getCleanCharsWhitespaceProper3(Result,ResultO),
-      %writeq(ResultO),nl,
-      getSurfaceFromChars(ResultO,Out,Vars),!,
-      Out=[RS],!.
 
       
       
@@ -202,7 +227,7 @@ getResult(InStream,RS,Vars):-
 
 cyclify(Same,Same):-var(Same);number(Same).
 cyclify([],[]).
-cyclify([H|T],Term):-integer(H) -> Term=[H|T];cyclify_l([H|T],Term).
+cyclify([H|T],Term):-integer(H) -> Term=[H|T]; cyclify_l([H|T],Term).
 cyclify(Before,After):-atom(Before),
       sub_atom(Before,0,1,_,F),!,
       cyclify(F,Before,After).
@@ -223,6 +248,35 @@ cyclify_l([B|BL],[A|AL]):-
       cyclify(B,A),
       cyclify_l(BL,AL).
 
+
+cyclifyNew(Same,Same):-var(Same);number(Same).
+cyclifyNew([],[]).
+cyclifyNew([H|T],Term):-integer(H) -> Term=[H|T]; cyclifyNew_l([H|T],Term).
+cyclifyNew(Before,After):-atom(Before),
+      sub_atom(Before,0,1,_,F),!,
+      cyclifyNew(F,Before,After).
+cyclifyNew(Before,After):-
+      Before=..[B|BL],
+      cyclifyNew(B,A),
+      cyclifyNew_l(BL,AL),
+      After=..[A|AL].
+
+cyclifyNew('#',Before,Before).
+cyclifyNew('?',Before,Before).
+cyclifyNew('"',Before,Before).
+cyclifyNew(_,Before,After):-atom_concat('#$',Before,After),makeConstant(Before).
+
+makeConstant(Const):-
+   sformat(String,'(CREATE-CONSTANT "~w")',[Const]),
+   catch( invokeSubL(String),_,true).
+
+      
+cyclifyNew_l([B],[A]):-cyclifyNew(B,A),!.
+cyclifyNew_l([],[]).
+cyclifyNew_l([B|BL],[A|AL]):-
+      cyclifyNew(B,A),
+      cyclifyNew_l(BL,AL).
+
       
 % ===================================================================
 % ===================================================================
@@ -234,21 +288,6 @@ sendNote(To,From,Subj,Msg):-
 % ===================================================================
 
 
-
-
-
-
-
-logOnFailure(assert(X,Y)):- catch(assert(X,Y),_,Y=0),!.
-logOnFailure(assert(X)):- catch(assert(X),_,true),!.
-logOnFailure(assert(X)):- catch(assert(X),_,true),!.
-%logOnFailure(X):-catch(X,E,true),!.
-logOnFailure(X):-catch(X,E,(writeFailureLog(E,X),!,catch((true,X),_,fail))),!.
-logOnFailure(X):- writeFailureLog('Predicate Failed',X),!.
-
-% TODO make reader more robust
-
-
 isSlot(Var):-var(Var).
 isSlot('$VAR'(Var)):-number(Var).
 
@@ -258,706 +297,52 @@ isSlot('$VAR'(Var)):-number(Var).
 :-dynamic read_in_atom/0.
 :-dynamic prev_char/1.
 
-readCycL(CHARS)  :-       !,
-         readCycL(user_input,CHARS).
+% ===================================================================
+% CycL Term Reader
+% ===================================================================
+readCycL(CHARS):-readCycL(user_input,CHARS).
 
 
 readCycL(Stream,[])  :-at_end_of_stream(Stream).     
-readCycL(Stream,CHARS)  :-
-		cyclReadStatePopParens,!,
+readCycL(Stream,Trim)  :-
+		flag('bracket_depth',_,0),
 		retractall(reading_in_comment),
 		retractall(reading_in_string),!,
-		once(readCycLChars_p0(Stream,CHARS)),!.
-
-readCycL_priv(Stream,[])  :-at_end_of_stream(Stream).     
-readCycL_priv(Stream,CHARS)  :-  
-		cyclReadStatePopParens,!,
-		unset_g(reading_in_comment),
-		unset_g(reading_in_string),!, %true,
-		call_with_depth_limit(readCycLChars_p0_priv(Stream,CHARS),40000,_),!.
-
-readCycLChars_p0_priv(Stream,[]):-at_end_of_stream(Stream),!.
-readCycLChars_p0_priv(Stream,[Char|Chars]):- !,
-        logOnFailure(peekCycLCharCode(Stream,C)),!,
-	logOnFailure(term_to_atom(C,CS)),
-	logOnFailure(cyclUpdateReadState(CS)),!,
-	(readCycLChars_next(C,Char,Stream,Chars)),!.
-	
-%peekCycLCharCode(Stream,10):-at_end_of_stream(Stream),!,dw('[at_end_of_stream]').
-peekCycLCharCode(Stream,10):-peek_byte(Stream,13),!,skipCycLChar(Stream),dw('[ln]'),!.
-peekCycLCharCode(Stream,10):-peek_byte(Stream,10),!,skipCycLChar(Stream),dw('[ln]'),!.
-peekCycLCharCode(Stream,46):-peek_byte(Stream,46),!,skipCycLChar(Stream),dw('[dot]'),!.
-peekCycLCharCode(Stream,32):-peek_byte(Stream,C),C < 32,!,skipCycLChar(Stream),dw('[ctl]'),!.
-peekCycLCharCode(Stream,C):-peek_byte(Stream,38),!,skipCycLChar(Stream),dw('[skipping]'),peekCycLCharCode(Stream,C),!.
-peekCycLCharCode(Stream,C):-peek_byte(Stream,46),!,skipCycLChar(Stream),dw('[skip-dot]'),peekCycLCharCode(Stream,C),!.
-peekCycLCharCode(Stream,C):-peek_byte(Stream,37),!,skipCycLChar(Stream),dw('[skipping]'),peekCycLCharCode(Stream,C),!.
-peekCycLCharCode(Stream,C):-peek_byte(Stream,C),skipCycLChar(Stream),!. %,put(C),!.
-peekCycLCharCode(Stream,C):-peek_byte(Stream,C),flush,dw('[peekCycLCharCode]'),sleep(2),!,peekCycLCharCode(Stream,C),!.
-
-readCycLChars_next(C,C,Stream,Chars):-if_g(reading_in_string),readCycLChars_p0_priv(Stream,Chars),!.
-readCycLChars_next(10,10,Stream,[]):-if_g(reading_in_comment),!.
-readCycLChars_next(13,10,Stream,[]):-if_g(reading_in_comment),!.
-readCycLChars_next(C,C,Stream,Chars):-if_g(reading_in_comment),readCycLChars_p0_priv(Stream,Chars),!.
-readCycLChars_next(41,41,Stream,[]):-flag('bracket_depth',X,X),(X=0),!.
-readCycLChars_next(C,Char,Stream,Chars):-once(cyclAsciiRemap(C,Char)),!,readCycLChars_p0_priv(Stream,Chars),!.
-readCycLChars_next(C,Char,Stream,Chars):-dw(errror).
-
-set_g(F):-!,flag(F,_,2),!.
-unset_g(F):-!,flag(F,_,1),!.
-if_g(F):-!,flag(F,X,X),not(X=1),!.
-
-%end_char(41,41)  :-   moo_console_bracket_depth(D),D<1,!. 
-
-cyclUpdateReadState('46'):-dw('[dotp]'),!.
-cyclUpdateReadState('32'):-!.
-cyclUpdateReadState(_):- if_g(reading_in_comment),dw('[;]'),!.
-cyclUpdateReadState('34'):-!,
-		(if_g(reading_in_string) -> (dw('[strout]'),unset_g(reading_in_string));(set_g(reading_in_string),!,dw('[strin]'))),!.
-cyclUpdateReadState('46'):-if_g(reading_in_string),dw('='),!.
-cyclUpdateReadState(_):-if_g(reading_in_string),dw('='),!.
-cyclUpdateReadState('59'):- set_g(reading_in_comment),dw('[commentStart]'),!.
-
-cyclUpdateReadState('40'):-!,logOnFailure(flag('bracket_depth',N,N)),dw(n(N)),logOnFailure(flag('bracket_depth',N,N + 1)),logOnFailure((V is N +1)),logOnFailure(dw([brackin:V])),!.
-cyclUpdateReadState('41'):-!,flag('bracket_depth',N,N - 1),dw([brackout:N]),!.
-cyclUpdateReadState(_):-!. %dw('-'),!.
-
-:-dynamic(bd/1).
-
-%bdInc:-
-
-dw(W):-flush_output,!. %write(W),flush. %,flush(user_error).
-
-cyclReadStatePopParens:-flag('bracket_depth',_,0),!,dw(newbd).
-
-skipCycLChar(Stream):- at_end_of_stream(Stream),!.
-skipCycLChar(Stream):- logOnFailure(get_char(Stream,_)),!.
-/*
-		stream_property(Stream,position('$stream_position'(PCharIndex, PLineNo, PLinePos))),
-		NCharIndex is PCharIndex +1,
-		seek(Stream,NCharIndex, bof, CharIndex),
-		ignore(check_same(NCharIndex,CharIndex)).
-*/
-
-check_same(NCharIndex,CharIndex):-NCharIndex == CharIndex,!.
-check_same(NCharIndex,CharIndex):-dw('!@#$%@#!@'),dw((NCharIndex,CharIndex)).
-
-
-getSurfaceFromChars_d(Chars,WFFOut,VARSOut):- 
-    retractall(var_counter(_)),retractall(numbered_var(_,_,_)),asserta(var_counter(0)), 
-               (getCycLTokens(Chars,Tokens) -> true ; (sendNote(user,cyclParser,'Syntax Error (or I need more work)',Chars),sleep(2),fail)),
-               logOnFailure(clean_sexpression(Tokens,WFFClean)),
-               logOnFailure(phrase(expr(WFF),WFFClean)),
-               collect_temp_vars(VARS),
-              !, ( 
-                     (VARS=[],VARSOut=_,WFFOut=WFF)
-               ;
-                     (
-                     unnumbervars(VARS,LIST),
-                     cyclVarNums(LIST,WFF,WFFOut,VARSOut2) ,
-                     list_to_set(VARSOut2,VARSOut1),
-                     open_list(VARSOut1,VARSOut)
-                     ) 
-               ).
-
-            
+		readCycLChars_p0(Stream,CHARS),!,trim(CHARS,Trim).
 
 readCycLChars_p0(Stream,[]):-at_end_of_stream(Stream),!.
 readCycLChars_p0(Stream,[Char|Chars]):-
-        get_code(Stream,C),!,
-	cyclReadStateChange(C),!,readCycLChars_p1(C,Char,Stream,Chars),!.
+        get_code(Stream,C),
+	%put(user_error,C),flush_output(user_error),
+	cyclReadStateChange(C),readCycLChars_p1(C,Char,Stream,Chars),!.
 	
+readCycLChars_p1(C,Char,Stream,[]):- at_end_of_stream(Stream),!.
 readCycLChars_p1(C,Char,Stream,[]):-isCycLTerminationStateChar(C,Char),!.
-readCycLChars_p1(C,Char,Stream,Chars):-once(cyclAsciiRemap(C,Char)),!,readCycLChars_p0(Stream,Chars),!.
+readCycLChars_p1(C,Char,Stream,Chars):-cyclAsciiRemap(C,Char),readCycLChars_p0(Stream,Chars),!.
 
-
-
-isCycLTerminationStateChar(10,32)  :-reading_in_comment,!.
-isCycLTerminationStateChar(13,32)  :-reading_in_comment,!.
-isCycLTerminationStateChar(41,41)   :-  flag('bracket_depth',X,X),!,(X=0),!.
-%isCycLTerminationStateChar(41,41)  :-   moo_console_bracket_depth(D),D<1,!. 
-
+isCycLTerminationStateChar(10,32):-reading_in_comment,!.
+isCycLTerminationStateChar(13,32):-reading_in_comment,!.
+isCycLTerminationStateChar(41,41):-flag('bracket_depth',X,X),(X<1),!.
 
 cyclReadStateChange(_):- reading_in_comment,!.
-cyclReadStateChange(34):-retract(reading_in_string),!.
-cyclReadStateChange(34):-assert(reading_in_string),!.
-cyclReadStateChange(_):-reading_in_string,!.
+cyclReadStateChange(34):- (retract(reading_in_string) ; assert(reading_in_string)),!.
+cyclReadStateChange(_):- reading_in_string,!.
 cyclReadStateChange(59):- assert(reading_in_comment),!.
-
 cyclReadStateChange(40):-!,flag('bracket_depth',N,N + 1).
 cyclReadStateChange(41):-!,flag('bracket_depth',N,N - 1).
 cyclReadStateChange(_).
 
-%cyclAsciiRemap(X,Y):-(catch(cyclAsciiRemap0(X,Y),_,fail)),!.
+skipCycLChar(Stream):- get_char(Stream,_),!.
 
-cyclAsciiRemap(X,X).
-
-cyclAsciiRemap(N,32):-not(number(N)).
+cyclAsciiRemap(N,32):-not(number(N)),!.
 cyclAsciiRemap(X,32):-X<32,!.
 cyclAsciiRemap(X,32):-X>128,!.
 cyclAsciiRemap(X,X):-!.
 
 
-isCodesWhite([]).
-isCodesWhite([T|W]):-member(T,[32,10,13]),isCodesWhite(W).
-
-
-% :-include('moo_header.pl').
-
-% TODO Need support for
-/*
-Predicate AFTER
-
-% 3037 (pnx_nf (FORWARD (arg1Isa hasMembers Organization)) GlobalContext T-3015) 
-surface(DynStat,'clause-form'(arg1Isa(hasMembers,'Organization')),'BaseIContext','GlobalContext','T-3015',_h75135). 
-clf(arg1Isa(hasMembers,'Organization'),true,'BaseIContext','GlobalContext','T-3015',3110).
-
-)
 % ===================================================================
-% EXPORTS
+% CycL Term Parser
 % ===================================================================
- */
- 
-ssleep(_).       
-                  
-source_from_stream(Stream,[],surf,Vars):-at_end_of_stream(Stream),!.
-source_from_stream(Stream,Trimed,Surface,Vars):-
-		logOnFailure(once(readCycL_priv(Stream,RRAW))), %writeFmt('~s\n',[RRAW]),
-		once(after_readCycL(Stream,RRAW,Trimed,Surface,Vars)),!.
-source_from_stream(Stream,Trimed,Surface,Vars):-line_count(Stream,Line),writeFmt(user_error,'\nLine ~w  Unreadable CycL (source_from_stream) \n',[Line]),ssleep(2),!.
-
-after_readCycL(Stream,RRAW,L_trimmed,Surface,Vars):-
-			logOnFailure(getCleanCharsWhitespaceProper(RRAW,Trimed)),
-			(once(ltrim(Trimed,L_trimmed))),
-			source_from_clean_chars(Stream,L_trimmed,Surface,Vars).
-
-after_readCycL(Stream,RRAW,Trimed,surf,Vars):- line_count(Stream,Line),writeFmt('\nLine ~w  Unreadable CycL: ~s (after_readCycL) \n',[Trimed,RRAW]),ssleep(2),!.
-
-source_from_chars(RRAW,Surface,Vars):-
-			source_from_chars(user_input,RRAW,Surface,Vars).
-
-source_from_chars(Stream,RRAW,Surface,Vars):-
-			logOnFailure(once(getCleanCharsWhitespaceProper(RRAW,Trimed))),
-			logOnFailure(once(ltrim(Trimed,L_trimmed))),
-			source_from_clean_chars(Stream,L_trimmed,Surface,Vars).
-       
-source_from_clean_chars(Stream,"var in stream",surf,Vars):-!,line_count(Stream,Line),writeFmt('\nLine ~w  Var in Stream CycL " \n',[Line]),ssleep(2),!.
-source_from_clean_chars(Stream,[40|REST],Surface,Vars):-
-				once(getSurfaceFromChars([40|REST],CycLSTERM,Vars)),
-				once(source_from_sterm(Stream,CycLSTERM,Surface,Vars)),!.
-
-source_from_clean_chars(Stream,[59|REST],file_comment(Atom),Vars):-!,string_to_atom([59|REST],Atom).% ignore(catch(fmtString(CMT,'~s',[59|REST]),_,fmtString(CMT,'~w',[59|REST]))).
-
-source_from_clean_chars(Stream,[],surf,Vars).
-source_from_clean_chars(Stream,[10],surf,Vars).
-source_from_clean_chars(Stream,[13],surf,Vars).
-source_from_clean_chars(Stream,Trimed,file_comment(nil),Vars):-!,line_count(Stream,Line),ignore(catch(writeFmt('\nLine ~w  Unreadable CycL "~s"\n',[Line,Trimed]),_,true)),ssleep(2),!.
-
-
-source_from_sterm(Stream,CycLSTERM,Surface,Vars):-
-			getMooTermFromSurface(CycLSTERM,Surface).
-
-source_from_sterm(Stream,CycLSTERM,Surface,Vars):-(line_count(Stream,Line),writeFmt('\nLine ~w  Uninterpretable "~q" (~q)\n',[Line,CycLSTERM,cycl])),ssleep(2).
-
-/*
-
-Purpose:                                                         
-  
-Transliterator to get CycL-like KR turned into a more expressive ground form sometimes using only syntax rules
-
-Used by moo_server
-
-% These predicates are used by moo_useragent.P and moo_operation.P
-
-:-export 
-      pterm_to_sterm/2, 
-      sterm_to_pterm/2,
-      conv_to_sterm/3,
-      conv_to_pterm/3,
-      conv_full_trans_request/3,
-      conv_full_trans_generic/3,
-      conv_full_trans_assert/3,
-      getSurfaceFromChars/3.
-
-  In ISO modules cannot use DCGs
-*/
-
-                           
-% ===================================================================
-% EXPORTS
-% ===================================================================
-                         
-/*
-
-:-export readCycL/1.
-:-export readCycL/2.
-
-:-export conv_readS/3.
-:-export conv_readP/3.
-:-export conv_readS/4.
-:-export conv_readP/4.
-:-export e_o_f/1.
-:-export conv_file_line_format/6.
-
-  */                         
-                           
-% ===================================================================
-% IMPORTS
-% ===================================================================
-
-                                                         
-:-assert(re_entry(conv_kr_rule_assert)).
-
-cycl_to_xml(CycL,ML):-
-         tell_retract_parse_chars(CycL,X,V),
-         toMarkUp(leml,X,V,ML).
-
-
-% =====================================================================================
-%  tell_retract_parse_chars(Chars,FORM,Vars) and  ask_parse_chars(Chars,FORM,Vars)
-%  Both Return FORM='nil' if not well formed
-% =====================================================================================
-
-tell_retract_parse_chars(Chars,FORM,Vars):-
-         logOnFailure(getCleanCharsWhitespaceProper(Chars,Show)),!,
-         once(getSurfaceFromChars(Show,STERM,Vars)),!,
-         getMooTermFromSurface(STERM,NEWFORM),!,  
-              once(( 
-                    NEWFORM=browser_only(browser_only(comment(end_of_file))) -> 
-                           ((
-                             catch(fmtString(What,'~s',[Show]),_,What='Unreadable'),!,
-                             sendNote(user,cyclParser,'Assertion/Retraction Syntax error: Unmatched parentheses',['"',What,'"',nl,helplink('Syntactical Well Formedness','syntax.html')]),
-                             FORM=nil 
-                             ))
-                                 ;
-                           (!,FORM=NEWFORM)
-                     )).
-
-
-ask_parse_chars(Chars,FORM,Vars):-
-         logOnFailure(getCleanCharsWhitespaceProper(Chars,Show)),!,
-         once(getSurfaceFromChars(Show,STERM,Vars)),!,
-         getMooTermFromSurface(STERM,NEWFORM),!,
-              once(( 
-                    NEWFORM=browser_only(browser_only(comment(end_of_file))) -> 
-                           ((
-                             catch(fmtString(What,'~s',[Show]),_,What='Unreadable'),!,
-                             sendNote(user,cyclParser,'Request Syntax error: Unmatched parentheses',['"',What,'"',nl,helplink('Syntactical Well Formedness','syntax.html')]),
-                             FORM=nil 
-                             ))
-                                 ;
-                           (!,FORM=NEWFORM)
-                     )).
-
-
-/*===================================================================
-Convert Prolog Term to S-Expression
-
-Recursively Applies the Univ Op to create an easier to compile prolog writeFmt
-                                                 
-Examples:
-
-| ?- pterm_to_sterm((G(X,Y):-A(X,Y)),Sterm).
-Sterm = [:-,[_h76,_h90,_h104],[_h122,_h90,_h104]]
-
-| ?- pterm_to_sterm(t,Sterm).
-Sterm = [t]
-
-| ?- pterm_to_sterm(t(a),Sterm).
-Sterm = [t,[a]]
-
-| ?- pterm_to_sterm(and(a,b),Sterm).
-Sterm = [and,[a],[b]]
-
-====================================================================*/
-%pterm_to_sterm(X,X):-!,writeq(pterm_to_sterm(X,X)).
-
-
-pterm_to_sterm(VAR,VAR):-isSlot(VAR),!.
-pterm_to_sterm([],['AssignmentFn','Set',[]]):-!.
-pterm_to_sterm(ATOM,[ATOM]):-atomic(ATOM),!.
-pterm_to_sterm(PTERM,STERM):-compound(PTERM),
-            PTERM=..[holds,P|PARGS],         !,
-            pterm_to_sterm_list(PARGS,SARGS),
-            STERM=[P|SARGS].
-pterm_to_sterm(PTERM,STERM):-compound(PTERM),!,
-            PTERM=..[P|PARGS],
-            pterm_to_sterm_list(PARGS,SARGS),
-            STERM=[P|SARGS].
-
-pterm_to_sterm_list([],[]):-!.
-pterm_to_sterm_list([P|PTERM],[S|STERM]):-!,
-              pterm_to_sterm(P,S),
-              pterm_to_sterm_list(PTERM,STERM).
-
-/*===================================================================
-Convert Prolog Term to S-Expression
-
-Recursively Applies the Univ Op to create an easier to compile prolog writeFmt
-                                                 
-Examples:
-
-| ?- pterm_to_sterm_native((G(X,Y):-A(X,Y)),Sterm_native).
-Sterm_native = [:-,[holds,_h76,_h90,_h104],[holds,_h122,_h90,_h104]]
-
-| ?- pterm_to_sterm_native(t,Sterm_native).
-Sterm_native = [t]
-
-| ?- pterm_to_sterm_native(t(a),Sterm_native).
-Sterm_native = [t,[a]]
-
-| ?- pterm_to_sterm_native(and(a,b),Sterm_native).
-Sterm_native = [and,[a],[b]]
-
-====================================================================*/
-%pterm_to_sterm_native(X,X):-!,writeq(pterm_to_sterm_native(X,X)).
-
-
-pterm_to_sterm_native(VAR,VAR):-isSlot(VAR),!.
-pterm_to_sterm_native([],['AssignmentFn','Set',[]]):-!.
-pterm_to_sterm_native(ATOM,[ATOM]):-atomic(ATOM),!.
-pterm_to_sterm_native(PTERM,STERM_NATIVE):-compound(PTERM),!,
-            PTERM=..[P|PARGS],
-            pterm_to_sterm_native_list(PARGS,SARGS),
-            STERM_NATIVE=[P|SARGS].
-
-pterm_to_sterm_native_list([],[]):-!.
-pterm_to_sterm_native_list([P|PTERM],[S|STERM_NATIVE]):-!,
-              pterm_to_sterm_native(P,S),
-              pterm_to_sterm_native_list(PTERM,STERM_NATIVE).
-
-/*===================================================================
-Convert S-Expression originating from user to a Prolog Clause representing the surface level
-
-Recursively creates a Prolog term based on the S-Expression to be done after compiler
-                                                 
-Examples:
-
-| ?- sterm_to_pterm([a,b],Pterm).
-Pterm = a(b)
-
-| ?- sterm_to_pterm([a,[b]],Pterm).    %Note:  This is a special Case
-Pterm = a(b)
-
-| ?- sterm_to_pterm([holds,X,Y,Z],Pterm).    %This allows Hilog terms to be Converted
-Pterm = _h76(_h90,_h104)                    
-
-| ?- sterm_to_pterm([X,Y,Z],Pterm).   %But still works in normal places
-Pterm = _h76(_h90,_h104)                    
-
-| ?- sterm_to_pterm(['AssignmentFn',X,[Y,Z]],Pterm).                                
-Pterm = 'AssignmentFn'(_h84,[_h102,_h116])
-====================================================================*/
-
-sterm_to_pterm(VAR,VAR):-isSlot(VAR),!.
-sterm_to_pterm([VAR],VAR):-isSlot(VAR),!.
-sterm_to_pterm([X],Y):-!,nonvar(X),sterm_to_pterm(X,Y).
-
-sterm_to_pterm([S|TERM],PTERM):-isSlot(S),
-            sterm_to_pterm_list(TERM,PLIST),            
-            PTERM=..[holds,S|PLIST].
-
-sterm_to_pterm([S|TERM],PTERM):-number(S),!,
-            sterm_to_pterm_list([S|TERM],PTERM).            
-	    
-sterm_to_pterm([S|TERM],PTERM):-nonvar(S),atomic(S),!,
-            sterm_to_pterm_list(TERM,PLIST),            
-            PTERM=..[S|PLIST].
-
-sterm_to_pterm([S|TERM],PTERM):-!,  atomic(S),
-            sterm_to_pterm_list(TERM,PLIST),            
-            PTERM=..[holds,S|PLIST].
-
-sterm_to_pterm(VAR,VAR):-!.
-
-sterm_to_pterm_list(VAR,VAR):-isSlot(VAR),!.
-sterm_to_pterm_list([],[]):-!.
-sterm_to_pterm_list([S|STERM],[P|PTERM]):-!,
-              sterm_to_pterm(S,P),
-              sterm_to_pterm_list(STERM,PTERM).
-sterm_to_pterm_list(VAR,[VAR]).
-
-/*===================================================================
-Convert S-Expression originating from user to a Prolog Clause representing the surface level
-
-Recursively creates a Prolog term based on the S-Expression to be done after compiler
-                                                 
-Examples:
-
-| ?- sterm_to_pterm_native([a,b],Pterm_native).
-Pterm_native = a(b)
-
-| ?- sterm_to_pterm_native([a,[b]],Pterm_native).    %Note:  This is a special Case
-Pterm_native = a(b)
-
-| ?- sterm_to_pterm_native([holds,X,Y,Z],Pterm_native).    %This allows Hilog terms to be Converted
-Pterm_native = _h76(_h90,_h104)                    
-
-| ?- sterm_to_pterm_native([X,Y,Z],Pterm_native).   %But still works in normal places
-Pterm_native = _h76(_h90,_h104)                    
-
-| ?- sterm_to_pterm_native(['AssignmentFn',X,[Y,Z]],Pterm_native).                                
-Pterm_native = 'AssignmentFn'(_h84,[_h102,_h116])
-====================================================================*/
-
-sterm_to_pterm_native(VAR,VAR):-isSlot(VAR),!.
-sterm_to_pterm_native([VAR],VAR):-isSlot(VAR),!.
-sterm_to_pterm_native([X],Y):-!,nonvar(X),sterm_to_pterm_native(X,Y).
-sterm_to_pterm_native([S|TERM],PTERM_NATIVE):-isSlot(S),
-            sterm_to_pterm_native_list(TERM,PLIST),            
-            PTERM_NATIVE=..[holds,S|PLIST].
-sterm_to_pterm_native([S|TERM],PTERM_NATIVE):-number(S),!,
-            sterm_to_pterm_native_list([S|TERM],PTERM_NATIVE).            
-sterm_to_pterm_native([S|TERM],PTERM_NATIVE):-nonvar(S),atomic(S),!,
-            sterm_to_pterm_native_list(TERM,PLIST),            
-            PTERM_NATIVE=..[S|PLIST].
-sterm_to_pterm_native([S|TERM],PTERM_NATIVE):-!,  atomic(S),
-            sterm_to_pterm_native_list(TERM,PLIST),            
-            PTERM_NATIVE=..[holds,S|PLIST].
-sterm_to_pterm_native(VAR,VAR):-!.
-
-sterm_to_pterm_native_list(VAR,VAR):-isSlot(VAR),!.
-sterm_to_pterm_native_list([],[]):-!.
-sterm_to_pterm_native_list([S|STERM],[P|PTERM_NATIVE]):-!,
-              sterm_to_pterm_native(S,P),
-              sterm_to_pterm_native_list(STERM,PTERM_NATIVE).
-sterm_to_pterm_native_list(VAR,[VAR]).
-
-% [and,A,B]                           lc(pos,and(A,B))                     A equal B
-% [not,[and,A,B]]                   lc(neg,and(A,B))                  ~ A equal B
-% [or,A,B]                             lc(pos,or(A,B))                        A v B
-% ['relation-const',V,B]            lc(pos,pc(pos,'relation-const',[V,B]))          relation-const(V,B)
-% [thereExists,V,['relation-const',V,B]]        lc(pos,exists(1,V,pc(pos,'relation-const',[V,B])))          ex V:  r(V,B)
-% [forall,V,[not,['relation-const',V,B]]]          lc(pos,univ(forall,V,pc(neg,'relation-const',[V,B])))               ex V:  ~r(V,B)
-% ['AssignmentFn',A,[B]]                         'AssignmentFn'(A,[B])
-% Fido   ->                            'AssignmentFn'(_,['Fido'])
-% [+,1,1] ->                          comp(+(1,1))
-% [list,1,2] ->                        varparams([1,2])
-
-
-% lc -> or clause
-% lc -> and clause
-% lc -> predicate constant clause
-% lc -> exists clause
-% lc -> univ clause
-% lc -> => clause
-% lc -> <=> clause
-                                        
-         
-% ========================================================
-%          Atom Transliteration
-% ========================================================
-
-
-
-
-% Prolog Declarations
-'surface-instance'((':-'),'ImplicationConnective',_).
-'surface-instance'((','),'ConjunctionalConnective',_).
-'surface-instance'((';'),'DisjunctionalConnective',_).
-'surface-instance'((':-'),'Connective',_).
-'surface-instance'((','),'Connective',_).
-'surface-instance'((';'),'Connective',_).
-'surface-instance'(('=>'),'ImplicationConnective',_).
-'surface-instance'(('and'),'ConjunctionalConnective',_).
-'surface-instance'(('or'),'DisjunctionalConnective',_).
-'surface-instance'(('=>'),'Connective',_).
-'surface-instance'(('and'),'Connective',_).
-'surface-instance'(('or'),'Connective',_).
-
-% Brought in from moo_language.[CycL|P]
-'surface-instance'(A,B,_):-'surface-instance'(A,B).
-'surface-instance'(A,C,_):-'surface-instance'(A,B),'surface-genls'(B,C).
-'surface-instance'(A,D,_):-'surface-instance'(A,B),'surface-genls'(B,C),'surface-genls'(C,D).
-'surface-instance'(A,E,_):-'surface-instance'(A,B),'surface-genls'(B,C),'surface-genls'(C,D),'surface-genls'(D,E).
-
-
-% Brought in from moo_language.[CycL|P]
-'surface-instance'(Arity2Pred,'ArityTwoPredicate',_C):-'surface-multiple-arity'(Arity2Pred).
-'surface-instance'(Arity1Pred,'ArityOnePredicate',_C):-'surface-single-arity'(Arity1Pred).
-'surface-instance'(AE,'Quantifier',_):-'surface-quantifier'(AE).
-'surface-instance'(findall,'Quantifier',_).
-
-
-'surface-instance'(and,'ArityTwoPredicate',_C).
-'surface-instance'(or,'ArityTwoPredicate',_C).
-'surface-instance'('<=>','ArityTwoPredicate',_C).
-'surface-instance'('=>','ArityTwoPredicate',_C).
-         
-% ========================================================
-%           Generic Transliteration
-% ========================================================
-
-conv_kr_rule_generic(V,V):- isSlot(V),!.
-
-
-conv_kr_rule_generic(IN,Out):- conv_pred(IN,Out),!.
-conv_kr_rule_generic(G,G).
-
-conv_kr_re_entry(IN,Out):-conv_pred(IN,Out),!.
-
-% ========================================================
-%           Common Transliteration  Expects S-Expression
-% ========================================================
-
-conv_pred(V,V):- isSlot(V),!.
-conv_pred([],[]).
-conv_pred([V],[V]):- isSlot(V),!.
-conv_pred( Before, After) :- atom(Before),'surface-word'( Before, After),!.
-
-% Variable in the 1st Position
-conv_pred([Op|A],[Op|List]):-isSlot(Op),!,conv_pred_list(A,List).
-
-
-conv_pred([V,A|R],New):- copy_term([V,A|R],Process),	
-		       'surface-macro'(Process,_),
-		       once((getPrologVars([V,A|R],BV,_,_), 
-		       getPrologVars(Process,PV,_,_))),
-		       length(PV,X),length(BV,X),!,
-		       'surface-macro'([V,A|R],NewTerm),!,
-		       conv_kr_re_entry(NewTerm,New).
-
-
-% Arity2Predicates that have only More then 2 Arguments
-conv_pred([Arity2Pred,A,B,C|M],List):-   
-                              'surface-instance'(Arity2Pred,'ArityTwoPredicate',_C),!,
-                                conv_functsymbol_two([Arity2Pred,A,B,C|M],MID),!,
-                                conv_kr_re_entry(MID,List).
-
-	conv_functsymbol_two([],[]).
-	conv_functsymbol_two([Pred,A,B,C|More],List):-!,
-		    conv_functsymbol_two([Pred,B,C|More],SEMORE),
-		    conv_functsymbol_two([Pred,A,SEMORE],List).
-	conv_functsymbol_two([_Pred,_A,_B],[_Pred,_A,_B]):-!.
-	conv_functsymbol_two([_Pred,_A],_A):-!.
-
-
-% Arity2Predicates that have only one Argument (Are squashed)
-conv_pred([Arity2Pred,MID],List):-   
-                              'surface-instance'(Arity2Pred,'ArityTwoPredicate',_C),!,
-                                conv_kr_re_entry(MID,List).
-
-% multiple arity not/not
-conv_pred([Arity1Pred,A,B|More],List):-  
-	    'surface-instance'(Arity1Pred,'ArityOnePredicate',_C),!,
-            conv_kr_re_entry([Arity1Pred,B|More],BEMORE),
-            conv_kr_re_entry([and,[Arity1Pred,A],BEMORE],List).
-
-% Arity1Predicates that are logical connectives
-conv_pred([Arity1Pred,A],[Arity1Pred,List]):- 'surface-instance'(Arity1Pred,'Connective',_C),!,
-              conv_kr_re_entry(A,List).
-
-
-% ========================================================
-% Agregation Predicates
-% ========================================================
-%conv_kr_re_entry([Agregation,Entity,[=>,Ant,Con]],Formula):-nonvar(Agregation),member(Agregation,[forall,forall,for_all,forall]),conv_kr_re_entry([=>,[and,exists(Entity),Ant],Con],Formula).
-
-% Single Entity Exists  %[exists,[list],tr]                                           
-conv_pred([AE,[Entity,Collection],FormulaA],Result):- ('surface-instance'(AE,'ExistentualQuantifier',_)),
-	conv_kr_re_entry(AE,AO),
-            isSlot(Entity),nonvar(Collection),!,conv_kr_re_entry(FormulaA,FormulaAO),
-            conv_kr_re_entry(['and',[instance,Entity,Collection],FormulaAO],FormulaB),
-            conv_kr_re_entry([AO,Entity,FormulaB],Result).
-
-conv_pred([AE,[Entity,Collection],FormulaA],Result):- ('surface-instance'(AE,'UniversalQuantifier',_)),
-            isSlot(Entity),nonvar(Collection),!,conv_kr_re_entry(FormulaA,FormulaAO),
-            conv_kr_re_entry(['=>',[instance,Entity,Collection],FormulaAO],Result).
-
-conv_pred([AE,Entity,FormulaA],[AO,Entity,FormulaB]):- ('surface-instance'(AE,'Quantifier',_)),
-	conv_kr_re_entry(AE,AO),
-            isSlot(Entity),!,
-            conv_kr_re_entry(FormulaA,FormulaB).
-
-conv_pred([AE,[],FormulaA],FormulaB):- ('surface-instance'(AE,'Quantifier',_)),!,
-            conv_kr_re_entry(FormulaA,FormulaB).
-
-conv_pred([AE,[Struct|More],FormulaA],Result):- ('surface-instance'(AE,'Quantifier',_)),
-            !,   conv_kr_re_entry(FormulaA,FormulaAO),  %%%% AO
-	conv_kr_re_entry(AE,AO),
-            conv_kr_re_entry([AO,Struct,FormulaAO],ResultFormulaA),
-            conv_kr_re_entry([AO,More,ResultFormulaA],Result).
-
-%conv_pred([Pred|ARGS],[browser_only,[Pred|ARGS]]):-'browser-only'(Pred),!.
-
-conv_pred([Class,Pred], ['instance',Pred,Class]):-nonvar(Pred),'surface-class'(Class),!.               
-
-conv_pred([A|T],[AO|TO]):-!,conv_pred_list([A|T],[AO|TO]).
-
-conv_pred(A,A):-!.
-
-conv_pred_list(Var,Var):-isSlot(Var),!.
-conv_pred_list([],[]):-!.
-conv_pred_list([H|T],[HH|TT]):-!,
-         conv_kr_re_entry(H,HH),
-         conv_pred_list(T,TT).
-
-
-% ========================================================
-% Mine Out Formulas Durring Transliteration
-% ========================================================
-
-reduce_arg_nth(_C,_,_,[],[]):-!.
-reduce_arg_nth(_C,Pred,N,[ArgS|ArgSS],[ArgSO|ArgSOS]):-!,
-            conv_kr_re_entry(ArgS,ArgSO),
-            reduce_arg_nth(_C,Pred,NN,ArgSS,ArgSOS).
-
-% Need to be moved to CycL File
-cycl_to_pterm_nv_fn([FN,ID,LITS],LITP):-nonvar(ID),ID='Set',cycl_to_pterm_list(LITS,LITP),!.
-cycl_to_pterm_nv_fn([FN,ID,LITS],'AssignmentFn'(ID,LITP)):-cycl_to_pterm_list(LITS,LITP),!.
-cycl_to_pterm_nv_fn([FN,ID|LITS],LITP):-nonvar(ID),ID='Set',cycl_to_pterm_list(LITS,LITP),!.
-cycl_to_pterm_nv_fn([FN,ID|LITS],'AssignmentFn'(ID,LITP)):-cycl_to_pterm_list(LITS,LITP),!.
-
-
-cycl_to_pterm(VAR,VAR):-isSlot(VAR),!.
-cycl_to_pterm([CycL],P):-!,cycl_to_pterm(CycL,P).
-cycl_to_pterm('zzskFn'(X),'zzskFn'(X)):-!.
-cycl_to_pterm([AS,X,Y],'surface-macro'(X,Y)):-nonvar(AS),AS='surface-macro',!.
-%cycl_to_pterm([Fn, Fn, [X|LIST]],'AssignmentFn'(X,PLIST)):-nonvar(Fn),Fn='AssignmentFn',!,cycl_to_pterm_list(LIST,PLIST).
-%%cycl_to_pterm([ID,FN|LITS],OUT):-nonvar(FN),FN='AssignmentFn',cycl_to_pterm([FN,ID|LITS],OUT),!.
-%cycl_to_pterm([FN,ID|LITS],OUT):-nonvar(FN),FN='AssignmentFn',cycl_to_pterm_nv_fn([FN,ID|LITS],OUT),!.
-cycl_to_pterm([X],Y):-!,nonvar(X),cycl_to_pterm(X,Y).
-cycl_to_pterm(ATOM,ATOM):-atomic(ATOM),!.
-
-cycl_to_pterm([S|TERM],PTERM):-isSlot(S),
-            cycl_to_pterm_list(TERM,PLIST),            
-            PTERM=..[holds,S|PLIST].
-
-cycl_to_pterm([holds|TERM],PTERM):-!,
-            cycl_to_pterm_list(TERM,PLIST),            
-            PTERM=..[holds|PLIST].
-	    	    
-cycl_to_pterm([S|TERM],PLIST):-nonvar(S),number(S),!,
-            cycl_to_pterm_list([S|TERM],PLIST).    
-	            
-cycl_to_pterm([S|TERM],PTERM):-nonvar(S),atomic(S),!,
-            cycl_to_pterm_list(TERM,PLIST),            
-            PTERM=..[S|PLIST].
-	    
-cycl_to_pterm(VAR,VAR):-!.
-
-cycl_to_pterm_list(VAR,VAR):-isSlot(VAR),!.
-cycl_to_pterm_list([],[]):-!.
-cycl_to_pterm_list([S|STERM],[P|PTERM]):-!,
-              cycl_to_pterm(S,P),
-              cycl_to_pterm_list(STERM,PTERM).
-	      
-cycl_to_pterm_list(VAR,[VAR]).
-
-
-'surface-argIsa'(salientAssertions,2,'Formula',_Cxt).
-'surface-argIsa'(ist,2,'Formula',_Cxt).
-
-'surface-argIsa'(P,1,'Formula',_Cxt):-nonvar(P),'surface-instance'(P,'Connective',_).
-'surface-argIsa'(P,2,'Formula',_Cxt):-nonvar(P),'surface-instance'(P,'Connective',_).
-'surface-argIsa'(P,N,T,_):-'argIsa'(P,N,T,_Cxt).
-'surface-argIsa'(P,N,T,_):-'argIsa'(P,N,T2,_Cxt),'genls'(T,T2,_Cxt).
-
-:-dynamic('argIsa'/4).
-:-dynamic('genls'/3).
-
-
-
-
 /*===================================================================
 % getSurfaceFromChars/3 is does less consistantsy checking then conv_to_sterm
 
@@ -988,30 +373,31 @@ Vars = [=(CITIZEN,_h2866)|_h3347]
 ====================================================================*/
 
 getSurfaceFromChars([],[end_of_file],_):-!.
+getSurfaceFromChars([41],[end_of_file],_):-!.
 
 getSurfaceFromChars([CH|ARSIn],TERM,VARS):-!, 
          %getCleanCharsWhitespaceProper(CHARSIn,NoWhiteCHARS),!,  
-         logOnFailure(ltrim([CH|ARSIn],CHARS)),!,
+         (trim([CH|ARSIn],CHARS)),!,
               CHARS=[FC|REST],!,
           (( 
-            ([FC]=";",TERM=[comment,end_of_file], VARS= _ ) ;   %Comment Char found in Line
+            (FC=59,TERM=[comment,REST], VARS= _ ) ;   % ";" Comment Char found in Line
             (CHARS=[],TERM=nil,VARS=_,! 	  )    %String came empty
             ;
-            (FC=40,getSurfaceFromChars_2(CHARS,TERM,VARS) ,! )    %Use vanila CycL parser
+            (FC=40,getSurfaceFromCharBalanced(CHARS,TERM,VARS) ,! )    %Use vanila CycL parser
             ;
-            ( TERM=[comment,end_of_file],VARS= _,! )     %All above methods of parsing failed.. Convert to comment
+            ( TERM=[comment,[FC|REST]],VARS= _,! )     %All above methods of parsing failed.. Convert to comment
             )).
 	    
 getSurfaceFromChars(C,TERM,VARS):-string_to_list(C,List),!,getSurfaceFromChars(List,TERM,VARS),!.
 
 
-getSurfaceFromChars_2(Chars,WFFOut,VARSOut):- 
+getSurfaceFromCharBalanced(Chars,WFFOut,VARSOut):- 
     retractall(var_counter(_)),retractall(numbered_var(_,_,_)),asserta(var_counter(0)), 
-               once(getCycLTokens(Chars,Tokens)), 
-               once((clean_sexpression(Tokens,WFFClean))),
-               phrase(moo(WFF),WFFClean),
-               collect_temp_vars(VARS),
-              !, ( 
+               getCycLTokens(Chars,Tokens), 
+               clean_sexpression(Tokens,WFFClean),!,
+               phrase(cycL(WFF),WFFClean),
+               collect_temp_vars(VARS),!,
+               ( 
                      (VARS=[],VARSOut=_,WFFOut=WFF)
                ;
                      (
@@ -1020,9 +406,7 @@ getSurfaceFromChars_2(Chars,WFFOut,VARSOut):-
                      list_to_set(VARSOut2,VARSOut1),
                      open_list(VARSOut1,VARSOut)
                      ) 
-               ).
-
-    
+               ),!.
 
 /*===================================================================
 % clean_sexpression(Tokens,CleanTokens)
@@ -1070,33 +454,17 @@ getCycLTokens(X,[X]).
 /*===================================================================
 % Removes Leading whitespaces and not ANSI charset
 ====================================================================*/
+trim(X,Y):-ltrim(X,R),reverse(R,Rv),ltrim(Rv,RY),reverse(RY,Y).
 
 ltrim([],[]):-!.
-ltrim([P|X],Y):-P<33,ltrim(X,Y),!.
-ltrim([P|X],Y):-P>128,ltrim(X,Y),!.
-ltrim(X,X):-!.
-
-/*===================================================================
-%   Open-CycL String to SXpression
-% Converts up to 6 Open-CycL Flags into set(Name,Val) pairs
-====================================================================*/
-
-termcycl((ISO_Prolog))--> ['(',':','OpenCycL'],moo(ISO_Prolog),[')'].
-termcycl((ISO_Prolog))--> ['('],cycl_flag(_),[':','OpenCycL'],moo(ISO_Prolog),[')'].
-termcycl((ISO_Prolog))--> ['('],cycl_flag(_),cycl_flag(_),[':','OpenCycL'],moo(ISO_Prolog),[')'].
-termcycl((ISO_Prolog))--> ['('],cycl_flag(_),cycl_flag(_),cycl_flag(_),[':','OpenCycL'],moo(ISO_Prolog),[')'].
-termcycl((ISO_Prolog))--> ['('],cycl_flag(_),cycl_flag(_),cycl_flag(_),cycl_flag(_),[':','OpenCycL'],moo(ISO_Prolog),[')'].
-termcycl((ISO_Prolog))--> ['('],cycl_flag(_),cycl_flag(_),cycl_flag(_),cycl_flag(_),cycl_flag(_),[':','OpenCycL'],moo(ISO_Prolog),[')'].
-termcycl((ISO_Prolog))--> ['('],cycl_flag(_),cycl_flag(_),cycl_flag(_),cycl_flag(_),cycl_flag(_),cycl_flag(_),[':','OpenCycL'],moo(ISO_Prolog),[')'].
-  
-termcycl(ISO_Prolog)--> moo(ISO_Prolog).
-
-flag_list((A,B)) --> cycl_flag(A),flag_list(B).
-flag_list(A) --> cycl_flag(A).
-flag_list(true) --> [].
-
-cycl_flag('set'(A,V)) -->  [(':'),A,V], { atomical(V) }.
-cycl_flag('set'(A,true)) -->  [(':'),A], { atomical(A) }.
+ltrim([32,32,32,32,32,32,32|String],Out) :-!, trim(String,Out),!.
+ltrim([32,32,32,32,32|String],Out) :- !,trim(String,Out),!.
+ltrim([32,32,32|String],Out) :-!, trim(String,Out),!.
+ltrim([32,32|String],Out) :- !,trim(String,Out),!.
+ltrim([32,32],[]) :- !.
+ltrim([P|X],Y):-P<33,trim(X,Y),!.
+ltrim([P|X],Y):-P>128,trim(X,Y),!.
+ltrim(T,T).
 
 /*===================================================================
 %  CycL String to DCG Converter
@@ -1108,8 +476,8 @@ cycl_flag('set'(A,true)) -->  [(':'),A], { atomical(A) }.
 ====================================================================*/
 
 
-moo([A]) --> expr(A).
-moo([and,A|L]) --> expr(A) , moo(L).
+cycL([A]) --> expr(A).
+cycL([and,A|L]) --> expr(A) , cycL(L).
 
    %%expr(RF) --> reifiableFN(RF),!.
 expr([]) -->  ['(',')'],!.
@@ -1215,41 +583,6 @@ unnumbervars(X,Y):-term_to_atom(X,A),atom_to_term(A,Y,_).
 open_list(V,V):-var(V).
 open_list(A,B):-append(A,_,B).
 
-getCleanCharsWhitespaceProper([],[]):-!.
-getCleanCharsWhitespaceProper(X,Z) :- !,logOnFailure(ascii_clean(X,Y)),!,logOnFailure(getCleanCharsWhitespaceProper3(Y,Z)),!.
-
-% Converts not ANSI Chars to whitespace 
-ascii_clean([],[]):-!.
-ascii_clean([X|String],[Y|Out]) :- transpose_char(X,Y),!,ascii_clean(String,Out).
-
-
-string_clean(X,X).
-
-transpose_char(10,32).
-%transpose_char(32,32).
-%transpose_char(X,32):-not(integer(X)),!.
-%transpose_char(X,32):-X<33,!.
-transpose_char( X , X).
-   
-% Blocks of Spaces are removed from a Charlist 
-getCleanCharsWhitespaceProper3([],[]).
-getCleanCharsWhitespaceProper3([10,13],[]).
-getCleanCharsWhitespaceProper3([13,10],[]).
-getCleanCharsWhitespaceProper3([32],[]).
-getCleanCharsWhitespaceProper3([10],[]).
-getCleanCharsWhitespaceProper3([13],[]).
-getCleanCharsWhitespaceProper3([32,32],[]).
-getCleanCharsWhitespaceProper3([32,32,32],[]).
-getCleanCharsWhitespaceProper3([X],[X]):-!.
-getCleanCharsWhitespaceProper3([32,32,32,32,32,32,32|String],[32|Out]) :-!, getCleanCharsWhitespaceProper3(String,Out),!.
-getCleanCharsWhitespaceProper3([32,32,32,32,32|String],[32|Out]) :- !,getCleanCharsWhitespaceProper3(String,Out),!.
-getCleanCharsWhitespaceProper3([32,32,32|String],[32|Out]) :-!, getCleanCharsWhitespaceProper3(String,Out),!.
-getCleanCharsWhitespaceProper3([32,32|String],[32|Out]) :- !,getCleanCharsWhitespaceProper3(String,Out),!.
-getCleanCharsWhitespaceProper3([X|String],[X|Out]) :- !,getCleanCharsWhitespaceProper3(String,Out),!.
-getCleanCharsWhitespaceProper3(X,X):-!.
-
-
-
 unnumbervars_nil(X,Y):-!,unnumbervars(X,Y).
 
 collect_temp_vars(VARS):-!,(setof(=(Name,Number),numbered_var(Name,Number,_),VARS);VARS=[]).
@@ -1345,121 +678,55 @@ valid(C)  :-   (65 =< C, C =< 90);    % A - Z
              C = 95; C = 39;C = 45.  % underscore; hyphen
 
 
-:-assert(show_this_hide(getCleanCharsWhitespaceProper,2)).
 
+/*===================================================================
+Convert S-Expression originating from user to a Prolog Clause representing the surface level
 
+Recursively creates a Prolog term based on the S-Expression to be done after compiler
+                                                 
+Examples:
 
+| ?- sterm_to_pterm([a,b],Pterm).
+Pterm = a(b)
 
+| ?- sterm_to_pterm([a,[b]],Pterm).    %Note:  This is a special Case
+Pterm = a(b)
 
+| ?- sterm_to_pterm([holds,X,Y,Z],Pterm).    %This allows Hilog terms to be Converted
+Pterm = _h76(_h90,_h104)                    
 
-ltrim([],[]):-!.
-ltrim([32,32,32,32,32,32,32|String],Out) :-!, ltrim(String,Out),!.
-ltrim([32,32,32,32,32|String],Out) :- !,ltrim(String,Out),!.
-ltrim([32,32,32|String],Out) :-!, ltrim(String,Out),!.
-ltrim([32,32|String],Out) :- !,ltrim(String,Out),!.
-ltrim([32|String],Out) :- !,ltrim(String,Out),!.
-ltrim(X,X):-!.
+| ?- sterm_to_pterm([X,Y,Z],Pterm).   %But still works in normal places
+Pterm = _h76(_h90,_h104)                    
 
+| ?- sterm_to_pterm(['AssignmentFn',X,[Y,Z]],Pterm).                                
+Pterm = 'AssignmentFn'(_h84,[_h102,_h116])
+====================================================================*/
 
+sterm_to_pterm(VAR,VAR):-isSlot(VAR),!.
+sterm_to_pterm([VAR],VAR):-isSlot(VAR),!.
+sterm_to_pterm([X],Y):-!,nonvar(X),sterm_to_pterm(X,Y).
 
-%:-discontiguous(conv_pred/3).
-%:-discontiguous(conv_pred/3).
+sterm_to_pterm([S|TERM],PTERM):-isSlot(S),
+            sterm_to_pterm_list(TERM,PLIST),            
+            PTERM=..[holds,S|PLIST].
 
+sterm_to_pterm([S|TERM],PTERM):-number(S),!,
+            sterm_to_pterm_list([S|TERM],PTERM).            
+	    
+sterm_to_pterm([S|TERM],PTERM):-nonvar(S),atomic(S),!,
+            sterm_to_pterm_list(TERM,PLIST),            
+            PTERM=..[S|PLIST].
 
-% ====================================================================
-% conv_readS/3-4 and conv_readP/3-4 
-% ====================================================================
+sterm_to_pterm([S|TERM],PTERM):-!,  atomic(S),
+            sterm_to_pterm_list(TERM,PLIST),            
+            PTERM=..[holds,S|PLIST].
 
-conv_readP(RAW,OUTP,VARS):-
-            conv_readS(RAW,NEWTERM,VARS),
-            getMooTermFromSurface(NEWTERM,OUTP).
+sterm_to_pterm(VAR,VAR):-!.
 
-conv_readP(Stream,RAW,OUTP,VARS):-
-            conv_readS(Stream,RAW,NEWTERM,VARS),
-            getMooTermFromSurface(NEWTERM,OUTP).
-
-chars_to_pterm(Chars,PTerm,Vars):-
-         once(getSurfaceFromChars(Chars,STERM,Vars)),!,
-         getMooTermFromSurface(STERM,PTerm),!.
-
-
-getMooTermFromSurface([end_of_file],end_of_file):-!.
-getMooTermFromSurface(NEWTERM,OUTP):-
-               conv_kr_rule_generic(NEWTERM,NEWTERMATOMS),
-	       conv_kr_rule_generic(NEWTERMATOMS,OUT),
-               cycl_to_pterm(OUT,OUTP).
-
-conv_readS(RAW,NEWTERM,VARS):-!,
-                once(readCycL(RRAW)),
-               once(getSurfaceFromChars(RRAW,RTERM,RVARS)),
-					 once((
-                 (RTERM=nil,!,conv_readS(RAW,NEWTERM,VARS),!)
-                 ;(once(getCleanCharsWhitespaceProper(RRAW,RAW)),NEWTERM=RTERM,VARS=RVARS)
-                 )).
-
-conv_readS(Stream,RAW,NEWTERM,VARS):-!,
-                     once(readCycL(Stream,RRAW)),
-                     once(getSurfaceFromChars(RRAW,RTERM,RVARS)),
-					 once((
-                 (RTERM=nil,!,conv_readS(Stream,RAW,NEWTERM,VARS),!)
-                 ;(once(getCleanCharsWhitespaceProper(RRAW,RAW)),NEWTERM=RTERM,VARS=RVARS)
-                 )).
-
-
-% ====================================================================
-% Moo File IO
-% ====================================================================
-      
-      
-
-:-dynamic(moo_B_seeing/3).
-:-dynamic(moo_BInserting/3).
-:-asserta((moo_B_seeing(userin,userin,1))).
-:-asserta((moo_BInserting(userin,userin,2))).
-/*
-moo_B_seen:-moo_B_seeing_console,!.
-moo_B_seen:-retract(moo_B_seeing(FileName,LocalFile,_IOPort)),!,file_close(_IOPort).
-*/
-moo_B_told:-moo_BInserting_console,!.
-moo_B_told:-retract(moo_BInserting(FileName,LocalFile,_IOPort)),!,file_close(_IOPort).
-
-/*
-moo_B_see(userin):-!.
-moo_B_see(FileName):-real_cycl_file_name(FileName,LocalFile),!,moo_file_open(LocalFile,'r',_IOPort),asserta(moo_B_seeing(FileName,LocalFile,_IOPort)).
-*/
-
-moo_BInsert(userin):-!.
-moo_BInsert(FileName):-real_cycl_file_name(FileName,LocalFile),!,moo_file_open(LocalFile,'w',_IOPort),asserta(moo_BInserting(FileName,LocalFile,_IOPort)).
-
-moo_B_get0(Char):-!,get(Char).
-moo_B_get0(Char):-moo_B_seeing(FileName,LocalFile,_IOPort),!,file_get0(_IOPort,Char).
-moo_B_get0(Stream,OChar):-!,
-            catch(file_get0(Stream,OChar),_,OChar=end_of_file).
-
-moo_B_get(Char):-moo_B_seeing_console,!,get(Char).
-moo_B_get(TERM):-moo_B_seeing(_FileName,_LocalFile,IOPort),!,file_get(IOPort,TERM,_).
-
-moo_B_read(TERM):-moo_B_seeing_console,!,read(TERM).
-moo_B_read(TERM):-moo_B_seeing(_FileName,_LocalFile,IOPort),!,file_read(IOPort,TERM,_).
-
-moo_B_put(Char):-moo_BInserting_console,!,put(Char).
-moo_B_put(Char):-moo_BInserting(FileName,LocalFile,_IOPort),!,put(_IOPort,Char).
-
-
-moo_B_seeing_console:-moo_B_seeing(FileName,LocalFile,_IOPort),!,LocalFile=userin.
-moo_BInserting_console:-moo_BInserting(FileName,LocalFile,_IOPort),!,LocalFile=userin.
-
-
-moo_file_open(_LocalFile,Mode,_IOPort):-file_open(_LocalFile,Mode,_IOPort),once((valid_handle(_IOPort);((writeIfOption(cb_error,['File Not Found',_LocalFile],_X)),!,abort))).
-
-% file_get0(IOPort,Char)  See Platform Specifics
-
-valid_handle('$stream'(_)):-!.
-valid_handle(IOPort):- IOPort > 3,!.
-
-
-
-
-
-
-
+sterm_to_pterm_list(VAR,VAR):-isSlot(VAR),!.
+sterm_to_pterm_list([],[]):-!.
+sterm_to_pterm_list([S|STERM],[P|PTERM]):-!,
+              sterm_to_pterm(S,P),
+              sterm_to_pterm_list(STERM,PTERM).
+sterm_to_pterm_list(VAR,[VAR]).
+                                                                

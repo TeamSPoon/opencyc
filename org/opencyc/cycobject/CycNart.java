@@ -309,7 +309,7 @@ public class CycNart extends CycFort implements Comparable {
     public String metaGuid() {
         String functorGuid =
             (this.functor instanceof CycConstant ?
-                ((CycConstant)this.functor).guid.toString() : ((CycNart)this.functor).metaGuid());
+                ((CycConstant) this.functor).guid.toString() : ((CycNart) this.functor).metaGuid());
         ListIterator iterator = this.arguments.listIterator();
         StringBuffer result = new StringBuffer("(");
         result.append(functorGuid);
@@ -320,9 +320,9 @@ public class CycNart extends CycFort implements Comparable {
             if (arg instanceof CycConstant)
                 argGuid = ((CycConstant)arg).guid.toString();
             else if (arg instanceof CycNart)
-                argGuid = ((CycNart)arg).metaGuid();
+                argGuid = ((CycNart) arg).metaGuid();
             else
-                argGuid = (String)arg;
+                argGuid = (String) arg;
             result.append(" ");
             result.append(argGuid);
         }
@@ -358,7 +358,7 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     public int hashCode() {
-        return this.metaGuid().hashCode();
+        return this.cyclify().hashCode();
     }
 
     /**

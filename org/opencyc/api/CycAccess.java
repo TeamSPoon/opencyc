@@ -5,6 +5,7 @@ import java.net.*;
 import java.io.*;
 import org.apache.oro.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.constraintsolver.*;
 import org.opencyc.util.*;
 
 /**
@@ -1115,10 +1116,33 @@ public class CycAccess {
     }
 
     /**
-     * Returns true if CycFort TERM is a instance of CycFort COLLECTION.
+     * Returns true if CycFort TERM is a instance of CycFort COLLECTION, defaulting to all microtheories.
+     *
+     * @param term the term
+     * @param collection the collection
+     * @return <tt>true</tt> if CycFort TERM is a instance of CycFort COLLECTION
      */
     public boolean isa (CycFort term, CycFort collection)  throws IOException, UnknownHostException {
         return converseBoolean("(isa-in-any-mt? " + term.stringApiValue() + " " + collection.stringApiValue() + ")");
+    }
+
+    /**
+     * Returns true if CycFort TERM is a instance of CycFort COLLECTION, using the given microtheory.
+     * Method implementation optimised for the binary api.
+     *
+     * @param term the term
+     * @param collection the collection
+     * @param mt the microtheory in which the ask is performed
+     * @return <tt>true</tt> if CycFort TERM is a instance of CycFort COLLECTION
+     */
+    public boolean isa (CycFort term, CycFort collection, CycFort mt)
+        throws IOException, UnknownHostException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("isa?"));
+        command.add(term.cycListApiValue());
+        command.add(collection.cycListApiValue());
+        command.add(mt.cycListApiValue());
+        return converseBoolean(command);
     }
 
     /**
@@ -1258,6 +1282,19 @@ public class CycAccess {
      */
     public boolean isFunction (CycConstant cycConstant)  throws IOException, UnknownHostException {
         return converseBoolean("(isa-in-any-mt? " + cycConstant.stringApiValue() + " #$Function-Denotational)");
+    }
+
+    /**
+     * Returns true if cycConstant is an evaluatable predicate.
+     */
+    public boolean isEvaluatablePredicate (CycConstant predicate)  throws IOException, UnknownHostException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("with-all-mts"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("evaluatable-predicate?"));
+        command1.add(predicate);
+        return converseBoolean(command);
     }
 
     /**
@@ -1709,6 +1746,43 @@ public class CycAccess {
     }
 
     /**
+     * Gets a list of the backchaining rules which might apply to the given rule.
+     *
+     * @param rule the rule for which backchaining rules are sought
+     * @param mt the microtheory (and its genlMts) in which the search for backchaining rules takes place
+     * @return a list of the backchaining rules which might apply to the given predicate
+     */
+    public CycList getBackchainRules (Rule rule, CycFort mt)
+        throws IOException, UnknownHostException {
+        StringBuffer command = new StringBuffer();
+        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
+            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+            command.append("(clet (backchain-rules formula) ");
+            command.append("  (with-all-mts ");
+            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :backward) ");
+            command.append("       (csetq formula (assertion-el-formula rule)) ");
+            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
+            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
+            command.append("                                          (third formula))) ");
+            command.append("         (cpush formula backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
+        else {
+            command.append("(clet (backchain-rules formula) ");
+            command.append("  (with-mt " + mt.stringApiValue() + " ");
+            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :backward) ");
+            command.append("       (csetq formula (assertion-el-formula rule)) ");
+            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
+            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
+            command.append("                                          (third formula))) ");
+            command.append("         (cpush formula backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
+        //this.traceOn();
+        return converseList(command.toString());
+    }
+
+    /**
      * Gets a list of the backchaining rules which might apply to the given predicate.
      *
      * @param predicate the predicate for which backchaining rules are sought
@@ -1718,13 +1792,60 @@ public class CycAccess {
     public CycList getBackchainRules (CycConstant predicate, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
-        command.append("(clet (backchain-rules) ");
-        command.append("  (with-mt " + mt.stringApiValue() + " ");
-        command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
-        command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
-        command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
-        command.append("   backchain-rules)");
-        //this.traceOn();
+        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
+            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+            command.append("(clet (backchain-rules) ");
+            command.append("  (with-all-mts ");
+            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
+            command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
+            command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
+        else {
+            command.append("(clet (backchain-rules) ");
+            command.append("  (with-mt " + mt.stringApiValue() + " ");
+            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
+            command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
+            command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
+        this.traceOn();
+        return converseList(command.toString());
+    }
+
+    /**
+     * Gets a list of the forward chaining rules which might apply to the given predicate.
+     *
+     * @param rule the rule for which backchaining rules are sought
+     * @param mt the microtheory (and its genlMts) in which the search for forward chaining rules takes place
+     * @return a list of the forward chaining rules which might apply to the given predicate
+     */
+    public CycList getForwardChainRules (Rule rule, CycFort mt)
+        throws IOException, UnknownHostException {
+        StringBuffer command = new StringBuffer();
+        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
+            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+            command.append("(clet (backchain-rules formula) ");
+            command.append("  (with-all-mts ");
+            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :forward) ");
+            command.append("       (csetq formula (assertion-el-formula rule)) ");
+            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
+            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
+            command.append("                                          (third formula))) ");
+            command.append("         (cpush formula backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
+        else {
+            command.append("(clet (backchain-rules formula) ");
+            command.append("  (with-mt " + mt.stringApiValue() + " ");
+            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :forward) ");
+            command.append("       (csetq formula (assertion-el-formula rule)) ");
+            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
+            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
+            command.append("                                          (third formula))) ");
+            command.append("         (cpush formula backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
         return converseList(command.toString());
     }
 
@@ -1738,12 +1859,23 @@ public class CycAccess {
     public CycList getForwardChainRules (CycConstant predicate, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
-        command.append("(clet (forward-chain-rules) ");
-        command.append("  (with-mt " + mt.stringApiValue() + " ");
-        command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
-        command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
-        command.append("         (cpush (assertion-el-formula rule) forward-chain-rules)))) ");
-        command.append("   forward-chain-rules)");
+        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
+            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+            command.append("(clet (backchain-rules) ");
+            command.append("  (with-all-mts ");
+            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
+            command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
+            command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
+        else {
+            command.append("(clet (backchain-rules) ");
+            command.append("  (with-mt " + mt.stringApiValue() + " ");
+            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
+            command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
+            command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
         return converseList(command.toString());
     }
 
@@ -1853,4 +1985,18 @@ public class CycAccess {
         command.add(mt.cycListApiValue());
         return this.converseBoolean(command);
     }
+
+    /**
+     * Returns <tt>true</tt> iff the predicate has the irreflexive property:
+     * (#$isa ?PRED #$IrreflexsiveBinaryPredicate).
+     *
+     * @param predicate the <tt>CycConstant</tt> predicate for which irreflexive status is sought
+     * @param mt microtheory (including its genlMts) in which the irreflexive status is sought
+     * @return <tt>true</tt> iff the predicate has the irreflexive property:
+     * (#$isa ?PRED #$IrreflexsiveBinaryPredicate)
+     */
+    public boolean isIrreflexivePredicate(CycConstant predicate, CycFort mt) throws IOException {
+        return this.isa(predicate, getKnownConstantByName("IrreflexiveBinaryPredicate"), mt);
+    }
+
 }

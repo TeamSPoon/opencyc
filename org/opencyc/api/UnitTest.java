@@ -1964,6 +1964,16 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.toString());
         }
+
+        // isEvaluatablePredicate
+        try {
+            Assert.assertTrue(cycAccess.isEvaluatablePredicate(cycAccess.getKnownConstantByName("#$different")));
+            Assert.assertTrue(! cycAccess.isEvaluatablePredicate(cycAccess.getKnownConstantByName("#$doneBy")));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
     }
 }
 

@@ -530,12 +530,33 @@ public class Rule  implements Comparable{
 
 
     /**
-     * Returns <tt>true</tt> if this is a ground formula having no variables.
+     * Returns <tt>true</tt> iff this is a ground formula having no variables.
      *
-     * @return <tt>boolean</tt> if this is a ground formula having no variables
+     * @return <tt>true</tt> iff this is a ground formula having no variables
      */
-    public boolean isGround() throws IOException {
+    public boolean isGround() {
         return this.getArity() == 0;
+    }
+
+    /**
+     * Returns <tt>true</tt> iff this is a formula having one variable.
+     *
+     * @return <tt>true</tt> iff this is a formula having one variable
+     */
+    public boolean isUnary() {
+        return this.getArity() == 1;
+    }
+
+    /**
+     * Returns <tt>true</tt> iff the predicate has the irreflexive property:
+     * (#$isa ?PRED #$IrreflexsiveBinaryPredicate).
+     *
+     * @param mt the microtheory in which the irreflexive property is sought
+     * @return <tt>true</tt> iff the predicate has the irreflexive property:
+     * (#$isa ?PRED #$IrreflexsiveBinaryPredicate)
+     */
+    public boolean isIrreflexive(CycFort mt) throws IOException {
+        return CycAccess.current().isIrreflexivePredicate(this.getPredicate(), mt);
     }
 
     /**
@@ -560,10 +581,17 @@ public class Rule  implements Comparable{
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
-        if (this.getPredicate().equals(CycAccess.elementOf))
-            return true;
-        else
+        if (! this.getPredicate().equals(CycAccess.elementOf))
             return false;
+        if (! (this.getArguments().get(0) instanceof CycVariable))
+            return false;
+        Object arg2 = this.getArguments().get(1);
+        if (! (arg2 instanceof CycList))
+            return false;
+        CycList elementList = (CycList) arg2;
+        if (elementList.size() < 2)
+           return false;
+        return elementList.first().equals(CycAccess.current().getKnownConstantByName("TheSet"));
     }
 
     /**

@@ -63,4 +63,16 @@ public class OcCollectionUtils {
         return false;
     }
 
+    /**
+     * Returns <tt>true</tt> iff the given {@link Collection} has any
+     * duplicated elements.
+     *
+     * @param collection the collection under consideration for having duplicate elements
+     * @return <tt>true</tt> the given {@link Collection} has any duplicated elements
+     */
+    public static boolean hasDuplicates(final Collection collection) {
+        HashSet aSet = new HashSet(collection);
+        return collection.size() != aSet.size();
+    }
+
 }

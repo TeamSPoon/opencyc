@@ -135,7 +135,7 @@ public class ArgumentTypeConstrainer {
         ArrayList result = new ArrayList();
         CycList isas = CycAccess.current().getArgNIsas(predicate, argPosition);
         for (int i = 0; i < isas.size(); i++) {
-            CycConstant collection = (CycConstant) isas.get(i);
+            CycFort collection = (CycFort) isas.get(i);
             String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
             Rule rule = new Rule(ruleString);
             result.add(rule);
@@ -165,7 +165,7 @@ public class ArgumentTypeConstrainer {
         ArrayList result = new ArrayList();
         CycList genls = CycAccess.current().getArgNGenls(predicate, argPosition);
         for (int i = 0; i < genls.size(); i++) {
-            CycConstant collection = (CycConstant) genls.get(i);
+            CycFort collection = (CycFort) genls.get(i);
             String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
             Rule rule = new Rule(ruleString);
             result.add(rule);
@@ -194,10 +194,10 @@ public class ArgumentTypeConstrainer {
      * @return <tt>true</tt> iff the given unary constraint rule is consistent with
      * the previously accepted unary constraints on the given variable
      */
-    public boolean isUnaryRuleConsistent(Rule unaryRule, CycVariable cycVariable) {
+    public boolean isUnaryRuleConsistent(Rule unaryRule, CycVariable cycVariable) throws IOException {
         // Find the associated collections for the unary constraint rule under consideration.
-        CycConstant consideringIsaCollection = null;
-        CycConstant consideringGenlsCollection = null;
+        CycFort consideringIsaCollection = null;
+        CycFort consideringGenlsCollection = null;
         CycConstant consideringPredicate = unaryRule.getPredicate();
         if (consideringPredicate.toString().equals("isa")) {
             consideringIsaCollection = (CycConstant) unaryRule.getArguments().third();
@@ -224,18 +224,18 @@ public class ArgumentTypeConstrainer {
                 System.out.println(cycVariable + " has applicable unary rule \n" + rule);
             CycConstant predicate = rule.getPredicate();
             if (predicate.toString().equals("isa")) {
-                CycConstant isaCollection = (CycConstant) rule.getArguments().third();
-                if (areDisjointCollections(consideringIsaCollection, isaCollection)) {
-                    if (verbosity > 3)
+                CycFort isaCollection = (CycFort) rule.getArguments().third();
+                if (CycAccess.current().areDisjoint(consideringIsaCollection, isaCollection)) {
+                    if (verbosity > 1)
                         System.out.println(consideringIsaCollection +
                                            " is disjoint from " + isaCollection);
                     return false;
                 }
             }
             else if (predicate.toString().equals("genls")) {
-                CycConstant genlsCollection = (CycConstant) rule.getArguments().third();
-                if (areDisjointCollections(consideringGenlsCollection, genlsCollection)) {
-                    if (verbosity > 3)
+                CycFort genlsCollection = (CycFort) rule.getArguments().third();
+                if (CycAccess.current().areDisjoint(consideringGenlsCollection, genlsCollection)) {
+                    if (verbosity > 1)
                         System.out.println(consideringGenlsCollection +
                                            " is disjoint from " + genlsCollection);
                     return false;
@@ -249,10 +249,6 @@ public class ArgumentTypeConstrainer {
         return true;
     }
 
-    //TODO replace with CycAccess method
-    protected boolean areDisjointCollections(CycConstant collection1, CycConstant collection2) {
-        return false;
-    }
 
 
 

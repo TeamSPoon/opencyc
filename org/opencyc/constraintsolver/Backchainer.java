@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import java.util.*;
 import java.io.*;
+import org.apache.oro.util.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 
@@ -69,6 +70,12 @@ public class Backchainer {
      * Indicates whether to backchain on predicates #$isa and #$genl
      */
     protected boolean sbhlBackchain = false;
+
+    /**
+     * Least Recently Used Cache of implication rule sets concluding a predicate, so that a reference to an
+     * existing implication rule set concluding a predicate is returned instead of gathering a duplicate.
+     */
+    protected static Cache implicationRuleSetCache = new CacheLRU(100);
 
     /**
      * Constructs a new <tt>Backchainer</tt> object given the parent <tt>ConstraintProblem</tt>
@@ -225,7 +232,21 @@ public class Backchainer {
                 System.out.println("backchain inference discouraged for predicate " + predicate);
             return result;
         }
-        CycList backchainRules = CycAccess.current().getBackchainRules(predicate,
+        if (CycAccess.current().isEvaluatablePredicate(predicate)) {
+            if (verbosity > 3)
+                System.out.println("backchain inference bypassed for evaluatable predicate " + predicate);
+            return result;
+        }
+        /*
+        ArrayList cachedResult = getCache(predicate);
+        if (cachedResult != null) {
+            if (verbosity > 1)
+                System.out.println("Using cached implication rule set concluding " + predicate);
+            return cachedResult;
+        }
+        */
+
+        CycList backchainRules = CycAccess.current().getBackchainRules(rule,
                                                                        constraintProblem.mt);
         for (int i = 0; i < backchainRules.size(); i++) {
             CycList cycListRule = (CycList) backchainRules.get(i);
@@ -238,7 +259,7 @@ public class Backchainer {
                     System.out.println("dropped ill-formed (backward) rule " + cycListRule.cyclify());
             }
         }
-        CycList forwardChainRules = CycAccess.current().getForwardChainRules(rule.getPredicate(),
+        CycList forwardChainRules = CycAccess.current().getForwardChainRules(rule,
                                                                              constraintProblem.mt);
         for (int i = 0; i < forwardChainRules.size(); i++) {
             CycList cycListRule = (CycList) forwardChainRules.get(i);
@@ -251,6 +272,9 @@ public class Backchainer {
                     System.out.println("dropped ill-formed (forward) rule " + cycListRule.cyclify());
             }
         }
+        /*
+        addCache(predicate, result);
+        */
         return result;
     }
 
@@ -286,4 +310,52 @@ public class Backchainer {
         this.verbosity = verbosity;
         unifier.setVerbosity(verbosity);
     }
+
+    /**
+     * Resets the implication rule set cache.
+     */
+    public static void resetImplicationRuleSetCache() {
+        implicationRuleSetCache = new CacheLRU(500);
+    }
+
+    /**
+     * Adds the implication rule set to the cache for the given predicate
+     *
+     * @param predicate the predicate concluded by the implication rule set
+     * @param ruleSet the set of implication rules concluding the given predicate
+     */
+    public static void addCache(CycConstant predicate, ArrayList ruleSet) {
+        implicationRuleSetCache.addElement(predicate, ruleSet);
+    }
+
+    /**
+     * Retrieves the implication rule set from the cache for the given predicate, returning <tt>null</tt>
+     * if not found in the cache.
+     *
+     * @param predicate the predicate concluded by the implication rule set
+     * @return the implication rule set from the cache for the given predicate, returning <tt>null</tt>
+     * if not found in the cache
+     */
+    public static ArrayList getCache(CycConstant predicate) {
+        return (ArrayList) implicationRuleSetCache.getElement(predicate);
+    }
+
+    /**
+     * Removes the implication rule set from the cache for the given predicate if it is contained within.
+     */
+    public static void removeCache(CycConstant predicate) {
+        Object element = implicationRuleSetCache.getElement(predicate);
+        if (element != null)
+            implicationRuleSetCache.addElement(predicate, null);
+    }
+
+    /**
+     * Returns the size of the implication rule set cache.
+     *
+     * @return an <tt>int</tt> indicating the number of implication rule sets in the cache
+     */
+    public static int getCacheSize() {
+        return implicationRuleSetCache.size();
+    }
+
 }

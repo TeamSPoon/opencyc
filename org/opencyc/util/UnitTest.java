@@ -54,6 +54,33 @@ public class UnitTest extends TestCase {
     }
 
     /**
+     * Tests the OcCollectionUtils.hasDuplicates method.
+     */
+    public void testHasDuplicates() {
+        System.out.println("** testHasDuplicates **");
+        ArrayList collection1 = new ArrayList();
+        collection1.add("a");
+        collection1.add("b");
+        collection1.add("b");
+        Assert.assertTrue(OcCollectionUtils.hasDuplicates(collection1));
+        ArrayList collection2 = new ArrayList();
+        collection2.add("a");
+        collection2.add("b");
+        collection2.add("c");
+        ArrayList arrayList = new ArrayList();
+        arrayList.add("d");
+        collection2.add(arrayList);
+        collection2.add(arrayList);
+        Assert.assertTrue(OcCollectionUtils.hasDuplicates(collection2));
+        ArrayList collection3 = new ArrayList();
+        collection3.add("a");
+        collection3.add("b");
+        collection3.add("c");
+        Assert.assertTrue(! OcCollectionUtils.hasDuplicates(collection3));
+        System.out.println("** testHasDuplicates OK **");
+    }
+
+    /**
      * Tests the OcCollectionUtils.hasIntersection method.
      */
     public void testHasIntersection() {

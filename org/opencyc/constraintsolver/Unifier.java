@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
+import org.opencyc.util.*;
 
 /**
  * Provides attribute and behavior for a formula unifier, used by the constraint solver
@@ -81,7 +82,7 @@ public class Unifier {
         // Clone a new horn clause having no variables in common with those variable which
         // are already included in the constraint problem.
         HornClause unifiedHornClause = (HornClause) hornClause.clone();
-        hornClause.renameVariables(backchainer.constraintProblem.variables, verbosity);
+        unifiedHornClause.renameVariables(backchainer.constraintProblem.variables, verbosity);
 
         // Visit each corresponding argument position in the rule and in the horn clause
         // consequent.
@@ -140,6 +141,8 @@ public class Unifier {
         }
         if (anyFalseViaKbLookup(unifiedHornClause.getAntecedantConjuncts()))
             return null;
+        else if (anyFalseViaIrreflexsivity(unifiedHornClause.getAntecedantConjuncts()))
+            return null;
         else
             return unifiedHornClause.getAntecedantConjuncts();
     }
@@ -167,6 +170,49 @@ public class Unifier {
                                            antecedantConjunct);
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks antecedant conjuncts for use of binary irreflexive predicates in a reflexsive situation, such as
+     * (#$father ?X ?X) or other irreflexive predicates such as (#$different ?X ?X), returning <tt>false</tt> iff
+     * any conjunct contains an invalid reflexsive usage.
+     *
+     * @param antecedantConjuncts
+     * @return <tt>false</tt> iff any conjunct contains an invalid reflexsive usage
+     */
+    protected boolean anyFalseViaIrreflexsivity(ArrayList antecedantConjuncts) throws IOException {
+        for (int i = 0; i < antecedantConjuncts.size(); i++) {
+            Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
+            if (verbosity > 8) {
+                System.out.println("  Screening irreflexivity usage\n  " +
+                                   antecedantConjunct);
+                System.out.println("    isIrreflexive " +
+                                   antecedantConjunct.isIrreflexive(backchainer.constraintProblem.mt));
+                System.out.println("    isAllDifferent " +
+                                   antecedantConjunct.isAllDifferent());
+                System.out.println("    arguments size " +
+                                   antecedantConjunct.getArguments().size());
+                System.out.println("    arity " +
+                                   antecedantConjunct.getArity());
+            }
+            if (antecedantConjunct.isIrreflexive(backchainer.constraintProblem.mt) &&
+                antecedantConjunct.getArguments().get(0).equals(antecedantConjunct.getArguments().get(1))) {
+                if (verbosity > 1)
+                    System.out.println("  unification abandoned because antecedant conjunct " +
+                                       "contains invalid reflexive usage\n  " +
+                                       antecedantConjunct);
+                return true;
+            }
+            if (antecedantConjunct.isAllDifferent() &&
+                antecedantConjunct.getArguments().containsDuplicates()) {
+                if (verbosity > 1)
+                    System.out.println("  unification abandoned because antecedant conjunct " +
+                                       "contains invalid #$different usage\n  " +
+                                       antecedantConjunct);
+                return true;
             }
         }
         return false;

@@ -72,10 +72,12 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testConstraintProblem4"));
             //testSuite.addTest(new UnitTest("testConstraintProblem5"));
             //testSuite.addTest(new UnitTest("testConstraintProblem6"));
-            //testSuite.addTest(new UnitTest("testBackchainer1"));
+            testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
-            testSuite.addTest(new UnitTest("testBackchainer3"));
+
+            //testSuite.addTest(new UnitTest("testBackchainer3"));
             //testSuite.addTest(new UnitTest("testBackchainer4"));
+            //testSuite.addTest(new UnitTest("testBackchainer5"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -1160,7 +1162,17 @@ public class UnitTest extends TestCase {
         String whatIsInAustinString =
             "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
         System.out.println(whatIsInAustinString);
-        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem(cycAccess);
         whatIsInAustinProblem.setVerbosity(8);
         // Request one solution.
         //whatIsInAustinProblem.nbrSolutionsRequested = new Integer(1);
@@ -1224,8 +1236,9 @@ public class UnitTest extends TestCase {
             "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
         System.out.println(whatIsInAustinString);
         ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
+        //whatIsInAustinProblem.setVerbosity(9);
         whatIsInAustinProblem.setVerbosity(2);
-        whatIsInAustinProblem.setMaxBackchainDepth(3);
+        whatIsInAustinProblem.setMaxBackchainDepth(2);
         // Request all solutions.
         whatIsInAustinProblem.nbrSolutionsRequested = null;
         try {
@@ -1275,4 +1288,34 @@ public class UnitTest extends TestCase {
         System.out.println("** testBackchainer4 OK **");
     }
 
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer5() {
+        System.out.println("** testBackchainer5 **");
+        // what is a CarvedArtwork? to depth 1
+        String whatIsACarvedArtworkString =
+            "(#$holdsIn ?SIT (#$pathState #$CityOfAustinTX #$PathBlocked))";
+        System.out.println(whatIsACarvedArtworkString);
+        ConstraintProblem whatIsACarvedArtworkProblem = new ConstraintProblem();
+        whatIsACarvedArtworkProblem.setVerbosity(9);
+        whatIsACarvedArtworkProblem.setSbhlBackchain(true);
+        whatIsACarvedArtworkProblem.setMaxBackchainDepth(1);
+        // Request all solutions.
+        whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsACarvedArtworkProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsACarvedArtworkProblem.solve(whatIsACarvedArtworkString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer5 OK **");
+    }
 }

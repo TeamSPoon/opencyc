@@ -1,6 +1,9 @@
-package org.opencyc.elf;
+package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.elf.LowestLevelNode;
+import org.opencyc.elf.Node;
+
 import org.opencyc.elf.a.Actuator;
 
 import org.opencyc.elf.bg.BehaviorGeneration;
@@ -183,16 +186,18 @@ public class ELFFactory {
    * Makes an actuator shell.
    */
   protected void makeActuatorShell () {
-    actuator = new Actuator();
-    actuator.setNode(node);
+    //TODO
+    //actuator = new Actuator();
+    //actuator.setNode(node);
   }
   
   /**
    * Makes a sensor shell.
    */
   protected void makeSensorShell () {
-    sensor = new Sensor();
-    sensor.setNode(node);
+    //TODO
+    //sensor = new Sensor();
+    //sensor.setNode(node);
   }
   
   //// Private Area

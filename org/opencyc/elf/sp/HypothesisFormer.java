@@ -8,8 +8,7 @@ import org.opencyc.elf.NodeComponent;
 /**
  * Provides the HypothesisFormer for ELF SensoryPerception.<br>
  * 
- * @version $Id: HypothesisFormer.java,v 1.1 2002/11/19 02:42:53 stephenreed
- *          Exp $
+ * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>

@@ -8,8 +8,7 @@ import org.opencyc.elf.NodeComponent;
 /**
  * Provides the predictor for the ELF WorldModel.<br>
  * 
- * @version $Id: SimulatorPredictor.java,v 1.1 2002/11/17 03:08:17 stephenreed
- *          Exp $
+ * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>

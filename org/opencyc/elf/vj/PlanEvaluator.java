@@ -13,8 +13,7 @@ import java.util.ArrayList;
 /**
  * <P>PlanEvaluator is designed to evaluate plans and thus assist plan selection.
  *
- * @version $Id: SensoryPerception.java,v 1.1 2002/11/18 17:45:40 stephenreed
- *          Exp $
+ * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>

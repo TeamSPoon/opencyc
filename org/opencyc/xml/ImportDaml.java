@@ -1,9 +1,11 @@
 package org.opencyc.xml;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
-import com.hp.hpl.jena.daml.*;
-import com.hp.hpl.jena.daml.common.DAMLModelImpl;
+import org.xml.sax.*;
+import com.hp.hpl.jena.rdf.arp.*;
+import com.hp.hpl.mesa.rdf.jena.common.*;
 import com.hp.hpl.mesa.rdf.jena.model.*;
 import org.opencyc.util.*;
 
@@ -37,7 +39,7 @@ import org.opencyc.util.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ImportDaml {
+public class ImportDaml implements StatementHandler {
 
     /**
      * The default verbosity of this application.  0 --> quiet ... 9 -> maximum
@@ -50,6 +52,11 @@ public class ImportDaml {
      * diagnostic input.
      */
     protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
+     * Another RDF Parser instance.
+     */
+    protected ARP arp;
 
     /**
      * The list of DAML web documents to import.
@@ -66,6 +73,8 @@ public class ImportDaml {
      * Constructs a new ImportDaml object.
      */
     public ImportDaml() {
+        arp = new ARP();
+        arp.setStatementHandler(this);
     }
 
     /**
@@ -188,159 +197,176 @@ public class ImportDaml {
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont", "oper");
     }
 
+
     /**
-     * Imports the DAML document.
+     * Parses and imports the given DAML URL.
+     *
+     * @param damlPath the URL to import
      */
     protected void importDaml (String damlPath) {
-        DAMLModel damlModel = new DAMLModelImpl();
         if (verbosity > 0)
             System.out.println("\nImporting " + damlPath);
+        System.out.println("\nStatements\n");
+        InputStream in;
+        URL url;
         try {
-            damlModel.read(damlPath);
+            File ff = new File(damlPath);
+            in = new FileInputStream(ff);
+            url = ff.toURL();
         }
-        catch (RDFException e) {
-            e.printStackTrace();
+        catch (Exception ignore) {
+            try {
+                url = new URL(damlPath);
+                in = url.openStream();
+            }
+            catch (Exception e) {
+                System.err.println("ARP: Failed to open: " + damlPath);
+                System.err.println("    " + ParseException.formatMessage(ignore));
+                System.err.println("    " + ParseException.formatMessage(e));
+                return;
+            }
         }
-        System.out.println(damlModel.toString());
-        System.out.println("Statements");
-
-        String localName;
-        String nameSpace;
-        String nickname;
-        String constantName;
-        // list the statements in the graph
         try {
-            StmtIterator stmtIter = damlModel.listStatements();
-
-            while (stmtIter.hasNext()) {
-                Statement statement = stmtIter.next();
-                Resource subject = statement.getSubject();
-                Property predicate = statement.getPredicate();
-                RDFNode object = statement.getObject();
-
-                if (subject instanceof Resource) {
-                    Resource subjectResource = (Resource) subject;
-                    localName = subjectResource.getLocalName();
-                    nameSpace = subjectResource.getNameSpace();
-                    if (localName == null || nameSpace == null) {
-                        System.out.print(subjectResource.toString() + " ");
-                    }
-                    else {
-                        nickname = getOntologyNickname(nameSpace, subjectResource);
-                        constantName = nickname + ":" + localName;
-                        System.out.print(constantName + " ");
-                    }
-                }
-                else
-                    System.out.print(subject + " ");
-
-                if (predicate instanceof Resource) {
-                    Resource predicateResource = (Resource) predicate;
-                    localName = predicateResource.getLocalName();
-                    nameSpace = predicateResource.getNameSpace();
-                    if (localName == null || nameSpace == null) {
-                        System.out.print(predicateResource.toString() + " ");
-                    }
-                    else {
-                        nickname = getOntologyNickname(nameSpace, predicateResource);
-                        constantName = nickname + ":" + localName;
-                        System.out.print(constantName + " ");
-                    }
-                }
-                else
-                    System.out.print(predicate + " ");
-
-                if (object instanceof Resource) {
-                    Resource objectResource = (Resource) object;
-                    localName = objectResource.getLocalName();
-                    nameSpace = objectResource.getNameSpace();
-                    if (localName == null || nameSpace == null) {
-                        System.out.print(objectResource.toString() + " ");
-                    }
-                    else {
-                        nickname = getOntologyNickname(nameSpace, objectResource);
-                        constantName = nickname + ":" + localName;
-                        System.out.print(constantName + " ");
-                    }
-                }
-                else {
-                    System.out.print(" \"" + object.toString() + "\"");
-                }
-                System.out.println(" .");
-            }
+            arp.load(in, url.toExternalForm());
         }
-        catch (RDFException e) {
-            e.printStackTrace();
-            System.exit(1);
+        catch (IOException e) {
+            System.err.println("Error: " + damlPath + ": " + ParseException.formatMessage(e));
         }
-
-        System.out.println("\nProperties");
-        Iterator iter = damlModel.listDAMLProperties();
-        while (iter.hasNext()) {
-            DAMLProperty c = (DAMLProperty)iter.next();
-            System.out.println(c.toString());
-        }
-
-
-        System.out.println("Classes\n");
-        iter = damlModel.listDAMLClasses();
-        while (iter.hasNext()) {
-            System.out.println();
-            DAMLClass damlClass = (DAMLClass)iter.next();
-            localName = damlClass.getLocalName();
-            nameSpace = damlClass.getNameSpace();
-            if (localName == null || nameSpace == null) {
-                System.out.println(damlClass.toString());
-            }
-            else {
-                nickname = getOntologyNickname(nameSpace, damlClass);
-                constantName = nickname + ":" + localName;
-                System.out.println(constantName);
-            }
-            Literal literal = damlClass.prop_label().getValue();
-            if (literal != null)
-                System.out.println("  label " + literal.toString());
-            Literal comment = damlClass.prop_comment().getValue();
-            if (comment != null)
-                System.out.println("  comment " + comment.toString());
-            Iterator iterSuperClasses = damlClass.getSuperClasses(false);
-            while (iterSuperClasses.hasNext()) {
-                Object superClassObject = iterSuperClasses.next();
-                if (superClassObject instanceof DAMLClass) {
-                    DAMLClass superClass = (DAMLClass) superClassObject;
-                    localName = superClass.getLocalName();
-                    nameSpace = superClass.getNameSpace();
-                    if (localName == null || nameSpace == null) {
-                        System.out.println("  superclass " + superClass.toString());
-                    }
-                    else {
-                        nickname = getOntologyNickname(nameSpace, superClass);
-                        constantName = nickname + ":" + localName;
-                        System.out.println("  superclass " + constantName);
-                    }
-                }
-                else
-                    System.out.println("  superclass " + superClassObject);
-            }
-            Iterator iterInstances = damlClass.getInstances();
-            while (iterInstances.hasNext()) {
-                System.out.println("  instances " + iterInstances.next().toString());
-            }
-
+        catch (SAXException sax) {
+            System.err.println("Error: " + damlPath + ": " + ParseException.formatMessage(sax));
         }
         if (verbosity > 0)
             System.out.println("\nDone importing " + damlPath + "\n");
     }
 
+    /**
+     * Provides the ARP statement handler for triple having an Object.
+     *
+     * @param subject the RDF Triple Subject
+     * @param predicate the RDF Triple Predicate
+     * @param object the RDF Triple Object
+     */
+    public void statement(AResource subject, AResource predicate, AResource object) {
+        resource(subject);
+        resource(predicate);
+        resource(object);
+        System.out.println();
+    }
+
+    /**
+     * Provides the ARP statement handler for triple having an Literal.
+     *
+     * @param subject the RDF Triple Subject
+     * @param predicate the RDF Triple Predicate
+     * @param object the RDF Triple Object
+     */
+    public void statement(AResource subject, AResource predicate, ALiteral literal) {
+        String lang = literal.getLang();
+        String parseType = literal.getParseType();
+        if (parseType != null) {
+            System.out.print("# ");
+            if (parseType != null)
+                System.out.print("'" + parseType + "'");
+            System.out.println();
+        }
+        resource(subject);
+        resource(predicate);
+        literal(literal);
+        System.out.println();
+    }
+
+    /**
+     * Displays the given RDF resource.
+     *
+     * @param aResource the RDF resource to be displayed
+     */
+    protected void resource(AResource aResource) {
+        Resource resource = this.translate(aResource);
+        if (aResource.isAnonymous())
+            System.out.print("anon-" + aResource.getAnonymousID() + " ");
+        else {
+            String localName = resource.getLocalName();
+            String nameSpace = resource.getNameSpace();
+            if (localName == null ||
+                nameSpace == null) {
+                System.out.print(resource.toString() + " ");
+            }
+            else if (! hasUriNamespaceSyntax(aResource.getURI())) {
+                System.out.print(resource.toString() + " ");
+            }
+            else {
+                String nickname = getOntologyNickname(nameSpace, resource);
+                String constantName = nickname + ":" + localName;
+                System.out.print(constantName + " ");
+            }
+        }
+    }
+
+    /**
+     * Displays the given RDF literal.
+     *
+     * @param literal the RDF literal to be displayed
+     */
+    static private void literal(ALiteral literal) {
+        if (literal.isWellFormedXML())
+            System.out.print("xml");
+        System.out.print("\"");
+        System.out.print(literal.toString());
+        System.out.print("\"");
+        String lang = literal.getLang();
+        if (lang != null && !lang.equals(""))
+            System.out.print("-" + lang);
+        System.out.print(" ");
+    }
+
+    /**
+     * Returns the ontology nickname for the given XML namespace.
+     *
+     * @param nameSpace the XML namespace for which the nickname is sought
+     * @param resource the resource containing the namespace, used for error messages
+     * @return the ontology nickname for the given XML namespace
+     */
     protected String getOntologyNickname (String nameSpace, Resource resource) {
         int len = nameSpace.length() - 1;
         String key = nameSpace.substring(0, len);
         String nickname = (String) ontologyNicknames.get(key);
-        if (nickname == null)
+        if (nickname == null) {
+            boolean ans = hasUriNamespaceSyntax(resource.getURI());
             throw new RuntimeException("Ontology nickname not found for " + key +
                                        "\nResource " + resource.toString());
+        }
         return nickname;
 
+    }
+
+    /**
+     * Returns true if the given URI has embedded XML namespace separators.
+     *
+     * @param uri the URI
+     * @return true if the given URI has embedded XML namespace separators, otherwise
+     * false
+     */
+    protected boolean hasUriNamespaceSyntax (String uri) {
+        return (uri.indexOf(":", 6) > -1) || (uri.indexOf("#") > -1);
+    }
+
+    /**
+     * Converts an ARP resource into a Jena resource.
+     *
+     * @param aResource The ARP resource.
+     * @return The Jena resource.
+     */
+    static public Resource translate(AResource aResource) {
+        if (aResource.isAnonymous()) {
+            String id = aResource.getAnonymousID();
+            Resource rr = (Resource) aResource.getUserData();
+            if (rr == null) {
+                rr = new ResourceImpl();
+                aResource.setUserData(rr);
+            }
+            return rr;
+        } else
+            return new ResourceImpl(aResource.getURI());
     }
 
     /**
@@ -352,7 +378,6 @@ public class ImportDaml {
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
-
 
 
 }

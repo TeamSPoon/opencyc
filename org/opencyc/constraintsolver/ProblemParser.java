@@ -222,10 +222,18 @@ public class ProblemParser {
                 }
                 if (domainPopulationPredicate.equals(CycAccess.isa)) {
                     if (candidatePredicate.equals(CycAccess.isa)) {
-                        CycConstant domainPopulationCollection =
-                            (CycConstant) domainPopulationRule.getArguments().get(1);
-                        CycConstant candidateCollection =
-                            (CycConstant) candidateRule.getArguments().get(1);
+                        Object object = domainPopulationRule.getArguments().get(1);
+                        CycFort domainPopulationCollection;
+                        if (object instanceof CycList)
+                            domainPopulationCollection = new CycNart((CycList) object);
+                        else
+                            domainPopulationCollection = (CycFort) object;
+                        object = candidateRule.getArguments().get(1);
+                        CycFort candidateCollection;
+                        if (object instanceof CycList)
+                            candidateCollection = new CycNart((CycList) object);
+                        else
+                            candidateCollection = (CycFort) object;
                         if (CycAccess.current().isGenlOf(candidateCollection,
                                                          domainPopulationCollection))
                             // Existing #$isa constraint is more specific and takes
@@ -403,7 +411,12 @@ public class ProblemParser {
                 CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
                 if (rule.getPredicate().equals(CycAccess.isa) ||
                     rule.getPredicate().equals(CycAccess.genls)) {
-                    CycConstant collection = (CycConstant) rule.getArguments().second();
+                    CycFort collection;
+                    Object object = rule.getArguments().second();
+                    if (object instanceof CycList)
+                        collection = new CycNart((CycList) object);
+                    else
+                        collection = (CycFort) object;
                     int nbrInstances =
                         CycAccess.current().countAllInstances_Cached(collection,
                                                                      constraintProblem.mt);

@@ -513,6 +513,24 @@ public class CycList extends ArrayList {
     }
 
     /**
+     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
+     */
+    public String stringApiValue() {
+        return cyclify();
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
+     */
+    public Object cycListApiValue() {
+        return this;
+    }
+
+    /**
      * Returns a new CycList, which is sorted in the default collating sequence.
      *
      * @return a new <tt>CycList</tt>, sorted in the default collating sequence.

@@ -87,6 +87,24 @@ public class CycAssertion {
     }
 
     /**
+     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
+     */
+    public String stringApiValue() {
+        return formula.cyclify();
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
+     */
+    public Object cycListApiValue() {
+        return this;
+    }
+
+    /**
      * Returns the formula for this assertion.
      *
      * @return the formula for this assertion

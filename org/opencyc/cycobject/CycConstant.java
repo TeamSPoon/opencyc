@@ -163,17 +163,31 @@ public class CycConstant extends CycFort implements Comparable {
             return name;
     }
 
-    public String cyclify() {
-        return cycName();
-    }
-
     /**
      * Returns the name of the <tt>CycConstant</tt> with "#$" prefixed.
      *
      * @return the name of the <tt>CycConstant</tt> with "#$" prefixed.
      */
-    public String cycName() {
+    public String cyclify() {
         return "#$" + name;
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
+     */
+    public String stringApiValue() {
+        return cyclify();
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
+     */
+    public Object cycListApiValue() {
+        return this;
     }
 
     /**

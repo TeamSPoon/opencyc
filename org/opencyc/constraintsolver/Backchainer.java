@@ -66,6 +66,11 @@ public class Backchainer {
     protected int maxBackchainDepth = 0;
 
     /**
+     * Indicates whether to backchain on predicates #$isa and #$genl
+     */
+    protected boolean sbhlBackchain = false;
+
+    /**
      * Constructs a new <tt>Backchainer</tt> object given the parent <tt>ConstraintProblem</tt>
      * object.
      *
@@ -175,9 +180,13 @@ public class Backchainer {
                 result.add(new Rule(conjunctiveAntecedantRule));
             }
         }
-        if (verbosity > 3)
+        if (verbosity > 3) {
+            System.out.println("\nSummary of accepted backchain rules\n");
+            for (int i = 0; i < result.size(); i++)
+                System.out.println(((Rule) result.get(i)).cyclify());
             System.out.println("\nAccepted " + nbrAcceptedRules + " backchain rules from " +
                                nbrCandidateRules + " candidates");
+        }
         return result;
     }
 
@@ -189,19 +198,63 @@ public class Backchainer {
      */
     public ArrayList gatherRulesConcluding(Rule rule) throws IOException {
         ArrayList result = new ArrayList();
-        CycList backchainRules = CycAccess.current().getBackchainRules(rule.getPredicate(),
+        CycConstant predicate = rule.getPredicate();
+        if (! this.sbhlBackchain &&
+            (predicate.equals(CycAccess.isa) || predicate.equals(CycAccess.genls))) {
+            if (verbosity > 3)
+                System.out.println("backchain inference bypassed for predicate " + predicate);
+            return result;
+        }
+        if (CycAccess.current().isBackchainForbidden(predicate,
+                                                     constraintProblem.mt)) {
+            if (verbosity > 3)
+                System.out.println("backchain inference forbidden for predicate " + predicate);
+            return result;
+        }
+        if (CycAccess.current().isBackchainDiscouraged(predicate,
+                                                       constraintProblem.mt)) {
+            if (verbosity > 3)
+                System.out.println("backchain inference discouraged for predicate " + predicate);
+            return result;
+        }
+        CycList backchainRules = CycAccess.current().getBackchainRules(predicate,
                                                                        constraintProblem.mt);
         for (int i = 0; i < backchainRules.size(); i++) {
-            Rule backchainRule = new Rule((CycList) backchainRules.get(i));
-            result.add(backchainRule);
+            CycList cycListRule = (CycList) backchainRules.get(i);
+            if (HornClause.isValidHornExpression(cycListRule)) {
+                Rule backchainRule = new Rule(cycListRule);
+                result.add(backchainRule);
+            }
+            else {
+                if (verbosity > 3)
+                    System.out.println("dropped ill-formed (backward) rule " + cycListRule.cyclify());
+            }
         }
         CycList forwardChainRules = CycAccess.current().getForwardChainRules(rule.getPredicate(),
                                                                              constraintProblem.mt);
         for (int i = 0; i < forwardChainRules.size(); i++) {
-            Rule forwardChainRule = new Rule((CycList) forwardChainRules.get(i));
-            result.add(forwardChainRule);
+            CycList cycListRule = (CycList) forwardChainRules.get(i);
+            if (HornClause.isValidHornExpression(cycListRule)) {
+                Rule forwardChainRule = new Rule(cycListRule);
+                result.add(forwardChainRule);
+            }
+            else {
+                if (verbosity > 3)
+                    System.out.println("dropped ill-formed (forward) rule " + cycListRule.cyclify());
+            }
         }
         return result;
+    }
+
+    /**
+     * Sets whether backchaining is performed on rules with the predicate of #$isa or #$genls.  Large
+     * numbers of rules conclude #$isa or #$genls, which are not usually relevant - so the default is
+     * false.
+     *
+     * @param sbhlBackchain whether backchaining is performed on rules with the predicate of #$isa or #$genls
+     */
+    public void setSbhlBackchain(boolean sbhlBackchain) {
+        this.sbhlBackchain = sbhlBackchain;
     }
 
     /**

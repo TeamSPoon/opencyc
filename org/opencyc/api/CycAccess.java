@@ -369,33 +369,47 @@ public class CycAccess {
      */
     private void initializeConstants()    throws IOException, UnknownHostException {
         if (baseKB == null)
-            baseKB = getConstantByName("BaseKB");
+            baseKB = getKnownConstantByName("BaseKB");
         if (isa == null)
-            isa = getConstantByName("isa");
+            isa = getKnownConstantByName("isa");
         if (genls == null)
-            genls = getConstantByName("genls");
+            genls = getKnownConstantByName("genls");
         if (genlMt == null)
-            genlMt = getConstantByName("genlMt");
+            genlMt = getKnownConstantByName("genlMt");
         if (comment == null)
-            comment = getConstantByName("comment");
+            comment = getKnownConstantByName("comment");
         if (collection == null)
-            collection = getConstantByName("Collection");
+            collection = getKnownConstantByName("Collection");
         if (binaryPredicate == null)
-            binaryPredicate = getConstantByName("BinaryPredicate");
+            binaryPredicate = getKnownConstantByName("BinaryPredicate");
         if (elementOf == null)
-            elementOf = getConstantByName("elementOf");
+            elementOf = getKnownConstantByName("elementOf");
         if (and == null)
-            and = getConstantByName("and");
+            and = getKnownConstantByName("and");
         if (or == null)
-            or = getConstantByName("or");
+            or = getKnownConstantByName("or");
         if (numericallyEqual == null)
-            numericallyEqual = getConstantByName("numericallyEqual");
+            numericallyEqual = getKnownConstantByName("numericallyEqual");
         if (plusFn == null)
-            plusFn = getConstantByName("PlusFn");
+            plusFn = getKnownConstantByName("PlusFn");
         if (different == null)
-            different = getConstantByName("different");
+            different = getKnownConstantByName("different");
         if (thing == null)
-            thing = getConstantByName("Thing");
+            thing = getKnownConstantByName("Thing");
+    }
+
+    /**
+     * Gets a known CycConstant by using its constant name.
+     *
+     * @param constantName the name of the constant to be instantiated
+     * @return the complete <tt>CycConstant</tt> if found, otherwise throw an exception
+     */
+    public CycConstant getKnownConstantByName (String constantName)
+        throws IOException, UnknownHostException {
+        CycConstant cycConstant = getConstantByName(constantName);
+        if (cycConstant == null)
+            throw new RuntimeException("Expected constant not found " + constantName);
+        return cycConstant;
     }
 
     /**
@@ -743,16 +757,16 @@ public class CycAccess {
     }
 
     /**
-     * Returns true if CycConstant BINARYPREDICATE relates CycConstant ARG1 and CycConstant ARG2.
+     * Returns true if CycConstant BINARYPREDICATE relates CycFort ARG1 and CycFort ARG2.
      */
     public boolean predicateRelates (CycConstant binaryPredicate,
-                                     CycConstant arg1,
-                                     CycConstant arg2)  throws IOException, UnknownHostException {
+                                     CycFort arg1,
+                                     CycFort arg2)  throws IOException, UnknownHostException {
         Object [] response = {null, null};
         String command = "(pred-u-v-holds-in-any-mt " +
-            binaryPredicate.cycName() + " " +
-            arg1.cycName() + " " +
-            arg2.cycName() + ")";
+            binaryPredicate.stringApiValue() + " " +
+            arg1.stringApiValue() + " " +
+            arg2.stringApiValue() + ")";
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
             if (response[1] == null)
@@ -767,24 +781,24 @@ public class CycAccess {
     }
 
     /**
-     * Gets the plural generated phrase for a CycConstant (intended for collections).
+     * Gets the plural generated phrase for a CycFort (intended for collections).
      */
-    public String getPluralGeneratedPhrase (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseString("(with-precise-paraphrase-on (generate-phrase " + cycConstant.cycName() + " '(#$plural)))");
+    public String getPluralGeneratedPhrase (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseString("(with-precise-paraphrase-on (generate-phrase " + cycFort.stringApiValue() + " '(#$plural)))");
     }
 
     /**
-     * Gets the singular generated phrase for a CycConstant (intended for individuals).
+     * Gets the singular generated phrase for a CycFort (intended for individuals).
      */
-    public String getSingularGeneratedPhrase (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseString("(with-precise-paraphrase-on (generate-phrase " + cycConstant.cycName() + " '(#$singular)))");
+    public String getSingularGeneratedPhrase (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseString("(with-precise-paraphrase-on (generate-phrase " + cycFort.stringApiValue() + " '(#$singular)))");
     }
 
     /**
-     * Gets the default generated phrase for a CycConstant (intended for predicates).
+     * Gets the default generated phrase for a CycFort (intended for predicates).
      */
-    public String getGeneratedPhrase (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseString("(with-precise-paraphrase-on (generate-phrase " + cycConstant.cycName() + "))");
+    public String getGeneratedPhrase (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseString("(with-precise-paraphrase-on (generate-phrase " + cycFort.stringApiValue() + "))");
     }
 
     /**
@@ -798,133 +812,133 @@ public class CycAccess {
      * Gets the comment for a CycConstant.  Embedded quotes are replaced by spaces.
      */
     public String getComment (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseString("(string-substitute \" \" \"\\\"\" (with-all-mts (comment " + cycConstant.cycName() + ")))");
+        return converseString("(string-substitute \" \" \"\\\"\" (with-all-mts (comment " + cycConstant.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the isas for a CycConstant.
+     * Gets a list of the isas for a CycFort.
      */
-    public CycList getIsas (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (isa " + cycConstant.cycName() + ")))");
+    public CycList getIsas (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (isa " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the directly asserted true genls for a CycConstant collection.
+     * Gets a list of the directly asserted true genls for a CycFort collection.
      */
-    public CycList getGenls (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (genls " + cycConstant.cycName() + ")))");
+    public CycList getGenls (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (genls " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the minimum (most specific) genls for a CycConstant collection.
+     * Gets a list of the minimum (most specific) genls for a CycFort collection.
      */
-    public CycList getMinGenls (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (min-genls " + cycConstant.cycName() + ")))");
+    public CycList getMinGenls (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (min-genls " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the directly asserted true specs for a CycConstant collection.
+     * Gets a list of the directly asserted true specs for a CycFort collection.
      */
-    public CycList getSpecs (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (specs " + cycConstant.cycName() + ")))");
+    public CycList getSpecs (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (specs " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the least specific specs for a CycConstant collection.
+     * Gets a list of the least specific specs for a CycFort collection.
      */
-    public CycList getMaxSpecs (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (max-specs " + cycConstant.cycName() + ")))");
+    public CycList getMaxSpecs (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (max-specs " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the direct genls of the direct specs for a CycConstant collection.
+     * Gets a list of the direct genls of the direct specs for a CycFort collection.
      */
-    public CycList getGenlSiblings (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (genl-siblings " + cycConstant.cycName() + ")))");
+    public CycList getGenlSiblings (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (genl-siblings " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the siblings (direct specs of the direct genls) for a CycConstant collection.
+     * Gets a list of the siblings (direct specs of the direct genls) for a CycFort collection.
      */
-    public CycList getSiblings (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return getSpecSiblings(cycConstant);
+    public CycList getSiblings (CycFort cycFort)  throws IOException, UnknownHostException {
+        return getSpecSiblings(cycFort);
     }
 
     /**
-     * Gets a list of the siblings (direct specs of the direct genls) for a CycConstant collection.
+     * Gets a list of the siblings (direct specs of the direct genls) for a CycFort collection.
      */
-    public CycList getSpecSiblings (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (spec-siblings " + cycConstant.cycName() + ")))");
+    public CycList getSpecSiblings (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (spec-siblings " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of all of the direct and indirect genls for a CycConstant collection.
+     * Gets a list of all of the direct and indirect genls for a CycFort collection.
      */
-    public CycList getAllGenls (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(all-genls-in-any-mt " + cycConstant.cycName() + ")");
+    public CycList getAllGenls (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(all-genls-in-any-mt " + cycFort.stringApiValue() + ")");
     }
 
     /**
-     * Gets a list of all of the direct and indirect specs for a CycConstant collection.
+     * Gets a list of all of the direct and indirect specs for a CycFort collection.
      */
-    public CycList getAllSpecs (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (all-specs " + cycConstant.cycName() + ")))");
+    public CycList getAllSpecs (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (all-specs " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of all of the direct and indirect genls for a CycConstant SPEC which are also specs of
-     * CycConstant GENL.
+     * Gets a list of all of the direct and indirect genls for a CycFort SPEC which are also specs of
+     * CycFort GENL.
      */
-    public CycList getAllGenlsWrt (CycConstant spec, CycConstant genl )  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (all-genls-wrt " + spec.cycName() + " " + genl.cycName() + ")))");
+    public CycList getAllGenlsWrt (CycFort spec, CycFort genl )  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (all-genls-wrt " + spec.stringApiValue() + " " + genl.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of all of the dependent specs for a CycConstant collection.  Dependent specs are those direct and
+     * Gets a list of all of the dependent specs for a CycFort collection.  Dependent specs are those direct and
      * indirect specs of the collection such that every path connecting the spec to a genl of the collection passes
      * through the collection.  In a typical taxomonmy it is expected that all-dependent-specs gives the same
      * result as all-specs.
      */
-    public CycList getAllDependentSpecs (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (all-dependent-specs " + cycConstant.cycName() + ")))");
+    public CycList getAllDependentSpecs (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (all-dependent-specs " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list with the specified number of sample specs of a CycConstant collection.  Attempts to return
+     * Gets a list with the specified number of sample specs of a CycFort collection.  Attempts to return
      * leaves that are maximally differet with regard to their all-genls.
      */
-    public CycList getSampleLeafSpecs (CycConstant cycConstant, int numberOfSamples)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (sample-leaf-specs " + cycConstant.cycName() + " " + numberOfSamples + "))");
+    public CycList getSampleLeafSpecs (CycFort cycFort, int numberOfSamples)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (sample-leaf-specs " + cycFort.stringApiValue() + " " + numberOfSamples + "))");
     }
 
     /**
-     * Returns true if CycConstant SPEC is a spec of CycConstant GENL.
+     * Returns true if CycFort SPEC is a spec of CycFort GENL.
      */
-    public boolean isSpecOf (CycConstant spec, CycConstant genl)  throws IOException, UnknownHostException {
+    public boolean isSpecOf (CycFort spec, CycFort genl)  throws IOException, UnknownHostException {
         return isGenlOf(genl, spec);
     }
 
     /**
-     * Returns true if CycConstant GENL is a genl of CycConstant SPEC.
+     * Returns true if CycFort GENL is a genl of CycFort SPEC.
      *
      * @param genl the collection for genl determination
      * @param spec the collection for spec determination
-     * @return <tt>true</tt> if CycConstant GENL is a genl of CycConstant SPEC
+     * @return <tt>true</tt> if CycFort GENL is a genl of CycFort SPEC
      */
-    public boolean isGenlOf (CycConstant genl, CycConstant spec)  throws IOException,
+    public boolean isGenlOf (CycFort genl, CycFort spec)  throws IOException,
                                                                          UnknownHostException {
-        return converseBoolean("(genl-in-any-mt? " + spec.cycName() + " " + genl.cycName() + ")");
+        return converseBoolean("(genl-in-any-mt? " + spec.stringApiValue() + " " + genl.stringApiValue() + ")");
     }
 
     /**
-     * Returns true if CycConstant GENL is a genl of CycConstant SPEC, implements a cache
+     * Returns true if CycFort GENL is a genl of CycFort SPEC, implements a cache
      * to avoid asking the same question twice from the KB.
      *
      * @param genl the collection for genl determination
      * @param spec the collection for spec determination
-     * @return <tt>true</tt> if CycConstant GENL is a genl of CycConstant SPEC
+     * @return <tt>true</tt> if CycFort GENL is a genl of CycFort SPEC
      */
-    public boolean isGenlOf_Cached (CycConstant genl, CycConstant spec)
+    public boolean isGenlOf_Cached (CycFort genl, CycFort spec)
         throws IOException,  UnknownHostException {
         boolean answer;
         ArrayList args = new ArrayList();
@@ -941,63 +955,63 @@ public class CycAccess {
     }
 
     /**
-     * Returns true if CycConstant COLLECION1 and CycConstant COLLECTION2 are tacitly coextensional via mutual genls of each other.
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are tacitly coextensional via mutual genls of each other.
      */
-    public boolean areTacitCoextensional (CycConstant collection1, CycConstant collection2)  throws IOException, UnknownHostException {
-        return converseBoolean("(with-all-mts (tacit-coextensional? " + collection1.cycName() + " " + collection2.cycName() + "))");
+    public boolean areTacitCoextensional (CycFort collection1, CycFort collection2)  throws IOException, UnknownHostException {
+        return converseBoolean("(with-all-mts (tacit-coextensional? " + collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
     }
 
     /**
-     * Returns true if CycConstant COLLECION1 and CycConstant COLLECTION2 are asserted coextensional.
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are asserted coextensional.
      */
-    public boolean areAssertedCoextensional (CycConstant collection1, CycConstant collection2)  throws IOException, UnknownHostException {
-        if (predicateRelates(getConstantByName("coExtensional"), collection1, collection2))
+    public boolean areAssertedCoextensional (CycFort collection1, CycFort collection2)  throws IOException, UnknownHostException {
+        if (predicateRelates(getKnownConstantByName("coExtensional"), collection1, collection2))
             return true;
-        else if (predicateRelates(getConstantByName("coExtensional"), collection2, collection1))
+        else if (predicateRelates(getKnownConstantByName("coExtensional"), collection2, collection1))
             return true;
         else
             return false;
     }
 
     /**
-     * Returns true if CycConstant COLLECION1 and CycConstant COLLECTION2 intersect with regard to all-specs.
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 intersect with regard to all-specs.
      */
-    public boolean areIntersecting (CycConstant collection1, CycConstant collection2)  throws IOException, UnknownHostException {
-        return converseBoolean("(with-all-mts (collections-intersect? " + collection1.cycName() + " " + collection2.cycName() + "))");
+    public boolean areIntersecting (CycFort collection1, CycFort collection2)  throws IOException, UnknownHostException {
+        return converseBoolean("(with-all-mts (collections-intersect? " + collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
     }
 
     /**
-     * Returns true if CycConstant COLLECION1 and CycConstant COLLECTION2 are in a hierarchy.
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are in a hierarchy.
      */
-    public boolean areHierarchical (CycConstant collection1, CycConstant collection2)  throws IOException, UnknownHostException {
-        return converseBoolean("(with-all-mts (hierarchical-collections? " + collection1.cycName() + " " + collection2.cycName() + "))");
+    public boolean areHierarchical (CycFort collection1, CycFort collection2)  throws IOException, UnknownHostException {
+        return converseBoolean("(with-all-mts (hierarchical-collections? " + collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
     }
 
     /**
-     * Gets a list of the justifications of why CycConstant SPEC is a SPEC of CycConstant GENL.
+     * Gets a list of the justifications of why CycFort SPEC is a SPEC of CycFort GENL.
      * getWhyGenl("Dog", "Animal") -->
      * "(((#$genls #$Dog #$CanineAnimal) :TRUE)
      *    (#$genls #$CanineAnimal #$NonPersonAnimal) :TRUE)
      *    (#$genls #$NonPersonAnimal #$Animal) :TRUE))
      *
      */
-    public CycList getWhyGenl (CycConstant spec, CycConstant genl)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (why-genl? " + spec.cycName() + " " + genl.cycName() + "))");
+    public CycList getWhyGenl (CycFort spec, CycFort genl)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (why-genl? " + spec.stringApiValue() + " " + genl.stringApiValue() + "))");
     }
 
     /**
-     * Gets an English parapharse of the justifications of why CycConstant SPEC is a SPEC of CycConstant GENL.
+     * Gets an English parapharse of the justifications of why CycFort SPEC is a SPEC of CycFort GENL.
      * getWhyGenlParaphrase("Dog", "Animal") -->
      * "a dog is a kind of canine"
      * "a canine is a kind of non-human animal"
      * "a non-human animal is a kind of animal"
      *
      */
-    public ArrayList getWhyGenlParaphrase (CycConstant spec, CycConstant genl)
+    public ArrayList getWhyGenlParaphrase (CycFort spec, CycFort genl)
         throws IOException, UnknownHostException {
         CycList listAnswer =
             converseList("(with-all-mts (why-genl? " +
-                         spec.cycName() + " " + genl.cycName() + "))");
+                         spec.stringApiValue() + " " + genl.stringApiValue() + "))");
         ArrayList answerPhrases = new ArrayList();
         if (listAnswer.size() == 0)
             return answerPhrases;
@@ -1012,24 +1026,24 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the justifications of why CycConstant COLLECTION1 and a CycConstant COLLECTION2 intersect.
+     * Gets a list of the justifications of why CycFort COLLECTION1 and a CycFort COLLECTION2 intersect.
      * see getWhyGenl
      */
-    public CycList getWhyCollectionsIntersect (CycConstant collection1,
-                                                         CycConstant collection2)  throws IOException, UnknownHostException {
+    public CycList getWhyCollectionsIntersect (CycFort collection1,
+                                                         CycFort collection2)  throws IOException, UnknownHostException {
         return converseList("(with-all-mts (why-collections-intersect? " +
-                            collection1.cycName() + " " + collection2.cycName() + "))");
+                            collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
     }
 
     /**
-     * Gets an English parapharse of the justifications of why CycConstant COLLECTION1 and a CycConstant COLLECTION2 intersect.
+     * Gets an English parapharse of the justifications of why CycFort COLLECTION1 and a CycFort COLLECTION2 intersect.
      * see getWhyGenlParaphrase
      */
-    public ArrayList getWhyCollectionsIntersectParaphrase (CycConstant collection1,
-                                                           CycConstant collection2)
+    public ArrayList getWhyCollectionsIntersectParaphrase (CycFort collection1,
+                                                           CycFort collection2)
         throws IOException, UnknownHostException {
         CycList listAnswer = converseList("(with-all-mts (why-collections-intersect? " +
-                                          collection1.cycName() + " " + collection2.cycName() + "))");
+                                          collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
         ArrayList answerPhrases = new ArrayList();
         if (listAnswer.size() == 0)
             return answerPhrases;
@@ -1045,88 +1059,88 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the collection leaves (most specific of the all-specs) for a CycConstant collection.
+     * Gets a list of the collection leaves (most specific of the all-specs) for a CycFort collection.
      */
-    public CycList getCollectionLeaves (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (collection-leaves " + cycConstant.cycName() + "))");
+    public CycList getCollectionLeaves (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (collection-leaves " + cycFort.stringApiValue() + "))");
     }
 
     /**
-     * Gets a list of the collections asserted to be disjoint with a CycConstant collection.
+     * Gets a list of the collections asserted to be disjoint with a CycFort collection.
      */
-    public CycList getLocalDisjointWith (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (local-disjoint-with " + cycConstant.cycName() + "))");
+    public CycList getLocalDisjointWith (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (local-disjoint-with " + cycFort.stringApiValue() + "))");
     }
 
     /**
-     * Returns true if CycConstant COLLECION1 and CycConstant COLLECTION2 are disjoint.
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are disjoint.
      */
-    public boolean areDisjoint (CycConstant collection1, CycConstant collection2)  throws IOException, UnknownHostException {
-        return converseBoolean("(with-all-mts (disjoint-with? " + collection1.cycName() + " " + collection2.cycName() + "))");
+    public boolean areDisjoint (CycFort collection1, CycFort collection2)  throws IOException, UnknownHostException {
+        return converseBoolean("(with-all-mts (disjoint-with? " + collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
     }
 
     /**
-     * Gets a list of the most specific collections (having no subsets) which contain a CycConstant term.
+     * Gets a list of the most specific collections (having no subsets) which contain a CycFort term.
      */
-    public CycList getMinIsas (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (min-isa " + cycConstant.cycName() + "))");
+    public CycList getMinIsas (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (min-isa " + cycFort.stringApiValue() + "))");
     }
 
     /**
-     * Gets a list of the instances (who are individuals) of a CycConstant collection.
+     * Gets a list of the instances (who are individuals) of a CycFort collection.
      */
-    public CycList getInstances (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (instances " + cycConstant.cycName() + "))");
+    public CycList getInstances (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (instances " + cycFort.stringApiValue() + "))");
     }
 
     /**
-     * Gets a list of the instance siblings of a CycConstant, for all collections of which it is an instance.
+     * Gets a list of the instance siblings of a CycFort, for all collections of which it is an instance.
      */
-    public CycList getInstanceSiblings (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (instance-siblings " + cycConstant.cycName() + "))");
+    public CycList getInstanceSiblings (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (instance-siblings " + cycFort.stringApiValue() + "))");
     }
 
     /**
-     * Gets a list of the collections of which the CycConstant is directly and indirectly an instance.
+     * Gets a list of the collections of which the CycFort is directly and indirectly an instance.
      */
-    public CycList getAllIsa (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(all-isa-in-any-mt " + cycConstant.cycName() + ")");
+    public CycList getAllIsa (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(all-isa-in-any-mt " + cycFort.stringApiValue() + ")");
     }
 
     /**
-     * Gets a list of all the direct and indirect instances (individuals) for a CycConstant collection.
+     * Gets a list of all the direct and indirect instances (individuals) for a CycFort collection.
      */
-    public CycList getAllInstances (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(all-instances-in-all-mts " + cycConstant.cycName() + ")");
+    public CycList getAllInstances (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(all-instances-in-all-mts " + cycFort.stringApiValue() + ")");
     }
 
     /**
-     * Returns true if CycConstant TERM is a instance of CycConstant COLLECTION.
+     * Returns true if CycFort TERM is a instance of CycFort COLLECTION.
      */
-    public boolean isa (CycConstant term, CycConstant collection)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + term.cycName() + " " + collection.cycName() + ")");
+    public boolean isa (CycFort term, CycFort collection)  throws IOException, UnknownHostException {
+        return converseBoolean("(isa-in-any-mt? " + term.stringApiValue() + " " + collection.stringApiValue() + ")");
     }
 
     /**
-     * Gets a list of the justifications of why CycConstant TERM is an instance of CycConstant COLLECTION.
+     * Gets a list of the justifications of why CycFort TERM is an instance of CycFort COLLECTION.
      * getWhyIsa("Brazil", "Country") -->
      * "(((#$isa #$Brazil #$IndependentCountry) :TRUE)
      *    (#$genls #$IndependentCountry #$Country) :TRUE))
      *
      */
-    public CycList getWhyIsa (CycConstant spec, CycConstant genl)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (why-isa? " + spec.cycName() + " " + genl.cycName() + "))");
+    public CycList getWhyIsa (CycFort spec, CycFort genl)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (why-isa? " + spec.stringApiValue() + " " + genl.stringApiValue() + "))");
     }
 
     /**
-     * Gets an English parapharse of the justifications of why CycConstant TERM is an instance of CycConstant COLLECTION.
+     * Gets an English parapharse of the justifications of why CycFort TERM is an instance of CycFort COLLECTION.
      * getWhyGenlParaphase("Brazil", "Country") -->
      * "Brazil is an independent country"
      * "an  independent country is a kind of country"
      *
      */
-    public ArrayList getWhyIsaParaphrase (CycConstant spec, CycConstant genl)  throws IOException {
-        String command = "(with-all-mts (why-isa? " + spec.cycName() + " " + genl.cycName() + "))";
+    public ArrayList getWhyIsaParaphrase (CycFort spec, CycFort genl)  throws IOException {
+        String command = "(with-all-mts (why-isa? " + spec.stringApiValue() + " " + genl.stringApiValue() + "))";
         CycList listAnswer = converseList(command);
         ArrayList answerPhrases = new ArrayList();
         if (listAnswer.size() == 0)
@@ -1143,28 +1157,28 @@ public class CycAccess {
      * Gets a list of the genlPreds for a CycConstant predicate.
      */
     public CycList getGenlPreds (CycConstant predicate)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (genl-predicates " + predicate.cycName() + ")))");
+        return converseList("(remove-duplicates (with-all-mts (genl-predicates " + predicate.stringApiValue() + ")))");
     }
 
     /**
      * Gets a list of the arg1Isas for a CycConstant predicate.
      */
     public CycList getArg1Isas (CycConstant predicate)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (arg1-isa " + predicate.cycName() + ")))");
+        return converseList("(remove-duplicates (with-all-mts (arg1-isa " + predicate.stringApiValue() + ")))");
     }
 
     /**
      * Gets a list of the arg2Isas for a CycConstant predicate.
      */
     public CycList getArg2Isas (CycConstant predicate)  throws IOException, UnknownHostException {
-       return converseList("(remove-duplicates (with-all-mts (arg2-isa " + predicate.cycName() + ")))");
+       return converseList("(remove-duplicates (with-all-mts (arg2-isa " + predicate.stringApiValue() + ")))");
     }
 
     /**
      * Gets a list of the argNIsas for a CycConstant predicate.
      */
     public CycList getArgNIsas (CycConstant predicate, int argPosition)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (argn-isa " + predicate.cycName() +
+        return converseList("(remove-duplicates (with-all-mts (argn-isa " + predicate.stringApiValue() +
                             " " + argPosition + ")))");
     }
 
@@ -1172,7 +1186,7 @@ public class CycAccess {
      * Gets a list of the argNGenls for a CycConstant predicate.
      */
     public CycList getArgNGenls (CycConstant predicate, int argPosition)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (argn-genl " + predicate.cycName() +
+        return converseList("(remove-duplicates (with-all-mts (argn-genl " + predicate.stringApiValue() +
                             " " + argPosition + ")))");
     }
 
@@ -1180,37 +1194,37 @@ public class CycAccess {
      * Gets a list of the arg1Formats for a CycConstant predicate.
      */
     public CycList getArg1Formats (CycConstant predicate)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (arg1-format " + predicate.cycName() + "))");
+        return converseList("(with-all-mts (arg1-format " + predicate.stringApiValue() + "))");
     }
 
     /**
      * Gets a list of the arg2Formats for a CycConstant predicate.
      */
     public CycList getArg2Formats (CycConstant predicate)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (arg2-format " + predicate.cycName() + "))");
+        return converseList("(with-all-mts (arg2-format " + predicate.stringApiValue() + "))");
     }
 
     /**
-     * Gets a list of the disjointWiths for a CycConstant.
+     * Gets a list of the disjointWiths for a CycFort.
      */
-    public CycList getDisjointWiths (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (local-disjoint-with " + cycConstant.cycName() + ")))");
+    public CycList getDisjointWiths (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (local-disjoint-with " + cycFort.stringApiValue() + ")))");
     }
 
     /**
-     * Gets a list of the coExtensionals for a CycConstant.  Limited to 120 seconds.
+     * Gets a list of the coExtensionals for a CycFort.  Limited to 120 seconds.
      */
-    public CycList getCoExtensionals (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        CycList answer = converseList("(ask-template '?X '(#$coExtensional " + cycConstant.cycName() + " ?X) #$EverythingPSC nil nil 120)");
-        answer.remove(cycConstant);
+    public CycList getCoExtensionals (CycFort cycFort)  throws IOException, UnknownHostException {
+        CycList answer = converseList("(ask-template '?X '(#$coExtensional " + cycFort.stringApiValue() + " ?X) #$EverythingPSC nil nil 120)");
+        answer.remove(cycFort);
         return answer;
     }
 
     /**
      * Returns true if cycConstant is a Collection.
      */
-    public boolean isCollection (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$Collection)");
+    public boolean isCollection (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseBoolean("(isa-in-any-mt? " + cycFort.stringApiValue() + " #$Collection)");
     }
 
     /**
@@ -1220,51 +1234,51 @@ public class CycAccess {
      * @param cycConstant the constant for determination as a Collection
      * @return <tt>true</tt> iff cycConstant is a Collection,
      */
-    public boolean isCollection_Cached(CycConstant cycConstant)  throws IOException {
+    public boolean isCollection_Cached(CycFort cycFort)  throws IOException {
         boolean answer;
-        Boolean isCollection = (Boolean) isCollectionCache.getElement(cycConstant);
+        Boolean isCollection = (Boolean) isCollectionCache.getElement(cycFort);
         if (isCollection != null) {
             answer = isCollection.booleanValue();
             return answer;
         }
-        answer = isCollection(cycConstant);
-        isCollectionCache.addElement(cycConstant, new Boolean(answer));
+        answer = isCollection(cycFort);
+        isCollectionCache.addElement(cycFort, new Boolean(answer));
         return answer;
     }
 
     /**
      * Returns true if cycConstant is an Individual.
      */
-    public boolean isIndividual (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$Individual)");
+    public boolean isIndividual (CycFort cycFort)  throws IOException, UnknownHostException {
+        return converseBoolean("(isa-in-any-mt? " + cycFort.stringApiValue() + " #$Individual)");
     }
 
     /**
      * Returns true if cycConstant is a Function.
      */
     public boolean isFunction (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$Function-Denotational)");
+        return converseBoolean("(isa-in-any-mt? " + cycConstant.stringApiValue() + " #$Function-Denotational)");
     }
 
     /**
      * Returns true if cycConstant is a Predicate.
      */
     public boolean isPredicate (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$Predicate)");
+        return converseBoolean("(isa-in-any-mt? " + cycConstant.stringApiValue() + " #$Predicate)");
     }
 
     /**
      * Returns true if cycConstant is a UnaryPredicate.
      */
     public boolean isUnaryPredicate (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$UnaryPredicate)");
+        return converseBoolean("(isa-in-any-mt? " + cycConstant.stringApiValue() + " #$UnaryPredicate)");
     }
 
     /**
      * Returns true if cycConstant is a BinaryPredicate.
      */
     public boolean isBinaryPredicate (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$BinaryPredicate)");
+        return converseBoolean("(isa-in-any-mt? " + cycConstant.stringApiValue() + " #$BinaryPredicate)");
     }
 
     /**
@@ -1278,7 +1292,7 @@ public class CycAccess {
      * Returns true if cycConstant is a PublicConstant.
      */
     public boolean isPublicConstant (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$PublicConstant)");
+        return converseBoolean("(isa-in-any-mt? " + cycConstant.stringApiValue() + " #$PublicConstant)");
     }
 
     /**
@@ -1295,7 +1309,7 @@ public class CycAccess {
      * term(s).
      */
     public synchronized void kill (CycConstant cycConstant)   throws IOException, UnknownHostException {
-        converseBoolean("(cyc-kill " + cycConstant.cycName() + ")");
+        converseBoolean("(cyc-kill " + cycConstant.stringApiValue() + ")");
         CycConstant.removeCache(cycConstant);
     }
 
@@ -1349,10 +1363,10 @@ public class CycAccess {
     private String withBookkeepingInfo () {
         String projectName = "nil";
         if (project != null)
-            projectName = project.cycName();
+            projectName = project.stringApiValue();
         String cyclistName = "nil";
         if (cyclist != null)
-            cyclistName = cyclist.cycName();
+            cyclistName = cyclist.stringApiValue();
         return "(with-bookkeeping-info (new-bookkeeping-info " +
             cyclistName + " (the-date) " +
             projectName + "(the-second)) ";
@@ -1380,71 +1394,71 @@ public class CycAccess {
      * will be added to the KB transcript for replication and archive.  Alternative method
      * signatures accomodate various arities, and argument datatypes.
      */
-    public void assertGaf (CycConstant mt,
+    public void assertGaf (CycFort mt,
                            CycConstant predicate,
-                           CycConstant arg1,
-                           CycConstant arg2)   throws IOException, UnknownHostException {
-        // (predicate <CycConstant> <CycConstant>)
+                           CycFort arg1,
+                           CycFort arg2)   throws IOException, UnknownHostException {
+        // (predicate <CycFort> <CycFort>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.cycName() + " " +
-            arg1.cycName() + " " +
-            arg2.cycName() + ")" +
-            mt.cycName() + "))";
+            predicate.stringApiValue() + " " +
+            arg1.stringApiValue() + " " +
+            arg2.stringApiValue() + ")" +
+            mt.stringApiValue() + "))";
         converseVoid(command);
     }
-    public void assertGaf (CycConstant mt,
+    public void assertGaf (CycFort mt,
                            CycConstant predicate,
-                           CycConstant arg1,
+                           CycFort arg1,
                            String arg2)   throws IOException, UnknownHostException {
-        // (predicate <CycConstant> <String>)
+        // (predicate <CycFort> <String>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.cycName() + " " +
-            arg1.cycName() + " " +
+            predicate.stringApiValue() + " " +
+            arg1.stringApiValue() + " " +
             "\"" + arg2 + "\")" +
-            mt.cycName() + "))";
+            mt.stringApiValue() + "))";
         converseVoid(command);
     }
-    public void assertGaf (CycConstant mt,
+    public void assertGaf (CycFort mt,
                            CycConstant predicate,
-                           CycConstant arg1,
+                           CycFort arg1,
                            CycList arg2)   throws IOException, UnknownHostException {
-        // (predicate <CycConstant> <List>)
+        // (predicate <CycFort> <List>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.cycName() + " " +
-            arg1.cycName() + " " +
-            arg2.cyclify() + ")" +
-            mt.cycName() + "))";
+            predicate.stringApiValue() + " " +
+            arg1.stringApiValue() + " " +
+            arg2.stringApiValue() + ")" +
+            mt.stringApiValue() + "))";
         converseVoid(command);
     }
-    public void assertGaf (CycConstant mt,
+    public void assertGaf (CycFort mt,
                            CycConstant predicate,
-                           CycConstant arg1,
+                           CycFort arg1,
                            int arg2)   throws IOException, UnknownHostException {
-        // (predicate <CycConstant> <int>)
+        // (predicate <CycFort> <int>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.cycName() + " " +
-            arg1.cycName() + " " +
+            predicate.stringApiValue() + " " +
+            arg1.stringApiValue() + " " +
             arg2 + ")" +
-            mt.cycName() + "))";
+            mt.stringApiValue() + "))";
         converseVoid(command);
     }
-    public void assertGaf (CycConstant mt,
+    public void assertGaf (CycFort mt,
                            CycConstant predicate,
-                           CycConstant arg1,
-                           CycConstant arg2,
-                           CycConstant arg3)   throws IOException, UnknownHostException {
-        // (predicate <CycConstant> <CycConstant> <CycConstant>)
+                           CycFort arg1,
+                           CycFort arg2,
+                           CycFort arg3)   throws IOException, UnknownHostException {
+        // (predicate <CycFort> <CycFort> <CycFort>)
         String command = withBookkeepingInfo() +
             "(cyc-assert '(" +
-            predicate.cycName() + " " +
-            arg1.cycName() + " " +
-            arg2.cycName() + " " +
-            arg3.cycName() + ")" +
-            mt.cycName() + "))";
+            predicate.stringApiValue() + " " +
+            arg1.stringApiValue() + " " +
+            arg2.stringApiValue() + " " +
+            arg3.stringApiValue() + ")" +
+            mt.stringApiValue() + "))";
         converseVoid(command);
     }
 
@@ -1454,18 +1468,18 @@ public class CycAccess {
      */
     public void assertComment (CycConstant cycConstant,
                                String comment,
-                               CycConstant mt)   throws IOException, UnknownHostException {
-        assertGaf(mt, getConstantByName("comment"), cycConstant, comment);
+                               CycFort mt)   throws IOException, UnknownHostException {
+        assertGaf(mt, getKnownConstantByName("comment"), cycConstant, comment);
     }
 
     /**
-     * Create a microtheory MT, with a comment, isa <mt type> and CycConstant genlMts.
+     * Create a microtheory MT, with a comment, isa <mt type> and CycFort genlMts.
      * An existing microtheory with
      * the same name is killed first, if it exists.
      */
     public CycConstant createMicrotheory (String mtName,
                                           String comment,
-                                          CycConstant isaMt,
+                                          CycFort isaMt,
                                           ArrayList genlMts)   throws IOException, UnknownHostException {
         CycConstant mt = getConstantByName(mtName);
         if (mt != null) {
@@ -1478,7 +1492,7 @@ public class CycAccess {
         while (true) {
             if (! iterator.hasNext())
                 break;
-            CycConstant aGenlMt = (CycConstant) iterator.next();
+            CycFort aGenlMt = (CycFort) iterator.next();
             assertGaf(baseKB, genlMt, mt, aGenlMt);
         }
     return mt;
@@ -1500,21 +1514,21 @@ public class CycAccess {
         String vocabMtComment = "The #$VocabularyMicrotheory for #$"+ theoryMtName;
         String dataMtName = mtRootName + "DataMt";
         String dataMtComment = "The #$DataMicrotheory for #$"+ theoryMtName;
-        CycConstant worldLikeOursMt = this.getConstantByName("WorldLikeOursCollectorMt");
-        CycConstant currentWorldDataMt = this.getConstantByName("CurrentWorldDataCollectorMt");
-        CycConstant genlMt_Vocabulary = this.getConstantByName("genlMt-Vocabulary");
+        CycConstant worldLikeOursMt = this.getKnownConstantByName("WorldLikeOursCollectorMt");
+        CycConstant currentWorldDataMt = this.getKnownConstantByName("CurrentWorldDataCollectorMt");
+        CycConstant genlMt_Vocabulary = this.getKnownConstantByName("genlMt-Vocabulary");
 
         CycConstant theoryMt = createMicrotheory(theoryMtName,
                                                  comment,
-                                                 getConstantByName("TheoryMicrotheory"),
+                                                 getKnownConstantByName("TheoryMicrotheory"),
                                                  genlMts);
         CycConstant vocabMt = createMicrotheory(vocabMtName,
                                                 vocabMtComment,
-                                                getConstantByName("VocabularyMicrotheory"),
+                                                getKnownConstantByName("VocabularyMicrotheory"),
                                                 new ArrayList());
         CycConstant dataMt = createMicrotheory(dataMtName,
                                                dataMtComment,
-                                               getConstantByName("DataMicrotheory"),
+                                               getKnownConstantByName("DataMicrotheory"),
                                                new ArrayList());
         assertGaf(baseKB, genlMt_Vocabulary, theoryMt, vocabMt);
         assertGaf(baseKB, genlMt, dataMt, theoryMt);
@@ -1532,30 +1546,30 @@ public class CycAccess {
      * The operation will be added to the KB transcript for replication and archive.
      */
     public void assertIsaCollection (CycConstant cycConstant,
-                                     CycConstant mt)   throws IOException, UnknownHostException {
+                                     CycFort mt)   throws IOException, UnknownHostException {
         assertGaf(mt, isa, cycConstant, collection);
     }
 
     /**
-     * Assert that the CycConstant GENLS is a genls of CycConstant SPEC,
+     * Assert that the CycConstant GENLS is a genls of CycFort SPEC,
      * in the specified defining microtheory MT.
      * The operation will be added to the KB transcript for replication and archive.
      */
-    public void assertGenls (CycConstant specCollection,
-                             CycConstant genlsCollection,
-                             CycConstant mt)   throws IOException, UnknownHostException {
+    public void assertGenls (CycFort specCollection,
+                             CycFort genlsCollection,
+                             CycFort mt)   throws IOException, UnknownHostException {
         assertGaf(mt, genls, specCollection, genlsCollection);
     }
 
     /**
-     * Assert that the CycConstant GENLS isa CycConstant ACOLLECTION,
+     * Assert that the CycFort GENLS isa CycFort ACOLLECTION,
      * in the specified defining microtheory MT.
      * The operation will be added to the KB transcript for replication and archive.
      */
-    public void assertIsa (CycConstant cycConstant,
-                             CycConstant aCollection,
-                             CycConstant mt)   throws IOException, UnknownHostException {
-        assertGaf(mt, isa, cycConstant, aCollection);
+    public void assertIsa (CycFort cycFort,
+                             CycFort aCollection,
+                             CycFort mt)   throws IOException, UnknownHostException {
+        assertGaf(mt, isa, cycFort, aCollection);
     }
 
     /**
@@ -1563,7 +1577,7 @@ public class CycAccess {
      * The operation will be added to the KB transcript for replication and archive.
      */
     public void assertIsaBinaryPredicate (CycConstant cycConstant,
-                                          CycConstant mt)   throws IOException, UnknownHostException {
+                                          CycFort mt)   throws IOException, UnknownHostException {
         assertIsa(cycConstant, binaryPredicate, mt);
     }
 
@@ -1588,6 +1602,8 @@ public class CycAccess {
         CycConstant cycConstant = this.getConstantByName(name);
         if (cycConstant == null) {
             cycConstant = this.createNewPermanent(name);
+            if (cycConstant == null)
+                throw new RuntimeException("Cannot create new constant for " + name);
             CycConstant.addCache(cycConstant);
         }
         return cycConstant;
@@ -1603,16 +1619,16 @@ public class CycAccess {
      */
     public CycList askWithVariable (CycList query,
                                     CycVariable variable,
-                                    CycConstant mt)  throws IOException, UnknownHostException {
+                                    CycFort mt)  throws IOException, UnknownHostException {
         StringBuffer queryBuffer = new StringBuffer();
         queryBuffer.append("(clet ((*cache-inference-results* nil) ");
         queryBuffer.append("       (*compute-inference-results* nil) ");
         queryBuffer.append("       (*unique-inference-result-bindings* t) ");
         queryBuffer.append("       (*generate-readable-fi-results* nil)) ");
         queryBuffer.append("  (without-wff-semantics ");
-        queryBuffer.append("    (ask-template '" + variable.cyclify() + " ");
-        queryBuffer.append("                  '" + query.cyclify() + " ");
-        queryBuffer.append("                  " + mt.cyclify() + " ");
+        queryBuffer.append("    (ask-template '" + variable.stringApiValue() + " ");
+        queryBuffer.append("                  '" + query.stringApiValue() + " ");
+        queryBuffer.append("                  " + mt.stringApiValue() + " ");
         queryBuffer.append("                  0 nil nil nil)))");
         return converseList(queryBuffer.toString());
     }
@@ -1625,7 +1641,7 @@ public class CycAccess {
      * @return <tt>true</tt> iff the query is true in the knowledge base
      */
     public boolean isQueryTrue (CycList query,
-                                CycConstant mt)  throws IOException, UnknownHostException {
+                                CycFort mt)  throws IOException, UnknownHostException {
         CycList command = new CycList();
         command.add(CycSymbol.makeCycSymbol("removal-ask"));
         CycList command1 = new CycList();
@@ -1646,7 +1662,7 @@ public class CycAccess {
      * @return <tt>true</tt> iff the query is true in the knowledge base
      */
     public boolean isQueryTrue_Cached (CycList query,
-                                          CycConstant mt) throws IOException {
+                                          CycFort mt) throws IOException {
         boolean answer;
         Boolean isQueryTrue = (Boolean) askCache.getElement(query);
         if (isQueryTrue != null) {
@@ -1665,10 +1681,10 @@ public class CycAccess {
      * @param mt microtheory (including its genlMts) in which the count is determined
      * @return the count of the instances of the given collection
      */
-    public int countAllInstances(CycConstant collection, CycConstant mt) throws IOException {
+    public int countAllInstances(CycFort collection, CycFort mt) throws IOException {
         return this.converseInt("(count-all-instances " +
-                                collection.cyclify() + " " +
-                                mt.cyclify() + ")");
+                                collection.stringApiValue() + " " +
+                                mt.stringApiValue() + ")");
     }
 
     /**
@@ -1679,8 +1695,8 @@ public class CycAccess {
      * @param mt microtheory (including its genlMts) in which the count is determined
      * @return the count of the instances of the given collection
      */
-    public int countAllInstances_Cached(CycConstant collection,
-                                        CycConstant mt) throws IOException {
+    public int countAllInstances_Cached(CycFort collection,
+                                        CycFort mt) throws IOException {
         int answer;
         Integer countAllInstances = (Integer) countAllInstancesCache.getElement(collection);
         if (countAllInstances != null) {
@@ -1699,13 +1715,14 @@ public class CycAccess {
      * @param mt the microtheory (and its genlMts) in which the search for backchaining rules takes place
      * @return a list of the backchaining rules which might apply to the given predicate
      */
-    public CycList getBackchainRules (CycConstant predicate, CycConstant mt)
+    public CycList getBackchainRules (CycConstant predicate, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
         command.append("(clet (backchain-rules) ");
-        command.append("  (with-mt " + mt.cyclify() + " ");
-        command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :backward) ");
-        command.append("       (cpush (assertion-el-formula rule) backchain-rules))) ");
+        command.append("  (with-mt " + mt.stringApiValue() + " ");
+        command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
+        command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
+        command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
         command.append("   backchain-rules)");
         //this.traceOn();
         return converseList(command.toString());
@@ -1718,13 +1735,14 @@ public class CycAccess {
      * @param mt the microtheory (and its genlMts) in which the search for forward chaining rules takes place
      * @return a list of the forward chaining rules which might apply to the given predicate
      */
-    public CycList getForwardChainRules (CycConstant predicate, CycConstant mt)
+    public CycList getForwardChainRules (CycConstant predicate, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
         command.append("(clet (forward-chain-rules) ");
-        command.append("  (with-mt " + mt.cyclify() + " ");
-        command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :forward) ");
-        command.append("       (cpush (assertion-el-formula rule) forward-chain-rules))) ");
+        command.append("  (with-mt " + mt.stringApiValue() + " ");
+        command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
+        command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
+        command.append("         (cpush (assertion-el-formula rule) forward-chain-rules)))) ");
         command.append("   forward-chain-rules)");
         return converseList(command.toString());
     }
@@ -1772,5 +1790,67 @@ public class CycAccess {
         return converseBoolean(command);
     }
 
+    /**
+     * Returns <tt>true</tt> iff backchain inference on the given predicate is required.
+     *
+     * @param predicate the <tt>CycConstant</tt> predicate for which backchaining required status is sought
+     * @param mt microtheory (including its genlMts) in which the backchaining required status is sought
+     * @return <tt>true</tt> iff backchain inference on the given predicate is required
+     */
+    public boolean isBackchainRequired(CycConstant predicate, CycFort mt) throws IOException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
+        command.add(predicate);
+        command.add(this.getKnownConstantByName("backchainRequired"));
+        command.add(mt.cycListApiValue());
+        return this.converseBoolean(command);
+    }
 
+    /**
+     * Returns <tt>true</tt> iff backchain inference on the given predicate is encouraged.
+     *
+     * @param predicate the <tt>CycConstant</tt> predicate for which backchaining encouraged status is sought
+     * @param mt microtheory (including its genlMts) in which the backchaining encouraged status is sought
+     * @return <tt>true</tt> iff backchain inference on the given predicate is encouraged
+     */
+    public boolean isBackchainEncouraged(CycConstant predicate, CycFort mt) throws IOException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
+        command.add(predicate);
+        command.add(this.getKnownConstantByName("backchainEncouraged"));
+        command.add(mt.cycListApiValue());
+        return this.converseBoolean(command);
+    }
+
+    /**
+     * Returns <tt>true</tt> iff backchain inference on the given predicate is discouraged.
+     *
+     * @param predicate the <tt>CycConstant</tt> predicate for which backchaining discouraged status is sought
+     * @param mt microtheory (including its genlMts) in which the backchaining discouraged status is sought
+     * @return <tt>true</tt> iff backchain inference on the given predicate is discouraged
+     */
+    public boolean isBackchainDiscouraged(CycConstant predicate, CycFort mt) throws IOException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
+        command.add(predicate);
+        command.add(this.getKnownConstantByName("backchainDiscouraged"));
+        command.add(mt.cycListApiValue());
+        return this.converseBoolean(command);
+    }
+
+    /**
+     * Returns <tt>true</tt> iff backchain inference on the given predicate is forbidden.
+     *
+     * @param predicate the <tt>CycConstant</tt> predicate for which backchaining forbidden status is sought
+     * @param mt microtheory (including its genlMts) in which the backchaining forbidden status is sought
+     * @return <tt>true</tt> iff backchain inference on the given predicate is forbidden
+     */
+    public boolean isBackchainForbidden(CycConstant predicate, CycFort mt) throws IOException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
+        command.add(predicate);
+        command.add(this.getKnownConstantByName("backchainForbidden"));
+        command.add(mt.cycListApiValue());
+        return this.converseBoolean(command);
+    }
 }

@@ -122,6 +122,24 @@ public class CycVariable implements Comparable {
     }
 
     /**
+     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
+     */
+    public String stringApiValue() {
+        return cyclify();
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
+     */
+    public Object cycListApiValue() {
+        return this;
+    }
+
+    /**
      * Returns <tt>true</tt> some object equals this <tt>CycVariable</tt>
      *
      * @param object the <tt>Object</tt> for equality comparison

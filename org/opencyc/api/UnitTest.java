@@ -372,7 +372,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(cycConstant);
-        Assert.assertEquals("#$Dog", cycConstant.cycName());
+        Assert.assertEquals("#$Dog", cycConstant.cyclify());
         Assert.assertEquals("Dog", cycConstant.name);
 
         // getConstantById
@@ -387,7 +387,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(cycConstant);
-        Assert.assertEquals("#$Dog", cycConstant.cycName());
+        Assert.assertEquals("#$Dog", cycConstant.cyclify());
         Assert.assertEquals("Dog", cycConstant.name);
         Assert.assertEquals(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"),
                             cycConstant.guid);
@@ -1668,11 +1668,11 @@ public class UnitTest extends TestCase {
         }
         Assert.assertTrue(mts.length == 3);
         Assert.assertNotNull(mts[0]);
-        Assert.assertEquals("#$CycAccessTestMt", mts[0].cycName());
+        Assert.assertEquals("#$CycAccessTestMt", mts[0].cyclify());
         Assert.assertNotNull(mts[1]);
-        Assert.assertEquals("#$CycAccessTestVocabMt", mts[1].cycName());
+        Assert.assertEquals("#$CycAccessTestVocabMt", mts[1].cyclify());
         Assert.assertNotNull(mts[2]);
-        Assert.assertEquals("#$CycAccessTestDataMt", mts[2].cycName());
+        Assert.assertEquals("#$CycAccessTestDataMt", mts[2].cyclify());
         try {
             cycAccess.kill(mts);
         }
@@ -1810,6 +1810,32 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.toString());
         }
+
+        // Test isBackchainRequired, isBackchainEncouraged, isBackchainDiscouraged, isBackchainForbidden
+        try {
+            Assert.assertTrue(cycAccess.isBackchainRequired(cycAccess.getConstantByName("#$notAssertible"),
+                                                            cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainEncouraged(cycAccess.getConstantByName("#$notAssertible"),
+                                                                cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(cycAccess.getConstantByName("#$notAssertible"),
+                                                                 cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainForbidden(cycAccess.getConstantByName("#$notAssertible"),
+                                                               cycAccess.baseKB));
+
+            Assert.assertTrue(! cycAccess.isBackchainRequired(cycAccess.getConstantByName("#$nearestIsa"),
+                                                            cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainEncouraged(cycAccess.getConstantByName("#$nearestIsa"),
+                                                                cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(cycAccess.getConstantByName("#$nearestIsa"),
+                                                                 cycAccess.baseKB));
+            Assert.assertTrue(cycAccess.isBackchainForbidden(cycAccess.getConstantByName("#$nearestIsa"),
+                                                               cycAccess.baseKB));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
+
 
         // Test getBackchainRules.
         try {

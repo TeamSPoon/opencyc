@@ -51,5 +51,19 @@ public abstract class CycFort implements Serializable {
     public abstract void toXML (XMLPrintWriter xml_writer, int indent, boolean relative)
         throws IOException;
 
+    /**
+     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
+     */
+    public abstract String stringApiValue();
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
+     */
+    public abstract Object cycListApiValue();
+
 }
 

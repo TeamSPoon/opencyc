@@ -306,8 +306,50 @@ public class HornClause {
         return stringBuffer.toString();
     }
 
+    /**
+     * Returns <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
+     * horn clause.  Specifically, an expression is not a valid constraint horn clause if any predicate
+     * is not a <tt>CycConstant</tt> object.
+     *
+     * @param string the representation of a constraint horn clause to be validated
+     * @return <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
+     * horn clause
+     */
+    public static boolean isValidHornExpression(String string) throws IOException {
+        return isValidHornExpression(CycAccess.current().makeCycList(string));
+    }
 
-
+    /**
+     * Returns <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
+     * horn clause.  Specifically, an expression is not a valid constraint horn clause if any predicate
+     * is not a <tt>CycConstant</tt> object.
+     *
+     * @param cycList the representation of a constraint horn clause to be validated
+     * @return <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
+     * horn clause
+     */
+    public static boolean isValidHornExpression(CycList cycList) throws IOException {
+        if (cycList.size() != 3)
+            return false;
+        Object implies = cycList.first();
+        if (! implies.equals(CycAccess.current().getKnownConstantByName("#$implies")))
+            return false;
+        CycList consequentCycList = (CycList) cycList.third();
+        if (! Rule.isValidRuleExpression(consequentCycList))
+            return false;
+        CycList antecedantCycList = (CycList) cycList.second();
+        if (antecedantCycList.first().equals(CycAccess.current().getKnownConstantByName("#$and"))) {
+            antecedantCycList = antecedantCycList.rest();
+            for (int i = 0; i < antecedantCycList.size(); i++)
+                if (! Rule.isValidRuleExpression((CycList) antecedantCycList.get(i)))
+                    return false;
+        }
+        else {
+            if (! Rule.isValidRuleExpression(antecedantCycList))
+                return false;
+        }
+        return true;
+    }
 
 
 

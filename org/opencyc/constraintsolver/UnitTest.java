@@ -71,9 +71,11 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testConstraintProblem3"));
             //testSuite.addTest(new UnitTest("testConstraintProblem4"));
             //testSuite.addTest(new UnitTest("testConstraintProblem5"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem6"));
             //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
             testSuite.addTest(new UnitTest("testBackchainer3"));
+            //testSuite.addTest(new UnitTest("testBackchainer4"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -458,6 +460,15 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
+        // isValidRuleExpression
+        try {
+            Assert.assertTrue(Rule.isValidRuleExpression(cycAccess.makeCycList("(#$isa ?country #$Country)")));
+            Assert.assertTrue(! Rule.isValidRuleExpression(cycAccess.makeCycList("(?pred ?country #$Country)")));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
         try {
             cycAccess.close();
         }
@@ -586,7 +597,7 @@ public class UnitTest extends TestCase {
 
             otherVariables.add(CycVariable.makeCycVariable("?BOAT"));
             hornClause5.renameVariables(otherVariables, 9);
-            Assert.assertEquals("(#$in-Floating ?BOAT_1 ?WATER)",
+            Assert.assertEquals("(#$in-Floating ?BOAT_2 ?WATER)",
                                 hornClause5.consequent.cyclify());
             Assert.assertEquals(3, hornClause5.getAntecedantConjuncts().size());
             Assert.assertEquals(2, hornClause5.getVariables().size());
@@ -603,6 +614,48 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(
                 ! (hornClause5.getAntecedantConjuncts().contains(
                     new Rule("(#$objectFoundInLocation ?BOAT ?WATER)"))));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        // isValidHornExpression
+        try {
+            String hornClauseString6 =
+                "(#$implies " +
+                " (#$and " +
+                "  (#$isa ?BOAT #$Watercraft-Surface) " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$objectFoundInLocation ?BOAT ?WATER)) " +
+                " (#$in-Floating ?BOAT ?WATER))";
+            Assert.assertTrue(HornClause.isValidHornExpression(hornClauseString6));
+            String hornClauseString7 =
+                "()";
+            Assert.assertTrue(! HornClause.isValidHornExpression(hornClauseString7));
+            String hornClauseString8 =
+                "(#$xor " +
+                " (#$and " +
+                "  (#$isa ?BOAT #$Watercraft-Surface) " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$objectFoundInLocation ?BOAT ?WATER)) " +
+                " (#$in-Floating ?BOAT ?WATER))";
+            Assert.assertTrue(HornClause.isValidHornExpression(hornClauseString8));
+            String hornClauseString9 =
+                "(#$implies " +
+                " (#$and " +
+                "  (#$?pred ?BOAT #$Watercraft-Surface) " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$objectFoundInLocation ?BOAT ?WATER)) " +
+                " (#$in-Floating ?BOAT ?WATER))";
+            Assert.assertTrue(HornClause.isValidHornExpression(hornClauseString9));
+            String hornClauseString10 =
+                "(#$implies " +
+                " (#$and " +
+                "  (#$isa ?BOAT #$Watercraft-Surface) " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$objectFoundInLocation ?BOAT ?WATER)) " +
+                " (#$?pred ?BOAT ?WATER))";
+            Assert.assertTrue(HornClause.isValidHornExpression(hornClauseString10));
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -1067,6 +1120,36 @@ public class UnitTest extends TestCase {
 
         System.out.println("** testConstraintProblem5 OK **");
     }
+
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem6() {
+        System.out.println("** testConstraintProblem6 **");
+
+        // query with nart.
+        String nartQueryString =
+            "(#$isa ?STORAGE (#$StoreFn #$CarvedArtwork))";
+        System.out.println(nartQueryString);
+        ConstraintProblem nartProblem = new ConstraintProblem();
+        nartProblem.setVerbosity(9);
+        // Request all solutions.
+        nartProblem.nbrSolutionsRequested = null;
+        try {
+            nartProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = nartProblem.solve(nartQueryString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem6 OK **");
+    }
+
     /**
      * Tests the <tt>Backchainer</tt> class.
      */
@@ -1141,8 +1224,8 @@ public class UnitTest extends TestCase {
             "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
         System.out.println(whatIsInAustinString);
         ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
-        whatIsInAustinProblem.setVerbosity(9);
-        whatIsInAustinProblem.setMaxBackchainDepth(2);
+        whatIsInAustinProblem.setVerbosity(1);
+        whatIsInAustinProblem.setMaxBackchainDepth(3);
         // Request all solutions.
         whatIsInAustinProblem.nbrSolutionsRequested = null;
         try {
@@ -1159,6 +1242,37 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
         System.out.println("** testBackchainer3 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer4() {
+        System.out.println("** testBackchainer4 **");
+        // what is a CarvedArtwork? to depth 1
+        String whatIsACarvedArtworkString =
+            "(#$isa ?WHAT #$CarvedArtwork)";
+        System.out.println(whatIsACarvedArtworkString);
+        ConstraintProblem whatIsACarvedArtworkProblem = new ConstraintProblem();
+        whatIsACarvedArtworkProblem.setVerbosity(9);
+        whatIsACarvedArtworkProblem.setSbhlBackchain(true);
+        whatIsACarvedArtworkProblem.setMaxBackchainDepth(1);
+        // Request all solutions.
+        whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsACarvedArtworkProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsACarvedArtworkProblem.solve(whatIsACarvedArtworkString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer4 OK **");
     }
 
 }

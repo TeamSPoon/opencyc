@@ -279,6 +279,27 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
+     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
+     */
+    public String stringApiValue() {
+        return "(quote " + cyclify() + ")";
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
+     */
+    public Object cycListApiValue() {
+        CycList apiValue = new CycList();
+        apiValue.add(CycSymbol.quote);
+        apiValue.add(this);
+        return apiValue;
+    }
+
+    /**
      * Returns a string representation of the <ttt>CycNart</tt> with the guid in place
      * of the constant name.
      *

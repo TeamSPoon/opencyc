@@ -601,4 +601,19 @@ public class Rule  implements Comparable{
         CycList newRule = rule.subst(value, cycVariable);
         return new Rule(newRule);
     }
+
+    /**
+     * Returns <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
+     * rule.  Specifically, an expression is not a valid constraint rule if its predicate is not a
+     * <tt>CycConstant</tt> object.
+     *
+     * @param cycListRule the representation of a constraint rule to be validated
+     * @return <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
+     * rule
+     */
+    public static boolean isValidRuleExpression(CycList cycListRule) {
+        if (cycListRule.size() < 2)
+            return false;
+        return cycListRule.first() instanceof CycConstant;
+    }
 }

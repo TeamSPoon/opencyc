@@ -375,11 +375,18 @@ public class CycConnection {
         Object[] answer =  {
             null, null
         };
-        if (cfaslInputStream.readObject() == null)
+        Object status = cfaslInputStream.readObject();
+        Object response = cfaslInputStream.readObject();
+        if (status == null ||
+            status.equals(CycSymbol.nil)) {
             answer[0] = Boolean.FALSE;
-        else
-            answer[0] = Boolean.TRUE;
-        answer[1] = cycAccess.completeObject(cfaslInputStream.readObject());
+            answer[1] = response;
+            if (trace)
+                System.out.println("received error = (" + status + ") " + response);
+            return answer;
+        }
+        answer[0] = Boolean.TRUE;
+        answer[1] = cycAccess.completeObject(response);
         if (trace)
             System.out.println("receive = (" + answer[0] + ") " + answer[1]);
         return  answer;

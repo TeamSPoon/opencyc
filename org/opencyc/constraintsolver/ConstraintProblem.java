@@ -324,4 +324,15 @@ public class ConstraintProblem {
     public void setMaxBackchainDepth(int maxBackchainDepth) {
         backchainer.setMaxBackchainDepth(maxBackchainDepth);
     }
+
+    /**
+     * Sets whether backchaining is performed on rules with the predicate of #$isa or #$genls.  Large
+     * numbers of rules conclude #$isa or #$genls, which are not usually relevant - so the default is
+     * false.
+     *
+     * @param sbhlBackchain whether backchaining is performed on rules with the predicate of #$isa or #$genls
+     */
+    public void setSbhlBackchain(boolean sbhlBackchain) {
+        backchainer.setSbhlBackchain(sbhlBackchain);
+    }
 }

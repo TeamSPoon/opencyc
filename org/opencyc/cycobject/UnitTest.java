@@ -154,7 +154,7 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(cycConstant1);
         Assert.assertEquals(1, CycConstant.getCacheSize());
         Assert.assertEquals(constantName.substring(2), cycConstant1.toString());
-        Assert.assertEquals(constantName, cycConstant1.cycName());
+        Assert.assertEquals(constantName, cycConstant1.cyclify());
         Assert.assertEquals(guidString, cycConstant1.guid.toString());
 
         // Attempt to create a duplicate returns the cached existing object.

@@ -1395,6 +1395,34 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
+        // Test getBackchainRules.
+        try {
+            //cycAccess.traceOn();
+            CycList backchainRules =
+                cycAccess.getBackchainRules(cycAccess.getConstantByName("#$doneBy"),
+                                            cycAccess.getConstantByName("HumanActivitiesMt"));
+            Assert.assertNotNull(backchainRules);
+            //for (int i = 0; i < backchainRules.size(); i++)
+            //    System.out.println(((CycList) backchainRules.get(i)).cyclify());
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        // Test getForwardChainRules.
+        try {
+            cycAccess.traceOn();
+            CycList forwardChainRules =
+                cycAccess.getForwardChainRules(cycAccess.getConstantByName("#$doneBy"),
+                                            cycAccess.getConstantByName("HumanActivitiesMt"));
+            Assert.assertNotNull(forwardChainRules);
+            for (int i = 0; i < forwardChainRules.size(); i++)
+                System.out.println(((CycList) forwardChainRules.get(i)).cyclify());
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
 
         //--------- last.
         try {

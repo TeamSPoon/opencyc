@@ -1512,5 +1512,41 @@ public class CycAccess {
         return answer;
     }
 
+    /**
+     * Gets a list of the backchaining rules which might apply to the given predicate.
+     *
+     * @param predicate the predicate for which backchaining rules are sought
+     * @param mt the microtheory (and its genlMts) in which the search for backchaining rules takes place
+     * @return a list of the backchaining rules which might apply to the given predicate
+     */
+    public CycList getBackchainRules (CycConstant predicate, CycConstant mt)
+        throws IOException, UnknownHostException {
+        StringBuffer command = new StringBuffer();
+        command.append("(clet (backchain-rules) ");
+        command.append("  (with-mt " + mt.cyclify() + " ");
+        command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :backward) ");
+        command.append("       (cpush (assertion-formula rule) backchain-rules))) ");
+        command.append("   backchain-rules)");
+        return converseList(command.toString());
+    }
+
+    /**
+     * Gets a list of the forward chaining rules which might apply to the given predicate.
+     *
+     * @param predicate the predicate for which forward chaining rules are sought
+     * @param mt the microtheory (and its genlMts) in which the search for forward chaining rules takes place
+     * @return a list of the forward chaining rules which might apply to the given predicate
+     */
+    public CycList getForwardChainRules (CycConstant predicate, CycConstant mt)
+        throws IOException, UnknownHostException {
+        StringBuffer command = new StringBuffer();
+        command.append("(clet (forward-chain-rules) ");
+        command.append("  (with-mt " + mt.cyclify() + " ");
+        command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :forward) ");
+        command.append("       (cpush (assertion-formula rule) forward-chain-rules))) ");
+        command.append("   forward-chain-rules)");
+        return converseList(command.toString());
+    }
+
 
 }

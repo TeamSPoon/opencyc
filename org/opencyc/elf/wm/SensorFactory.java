@@ -11,6 +11,8 @@ import org.opencyc.elf.bg.planner.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
+
 /**  SensorFactory is designed to create actuators.  There is a singleton instance of sensor factory.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
@@ -62,7 +64,10 @@ public class SensorFactory {
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     List sensationCapabilities = new ArrayList();
     sensationCapabilities.add(Sensation.CONSOLE_INPUT);
-    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources, sensationCapabilities);
+    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, 
+                                                 resources, 
+                                                 sensationCapabilities, 
+                                                 new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY));
     SensorPool.getInstance().setSensor(consoleInput.getName(), consoleInput);
   }
   //// Protected Area

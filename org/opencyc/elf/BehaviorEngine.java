@@ -5,6 +5,10 @@ import org.opencyc.elf.bg.planner.JobAssignmentLibrary;
 import org.opencyc.elf.bg.planner.ResourcePool;
 import org.opencyc.elf.bg.planner.ScheduleLibrary;
 
+import org.opencyc.elf.bg.predicate.NotNull;
+
+import org.opencyc.elf.bg.state.StateVariable;
+
 //// External Imports
 import java.util.logging.Logger;
 
@@ -50,7 +54,7 @@ public class BehaviorEngine {
     (new ResourcePool()).getInstance().initialize();
     (new JobAssignmentLibrary()).getInstance().initialize();
     (new ScheduleLibrary()).getInstance().initialize();
-    
+    new NotNull();
     //TODO
   }
   
@@ -76,7 +80,7 @@ public class BehaviorEngine {
     logger.info("Creating BehaviorEngine");
     BehaviorEngine behaviorEngine = new BehaviorEngine();
     behaviorEngine.initialize();
-    
+    StateVariable.initialize();
     //TODO
     
     System.exit(0);

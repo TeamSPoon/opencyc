@@ -1,6 +1,12 @@
 package org.opencyc.elf.wm;
 
+//// Internal Imports
+import org.opencyc.elf.bg.state.StateVariable;
+
+//// External Imports
 import java.util.*;
+
+import java.util.logging.Logger;
 
 import junit.framework.*;
 
@@ -31,14 +37,9 @@ import junit.framework.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class UnitTest extends TestCase {
-  /**
-   * Main method in case tracing is prefered over running JUnit.
-   * @param args DOCUMENT ME!
-   */
-  public static void main(String[] args) {
-    junit.textui.TestRunner.run(suite());
-  }
-
+  
+  //// Constructors
+  
   /**
    * Construct a new UnitTest object.
    * 
@@ -48,11 +49,14 @@ public class UnitTest extends TestCase {
     super(name);
   }
 
+  //// Public Area
+  
   /**
    * Runs the unit tests
-   * @return DOCUMENT ME!
+   * @return the unit test suite
    */
   public static Test suite() {
+    logger = Logger.getLogger("org.opencyc.elf");
     TestSuite testSuite = new TestSuite();
     testSuite.addTest(new UnitTest("testEntityFrame"));
 
@@ -66,7 +70,8 @@ public class UnitTest extends TestCase {
     System.out.println("\n*** testEntityFrame ***");
 
     EntityFrame entityFrame1 = new EntityFrame();
-    Object stateVariable1 = new Object();
+    StateVariable stateVariable1 = new StateVariable("stateVariable1", 
+                                                     "test state variable stateVariable1");
     Object attribute1 = new Object();
     Assert.assertNull(entityFrame1.getState().getStateValue(stateVariable1));
     entityFrame1.getState().setStateValue(stateVariable1, "abc");
@@ -75,20 +80,11 @@ public class UnitTest extends TestCase {
     EntityFrame entityFrame2 = new EntityFrame(entityFrame1);
     Assert.assertEquals(entityFrame1, entityFrame2);
 
-    Object stateVariable2 = new Object();
+    StateVariable stateVariable2 = new StateVariable("stateVariable2", 
+                                                     "test state variable stateVariable2");
     entityFrame2.getState().setStateValue(stateVariable2, "def");
     Assert.assertTrue(!entityFrame1.equals(entityFrame2));
     System.out.println(entityFrame2.toString());
-
-    String context = "context";
-    entityFrame2 = new EntityFrame(entityFrame1);
-    entityFrame1.getState().setContext(context);
-    Assert.assertEquals(context, entityFrame1.getState().getContext());
-    Assert.assertTrue(!entityFrame1.equals(entityFrame2));
-    entityFrame2.getState().setContext(context);
-    Assert.assertTrue(entityFrame1.equals(entityFrame2));
-    entityFrame2.getState().setContext("context2");
-    Assert.assertTrue(!entityFrame1.equals(entityFrame2));
 
     int iteratorCount = 0;
     Object iterator1 = entityFrame1.getState().stateVariables();
@@ -107,4 +103,26 @@ public class UnitTest extends TestCase {
 
     System.out.println("*** testEntityFrame OK ***");
   }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /**
+   * the logger
+   */
+  protected static Logger logger;
+
+  //// Main
+  
+  /**
+   * Main method in case tracing is prefered over running JUnit.
+   * @param args the command line arguments (unused)
+   */
+  public static void main(String[] args) {
+    junit.textui.TestRunner.run(suite());
+  }
+
 }

@@ -52,22 +52,10 @@ public class State {
    * @return true if the given object equals this state
    */
   public boolean equals(Object obj) {
-    if (!(obj instanceof State)) {
+    if (!(obj instanceof State))
       return false;
-    }
-
-    State thatState = (State) obj;
-
-    if (((context == null) && (thatState.context != null)) || ((context != null) && (thatState.context == null))) {
-      return false;
-    }
-
-    if ((context != null) && (!context.equals(thatState.context))) {
-      return false;
-    }
-    else {
-      return this.stateVariableDictionary.equals(thatState.stateVariableDictionary);
-    }
+    State that = (State) obj;
+    return this.stateVariableDictionary.equals(that.stateVariableDictionary);
   }
 
   /**
@@ -77,14 +65,7 @@ public class State {
    */
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
-
-    if (context != null) {
-      stringBuffer.append("State context: " + context + "\n");
-    }
-    else {
-      stringBuffer.append("[State :\n");
-    }
-
+    stringBuffer.append("[State :\n");
     Iterator iter = stateVariableDictionary.keySet().iterator();
 
     while (iter.hasNext()) {
@@ -115,26 +96,21 @@ public class State {
    */
   public Object clone() {
     State state = new State();
-    state.context = this.context;
 
     Iterator iter = stateVariables();
 
     while (iter.hasNext()) {
-      Object stateVariable = iter.next();
+      StateVariable stateVariable = (StateVariable) iter.next();
       Object value = null;
-
       try {
         value = ((State) getStateValue(stateVariable)).clone();
       }
-
       //TOTO replace with CloneNotSupportedException
        catch (Exception e) {
         value = getStateValue(stateVariable);
       }
-
       state.setStateValue(stateVariable, value);
     }
-
     return state;
   }
 
@@ -163,7 +139,7 @@ public class State {
    * @param stateVariable variable the state variable
    * @param value the stateVariable's value
    */
-  public void setStateValue(Object stateVariable, Object value) {
+  public void setStateValue(StateVariable stateVariable, Object value) {
     stateVariableDictionary.put(stateVariable, value);
   }
 
@@ -178,24 +154,6 @@ public class State {
     return stateVariableDictionary.get(stateVariable);
   }
 
-  /**
-   * Gets the state context.
-   * 
-   * @return the state context
-   */
-  public Object getContext() {
-    return context;
-  }
-
-  /**
-   * Sets the state context.
-   * 
-   * @param context the state context
-   */
-  public void setContext(Object context) {
-    this.context = context;
-  }
-
   //// Protected Area
 
   //// Private Area
@@ -207,9 +165,6 @@ public class State {
    * stateVariable/values.
    */
   protected Hashtable stateVariableDictionary;
-
-  /** the state context */
-  protected Object context;
 
   //// Main
   

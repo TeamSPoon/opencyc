@@ -1,5 +1,9 @@
 package org.opencyc.elf.goal;
 
+//// Internal Imports
+
+//// External Imports
+
 /**
  * Provides the Importance container for the Elementary Loop Functioning
  * (ELF).<br>
@@ -25,17 +29,51 @@ package org.opencyc.elf.goal;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Importance {
-  /**
-   * Importances range from 0.0 for least important, to +1 for most important.
-   */
-  float importance;
-
+  
+  //// Constructors
+  
   /**
    * Constructs a new Importance object.
    */
   public Importance() {
   }
 
+  /**
+   * Constructs a new Importance object given the importance.
+   *
+   * @importance the importance
+   */
+  public Importance(float importance) {
+    setImportance(importance);
+  }
+
+  //// Public Area
+  
+  /**
+   * most important
+   */
+  public static final float MOST = 1.0f;
+  
+  /**
+   * more important
+   */
+  public static final float MORE = .75f;
+  
+  /**
+   * neutrally important
+   */
+  public static final float NEUTRAL = .5f;
+  
+  /**
+   * less important
+   */
+  public static final float LESS = .75f;
+  
+  /**
+   * least important
+   */
+  public static final float LEAST = 0.0f;
+  
   /**
    * Gets the importance
    * 
@@ -49,13 +87,23 @@ public class Importance {
    * Sets the importance
    * 
    * @param importance the importance
-   * @throws IllegalArgumentException DOCUMENT ME!
+   * @throws IllegalArgumentException when the importance is not in the range [0.0 ... +1.0]
    */
   public void setImportance(float importance) {
-    if ((importance < 0.0) || (importance > 1.0)) {
+    if ((importance < 0.0) || (importance > 1.0))
       throw new IllegalArgumentException(importance + " is not in the range [0.0 ... +1.0]");
-    }
-
     this.importance = importance;
   }
+  
+  //// Protected Area
+  
+  /**
+   * Importances range from 0.0 for least important, to +1 for most important.
+   */
+  float importance;
+
+  //// Private Area
+  
+  //// Internal Rep
+  
 }

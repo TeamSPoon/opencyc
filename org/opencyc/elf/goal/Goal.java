@@ -3,6 +3,10 @@ package org.opencyc.elf.goal;
 //// Internal Imports
 import org.opencyc.elf.ELFObject;
 
+import org.opencyc.elf.bg.predicate.Predicate;
+
+import org.opencyc.elf.goal.PredicateExpression;
+
 //// External Imports
 import java.util.ArrayList;
 
@@ -45,9 +49,49 @@ public class Goal extends ELFObject {
    * @return a string representation of this object
    */
   public String toString() {
-    return goalPredicateExpression.toString();
+    return predicateExpression.toString();
   }
   
+  /**
+   * Gets the predicate expression which when true, indicates that the goal
+   * is achieved
+   *
+   * @return the predicate expression which when true, indicates that the goal
+   * is achieved
+   */
+  public PredicateExpression getPredicateExpression () {
+    return predicateExpression;
+  }
+
+  /**
+   * Sets the predicate expression which when true, indicates that the goal
+   * is achieved
+   *
+   * @param predicateExpression the predicate expression which when true, indicates that 
+   * the goal is achieved
+   */
+  public void setPredicateExpression (PredicateExpression predicateExpression) {
+    this.predicateExpression = predicateExpression;
+  }
+
+  /**
+   * Gets the list of predicate expressions which if true, indicate goal failure
+   *
+   * @return the list of predicate expressions which if true, indicate goal failure
+   */
+  public ArrayList getfailurePredicateExpressions () {
+    return failurePredicateExpressions;
+  }
+
+  /**
+   * Sets the list of predicate expressions which if true, indicate goal failure
+   *
+   * @param failurePredicateExpressions the list of predicate expressions which if true, 
+   * indicate goal failure
+   */
+  public void setfailurePredicateExpressions (ArrayList failurePredicateExpressions) {
+    this.failurePredicateExpressions = failurePredicateExpressions;
+  }
 
   /**
    * Gets the goal importance
@@ -74,40 +118,19 @@ public class Goal extends ELFObject {
   //// Internal Rep
   
   /**
-   * GoalPredicateExpression contains an evaluatable symbol and an argument list of state variables
-   * and objects
+   * the predicate expression which when true, indicates that the goal
+   * is achieved
    */
-  class GoalPredicateExpression {
-    
-    /**
-     * the goal predicate
-     */
-    int goalPredicate;
-    
-    /**
-     * the argument list
-     */
-    ArrayList arguments;
-    
-    /**
-     * Returns a string representation of this object.
-     * 
-     * @return a string representation of this object
-     */
-    public String toString() {
-    }
-  }
-  
-  /**
-   * the goal predicate expression
+  PredicateExpression predicateExpression;
+
+  /** 
+   * the list of predicate expressions which if true, indicate goal failure 
    */
-  GoalPredicateExpression goalPredicateExpression;
+  protected ArrayList failurePredicateExpressions = new ArrayList();
 
-  
-  /** the list of goal predicate expressions which if true, indicate goal failure */
-  protected ArrayList goalFailurePredicateExpressions;
-
-  /** the goal importance */
+  /** 
+   * the goal importance 
+   */
   protected Importance importance;
 
   //// Main

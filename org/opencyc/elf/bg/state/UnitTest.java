@@ -62,10 +62,11 @@ public class UnitTest extends TestCase {
    */
   public void testSituation() {
     System.out.println("\n*** testSituation ***");
-
+    StateVariable.initialize();
+    
     Situation situation1 = new Situation();
-    Object stateVariable1 = new Object();
-    Object attribute1 = new Object();
+    StateVariable stateVariable1 = new StateVariable("stateVariable1", 
+                                                     "test state variable stateVariable1");
     Assert.assertNull(situation1.getState().getStateValue(stateVariable1));
     situation1.getState().setStateValue(stateVariable1, "abc");
     Assert.assertEquals("abc", situation1.getState().getStateValue(stateVariable1));
@@ -73,20 +74,11 @@ public class UnitTest extends TestCase {
     Situation situation2 = new Situation(situation1);
     Assert.assertEquals(situation1, situation2);
 
-    Object stateVariable2 = new Object();
+    StateVariable stateVariable2 = new StateVariable("stateVariable2", 
+                                                     "test state variable stateVariable2");
     situation2.getState().setStateValue(stateVariable2, "def");
     Assert.assertTrue(!situation1.equals(situation2));
     System.out.println(situation2.toString());
-
-    String context = "context";
-    situation2 = new Situation(situation1);
-    situation1.getState().setContext(context);
-    Assert.assertEquals(context, situation1.getState().getContext());
-    Assert.assertTrue(!situation1.equals(situation2));
-    situation2.getState().setContext(context);
-    Assert.assertTrue(situation1.equals(situation2));
-    situation2.getState().setContext("context2");
-    Assert.assertTrue(!situation1.equals(situation2));
 
     int iteratorCount = 0;
     Object iterator1 = situation1.getState().stateVariables();

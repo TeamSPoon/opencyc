@@ -1,8 +1,12 @@
 package org.opencyc.elf.goal;
 
 //// Internal Imports
+import org.opencyc.elf.bg.predicate.NotNull;
+
+import org.opencyc.elf.bg.state.StateVariable;
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * <P>GoalFactory is designed to create goals.  There is a singleton instance.
@@ -57,7 +61,10 @@ public class GoalFactory {
    */
   public Goal makeConsolePromptedInput () {
     Goal goal = new Goal();
-    
+    goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
+                                                        StateVariable.PROMPT));
+    goal.setImportance(new Importance(Importance.NEUTRAL));
+    return goal;
   }  
   
   //// Protected Area

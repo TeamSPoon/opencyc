@@ -51,7 +51,6 @@ public class ActionFactory {
    */
   public Action makeAbort () {
     Action abortAction = new Action();
-    abortAction.setState(new State());
     abortAction.setName(Action.ABORT);
     abortAction.setParameterNames(new ArrayList());
     abortAction.setParameterTypes(new ArrayList());
@@ -64,7 +63,6 @@ public class ActionFactory {
    */
   public Action makeConsolePromptedInput () {
     Action consolePromptedInputAction = new Action();
-    consolePromptedInputAction.setState(new State());
     consolePromptedInputAction.setName(Action.CONSOLE_PROMPTED_INPUT);
     ArrayList parameterNames = new ArrayList();
     parameterNames.add("prompt");
@@ -81,7 +79,6 @@ public class ActionFactory {
    */
   public Action makeConverseWithUser () {
     Action converseWithUserAction = new Action();
-    converseWithUserAction.setState(new State());
     converseWithUserAction.setName(Action.CONVERSE_WITH_USER);
     ArrayList parameterNames = new ArrayList();
     parameterNames.add("prompt");
@@ -97,7 +94,6 @@ public class ActionFactory {
    */
   public Action makeEmergencyStop () {
     Action emergencyStopAction = new Action();
-    emergencyStopAction.setState(new State());
     emergencyStopAction.setName(Action.EMERGENCY_STOP);
     emergencyStopAction.setParameterNames(new ArrayList());
     emergencyStopAction.setParameterTypes(new ArrayList());
@@ -109,7 +105,6 @@ public class ActionFactory {
    */
   public Action makeInit () {
     Action initAction = new Action();
-    initAction.setState(new State());
     initAction.setName(Action.INIT);
     initAction.setParameterNames(new ArrayList());
     initAction.setParameterTypes(new ArrayList());

@@ -37,13 +37,33 @@ public class StateVariable extends ELFObject {
    * Creates a new instance of StateVariable given its name.
    *
    * @param name the state variable name
+   * @param comment the comment
    */
-  public StateVariable(String name) {
+  public StateVariable(String name, String comment) {
     this.name = name;
+    this.comment = comment;
   }
   
   //// Public Area
   
+  /**
+   * Gets the state variable name
+   *
+   * @return the state variable name
+   */
+  public String getName () {
+    return name;
+  }
+
+  /**
+   * Gets the state variable comment
+   *
+   * @return the state variable comment
+   */
+  public String getComment () {
+    return comment;
+  }
+
   /**
    * Returns a string representation of this object.
    * 
@@ -68,6 +88,18 @@ public class StateVariable extends ELFObject {
     return this.name.equals(that.name);
   }
   
+  /** 
+   * the prompt 
+   */
+  public static StateVariable PROMPT;
+  
+  /**
+   * Initializes the state variables.
+   */
+  public static void initialize () {
+    PROMPT = new StateVariable("prompt", "the prompt");
+  }
+  
   //// Protected Area
   
   //// Private Area
@@ -78,6 +110,11 @@ public class StateVariable extends ELFObject {
    * the state variable name
    */
   protected String name;
+  
+  /**
+   * the state variable comment
+   */
+  protected String comment;
   
   //// Main
   

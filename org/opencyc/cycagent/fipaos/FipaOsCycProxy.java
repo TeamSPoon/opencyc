@@ -62,8 +62,8 @@ public class FipaOsCycProxy {
             return;
         }
         FipaOsCommunityAdapter.platform_profile = args[0];
-        FipaOsCycProxy fipaOsCycProxy = new FipaOsCycProxy(args[1],
-                                                           AgentCommunityAdapter.MAX_VERBOSITY);
+        FipaOsCycProxy fipaOsCycProxy =
+             new FipaOsCycProxy(args[1], AgentCommunityAdapter.MAX_VERBOSITY);
         fipaOsCycProxy.cycProxy.initializeAgentCommunity();
         while (true)
             // Keep root thread running with minimal resource consumption, while awaiting

@@ -1,10 +1,13 @@
 package org.opencyc.cycagent;
 
 import java.io.*;
+import java.util.*;
 import javax.naming.TimeLimitExceededException;
 import fipaos.ont.fipa.*;
 import fipaos.ont.fipa.fipaman.*;
+import fipaos.util.*;
 import org.jdom.*;
+import ViolinStrings.*;
 import org.opencyc.util.Timer;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
@@ -289,6 +292,36 @@ public class GenericAgent implements MessageReceiver {
         }
         else
             return this.fipaOsCommunityAdapter.getAID();
+    }
+
+    /**
+     * Makes an AgentID for the given agent name
+     *
+     * @param agentName the name of the agent
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
+     */
+    public AgentID makeAID (String agentName, int remoteAgentCommunity) {
+        AgentID agentID = null;
+        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY) {
+            agentID = new AgentID();
+            agentID.setName(agentName);
+        }
+        else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY) {
+            agentID = (AgentID) fipaOsCommunityAdapter.getAID().clone();
+            agentID.setName(agentName);
+            List addresses = agentID.getAddresses();
+            ArrayList newAddresses = new ArrayList();
+            for (int i = 0; i < addresses.size(); i++) {
+                URL address = (URL) addresses.get(i);
+                URL newAddress = (URL) address.clone();
+                newAddresses.add(newAddress);
+                newAddress.setTarget(agentName);
+            }
+            agentID.setAddresses(newAddresses);
+        }
+        else
+            throw new RuntimeException ("Invalid agent community " + remoteAgentCommunity);
+        return agentID;
     }
 
     /**

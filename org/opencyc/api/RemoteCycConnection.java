@@ -121,8 +121,7 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
         acl.setPerformative(FIPACONSTANTS.REQUEST);
         AgentID senderAid = getAID(remoteAgentCommunity);
         acl.setSenderAID(senderAid);
-        AgentID receiverAid = new AgentID();
-        receiverAid.setName(remoteAgentName);
+        AgentID receiverAid = this.makeAID(remoteAgentName, remoteAgentCommunity);
         acl.addReceiverAID(receiverAid);
         CycList apiRequest = null;
         String apiRequestXml;

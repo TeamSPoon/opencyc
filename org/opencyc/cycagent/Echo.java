@@ -86,8 +86,7 @@ public class Echo extends GenericAgent {
         acl.setPerformative(FIPACONSTANTS.REQUEST);
         AgentID senderAid = getAID(remoteAgentCommunity);
         acl.setSenderAID(senderAid);
-        AgentID receiverAid = new AgentID();
-        receiverAid.setName(remoteAgentName);
+        AgentID receiverAid = this.makeAID(remoteAgentName, remoteAgentCommunity);
         acl.addReceiverAID(receiverAid);
         String echoRequestXml =
             "\n<list>\n" +

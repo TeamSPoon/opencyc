@@ -87,6 +87,12 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
      */
     protected Hashtable replyMessages = new Hashtable();
 
+
+    /**
+     * Indicates whether this agent is registered.
+     */
+    protected boolean isRegistered = false;
+
     /**
      * Constructs a new FipaOsCommunityAdapter object for the given agent, with the given verbosity.
      *
@@ -94,7 +100,10 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
      * diagnostic input
      */
     public FipaOsCommunityAdapter(MessageReceiver messageReceiver, int verbosity) {
-        super(platform_profile, messageReceiver.getMyAgentName(), FipaOsCommunityAdapter.OWNER, true);
+        super(platform_profile,
+              messageReceiver.getMyAgentName(),
+              FipaOsCommunityAdapter.OWNER,
+              true);
         this.messageReceiver = messageReceiver;
         if (Log.current == null)
             Log.makeLog();
@@ -115,6 +124,7 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
         register();
         if (verbosity > 2)
             Log.current.println("My agent ID\n  " + this.getAID());
+        Runtime.getRuntime().addShutdownHook(new Shutdown());
     }
 
     /**
@@ -153,7 +163,9 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
                 shutdown();
                 return;
             }
+            DIAGNOSTICS.println("Already registered with DF", this, diagnosticLevel);
         }
+        isRegistered = true;
     }
 
 
@@ -227,6 +239,8 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
      * De-register this agent.
      */
     public void deregister() {
+        if (! isRegistered)
+            return;
         try {
             deregisterWithDF();
         }
@@ -243,6 +257,7 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
             shutdown();
             return;
         }
+        isRegistered = false;
     }
 
     /**
@@ -435,6 +450,26 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
             ACL replyAcl = (ACL) replyMessages.get(requestAcl.getReplyWith());
             forward(replyAcl);
             done();
+        }
+    }
+
+    /**
+     * Thread which shuts down the agent nicely.
+     */
+    protected class Shutdown extends Thread {
+        /**
+         * Constructs a new Shutdown object.
+         */
+        public Shutdown () {
+        }
+
+        /**
+         * Runs the shutdown thread.
+         */
+        public void run () {
+            System.out.println("Shutting down");
+            deregister();
+            shutdown();
         }
     }
 }

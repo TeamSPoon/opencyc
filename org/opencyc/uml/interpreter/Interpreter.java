@@ -3,9 +3,9 @@ package org.opencyc.uml.interpreter;
 import java.util.*;
 import javax.swing.tree.*;
 import org.apache.commons.collections.*;
+import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.statemachine.*;
 import org.opencyc.util.*;
-
 
 /**
  * Interprets a UML StateMachine.
@@ -171,7 +171,13 @@ public class Interpreter {
                 Iterator transitions = state.getOutgoing().listIterator();
                 while (transitions.hasNext()) {
                     Transition transition = (Transition) transitions.next();
-
+                    if (transition.getTrigger().equals(currentEvent)) {
+                        BooleanExpression guardExpression = transition.getGuard().getexpression();
+                        /*
+                        if (evaluateBoolean(guardExpression.getBody()) {
+                        }
+                        */
+                    }
                 }
 
             }

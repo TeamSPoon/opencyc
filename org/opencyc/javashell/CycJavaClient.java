@@ -43,43 +43,42 @@ public class CycJavaClient extends Thread {
     private OutputStream out = null;
     private CycAccess cycAccess = null;
     private static CycSymbol QUIT_COMMAND = new CycSymbol("API-QUIT");
-
+    
     public CycJavaClient(Socket client,CycJavaShell jshell) throws IOException {
-    privJshell = jshell;
-    clientSocket = client;
-    in = client.getInputStream();
-    out = client.getOutputStream();
+	privJshell = jshell;
+	clientSocket = client; 
+	in = client.getInputStream();
+	out = client.getOutputStream();
     }
 
     public void run() {
-    PrintStream outstream = new PrintStream(out);
-    CycListParser cyclp = new CycListParser(cycAccess);
-    while( !this.interrupted() && in!=null && out!=null ) {
-        StreamTokenizer st = new StreamTokenizer(new BufferedReader(new InputStreamReader(in)));
-        st.commentChar( ';' ); st.ordinaryChar( '(' ); st.ordinaryChar( ')' ); st.ordinaryChar( '\'' ); st.ordinaryChar( '`' ); st.ordinaryChar( '.' );
-        st.wordChars( '=', '=' ); st.wordChars( '+', '+' ); st.wordChars( '-', '-' ); st.wordChars( '_', '_' ); st.wordChars( '<', '<' ); st.wordChars( '>', '>' );
-        st.wordChars( '*', '*' ); st.wordChars( '/', '/' ); st.wordChars( '.', '.' ); st.wordChars( '#', '#' ); st.wordChars( ':', ':' ); st.wordChars( '!', '!' );
-        st.wordChars( '$', '$' ); st.wordChars( '?', '?' ); st.wordChars( '%', '%' ); st.wordChars( '&', '&' );
-        try {
-        CycList todo = cyclp.read(st);
-        if(todo.first().equals(QUIT_COMMAND)) {
-        // Do client goodbyes
-        return;
-        }
-        Object result = privJshell.invoke(todo);
-        if(result instanceof CycObject) {
-            outstream.println("200 "+((CycObject)result).cyclify());
-        } else if(result instanceof String) {
-            outstream.println("200 \""+result+"\"");
-        } else {
-            outstream.println("200 "+result);
-        }
-        } catch (Exception e){
-        outstream.println("500 \""+e+"\"");
-        }
-    }
+	PrintStream outstream = new PrintStream(out);
+	CycListParser cyclp = new CycListParser(cycAccess); 
+	while( !this.interrupted() && in!=null && out!=null ) {
+	    StreamTokenizer st = new StreamTokenizer(in);
+	    st.commentChar( ';' ); st.ordinaryChar( '(' ); st.ordinaryChar( ')' ); st.ordinaryChar( '\'' ); st.ordinaryChar( '`' ); st.ordinaryChar( '.' );
+	    st.wordChars( '=', '=' ); st.wordChars( '+', '+' ); st.wordChars( '-', '-' ); st.wordChars( '_', '_' ); st.wordChars( '<', '<' ); st.wordChars( '>', '>' );
+	    st.wordChars( '*', '*' ); st.wordChars( '/', '/' ); st.wordChars( '.', '.' ); st.wordChars( '#', '#' ); st.wordChars( ':', ':' ); st.wordChars( '!', '!' );
+	    st.wordChars( '$', '$' ); st.wordChars( '?', '?' ); st.wordChars( '%', '%' ); st.wordChars( '&', '&' );
+	    try {
+	    CycList todo = cyclp.read(st);
+	    System.out.println(todo);
+	    if(todo.first().equals(QUIT_COMMAND)) {
+		// Do client goodbyes
+		return;
+	    }
+		Object result = privJshell.invoke(todo);        
+		if(result instanceof CycObject) {
+		    outstream.println("200 "+((CycObject)result).cyclify());
+		} else if(result instanceof String) {
+		    outstream.println("200 \""+result+"\"");
+		} else {
+		    outstream.println("200 "+result);
+		}
+	    } catch (Exception e){
+		outstream.println("500 \""+e+"\"");
+	    }
+	}
     }
 }
-
-
 

@@ -55,6 +55,7 @@ public class CycJavaCommandline extends Thread {
 					       cycAccess.findOrCreate("JavaMappingMt"),
 					       cycAccess.findOrCreate("JavaTheoryMt"));
 
+	System.out.println(clientJshell.toCycClass(com.globalinfotek.coabsgrid.GridService.class));
 	System.out.println(clientJshell.toCycClass(cycAccess.getClass()));
 	/*
 	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));

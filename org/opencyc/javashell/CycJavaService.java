@@ -26,6 +26,7 @@ package org.opencyc.javashell;
  */
 
 import java.io.IOException;
+import java.lang.Thread;
 
 public class CycJavaService {
 
@@ -41,6 +42,11 @@ public class CycJavaService {
 	    jshellserver = new CycJavaServer(jshell,3699); 
 	    jshellserver.start();
 	}
+    }
+    public static void main(String[] arg) throws Exception {
+	jshell = new CycJavaShell(); 
+	jshellserver = new CycJavaServer(jshell,3699); 
+	jshellserver.run();
     }
 }
 

@@ -160,6 +160,7 @@ public class CycJavaShell {
 	    cycHasSlotValue =  cycAccess.makeCycConstant("hasSlotValue");
 	    cycArrayOfClass =  cycAccess.makeCycConstant("ArrayOfTypeFn");
 	    cycAccess.assertIsa(cycArrayOfClass,cycAccess.makeCycConstant("UnaryFunction"));
+	    cycAccess.assertResultIsa(cycArrayOfClass,cycAccess.makeCycConstant("Collection"));
 	    cycJavaFeild =   cycAccess.makeCycConstant("JavaFeild");
 	    cycAccess.assertIsa(cycJavaFeild,cycAccess.makeCycConstant("Collection"));
 	    cycAccess.assertIsa(cycJavaFeild,cycAccess.makeCycConstant("PredicateCategory"));
@@ -420,6 +421,7 @@ public class CycJavaShell {
 	if( classname.endsWith(";") ) classname = classname.substring(0,classname.length()-1);
 	//String packagename = jclass.getPackage().getName();
 	String classextension = "Object";
+	if(jclass.isInterface()) classextension = "Interface";
 	if( jclass.isPrimitive() ) {
 	 //   jboolean z; jbyte    b; jchar    c; jshort   s; jint     i; jlong    j; jfloat   f; jdouble  d; jobject  l;
 	    if( jclass.isArray() ) {
@@ -451,11 +453,19 @@ public class CycJavaShell {
 	    } catch( Exception e ) {
 		e.printStackTrace();
 	    }
-	    if( classname.startsWith("java")
-		|| classname.startsWith("logicmoo")
-		|| classname.startsWith("org")
-		//    || classname.startsWith("com")
-	      ) {
+	    if( classname.startsWith("org") || classname.startsWith("com") || classname.startsWith("net") || classname.startsWith("mil")) {
+		int lp = classname.indexOf(".");
+		if( lp>2 ) classname = classname.substring(lp+1);
+		lp = classname.lastIndexOf(".");
+		if( lp>2 ) {
+		    if(!classname.substring(lp+1).endsWith("Interface")) {
+			if(jclass.isInterface()) classname = classname.substring(lp+1) + "_Interface_" + classname.substring(0,lp); 
+			else  classname = classname.substring(lp+1) + "_" + classname.substring(0,lp); 
+		    }
+		}
+		classextension = "";
+	    }
+	    if( classname.startsWith("java")) {
 		int lp = classname.lastIndexOf(".");
 		if( lp>2 ) classname = classname.substring(lp+1);
 	    }
@@ -463,12 +473,14 @@ public class CycJavaShell {
 
 	classname = Strings.change(classname,".","_");
 	classname = Strings.change(classname,"$","_");
-
+	classname = classname.substring(0,1).toUpperCase() + classname.substring(1);
+	
 	String cycclassname = classname + classextension;
 	try {
 	    cycjclass =  cycAccess.makeCycConstant(cycclassname);    
 	    System.out.println("cycclassname = " + cycjclass.cyclify());
 	    //assertGaf(mappingMt,cycNameOFClass,cycjclass,jclass.toString());
+	    assertGaf(mappingMt,cycAccess.comment,cycjclass,jclass.toString());
 	} catch( Exception e ) {
 	    System.out.println("cycAccess.makeCycConstant: " +cycclassname+" "+ e );
 	    e.printStackTrace(System.err);
@@ -485,10 +497,20 @@ public class CycJavaShell {
 	try {
 	    // Make super classes
 	    Class superjclass = jclass.getSuperclass();
-	    //if( superjclass != null )  cycAccess.assertGenls(cycjclass,toCycClass(superjclass),vocabMt);
+	    if( superjclass != null )  cycAccess.assertGenls(cycjclass,toCycClass(superjclass),vocabMt);
 	} catch( Exception e ) {
 	    e.printStackTrace(System.err);
 	}
+
+	 Class[] interfce = jclass.getInterfaces();
+	 for( int i =0; i<interfce.length;i++ ) {
+	     try {
+	       cycAccess.assertGenls(cycjclass,toCycClass(interfce[i]),vocabMt);
+	     } catch( Exception e ) {
+		 e.printStackTrace(System.err);
+	     }
+	 }
+
 	// Decide if we should make a template
 	String classstring = jclass.toString();
 	if( classstring.startsWith("class java.lang") 
@@ -505,11 +527,31 @@ public class CycJavaShell {
 	    Method method = methods[i];
 	    String methodname = method.getName();
 	    CycFort cycmethod = makeTypedCycFort("JavaMethod",methodname + "_method");
+	    String methComment = ""+method;
+	    CycFort returntype = toCycClass(method.getReturnType());
+	    CycList params = toCycClassList(method.getParameterTypes());
 	    template.put(cycmethod,method);
+	    if(isMethodInert(method)) {
+		assertWithTranscriptNoWffCheckJava("(#$isa " + cycmethod.cyclify() +" #$BinaryPredicate )",vocabMt);
+		assertWithTranscriptNoWffCheckJava("(#$isa " + cycjclass.cyclify() +" #$Collection )",vocabMt);
+		assertWithTranscriptNoWffCheckJava("(#$isa " + returntype.cyclify() +" #$Collection )",vocabMt);
+		assertWithTranscriptNoWffCheckJava(
+						  "(#$relationAllExists "  
+						  + " " + cycmethod.cyclify()
+						  + " " + cycjclass.cyclify()
+						  + "  " + returntype.cyclify() +  " )",(CycFort) theoryMt);
+	    } else {
 	    assertWithTranscriptNoWffCheckJava(
 					      "(#$hasJavaMethod " + cycjclass.cyclify()
-					      + " (#$JavaMethodFn " + cycmethod.cyclify() + " " + toCycClassList(method.getParameterTypes()).cyclify() + " ) " 
-					      + "  " + toCycClass(method.getReturnType()).cyclify() +  " )",theoryMt);
+					      + " (#$JavaMethodFn " + cycmethod.cyclify() + " " + params.cyclify() + " ) " 
+					      + "  " + returntype.cyclify() +  " )",theoryMt);
+	    }
+	    try{ 
+	      //  cycAccess.assertComment(cycmethod,methComment,theoryMt);
+	    } catch( Exception e ) {
+		e.printStackTrace(System.err);
+	    }
+
 	}
 
 	Field[] fields = jclass.getFields();
@@ -531,6 +573,20 @@ public class CycJavaShell {
 	thisClassTemplates.put(jclass,template);
 	thisClassTemplates.put(cycjclass,template);
 	return cycjclass;
+    }
+
+    public boolean isMethodInert(Method mthod) {
+	if(mthod.getParameterTypes().length!=0) return false;
+	String methodname = mthod.getName();
+	return
+	    (methodname.startsWith("get") 
+	     || methodname.startsWith("equals")
+	     || methodname.startsWith("is") 
+	     || methodname.startsWith("checkF") 
+	     || methodname.startsWith("to")
+	     || methodname.startsWith("hashCode") 
+	     || methodname.startsWith("constains")
+	     || methodname.startsWith("size")); 
     }
 
     public CycFort makeTypedCycFort( String type,String name) {

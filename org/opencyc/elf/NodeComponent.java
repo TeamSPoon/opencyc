@@ -83,9 +83,6 @@ public abstract class NodeComponent extends ELFObject implements Runnable {
     }
   }
   
-  
-  
-  
   //// Private Area
   
   //// Internal Rep

@@ -45,7 +45,8 @@ public class ResourcePool {
    * Initializes the resource pool.
    */
   public void initialize () {
-    //TODO
+    ResourceFactory resourceFactory = new ResourceFactory();
+    resourceFactory.makeResources();
   }
   
   /**

@@ -10,7 +10,9 @@ import java.util.List;
 
 import java.util.logging.Logger;
 
+import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
 
 /** DirectSensor is the abstract super class of all direct sensors, as opposed to
  * virtual sensors (sensory perception).
@@ -44,11 +46,13 @@ public abstract class DirectSensor extends NodeComponent  implements Sensor {
    * @param name the sensor name
    * @param resources the resources required by this sensor
    * @param sensationCapabilities the names of sensations that this sensor can sense
+   * @param sensorChannel the takable channel from which messages are input
    */
-  public DirectSensor (String name, List resources, List sensationCapabilities) {
+  public DirectSensor (String name, List resources, List sensationCapabilities, Takable sensorChannel) {
     this.name = name;
     this.resources = resources;
     this.sensationCapabilities = sensationCapabilities;
+    this.sensorChannel = sensorChannel;
     logger = Logger.getLogger("org.opencyc.elf");
   }
 
@@ -98,6 +102,16 @@ public abstract class DirectSensor extends NodeComponent  implements Sensor {
     return sensationCapabilities;
   }
   
+  /** Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   */
+  public Puttable getChannel() {
+    return (Puttable) sensorChannel;
+  }
+  
   /** the console input sensor name */
   public static final String CONSOLE_INPUT = "console input";
 
@@ -115,6 +129,12 @@ public abstract class DirectSensor extends NodeComponent  implements Sensor {
   
   /** the resources required by this sensor */
   protected List resources;
+  
+  /** the takable channel from which messages are input */
+  protected Takable sensorChannel = null;
+    
+  /** the executor of the consumer thread */
+  protected Executor executor;
   
   /** the logger */
   protected static Logger logger;

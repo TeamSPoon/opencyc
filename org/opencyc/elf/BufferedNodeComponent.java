@@ -9,9 +9,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
  * Provides common attributes and behavior for Elementary Loop Functioning
- * (ELF) node components.<br>
- * Each node component contains one or more process threads that communicates with other 
- * node components by sending asychronous messages.
+ * (ELF) node components which have an input message buffer.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

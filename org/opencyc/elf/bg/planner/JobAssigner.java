@@ -2,6 +2,7 @@ package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
 import org.opencyc.elf.BufferedNodeComponent;
+import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
 
@@ -63,12 +64,16 @@ public class JobAssigner extends BufferedNodeComponent {
    * Creates a new instance of JobAssigner with the given
    * input and output channels.
    *
+   * @param node the containing ELF node
    * @param jobAssignerChannel the takable channel from which messages are input
    * @param executorChannel the puttable channel to which messages are output to the higher
    * level executor, or null if this is the highest level
    */
-  public JobAssigner (Takable jobAssignerChannel,
+  public JobAssigner (Node node,
+                      Takable jobAssignerChannel,
                       Puttable executorChannel) {
+    setNode(node);
+    getLogger().info("Creating JobAssigner");
     this.jobAssignerChannel = jobAssignerChannel;
     consumer = new Consumer(jobAssignerChannel,
                             executorChannel,
@@ -85,6 +90,8 @@ public class JobAssigner extends BufferedNodeComponent {
 
   //// Public Area
 
+  
+  
   /** 
    * Gets the puttable channel for this node component to which other node
    * components can send messages.
@@ -185,6 +192,7 @@ public class JobAssigner extends BufferedNodeComponent {
     protected Consumer (Takable jobAssignerChannel,
                         Puttable executorChannel,
                         NodeComponent nodeComponent) { 
+      getLogger().info("Creating JobAssigner.Consumer");
       this.jobAssignerChannel = jobAssignerChannel;
       this.executorChannel = executorChannel;
       this.nodeComponent = nodeComponent;
@@ -194,6 +202,7 @@ public class JobAssigner extends BufferedNodeComponent {
      * Reads messages from the input queue and processes them.
      */
     public void run () {
+      getLogger().info("Running JobAssigner.Consumer");
       try {
         while (true) { 
           dispatchMsg((GenericMsg) jobAssignerChannel.take()); 

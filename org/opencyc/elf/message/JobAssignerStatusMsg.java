@@ -30,12 +30,12 @@ import org.opencyc.elf.Status;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class JobAssignmentStatus extends GenericMsg {
+public class JobAssignerStatusMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of JobAssignmentStatus. */
-  public JobAssignmentStatus() {
+  /** Creates a new instance of JobAssignerStatusMsg. */
+  public JobAssignerStatusMsg() {
   }
   
   //// Public Area

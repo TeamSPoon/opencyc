@@ -6,6 +6,7 @@ import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.PerceivedSensoryInputMsg;
 import org.opencyc.elf.message.PredictedInputMsg;
+import org.opencyc.elf.message.PredictionRequestMsg;
 
 //// External Imports
 
@@ -46,15 +47,13 @@ public class Predictor extends NodeComponent {
   
   /** 
    * Creates a new instance of Predictor with the given
-   * input and output message channels.
+   * input channel.
    *
    * @param predictorChannel the takable channel from which messages are input
-   * @param planEvaluationChannel the puttable channel to which messages are output
    */
   public Predictor (Takable predictorChannel,
                     Puttable planEvaluatorChannel) {
     consumer = new Consumer(predictorChannel,
-                            planEvaluatorChannel,
                             this);
     executor = new ThreadedExecutor();
     try {
@@ -81,11 +80,6 @@ public class Predictor extends NodeComponent {
     protected final Takable predictorChannel;
     
     /**
-     * the puttable channel to which messages are output for the plan evaluator
-     */
-    protected final Puttable planEvaluatorChannel;
-    
-    /**
      * the parent node component
      */
     protected NodeComponent nodeComponent;
@@ -94,14 +88,11 @@ public class Predictor extends NodeComponent {
      * Creates a new instance of Consumer.
      *
      * @param predictorChannel the takable channel from which messages are input
-     * @param planEvaluatorChannel the puttable channel to which messages are output
      * @param nodeComponent the parent node component
      */
     protected Consumer (Takable predictorChannel,
-                        Puttable planEvaluatorChannel,
                         NodeComponent nodeComponent) { 
       this.predictorChannel = predictorChannel;
-      this.planEvaluatorChannel = planEvaluatorChannel;
       this.nodeComponent = nodeComponent;
     }
 
@@ -123,49 +114,41 @@ public class Predictor extends NodeComponent {
      * @param genericMsg the given input channel message
      */
     void dispatchMsg (GenericMsg genericMsg) {
-      if (genericMsg instanceof PredictedInputMsg)
-        processPredictedInputMsg((PredictedInputMsg) genericMsg);
-      else if (genericMsg instanceof SimulateScheduleMsg)
-        processSimulateScheduleMsg((SimulateScheduleMsg) genericMsg);
+      if (genericMsg instanceof PredictionRequestMsg)
+        respondToPredictionRequestMsg((PredictionRequestMsg) genericMsg);
+      else if (genericMsg instanceof PerceivedSensoryInputMsg)
+        processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
     }
   
     /**
-     * Simulates the schedule from an executor and sends the result to the plan evaluator.
+     * Responds to the prediction request message.
      *
-     * @param simulateScheduleMsg the simulate schedule message
+     * @param predictionRequestMsg the prediction request message
      */
-    protected void processSimulateScheduleMsg(SimulateScheduleMsg simulateScheduleMsg) {
-      controlledResources =  simulateScheduleMsg.getControlledResources();
-      taskCommand =  simulateScheduleMsg.getTaskCommand();
-      schedule =  simulateScheduleMsg.getSchedule();
+    protected void respondToPredictionRequestMsg(PredictionRequestMsg predictionRequestMsg) {
+      Object obj = predictionRequestMsg.getObj();
       //TODO
-    }
-    
-    /**
-     * Processes the predicted input message.
-     *
-     * @param predictedInputMsg the predicted input message
-     */
-    protected void processPredictedInputMsg(PredictedInputMsg predictedInputMsg) {
-      Object obj = predictedInputMsg.getObj();
-      Object data = predictedInputMsg.getData();
-      //TODO
-    }
-    
-    /**
-     * Sends the evaluate schedule message to the plan evaluator.
-     */
-    protected void sendEvaluateScheduleMsg() {
-      //TODO
-      Object result = null;
+      Object data = null;
       
-      EvaluateScheduleMsg evaluateScheduleMsg = new EvaluateScheduleMsg();
-      evaluateScheduleMsg.setSender(nodeComponent);
-      evaluateScheduleMsg.setControlledResources(controlledResources);
-      evaluateScheduleMsg.setTaskCommand(taskCommand);
-      evaluateScheduleMsg.setSchedule(schedule);
-      sendMsgToRecipient(planEvaluatorChannel, evaluateScheduleMsg);
+      PredictedInputMsg predictedInputMsg = new PredictedInputMsg();
+      predictedInputMsg.setSender(nodeComponent);
+      predictedInputMsg.setInReplyToMsg(predictionRequestMsg);
+      predictedInputMsg.setObj(obj);
+      predictedInputMsg.setData(data);
+      sendMsgToRecipient(predictedInputMsg.getReplyToChannel(), predictedInputMsg);
     }
+    
+    /**
+     * Processes the perceived sensory input message.
+     *
+     * @param perceivedSensoryInputMsg the perceived sensory input message
+     */
+    protected void processPerceivedSensoryInputMsg(PerceivedSensoryInputMsg perceivedSensoryInputMsg) {
+      Object obj = perceivedSensoryInputMsg.getObj();
+      Object data = perceivedSensoryInputMsg.getData();
+      //TODO
+    }
+    
   }
   
   //// Private Area

@@ -2211,12 +2211,16 @@ public class UnitTest extends TestCase {
 
         // SubL scripts
         try {
-            cycAccess.traceOn();
-            //cycAccess.traceOnDetailed();
             String script;
             Object responseObject;
             CycList responseList;
+            String responseString;
             boolean responseBoolean;
+
+            // environment
+            script = "(get-environment)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("\n", responseString);
 
             // definition
             script =
@@ -2283,15 +2287,27 @@ public class UnitTest extends TestCase {
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
 
-
-
-
             // assignment
             script = "(csetq a '(1 #$Dog #$Plant))";
             cycAccess.converseVoid(script);
             script = "(symbol-value 'a)";
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
+
+            script =
+                "(csetq a '(1 #$Dog #$Plant) \n" +
+                "       b '(2 #$Dog #$Plant) \n" +
+                "       c 3)";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'a)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
+            script = "(symbol-value 'b)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(2 #$Dog #$Plant)"), responseList);
+            script = "(symbol-value 'c)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(3), responseObject);
 
             script = "(cpush 4 a)";
             cycAccess.converseVoid(script);
@@ -2304,6 +2320,210 @@ public class UnitTest extends TestCase {
             script = "(symbol-value 'a)";
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
+
+            script = "(fi-set-parameter 'my-parm '(1 #$Dog #$Plant))";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'my-parm)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
+
+            script =
+                "(clet (a b) \n" +
+                "  (csetq a '(1 2 3)) \n" +
+                "  (csetq b (cpop a)) \n" +
+                "  (list a b))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("((2 3) (2 3))"), responseList);
+
+            // fi-get-parameter
+            script = "(csetq my-parm '(2 #$Dog #$Plant))";
+            cycAccess.converseVoid(script);
+            script = "(fi-get-parameter 'my-parm)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(2 #$Dog #$Plant)"), responseList);
+
+            // eval
+            script = "(eval '(csetq a 4))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(4), responseObject);
+            script = "(eval 'a)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(4), responseObject);
+
+            script = "(eval (list 'csetq 'a 5))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(5), responseObject);
+            script = "(eval 'a)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(5), responseObject);
+
+
+            // apply
+            script = "(apply #'+ '(1 2 3))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(6), responseObject);
+
+            script = "(apply #'+ 1 2 '(3 4 5))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(15), responseObject);
+
+            script = "(apply (function +) '(1 2 3))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(6), responseObject);
+
+            script = "(apply (function +) 1 2 '(3 4 5))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(15), responseObject);
+
+            script = "(apply #'my-copy-tree '((1 (2 (3)))))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 (2 (3)))"),
+                                responseList);
+
+            // funcall
+            script = "(funcall #'+ 1 2 3)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(6), responseObject);
+
+            script = "(funcall (function +) 1 2 3)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(6), responseObject);
+
+            script = "(funcall #'my-copy-tree (1 (2 (3))))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 (2 (3)))"),
+                                responseList);
+
+            // multiple-value-list
+            script = "(multiple-value-list (floor 5 3))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
+
+            // trace and untrace
+            script = "(untrace)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+            script = "(clear-trace-log)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+            script = "(get-trace-log)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("\n", responseString);
+
+            script = "(trace my-copy-tree)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(cycAccess.makeCycList("(my-copy-tree)"), responseObject);
+
+            script = "(trace)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(cycAccess.makeCycList("(my-copy-tree)"), responseObject);
+
+            script = "(my-copy-tree '(1 (2 (3))))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 (2 (3)))"),
+                                responseList);
+
+            script = "(get-trace-log)";
+            responseString = cycAccess.converseString(script);
+            String expectedTraceLog =
+                "\n" +
+                "  0: (MY-COPY-TREE (1 (2 (3))))\n" +
+                "    1: (MY-COPY-TREE 1)\n" +
+                "    1: returned 1 \n" +
+                "    1: (MY-COPY-TREE ((2 (3))))\n" +
+                "      2: (MY-COPY-TREE (2 (3)))\n" +
+                "        3: (MY-COPY-TREE 2)\n" +
+                "        3: returned 2 \n" +
+                "        3: (MY-COPY-TREE ((3)))\n" +
+                "          4: (MY-COPY-TREE (3))\n" +
+                "            5: (MY-COPY-TREE 3)\n" +
+                "            5: returned 3 \n" +
+                "            5: (MY-COPY-TREE NIL)\n" +
+                "            5: returned NIL \n" +
+                "          4: returned (3) \n" +
+                "          4: (MY-COPY-TREE NIL)\n" +
+                "          4: returned NIL \n" +
+                "        3: returned ((3)) \n" +
+                "      2: returned (2 (3)) \n" +
+                "      2: (MY-COPY-TREE NIL)\n" +
+                "      2: returned NIL \n" +
+                "    1: returned ((2 (3))) \n" +
+                "  0: returned (1 (2 (3))) \n";
+            Assert.assertEquals(expectedTraceLog,
+                                responseString);
+
+            script = "(trace floor)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(cycAccess.makeCycList("(FLOOR)"), responseObject);
+
+            script = "(floor 5 3)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(1), responseObject);
+
+            script = "(get-trace-log)";
+            responseString = cycAccess.converseString(script);
+            expectedTraceLog =
+                "\n" +
+                "  0: (FLOOR 5 3)\n" +
+                "  0: returned 1 2 \n";
+            Assert.assertEquals(expectedTraceLog,
+                                responseString);
+
+            script = "(floor 5 3)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(1), responseObject);
+            script = "(floor 5 3)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(1), responseObject);
+
+            script = "(clear-trace-log)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+            script = "(get-trace-log)";
+            responseString = cycAccess.converseString(script);
+            expectedTraceLog = "\n";
+            Assert.assertEquals(expectedTraceLog,
+                                responseString);
+
+            script = "(trace)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(cycAccess.makeCycList("(FLOOR MY-COPY-TREE)"), responseObject);
+
+            script = "(untrace floor)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(cycAccess.makeCycList("(FLOOR)"), responseObject);
+
+            script = "(floor 5 3)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(1), responseObject);
+
+            script = "(get-trace-log)";
+            responseString = cycAccess.converseString(script);
+            expectedTraceLog = "\n";
+            Assert.assertEquals(expectedTraceLog,
+                                responseString);
+
+            script = "(untrace)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+            // arithmetic
+            script = "(add1 2)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(3), responseObject);
+
+            script = "(eq (add1 2) 3)";
+            Assert.assertTrue(cycAccess.converseBoolean(script));
+
+            script = "(sub1 10)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(9), responseObject);
+
+            script = "(eq (sub1 10) 9)";
+            Assert.assertTrue(cycAccess.converseBoolean(script));
 
             // sequence
             script = "(progn (csetq a nil) (csetq a (list a)) (csetq a (list a)))";
@@ -2337,6 +2557,12 @@ public class UnitTest extends TestCase {
                      "       (b (add1 a)) " +
                      "       (c (sub1 b))) " +
                      "  c)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(1), responseObject);
+
+            script = "(clet ((*my-parm* 1)) " +
+                     "  (csetq a (fi-get-parameter '*my-parm*)) " +
+                     "  a)";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(new Integer(1), responseObject);
 
@@ -2396,6 +2622,9 @@ public class UnitTest extends TestCase {
             script = "(cand (cnot nil) (cor t nil))";
             responseBoolean = cycAccess.converseBoolean(script);
             Assert.assertTrue(responseBoolean);
+
+cycAccess.traceOn();
+
 
             // conditional sequencing
 

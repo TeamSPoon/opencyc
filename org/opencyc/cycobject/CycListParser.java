@@ -202,6 +202,22 @@ public class CycListParser  {
     }
 
     /**
+     * Expands #'s to (function s  when reading.
+     */
+    private void scanFunctionQuote() {
+        Integer i;
+
+        //System.out.println("#'");
+
+        if ((parenLevel > 0) && (parenLevel != readStack.sp))
+            readStack.push(consMarkerSymbol);
+
+        readStack.push(consMarkerSymbol);
+        quoteStack.push(new Integer(++parenLevel));
+        readStack.push(CycObjectFactory.makeCycSymbol("function"));
+    }
+
+    /**
      * Scans a left parenthesis when reading.
      */
     private void ScanLeftParen() {
@@ -354,6 +370,17 @@ public class CycListParser  {
             w = cycAccess.makeCycConstant(st.sval);
         else if (st.sval.startsWith("?"))
             w = CycObjectFactory.makeCycVariable(st.sval);
+        else if (st.sval.equals("#")) {
+            int nextTok = st.nextToken();
+            if (nextTok == 39) {
+                scanFunctionQuote();
+                return;
+            }
+            else {
+                st.pushBack();
+                w = CycObjectFactory.makeCycSymbol(st.sval);
+            }
+        }
         else
             w = CycObjectFactory.makeCycSymbol(st.sval);
 

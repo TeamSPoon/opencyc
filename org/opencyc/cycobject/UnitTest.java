@@ -483,6 +483,11 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.makeCycList("(A)"), cycList17.first());
             Assert.assertEquals(cycAccess.makeCycList("(B C)"), cycList17.second());
             Assert.assertEquals(cycAccess.makeCycList("(((D)))"), cycList17.third());
+            listAsString = "(apply #'+ '(1 2 3))";
+            CycList cycList18 = cycAccess.makeCycList(listAsString);
+            Assert.assertEquals("(APPLY (FUNCTION +) (QUOTE (1 2 3)))",
+                                cycList18.toString());
+
         }
         catch (Exception e) {
             e.printStackTrace();

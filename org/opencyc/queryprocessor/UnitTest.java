@@ -59,24 +59,23 @@ public class UnitTest extends TestCase {
             testSuite = new TestSuite(UnitTest.class);
         else {
             testSuite = new TestSuite();
-            //testSuite.addTest(new UnitTest("testQueryParser"));
-            //testSuite.addTest(new UnitTest("testLiteralAsker1"));
-            //testSuite.addTest(new UnitTest("testHashJoiner"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor1"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor3"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor4"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor5"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor6"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor7"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor8"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor9"));
+            testSuite.addTest(new UnitTest("testQueryParser"));
+            testSuite.addTest(new UnitTest("testLiteralAsker1"));
+            testSuite.addTest(new UnitTest("testHashJoiner"));
+            testSuite.addTest(new UnitTest("testQueryProcessor1"));
+            testSuite.addTest(new UnitTest("testQueryProcessor4"));
+            testSuite.addTest(new UnitTest("testQueryProcessor5"));
+            testSuite.addTest(new UnitTest("testQueryProcessor6"));
+            testSuite.addTest(new UnitTest("testQueryProcessor7"));
+            testSuite.addTest(new UnitTest("testQueryProcessor8"));
+            testSuite.addTest(new UnitTest("testQueryProcessor9"));
             testSuite.addTest(new UnitTest("testQueryProcessor11"));
-            //testSuite.addTest(new UnitTest("testBackchainer1"));
-            //testSuite.addTest(new UnitTest("testBackchainer2"));
-            //testSuite.addTest(new UnitTest("testBackchainer3"));
-            //testSuite.addTest(new UnitTest("testBackchainer4"));
-            //testSuite.addTest(new UnitTest("testBackchainer5"));
-            //testSuite.addTest(new UnitTest("testBackchainer6"));
+            testSuite.addTest(new UnitTest("testBackchainer1"));
+            testSuite.addTest(new UnitTest("testBackchainer2"));
+            testSuite.addTest(new UnitTest("testBackchainer3"));
+            testSuite.addTest(new UnitTest("testBackchainer4"));
+            testSuite.addTest(new UnitTest("testBackchainer5"));
+            testSuite.addTest(new UnitTest("testBackchainer6"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -294,38 +293,6 @@ public class UnitTest extends TestCase {
         System.out.println("** testQueryProcessor1 OK **");
     }
 
-
-    /**
-     * Tests the <tt>QueryProcessor</tt> class.
-     */
-    public void testQueryProcessor3() {
-        System.out.println("** testQueryProcessor3 **");
-
-        // European Cathedrals with arg type discovery
-        String whatIsInAustinString =
-            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
-        System.out.println(whatIsInAustinString);
-        QueryProcessor whatIsInAustinProblem2 = new QueryProcessor();
-        whatIsInAustinProblem2.setVerbosity(3);
-        // Request one solution.
-        //whatIsInAustinProblem2.nbrSolutionsRequested = new Integer(1);
-        // Request all solutions.
-        whatIsInAustinProblem2.nbrSolutionsRequested = null;
-        try {
-            CycConstant inferencePSC =
-                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
-            whatIsInAustinProblem2.mt = inferencePSC;
-            ArrayList solutions = whatIsInAustinProblem2.ask(whatIsInAustinString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testQueryProcessor3 OK **");
-    }
 
     /**
      * Tests the <tt>QueryProcessor</tt> class.

@@ -64,32 +64,6 @@ public abstract class Procedure {
    */
   public abstract Object execute(ArrayList inputs);
 
-  //// Protected Area
-
-  /** the class dictionary of execute methods */
-  protected static HashMap executeMethodDictionary;
-
-  /** the procedure name */
-  protected static String name;
-
-  /** the procedure namespace */
-  protected String namespace;
-
-  /** the parameter names each of which is a String */
-  protected static ArrayList parameterNames;
-
-  /** the parameter types each of which is a Class */
-  protected static ArrayList parameterTypes;
-
-  /** the output type */
-  protected Class outputType;
-
-  /**
-   * Registers this procedure's execute method so that it may be subsequently
-   * called with its parameter list and without its list of parameter types.
-   */
-  protected void register() {
-  }
 
   /**
    * Returns true if the given object equals this procedure.
@@ -109,6 +83,150 @@ public abstract class Procedure {
     return true;
   }
 
+
+  /**
+   * Gets the procedure state
+   *
+   * @return the procedure state
+   */
+  public State getState () {
+    return state;
+  }
+
+  /**
+   * Sets the procedure state
+   *
+   * @param state the procedure state
+   */
+  public void setState (State state) {
+    this.state = state;
+  }
+
+  /**
+   * Gets the procedure name
+   *
+   * @return the procedure name
+   */
+  public String getName () {
+    return name;
+  }
+
+  /**
+   * Sets the procedure name
+   *
+   * @param name the procedure name
+   */
+  public void setName (String name) {
+    this.name = name;
+  }
+
+  /**
+   * Gets the procedure namespace
+   *
+   * @return the procedure namespace
+   */
+  public String getNamespace () {
+    return namespace;
+  }
+
+  /**
+   * Sets the procedure namespace
+   *
+   * @param namespace the procedure namespace
+   */
+  public void setNamespace (String namespace) {
+    this.namespace = namespace;
+  }
+  
+  /**
+   * Gets the parameter names each of which is a String
+   *
+   * @return the parameter names each of which is a String
+   */
+  public ArrayList getParameterNames () {
+    return parameterNames;
+  }
+
+  /**
+   * Sets the parameter names each of which is a String
+   *
+   * @param parameterNames the parameter names each of which is a String
+   */
+  public void setParameterNames (ArrayList parameterNames) {
+    this.parameterNames = parameterNames;
+  }
+
+  /**
+   * Gets the parameter types each of which is a Class
+   *
+   * @return the parameter types each of which is a Class
+   */
+  public ArrayList getParameterTypes () {
+    return parameterTypes;
+  }
+
+  /**
+   * Sets the parameter types each of which is a Class
+   *
+   * @param parameterTypes the parameter types each of which is a Class
+   */
+  public void setParameterTypes (ArrayList parameterTypes) {
+    this.parameterTypes = parameterTypes;
+  }
+
+  /**
+   * Gets the output type
+   *
+   * @return the output type
+   */
+  public Class getOutputType () {
+    return outputType;
+  }
+
+  /**
+   * Sets the output type
+   *
+   * @param outputType the output type
+   */
+  public void setOutputType (Class outputType) {
+    this.outputType = outputType;
+  }
+  
+  //// Protected Area
+
+  /**
+   * Registers this procedure's execute method so that it may be subsequently
+   * called with its parameter list and without its list of parameter types.
+   */
+  protected void register() {
+  }
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
   /** the procedure state */
   protected State state;
+  
+    /** the class dictionary of execute methods */
+  protected static HashMap executeMethodDictionary;
+
+  /** the procedure name */
+  protected static String name;
+
+  /** the procedure namespace */
+  protected String namespace;
+
+  /** the parameter names each of which is a String */
+  protected static ArrayList parameterNames;
+
+  /** the parameter types each of which is a Class */
+  protected static ArrayList parameterTypes;
+
+  /** the output type */
+  protected Class outputType;
+
+  //// Main
+  
+
 }

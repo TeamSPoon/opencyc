@@ -634,6 +634,36 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
+        // addNew
+        try {
+            CycList cycList46 = cycAccess.makeCycList("(1 2 3 4 5)");
+            Assert.assertEquals(5, cycList46.size());
+            cycList46.addNew(new Integer(6));
+            Assert.assertEquals(6, cycList46.size());
+            cycList46.addNew(new Integer(2));
+            Assert.assertEquals(6, cycList46.size());
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        // addAllNew
+        try {
+            CycList cycList47 = cycAccess.makeCycList("(1 2 3 4 5)");
+            Assert.assertEquals(5, cycList47.size());
+            CycList cycList48 = cycAccess.makeCycList("(6 7 8 9 10)");
+            Assert.assertEquals(5, cycList48.size());
+            cycList47.addAllNew(cycList48);
+            Assert.assertEquals(10, cycList47.size());
+            CycList cycList49 = cycAccess.makeCycList("(2 5 8 9 11)");
+            Assert.assertEquals(5, cycList49.size());
+            cycList47.addAllNew(cycList49);
+            Assert.assertEquals(11, cycList47.size());
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
         // last
         CycList cycList46 = cycAccess.makeCycList("(8 7 6)");
         Assert.assertEquals(new Integer(6), cycList46.last());

@@ -303,7 +303,7 @@ public class CycList extends ArrayList {
     /**
      * Returns the CycList after removing the first element.
      *
-     * @ret urn new <tt>CycList</tt> with first element removed.
+     * @return new <tt>CycList</tt> with first element removed.
      */
     public CycList rest() {
         if (this.size() == 0)
@@ -314,10 +314,29 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Returns a new <tt>CycList</tt> whose elements are the reverse of
-     * this <tt>CycList</tt>, which is unaffected.
+     * Adds the given element to this list if it is not already contained.
+     */
+    public void addNew(Object object) {
+        if (! this.contains(object))
+            this.add(object);
+    }
+
+    /**
+     * Adds the given elements to this list if they are not already contained.
+     */
+    public void addAllNew(Collection objects) {
+        Iterator iter = objects.iterator();
+        while (true) {
+            if (! iter.hasNext())
+                break;
+            this.addNew(iter.next());
+        }
+    }
+
+    /**
+     * Returns true iff this list contains duplicate elements.
      *
-     * @return new <tt>CycList</tt> with elements reversed.
+     * @return true iff this list contains duplicate elements
      */
     public boolean containsDuplicates() {
         if (! isProperList)
@@ -479,27 +498,27 @@ public class CycList extends ArrayList {
    * <tt>String</tt> representation this <tt>CycList</tt>
    * @return a `pretty-printed' <tt>String</tt> representation of this
    * <tt>CycList</tt>.
-   */  
+   */
   public String toPrettyString(String indent) {
     StringBuffer result = new StringBuffer(indent + "(");
     for (int i = 0; i < this.size(); i++) {
       if (i > 0)
-	result.append(" ");
+    result.append(" ");
       Object element = this.get(i);
       if (element instanceof String) {result.append("\"" + element + "\"");}
-      else if (element instanceof CycList) 
-	{result.append("\n" + ((CycList)element).toPrettyString(indent + "  "));}
+      else if (element instanceof CycList)
+    {result.append("\n" + ((CycList)element).toPrettyString(indent + "  "));}
       else {result.append(element.toString());}
     }
     if (!isProperList) {
       result.append(" . ");
       if (dottedElement instanceof String) {
-	result.append("\"");
-	result.append(dottedElement);
-	result.append("\"");
+    result.append("\"");
+    result.append(dottedElement);
+    result.append("\"");
       }
       else
-	result.append(this.dottedElement.toString());
+    result.append(this.dottedElement.toString());
     }
     result.append(")");
     return result.toString();

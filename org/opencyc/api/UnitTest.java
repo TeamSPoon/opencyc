@@ -550,6 +550,19 @@ public class UnitTest extends TestCase {
         Assert.assertTrue((genlPreds.toString().equals("(preActors)")) ||
                           (genlPreds.toString().equals("(actors)")));
 
+        // getAllGenlPreds.
+        List allGenlPreds = null;
+        try {
+            CycConstant target = cycAccess.getKnownConstantByGuid("c10afaed-9c29-11b1-9dad-c379636f7270");
+            allGenlPreds = cycAccess.getAllGenlPreds(target);
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(allGenlPreds);
+        Assert.assertTrue(allGenlPreds.size() > 2);
+
         // getArg1Formats.
         List arg1Formats = null;
         try {
@@ -2331,6 +2344,11 @@ public class UnitTest extends TestCase {
             String responseString;
             boolean responseBoolean;
 
+            // turn on api if not on.
+            script = "(pwhen (boundp '*eval-in-api?*) \n" +
+                     "       (csetq *eval-in-api?* t))";
+            cycAccess.converseVoid(script);
+
             // environment
             script = "(get-environment)";
             responseString = cycAccess.converseString(script);
@@ -2466,6 +2484,16 @@ public class UnitTest extends TestCase {
                 "  (list a b))";
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("((2 3) (2 3))"), responseList);
+
+            // boundp
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script = "(get-environment)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("\n", responseString);
+            Assert.assertTrue(! cycAccess.converseBoolean("(boundp 'a)"));
+            cycAccess.converseVoid("(csetq a nil)");
+            Assert.assertTrue(cycAccess.converseBoolean("(boundp 'a)"));
 
             // fi-get-parameter
             script = "(csetq my-parm '(2 #$Dog #$Plant))";

@@ -1270,6 +1270,15 @@ public class CycAccess {
     }
 
     /**
+     * Gets a list of all of the genlPreds for a CycConstant predicate, using an upward closure.
+     * @parameter predicate the predicate for which all the genlPreds are obtained
+     * @return a list of all of the genlPreds for a CycConstant predicate, using an upward closure
+     */
+    public CycList getAllGenlPreds (CycConstant predicate)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (all-genl-predicates " + predicate.stringApiValue() + ")))");
+    }
+
+    /**
      * Gets a list of the arg1Isas for a CycConstant predicate.
      */
     public CycList getArg1Isas (CycConstant predicate)  throws IOException, UnknownHostException {

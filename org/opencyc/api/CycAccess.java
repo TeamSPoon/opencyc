@@ -3,7 +3,6 @@ package org.opencyc.api;
 import java.util.*;
 import java.net.*;
 import java.io.*;
-import java.lang.IllegalArgumentException;
 import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
 
@@ -813,7 +812,7 @@ public class CycAccess {
      * "an  independent country is a kind of country"
      *
      */
-    public ArrayList getWhyIsaParaphrase (CycConstant spec, CycConstant genl)  throws IOException, UnknownHostException {
+    public ArrayList getWhyIsaParaphrase (CycConstant spec, CycConstant genl)  throws IOException {
         String command = "(with-all-mts (why-isa? " + spec.cycName() + " " + genl.cycName() + "))";
         CycList listAnswer = converseList(command);
         ArrayList answerPhrases = new ArrayList();
@@ -828,38 +827,46 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the genlPreds for a CycConstant.
+     * Gets a list of the genlPreds for a CycConstant predicate.
      */
-    public CycList getGenlPreds (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (genl-predicates " + cycConstant.cycName() + ")))");
+    public CycList getGenlPreds (CycConstant predicate)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (genl-predicates " + predicate.cycName() + ")))");
     }
 
     /**
-     * Gets a list of the arg1Isas for a CycConstant.
+     * Gets a list of the arg1Isas for a CycConstant predicate.
      */
-    public CycList getArg1Isas (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(remove-duplicates (with-all-mts (arg1-isa " + cycConstant.cycName() + ")))");
+    public CycList getArg1Isas (CycConstant predicate)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (arg1-isa " + predicate.cycName() + ")))");
     }
 
     /**
-     * Gets a list of the arg2Isas for a CycConstant.
+     * Gets a list of the arg2Isas for a CycConstant predicate.
      */
-    public CycList getArg2Isas (CycConstant cycConstant)  throws IOException, UnknownHostException {
-       return converseList("(remove-duplicates (with-all-mts (arg2-isa " + cycConstant.cycName() + ")))");
+    public CycList getArg2Isas (CycConstant predicate)  throws IOException, UnknownHostException {
+       return converseList("(remove-duplicates (with-all-mts (arg2-isa " + predicate.cycName() + ")))");
     }
 
     /**
-     * Gets a list of the arg1Formats for a CycConstant.
+     * Gets a list of the argNIsas for a CycConstant predicate.
      */
-    public CycList getArg1Formats (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (arg1-format " + cycConstant.cycName() + "))");
+    public CycList getArgNIsas (CycConstant predicate, int argPosition)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (argn-isa " + predicate.cycName() +
+                            " " + argPosition + ")))");
     }
 
     /**
-     * Gets a list of the arg2Formats for a CycConstant.
+     * Gets a list of the arg1Formats for a CycConstant predicate.
      */
-    public CycList getArg2Formats (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseList("(with-all-mts (arg2-format " + cycConstant.cycName() + "))");
+    public CycList getArg1Formats (CycConstant predicate)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (arg1-format " + predicate.cycName() + "))");
+    }
+
+    /**
+     * Gets a list of the arg2Formats for a CycConstant predicate.
+     */
+    public CycList getArg2Formats (CycConstant predicate)  throws IOException, UnknownHostException {
+        return converseList("(with-all-mts (arg2-format " + predicate.cycName() + "))");
     }
 
     /**

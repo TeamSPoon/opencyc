@@ -386,6 +386,20 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(arg2Isas);
         Assert.assertEquals("(SomethingExisting)", arg2Isas.toString());
 
+        // getArgNIsas.
+        List argNIsas = null;
+        try {
+            argNIsas = cycAccess.getArgNIsas(cycAccess.getConstantByName("#$doneBy"), 1);
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(argNIsas);
+        Assert.assertEquals("(Event)", argNIsas.toString());
+
         // isCollection.
         boolean answer = false;
         try {

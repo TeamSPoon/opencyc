@@ -1,7 +1,9 @@
 package org.opencyc.constraintsolver;
 
 import java.util.*;
+import java.io.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * Provides argument type consistency checking for candidate backchaining rules, and also
@@ -78,7 +80,7 @@ public class ArgumentTypeConstrainer {
      * @param cycVariable the variable used to construct the returned rules
      * @return the argument type constraint rules for the given rule
      */
-    public ArrayList retrieveArgumentTypeConstraintRules(Rule rule) {
+    public ArrayList retrieveArgumentTypeConstraintRules(Rule rule) throws IOException {
         ArrayList result = new ArrayList();
         CycConstant predicate = rule.getPredicate();
         for (int i = 0; i < rule.getArguments().size(); i++) {
@@ -86,6 +88,7 @@ public class ArgumentTypeConstrainer {
             if (rule.getVariables().contains(argument)) {
                 CycVariable cycVariable = (CycVariable) argument;
                 int argPosition = i + 1;
+                System.out.println("rule=" + rule.cyclify() + " variable=" + cycVariable + " argPosition=" + argPosition);
                 result.addAll(retrieveArgumentTypeConstraintRules(predicate,
                                                                   argPosition,
                                                                   cycVariable));
@@ -106,10 +109,10 @@ public class ArgumentTypeConstrainer {
      */
     public ArrayList retrieveArgumentTypeConstraintRules(CycConstant predicate,
                                                             int argPosition,
-                                                            CycVariable cycVariable) {
+                                                            CycVariable cycVariable) throws IOException {
         ArrayList result = new ArrayList();
         result.addAll(retrieveArgNIsas(predicate, argPosition, cycVariable));
-        result.addAll(retrieveArgNGenls(predicate, argPosition, cycVariable));
+        //result.addAll(retrieveArgNGenls(predicate, argPosition, cycVariable));
         return result;
     }
 
@@ -126,16 +129,25 @@ public class ArgumentTypeConstrainer {
      */
     public ArrayList retrieveArgNIsas(CycConstant predicate,
                                          int argPosition,
-                                         CycVariable cycVariable) {
+                                         CycVariable cycVariable) throws IOException {
         ArrayList result = new ArrayList();
-
-        //TODO retrieve argNIsa constraints
-        Rule rule = null;
-        if (verbosity > 3)
-            System.out.println(predicate +
-                               " has #$argNIsa constraint at arg position " + argPosition +
-                               "  \n" + rule);
-
+        CycList isas = CycAccess.current().getArgNIsas(predicate, argPosition);
+        for (int i = 0; i < isas.size(); i++) {
+            CycConstant collection = (CycConstant) isas.get(i);
+            if (collection.equals(CycAccess.current().getConstantByName("Thing"))) {
+                if (verbosity > 3)
+                    System.out.println("ignoring " + predicate.cyclify() + " arg type #$isa #$Thing at arg position " + argPosition);
+            }
+            else {
+                String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
+                Rule rule = new Rule(ruleString);
+                result.add(rule);
+                if (verbosity > 3)
+                    System.out.println(predicate.cyclify() +
+                                       " has #$argNIsa constraint at arg position " + argPosition +
+                                       "  \n" + rule.cyclify());
+            }
+        }
         return result;
     }
 

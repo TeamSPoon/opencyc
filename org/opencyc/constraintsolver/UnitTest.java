@@ -64,6 +64,7 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testBinding"));
             //testSuite.addTest(new UnitTest("testSolution"));
             //testSuite.addTest(new UnitTest("testRuleEvaluator"));
+            //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
             testSuite.addTest(new UnitTest("testConstraintProblem"));
         }
         TestResult testResult = new TestResult();
@@ -513,6 +514,47 @@ public class UnitTest extends TestCase {
     }
 
     /**
+     * Tests the <tt>ArgumentTypeConstrainer</tt> class.
+     */
+    public void testArgumentTypeConstrainer() {
+        System.out.println("** testArgumentTypeConstrainer **");
+
+        ConstraintProblem constraintProblem = null;
+        try {
+            constraintProblem = new ConstraintProblem();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        try{
+            Rule rule1 = new Rule("(#$countryOfCity ?country ?city)");
+            ArrayList argConstraints =
+                constraintProblem.argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(rule1);
+            Rule rule2 = new Rule ("(#$isa ?country #$Country)");
+            Rule rule3 = new Rule ("(#$isa ?city #$City)");
+            Assert.assertNotNull(argConstraints);
+            Assert.assertEquals(2, argConstraints.size());
+            Assert.assertTrue(argConstraints.contains(rule2));
+            Assert.assertTrue(argConstraints.contains(rule3));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            CycAccess.current().close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testArgumentTypeConstrainer OK **");
+    }
+
+    /**
      * Tests the <tt>Unifier</tt> class.
      */
     public void testUnifier() {
@@ -651,6 +693,29 @@ public class UnitTest extends TestCase {
     public void testConstraintProblem() {
         System.out.println("** testConstraintProblem **");
 
+        // European Cathedrals with arg type discovery
+        String europeanCathedralsString2 =
+            "(#$and " +
+            "  (#$isa ?country #$WesternEuropeanCountry) " +
+            "  (#$isa ?cathedral #$Cathedral) " +
+            "  (#$countryOfCity ?country ?city) " +
+            "  (#$objectFoundInLocation ?cathedral ?city)) ";
+        System.out.println(europeanCathedralsString2);
+        ConstraintProblem europeanCathedralsProblem2 = new ConstraintProblem();
+        europeanCathedralsProblem2.setVerbosity(8);
+        // Request one solution.
+        europeanCathedralsProblem2.nbrSolutionsRequested = new Integer(1);
+        // Request all solutions.
+        //europeanCathedralsProblem2.nbrSolutionsRequested = null;
+        try {
+            europeanCathedralsProblem2.mt =
+                CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+        }
+        catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        Assert.assertNotNull(europeanCathedralsProblem2.solve(CycAccess.current().makeCycList(europeanCathedralsString2)));
+
         //Zebra Puzzle
         String zebraPuzzleString =
             "(#$and " +
@@ -714,7 +779,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        zebraProblem.setVerbosity(1);
+        zebraProblem.setVerbosity(9);
         ArrayList solutions = zebraProblem.solve(zebraPuzzleCycList);
         Assert.assertNotNull(solutions);
 
@@ -789,6 +854,7 @@ public class UnitTest extends TestCase {
         }
         solutions = europeanCathedralsProblem.solve(cycAccess.makeCycList(europeanCathedralsString));
         Assert.assertNotNull(solutions);
+
 
         System.out.println("** testConstraintProblem OK **");
     }

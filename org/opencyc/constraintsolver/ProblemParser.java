@@ -81,13 +81,15 @@ public class ProblemParser {
             Rule rule = (Rule) constraintProblem.simplifiedRules.get(i);
             if (rule.isVariableDomainPopulatingRule())
                 constraintProblem.domainPopulationRules.add(rule);
-            else
+            else {
                 constraintProblem.constraintRules.add(rule);
+                ArrayList argConstraints = constraintProblem.argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(rule);
+                constraintProblem.domainPopulationRules.addAll(argConstraints);
+            }
         }
         if (verbosity > 1)
             constraintProblem.displayConstraintRules();
     }
-
 
     /**
      * Gathers the unique variables used in this constraint problem.

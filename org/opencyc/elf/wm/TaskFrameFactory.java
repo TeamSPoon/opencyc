@@ -12,6 +12,8 @@ import org.opencyc.elf.bg.taskframe.TaskFrame;
 
 import org.opencyc.elf.bg.planner.Resource;
 
+import org.opencyc.elf.goal.Goal;
+
 import org.opencyc.elf.s.ConsoleInput;
 import org.opencyc.elf.s.Sensor;
 
@@ -84,8 +86,8 @@ public class TaskFrameFactory {
     taskFrame.addScheduleInfo(schedule, 
                               consoleOutput, 
                               consoleInput);
-    
-    //taskFrame.setTaskGoal(taskGoal);    
+    taskFrame.setTaskGoal(GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT));   
+    TaskFrameLibrary.getInstance().addTaskFrame(taskFrame);
   }
   
   //// Protected Area

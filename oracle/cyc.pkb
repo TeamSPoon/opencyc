@@ -36,7 +36,7 @@ IS
  * Oracle Java Developer's Guide
  *   http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90209/toc.htm
  * Oracle Java Stored Procedures Developer's Guide (especially part 3)
- *   http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90210/toc.htm
+ *   http://download-west.oracle.com/docs/cd/B10501_01/java.920/a96659/toc.htm
  * Oracle JDBC Developer's Guide and Reference (part 10 and 18 ->connecting to internal driver)
  *   http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90211/toc.htm
  * 
@@ -91,6 +91,15 @@ AS LANGUAGE JAVA
 PROCEDURE assertGaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 )
 AS LANGUAGE JAVA
 	NAME 'CycJsprocs.assertGaf( java.lang.String, java.lang.String )';
+
+/***************************************************************************
+ *
+ * un asserts a ground atomic formula
+ *
+ ***************************************************************************/
+PROCEDURE unassertGaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 )
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.unassertGaf( java.lang.String, java.lang.String )';
 
 /***************************************************************************
  *
@@ -160,6 +169,22 @@ FUNCTION askWithVariable( query_in IN VARCHAR2, variable_in IN VARCHAR2, mt_in I
 RETURN cyclist_type
 AS LANGUAGE JAVA
 	NAME 'CycJsprocs.askWithVariable( java.lang.String, java.lang.String, java.lang.String )
+		return oracle.sql.ARRAY';
+
+/***************************************************************************
+ *
+ * Extended askWithVariable
+ * Performs a query, returns a table of varchar2 with bindings of the variable.
+ *
+ ***************************************************************************/
+FUNCTION askWithVariable(
+    query_in IN VARCHAR2,
+    variable_in IN VARCHAR2,
+    mt_in IN VARCHAR2,
+    backchain_in IN NUMBER )
+RETURN cyclist_type
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.askWithVariable( java.lang.String, java.lang.String, java.lang.String, int )
 		return oracle.sql.ARRAY';
 
 /***************************************************************************

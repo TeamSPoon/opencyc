@@ -45,15 +45,17 @@ PROCEDURE endConnection;
 
 PROCEDURE makeCycConstant( constant_in IN VARCHAR2 );
 
-PROCEDURE assertgaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 );
-
 PROCEDURE createMicrotheory(
     mtname_in IN VARCHAR2,
     comment_in IN VARCHAR2,
     isamt_in IN VARCHAR2,
     genlmts_in IN cyclist_type );
 
-FUNCTION assertgaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 )
+PROCEDURE assertGaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 );
+
+PROCEDURE unassertGaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 );
+
+FUNCTION assertGaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 )
 RETURN VARCHAR2;
 
 PROCEDURE assertWithTranscript( sentence_in IN VARCHAR2, mt_in IN VARCHAR2 );
@@ -65,6 +67,13 @@ FUNCTION isQueryTrue( query_in IN VARCHAR2, mt_in IN VARCHAR2 )
 RETURN NUMBER;
 
 FUNCTION askWithVariable( query_in IN VARCHAR2, variable_in IN VARCHAR2, mt_in VARCHAR2 )
+RETURN cyclist_type;
+
+FUNCTION askWithVariable(
+    query_in IN VARCHAR2,
+    variable_in IN VARCHAR2,
+    mt_in IN VARCHAR2,
+    backchain_in IN NUMBER )
 RETURN cyclist_type;
 
 FUNCTION getBackChainRules( predicate_in IN VARCHAR2 )

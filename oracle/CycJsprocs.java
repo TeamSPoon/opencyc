@@ -134,6 +134,25 @@ public class CycJsprocs {
     }
 
     /**
+     * Unasserts the given ground atomic formula (gaf) in the specified microtheory MT.
+     *
+     * @param gaf the gaf in the form of a CycList
+     * @param mt the microtheory in which the assertion is made
+     */
+    public static void unassertGaf (String gaf, String mt)
+        throws RuntimeException {
+        try {
+            CycFort cmt = cycAccess.getKnownConstantByName (mt);
+            CycList cgaf = cycAccess.makeCycList (gaf);
+            cycAccess.unassertGaf (cgaf, cmt);
+        }
+        catch (Exception e) {
+            throw new RuntimeException (e.getMessage());
+        }
+    }
+
+
+    /**
      * Wrapper of Cyc Java API assertGaf, function variant.
      * 
      * Same as previous, but returns something, so it can be called by a pl/sql function,
@@ -255,6 +274,32 @@ public class CycJsprocs {
             CycVariable cvar = new CycVariable (var);
             CycFort cmt = cycAccess.getKnownConstantByName (mt);
             CycList answer = cycAccess.askWithVariable (cquery, cvar, cmt);
+
+            return cycListToArray (answer);
+        }
+            catch (Exception e) {
+            throw new RuntimeException( e.getMessage() );
+        }
+    }
+
+    /**
+     * Wrapper of Cyc Java API askWithVariable.
+     * 
+     * Asks a question with one variable.
+     *
+     * @param query is e.g. (#$isa ?X #$Employee)
+     * @param var is the variable of which bindings will be returned
+     * @param mt is e.g. InferencePSC
+     * @param backchain is the maximum number of backchain steps to perform
+     * @return oracle array type with bindings.
+     */
+    public static oracle.sql.ARRAY askWithVariable (String query, String var, String mt, int backchain )
+        throws RuntimeException, CycApiException, IOException, SQLException, UnknownHostException {
+        try {
+            CycList cquery = cycAccess.makeCycList (query);
+            CycVariable cvar = new CycVariable (var);
+            CycFort cmt = cycAccess.getKnownConstantByName (mt);
+            CycList answer = cycAccess.askWithVariable (cquery, cvar, cmt, backchain );
 
             return cycListToArray (answer);
         }
@@ -425,41 +470,4 @@ public class CycJsprocs {
         cycAccess.kill(cycConstant);
     }
 
-    /**
-     * Converses with Cyc to perform an API command whose result is returned is an list
-     * Convert to cyclified string to enable conversion to VARCHAR2.
-     *
-     * @param command the command string or CycList
-     * @return the result of processing the API command
-     */
-    public static String testCyclify (String instring)
-        throws RuntimeException {
-        try {
-            CycList cgaf = cycAccess.makeCycList (instring);
-            StringBuffer result = new StringBuffer("(");
-            String cyclifiedObject = null;
-            CycConstant constant = null;
-            for (int i = 0; i < cgaf.size(); i++) {
-                Object obj = cgaf.get(i);
-                String strobj = obj.toString();
-                if (obj == null)
-                    throw new RuntimeException("Invalid null element after " + result);
-                try {
-                    constant = cycAccess.getKnownConstantByName( strobj );
-                    cyclifiedObject = constant.cyclify();
-                }
-                catch (CycApiException e) {
-                    cyclifiedObject = strobj;
-                }
-                if (i > 0)
-                    result.append(" ");
-                result.append(cyclifiedObject);
-            }
-            result.append(")");
-            return result.toString();
-        }
-        catch (Exception e) {
-            throw new RuntimeException( e.getMessage() );
-        }
-    }
 }

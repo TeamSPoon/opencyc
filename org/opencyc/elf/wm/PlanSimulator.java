@@ -10,6 +10,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.EvaluateScheduleMsg;
 import org.opencyc.elf.message.PredictedInputMsg;
+import org.opencyc.elf.message.PredictionRequestMsg;
 import org.opencyc.elf.message.SimulateScheduleMsg;
 
 //// External Imports
@@ -59,13 +60,16 @@ public class PlanSimulator extends NodeComponent {
    * Creates a new instance of PlanSimulator with the given
    * input and output message channels.
    *
-   * @param planSimulationChannel the takable channel from which messages are input
-   * @param planEvaluationChannel the puttable channel to which messages are output
+     * @param planEvaluatorChannel the puttable channel to which messages are output for the plan
+     * evaluator
+     * @param predictorChannel the puttable channel to which messages are output for the predictor
    */
-  public PlanSimulator (Takable planSimulationChannel,
-                        Puttable planEvaluatorChannel) {
-    consumer = new Consumer(planSimulationChannel,
+  public PlanSimulator (Takable planSimulatorChannel,
+                        Puttable planEvaluatorChannel,
+                        Puttable predictorChannel) {
+    consumer = new Consumer(planSimulatorChannel,
                             planEvaluatorChannel,
+                            predictorChannel,
                             this);
     executor = new ThreadedExecutor();
     try {
@@ -89,12 +93,17 @@ public class PlanSimulator extends NodeComponent {
     /**
      * the takable channel from which messages are input
      */
-    protected final Takable planSimulationChannel;
+    protected final Takable planSimulatorChannel;
     
     /**
      * the puttable channel to which messages are output for the plan evaluator
      */
     protected final Puttable planEvaluatorChannel;
+    
+    /**
+     * the puttable channel to which messages are output for the predictor
+     */
+    protected final Puttable predictorChannel;
     
     /**
      * the parent node component
@@ -119,15 +128,19 @@ public class PlanSimulator extends NodeComponent {
     /**
      * Creates a new instance of Consumer.
      *
-     * @param planSimulationChannel the takable channel from which messages are input
-     * @param planEvaluatorChannel the puttable channel to which messages are output
+     * @param planSimulatorChannel the takable channel from which messages are input
+     * @param planEvaluatorChannel the puttable channel to which messages are output for the plan
+     * evaluator
+     * @param predictorChannel the puttable channel to which messages are output for the predictor
      * @param nodeComponent the parent node component
      */
-    protected Consumer (Takable planSimulationChannel,
+    protected Consumer (Takable planSimulatorChannel,
                         Puttable planEvaluatorChannel,
+                        Puttable predictorChannel,
                         NodeComponent nodeComponent) { 
-      this.planSimulationChannel = planSimulationChannel;
+      this.planSimulatorChannel = planSimulatorChannel;
       this.planEvaluatorChannel = planEvaluatorChannel;
+      this.predictorChannel = predictorChannel;
       this.nodeComponent = nodeComponent;
     }
 
@@ -137,7 +150,7 @@ public class PlanSimulator extends NodeComponent {
     public void run () {
       try {
         while (true) { 
-          dispatchMsg((GenericMsg) planSimulationChannel.take()); 
+          dispatchMsg((GenericMsg) planSimulatorChannel.take()); 
         }
       }
       catch (InterruptedException ex) {}
@@ -166,6 +179,20 @@ public class PlanSimulator extends NodeComponent {
       schedule =  simulateScheduleMsg.getSchedule();
       //TODO
     }
+    
+    /**
+     * Requests a predicted input from the predictor.
+     */
+    protected void requestPredictedInput () {
+      //TODO
+      Object obj = null;
+      PredictedInputMsg predictedInputMsg = new PredictedInputMsg();
+      predictedInputMsg.setSender(nodeComponent);
+      predictedInputMsg.setReplyToChannel((Puttable) planSimulatorChannel);
+      predictedInputMsg.setObj(obj);
+      sendMsgToRecipient(predictorChannel, predictedInputMsg);
+    }
+    
     
     /**
      * Processes the predicted input message.

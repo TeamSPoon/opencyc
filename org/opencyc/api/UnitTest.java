@@ -2394,8 +2394,26 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.makeCycList("(1 (2 (3)))"),
                                 responseList);
 
-            // multiple-value-list
+            // multiple values
             script = "(multiple-value-list (floor 5 3))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
+
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script = "(get-environment)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("\n", responseString);
+            script = "(csetq answer nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+            script = "(cmultiple-value-bind (a b) " +
+                     "    (floor 5 3) " +
+                     "  (csetq answer (list a b))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
+            script = "(symbol-value 'answer)";
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
 
@@ -2624,9 +2642,129 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(responseBoolean);
 
 cycAccess.traceOn();
-
-
             // conditional sequencing
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script = "(get-environment)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("\n", responseString);
+            script = "(csetq answer nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+            script = "(pcond ((eq 0 0) \n" +
+                     "        (csetq answer \"clause 1 true\")) \n" +
+                     "       ((> 1 4) \n" +
+                     "        (csetq answer \"clause 2 true\")) \n" +
+                     "       (t \n" +
+                     "        (csetq answer \"clause 3 true\")))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+
+            script = "(pcond ((eq 1 0) \n" +
+                     "        (csetq answer \"clause 1 true\")) \n" +
+                     "       ((> 5 4) \n" +
+                     "        (csetq answer \"clause 2 true\")) \n" +
+                     "       (t \n" +
+                     "        (csetq answer \"clause 3 true\")))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+
+            script = "(pcond ((eq 1 0) \n" +
+                     "        (csetq answer \"clause 1 true\")) \n" +
+                     "       ((> 1 4) \n" +
+                     "        (csetq answer \"clause 2 true\")) \n" +
+                     "       (t \n" +
+                     "        (csetq answer \"clause 3 true\")))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 3 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 3 true", responseString);
+
+            script = "(pif (string= \"abc\" \"abc\") \n" +
+                     "     (csetq answer \"clause 1 true\")) \n" +
+                     "     ;; else \n" +
+                     "     (csetq answer \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+
+            script = "(pif (string> \"abc\" \"abc\") \n" +
+                     "     (csetq answer \"clause 1 true\")) \n" +
+                     "     ;; else \n" +
+                     "     (csetq answer \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+
+            script = "(csetq answer \n" +
+                     "       (fif (string= \"abc\" \"abc\") \n" +
+                     "            \"clause 1 true\" \n" +
+                     "            ;; else \n" +
+                     "            \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+
+            script = "(csetq answer \n" +
+                     "       (fif (string> \"abc\" \"abc\") \n" +
+                     "            \"clause 1 true\" \n" +
+                     "            ;; else \n" +
+                     "            \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+
+            script = "(csetq answer \"clause 1 true\") \n" +
+                     "(pwhen (string= \"abc\" \"abc\") \n" +
+                     "       (csetq answer \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+
+            script = "(csetq answer \"clause 1 true\") \n" +
+                     "(pwhen (string> \"abc\" \"abc\") \n" +
+                     "       (csetq answer \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+
+            script = "(csetq answer \"clause 1 true\") \n" +
+                     "(punless (string> \"abc\" \"abc\") \n" +
+                     "         (csetq answer \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 2 true", responseString);
+
+            script = "(csetq answer \"clause 1 true\") \n" +
+                     "(punless (string= \"abc\" \"abc\") \n" +
+                     "         (csetq answer \"clause 2 true\"))";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
+            script = "(symbol-value 'answer)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("clause 1 true", responseString);
 
             // iteration
 

@@ -91,6 +91,10 @@ public class RemoteCycConnection implements CycConnectionInterface {
     /**
      * Constructs a new RemoteCycConnection object to the given CycProxyAgent in the given
      * agent community.
+     *
+     * @param myAgentName the name of the local agent
+     * @param cycProxyAgentName the name of the cyc proxy agent
+     * @param agentCommunity the agent community to which the cyc proxy agent belongs
      */
     public RemoteCycConnection(String myAgentName,
                                String cycProxyAgentName,

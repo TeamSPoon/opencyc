@@ -98,4 +98,9 @@ public class FipaOsCommunityAdapter implements AgentCommunityAdapter {
         return "message" + ++msgSerialNumber;
     }
 
+    /**
+     * Terminate this agent.
+     */
+    public void terminate() {
+    }
 }

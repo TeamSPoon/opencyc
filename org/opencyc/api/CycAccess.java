@@ -195,6 +195,21 @@ public class CycAccess {
     }
 
     /**
+     * Constructs a new CycAccess object to the given CycProxyAgent in the given
+     * agent community.
+     *
+     * @param myAgentName the name of the local agent
+     * @param cycProxyAgentName the name of the cyc proxy agent
+     * @param agentCommunity the agent community to which the cyc proxy agent belongs
+     */
+    public CycAccess (String myAgentName,
+                      String cycProxyAgentName,
+                      int agentCommunity) throws IOException, CycApiException  {
+        cycConnection = new RemoteCycConnection(myAgentName, cycProxyAgentName, agentCommunity);
+        commonInitialization();
+    }
+
+    /**
      * Constructs a new CycAccess object given a host name, port, communication mode and persistence indicator.
      *
      * @param hostName the host name
@@ -205,13 +220,22 @@ public class CycAccess {
      */
     public CycAccess(String hostName, int basePort, int communicationMode, boolean persistentConnection)
         throws IOException, UnknownHostException, CycApiException {
-        cycAccessInstances.put(Thread.currentThread(), this);
         this.hostName = hostName;
         this.port = basePort;
         this.communicationMode = communicationMode;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
             cycConnection = new CycConnection(hostName, port, communicationMode, this);
+        commonInitialization();
+    }
+
+    /**
+     * Provides common local and remote CycAccess object initialization.
+     */
+    protected  void commonInitialization() throws IOException, CycApiException {
+        cycAccessInstances.put(Thread.currentThread(), this);
+        if (sharedCycAccessInstance == null)
+            sharedCycAccessInstance = this;
         initializeConstants();
     }
 

@@ -395,4 +395,11 @@ public class CoAbsCommunityAdapter
             Log.current.printStackTrace(e);
         }
     }
+
+    /**
+     * Terminate this agent.
+     */
+    public void terminate() {
+        deregister();
+    }
 }

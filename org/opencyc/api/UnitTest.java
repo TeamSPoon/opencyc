@@ -34,6 +34,25 @@ import org.opencyc.util.*;
  */
 public class UnitTest extends TestCase {
 
+    protected static final String myAgentName = "Agent1";
+    protected static final String cycProxyAgentName = "Agent2";
+    protected static final int agentCommunity = RemoteCycConnection.COABS_AGENT_COMMUNTITY;
+
+    /**
+     * Indicates the use of a local CycConnection object to connect with
+     * a Cyc server.
+     */
+    protected static final int LOCAL_CYC_CONNECTION = 1;
+
+    /**
+     * Indicates the use of a local RemoteCycConnection object to connect with
+     * a remote CycConnection object via a CoABS grid or FIPA-OS agent community.
+     * The remote CycConnection has a connection with a Cyc server.
+     */
+    protected static final int REMOTE_CYC_CONNECTION = 2;
+
+    protected int connectionMode = LOCAL_CYC_CONNECTION;
+
     /**
      * Creates a <tt>UnitTest</tt> object with the given name.
      */
@@ -92,14 +111,16 @@ public class UnitTest extends TestCase {
      * Tests the fundamental aspects of the ascii api connection to the OpenCyc server.
      */
     public void testAsciiCycConnection () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycConnection ****");
-
         CycConnectionInterface cycConnection = null;
         try {
-            CycAccess cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                                CycConnection.DEFAULT_BASE_PORT,
-                                                CycConnection.ASCII_MODE,
-                                                CycAccess.PERSISTENT_CONNECTION);
+            CycAccess cycAccess = null;
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
             cycConnection = cycAccess.cycConnection;
             //cycConnection.trace = true;
         }
@@ -189,18 +210,23 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Tests the fundamental aspects of the binary (cfasl) api connection to the OpenCyc server.
+     * Tests the fundamental aspects of the binary (cfasl) api connection to the
+     * OpenCyc server.
      */
     public void testBinaryCycConnection1 () {
         System.out.println("**** testBinaryCycConnection1 ****");
         CycAccess cycAccess = null;
         CycConnectionInterface cycConnection = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      //3654,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
             cycConnection = cycAccess.cycConnection;
             //cycConnection.trace = true;
         }
@@ -306,6 +332,8 @@ public class UnitTest extends TestCase {
      * CycAccess is set to null;
      */
     public void testBinaryCycConnection2 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testBinaryCycConnection2 ****");
         CycConnection cycConnection = null;
         try {
@@ -412,6 +440,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess1 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycAccess 1 ****");
         CycAccess cycAccess = null;
         try {
@@ -437,10 +467,15 @@ public class UnitTest extends TestCase {
         System.out.println("**** testBinaryCycAccess 1 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.TRANSIENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.TRANSIENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -544,6 +579,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess2 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycAccess 2 ****");
         CycAccess cycAccess = null;
         try {
@@ -571,10 +608,15 @@ public class UnitTest extends TestCase {
         System.out.println("**** testBinaryCycAccess 2 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
         }
         catch (Exception e) {
             CycAccess.current().close();
@@ -863,6 +905,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess3 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycAccess 3 ****");
         CycAccess cycAccess = null;
         try {
@@ -889,10 +933,15 @@ public class UnitTest extends TestCase {
         System.out.println("**** testBinaryCycAccess 3 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1231,6 +1280,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess4 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycAccess 4 ****");
         CycAccess cycAccess = null;
         try {
@@ -1257,10 +1308,15 @@ public class UnitTest extends TestCase {
         System.out.println("**** testBinaryCycAccess 4 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1500,6 +1556,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess5 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycAccess 5 ****");
         CycAccess cycAccess = null;
         try {
@@ -1526,10 +1584,15 @@ public class UnitTest extends TestCase {
         System.out.println("**** testBinaryCycAccess 5 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1787,6 +1850,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess6 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycAccess 6 ****");
         CycAccess cycAccess = null;
         try {
@@ -1813,11 +1878,16 @@ public class UnitTest extends TestCase {
         System.out.println("**** testBinaryCycAccess 6 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
-        }
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
+       }
         catch (Exception e) {
             Assert.fail(e.toString());
         }
@@ -2069,6 +2139,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the ascii api connection.
      */
     public void testAsciiCycAccess7 () {
+        if (connectionMode == REMOTE_CYC_CONNECTION)
+            return;
         System.out.println("**** testAsciiCycAccess 7 ****");
         CycAccess cycAccess = null;
         try {
@@ -2096,10 +2168,15 @@ public class UnitTest extends TestCase {
         System.out.println("**** testBinaryCycAccess 7 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.BINARY_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
 
             // Java ByteArray  and SubL byte-vector are used only in the binary api.
             // turn on api if not on.

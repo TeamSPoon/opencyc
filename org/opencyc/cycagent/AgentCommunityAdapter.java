@@ -73,4 +73,9 @@ public interface AgentCommunityAdapter {
      * @return the next message serial number identifier
      */
     public String nextMessageId ();
+
+    /**
+     * Terminate this agent.
+     */
+    public void terminate();
 }

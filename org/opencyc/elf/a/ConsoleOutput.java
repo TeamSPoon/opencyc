@@ -10,7 +10,7 @@ import org.opencyc.elf.message.ActuateMsg;
 import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
@@ -53,8 +53,8 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    * @param actionCapabilities the actions that this actuator can accomplish
    */
   public ConsoleOutput(String name, 
-                       ArrayList resources, 
-                       ArrayList actionCapabilities) {
+                       List resources, 
+                       List actionCapabilities) {
     this.name = name;
     this.resources = resources;
     this.actionCapabilities = actionCapabilities;
@@ -120,7 +120,7 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    *
    * @return the resources requried by this actuator
    */
-  public ArrayList getResources() {
+  public List getResources() {
     return resources;
   }
   
@@ -129,25 +129,19 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    *
    * @return the actions that this actuator or virtual actuator (job assigner) can accomplish
    */
-  public ArrayList getActionCapabilities() {
+  public List getActionCapabilities() {
     return actionCapabilities;
   }
   
   //// Protected Area
     
-  /**
-   * Thread which processes the input channel of messages.
-   */
+  /** Thread which processes the input channel of messages. */
   protected class Consumer implements Runnable {
     
-    /**
-     * the takable channel from which messages are input
-     */
+    /** the takable channel from which messages are input */
     protected final Takable actuatorChannel;
 
-    /**
-     * the parent node component
-     */
+    /** the parent node component */
     protected NodeComponent nodeComponent;
     
     /**
@@ -162,9 +156,7 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
       this.nodeComponent = nodeComponent;
     }
 
-    /**
-     * Reads messages from the input queue and processes them.
-     */
+    /** Reads messages from the input queue and processes them. */
     public void run () {
       try {
         while (true) { 
@@ -195,10 +187,10 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   protected String name;
   
   /** the names of actions that this actuator can accomplish */
-  protected ArrayList actionCapabilities;
+  protected List actionCapabilities;
   
   /** the resources requried by this actuator */
-  protected ArrayList resources;
+  protected List resources;
   
   /** the takable channel from which messages are input */
   protected Takable actuatorChannel = null;

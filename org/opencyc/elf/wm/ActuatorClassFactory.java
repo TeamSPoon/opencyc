@@ -48,9 +48,7 @@ public class ActuatorClassFactory {
     return actuatorClassFactory;
   }
   
-  /**
-   * Generates the actuator classes.
-   */
+  /** Generates the actuator classes. */
   public void generate () {
     //TODO
   }

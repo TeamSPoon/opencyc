@@ -3,7 +3,7 @@ package org.opencyc.elf.bg.predicate;
 //// Internal Imports
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <P>
@@ -60,7 +60,7 @@ public abstract class Predicate {
    *
    * @param arguments the given arguments to evaluate
    */
-  public abstract boolean evaluate (ArrayList arguments);
+  public abstract boolean evaluate (List arguments);
   
   /**
    * Returns a string representation of this predicate given
@@ -69,7 +69,7 @@ public abstract class Predicate {
    * @param arguments the given arguments to evaluate
    * @return a string representation of this object
    */
-  public abstract String toString(ArrayList arguments);
+  public abstract String toString(List arguments);
   
  /**
    * Returns true if the given object equals this object.

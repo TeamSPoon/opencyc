@@ -76,14 +76,10 @@ public class JobAssignmentLibrary {
   
   //// Internal Rep
   
-  /**
-   * the singleton job assignment library instance
-   */
+  /** the singleton job assignment library instance */
   protected static JobAssignmentLibrary jobAssignmentLibrary;
   
-  /**
-   * the dictionary that associates a given action name with the list of schedules that accomplish it
-   */
+  /** the dictionary that associates a given action name with the list of schedules that accomplish it */ 
   protected HashMap jobAssignmentDictionary = new HashMap();
   
   //// Main

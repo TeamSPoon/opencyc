@@ -6,9 +6,7 @@ import org.opencyc.elf.bg.state.State;
 //// External Imports
 
 /**
- * <P>
  * EntityFrame is describes an entity with a list of stateVariable/values.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -6,6 +6,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 //// External Imports
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * <P>
@@ -37,9 +38,7 @@ import java.util.Iterator;
 public class Schedule {
   //// Constructors
 
-  /**
-   * Creates a new instance of Schedule
-   */
+  /** Creates a new instance of Schedule. */
   public Schedule() {
   }
 
@@ -50,7 +49,7 @@ public class Schedule {
    *
    * @return the list of planned actions
    */
-  public ArrayList getPlannedActions () {
+  public List getPlannedActions () {
     return plannedActions;
   }
 
@@ -59,7 +58,7 @@ public class Schedule {
    *
    * @param plannedActions the list of planned actions
    */
-  public void setPlannedActions (ArrayList plannedActions) {
+  public void setPlannedActions (List plannedActions) {
     this.plannedActions = plannedActions;
   }
 
@@ -68,7 +67,7 @@ public class Schedule {
    *
    * @return the list of planned goals
    */
-  public ArrayList getPlannedGoals () {
+  public List getPlannedGoals () {
     return plannedGoals;
   }
 
@@ -77,7 +76,7 @@ public class Schedule {
    *
    * @param plannedGoals the list of planned goals
    */
-  public void setPlannedGoals (ArrayList plannedGoals) {
+  public void setPlannedGoals (List plannedGoals) {
     this.plannedGoals = plannedGoals;
   }
 
@@ -88,7 +87,7 @@ public class Schedule {
    * @return the list of planned goal times, each of which is the planned duration of time in milliseconds to
    * elapse from the time the plan commences exectution until the planned goal is achieved
    */
-  public ArrayList getPlannedGoalTimeMilliseconds () {
+  public List getPlannedGoalTimeMilliseconds () {
     return plannedGoalTimeMilliseconds;
   }
 
@@ -100,7 +99,7 @@ public class Schedule {
    * of time in milliseconds to elapse from the time the plan commences exectution until the planned goal is 
    * achieved
    */
-  public void setPlannedGoalTimeMilliseconds (ArrayList plannedGoalTimeMilliseconds) {
+  public void setPlannedGoalTimeMilliseconds (List plannedGoalTimeMilliseconds) {
     this.plannedGoalTimeMilliseconds = plannedGoalTimeMilliseconds;
   }
 
@@ -142,7 +141,7 @@ public class Schedule {
    */
   public Object clone () {
     Schedule schedule = new Schedule();
-    ArrayList clonedPlannedActions = new ArrayList();
+    List clonedPlannedActions = new ArrayList();
     Iterator iter = plannedActions.iterator();
     while (iter.hasNext()) {
       Action action = (Action) iter.next();
@@ -156,20 +155,16 @@ public class Schedule {
   
   //// Protected Area
 
-  /**
-   * the list of planned actions
-   */
-  protected ArrayList plannedActions;
+  /** the list of planned actions */
+  protected List plannedActions;
   
-  /**
-   * the list of planned goals
-   */
-  protected ArrayList plannedGoals;
+  /** the list of planned goals */
+  protected List plannedGoals;
   
   /**
    * the list of planned goal times, each of which is the planned duration of time in milliseconds to
    * elapse from the time the plan commences exectution until the planned goal is achieved
    */
-  protected ArrayList plannedGoalTimeMilliseconds;
+  protected List plannedGoalTimeMilliseconds;
 
 }

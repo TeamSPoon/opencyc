@@ -4,12 +4,9 @@ package org.opencyc.elf;
 import org.opencyc.elf.message.GenericMsg;
 
 //// External Imports
-import java.util.ArrayList;
-
 import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
-
 
 /**
  * Provides common attributes and behavior for Elementary Loop Functioning
@@ -40,7 +37,6 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 public abstract class NodeComponent {
 
   //// Constructors
-
 
   //// Public Area
   
@@ -92,9 +88,7 @@ public abstract class NodeComponent {
   
   //// Internal Rep
   
-  /**
-   * the ELF node that contains this object
-   */
+  /** the ELF node that contains this object */
   protected Node node;
 
   //// Main

@@ -63,9 +63,7 @@ public class SchedulerStatusMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the scheduler status
-   */
+  /** the scheduler status */
   protected Status status;
   
   //// Main

@@ -64,9 +64,7 @@ public class ScheduleJobMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the commanded task for scheduling
-   */
+  /** the commanded task for scheduling */
   protected TaskCommand taskCommand;
   
   //// Main

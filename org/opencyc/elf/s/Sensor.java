@@ -4,7 +4,7 @@ package org.opencyc.elf.s;
 import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Sensor defines the sensor interface for the Elementary Loop Functioning (ELF).
@@ -43,14 +43,14 @@ public interface Sensor {
    *
    * @return the resources required by this sensor or virtual sensor (sensory perception)
    */
-  public ArrayList getResources();
+  public List getResources();
   
   /**
    * Gets the names of sensations that this sensor or virtual sensor (sensory perception) can sense.
    *
    * @return the names of sensations that this sensor or virtual sensor (sensory perception) can sense
    */
-  public ArrayList getSensationCapabilities ();
+  public List getSensationCapabilities ();
   
   /** the console input sensor name */
   public static final String CONSOLE_INPUT = "console input";

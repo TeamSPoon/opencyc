@@ -105,14 +105,10 @@ public class GoalTime {
   
   //// Internal Rep
   
-  /**
-   * the goal achievement time in milliseconds
-   */
+  /** the goal achievement time in milliseconds */
   protected long goalTimeMilliseconds;  
   
-  /**
-   * the goal achievement tolerance in milliseconds
-   */
+  /** the goal achievement tolerance in milliseconds */
   protected long goalToleranceMilliseconds = 0;
     
   //// Main

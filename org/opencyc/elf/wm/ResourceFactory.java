@@ -7,7 +7,7 @@ import org.opencyc.elf.bg.planner.Resource;
 import java.util.HashMap;
 
 /**
- * <P>ResourceFactory populates the resource pool.  There is
+ * ResourceFactory populates the resource pool.  There is
  * a singleton instance.
  *
  * @version $Id$

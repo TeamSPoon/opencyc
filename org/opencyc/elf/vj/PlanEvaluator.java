@@ -8,10 +8,10 @@ import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <P>PlanEvaluator is designed to evaluate plans and thus assist plan selection.
+ * PlanEvaluator is designed to evaluate plans and thus assist plan selection.
  *
  * @version $Id$
  * @author Stephen L. Reed  

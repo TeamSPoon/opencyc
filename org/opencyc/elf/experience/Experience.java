@@ -10,7 +10,7 @@ import org.opencyc.elf.goal.Value;
 //// External Imports
 import java.sql.Timestamp;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides the Experience container for the Elementary Loop Functioning
@@ -40,9 +40,7 @@ public class Experience {
   
   //// Constructors
   
-  /**
-   * Constructs a new experience object.
-   */
+  /** Constructs a new experience object. */
   public Experience() {
   }
 
@@ -134,7 +132,7 @@ public class Experience {
    * 
    * @return the state transitions
    */
-  public ArrayList getTransitions() {
+  public List getTransitions() {
     return transitions;
   }
 
@@ -143,7 +141,7 @@ public class Experience {
    * 
    * @param transitions the state transitions
    */
-  public void setTransitions(ArrayList transitions) {
+  public void setTransitions(List transitions) {
     this.transitions = transitions;
   }
 
@@ -184,7 +182,7 @@ public class Experience {
   protected Goal goal;
 
   /** the state transitions from the initial state to the final state */
-  protected ArrayList transitions;
+  protected List transitions;
 
   /** the value of the experience */
   protected Value value;

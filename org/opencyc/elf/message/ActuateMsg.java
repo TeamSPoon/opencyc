@@ -88,9 +88,7 @@ public class ActuateMsg extends GenericMsg {
    */  
   protected Object obj;
   
-  /**
-   * the action data specifying the parameters of the commanded action
-   */  
+  /** the action data specifying the parameters of the commanded action */
   protected Object data;
   
   //// Main

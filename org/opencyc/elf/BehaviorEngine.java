@@ -5,6 +5,8 @@ import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
 
+import org.opencyc.elf.bg.taskframe.TaskFrame;
+
 import org.opencyc.elf.wm.ActuatorClassFactory;
 import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ActionLibrary;
@@ -18,7 +20,6 @@ import org.opencyc.elf.wm.JobAssignmentFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.NodeFactory;
-import org.opencyc.elf.wm.NodePool;
 import org.opencyc.elf.wm.PredicateClassFactory;
 import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
@@ -74,8 +75,15 @@ public class BehaviorEngine {
     (new ActuatorClassFactory()).getInstance().generate();
     (new PredicateClassFactory()).getInstance().generate();
     createSingletonInstances();
+  }
+  
+  /** Executes the behavior engine */
+  public void execute() {
+    TaskFrame taskFrame = TaskFrameLibrary.getInstance().getRootTaskFrame(); 
+        
+    // instantiate a node to execute the root frame (the root frame probably 
+    // contains an iteration)
     
-    //TODO
   }
   
   //// Protected Area
@@ -101,8 +109,7 @@ public class BehaviorEngine {
     (new ActuatorFactory()).getInstance().populateActuatorPool();
     new SensorPool();
     (new SensorFactory()).getInstance().populateSensorPool();
-    new NodePool();
-    (new NodeFactory()).getInstance().populateNodePool();
+    new NodeFactory();
   }
   
   /** Creates the predicate singleton instances. */
@@ -130,8 +137,7 @@ public class BehaviorEngine {
   public static void main(String[] args) {
     new BehaviorEngine();
     behaviorEngine.initialize();
-    //TODO
-    
+    behaviorEngine.execute();
     System.exit(0);
   }
   

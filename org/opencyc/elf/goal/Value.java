@@ -1,5 +1,9 @@
 package org.opencyc.elf.goal;
 
+//// Internal Imports
+
+//// External Imports
+
 /**
  * Provides the Value container for the Elementary Loop Functioning (ELF).
  * 
@@ -24,18 +28,15 @@ package org.opencyc.elf.goal;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Value {
-  /**
-   * Values range from -1 for most negative, to zero for neutral, to +1 for
-   * most positive.
-   */
-  float value;
 
-  /**
-   * Constructs a new Value object.
-   */
+  //// Constructors
+  
+  /** Constructs a new Value object. */
   public Value() {
   }
 
+  //// Public Area
+  
   /**
    * Gets the value
    * 
@@ -58,4 +59,17 @@ public class Value {
 
     this.value = value;
   }
+
+  //// Protected Area
+
+  /**
+   * Values range from -1 for most negative, to zero for neutral, to +1 for
+   * most positive.
+   */
+  protected float value;
+
+  //// Private Area
+  
+  //// Internal Rep
+  
 }

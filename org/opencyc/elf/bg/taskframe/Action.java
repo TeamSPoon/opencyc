@@ -6,8 +6,8 @@ import org.opencyc.elf.ELFException;
 import org.opencyc.elf.bg.state.State;
 
 //// External Imports
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Action describes the action to be performed and may include a set of modifiers such as
@@ -107,7 +107,7 @@ public class Action {
    *
    * @return the parameter names for this action
    */
-  public ArrayList getParameterNames () {
+  public List getParameterNames () {
     return parameterNames;
   }
    
@@ -116,7 +116,7 @@ public class Action {
    *
    * @return the parameter types for this action
    */
-  public ArrayList getParameterTypes () {
+  public List getParameterTypes () {
     return parameterTypes;
   }
     
@@ -125,7 +125,7 @@ public class Action {
    *
    * @return the parameter values for this action
    */
-  public ArrayList getParameterValues () {
+  public List getParameterValues () {
     return parameterValues;
   }
   
@@ -134,7 +134,7 @@ public class Action {
    *
    * @param parameterValues the parameter values for this action
    */
-  public void setParameterValues (ArrayList parameterValues) {
+  public void setParameterValues (List parameterValues) {
     if (parameterValues.size() != getParameterTypes().size())
       throw new ELFException("Number of parameter values (" + parameterValues.size() +
                              ") does not match the number of parameter types (" +
@@ -186,7 +186,7 @@ public class Action {
    *
    * @param parameterNames the parameter names for this action
    */
-  public void setParameterNames (ArrayList parameterNames) {
+  public void setParameterNames (List parameterNames) {
     this.parameterNames = parameterNames;
   }
    
@@ -195,7 +195,7 @@ public class Action {
    *
    * @param parameterTypes the parameter types for this action
    */
-  public void setParameterTypes (ArrayList parameterTypes) {
+  public void setParameterTypes (List parameterTypes) {
     this.parameterTypes = parameterTypes;
   }
    
@@ -216,63 +216,41 @@ public class Action {
     this.outputValue = outputValue;
   }
    
-  /**
-   * the abort action name
-   */
+  /** the abort action name */
   public static final String ABORT = "abort";
   
-  /**
-   * the converse with user action name
-   */
+  /** the converse with user action name */
   public static final String CONVERSE_WITH_USER = "converse with user";
   
-  /**
-   * the console prompted input action name
-   */
+  /** the console prompted input action name */
   public static final String CONSOLE_PROMPTED_INPUT = "console prompted input";
   
-  /**
-   * the init action name
-   */
+  /** the init action name */
   public static final String INIT = "init";
   
-  /**
-   * the emergency stop action name
-   */
+  /** the emergency stop action name */
   public static final String EMERGENCY_STOP = "emergency stop";
   
   //// Private Area
   
   //// Internal Rep
     
-  /**
-   * the name of the action
-   */
+  /** the name of the action */
   protected String name;
   
-  /**
-   * the parameter names for this action
-   */
-  protected ArrayList parameterNames;
+  /** the parameter names for this action */
+  protected List parameterNames;
   
-  /**
-   * the parameter types for this action
-   */
-  protected ArrayList parameterTypes;
+  /** the parameter types for this action */
+  protected List parameterTypes;
   
-  /**
-   * the parameter values for this action
-   */
-  protected ArrayList parameterValues;
+  /** the parameter values for this action */
+  protected List parameterValues;
   
-  /**
-   * the output type for this action
-   */
+  /** the output type for this action */
   protected Class outputType;
   
-  /**
-   * the output value for this (completed) action
-   */
+  /** the output value for this (completed) action */
   protected Object outputValue;
   
   //// Main

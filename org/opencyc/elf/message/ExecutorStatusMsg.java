@@ -7,7 +7,7 @@ import org.opencyc.elf.Status;
 //// External Imports
 
 /**
- * <P>Provides the status message that is sent from the executor to the scheduler.
+ * Provides the status message that is sent from the executor to the scheduler.
  *
  * @version $Id$
  * @author  reed
@@ -86,9 +86,8 @@ public class ExecutorStatusMsg extends GenericMsg {
   //// Private Area
   
   //// Internal Rep
-  /**
-   * the scheduler status
-   */
+  
+  /** the scheduler status */
   protected Status status;
   
   //// Main

@@ -27,6 +27,9 @@ import org.opencyc.elf.wm.Predictor;
 import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
+import java.util.ArrayList;
+import java.util.List;
+
 import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
@@ -80,19 +83,15 @@ public class NodeFactory {
   }
   
   /**
-   * Populates the node pool.
+   * Makes a node given the set of task frames that it must process.
+   *
+   * @param taskFrameNames the set of task frames that it must process
    */
-  public void populateNodePool () {
-    // converse with user
-    Node node = makeNodeShell(Node.CONVERSE_WITH_USER);
-    
-    
-    
+  public Node makeNode(List taskFrames) {
     //TODO
-    // consider working from a set of task frames and building a node to process those
-    // task frames.
+    return null;
   }
-
+  
   /**
    * Makes a shell node.
    *
@@ -170,7 +169,9 @@ public class NodeFactory {
    */
   protected void makeSensoryPerceptionShell () {
     //TODO
-    //sensoryPerception = new SensoryPerception(sensoryPerceptionChannel, null);
+    List sensationCapabilities = new ArrayList();
+    String sensoryPerceptionName = "";
+    sensoryPerception = new SensoryPerception(sensoryPerceptionName, sensationCapabilities);
     sensoryPerception.setNode(node);
     estimator = new Estimator();
     sensoryPerception.setEstimator(estimator);
@@ -195,94 +196,58 @@ public class NodeFactory {
    */
   protected Logger logger;
   
-  /**
-   * the Elementary Loop Functioning (ELF) node
-   */
+  /** the Elementary Loop Functioning (ELF) node */
   protected Node node;
   
-  /**
-   * the behavior generation node component
-   */
+  /** the behavior generation node component */
   protected BehaviorGeneration behaviorGeneration;
   
-  /**
-   * the job assigner node component
-   */
+  /** the job assigner node component */
   protected JobAssigner jobAssigner;
   
-  /**
-   * the plan selector node component
-   */
+  /** the plan selector node component */
   protected PlanSelector planSelector;
   
-  /**
-   * the world model node component
-   */
+  /** the world model node component */
   protected WorldModel worldModel;
   
-  /**
-   * the knowledge base node component
-   */
+  /** the knowledge base node component */
   protected KnowledgeBase knowledgeBase;
   
-  /**
-   * the plan simulator node component
-   */
+  /** the plan simulator node component */
   protected PlanSimulator planSimulator;
   
-  /**
-   * the predictor node component
-   */
+  /** the predictor node component */
   protected Predictor predictor;
   
-  /**
-   * the value judgement node component
-   */
+  /** the value judgement node component */
   protected ValueJudgement valueJudgement;
   
-  /**
-   * the plan evaluator node component
-   */
+  /** the plan evaluator node component */
   protected PlanEvaluator planEvaluator;
   
-  /**
-   * the entity evaluator node component
-   */
+  /** the entity evaluator node component */
   protected EntityEvaluator entityEvaluator;
 
-  /**
-   * the sensory perception node component
-   */
+  /** the sensory perception node component */
   protected SensoryPerception sensoryPerception;
   
-  /**
-   * the estimator node component
-   */
+  /** the estimator node component */
   protected Estimator estimator;
   
-  /**
-   * the feature extractor node component
-   */
+  /** the feature extractor node component */
   protected FeatureExtractor featureExtractor;
   
-  /**
-   * the hypothesis evaluator node component
-   */
+  /** the hypothesis evaluator node component */
   protected HypothesisEvaluator hypothesisEvaluator;
   
-  /**
-   * the hypothesis former node component
-   */
+  /** the hypothesis former node component */
   protected HypothesisFormer hypothesisFormer;
   
-  /**
-   * an actuator node component
-   */
+  /** an actuator node component */
   protected Actuator actuator;
   
-  /**
-   * a sensor node component
-   */
+  /** a sensor node component */
   protected Sensor sensor;
   
   /**
@@ -291,19 +256,13 @@ public class NodeFactory {
    */
   protected int CHANNEL_CAPACITY = 100;
   
-  /**
-   * the job assigner channel
-   */
+  /** the job assigner channel */
   protected Channel jobAssignerChannel;
   
-  /**
-   * the higher level node's executor channel
-   */
+  /** the higher level node's executor channel */
   protected Takable executorChannel;
   
-  /**
-   * the takable channel from which messages are input
-   */
+  /** the takable channel from which messages are input */
   protected Channel sensoryPerceptionChannel;
 
   /**
@@ -312,9 +271,7 @@ public class NodeFactory {
    */
   protected Puttable nextHigherLevelSensoryPerceptionChannel;
   
-  /**
-   * the node factory singleton instance
-   */
+  /** the node factory singleton instance */
   protected static NodeFactory nodeFactory;
   
   //// Main

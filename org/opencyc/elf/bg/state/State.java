@@ -7,9 +7,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 /**
- * <P>
  * State provides the container for the list of stateVariable/values.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -35,9 +33,7 @@ public class State {
   
   //// Constructors
   
-  /**
-   * Constructs a new instance of this object.
-   */
+  /** Constructs a new instance of this object. */
   public State() {
     stateVariableDictionary = new Hashtable();
   }

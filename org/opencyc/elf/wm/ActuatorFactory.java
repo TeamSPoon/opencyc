@@ -10,6 +10,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  ActuatorFactory is designed to create actuators.  There is a singleton instance of actuator factory.
@@ -60,7 +61,7 @@ public class ActuatorFactory {
     
   /** Populates the actuator pool. */
   public void populateActuatorPool() {
-    ArrayList resources = new ArrayList();
+    List resources = new ArrayList();
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     ArrayList actionCapabilities = new ArrayList();
     actionCapabilities.add(Action.CONSOLE_PROMPTED_INPUT);

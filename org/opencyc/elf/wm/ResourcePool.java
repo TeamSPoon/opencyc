@@ -7,7 +7,7 @@ import org.opencyc.elf.bg.planner.Resource;
 import java.util.HashMap;
 
 /**
- * <P>ResourcePool contains the resources available to all ELF nodes.  There is a 
+ * ResourcePool contains the resources available to all ELF nodes.  There is a 
  * singleton instance.
  *
  * @version $Id$
@@ -77,9 +77,7 @@ public class ResourcePool {
   
   //// Internal Rep
   
-  /**
-   * the singleton resource pool instance
-   */
+  /** the singleton resource pool instance */
   protected static ResourcePool resourcePool;
   
   /**

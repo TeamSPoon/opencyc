@@ -82,14 +82,10 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the object for which data is perceived
-   */  
+  /** the object for which data is perceived */
   protected Object obj;
   
-  /**
-   * the perceived data associated with the object
-   */  
+  /** the perceived data associated with the object */
   protected Object data;
   
   //// Main

@@ -1,14 +1,12 @@
 package org.opencyc.elf.bg.state;
 
 //// Internal Imports
+
 //// External Imports
 import java.util.Iterator;
 
-
 /**
- * <P>
  * StateIterator provides an iterator over the stateVariable/values.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -79,7 +77,7 @@ public class StateIterator implements Iterator {
    *            called after the last call to the <tt>next</tt> method.
    * @throws java.lang.UnsupportedOperationException DOCUMENT ME!
    */
-  public void remove() throws UnsupportedOperationException, IllegalStateException {
+  public void remove() {
     throw new java.lang.UnsupportedOperationException("remove method is not supported for this Iterator");
   }
 

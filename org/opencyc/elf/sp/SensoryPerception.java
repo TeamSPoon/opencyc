@@ -12,6 +12,7 @@ import org.opencyc.elf.s.Sensor;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.List;
 
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
@@ -52,7 +53,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
    * @param name the sensory perception name
    * @param sensationCapabilities the names of sensations that this virtual sensor can sense
    */
-  public SensoryPerception(String name, ArrayList sensationCapabilities) {
+  public SensoryPerception(String name, List sensationCapabilities) {
     this.name = name;
     this.sensationCapabilities = sensationCapabilities;
     node.setSensoryPerception(this);
@@ -229,8 +230,8 @@ public class SensoryPerception extends NodeComponent implements Sensor {
    *
    * @return the resources required by this virtual sensor
    */
-  public ArrayList getResources() {
-    ArrayList resources = new ArrayList();
+  public List getResources() {
+    List resources = new ArrayList();
     //TODO
     return resources;
   }
@@ -240,7 +241,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
    *
    * @return the names of sensations that this virtual sensor can sense
    */
-  public ArrayList getSensationCapabilities() {
+  public List getSensationCapabilities() {
     return sensationCapabilities;
   }
   
@@ -349,52 +350,34 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   /** the sensory perception name */
   protected String name;
   
-  /** tthe names of sensations that this virtual sensor can sense */
-  protected ArrayList sensationCapabilities;
+  /** the names of sensations that this virtual sensor can sense */
+  protected List sensationCapabilities;
   
-  /**
-   * the estimator node component
-   */
+  /** the estimator node component */
   protected Estimator estimator;
   
-  /**
-   * the feature extractor node component
-   */
+  /** the feature extractor node component */
   protected FeatureExtractor featureExtractor;
   
-  /**
-   * the hypothesis evaluator node component
-   */
+  /** the hypothesis evaluator node component */
   protected HypothesisEvaluator hypothesisEvaluator;
   
-  /**
-   * the hypothesis former node component
-   */
+  /** the hypothesis former node component */
   protected HypothesisFormer hypothesisFormer;
   
-  /**
-   * the parent sensory perception node component
-   */
+  /** the parent sensory perception node component */
   protected SensoryPerception parentSensoryPerception;
   
-  /**
-   * the children sensory perception node compontents
-   */
+  /** the children sensory perception node compontents */
   protected ArrayList childrenSensoryPerception;
   
-  /**
-   * the takable channel from which messages are input
-   */
+  /** the takable channel from which messages are input */
   protected Takable sensoryPerceptionChannel;
     
-  /**
-   * the thread which processes the input channel of messages
-   */
+  /** the thread which processes the input channel of messages */
   protected Consumer consumer;
   
-  /**
-   * the executor of the observed input consumer thread
-   */
+  /** the executor of the observed input consumer thread */
   protected Executor executor;
   
   //// Main

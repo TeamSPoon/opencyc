@@ -80,9 +80,7 @@ public class SensorPool {
   /** the sensor library singleton instance */
   protected static SensorPool sensorPool;
   
-  /**
-   * the dictionary that associates a given sensor name with the sensor object
-   */
+  /** the dictionary that associates a given sensor name with the sensor object */
   protected HashMap sensorDictionary = new HashMap();
   
   //// Main

@@ -4,7 +4,7 @@ package org.opencyc.elf.bg.planner;
 import org.opencyc.elf.bg.taskframe.Action;
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JobAssignment contains non-temporal (for example spatial) task decompositions
@@ -64,7 +64,7 @@ public class JobAssignment {
    *
    * @return the resources required to schedule the tasks that accomplish the commanded action
    */
-  public ArrayList getRequiredResources () {
+  public List getRequiredResources () {
     return requiredResources;
   }
 
@@ -73,7 +73,7 @@ public class JobAssignment {
    *
    * @param requiredResources the resources required to schedule the tasks that accomplish the commanded action
    */
-  public void setRequiredResources (ArrayList requiredResources) {
+  public void setRequiredResources (List requiredResources) {
     this.requiredResources = requiredResources;
   }
 
@@ -120,15 +120,11 @@ public class JobAssignment {
   
   //// Internal Rep
   
-  /**
-   * the name of the commanded action to be accomplished
-   */
+  /** the name of the commanded action to be accomplished */
   protected String actionName;
   
-  /**
-   * the resources required to schedule the tasks that accomplish the commanded action
-   */
-  protected ArrayList requiredResources;
+  /** the resources required to schedule the tasks that accomplish the commanded action */
+  protected List requiredResources;
   
   /**
    * the action to be performed by a qualified scheduler that will entirely or in part

@@ -1,12 +1,11 @@
 package org.opencyc.elf.s;
 
 //// Internal Imports
+
 //// External Imports
 
 /**
- * <P>
  * Event contains the features and behavior of events.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -31,9 +30,7 @@ package org.opencyc.elf.s;
 public class Event {
   //// Constructors
 
-  /**
-   * Creates a new instance of Event
-   */
+  /** Creates a new instance of Event */
   public Event() {
   }
 

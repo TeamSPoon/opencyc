@@ -5,12 +5,9 @@ package org.opencyc.elf.bg.state;
 //// External Imports
 import java.util.Iterator;
 
-
 /**
- * <P>
  * Situation is designed to contain a situation described by a list of
  * stateVariable/values.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -35,9 +32,7 @@ import java.util.Iterator;
 public class Situation {
   //// Constructors
 
-  /**
-   * Creates a new instance of Situation.
-   */
+  /**Creates a new instance of Situation. */
   public Situation() {
     state = new State();
   }
@@ -92,7 +87,7 @@ public class Situation {
     return state;
   }
 
-  /** DOCUMENT ME! */
+  /** the state that constitutes this situation */
   protected State state;
 
   //// Main

@@ -49,9 +49,7 @@ public class PredicateClassFactory {
     return predicateClassFactory;
   }
   
-  /**
-   * Generates the predicate classes.
-   */
+  /** Generates the predicate classes. */
   public void generate () {
     new NotNull();
     //TODO

@@ -47,9 +47,7 @@ public class StateVariableFactory {
     return stateVariableFactory;
   }
   
-  /**
-   * Populates the state variable libarary.
-   */
+  /** Populates the state variable libarary. */
   public void populateStateVariableLibrary () {
     StateVariable stateVariable = new StateVariable(String.class,
                                                     StateVariable.USER_PROMPT,

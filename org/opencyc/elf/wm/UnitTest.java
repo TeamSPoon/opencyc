@@ -31,8 +31,6 @@ import org.doomdark.uuid.UUID;
 /**
  * Provides a suite of JUnit test cases for the org.opencyc.elf.wm package.
  * 
- * <p></p>
- * 
  * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
@@ -213,7 +211,7 @@ public class UnitTest extends TestCase {
     Action action = jobAssignment.getActionForScheduling();
     Assert.assertNotNull(action);    
     Assert.assertEquals("[Action: console prompted input( prompt: null)]", action.toString());
-    ArrayList requiredResources = jobAssignment.getRequiredResources();
+    List requiredResources = jobAssignment.getRequiredResources();
     Assert.assertNotNull(requiredResources);
     Assert.assertEquals(1, requiredResources.size());
     Assert.assertEquals("[Resource: console]", requiredResources.get(0).toString());
@@ -245,11 +243,11 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(taskFrame);
     Assert.assertEquals("[TaskFrame task: converse with user goal: (not-null userInput)]", 
                         taskFrame.toString());
-    ArrayList actuators = taskFrame.getActuators();
+    List actuators = taskFrame.getActuators();
     Assert.assertNotNull(actuators);
     Assert.assertEquals(1, actuators.size());
     Assert.assertEquals("[ConsoleOutput resources: [[Resource: console]]]", actuators.get(0).toString());
-    ArrayList sensors = taskFrame.getSensors();
+    List sensors = taskFrame.getSensors();
     Assert.assertNotNull(sensors);
     Assert.assertEquals(1, sensors.size());
     Assert.assertEquals("[ConsoleInput resources: [[Resource: console]]]", sensors.get(0).toString());
@@ -259,7 +257,7 @@ public class UnitTest extends TestCase {
     Assert.assertEquals("converse with user", taskFrame.getTaskName());
     Assert.assertNotNull(taskFrame.getTaskAction());
     Assert.assertEquals("[Action: converse with user( prompt: null)]", taskFrame.getTaskAction().toString());
-    ArrayList scheduleInfos = taskFrame.getScheduleInfos();
+    List scheduleInfos = taskFrame.getScheduleInfos();
     Assert.assertNotNull(scheduleInfos);
     Assert.assertEquals(1, scheduleInfos.size());
     TaskFrame.ScheduleInfo scheduleInfo = (TaskFrame.ScheduleInfo) scheduleInfos.get(0);

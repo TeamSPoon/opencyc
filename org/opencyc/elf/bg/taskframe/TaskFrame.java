@@ -13,6 +13,7 @@ import org.opencyc.elf.s.Sensor;
 //// External Imports
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.doomdark.uuid.UUID;
 
@@ -45,9 +46,7 @@ public class TaskFrame {
   
   //// Constructors
 
-  /**
-   * Creates a new instance of TaskFrame and gives it a unique ID.
-   */
+  /** Creates a new instance of TaskFrame. */
   public TaskFrame () {
   }
 
@@ -61,7 +60,7 @@ public class TaskFrame {
   public Object clone () {
     TaskFrame taskFrame = new TaskFrame();
     taskFrame.setTaskName(taskName);
-    ArrayList clonedScheduleInfos = new ArrayList();
+    List clonedScheduleInfos = new ArrayList();
     Iterator iter = scheduleInfos.iterator();
     while (iter.hasNext()) {
       ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
@@ -180,7 +179,7 @@ public class TaskFrame {
    * 
    * @return taskObjects the objects upon which the desired task is performed
    */
-  public ArrayList getTaskObjects () {
+  public List getTaskObjects () {
     return taskObjects;
   }
 
@@ -189,7 +188,7 @@ public class TaskFrame {
    * 
    * @param taskObjects the objects upon which the desired task is performed
    */
-  public void setTaskObjects (ArrayList taskObjects) {
+  public void setTaskObjects (List taskObjects) {
     this.taskObjects = taskObjects;
   }
 
@@ -200,7 +199,7 @@ public class TaskFrame {
    * @return the parameters that specify or modulate how the
    *         task should be performed
    */
-  public ArrayList getTaskParameters () {
+  public List getTaskParameters () {
     return taskParameters;
   }
 
@@ -211,7 +210,7 @@ public class TaskFrame {
    * @param taskParameters the parameters that specify or modulate how the task
    *        should be performed
    */
-  public void setTaskParameters (ArrayList taskParameters) {
+  public void setTaskParameters (List taskParameters) {
     this.taskParameters = taskParameters;
   }
 
@@ -221,8 +220,8 @@ public class TaskFrame {
    * @return all the actuators that are responsible for carrying
    *         out the task
    */
-  public ArrayList getActuators () {
-    ArrayList actuators = new ArrayList();
+  public List getActuators () {
+    List actuators = new ArrayList();
     Iterator iter = scheduleInfos.iterator();
     while (iter.hasNext()) {
       ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
@@ -237,8 +236,8 @@ public class TaskFrame {
    * 
    * @return all the sensors that are responsible for sensing phenomena related to the task
    */
-  public ArrayList getSensors () {
-    ArrayList sensors = new ArrayList();
+  public List getSensors () {
+    List sensors = new ArrayList();
     Iterator iter = scheduleInfos.iterator();
     while (iter.hasNext()) {
       ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
@@ -253,8 +252,8 @@ public class TaskFrame {
    * 
    * @return all the resources which are required to execute the task
    */
-  public ArrayList getTaskResources () {
-    ArrayList taskResources = new ArrayList();
+  public List getTaskResources () {
+    List taskResources = new ArrayList();
     Iterator scheduleIterator = scheduleInfos.iterator();
     while (scheduleIterator.hasNext()) {
       ScheduleInfo scheduleInfo = (ScheduleInfo) scheduleIterator.next();
@@ -273,7 +272,7 @@ public class TaskFrame {
    * 
    * @return the constraints upon the performance of the task
    */
-  public ArrayList getTaskConstraints () {
+  public List getTaskConstraints () {
     return taskConstraints;
   }
 
@@ -282,7 +281,7 @@ public class TaskFrame {
    * 
    * @param taskConstraints the constraints upon the performance of the task
    */
-  public void setTaskConstraints (ArrayList taskConstraints) {
+  public void setTaskConstraints (List taskConstraints) {
     this.taskConstraints = taskConstraints;
   }
 
@@ -295,7 +294,7 @@ public class TaskFrame {
    *         for generating plans, organized as a dictionary of execeptional
    *         states and associated procedures for handling them
    */
-  public ArrayList getScheduleInfos () {
+  public List getScheduleInfos () {
     return scheduleInfos;
   }
 
@@ -338,9 +337,7 @@ public class TaskFrame {
       this.sensor = sensor;
     }
     
-    /**
-     * Creates and returns a copy of this object.
-     */
+    /** Creates and returns a copy of this object. */
     public Object clone () {
       return new ScheduleInfo((Schedule) schedule.clone(),
                               actuator,
@@ -361,8 +358,8 @@ public class TaskFrame {
      *
      * @return the resources required by the schedule
      */
-    public ArrayList getResources () {
-      ArrayList resources = new ArrayList();
+    public List getResources () {
+      List resources = new ArrayList();
       resources.add(actuator.getResources());
       Iterator iter = sensor.getResources().iterator();
       while (iter.hasNext()) {
@@ -430,7 +427,7 @@ public class TaskFrame {
    *
    * @param scheduleInfos the schedule info objects, each containing a schedule, resources, actuator and sensor
    */
-  protected void setScheduleInfos (ArrayList scheduleInfos) {
+  protected void setScheduleInfos (List scheduleInfos) {
     this.scheduleInfos = scheduleInfos;
   }
   
@@ -451,15 +448,15 @@ public class TaskFrame {
   protected Goal taskGoal;
 
   /** the objects upon which the desired task is performed */
-  protected ArrayList taskObjects = new ArrayList();
+  protected List taskObjects = new ArrayList();
 
   /** the parameters that specify or modulate how the task should be performed */
-  protected ArrayList taskParameters = new ArrayList();
+  protected List taskParameters = new ArrayList();
 
   /** the constraints upon the performance of the task */
-  protected ArrayList taskConstraints = new ArrayList();
+  protected List taskConstraints = new ArrayList();
 
   /** the schedule info objects, each containing a schedule, resources and actuator */
-  protected ArrayList scheduleInfos = new ArrayList();
+  protected List scheduleInfos = new ArrayList();
 
 }

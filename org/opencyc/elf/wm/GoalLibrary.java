@@ -78,9 +78,7 @@ public class GoalLibrary {
   /** the goal library singleton instance */
   protected static GoalLibrary goalLibrary;
   
-  /**
-   * the dictionary that associates a given goal name with the goal object
-   */
+  /** the dictionary that associates a given goal name with the goal object */
   protected HashMap goalDictionary = new HashMap();
   
   //// Main

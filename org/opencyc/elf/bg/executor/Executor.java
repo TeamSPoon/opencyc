@@ -12,7 +12,6 @@ import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
-import java.util.ArrayList;
 
 /**
  * Provides the Executor for ELF BehaviorGeneration.
@@ -41,9 +40,7 @@ public class Executor extends NodeComponent {
   
   //// Constructors
   
-  /**
-   * Constructs a new Executor object.
-   */
+  /** Constructs a new Executor object. */
   public Executor() {
   }
 
@@ -114,9 +111,7 @@ public class Executor extends NodeComponent {
 
   //// Protected Area
   
-  /**
-   * Receives the update schedule message from ?
-   */
+  /** Receives the update schedule message from ? */
   protected void receiveUpdateSchedule () {
     // TODO
     // receive via channel from ?
@@ -146,9 +141,7 @@ public class Executor extends NodeComponent {
     // TaskCommnd taskCommand
   }
   
-  /**
-   * Sends the executor status to its scheduler.
-   */
+  /** Sends the executor status to its scheduler. */
   protected void sendExecutorStatus () {
     // TODO
     // send via channel to ?

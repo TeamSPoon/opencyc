@@ -14,7 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import java.util.logging.Logger;
 
@@ -54,7 +54,7 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    * @param resources the resources required by this sensor
    * @param sensationCapabilities the names of sensations that this sensor can sense
    */
-  public ConsoleInput (String name, ArrayList resources, ArrayList sensationCapabilities) {
+  public ConsoleInput (String name, List resources, List sensationCapabilities) {
     this.name = name;
     this.resources = resources;
     this.sensationCapabilities = sensationCapabilities;
@@ -105,7 +105,7 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    *
    * @return the resources required by this sensor
    */
-  public ArrayList getResources() {
+  public List getResources() {
     return resources;
   }
   
@@ -114,25 +114,19 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    *
    * @return the names of sensations that this sensor can sense
    */
-  public ArrayList getSensationCapabilities() {
+  public List getSensationCapabilities() {
     return sensationCapabilities;
   }
   
   //// Protected Area
   
-  /**
-   * Thread which processes the output channel of messages.
-   */
+  /** Thread which processes the output channel of messages. */
   protected class Producer implements Runnable {
     
-    /**
-     * the puttable channel to which messages are output
-     */
+    /** the puttable channel to which messages are output */
     protected final Puttable sensoryPerceptionChannel;
 
-    /**
-     * the parent node component
-     */
+    /** the parent node component */
     protected NodeComponent nodeComponent;
     
     /**
@@ -167,6 +161,7 @@ public class ConsoleInput extends NodeComponent implements Sensor {
       catch (IOException e) {
         logger.severe(e.getMessage());
       }
+
     }
     
     /** Sends the sensed object message. */
@@ -196,10 +191,10 @@ public class ConsoleInput extends NodeComponent implements Sensor {
   protected String name;
   
   /** the names of sensations that this sensor can sense */
-  protected ArrayList sensationCapabilities;
+  protected List sensationCapabilities;
   
   /** the resources required by this sensor */
-  protected ArrayList resources;
+  protected List resources;
   
   /** the thread which processes the input channel of messages */
   protected Producer producer;

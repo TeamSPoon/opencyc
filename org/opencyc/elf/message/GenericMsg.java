@@ -115,19 +115,13 @@ abstract public class GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the sender of the message
-   */
+  /** the sender of the message */
   protected NodeComponent sender;
   
-  /**
-   * the in-reply-to message, or null if this message is unsolicited
-   */
+  /** the in-reply-to message, or null if this message is unsolicited */
   protected GenericMsg inReplyToMsg;
   
-  /**
-   * the reply-to channel, or null if no response is required
-   */
+  /** the reply-to channel, or null if no response is required */
   protected Puttable replyToChannel;
 
   //// Main

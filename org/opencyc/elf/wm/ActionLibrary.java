@@ -7,7 +7,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 import java.util.HashMap;
 
 /**
- * <P>ActionLibrary provides a store in which partially instantiated actions can be retrieved
+ * ActionLibrary provides a store in which partially instantiated actions can be retrieved
  * by name.  It is initially populated by the action factory.  There is a singleton instance
  * of action libary.
  *
@@ -81,9 +81,7 @@ public class ActionLibrary {
   /** the action library singleton instance */
   protected static ActionLibrary actionLibrary;
   
-  /**
-   * the dictionary that associates a given action name with the action object
-   */
+  /** the dictionary that associates a given action name with the action object */
   protected HashMap actionDictionary = new HashMap();
   
   //// Main

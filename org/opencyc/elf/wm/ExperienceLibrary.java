@@ -53,7 +53,9 @@ public class ExperienceLibrary {
   }
   
   /**
-   * 
+   * Adds the given experience to the library.
+   *
+   * @param experience the given experience 
    */
   public void addExperience (Experience experience) {
     //TODO add database access

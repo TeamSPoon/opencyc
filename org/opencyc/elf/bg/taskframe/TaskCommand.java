@@ -8,9 +8,7 @@ import org.opencyc.elf.goal.GoalTime;
 //// External Imports
 
 /**
- * <P>
  * TaskCommand is an instruction to perform a named task.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -36,9 +34,7 @@ public class TaskCommand {
   
   //// Constructors
 
-  /**
-   * Creates a new instance of TaskCommand
-   */
+  /** Creates a new instance of TaskCommand */
   public TaskCommand() {
   }
 
@@ -190,34 +186,22 @@ public class TaskCommand {
   
   //// Internal Rep
   
-  /**
-   * the action command plus modifiers
-   */
+  /** the action command plus modifiers */
   protected Action actionCommand;
   
-  /**
-   * the goal to be accomplish, or the state to be maintained, plus modifiers
-   */
+  /** the goal to be accomplish, or the state to be maintained, plus modifiers */
   protected Goal goalCommand;
   
-  /**
-   * the goal time constraint plus modifiers such as tolerance
-   */
+  /** the goal time constraint plus modifiers such as tolerance */
   protected GoalTime goalTime;
   
-  /**
-   * the planned next action command plus modifiers
-   */
+  /** the planned next action command plus modifiers */
   protected Action nextActionCommand;
   
-  /**
-   * the planned next goal to be accomplish, or the state to be maintained, plus modifiers
-   */
+  /** the planned next goal to be accomplish, or the state to be maintained, plus modifiers */
   protected Goal nextGoalCommand;
   
-  /**
-   * the planned next goal time constraint plus modifiers such as tolerance
-   */
+  /** the planned next goal time constraint plus modifiers such as tolerance */
   protected GoalTime nextGoalTime;
   
 }

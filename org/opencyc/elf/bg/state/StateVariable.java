@@ -5,7 +5,7 @@ package org.opencyc.elf.bg.state;
 //// External Imports
 
 /**
- * <P>StateVariable contains the name of an ELF state variable.  This class is required to
+ * StateVariable contains the name of an ELF state variable.  This class is required to
  * distinguish state variables from string literals used in goal predicate expressions.
  *
  * @version $Id$
@@ -98,24 +98,16 @@ public class StateVariable {
     return this.name.equals(that.name);
   }
   
-  /** 
-   * the user input state variable name
-   */
+  /** the user input state variable name */ 
   public static String USER_INPUT = "userInput";
   
-  /** 
-   * the user prompt state variable name
-   */
+  /** the user prompt state variable name */ 
   public static String USER_PROMPT = "userPrompt";
   
-  /** 
-   * the console input state variable name
-   */
+  /** the console input state variable name */ 
   public static String CONSOLE_INPUT = "consoleInput";
   
-  /** 
-   * the console prompt state variable name
-   */
+  /** the console prompt state variable name */ 
   public static String CONSOLE_PROMPT = "consolePrompt";
   
   //// Protected Area
@@ -124,19 +116,13 @@ public class StateVariable {
   
   //// Internal Rep
   
-  /**
-   * the state variable type
-   */
+  /** the state variable type */
   protected Class type;
   
-  /**
-   * the state variable name
-   */
+  /** the state variable name */
   protected String name;
   
-  /**
-   * the state variable comment
-   */
+  /** the state variable comment */
   protected String comment;
   
   //// Main

@@ -3,7 +3,7 @@ package org.opencyc.elf.bg.predicate;
 //// Internal Imports
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <P>NotNull is a predicate of arity one that returns true if its argument
@@ -48,7 +48,7 @@ public class NotNull extends Predicate {
    * @param arguments the given arguments to evaluate
    *
    */
-   public boolean evaluate (ArrayList arguments) {
+   public boolean evaluate (List arguments) {
     return arguments.get(0)!= null;
   }
   
@@ -59,7 +59,7 @@ public class NotNull extends Predicate {
    * @param arguments the given arguments to evaluate
    * @return a string representation of this object
    */
-  public String toString(ArrayList arguments) {
+  public String toString(List arguments) {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("(not-null ");
     stringBuffer.append(arguments.get(0).toString());

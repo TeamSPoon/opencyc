@@ -6,10 +6,10 @@ import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <P>Contains the schedule consistency request message which is sent from one
+ * Contains the schedule consistency request message which is sent from one
  * scheduler to each of its peer schedulers in a node.
  *
  * @version $Id$
@@ -71,7 +71,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
    *
    * @return the resources controlled by this node
    */
-  public ArrayList getControlledResources () {
+  public List getControlledResources () {
     return controlledResources;
   }
 
@@ -80,7 +80,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
    *
    * @param controlledResources the resources controlled by this node
    */
-  public void setControlledResources (ArrayList controlledResources) {
+  public void setControlledResources (List controlledResources) {
     this.controlledResources = controlledResources;
   }
 
@@ -130,14 +130,10 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the resources controlled by this node
-   */
-  protected ArrayList controlledResources;
+  /** the resources controlled by this node */
+  protected List controlledResources;
   
-  /**
-   * the node's commanded task
-   */
+  /** the node's commanded task */
   protected TaskCommand taskCommand;
   
   /**

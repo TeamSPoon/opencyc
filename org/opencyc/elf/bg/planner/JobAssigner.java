@@ -22,6 +22,7 @@ import org.opencyc.elf.message.ScheduleJobMsg;
 //// External Imports
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import java.util.logging.Logger;
 
@@ -66,7 +67,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    * @param actionCapabilities the names of actions that this virtual actuator can accomplish
    */
   public JobAssigner (Node node,
-                      ArrayList actionCapabilities) {
+                      List actionCapabilities) {
     setNode(node);
     node.getBehaviorGeneration().setJobAssigner(this);
     getLogger().info("Creating JobAssigner");
@@ -141,7 +142,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    *
    * @return the list of schedulers for this job assigner
    */
-  public ArrayList getSchedulers () {
+  public List getSchedulers () {
     return schedulers;
   }
 
@@ -150,7 +151,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    *
    * @param schedulers the list of schedulers for this job assigner
    */
-  public void setSchedulers (ArrayList schedulers) {
+  public void setSchedulers (List schedulers) {
     this.schedulers = schedulers;
   }
 
@@ -169,8 +170,8 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    *
    * @return the resources required by this virtual actuator
    */
-  public ArrayList getResources() {
-    ArrayList resources = new ArrayList();
+  public List getResources() {
+    List resources = new ArrayList();
     Iterator schedulerIterator = schedulers.iterator();
     while (schedulerIterator.hasNext()) {
       Scheduler scheduler = (Scheduler) schedulerIterator.next();
@@ -189,20 +190,16 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    *
    * @return names of the actions that this virtual actuator can accomplish
    */
-  public ArrayList getActionCapabilities() {
+  public List getActionCapabilities() {
     return actionCapabilities;
   }
   
   //// Protected Area
 
-  /**
-   * Thread which processes the input message channel.
-   */
+  /** Thread which processes the input message channel. */
   protected class Consumer implements Runnable {
     
-    /**
-     * the takable channel from which messages are input
-     */
+    /** the takable channel from which messages are input */
     protected final Takable jobAssignerChannel;
     
     /**
@@ -211,19 +208,13 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
      */
     protected Puttable executorChannel;
     
-    /**
-     * the parent node component
-     */
+    /** the parent node component */
     protected NodeComponent nodeComponent;
           
-    /**
-     * the node's commanded task
-     */
+    /** the node's commanded task */
     protected TaskCommand taskCommand;
     
-    /**
-     * the task frame for the current task command
-     */
+    /** the task frame for the current task command */
     protected TaskFrame taskFrame;
     
     /**
@@ -243,9 +234,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       this.nodeComponent = nodeComponent;
     }
 
-    /**
-     * Reads messages from the input queue and processes them.
-     */
+    /** Reads messages from the input queue and processes them. */
     public void run () {
       getLogger().info("Running JobAssigner.Consumer");
       try {
@@ -307,9 +296,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       //TODO
     }
     
-    /**
-     * Sends the job assignment status message to the higher-level executor.
-     */
+    /** Sends the job assignment status message to the higher-level executor. */
     protected void sendJobAssignmentStatus () {
       //TODO
       Status status = new Status();
@@ -321,9 +308,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         
   }
   
-  /**
-   * Sends the decompose task frame message to ?.
-   */
+  /** Sends the decompose task frame message to ?. */
   protected void decomposeTaskFrame () {
     //TODO
     // send via channel to ?
@@ -344,27 +329,19 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   //// Internal Rep
   
   /** the names of actions that this virtual actuator can accomplish */
-  protected ArrayList actionCapabilities;
+  protected List actionCapabilities;
   
-  /**
-   * the takable channel from which messages are input
-   */
+  /** the takable channel from which messages are input */
   protected Takable jobAssignerChannel;
     
-  /**
-   * the thread which processes the input channel of messages
-   */
+  /** the thread which processes the input channel of messages */
   protected Consumer consumer;
   
-  /**
-   * the executor of the consumer thread
-   */
+  /** the executor of the consumer thread */
   protected Executor executor;
   
-  /**
-   * the list of schedulers for this job assigner
-   */
-  protected ArrayList schedulers;
+  /** the list of schedulers for this job assigner */
+  protected List schedulers;
   
   //// main
 }

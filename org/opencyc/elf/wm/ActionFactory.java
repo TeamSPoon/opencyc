@@ -7,6 +7,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ActionFactory populates the action libary.  There is a singleton instance.
@@ -70,10 +71,10 @@ public class ActionFactory {
     // console prompted input
     action = new Action();
     action.setName(Action.CONSOLE_PROMPTED_INPUT);
-    ArrayList parameterNames = new ArrayList();
+    List parameterNames = new ArrayList();
     parameterNames.add("prompt");
     action.setParameterNames(parameterNames);
-    ArrayList parameterTypes = new ArrayList();
+    List parameterTypes = new ArrayList();
     parameterTypes.add(String.class);
     action.setParameterTypes(parameterTypes);
     ActionLibrary.getInstance().setAction(action.getName(), action);

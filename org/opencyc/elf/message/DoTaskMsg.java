@@ -64,9 +64,7 @@ public class DoTaskMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the commanded task for job assignment
-   */
+  /** the commanded task for job assignment */
   protected TaskCommand taskCommand;
   
   //// Main

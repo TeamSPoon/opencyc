@@ -84,6 +84,8 @@ public class TaskFrameLibrary {
   
   /**
    * Adds a named task frame to the dictionary.
+   *
+   * @param taskFrame the named task frame
    */
   protected void addTaskFrame (TaskFrame taskFrame) {
     taskFrameDictionary.put(taskFrame.getTaskName(), taskFrame);

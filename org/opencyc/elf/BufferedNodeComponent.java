@@ -3,6 +3,7 @@ package org.opencyc.elf;
 //// Internal Imports
 
 //// External Imports
+
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**

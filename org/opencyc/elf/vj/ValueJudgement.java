@@ -11,8 +11,6 @@ import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
-import java.util.ArrayList;
-
 
 /**
  * Provides Value Judgement for the Elementary Loop Functioning (ELF).

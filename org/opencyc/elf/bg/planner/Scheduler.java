@@ -20,6 +20,7 @@ import org.opencyc.elf.message.ScheduleJobMsg;
 //// External Imports
 
 import java.util.ArrayList;
+import java.util.List;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
@@ -54,9 +55,7 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 public class Scheduler extends NodeComponent {
   //// Constructors
 
-  /**
-   * Creates a new instance of Scheduler
-   */
+  /** Creates a new instance of Scheduler */
   public Scheduler() {
   }
 
@@ -146,8 +145,8 @@ public class Scheduler extends NodeComponent {
    *
    * @return the resources required by this scheduler
    */
-  public ArrayList getResources() {
-    ArrayList resources = new ArrayList();
+  public List getResources() {
+    List resources = new ArrayList();
     //TODO iterate through the task frame schedule infos
     return resources;
   }
@@ -159,35 +158,22 @@ public class Scheduler extends NodeComponent {
    */
   protected class Consumer implements Runnable {
     
-    /**
-     * the takable channel from which messages are input
-     */
+    /** the takable channel from which messages are input */
     protected final Takable schedulerChannel;
     
-    /**
-     * the puttable channel to which messages are output to the
-     * job assigner
-     */
+    /** the puttable channel to which messages are output to the job assigner */
     protected final Puttable jobAssignerChannel;
     
-    /**
-     * the parent node component
-     */
+    /** the parent node component */
     protected NodeComponent nodeComponent;
           
-    /**
-     * the node's controlled resources
-     */
-    protected ArrayList controlledResources;
+    /** the node's controlled resources */
+    protected List controlledResources;
     
-    /**
-     * the node's commanded task
-     */
+    /** the node's commanded task */
     protected TaskCommand taskCommand;
         
-    /**
-     * the schedule which is planned to accomplish the commanded task
-     */
+    /** the schedule which is planned to accomplish the commanded task */
     protected Schedule schedule;
     
     /**
@@ -271,15 +257,13 @@ public class Scheduler extends NodeComponent {
      * @param scheduleConsistencyRequestMsg the schedule consistency request message
      */
     protected void processScheduleConsistencyRequestMsg (ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg) {
-      ArrayList peerControlledResources = scheduleConsistencyRequestMsg.getControlledResources();
+      List peerControlledResources = scheduleConsistencyRequestMsg.getControlledResources();
       TaskCommand peerTaskCommand = scheduleConsistencyRequestMsg.getTaskCommand();
       Schedule peerSchedule = scheduleConsistencyRequestMsg.getSchedule();
       //TODO
     }
     
-    /**
-     * Sends the scheduler status message to the job assigner.
-     */
+    /** Sends the scheduler status message to the job assigner. */
     protected void sendSchedulerStatusMsg () {
       //TODO
       Status status = new Status();
@@ -330,23 +314,15 @@ public class Scheduler extends NodeComponent {
 
   //// Internal Rep
 
-  /**
-   * the takable channel from which messages are input
-   */
+  /** the takable channel from which messages are input */
   protected Takable schedulerChannel;
 
-  /**
-   * the thread which processes the input channel of messages
-   */
+  /** the thread which processes the input channel of messages */
   protected Consumer consumer;
 
-  /**
-   * the consumer thread executor
-   */
+  /** the consumer thread executor */
   protected EDU.oswego.cs.dl.util.concurrent.Executor consumerExecutor;
   
-  /**
-   * the executor for this scheduler
-   */
+  /** the executor for this scheduler */
   org.opencyc.elf.bg.executor.Executor executor;
 }

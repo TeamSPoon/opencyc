@@ -32,9 +32,7 @@ public class Importance {
   
   //// Constructors
   
-  /**
-   * Constructs a new Importance object.
-   */
+  /** Constructs a new Importance object. */
   public Importance() {
   }
 
@@ -49,29 +47,19 @@ public class Importance {
 
   //// Public Area
   
-  /**
-   * most important
-   */
+  /** most important */
   public static final float MOST = 1.0f;
   
-  /**
-   * more important
-   */
+  /** more important */
   public static final float MORE = .75f;
   
-  /**
-   * neutrally important
-   */
+  /** neutrally important */
   public static final float NEUTRAL = .5f;
   
-  /**
-   * less important
-   */
+  /** less important */
   public static final float LESS = .75f;
   
-  /**
-   * least important
-   */
+  /** least important */
   public static final float LEAST = 0.0f;
   
   /**
@@ -97,10 +85,8 @@ public class Importance {
   
   //// Protected Area
   
-  /**
-   * Importances range from 0.0 for least important, to +1 for most important.
-   */
-  float importance;
+  /** Importances range from 0.0 for least important, to +1 for most important. */
+  protected float importance;
 
   //// Private Area
   

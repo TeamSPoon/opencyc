@@ -5,9 +5,7 @@ package org.opencyc.elf;
 //// External Imports
 
 /**
- * <P>
  * Status contains status information.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  

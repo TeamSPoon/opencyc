@@ -79,9 +79,7 @@ public class StateVariableLibrary {
   /** the state variable library singleton instance */
   protected static StateVariableLibrary stateVariableLibrary;
   
-  /**
-   * the dictionary that associates a given state variable name with the state variable object
-   */
+  /** the dictionary that associates a given state variable name with the state variable object */
   protected HashMap stateVariableDictionary = new HashMap();
   
   //// Main

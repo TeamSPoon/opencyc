@@ -6,7 +6,7 @@ import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains the schedule consistency evaluation message which is sent from one
@@ -72,7 +72,7 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
    *
    * @return the resources controlled by this node
    */
-  public ArrayList getControlledResources () {
+  public List getControlledResources () {
     return controlledResources;
   }
 
@@ -81,7 +81,7 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
    *
    * @param controlledResources the resources controlled by this node
    */
-  public void setControlledResources (ArrayList controlledResources) {
+  public void setControlledResources (List controlledResources) {
     this.controlledResources = controlledResources;
   }
 
@@ -134,7 +134,7 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
   /**
    * the resources controlled by this node
    */
-  protected ArrayList controlledResources;
+  protected List controlledResources;
   
   /**
    * the node's commanded task

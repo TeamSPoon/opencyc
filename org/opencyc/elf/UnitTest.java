@@ -41,7 +41,6 @@ import org.opencyc.elf.wm.JobAssignmentFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.NodeFactory;
-import org.opencyc.elf.wm.NodePool;
 import org.opencyc.elf.wm.PlanSimulator;
 import org.opencyc.elf.wm.PredicateClassFactory;
 import org.opencyc.elf.wm.Predictor;
@@ -57,6 +56,7 @@ import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.List;
 
 import java.util.logging.Logger;
 
@@ -242,13 +242,12 @@ public class UnitTest extends TestCase {
     (new ActuatorFactory()).getInstance().populateActuatorPool();
     new SensorPool();
     (new SensorFactory()).getInstance().populateSensorPool();
-    new NodePool();
-    (new NodeFactory()).getInstance().populateNodePool();
+    new NodeFactory();
     Node node = NodeFactory.getInstance().makeNodeShell("test-node");
     
     ActionFactory actionFactory = new ActionFactory();
     Action converseWithUserAction = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
-    ArrayList parameterValues = new ArrayList();
+    List parameterValues = new ArrayList();
     parameterValues.add(">");
     converseWithUserAction.setParameterValues(parameterValues);
     

@@ -8,7 +8,6 @@ import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
-import java.util.ArrayList;
 
 /**
  * Provides the plan simulator for the ELF WorldModel.
@@ -37,9 +36,7 @@ public class PlanSimulator extends NodeComponent {
   
   //// Constructors
   
-  /**
-   * Constructs a new PlanSimulator object.
-   */
+  /** Constructs a new PlanSimulator object. */
   public PlanSimulator() {
   }
 

@@ -32,9 +32,7 @@ public class HypothesisFormer extends NodeComponent {
   
   //// Constructors
   
-  /**
-   * Constructs a new HypothesisFormer object.
-   */
+  /** Constructs a new HypothesisFormer object. */
   public HypothesisFormer() {
   }
 

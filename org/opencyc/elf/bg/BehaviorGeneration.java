@@ -43,9 +43,7 @@ public class BehaviorGeneration extends NodeComponent {
 
   //// Constructors
   
-  /**
-   * Constructs a new BehaviorGeneration object.
-   */
+  /** Constructs a new BehaviorGeneration object.*/
   public BehaviorGeneration() {
   }
 
@@ -114,15 +112,10 @@ public class BehaviorGeneration extends NodeComponent {
   
   //// Internal Rep
   
-  /**
-   * the job assigner
-   */
+  /** the job assigner */
   protected JobAssigner jobAssigner;
   
-  /**
-   * the plan selector
-   */
+  /** the plan selector */
   protected PlanSelector planSelector;
-  
-  
+    
 }

@@ -10,7 +10,6 @@ import org.opencyc.elf.goal.Importance;
 import org.opencyc.elf.goal.PredicateExpression;
 
 //// External Imports
-import java.util.ArrayList;
 
 /**
  * GoalFactory is designed to create goals.  There is a singleton instance of goal factory.
@@ -85,9 +84,7 @@ public class GoalFactory {
   
   //// Internal Rep
   
-  /**
-   * the singleton goal factory instance
-   */
+  /** the singleton goal factory instance */
   protected static GoalFactory goalFactory;
   
   //// Main

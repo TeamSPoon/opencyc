@@ -33,9 +33,7 @@ public class Estimator extends NodeComponent {
   
   //// Constructors
   
-  /**
-   * Constructs a new Estimator object.
-   */
+  /** Constructs a new Estimator object. */
   public Estimator() {
   }
 

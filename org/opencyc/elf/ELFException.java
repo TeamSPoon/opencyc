@@ -5,7 +5,7 @@ package org.opencyc.elf;
 //// External Imports
 
 /**
- * <P>ELFException contains the ELF exception.
+ * ELFException contains the ELF exception.
  *
  * @version $Id$
  * @author Stephen L. Reed  

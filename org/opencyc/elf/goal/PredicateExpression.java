@@ -5,9 +5,10 @@ import org.opencyc.elf.bg.predicate.Predicate;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <P>PredicateExpression contains a predicate and arguments that can be
+ * PredicateExpression contains a predicate and arguments that can be
  * evaluated to indicate the achivement of a goal (or alternately the
  * failure to achieve a goal).
  *
@@ -36,10 +37,8 @@ public class PredicateExpression {
   
   //// Constructors
   
-  /** 
-   * Creates a new instance of PredicateExpression.
-   */
-  public PredicateExpression() {
+  /** Creates a new instance of PredicateExpression. */ 
+ public PredicateExpression() {
   }
   
   /** 
@@ -95,7 +94,7 @@ public class PredicateExpression {
    *
    * @return the argument list
    */
-  public ArrayList getArguments () {
+  public List getArguments () {
     return arguments;
   }
 
@@ -104,7 +103,7 @@ public class PredicateExpression {
    *
    * @param arguments the argument list
    */
-  public void setArguments (ArrayList arguments) {
+  public void setArguments (List arguments) {
     this.arguments = arguments;
   }
   
@@ -134,15 +133,11 @@ public class PredicateExpression {
  
   //// Protected Area
   
-  /**
-   * the goal predicate
-   */
+  /** the goal predicate */
   protected Predicate predicate;
 
-  /**
-   * the argument list
-   */
-  protected ArrayList arguments;
+  /** the argument list */
+  protected List arguments;
   
   //// Private Area
   

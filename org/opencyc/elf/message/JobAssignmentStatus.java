@@ -64,9 +64,7 @@ public class JobAssignmentStatus extends GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the job assigner status
-   */
+  /** the job assigner status */
   protected Status status;
   
   //// Main

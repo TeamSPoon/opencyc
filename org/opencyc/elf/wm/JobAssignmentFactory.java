@@ -10,6 +10,7 @@ import org.opencyc.elf.wm.ActionFactory;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JobAssignmentFactory populates the job assignment library.  There is a singleton instance.
@@ -61,7 +62,7 @@ public class JobAssignmentFactory {
     // converse with user
     JobAssignment jobAssignment = new JobAssignment();
     jobAssignment.setActionName(Action.CONVERSE_WITH_USER);
-    ArrayList requiredResources = new ArrayList();
+    List requiredResources = new ArrayList();
     requiredResources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     jobAssignment.setRequiredResources(requiredResources);
     ActionFactory actionFactory = new ActionFactory();

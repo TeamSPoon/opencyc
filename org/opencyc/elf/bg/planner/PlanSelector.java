@@ -7,9 +7,7 @@ import org.opencyc.elf.Status;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
-
 //// External Imports
-import java.util.ArrayList;
 
 /**
  * PlanSelector selects the best plan from alternatives.

@@ -89,9 +89,7 @@ public class KnowledgeBase extends NodeComponent {
   
   //// Internal Rep
   
-  /**
-   * the knowledge base cache associating obj --> data
-   */
+  /** the knowledge base cache associating obj --> data */
   protected Hashtable kbCache = new Hashtable();
   
   /** the knowledge base singleton instance */

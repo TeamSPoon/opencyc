@@ -22,6 +22,7 @@ import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TaskFrameFactory populates the task frame library.  There is a singleton instance.
@@ -76,16 +77,16 @@ public class TaskFrameFactory {
     taskFrame.setTaskName(action.getName());
     taskFrame.setTaskAction(action);
     Schedule schedule = new Schedule();
-    ArrayList plannedActions = new ArrayList();
+    List plannedActions = new ArrayList();
     action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
     schedule.setPlannedActions(plannedActions);
     Resource resource = ResourcePool.getInstance().getResource(Resource.CONSOLE);
-    ArrayList resources = new ArrayList();
+    List resources = new ArrayList();
     resources.add(resource);
-    ArrayList actionCapabilities = new ArrayList();
+    List actionCapabilities = new ArrayList();
     actionCapabilities.add(Action.CONSOLE_PROMPTED_INPUT);
     ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources, actionCapabilities);
-    ArrayList sensationCapabilities = new ArrayList();
+    List sensationCapabilities = new ArrayList();
     sensationCapabilities.add(Sensation.CONSOLE_INPUT);
     ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources, sensationCapabilities);
     taskFrame.addScheduleInfo(schedule, 

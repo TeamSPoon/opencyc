@@ -80,9 +80,7 @@ public class ActuatorPool {
   /** the actuator library singleton instance */
   protected static ActuatorPool actuatorPool;
   
-  /**
-   * the dictionary that associates a given actuator name with the actuator object
-   */
+  /** the dictionary that associates a given actuator name with the actuator object */
   protected HashMap actuatorDictionary = new HashMap();
   
   //// Main

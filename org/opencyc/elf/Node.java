@@ -13,8 +13,8 @@ import org.opencyc.elf.vj.ValueJudgement;
 import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import java.util.logging.Logger;
 
@@ -228,7 +228,7 @@ public class Node {
    * 
    * @return the Child nodes of this node for the task at hand
    */
-  public ArrayList getChildNodes() {
+  public List getChildNodes() {
     return childNodes;
   }
 
@@ -237,7 +237,7 @@ public class Node {
    * 
    * @param childNodes the Child nodes of this node for the task at hand
    */
-  public void setChildNodes(ArrayList childNodes) {
+  public void setChildNodes(List childNodes) {
     this.childNodes = childNodes;
   }
 
@@ -246,7 +246,7 @@ public class Node {
    * 
    * @return the list of sibling nodes at this ELF resolution level
    */
-  public ArrayList getSiblingNodes() {
+  public List getSiblingNodes() {
     return siblingNodes;
   }
 
@@ -255,7 +255,7 @@ public class Node {
    * 
    * @param siblingNodes the list of sibling nodes at this ELF resolution level
    */
-  public void setSiblingNodes(ArrayList siblingNodes) {
+  public void setSiblingNodes(List siblingNodes) {
     this.siblingNodes = siblingNodes;
   }
   
@@ -307,10 +307,10 @@ public class Node {
    * The Child nodes of this node for the task at hand.  The lowest level nodes
    * in the hierarchy have null for childNodes;
    */
-  protected ArrayList childNodes;
+  protected List childNodes;
 
   /** the list of sibling nodes at this ELF resolution level */
-  protected ArrayList siblingNodes;
+  protected List siblingNodes;
   
   /** the logger */
   protected Logger logger;

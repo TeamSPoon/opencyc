@@ -48,9 +48,7 @@ public class SensorClassFactory {
     return SensorClassFactory;
   }
   
-  /**
-   * Generates the Sensor classes.
-   */
+  /** Generates the Sensor classes. */
   public void generate () {
     //TODO
   }

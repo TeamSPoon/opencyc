@@ -1,3 +1,9 @@
+
+
+//     DELETE THIS MODULE as it is no longer required, instead nodes will be
+//     generated on the fly and discarded when done.  Only the actuators and
+//     sensors are pooled.
+
 package org.opencyc.elf.wm;
 
 //// Internal Imports
@@ -61,6 +67,7 @@ public class NodePool {
     return (Node)  nodeDictionary.get(name);
   }
 
+  
   /**
    * Sets the node associated with the given node name.
    *
@@ -80,9 +87,7 @@ public class NodePool {
   /** the node pool singleton instance */
   protected static NodePool nodePool;
   
-  /**
-   * the dictionary that associates a given node name with the node object
-   */
+  /** the dictionary that associates a given node name with the node object */
   protected HashMap nodeDictionary = new HashMap();
   
   //// Main

@@ -10,10 +10,10 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
- * <P>Contains the ELF replan message that is sent from the plan selector to the
+ * Contains the ELF replan message that is sent from the plan selector to the
  * scheduler and to the job assigner.
  *
  * @version $Id$
@@ -75,7 +75,7 @@ public class ReplanMsg extends GenericMsg {
    *
    * @return the resources controlled by this node
    */
-  public ArrayList getControlledResources () {
+  public List getControlledResources () {
     return controlledResources;
   }
 
@@ -84,7 +84,7 @@ public class ReplanMsg extends GenericMsg {
    *
    * @param controlledResources the resources controlled by this node
    */
-  public void setControlledResources (ArrayList controlledResources) {
+  public void setControlledResources (List controlledResources) {
     this.controlledResources = controlledResources;
   }
 
@@ -155,7 +155,7 @@ public class ReplanMsg extends GenericMsg {
   /**
    * the resources controlled by this node
    */
-  protected ArrayList controlledResources;
+  protected List controlledResources;
   
   /**
    * the node's commanded task

@@ -104,10 +104,6 @@ public class ExportHtml {
      */
     public static final Guid ikbConstantGuid = CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
     /**
-     * The #$CycLConstant guid.
-     */
-    public static final Guid cycLConstantGuid = CycObjectFactory.makeGuid("bf3491c4-9c29-11b1-9dad-c379636f7270");
-    /**
      * The CycKBSubsetCollection whose elements are exported to HTML.
      */
     public Guid cycKbSubsetCollectionGuid = null;
@@ -273,10 +269,16 @@ public class ExportHtml {
                 System.exit(1);
             }
 
-            exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCandidateConstantGuid);
-            exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCoreConstantGuid);
-            exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyConstantGuid);
-            exportHtml.filterFromDirectInstanceGuids.add(cycLConstantGuid);
+            Guid quaUnterestingWeaponSystemGuid =
+                CycObjectFactory.makeGuid("c1085b99-9c29-11b1-9dad-c379636f7270");
+            Guid economicInterestTypeGuid =
+                CycObjectFactory.makeGuid("c02a0764-9c29-11b1-9dad-c379636f7270");
+
+            //exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCandidateConstantGuid);
+            //exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCoreConstantGuid);
+            //exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyConstantGuid);
+            exportHtml.filterFromDirectInstanceGuids.add(quaUnterestingWeaponSystemGuid);
+            exportHtml.filterFromDirectInstanceGuids.add(economicInterestTypeGuid);
             exportHtml.print_guid = false;
 
             exportHtml.cycKbSubsetFilterGuid = ikbConstantGuid;

@@ -68,10 +68,10 @@ public class Sensation {
   }
 
   /** the name of the console input sensation */
-  public static final String CONSOLE_INPUT = "console input";  
+  public static final String CONSOLE_INPUT = "ConsoleInput";  
   
   /** the name of the Cyc API response sensation */
-  public static final String CYC_API_RESPONSE = "cyc api response";  
+  public static final String CYC_API_RESPONSE = "CycApiResponse";  
   
   //// Protected Area
   

@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.ActionFactory;
 
 //// External Imports
@@ -60,11 +61,13 @@ public class ScheduleLibrary {
     // 
     Schedule schedule = new Schedule();
     ActionFactory actionFactory = new ActionFactory();
-    // console prompted input
+    
+    // convserse with user --> console prompted input
     ArrayList plannedActions = new ArrayList();
     plannedActions.add(actionFactory.makeConsolePromptedInput());
     schedule.setPlannedActions(plannedActions);
     ArrayList plannedGoals = new ArrayList();
+    addSchedule(Action.CONVERSE_WITH_USER, schedule);
   }
   
   /**

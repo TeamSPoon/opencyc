@@ -12,9 +12,13 @@ import org.opencyc.elf.bg.state.State;
 
 /**
  * <P>
- * Procedure contains the procedure framework that specific procedures extend.  Procedures
- * are not directly executable, they provide the source code for the action that
- * interprets the procedure.
+ * A Procedure instance contains the procedure desciption - name, input parameter types
+ * and output type.  Procedures are contained in actions that provide the input parameter
+ * values.  Actuators directly execute methods identified by some procedures using the input
+ * values contained in the associated action.  A job assigner decomposes a procedure according
+ * to available agents and resources for scheduling.  A scheduler creates one or more plans 
+ * that accomplish the procedure, and each plan consists of a program containing actions
+ * and control statements for processing by the corresponding executor.
  * </p>
  * 
  * @version $Id$
@@ -39,17 +43,17 @@ import org.opencyc.elf.bg.state.State;
  */
 public class Procedure {
   
+  //TODO put back namespace
+  
   //// Constructors
 
   /**
    * Creates a new instance of Procedure.
-   * @param namespace the procedure namespace
    * @param name the procedure name
    * @param parameterTypes the types of the procedure parameters
    * @param outputType the type of the procedure output
    */
-  public Procedure(String namespace, String name, ArrayList parameterTypes, Class outputType) {
-    this.namespace = namespace;
+  public Procedure(String name, ArrayList parameterTypes, Class outputType) {
     this.name = name;
     this.parameterTypes = parameterTypes;
   }
@@ -68,10 +72,7 @@ public class Procedure {
       return false;
     }
     Procedure that = (Procedure) obj;
-    if (! this.namespace.equals(that.namespace))
-      return false;
-    else
-      return (this.name.equals(that.name));
+    return (this.name.equals(that.name));
   }
 
   /**
@@ -92,24 +93,6 @@ public class Procedure {
     this.name = name;
   }
 
-  /**
-   * Gets the procedure namespace
-   *
-   * @return the procedure namespace
-   */
-  public String getNamespace () {
-    return namespace;
-  }
-
-  /**
-   * Sets the procedure namespace
-   *
-   * @param namespace the procedure namespace
-   */
-  public void setNamespace (String namespace) {
-    this.namespace = namespace;
-  }
-  
   /**
    * Gets the parameter names each of which is a String
    *
@@ -181,6 +164,7 @@ public class Procedure {
   public void setBody (ArrayList body) {
     this.body = body;
   }  
+  
   //// Protected Area
 
   //// Private Area
@@ -191,11 +175,6 @@ public class Procedure {
    * the procedure name 
    */
   protected String name;
-
-  /** 
-   * the procedure namespace 
-   */
-  protected String namespace;
 
   /** 
    * the parameter names each of which is a String 

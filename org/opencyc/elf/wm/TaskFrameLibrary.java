@@ -56,7 +56,8 @@ public class TaskFrameLibrary {
    * @return the task frame given the task name
    */
   public TaskFrame getTaskFrame (String taskName) {
-    return (TaskFrame) taskFrameDictionary.get(taskName);
+    TaskFrame taskFrame = (TaskFrame) taskFrameDictionary.get(taskName);
+    return (TaskFrame) taskFrame.clone();
   }
     
   //// Protected Area

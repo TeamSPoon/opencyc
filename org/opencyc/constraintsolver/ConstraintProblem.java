@@ -113,13 +113,13 @@ public class ConstraintProblem {
     /**
      * Collection of the rules which populate variable domains.
      */
-    protected ArrayList domainPopulationRules = new ArrayList();
+    protected ArrayList domainPopulationRules;
 
     /**
      * Collection of the constraint rules used in the search for
      * solution(s).
      */
-    protected ArrayList constraintRules = new ArrayList();
+    protected ArrayList constraintRules;
 
     /**
      * Collection of the simplified constraint rules derived
@@ -242,7 +242,6 @@ public class ConstraintProblem {
                 return new ArrayList();
             }
             problemParser.gatherVariables();
-            variableDomainPopulator.initializeDomains();
             if (variables.size() > 0)
                 nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();

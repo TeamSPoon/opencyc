@@ -56,10 +56,10 @@ public class UnitTest extends TestCase {
         //testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
         //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -1700,6 +1700,20 @@ public class UnitTest extends TestCase {
             CycList response = CycAccess.current().askWithVariable(query, variable, mt);
             Assert.assertNotNull(response);
             Assert.assertTrue(response.contains(CycAccess.current().getConstantByName("#$UniversityOfTexasAtAustin")));
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        // askWithVariables
+        try {
+            CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation ?WHAT ?WHERE)");
+            ArrayList variables = new ArrayList();
+            variables.add(CycVariable.makeCycVariable("?WHAT"));
+            variables.add(CycVariable.makeCycVariable("?WHERE"));
+            mt = CycAccess.current().getKnownConstantByName("UniverseDataMt");
+            CycList response = CycAccess.current().askWithVariables(query, variables, mt);
+            Assert.assertNotNull(response);
         }
         catch (Exception e) {
             Assert.fail(e.toString());

@@ -67,13 +67,14 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
             //testSuite.addTest(new UnitTest("testProblemParser"));
             //testSuite.addTest(new UnitTest("testConstraintProblem1"));
-            testSuite.addTest(new UnitTest("testConstraintProblem2"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem2"));
             //testSuite.addTest(new UnitTest("testConstraintProblem3"));
             //testSuite.addTest(new UnitTest("testConstraintProblem4"));
             //testSuite.addTest(new UnitTest("testConstraintProblem5"));
             //testSuite.addTest(new UnitTest("testConstraintProblem6"));
             //testSuite.addTest(new UnitTest("testConstraintProblem7"));
             //testSuite.addTest(new UnitTest("testConstraintProblem8"));
+            testSuite.addTest(new UnitTest("testConstraintProblem9"));
             //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
 
@@ -1004,8 +1005,7 @@ public class UnitTest extends TestCase {
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         System.out.println(europeanCathedralsString2);
         ConstraintProblem europeanCathedralsProblem2 = new ConstraintProblem();
-        //europeanCathedralsProblem2.setVerbosity(1);
-        europeanCathedralsProblem2.setVerbosity(9);
+        europeanCathedralsProblem2.setVerbosity(1);
         // Request one solution.
         europeanCathedralsProblem2.nbrSolutionsRequested = new Integer(1);
         // Request all solutions.
@@ -1233,6 +1233,38 @@ public class UnitTest extends TestCase {
         System.out.println("** testConstraintProblem8 OK **");
     }
 
+//(and (temporallySubsumes ?TIME ?MT-TIME) (mtTime ?MT ?MT-TIME) (holdsIn ?TIME (on-Physical ?WHAT CityOfAustinTX)))
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem9() {
+        System.out.println("** testConstraintProblem9 **");
+
+        // domain population rules are all high cardinality isa rules.
+        String problemString =
+            "(#$and " +
+            "  (#$temporallySubsumes ?TIME ?MT-TIME) " +
+            "  (#$mtTime ?MT ?MT-TIME) " +
+            "  (#$holdsIn ?TIME (#$on-Physical ?WHAT #$CityOfAustinTX)))";
+        System.out.println(problemString);
+        ConstraintProblem problem = new ConstraintProblem();
+        problem.setVerbosity(9);
+        // Request all solutions.
+        problem.nbrSolutionsRequested = null;
+        try {
+            problem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = problem.solve(problemString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem9 OK **");
+    }
 
 
     /**
@@ -1376,7 +1408,6 @@ public class UnitTest extends TestCase {
      */
     public void testBackchainer5() {
         System.out.println("** testBackchainer5 **");
-        // what is a CarvedArtwork? to depth 1
         String whatIsACarvedArtworkString =
             "(#$holdsIn ?SIT (#$pathState #$CityOfAustinTX #$PathBlocked))";
         System.out.println(whatIsACarvedArtworkString);

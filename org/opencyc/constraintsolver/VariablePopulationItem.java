@@ -35,12 +35,12 @@ public class VariablePopulationItem implements Comparable {
     /**
      * The variable whose value domain is to be populated.
      */
-    CycVariable cycVariable;
+    protected CycVariable cycVariable;
 
     /**
      * The rule which populates this variable.
      */
-    Rule rule;
+    protected Rule rule;
 
     public VariablePopulationItem(CycVariable cycVariable, Rule rule) {
         this.cycVariable = cycVariable;

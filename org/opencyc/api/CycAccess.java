@@ -1677,7 +1677,31 @@ public class CycAccess {
     }
 
     /**
-     * Returns <tt>true</tt> iff the query is true in the knowledge base.
+     * Returns a list of bindings for a query with unbound variables.
+     *
+     * @param query the query to be asked in the knowledge base
+     * @param variables the list of unbound variables in the query for which bindings are sought
+     * @param mt the microtheory in which the query is asked
+     * @return a list of bindings for the query
+     */
+    public CycList askWithVariables (CycList query,
+                                     ArrayList variables,
+                                     CycFort mt)  throws IOException, UnknownHostException {
+        StringBuffer queryBuffer = new StringBuffer();
+        queryBuffer.append("(clet ((*cache-inference-results* nil) ");
+        queryBuffer.append("       (*compute-inference-results* nil) ");
+        queryBuffer.append("       (*unique-inference-result-bindings* t) ");
+        queryBuffer.append("       (*generate-readable-fi-results* nil)) ");
+        queryBuffer.append("  (without-wff-semantics ");
+        queryBuffer.append("    (ask-template '" + (new CycList(variables)).stringApiValue() + " ");
+        queryBuffer.append("                  '" + query.stringApiValue() + " ");
+        queryBuffer.append("                  " + mt.stringApiValue() + " ");
+        queryBuffer.append("                  0 nil nil nil)))");
+        return converseList(queryBuffer.toString());
+    }
+
+    /**
+     * Returns <tt>true</tt> iff the ground query is true in the knowledge base.
      *
      * @param query the query to be asked in the knowledge base
      * @param mt the microtheory in which the query is asked

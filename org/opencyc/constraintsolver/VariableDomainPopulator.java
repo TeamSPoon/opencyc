@@ -92,8 +92,10 @@ public class VariableDomainPopulator {
      */
     public VariableDomainPopulator(ConstraintProblem constraintProblem) {
         this.constraintProblem = constraintProblem;
-        this.domainPopulationRules = constraintProblem.domainPopulationRules;
-        this.constraintRules = constraintProblem.constraintRules;
+        this.domainPopulationRules = new ArrayList();
+        constraintProblem.domainPopulationRules = this.domainPopulationRules;
+        this.constraintRules = new ArrayList();
+        constraintProblem.constraintRules = this.constraintRules;
         this.valueDomains = constraintProblem.valueDomains;
     }
 
@@ -120,34 +122,44 @@ public class VariableDomainPopulator {
                                    variablePopulationItem.cycVariable.cyclify() +
                                    "\n  " + variablePopulationItem.rule +
                                    "\n  which has " + variablePopulationItem.getNbrFormulaInstances() + " instances");
+
+            if ((variablePopulationItem.rule.getArity() > 1) &&
+                (! constraintRules.contains(variablePopulationItem.rule)))
+                constraintRules.add(variablePopulationItem.rule);
+
             if (i == 0) {
                 if (verbosity > 3)
                     System.out.println("  First variable must always be populated");
                 variableDomainPopulators.put(variablePopulationItem.cycVariable, variablePopulationItem);
                 domainPopulationRules.add(variablePopulationItem.rule);
                 valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
+                initializeDomain(variablePopulationItem);
                 continue;
             }
             if (variableDomainPopulators.containsKey(variablePopulationItem.cycVariable)) {
                 if (verbosity > 3)
                     System.out.println("  Variable already has the best domain populating rule");
-                constraintRules.add(variablePopulationItem.rule);
+                if (! constraintRules.contains(variablePopulationItem.rule))
+                    constraintRules.add(variablePopulationItem.rule);
                 continue;
             }
             if (variablePopulationItem.getNbrFormulaInstances() > domainSizeThreshold) {
                 if (verbosity > 3)
                     System.out.println("  Rule's domain size exceeds the threshold of " + domainSizeThreshold +
                                        ", domain population postponed");
-                variablePopulationItem.rule = null;
                 variableDomainPopulators.put(variablePopulationItem.cycVariable, variablePopulationItem);
                 valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
                 continue;
             }
             if (verbosity > 3)
                 System.out.println("  Will populate using this rule");
-                domainPopulationRules.add(variablePopulationItem.rule);
-                valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
+            domainPopulationRules.add(variablePopulationItem.rule);
+            variableDomainPopulators.put(variablePopulationItem.cycVariable, variablePopulationItem);
+            valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
+            initializeDomain(variablePopulationItem);
         }
+        if (verbosity > 1)
+            valueDomains.displayVariablesAndDomains();
     }
 
     /**
@@ -272,37 +284,85 @@ public class VariableDomainPopulator {
     }
 
     /**
-     * Initializes the value domains for each variable.
+     * Initializes the value domain for each variable.
+     *
+     * @param variablePopulationItem the <tt>VariablePopulationItem</tt> object which contains the variable
+     * and its domain populating rule
      */
-    public void initializeDomains() throws IOException {
-        for (int i = 0; i < domainPopulationRules.size(); i++) {
-            Rule rule = (Rule) domainPopulationRules.get(i);
-            if (rule.isExtensionalVariableDomainPopulatingRule()) {
-                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
-                if (valueDomains.domains.containsKey(cycVariable))
-                    throw new RuntimeException("Duplicate domain specifying rule for " +
-                                               cycVariable);
-                valueDomains.domains.put(cycVariable, null);
-                if (valueDomains.varsDictionary.containsKey(cycVariable))
-                    throw new RuntimeException("Duplicate varsDictionary entry for " + cycVariable);
-                CycList theSet =  (CycList) rule.getFormula().third();
-                if (! (theSet.first().toString().equals("TheSet")))
-                    throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
-                ArrayList domainValues = new ArrayList(theSet.rest());
-                valueDomains.varsDictionary.put(cycVariable, domainValues);
-            }
-            else if (rule.getArity() == 1) {
-                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
-                populateDomainViaQuery(rule, cycVariable);
-            }
-            else {
-
-                //TODO handle domain population for arity > 1
-
+    public void initializeDomain(VariablePopulationItem variablePopulationItem) throws IOException {
+        CycVariable cycVariable = variablePopulationItem.cycVariable;
+        Rule rule = variablePopulationItem.rule;
+        if (valueDomains.domains.containsKey(cycVariable))
+            throw new RuntimeException("Duplicate domain specifying rule for " +
+                                       cycVariable);
+        if (rule.isExtensionalVariableDomainPopulatingRule()) {
+            valueDomains.domains.put(cycVariable, null);
+            CycList theSet =  (CycList) rule.getFormula().third();
+            if (! (theSet.first().toString().equals("TheSet")))
+                throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
+            ArrayList domainValues = new ArrayList(theSet.rest());
+            valueDomains.varsDictionary.put(cycVariable, domainValues);
+        }
+        else if (rule.getArity() == 1) {
+            populateDomainViaQuery(rule, cycVariable);
+        }
+        else {
+            CycList resultSet =
+                CycAccess.current().askWithVariables(rule.formula, rule.variables, constraintProblem.mt);
+            for (int i = 0; i < rule.variables.size(); i++) {
+                if (rule.getVariables().get(i).equals(cycVariable)) {
+                    ArrayList domainValues = new ArrayList();
+                    for (int k = 0; k < resultSet.size(); k++) {
+                        CycList resultItem = (CycList) resultSet.get(k);
+                        domainValues.add(resultItem.get(i));
+                    }
+                    valueDomains.varsDictionary.put(cycVariable, domainValues);
+                    break;
+                }
             }
         }
-        if (verbosity > 1)
-            valueDomains.displayVariablesAndDomains();
+    }
+
+    /**
+     * Populates the domain of an postponed high cardinality variable, using the previously
+     * determined best value domain population rule.
+     *
+     * @param variable the variable whose value domain is to be populated
+     */
+    protected void populatePostponedDomain (CycVariable variable) throws IOException {
+        VariablePopulationItem variablePopulationItem =
+            (VariablePopulationItem) variableDomainPopulators.get(variable);
+        Rule rule = variablePopulationItem.rule;
+        if (verbosity > 2)
+            System.out.println("Populating high cardinality variable " + variable +
+                               "\n  with rule\n" + rule.cyclify());
+        ArrayList permittedValues = null;
+        if (rule.getArity() == 1)
+            permittedValues =
+                CycAccess.current().askWithVariable(rule.formula, variable, constraintProblem.mt);
+        else {
+            CycList resultSet =
+                CycAccess.current().askWithVariables(rule.formula, rule.variables, constraintProblem.mt);
+            for (int i = 0; i < rule.variables.size(); i++) {
+                if (rule.getVariables().get(i).equals(variable)) {
+                    permittedValues = new ArrayList();
+                    for (int k = 0; k < resultSet.size(); k++) {
+                        CycList resultItem = (CycList) resultSet.get(k);
+                        permittedValues.add(resultItem.get(i));
+                    }
+                    break;
+                }
+            }
+        }
+        for (int i = 0; i < permittedValues.size(); i++) {
+            Object value = permittedValues.get(i);
+            Binding binding = new Binding(variable, value);
+            if (verbosity > 2)
+                System.out.println("  " + binding.cyclify() +
+                                   " is new");
+            valueDomains.addDomainValue(variable, value);
+            valueDomains.markDomain(variable, value, Boolean.TRUE);
+        }
     }
 
 }

@@ -48,17 +48,17 @@ public class Transition extends ModelElement {
     /**
      * (extension) the input pin bindings
      */
-    protected ArrayList effectInputBinding;
+    protected ArrayList effectInputBinding = new ArrayList();
 
     /**
      * the input pin bindings for the transition effect
      */
-    protected ArrayList effectInputBindings;
+    protected ArrayList effectInputBindings = new ArrayList();
 
     /**
      * the output pin bindings for the transition effect
      */
-    protected ArrayList effectOutputBindings;
+    protected ArrayList effectOutputBindings = new ArrayList();
 
     /**
      * the event which triggered this transition

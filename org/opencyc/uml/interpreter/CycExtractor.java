@@ -710,7 +710,7 @@ public class CycExtractor {
             CycFort stateVertexTerm = (CycFort) stateTermStack.pop();
             stateVertexTerms.add(stateVertexTerm);
             if (verbosity > 2)
-                Log.current.println("Found state " + stateVertexTerm.cyclify());
+                Log.current.println("  Found state " + stateVertexTerm.cyclify());
             if (cycAccess.isa(stateVertexTerm, "UMLCompositeState")) {
                 CycList subStates =
                     cycAccess.getArg1s(cycAccess.getKnownConstantByName("umlContainer"),
@@ -773,7 +773,7 @@ public class CycExtractor {
                 transition.setName(modelElementTerm.toString());
                 transitionDictionary.put(modelElementTerm, transition);
                 if (verbosity > 2)
-                    Log.current.println("Found transition " + modelElementTerm.cyclify());
+                    Log.current.println("  Found transition " + modelElementTerm.cyclify());
             }
         }
     }
@@ -807,7 +807,7 @@ public class CycExtractor {
                 if (entryProcedureTerm != null) {
                     procedureTerms.add(entryProcedureTerm);
                     if (verbosity > 2)
-                        Log.current.println("Found entry procedure " + entryProcedureTerm.cyclify());
+                        Log.current.println("  Found entry procedure " + entryProcedureTerm.cyclify());
                     extractEntryProcedurePinBindings(stateVertexTerm);
                 }
                 CycFort exitProcedureTerm =
@@ -817,7 +817,7 @@ public class CycExtractor {
                 if (exitProcedureTerm != null) {
                     procedureTerms.add(exitProcedureTerm);
                     if (verbosity > 2)
-                        Log.current.println("Found exit procedure " + exitProcedureTerm.cyclify());
+                        Log.current.println("  Found exit procedure " + exitProcedureTerm.cyclify());
                     extractExitProcedurePinBindings(stateVertexTerm);
                 }
                 CycFort doActivityProcedureTerm =
@@ -827,7 +827,7 @@ public class CycExtractor {
                 if (doActivityProcedureTerm != null) {
                     procedureTerms.add(doActivityProcedureTerm);
                     if (verbosity > 2)
-                        Log.current.println("Found doActivty procedure " + doActivityProcedureTerm.cyclify());
+                        Log.current.println("  Found doActivty procedure " + doActivityProcedureTerm.cyclify());
                     extractExitProcedurePinBindings(stateVertexTerm);
                 }
             }
@@ -853,9 +853,9 @@ public class CycExtractor {
             InputPin inputPin = (InputPin) result[0];
             Object boundInputValueExpression = result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted input pin binding for " + inputPin.toString() +
-                                    "\n  bound to " + boundInputValueExpression.toString() +
-                                    "\n  called from state entry " + stateVertexTerm.toString());
+                Log.current.println("  Extracted input pin binding for " + inputPin.toString() +
+                                    "\n    bound to " + boundInputValueExpression.toString() +
+                                    "\n    called from state entry " + stateVertexTerm.toString());
             stateMachineFactory.addEntryInputBinding((State) stateVertexDictionary.get(stateVertexTerm),
                                                      inputPin,
                                                      boundInputValueExpression);
@@ -871,9 +871,9 @@ public class CycExtractor {
             OutputPin outputPin = (OutputPin) result[0];
             StateVariable stateVariable = (StateVariable) result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted output pin binding for " + outputPin.toString() +
-                                    "\n  bound to state variable " + stateVariable.toString() +
-                                    "\n  called from state entry " + stateVertexTerm.toString());
+                Log.current.println("  Extracted output pin binding for " + outputPin.toString() +
+                                    "\n    bound to state variable " + stateVariable.toString() +
+                                    "\n    called from state entry " + stateVertexTerm.toString());
             stateMachineFactory.addEntryOutputBinding((State) stateVertexDictionary.get(stateVertexTerm),
                                                       outputPin,
                                                       stateVariable);
@@ -900,9 +900,9 @@ public class CycExtractor {
             InputPin inputPin = (InputPin) result[0];
             Object boundInputValueExpression = result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted input pin binding for " + inputPin.toString() +
-                                    "\n  bound to " + boundInputValueExpression.toString() +
-                                    "\n  called from state exit " + stateVertexTerm.toString());
+                Log.current.println("  Extracted input pin binding for " + inputPin.toString() +
+                                    "\n    bound to " + boundInputValueExpression.toString() +
+                                    "\n    called from state exit " + stateVertexTerm.toString());
             stateMachineFactory.addExitInputBinding((State) stateVertexDictionary.get(stateVertexTerm),
                                                     inputPin,
                                                     boundInputValueExpression);
@@ -918,9 +918,9 @@ public class CycExtractor {
             OutputPin outputPin = (OutputPin) result[0];
             StateVariable stateVariable = (StateVariable) result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted output pin binding for " + outputPin.toString() +
-                                    "\n  bound to state variable " + stateVariable.toString() +
-                                    "\n  called from state exit " + stateVertexTerm.toString());
+                Log.current.println("  Extracted output pin binding for " + outputPin.toString() +
+                                    "\n    bound to state variable " + stateVariable.toString() +
+                                    "\n    called from state exit " + stateVertexTerm.toString());
             stateMachineFactory.addExitOutputBinding((State) stateVertexDictionary.get(stateVertexTerm),
                                                      outputPin,
                                                      stateVariable);
@@ -947,9 +947,9 @@ public class CycExtractor {
             InputPin inputPin = (InputPin) result[0];
             Object boundInputValueExpression = result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted input pin binding for " + inputPin.toString() +
-                                    "\n  bound to " + boundInputValueExpression.toString() +
-                                    "\n  called from state doActivity " + stateVertexTerm.toString());
+                Log.current.println("  Extracted input pin binding for " + inputPin.toString() +
+                                    "\n    bound to " + boundInputValueExpression.toString() +
+                                    "\n    called from state doActivity " + stateVertexTerm.toString());
             stateMachineFactory.addExitInputBinding((State) stateVertexDictionary.get(stateVertexTerm),
                                                     inputPin,
                                                     boundInputValueExpression);
@@ -965,9 +965,9 @@ public class CycExtractor {
             OutputPin outputPin = (OutputPin) result[0];
             StateVariable stateVariable = (StateVariable) result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted output pin binding for " + outputPin.toString() +
-                                    "\n  bound to state variable " + stateVariable.toString() +
-                                    "\n  called from state doActivity " + stateVertexTerm.toString());
+                Log.current.println("  Extracted output pin binding for " + outputPin.toString() +
+                                    "\n    bound to state variable " + stateVariable.toString() +
+                                    "\n    called from state doActivity " + stateVertexTerm.toString());
             stateMachineFactory.addExitOutputBinding((State) stateVertexDictionary.get(stateVertexTerm),
                                                      outputPin,
                                                      stateVariable);
@@ -993,7 +993,7 @@ public class CycExtractor {
             if (effectProcedureTerm != null) {
                 procedureTerms.add(effectProcedureTerm);
                 if (verbosity > 2)
-                    Log.current.println("Found effect procedure " + effectProcedureTerm.cyclify());
+                    Log.current.println("  Found effect procedure " + effectProcedureTerm.cyclify());
                 extractEffectProcedurePinBindings(transitionTerm);
             }
         }
@@ -1021,9 +1021,9 @@ public class CycExtractor {
             InputPin inputPin = (InputPin) result[0];
             Object boundInputValueExpression = result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted input pin binding for " + inputPin.toString() +
-                                    "\n  bound to " + boundInputValueExpression.toString() +
-                                    "\n  called from transition " + transitionTerm.toString());
+                Log.current.println("  Extracted input pin binding for " + inputPin.toString() +
+                                    "\n    bound to " + boundInputValueExpression.toString() +
+                                    "\n    called from transition " + transitionTerm.toString());
             stateMachineFactory.addEffectInputBinding(transition,
                                                       inputPin,
                                                       boundInputValueExpression);
@@ -1039,9 +1039,9 @@ public class CycExtractor {
             OutputPin outputPin = (OutputPin) result[0];
             StateVariable stateVariable = (StateVariable) result[1];
             if (verbosity > 2)
-                Log.current.println("Extracted output pin binding for " + outputPin.toString() +
-                                    "\n  bound to state variable " + stateVariable.toString() +
-                                    "\n  called from transition " + transitionTerm.toString());
+                Log.current.println("  Extracted output pin binding for " + outputPin.toString() +
+                                    "\n    bound to state variable " + stateVariable.toString() +
+                                    "\n    called from transition " + transitionTerm.toString());
             stateMachineFactory.addEffectOutputBinding(transition,
                                                        outputPin,
                                                        stateVariable);
@@ -1069,6 +1069,8 @@ public class CycExtractor {
         InputPin inputPin = new InputPin();
         inputPin.setName(inputPinTerm.toString());
         inputPinDictionary.put(inputPinTerm, inputPin);
+        if (verbosity > 2)
+            Log.current.println("  Found input pin " + inputPinTerm.cyclify());
         Object boundInputValueExpressionTerm =
             (CycFort) cycAccess.getArg2("umlBoundInputValueExpression",
                                         inputPinBindingTerm,
@@ -1120,6 +1122,8 @@ public class CycExtractor {
         OutputPin outputPin = new OutputPin();
         outputPin.setName(outputPinTerm.toString());
         outputPinDictionary.put(outputPinTerm, outputPin);
+        if (verbosity > 2)
+            Log.current.println("  Found output pin " + outputPinTerm.cyclify());
         CycFort boundOutputStateVariableTerm =
             (CycFort) cycAccess.getArg2("umlBoundOutputStateVariable",
                                         outputPinBindingTerm,

@@ -66,7 +66,7 @@ public class InputBinding extends ModelElement {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("[");
         stringBuffer.append(boundInputValueExpression.toString());
-        stringBuffer.append("-->");
+        stringBuffer.append(" --> ");
         stringBuffer.append(boundInputPin.toString());
         stringBuffer.append("]");
         return stringBuffer.toString();

@@ -41,12 +41,12 @@ public abstract class State extends StateVertex {
     /**
      * the input pin bindings for the state entry procedure
      */
-    protected ArrayList entryInputBindings;
+    protected ArrayList entryInputBindings = new ArrayList();
 
     /**
      * the output pin bindings for the state entry procedure
      */
-    protected ArrayList entryOutputBindings;
+    protected ArrayList entryOutputBindings = new ArrayList();
 
     /**
      * the exit procedure for this state
@@ -56,12 +56,12 @@ public abstract class State extends StateVertex {
     /**
      * the input pin bindings for the state exit procedure
      */
-    protected ArrayList exitInputBindings;
+    protected ArrayList exitInputBindings = new ArrayList();
 
     /**
      * the output pin bindings for the state exit procedure
      */
-    protected ArrayList exitOutputBindings;
+    protected ArrayList exitOutputBindings = new ArrayList();
 
     /**
      * the do activity for this state
@@ -71,12 +71,12 @@ public abstract class State extends StateVertex {
     /**
      * the input pin bindings for the state do activity procedure
      */
-    protected ArrayList doActivityInputBindings;
+    protected ArrayList doActivityInputBindings = new ArrayList();
 
     /**
      * the output pin bindings for the state do activity procedure
      */
-    protected ArrayList doActivityOutputBindings;
+    protected ArrayList doActivityOutputBindings = new ArrayList();
 
     /**
      * the deferrable events for this state
@@ -154,8 +154,6 @@ public abstract class State extends StateVertex {
     public void addEntryInputBinding (InputPin inputPin, Object boundObject) {
         InputBinding inputBinding =
             new InputBinding(inputPin, boundObject);
-        if (entryInputBindings == null)
-            entryInputBindings = new ArrayList();
         entryInputBindings.add(inputBinding);
     }
 
@@ -187,8 +185,6 @@ public abstract class State extends StateVertex {
     public void addEntryOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
         OutputBinding outputBinding =
             new OutputBinding(outputPin, stateVariable);
-        if (entryOutputBindings == null)
-            entryOutputBindings = new ArrayList();
         entryOutputBindings.add(outputBinding);
     }
 
@@ -238,8 +234,6 @@ public abstract class State extends StateVertex {
     public void addExitInputBinding (InputPin inputPin, Object boundObject) {
         InputBinding inputBinding =
             new InputBinding(inputPin, boundObject);
-        if (exitInputBindings == null)
-            exitInputBindings = new ArrayList();
         exitInputBindings.add(inputBinding);
     }
 
@@ -271,8 +265,6 @@ public abstract class State extends StateVertex {
     public void addExitOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
         OutputBinding outputBinding =
             new OutputBinding(outputPin, stateVariable);
-        if (exitOutputBindings == null)
-            exitOutputBindings = new ArrayList();
         exitOutputBindings.add(outputBinding);
     }
 
@@ -399,8 +391,6 @@ public abstract class State extends StateVertex {
     public void addDoActivityInputBinding (InputPin inputPin, Object boundObject) {
         InputBinding inputBinding =
             new InputBinding(inputPin, boundObject);
-        if (doActivityInputBindings == null)
-            doActivityInputBindings = new ArrayList();
         doActivityInputBindings.add(inputBinding);
     }
 
@@ -432,8 +422,6 @@ public abstract class State extends StateVertex {
     public void addDoActivityOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
         OutputBinding outputBinding =
             new OutputBinding(outputPin, stateVariable);
-        if (doActivityOutputBindings == null)
-            doActivityOutputBindings = new ArrayList();
         doActivityOutputBindings.add(outputBinding);
     }
 

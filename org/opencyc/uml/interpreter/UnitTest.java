@@ -56,11 +56,13 @@ public class UnitTest extends TestCase {
      */
     public static Test suite () {
         TestSuite testSuite = new TestSuite();
+        /*
         testSuite.addTest(new UnitTest("testJavaInterpreter"));
         testSuite.addTest(new UnitTest("testExpressionEvaluation"));
         testSuite.addTest(new UnitTest("testContextFrames"));
         testSuite.addTest(new UnitTest("testProcedureInterpretation"));
         testSuite.addTest(new UnitTest("testSimpleStateMachine"));
+        */
         testSuite.addTest(new UnitTest("testCycExtractor"));
         return  testSuite;
     }

@@ -165,49 +165,47 @@ public class StateMachineFactory {
     /**
      * Adds an input pin (variable) to the given procedure.
      *
+     * @param inputPin the given input pin shell
      * @param name the name of the input pin (variable)
      * @param commentString the comment for this input pin
      * @param procedure the given procedure to which the input pin is to
      * be added
      * @param type the Class of the input pin (variable)
-     * @return the added input pin for the given procedure
      */
-    public InputPin addInputPinToProcedure(String name,
-                                           String commentString,
-                                           Procedure procedure,
-                                           java.lang.Class type) {
-        InputPin inputPin = new InputPin();
+    public void addInputPinToProcedure(InputPin inputPin,
+                                       String name,
+                                       String commentString,
+                                       Procedure procedure,
+                                       java.lang.Class type) {
         setNamespaceNameComment(inputPin,
                                 name,
                                 commentString);
         inputPin.setType(type);
         inputPin.setProcedure(procedure);
         procedure.getArgument().add(inputPin);
-        return inputPin;
     }
 
     /**
      * Adds an output pin (variable) to the given procedure.
      *
+     * @param outputPin the given input pin shell
      * @param name the name of the output pin (variable)
      * @param commentString the comment for this output pin
      * @param procedure the given procedure to which the output pin is to
      * be added
      * @param type the Class of the output pin (variable)
-     * @return the added output pin for the given procedure
      */
-    public OutputPin addOutputPinToProcedure(String name,
-                                             String commentString,
-                                             Procedure procedure,
-                                             java.lang.Class type) {
-        OutputPin outputPin = new OutputPin();
+    public void addOutputPinToProcedure(OutputPin outputPin,
+                                        String name,
+                                        String commentString,
+                                        Procedure procedure,
+                                        java.lang.Class type) {
         setNamespaceNameComment(outputPin,
                                 name,
                                 commentString);
         outputPin.setType(type);
         outputPin.setProcedure(procedure);
         procedure.getResult().add(outputPin);
-        return outputPin;
     }
 
     /**
@@ -591,6 +589,7 @@ public class StateMachineFactory {
     /**
      * Makes a new transition object.
      *
+     * @param transition the given tranistion shell to add
      * @param name the identifier for the transition within its containing
      * namespace
      * @param commentString the comment for this transition
@@ -604,15 +603,15 @@ public class StateMachineFactory {
      * @param source the source state of this transition
      * @param target the target state of this transition
      */
-    public Transition makeTransition (String name,
-                                      String commentString,
-                                      String guardExpressionLanguage,
-                                      Object guardExpressionBody,
-                                      Procedure effect,
-                                      Event trigger,
-                                      StateVertex source,
-                                      StateVertex target) {
-        Transition transition = new Transition();
+    public Transition addTransition (Transition transition,
+                                     String name,
+                                     String commentString,
+                                     String guardExpressionLanguage,
+                                     Object guardExpressionBody,
+                                     Procedure effect,
+                                     Event trigger,
+                                     StateVertex source,
+                                     StateVertex target) {
         setNamespaceNameComment(transition,
                                 name,
                                 commentString);

@@ -67,6 +67,11 @@ public class StateMachineReport {
         topState = stateMachine.getTop();
         Log.current.println("StateMachine top state: " + topState.getName());
         Log.current.println("StateMachine top context: " + stateMachine.getContext().toString());
+        Iterator iter = stateMachine.getContext().getFeature().iterator();
+        while (iter.hasNext()) {
+            StateVariable stateVariable = (StateVariable) iter.next();
+            Log.current.println("  state variable: " +   stateVariable.getName());
+        }
     }
 
     /**
@@ -184,19 +189,29 @@ public class StateMachineReport {
      * @param description the transition description
      */
     protected void reportTransitionDetails (Transition transition, String description) {
+        Iterator iter = transition.getEffectInputBindings().iterator();
+        while (iter.hasNext()) {
+            InputBinding inputBinding = (InputBinding) iter.next();
+            Log.current.println("  " + inputBinding.getBoundInputValueExpression().toString() +
+                                " --> " + inputBinding.getBoundInputPin().toString());
+        }
         if (transition.getSource().equals(transition.getTarget()))
             Log.current.print("  " + description + ": " +
                               transition.toString());
         else
             Log.current.print("  " + description + ": " +
                               transition.toString() + " to " + transition.getTarget().toString());
-        if (transition.getGuard() != null) {
+        if (transition.getGuard() != null)
             Log.current.print(" when " +
                               transition.getGuard().getexpression().getBody());
-        }
-        if (transition.getEffect() != null) {
+        if (transition.getEffect() != null)
             Log.current.print("\n    do " +
                               transition.getEffect().getBody());
+        iter = transition.getEffectOutputBindings().iterator();
+        while (iter.hasNext()) {
+            OutputBinding outputBinding = (OutputBinding) iter.next();
+            Log.current.print("\n  " + outputBinding.getBoundOutputPin().toString() +
+                                " --> " + outputBinding.getBoundOutputStateVariable().toString());
         }
         Log.current.println();
     }

@@ -69,7 +69,7 @@ public class OutputBinding extends ModelElement {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("[");
         stringBuffer.append(boundOutputPin.toString());
-        stringBuffer.append("-->");
+        stringBuffer.append(" --> ");
         stringBuffer.append(boundOutputStateVariable.toString());
         stringBuffer.append("]");
         return stringBuffer.toString();

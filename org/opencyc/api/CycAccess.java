@@ -4145,7 +4145,7 @@ public class CycAccess {
      */
     public void assertWithTranscriptAndBookkeeping (CycList sentence, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        assertWithTranscript(sentence.cyclify(), mt);
+        assertWithTranscriptAndBookkeeping(sentence.cyclify(), mt);
     }
 
     /**

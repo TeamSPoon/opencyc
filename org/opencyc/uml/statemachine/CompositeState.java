@@ -43,7 +43,7 @@ public class CompositeState extends State {
     /**
      * the set of state vertices that are owned by this composite state
      */
-    protected ArrayList subVertex;
+    protected ArrayList subVertex = new ArrayList();
 
     /**
      * Constructs a new CompositeState object.

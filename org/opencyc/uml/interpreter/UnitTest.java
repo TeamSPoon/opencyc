@@ -106,7 +106,7 @@ public class UnitTest extends TestCase {
 
         //  state machine
         String namespaceName = "test namespace";
-        String name = "testStateMachine";
+        String name = "TestStateMachine";
         String commentString = "This is the test comment for testStateMachine.";
         Object context = this;
 
@@ -126,11 +126,60 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(context, stateMachine.getContext());
 
         //  procedures
-        name = "incrementProcedure";
-        commentString = "Increments the given number by one.";
+        name = "TestStateMachine-InitializeNumberToZeroProcedure";
+        commentString = "Initializes the variable to the value zero.";
         String language = "java";
-        String body = "x = new Integer(x.intValue() + 1);";
+        String body = "x = 0;";
         boolean isList = false;
+        Procedure initializeNumberToZero =
+            stateMachineFactory.makeProcedure(name,
+                                              commentString,
+                                              language,
+                                              body,
+                                              isList);
+        Assert.assertTrue(initializeNumberToZero instanceof Procedure);
+        Assert.assertTrue(initializeNumberToZero.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, initializeNumberToZero.getNamespace().getName());
+        Assert.assertTrue(initializeNumberToZero.getNamespace().getOwnedElement().contains(initializeNumberToZero));
+        Assert.assertEquals(name, initializeNumberToZero.getName());
+        Assert.assertTrue(initializeNumberToZero.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, initializeNumberToZero.getComment().getBody());
+        Assert.assertEquals(initializeNumberToZero, initializeNumberToZero.getComment().getAnnotatedElement());
+        Assert.assertEquals(language, initializeNumberToZero.getLanguage());
+        Assert.assertEquals(body, initializeNumberToZero.getBody());
+        Assert.assertEquals(isList, initializeNumberToZero.isList());
+
+        name = "x";
+        commentString = "the variable X initialized to zero.";
+        Class type = null;
+        try {
+            type = Class.forName("org.opencyc.uml.statemachine.PrimitiveInt");
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+        OutputPin outputPinX1 =
+            stateMachineFactory.addOutputPinToProcedure(name,
+                                                        commentString,
+                                                        initializeNumberToZero,
+                                                        type);
+        Assert.assertTrue(outputPinX1 instanceof OutputPin);
+        Assert.assertTrue(outputPinX1.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, outputPinX1.getNamespace().getName());
+        Assert.assertTrue(outputPinX1.getNamespace().getOwnedElement().contains(outputPinX1));
+        Assert.assertEquals(name, outputPinX1.getName());
+        Assert.assertTrue(outputPinX1.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, outputPinX1.getComment().getBody());
+        Assert.assertEquals(outputPinX1, outputPinX1.getComment().getAnnotatedElement());
+        Assert.assertTrue(initializeNumberToZero.getResult().contains(outputPinX1));
+        Assert.assertEquals(initializeNumberToZero, outputPinX1.getProcedure());
+
+        name = "TestStateMachine-IncrementProcedure";
+        commentString = "Increments the given number by one.";
+        language = "java";
+        body = "x++;";
+        isList = false;
         Procedure increment =
             stateMachineFactory.makeProcedure(name,
                                               commentString,
@@ -149,16 +198,9 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(body, increment.getBody());
         Assert.assertEquals(isList, increment.isList());
 
+
         name = "x";
         commentString = "the given number to be incremented";
-        Class type = null;
-        try {
-            type = Class.forName("java.lang.Integer");
-        }
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
         InputPin inputPinX =
             stateMachineFactory.addInputPinToProcedure(name,
                                                        commentString,
@@ -192,12 +234,235 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(increment.getResult().contains(outputPinX));
         Assert.assertEquals(increment, outputPinX.getProcedure());
 
-        //  events
+        //  events (no events in this test)
         //  states
-        //  state vertices
+
+        name = "TestStateMachine-TopState";
+        commentString = "Top state for the test state machine.";
+        CompositeState container = null;
+        Procedure entry = null;
+        Procedure exit = null;
+        Procedure doActivity = null;
+        boolean isConcurrent = false;
+
+        CompositeState topState =
+            stateMachineFactory.makeCompositeState(name,
+                                                   commentString,
+                                                   container,
+                                                   entry,
+                                                   exit,
+                                                   doActivity,
+                                                   isConcurrent);
+        Assert.assertTrue(topState instanceof CompositeState);
+        Assert.assertTrue(topState.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, topState.getNamespace().getName());
+        Assert.assertTrue(topState.getNamespace().getOwnedElement().contains(topState));
+        Assert.assertEquals(name, topState.getName());
+        Assert.assertTrue(topState.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, topState.getComment().getBody());
+        Assert.assertEquals(topState, topState.getComment().getAnnotatedElement());
+        Assert.assertEquals(container, topState.getContainer());
+        Assert.assertEquals(entry, topState.getEntry());
+        Assert.assertEquals(exit, topState.getExit());
+        Assert.assertEquals(doActivity, topState.getDoActivity());
+        Assert.assertEquals(isConcurrent, topState.isConcurrent());
+        Assert.assertEquals(0, topState.getDeferrableEvent().size());
+        Assert.assertTrue(! topState.isRegion());
+
+
+        name = "TestStateMachine-InitialState";
+        commentString = "Initial state for the test state machine.";
+        container = topState;
+        int kind = PseudoState.PK_INITIAL;
+        PseudoState initialState =
+            stateMachineFactory.makePseudoState(name,
+                                                commentString,
+                                                container,
+                                                kind);
+        Assert.assertTrue(initialState instanceof PseudoState);
+        Assert.assertTrue(initialState.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, initialState.getNamespace().getName());
+        Assert.assertTrue(initialState.getNamespace().getOwnedElement().contains(initialState));
+        Assert.assertEquals(name, initialState.getName());
+        Assert.assertTrue(initialState.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, initialState.getComment().getBody());
+        Assert.assertEquals(initialState, initialState.getComment().getAnnotatedElement());
+        Assert.assertEquals(container, initialState.getContainer());
+        Assert.assertEquals(kind, initialState.getKind());
+        Assert.assertTrue(topState.getSubVertex().contains(initialState));
+
+        name = "TestStateMachine-CounterState";
+        commentString = "Counter state for the test state machine.";
+        SimpleState counterState =
+            stateMachineFactory.makeSimpleState(name,
+                                                commentString,
+                                                container,
+                                                entry,
+                                                exit,
+                                                doActivity);
+        Assert.assertTrue(counterState instanceof SimpleState);
+        Assert.assertTrue(counterState.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, counterState.getNamespace().getName());
+        Assert.assertTrue(counterState.getNamespace().getOwnedElement().contains(counterState));
+        Assert.assertEquals(name, counterState.getName());
+        Assert.assertTrue(counterState.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, counterState.getComment().getBody());
+        Assert.assertEquals(counterState, counterState.getComment().getAnnotatedElement());
+        Assert.assertEquals(container, counterState.getContainer());
+        Assert.assertTrue(topState.getSubVertex().contains(counterState));
+        Assert.assertEquals(entry, counterState.getEntry());
+        Assert.assertEquals(exit, counterState.getExit());
+        Assert.assertEquals(doActivity, counterState.getDoActivity());
+        Assert.assertEquals(0, counterState.getDeferrableEvent().size());
+
+        name = "TestStateMachine-FinalState";
+        commentString = "Final state for the test state machine.";
+        FinalState finalState =
+            stateMachineFactory.makeFinalState(name,
+                                               commentString,
+                                               container,
+                                               entry,
+                                               exit,
+                                               doActivity);
+        Assert.assertTrue(finalState instanceof FinalState);
+        Assert.assertTrue(finalState.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, finalState.getNamespace().getName());
+        Assert.assertTrue(finalState.getNamespace().getOwnedElement().contains(finalState));
+        Assert.assertEquals(name, finalState.getName());
+        Assert.assertTrue(finalState.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, finalState.getComment().getBody());
+        Assert.assertEquals(finalState, finalState.getComment().getAnnotatedElement());
+        Assert.assertEquals(container, finalState.getContainer());
+        Assert.assertTrue(topState.getSubVertex().contains(finalState));
+        Assert.assertEquals(entry, finalState.getEntry());
+        Assert.assertEquals(exit, finalState.getExit());
+        Assert.assertEquals(doActivity, finalState.getDoActivity());
+        Assert.assertEquals(0, finalState.getDeferrableEvent().size());
+
+        //  state vertices (no state vertices in this test)
         //  transistions
 
+        name = "TestStateMachine-Transition1";
+        commentString = "Transition 1 for the test state machine.";
+        String guardExpressionLanguage = null;
+        String guardExpressionBody = null;
+        Procedure effect = null;
+        Event trigger = null;
+        StateVertex source = initialState;
+        StateVertex target = counterState;
+        Transition transition1 =
+            stateMachineFactory.makeTransition(name,
+                                               commentString,
+                                               guardExpressionLanguage,
+                                               guardExpressionBody,
+                                               effect,
+                                               trigger,
+                                               source,
+                                               target);
+        Assert.assertTrue(transition1 instanceof Transition);
+        Assert.assertTrue(transition1.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, transition1.getNamespace().getName());
+        Assert.assertTrue(transition1.getNamespace().getOwnedElement().contains(transition1));
+        Assert.assertEquals(name, transition1.getName());
+        Assert.assertTrue(transition1.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, transition1.getComment().getBody());
+        Assert.assertEquals(transition1, transition1.getComment().getAnnotatedElement());
+        Assert.assertEquals(effect, transition1.getEffect());
+        Assert.assertNull(transition1.getGuard());
+        Assert.assertEquals(source, transition1.getSource());
+        Assert.assertEquals(target, transition1.getTarget());
+        Assert.assertEquals(stateMachine, transition1.getStateMachine());
+        Assert.assertEquals(trigger, transition1.getTrigger());
+        Assert.assertTrue(! transition1.isSelfTransition());
+        Assert.assertTrue(initialState.getOutgoing().contains(transition1));
+        Assert.assertTrue(counterState.getIncoming().contains(transition1));
 
+
+        name = "TestStateMachine-Transition2";
+        commentString = "Transition 2 for the test state machine.";
+        guardExpressionLanguage = "java";
+        guardExpressionBody = "x < 10";
+        effect = increment;
+        trigger = null;
+        source = counterState;
+        target = counterState;
+        Transition transition2 =
+            stateMachineFactory.makeTransition(name,
+                                               commentString,
+                                               guardExpressionLanguage,
+                                               guardExpressionBody,
+                                               effect,
+                                               trigger,
+                                               source,
+                                               target);
+        Assert.assertTrue(transition2 instanceof Transition);
+        Assert.assertTrue(transition2.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, transition2.getNamespace().getName());
+        Assert.assertTrue(transition2.getNamespace().getOwnedElement().contains(transition2));
+        Assert.assertEquals(name, transition2.getName());
+        Assert.assertTrue(transition2.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, transition2.getComment().getBody());
+        Assert.assertEquals(transition2, transition2.getComment().getAnnotatedElement());
+        Assert.assertEquals(effect, transition2.getEffect());
+        Assert.assertNotNull(transition2.getGuard());
+        Assert.assertTrue(transition2.getGuard() instanceof Guard);
+        Assert.assertNotNull(transition2.getGuard().getexpression());
+        Guard guard = transition2.getGuard();
+        Assert.assertEquals(name, guard.getName());
+        Assert.assertEquals(commentString, guard.getComment().getBody());
+        Assert.assertEquals(transition2, guard.getTransition());
+        Assert.assertTrue(guard.getNamespace().getOwnedElement().contains(guard));
+        Assert.assertEquals(guardExpressionBody, guard.getexpression().getBody());
+        Assert.assertEquals(source, transition2.getSource());
+        Assert.assertEquals(target, transition2.getTarget());
+        Assert.assertEquals(stateMachine, transition2.getStateMachine());
+        Assert.assertEquals(trigger, transition2.getTrigger());
+        Assert.assertTrue(transition2.isSelfTransition());
+        Assert.assertTrue(source.getOutgoing().contains(transition2));
+        Assert.assertTrue(target.getIncoming().contains(transition2));
+
+        name = "TestStateMachine-Transition3";
+        commentString = "Transition 3 for the test state machine.";
+        guardExpressionLanguage = "java";
+        guardExpressionBody = "x == 10";
+        effect = null;
+        trigger = null;
+        source = counterState;
+        target = finalState;
+        Transition transition3 =
+            stateMachineFactory.makeTransition(name,
+                                               commentString,
+                                               guardExpressionLanguage,
+                                               guardExpressionBody,
+                                               effect,
+                                               trigger,
+                                               source,
+                                               target);
+        Assert.assertTrue(transition3 instanceof Transition);
+        Assert.assertTrue(transition3.getNamespace() instanceof Namespace);
+        Assert.assertEquals(namespaceName, transition3.getNamespace().getName());
+        Assert.assertTrue(transition3.getNamespace().getOwnedElement().contains(transition3));
+        Assert.assertEquals(name, transition3.getName());
+        Assert.assertTrue(transition3.getComment() instanceof Comment);
+        Assert.assertEquals(commentString, transition3.getComment().getBody());
+        Assert.assertEquals(transition3, transition3.getComment().getAnnotatedElement());
+        Assert.assertEquals(effect, transition3.getEffect());
+        Assert.assertNotNull(transition3.getGuard());
+        Assert.assertTrue(transition3.getGuard() instanceof Guard);
+        Assert.assertNotNull(transition3.getGuard().getexpression());
+        guard = transition3.getGuard();
+        Assert.assertEquals(name, guard.getName());
+        Assert.assertEquals(commentString, guard.getComment().getBody());
+        Assert.assertEquals(transition3, guard.getTransition());
+        Assert.assertTrue(guard.getNamespace().getOwnedElement().contains(guard));
+        Assert.assertEquals(guardExpressionBody, guard.getexpression().getBody());
+        Assert.assertEquals(source, transition3.getSource());
+        Assert.assertEquals(target, transition3.getTarget());
+        Assert.assertEquals(stateMachine, transition3.getStateMachine());
+        Assert.assertEquals(trigger, transition3.getTrigger());
+        Assert.assertTrue(! transition3.isSelfTransition());
+        Assert.assertTrue(source.getOutgoing().contains(transition3));
+        Assert.assertTrue(target.getIncoming().contains(transition3));
 
         System.out.println("\n**** testSimpleStateMachine ****");
     }

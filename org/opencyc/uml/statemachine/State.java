@@ -30,7 +30,7 @@ import org.opencyc.uml.interpreter.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class State extends StateVertex {
+public abstract class State extends StateVertex {
 
     /**
      * the entry procedure for this state

@@ -5,19 +5,7 @@ import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.action.*;
 
 /**
- * Provides a factory for creating UML State_Machines objects.
- * <p>
- * Make objects in this order:<br>
- * 1. state machine<br>
- * 2. procedures<br>
- * 3. events<br>
- * 4. states<br>
- * 5. state vertices<br>
- * 6. transistions<p>
- *
- * The context object for the state machine contains the all the variables
- * used in guards, actions, procedures and events.  The context object also
- * implements the operations performed by the state machine.
+ * StateVertex from the UML State_Machines package.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -318,37 +306,71 @@ public class StateMachineFactory {
     }
 
     /**
-     * Makes a new state object.  The top (composite) state must be created
-     * first, then parent states should be created before their child states.
+     * Makes a new simple state object.  The top (composite) state must be created
+     * first, then parent states should be created before their child simple states.
      *
-     * @param name the identifier for the state within its containing
+     * @param name the identifier for the simple state within its containing
      * namespace
-     * @param commentString the comment for this state
-     * @param container the container (parent) of this state, or null if top state
-     * @param entry the entry action for this state, or null if none
-     * @param exit the exit action for this state, or null if none
-     * @param doActivity the do activity for this state, or null if none
-     * @return the new state object
+     * @param commentString the comment for this simple state
+     * @param container the container (parent) of this simple state, or null if top state
+     * @param entry the entry action for this simple state, or null if none
+     * @param exit the exit action for this simple state, or null if none
+     * @param doActivity the do activity for this simple state, or null if none
+     * @return the newsimple  state object
      */
-    public State makeState (String name,
-                            String commentString,
-                            CompositeState container,
-                            Procedure entry,
-                            Procedure exit,
-                            Procedure doActivity) {
-        State state = new State();
-        setNamespaceNameComment(state,
+    public SimpleState makeSimpleState (String name,
+                                        String commentString,
+                                        CompositeState container,
+                                        Procedure entry,
+                                        Procedure exit,
+                                        Procedure doActivity) {
+        SimpleState simpleState = new SimpleState();
+        setNamespaceNameComment(simpleState,
                                 name,
                                 commentString);
-        state.setContainer(container);
+        simpleState.setContainer(container);
         if (container == null)
-            state.setStateMachine(stateMachine);
+            simpleState.setStateMachine(stateMachine);
         else
-            container.getSubVertex().add(state);
-        state.setEntry(entry);
-        state.setExit(exit);
-        state.setDoActivity(doActivity);
-        return state;
+            container.getSubVertex().add(simpleState);
+        simpleState.setEntry(entry);
+        simpleState.setExit(exit);
+        simpleState.setDoActivity(doActivity);
+        return simpleState;
+    }
+
+    /**
+     * Makes a new final state object.  The top (composite) state must be created
+     * first, then parent states should be created before their child final states.
+     *
+     * @param name the identifier for the final state within its containing
+     * namespace
+     * @param commentString the comment for this final state
+     * @param container the container (parent) of this final state, or null if top state
+     * @param entry the entry action for this final state, or null if none
+     * @param exit the exit action for this final state, or null if none
+     * @param doActivity the do activity for this final state, or null if none
+     * @return the newfinal  state object
+     */
+    public FinalState makeFinalState (String name,
+                                      String commentString,
+                                      CompositeState container,
+                                      Procedure entry,
+                                      Procedure exit,
+                                      Procedure doActivity) {
+        FinalState finalState = new FinalState();
+        setNamespaceNameComment(finalState,
+                                name,
+                                commentString);
+        finalState.setContainer(container);
+        if (container == null)
+            finalState.setStateMachine(stateMachine);
+        else
+            container.getSubVertex().add(finalState);
+        finalState.setEntry(entry);
+        finalState.setExit(exit);
+        finalState.setDoActivity(doActivity);
+        return finalState;
     }
 
     /**
@@ -364,13 +386,13 @@ public class StateMachineFactory {
      * @param isConcurrent true if concurrent processes, otherwise false
      * @return the new composite state object
      */
-    public State makeCompositeState (String name,
-                                     String commentString,
-                                     CompositeState container,
-                                     Procedure entry,
-                                     Procedure exit,
-                                     Procedure doActivity,
-                                     boolean isConcurrent) {
+    public CompositeState makeCompositeState (String name,
+                                              String commentString,
+                                              CompositeState container,
+                                              Procedure entry,
+                                              Procedure exit,
+                                              Procedure doActivity,
+                                              boolean isConcurrent) {
         CompositeState compositeState = new CompositeState();
         setNamespaceNameComment(compositeState,
                                 name,
@@ -494,6 +516,7 @@ public class StateMachineFactory {
             guardExpression.setLanguage(guardExpressionLanguage);
             guardExpression.setBody(guardExpressionBody);
             guard.setexpression(guardExpression);
+            guard.setTransition(transition);
             transition.setGuard(guard);
         }
         transition.setEffect(effect);

@@ -975,8 +975,8 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(domainValueMarks.containsKey(new Integer(1)));
         Assert.assertNotNull(domainValueMarks.get(new Integer(1)));
 
-        // test HighCardinalityDomains
-        Assert.assertTrue(zebraProblem.highCardinalityDomains.highCardinalityDomains.size() == 0);
+        // test VariableDomainPopulator
+        Assert.assertTrue(zebraProblem.variableDomainPopulator.highCardinalityDomains.size() == 0);
 
         // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
         Assert.assertEquals(20, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());

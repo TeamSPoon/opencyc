@@ -10,7 +10,7 @@ import org.opencyc.api.*;
  * A <tt>ProblemParser</tt> object is created to parse the input constraint problem
  * representation.<br>
  * A <tt>ValueDomains</tt> object is created to model the variables and their value domains.<br>
- * A <tt>HighCardinalityDomains</tt> object is created to model variables whose value domain
+ * A <tt>VariableDomainPopulator</tt> object is created to model variables whose value domain
  * cardinality exceeds a threshold for special case processing.
  *
  * @version $Id$
@@ -49,7 +49,7 @@ public class ConstraintProblem {
     /**
      * High cardinality domains for this <tt>ConstraintProblem</tt>.
      */
-    protected HighCardinalityDomains highCardinalityDomains = new HighCardinalityDomains();
+    protected VariableDomainPopulator variableDomainPopulator = new VariableDomainPopulator();
 
     /**
      * <tt>NodeConsistencyAchiever</tt> for this <tt>ConstraintProblem</tt>.
@@ -99,10 +99,16 @@ public class ConstraintProblem {
     public Integer nbrSolutionsRequested = new Integer(1);
 
     /**
+     * The default verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 8;
+    protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
      * Collection of the rules which populate variable domains.
@@ -340,17 +346,6 @@ public class ConstraintProblem {
     }
 
     /**
-     * Set the value of the variable value domain size beyond which the initial values
-     * are not all fetched from the KB using #$isa, rather some other more specific
-     * constraint rule populates the variable domain as needed.
-     *
-     * @param domainSizeThreshold an <tt>int</tt> which is the new threshold.
-     */
-    public void setDomainSizeThreshold(int domainSizeThreshold) {
-        highCardinalityDomains.domainSizeThreshold = domainSizeThreshold;
-    }
-
-    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      *
@@ -360,7 +355,7 @@ public class ConstraintProblem {
         this.verbosity = verbosity;
         problemParser.setVerbosity(verbosity);
         valueDomains.setVerbosity(verbosity);
-        highCardinalityDomains.setVerbosity(verbosity);
+        variableDomainPopulator.setVerbosity(verbosity);
         argumentTypeConstrainer.setVerbosity(verbosity);
         backchainer.setVerbosity(verbosity);
         nodeConsistencyAchiever.setVerbosity(verbosity);
@@ -391,4 +386,17 @@ public class ConstraintProblem {
     public void setSbhlBackchain(boolean sbhlBackchain) {
         backchainer.setSbhlBackchain(sbhlBackchain);
     }
+
+    /**
+     * Sets the domain size threshold, beyond which the population of a
+     * variable's domain is typically postponed until the forward checking
+     * search.
+     *
+     * @param domainSizeThreshold domain size threshold
+     */
+    public void setDomainSizeThreshold(int domainSizeThreshold) {
+        variableDomainPopulator.setDomainSizeThreshold(domainSizeThreshold);
+    }
+
+
 }

@@ -45,7 +45,7 @@ public class RuleEvaluator {
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 9;
+    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
 
     /**
      * Cached reference to #$numericallyEqual predicate.

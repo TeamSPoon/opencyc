@@ -40,7 +40,7 @@ public class ForwardCheckingSearcher {
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 0;
+    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
 
     /**
      * Reference to the parent <tt>ConstraintProblem</tt> object.
@@ -65,10 +65,10 @@ public class ForwardCheckingSearcher {
     protected ValueDomains valueDomains;
 
     /**
-     * Reference to the <tt>HighCardinalityDomains</tt> object for the parent <tt>ConstraintProblem</tt>
+     * Reference to the <tt>VariableDomainPopulator</tt> object for the parent <tt>ConstraintProblem</tt>
      * object.
      */
-    protected HighCardinalityDomains highCardinalityDomains;
+    protected VariableDomainPopulator variableDomainPopulator;
 
     /**
      * When instantiating a rule having one variable left to instantiate for subsequent
@@ -95,7 +95,7 @@ public class ForwardCheckingSearcher {
         constraintRules = constraintProblem.constraintRules;
         solution = constraintProblem.solution;
         valueDomains = constraintProblem.valueDomains;
-        highCardinalityDomains = constraintProblem.highCardinalityDomains;
+        variableDomainPopulator = constraintProblem.variableDomainPopulator;
         verbosity = constraintProblem.verbosity;
     }
 
@@ -121,8 +121,8 @@ public class ForwardCheckingSearcher {
         CycVariable selectedVariable = selectVariable(variables);
 
         // Handle the atypical case where a high cardinality variable is selected first.
-        if (this.highCardinalityDomains.contains(selectedVariable) &&
-            this.highCardinalityDomains.getPopulatingRule(selectedVariable) == null)
+        if (this.variableDomainPopulator.contains(selectedVariable) &&
+            this.variableDomainPopulator.getPopulatingRule(selectedVariable) == null)
             populatePostponedDomain(selectedVariable);
 
         ArrayList remainingDomain = valueDomains.getUnmarkedDomainValues(selectedVariable);
@@ -373,15 +373,15 @@ public class ForwardCheckingSearcher {
         if (remainingRuleVariables.size() == 1) {
             CycVariable variable = (CycVariable) remainingRuleVariables.get(0);
             // one variable left to instantiate
-            if (highCardinalityDomains.contains(variable))
+            if (variableDomainPopulator.contains(variable))
 
                 // The one variable left has a high cardinality domain.
-                if (highCardinalityDomains.getPopulatingRule(variable) == null) {
+                if (variableDomainPopulator.getPopulatingRule(variable) == null) {
                     // A rule has not yet populated the high cardinality domain.
                     if (verbosity > 2)
                         System.out.println("Using " + instantiatedRule.cyclify() +
                                            "\nto populate the domain of " + variable);
-                    highCardinalityDomains.setPopulatingRule(variable, rule);
+                    variableDomainPopulator.setPopulatingRule(variable, rule);
                 }
         }
         ArrayList bindingList = new ArrayList();
@@ -435,9 +435,9 @@ public class ForwardCheckingSearcher {
                     variable = binding.getCycVariable();
                     if (! variable.equals(selectedVariable)) {
                         value = binding.getValue();
-                    if ((! highCardinalityDomains.contains(variable)) ||
+                    if ((! variableDomainPopulator.contains(variable)) ||
                         // initial population of high cardinality domain
-                        highCardinalityDomains.isPopulatingRule(currentRule, variable) ||
+                        variableDomainPopulator.isPopulatingRule(currentRule, variable) ||
                         // Other rules cannot extend a high cardinality domain.
                         valueDomains.domainHasValue(variable, value))
                         if (verbosity > 2)
@@ -454,13 +454,13 @@ public class ForwardCheckingSearcher {
             // instantiation is not efficient.
             CycVariable variable = (CycVariable) remainingVariables.get(0);
             boolean isHighCardinalityDomain =
-                highCardinalityDomains.contains(variable);
+                variableDomainPopulator.contains(variable);
             if (verbosity > 2) {
                 System.out.println("Rule instantiation reached singleton " + variable);
                 System.out.println("  high cardinality? --> " + isHighCardinalityDomain);
             }
             if (isHighCardinalityDomain &&
-                highCardinalityDomains.isPopulatingRule(currentRule, variable)) {
+                variableDomainPopulator.isPopulatingRule(currentRule, variable)) {
                 // Special case where the rule is used to populate the values of an
                 // otherwise high cardinality domain.  Thus the constraint reasoner
                 // searches some subset of the potential domain values, where the

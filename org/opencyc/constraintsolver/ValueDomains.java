@@ -37,7 +37,7 @@ public class ValueDomains {
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 9;
+    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
 
     /**
      * Dictionary of variable --> domain value <tt>ArrayList</tt>.
@@ -79,7 +79,7 @@ public class ValueDomains {
         for (int i = 0; i < orderedVariables.size(); i++) {
             CycVariable cycVariable = (CycVariable) orderedVariables.get(i);
             ArrayList domainValues = getDomainValues(cycVariable);
-            if (constraintProblem.highCardinalityDomains.contains(cycVariable)) {
+            if (constraintProblem.variableDomainPopulator.contains(cycVariable)) {
                 if (domainValues.size() == 0)
                     System.out.println("  " + cycVariable + "\t... unpopulated high cardinality domain");
                 else
@@ -196,8 +196,8 @@ public class ValueDomains {
         // Special case for high cardinality domains whose complete extent may not yet
         // be known.
         if (unmarkedDomainSize == 0 &&
-            constraintProblem.highCardinalityDomains.contains(cycVariable))
-            return constraintProblem.highCardinalityDomains.getDomainSize(cycVariable);
+            constraintProblem.variableDomainPopulator.contains(cycVariable))
+            return constraintProblem.variableDomainPopulator.getDomainSize(cycVariable);
         else
             return unmarkedDomainSize;
     }

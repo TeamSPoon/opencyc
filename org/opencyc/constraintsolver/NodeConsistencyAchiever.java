@@ -44,7 +44,7 @@ public class NodeConsistencyAchiever {
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 9;
+    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
 
     /**
      * The <tt>ArrayList</tt> of unary constraint rules belonging to the

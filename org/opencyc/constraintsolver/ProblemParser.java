@@ -65,21 +65,15 @@ public class ProblemParser {
     protected ArgumentTypeConstrainer argumentTypeConstrainer;
 
     /**
-     * Reference to the constraint problem's HighCardinalityDomains object.
+     * Reference to the constraint problem's VariableDomainPopulator object.
      */
-    protected HighCardinalityDomains highCardinalityDomains;
-
-    /**
-     * List of <tt>VariablePopulation</tt> objects used to determine the best domain population rule
-     * for each variable.
-     */
-    protected ArrayList variablePopulations = new ArrayList();
+    protected VariableDomainPopulator variableDomainPopulator;
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 9;
+    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
 
     /**
      * Constructs a new <tt>ProblemParser</tt> object for the parent
@@ -93,7 +87,7 @@ public class ProblemParser {
         domainPopulationRules = constraintProblem.domainPopulationRules;
         constraintRules = constraintProblem.constraintRules;
         argumentTypeConstrainer = constraintProblem.argumentTypeConstrainer;
-        highCardinalityDomains = constraintProblem.highCardinalityDomains;
+        variableDomainPopulator = constraintProblem.variableDomainPopulator;
         valueDomains = constraintProblem.valueDomains;
     }
 
@@ -129,20 +123,19 @@ public class ProblemParser {
                 (! isRuleSatisfiable(rule)))
                 return false;
             for (int j = 0; j < rule.getVariables().size(); j++) {
-                VariablePopulation variablePopulation =
-                    new VariablePopulation((CycVariable) rule.getVariables().get(j),
+                VariablePopulationItem variablePopulationItem =
+                    new VariablePopulationItem((CycVariable) rule.getVariables().get(j),
                                             rule);
-                variablePopulations.add(variablePopulation);
+                variableDomainPopulator.add(variablePopulationItem);
             }
         }
 
-        Collections.sort(variablePopulations);
         //TODO having rethought the benefit of argument type constraint additions, -- they are
         //unary constraints disposed of before the constraint search begins.  Not useful for
         //domain population because any non-isa/genls rule will be lower cardinality and thus
         //a better domain population alternative.
 
-        //Simple get all the VariablePopulation objects and rank the rules and populate any variables
+        //Simply get all the VariablePopulation objects and rank the rules and populate any variables
         //below the high cardinality theshold.
 
 
@@ -454,6 +447,9 @@ public class ProblemParser {
      * Initializes the value domains for each variable.
      */
     public void initializeDomains() throws IOException {
+
+        //TODO use iterate over VariablePopulation instead of domain population rules.
+
         for (int i = 0; i < domainPopulationRules.size(); i++) {
             Rule rule = (Rule) domainPopulationRules.get(i);
             if (rule.isExtensionalVariableDomainPopulatingRule()) {
@@ -487,12 +483,12 @@ public class ProblemParser {
                         System.out.println("\nIntensional variable domain populating rule\n" + rule);
                         System.out.println("  nbrInstances " + nbrInstances);
                     }
-                    if (nbrInstances > highCardinalityDomains.domainSizeThreshold) {
+                    if (nbrInstances > variableDomainPopulator.domainSizeThreshold) {
                         if (verbosity > 3)
                             System.out.println("  domain size " + nbrInstances +
                                                " exceeded high cardinality threshold of " +
-                                               highCardinalityDomains.domainSizeThreshold);
-                        highCardinalityDomains.setDomainSize(cycVariable,
+                                               variableDomainPopulator.domainSizeThreshold);
+                        variableDomainPopulator.setDomainSize(cycVariable,
                                                              new Integer(nbrInstances));
                         valueDomains.varsDictionary.put(cycVariable, new ArrayList());
                     }

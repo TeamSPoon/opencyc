@@ -306,7 +306,7 @@ public class IrcChat extends Thread  implements ChatSender {
 	}
 
 	if ( post instanceof CycList && isParaphrased(destination) )
-	    return sendMessage(destination,attemptParaphrase((CycList)post));
+	    return sendMessage(destination,attemptParaphrase((CycList)post) + " (" + ((CycList)post).toString() + ")");
 
 
 	String message = post.toString().trim();
@@ -802,7 +802,7 @@ public class IrcChat extends Thread  implements ChatSender {
      * Sends the chat message from Cyc into the chat system.
      */
     public void sendChatMessage(String chatMessage) {
-	sendMessage(ircDestination,chatMessage);
+       // sendMessage(ircDestination,chatMessage);
     }
 
     /**

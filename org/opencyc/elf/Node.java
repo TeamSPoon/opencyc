@@ -18,8 +18,7 @@ import java.util.List;
 
 import java.util.logging.Logger;
 
-/**
- * Provides the Node container for the Elementary Loop Functioning (ELF).
+/** Provides the Node container for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -45,15 +44,13 @@ public class Node {
 
   //// Constructors
   
-  /**
-   * Constructs a new Node object.
+  /** Constructs a new Node object.
    */
   public Node() {
     logger = Logger.getLogger("org.opencyc.elf.Node");
   }
 
-  /**
-   * Constructs a new Node object with the given name.
+  /** Constructs a new Node object with the given name.
    *
    * @param name the given node name
    */
@@ -64,8 +61,7 @@ public class Node {
   
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -79,8 +75,7 @@ public class Node {
     return stringBuffer.toString();
   }
 
-  /**
-   * Gets the dictionary of nodes by name
+  /** Gets the dictionary of nodes by name
    * 
    * @return the dictionary of nodes by name
    */
@@ -88,8 +83,7 @@ public class Node {
     return nodes;
   }
 
-  /**
-   * Sets the dictionary of nodes by name
+  /** Sets the dictionary of nodes by name
    * 
    * @param nodes the dictionary of nodes by name
    */
@@ -97,8 +91,7 @@ public class Node {
     this.nodes = nodes;
   }
 
-  /**
-   * Gets the unique name of this node
+  /** Gets the unique name of this node
    * 
    * @return the unique name of this node
    */
@@ -106,8 +99,7 @@ public class Node {
     return name;
   }
 
-  /**
-   * Sets the unique name of this node
+  /** Sets the unique name of this node
    * 
    * @param name the unique name of this node
    */
@@ -115,8 +107,7 @@ public class Node {
     this.name = name;
   }
 
-  /**
-   * Gets the purpose description
+  /** Gets the purpose description
    * 
    * @return the purpose description
    */
@@ -124,8 +115,7 @@ public class Node {
     return purpose;
   }
 
-  /**
-   * Sets the purpose description
+  /** Sets the purpose description
    * 
    * @param purpose the purpose description
    */
@@ -133,8 +123,7 @@ public class Node {
     this.purpose = purpose;
   }
 
-  /**
-   * Gets the World Model for this node
+  /** Gets the World Model for this node
    * 
    * @return the World Model for this node
    */
@@ -142,8 +131,7 @@ public class Node {
     return worldModel;
   }
 
-  /**
-   * Sets the World Model for this node
+  /** Sets the World Model for this node
    * 
    * @param worldModel the World Model for this node
    */
@@ -151,8 +139,7 @@ public class Node {
     this.worldModel = worldModel;
   }
 
-  /**
-   * Gets the ValueJudgement for this node
+  /** Gets the ValueJudgement for this node
    * 
    * @return the ValueJudgement for this node
    */
@@ -160,8 +147,7 @@ public class Node {
     return valueJudgement;
   }
 
-  /**
-   * Sets the ValueJudgement for this node
+  /** Sets the ValueJudgement for this node
    * 
    * @param valueJudgement the ValueJudgement for this node
    */
@@ -169,8 +155,7 @@ public class Node {
     this.valueJudgement = valueJudgement;
   }
 
-  /**
-   * Gets the BehaviorGeneration for this node
+  /** Gets the BehaviorGeneration for this node
    * 
    * @return the BehaviorGeneration for this node
    */
@@ -187,8 +172,7 @@ public class Node {
     this.behaviorGeneration = behaviorGeneration;
   }
 
-  /**
-   * Gets the SensoryPerception
+  /** Gets the SensoryPerception
    * 
    * @return the SensoryPerception
    */
@@ -196,8 +180,7 @@ public class Node {
     return sensoryPerception;
   }
 
-  /**
-   * Sets the SensoryPerception
+  /** Sets the SensoryPerception
    * 
    * @param sensoryPerception the SensoryPerception
    */
@@ -205,8 +188,7 @@ public class Node {
     this.sensoryPerception = sensoryPerception;
   }
 
-  /**
-   * Gets the parent node of this node for the task at hand
+  /** Gets the parent node of this node for the task at hand
    * 
    * @return the parent node of this node for the task at hand
    */
@@ -214,8 +196,7 @@ public class Node {
     return parentNode;
   }
 
-  /**
-   * Sets the parent node of this node for the task at hand
+  /** Sets the parent node of this node for the task at hand
    * 
    * @param parentNode the parent node of this node for the task at hand
    */
@@ -223,8 +204,7 @@ public class Node {
     this.parentNode = parentNode;
   }
 
-  /**
-   * Gets the Child nodes of this node for the task at hand
+  /** Gets the Child nodes of this node for the task at hand
    * 
    * @return the Child nodes of this node for the task at hand
    */
@@ -232,8 +212,7 @@ public class Node {
     return childNodes;
   }
 
-  /**
-   * Sets the Child nodes of this node for the task at hand
+  /** Sets the Child nodes of this node for the task at hand
    * 
    * @param childNodes the Child nodes of this node for the task at hand
    */
@@ -241,8 +220,7 @@ public class Node {
     this.childNodes = childNodes;
   }
 
-  /**
-   * Gets the list of sibling nodes at this ELF resolution level
+  /** Gets the list of sibling nodes at this ELF resolution level
    * 
    * @return the list of sibling nodes at this ELF resolution level
    */
@@ -250,8 +228,7 @@ public class Node {
     return siblingNodes;
   }
 
-  /**
-   * Sets the list of sibling nodes at this ELF resolution level
+  /** Sets the list of sibling nodes at this ELF resolution level
    * 
    * @param siblingNodes the list of sibling nodes at this ELF resolution level
    */
@@ -259,8 +236,7 @@ public class Node {
     this.siblingNodes = siblingNodes;
   }
   
-  /**
-   * Gets the logger
+  /** Gets the logger
    *
    * @return the logger
    */
@@ -298,13 +274,12 @@ public class Node {
   /** the SensoryPerception */
   protected SensoryPerception sensoryPerception;
 
-  /**
-   * The parent node of this node for the task at hand.  The topmost node has
+  /** The parent node of this node for the task at hand.  The topmost node has
    * value null for parentNode.
    */
   protected Node parentNode;
-  /**
-   * The Child nodes of this node for the task at hand.  The lowest level nodes
+  
+  /** The Child nodes of this node for the task at hand.  The lowest level nodes
    * in the hierarchy have null for childNodes;
    */
   protected List childNodes;

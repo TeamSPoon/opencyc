@@ -6,8 +6,7 @@ package org.opencyc.elf;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
-/**
- * Provides common attributes and behavior for Elementary Loop Functioning
+/** Provides common attributes and behavior for Elementary Loop Functioning
  * (ELF) node components which have an input message buffer.
  * 
  * @version $Id$
@@ -31,13 +30,12 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public abstract class BufferedNodeComponent extends NodeComponent {
+  
   //// Constructors
-
 
   //// Public Area
   
-  /**
-   * Gets the puttable channel for this node component to which other node
+  /** Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
    * @return the puttable channel for this node component to which other node

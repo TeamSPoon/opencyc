@@ -1,71 +1,37 @@
 package org.opencyc.elf;
 
 //// Internal Imports
-import org.opencyc.elf.a.Actuator;
-
 import org.opencyc.elf.bg.BehaviorGeneration;
-
-import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
 
+import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
 import org.opencyc.elf.message.DoTaskMsg;
 
-import org.opencyc.elf.s.Sensor;
-
-import org.opencyc.elf.sp.Estimator;
-import org.opencyc.elf.sp.FeatureExtractor;
-import org.opencyc.elf.sp.HypothesisEvaluator;
-import org.opencyc.elf.sp.HypothesisFormer;
-import org.opencyc.elf.sp.SensoryPerception;
-
+import org.opencyc.elf.sp.*;
 import org.opencyc.elf.vj.EntityEvaluator;
 import org.opencyc.elf.vj.PlanEvaluator;
 import org.opencyc.elf.vj.ValueJudgement;
 
-import org.opencyc.elf.wm.ActuatorClassFactory;
-import org.opencyc.elf.wm.ActionFactory;
-import org.opencyc.elf.wm.ActionLibrary;
-import org.opencyc.elf.wm.ActuatorFactory;
-import org.opencyc.elf.wm.ActuatorPool;
-import org.opencyc.elf.wm.NodeFactory;
-import org.opencyc.elf.wm.ExperienceLibrary;
-import org.opencyc.elf.wm.GoalFactory;
-import org.opencyc.elf.wm.GoalLibrary;
-import org.opencyc.elf.wm.JobAssignmentFactory;
-import org.opencyc.elf.wm.JobAssignmentLibrary;
-import org.opencyc.elf.wm.KnowledgeBase;
-import org.opencyc.elf.wm.NodeFactory;
-import org.opencyc.elf.wm.PlanSimulator;
-import org.opencyc.elf.wm.PredicateClassFactory;
-import org.opencyc.elf.wm.Predictor;
-import org.opencyc.elf.wm.ResourceFactory;
-import org.opencyc.elf.wm.ResourcePool;
-import org.opencyc.elf.wm.SensorFactory;
-import org.opencyc.elf.wm.SensorPool;
-import org.opencyc.elf.wm.StateVariableFactory;
-import org.opencyc.elf.wm.StateVariableLibrary;
-import org.opencyc.elf.wm.TaskFrameFactory;
-import org.opencyc.elf.wm.TaskFrameLibrary;
-import org.opencyc.elf.wm.WorldModel;
-
-import org.opencyc.elf.wm.state.StateVariable;
+import org.opencyc.elf.wm.*;
 
 //// External Imports
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.logging.Logger;
 
-import junit.framework.*;
-
-import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
-import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
-import EDU.oswego.cs.dl.util.concurrent.Takable;
+
+import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import junit.textui.TestRunner;
 
 /** Provides a suite of JUnit test cases for the org.opencyc.elf package.
  * 
@@ -213,8 +179,7 @@ public class UnitTest extends TestCase {
     System.out.println("*** testNodeFactory OK ***");
   }
 
-  /** Tests BehaviorGeneration object behavior.
-   */
+  /** Tests BehaviorGeneration object behavior. */
   public void testBehaviorGeneration() {
     System.out.println("\n*** testBehaviorGeneration ***");
     
@@ -312,7 +277,7 @@ public class UnitTest extends TestCase {
    */
   public static void main(String[] args) {
     logger = Logger.getLogger("org.opencyc.elf");
-    junit.textui.TestRunner.run(suite());
+    TestRunner.run(suite());
     System.exit(0);
   }
 }

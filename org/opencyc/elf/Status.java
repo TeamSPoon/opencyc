@@ -3,9 +3,10 @@ package org.opencyc.elf;
 //// Internal Imports
 
 //// External Imports
+import java.util.HashMap;
 
-/**
- * Status contains status information.
+/** Status contains status information.  A dictinary is employed to economise on the number
+ * of instance variables that otherwise would be required.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -36,6 +37,36 @@ public class Status {
   }
   
   //// Public Area
+
+  /** Gets a value from the status dictionary given the key.  If the value is not present
+   * then null is returned
+   *
+   * @param key the key for which a value (if present) will be returned
+   * @return a value from the status dictionary given the key.  If the value is not present
+   * then null is returned
+   */
+  public Object getValue (Object key) {
+    return statusDictionary.get(key);
+  }
+
+  /** Puts the given key / value pair into the status dictionary.
+   *
+   * @param key the given key
+   * @param value the given value
+   */
+  public void setValue (Object key, Object value) {
+    statusDictionary.put(key, value);
+  }
+
+  /** When present, indicates to the job assigner that the reporting scheduler has finished
+   * the assigned schedule.
+   */
+  public static String SCHEDULE_FINISHED = "schedule finished";
+  
+  /** When present, indicates to the higher-level executor that the reporting job assigner has 
+   * finished the commanded task.
+   */
+  public static String TASK_FINISHED = "task finished";
   
   //// Protected Area
   
@@ -43,6 +74,10 @@ public class Status {
   
   //// Internal Rep
   
+  /** the status dictionary **/
+  protected HashMap statusDictionary = new HashMap();
+  
   //// Main
+
   
 }

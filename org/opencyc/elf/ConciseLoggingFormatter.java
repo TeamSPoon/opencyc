@@ -8,8 +8,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-/**
- * Provides a concise formatter for java logging output.
+/** Provides a concise formatter for java logging output.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -41,8 +40,7 @@ public class ConciseLoggingFormatter extends SimpleFormatter {
   
   //// Public Area
   
-  /**
-   * Formats the given log record.
+  /** Formats the given log record.
    *
    * @param logRecord the given log record
    */

@@ -4,8 +4,7 @@ package org.opencyc.elf;
 
 //// External Imports
 
-/**
- * ELFException contains the ELF exception.
+/** ELFException contains the ELF exception.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -31,8 +30,7 @@ public class ELFException extends RuntimeException {
   
   //// Constructors
   
-  /** 
-   * Constructs a new runtime exception with null as its detail message. The cause is 
+  /**  Constructs a new runtime exception with null as its detail message. The cause is 
    * not initialized, and may subsequently be initialized by a call to 
    * Throwable.initCause(java.lang.Throwable). 
    */
@@ -40,8 +38,7 @@ public class ELFException extends RuntimeException {
     super();
   }
   
-  /** 
-   * Constructs a new runtime exception with the specified detail message. The cause is 
+  /**  Constructs a new runtime exception with the specified detail message. The cause is 
    * not initialized, and may subsequently be initialized by a call to 
    * Throwable.initCause(java.lang.Throwable). 
    *
@@ -52,8 +49,7 @@ public class ELFException extends RuntimeException {
     super(message);
   }
   
-  /**
-   * Constructs a new runtime exception with the specified detail message and cause.  Note that 
+  /** Constructs a new runtime exception with the specified detail message and cause.  Note that 
    * the detail message associated with cause is not automatically incorporated in this runtime 
    * exception's detail message. 
    *

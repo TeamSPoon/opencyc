@@ -4,8 +4,7 @@ package org.opencyc.elf;
 
 //// External Imports
 
-/**
- * Result contains result information.
+/** Result contains result information.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -8,8 +8,7 @@ import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
-/**
- * Provides common attributes and behavior for Elementary Loop Functioning
+/** Provides common attributes and behavior for Elementary Loop Functioning
  * (ELF) node components.
  * Each node component contains one or more process threads that communicates with other 
  * node components by sending asychronous messages.
@@ -40,8 +39,7 @@ public abstract class NodeComponent {
 
   //// Public Area
   
-  /**
-   * Gets the ELF Node that contains this object.
+  /** Gets the ELF Node that contains this object.
    * 
    * @return the ELF Node that contains this object
    */
@@ -49,8 +47,7 @@ public abstract class NodeComponent {
     return node;
   }
 
-  /**
-   * Sets the ELF Node that contains this object.
+  /** Sets the ELF Node that contains this object.
    * 
    * @param node the ELF Node thatcontains this object
    */
@@ -58,8 +55,7 @@ public abstract class NodeComponent {
     this.node = node;
   }
   
-  /**
-   * Gets the logger for this node.
+  /** Gets the logger for this node.
    *
    * @return the logger for this node
    */
@@ -67,8 +63,7 @@ public abstract class NodeComponent {
     return node.getLogger();
   }
   
-  /**
-   * Sends the given message through the given channel to the recipient.
+  /** Sends the given message through the given channel to the recipient.
    *
    * @param channel the communication channel
    * @param genericMsg the message to be sent to the recipient

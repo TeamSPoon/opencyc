@@ -6,19 +6,6 @@ import fipaos.ont.fipa.*;
 import org.opencyc.api.*;
 import org.opencyc.util.*;
 
-
-
-
-
-// TO-DO reconcile with CycProxy
-
-
-
-
-
-
-
-
 /**
  * Provides a FIPA-OS agent proxy and a Grid proxy for an OpenCyc server.<p>
  *
@@ -44,7 +31,7 @@ import org.opencyc.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class AgentManager extends GenericAgent {
+public class AgentManager {
 
     /**
      * singleton instance of AgentManager
@@ -107,7 +94,6 @@ public class AgentManager extends GenericAgent {
         super.messageReceived(acl);
         if (messageConsumed)
             return;
-
     }
 }
 

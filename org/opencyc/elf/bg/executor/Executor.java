@@ -49,6 +49,15 @@ public class Executor extends NodeComponent {
   //// Public Area
 
   /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "Executor for " + node.getName();
+  }
+  
+  /**
    * Gets the procedure to execute
    * 
    * @return the procedure to execute

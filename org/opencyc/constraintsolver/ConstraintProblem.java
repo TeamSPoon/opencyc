@@ -48,11 +48,6 @@ public class ConstraintProblem {
     protected ValueDomains valueDomains = new ValueDomains(this);
 
     /**
-     * Variable Domain Populator for this <tt>ConstraintProblem</tt>.
-     */
-    protected VariableDomainPopulator variableDomainPopulator = new VariableDomainPopulator(this);
-
-    /**
      * <tt>NodeConsistencyAchiever</tt> for this <tt>ConstraintProblem</tt>.
      */
     protected NodeConsistencyAchiever nodeConsistencyAchiever = new NodeConsistencyAchiever(this);
@@ -203,7 +198,8 @@ public class ConstraintProblem {
      * Solves a constraint problem and return a list of solutions if one or more
      * was found, otherwise returns <tt>null</tt>.
      *
-     * @param solution a partial solution
+     * @param solution the partial solution
+     * @param variables the list of variables present in this constraint problem
      * @param constraintRules a list of constraint rules to further restrict the partial solution.
      * @return an <tt>ArrayList</tt> of solutions or <tt>null</tt> if no solutions were
      * found.  Each solution is an <tt>ArrayList</tt> of variable binding <tt>ArrayList</tt>
@@ -212,14 +208,66 @@ public class ConstraintProblem {
      * <tt>Object</tt>.
      */
     public ArrayList solveUsingPartialSolution(Solution solution,
+                                               ArrayList variables,
                                                ArrayList constraintRules) throws IOException {
         CycList problem = new CycList();
-        problem.add(CycAccess.and);
+        problem.add(buildDomainPopulationRules(solution, variables));
+        problem.add(buildSolutionConstraint(solution));
+        problem.addAll(constraintRules);
+        return solve(problem);
+    }
+
+    /**
+     * Builds a list of domain population rules from the given partial solution object.
+     * <code>
+     * (#$elementOf ?var1 (#$TheSet value1_1 ... value1_N))
+     *       ...
+     * (#$elementOf ?varM (#$TheSet valueM_1 ... valueM_N))
+     * </code>
+     * @param solution the partial solution
+     * @param variables the list of variables present in this constraint problem
+     * @return solution constraint built from the given partial solution object
+     */
+    protected ArrayList buildDomainPopulationRules(Solution solution, ArrayList variables)
+        throws IOException {
+        ArrayList domainPopulationRules = new ArrayList();
+        ArrayList partialSolution = null;
+        for (int i = 0; i < variables.size(); i++) {
+            CycVariable variable = (CycVariable) variables.get(i);
+            CycList elementOfClause = new CycList();
+            elementOfClause.add(CycAccess.elementOf);
+            ArrayList partialSolutions = solution.getSolutions();
+            for (int j = 0; j < partialSolutions.size(); j++) {
+                partialSolution = (ArrayList) partialSolution.get(j);
+                CycList theSetClause = new CycList();
+                theSetClause.add(CycAccess.current().getKnownConstantByName("#$TheSet"));
+                for (int k = 0;k < partialSolution.size(); k++) {
+                    Binding binding = (Binding) partialSolution.get(k);
+                    CycVariable boundVariable = binding.getCycVariable();
+                    if (variable.equals(boundVariable))
+                        theSetClause.add(binding.getValue());
+                }
+            }
+            domainPopulationRules.add(elementOfClause);
+        }
+        return domainPopulationRules;
+    }
+
+    /**
+     * Builds a constraint expression from the given partial solution object.
+     * <code>
+     * (#$or (#$and (#$equals ?var1 value1_1) ... (#$equals ?varN value1_N))
+     *       ...
+     *       (#$and (#$equals ?var1 valueM_1) ... (#$equals ?varN valueM_N)))
+     * </code>
+     * @param solution a partial solution
+     * @return solution constraint built from the given partial solution object
+     */
+    protected CycList buildSolutionConstraint(Solution solution) throws IOException {
+        CycList solutionConstraint = new CycList();
+        solutionConstraint.add(CycAccess.or);
         ArrayList partialSolutions = solution.getSolutions();
         ArrayList partialSolution = null;
-        CycList solutionConstraint = new CycList();
-        problem.add(solutionConstraint);
-        solutionConstraint.add(CycAccess.or);
         CycList andClause;
         CycList equalsClause;
         CycConstant equals = CycAccess.current().getKnownConstantByName("equals");
@@ -239,9 +287,9 @@ public class ConstraintProblem {
                 equalsClause.add(value);
             }
         }
-        problem.addAll(constraintRules);
-        return solve(problem);
+        return solutionConstraint;
     }
+
 
     /**
      * Solves a constraint problem and return a list of solutions if one or more
@@ -276,6 +324,7 @@ public class ConstraintProblem {
         try {
             problemParser.extractRulesAndDomains();
             problemParser.gatherVariables();
+            problemParser.initializeDomains();
             if (variables.size() > 0)
                 nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();
@@ -383,7 +432,6 @@ public class ConstraintProblem {
         this.verbosity = verbosity;
         problemParser.setVerbosity(verbosity);
         valueDomains.setVerbosity(verbosity);
-        variableDomainPopulator.setVerbosity(verbosity);
         argumentTypeConstrainer.setVerbosity(verbosity);
         nodeConsistencyAchiever.setVerbosity(verbosity);
         ruleEvaluator.setVerbosity(verbosity);
@@ -391,17 +439,6 @@ public class ConstraintProblem {
             forwardCheckingSearcher.setVerbosity(verbosity);
         if (solution != null)
             solution.setVerbosity(verbosity);
-    }
-
-    /**
-     * Sets the domain size threshold, beyond which the population of a
-     * variable's domain is typically postponed until the forward checking
-     * search.
-     *
-     * @param domainSizeThreshold domain size threshold
-     */
-    public void setDomainSizeThreshold(int domainSizeThreshold) {
-        variableDomainPopulator.setDomainSizeThreshold(domainSizeThreshold);
     }
 
 

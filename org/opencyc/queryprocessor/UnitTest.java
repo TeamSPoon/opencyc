@@ -70,7 +70,8 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testQueryProcessor7"));
             //testSuite.addTest(new UnitTest("testQueryProcessor8"));
             //testSuite.addTest(new UnitTest("testQueryProcessor9"));
-            testSuite.addTest(new UnitTest("testBackchainer1"));
+            testSuite.addTest(new UnitTest("testQueryProcessor10"));
+            //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
             //testSuite.addTest(new UnitTest("testBackchainer3"));
             //testSuite.addTest(new UnitTest("testBackchainer4"));
@@ -471,7 +472,6 @@ public class UnitTest extends TestCase {
         System.out.println("** testQueryProcessor8 OK **");
     }
 
-//(and (temporallySubsumes ?TIME ?MT-TIME) (mtTime ?MT ?MT-TIME) (holdsIn ?TIME (on-Physical ?WHAT CityOfAustinTX)))
     /**
      * Tests the <tt>QueryProcessor</tt> class.
      */
@@ -502,6 +502,85 @@ public class UnitTest extends TestCase {
         }
 
         System.out.println("** testQueryProcessor9 OK **");
+    }
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor10() {
+        System.out.println("** testQueryProcessor10 **");
+
+        // zebra constraint problem.
+        String problemString =
+            "(#$and " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?norwegian (#$PlusFn ?blue 1)) " +
+            "    (#$numericallyEqual ?blue (#$PlusFn ?norwegian 1))) " +
+            "  (#$numericallyEqual ?japanese ?volkswagen) " +
+            "  (#$numericallyEqual ?mercedes-benz ?orange-juice) " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?ford (#$PlusFn ?horse 1)) " +
+            "    (#$numericallyEqual ?horse (#$PlusFn ?ford 1))) " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?chevrolet (#$PlusFn ?fox 1)) " +
+            "    (#$numericallyEqual ?fox (#$PlusFn ?chevrolet 1))) " +
+            "  (#$numericallyEqual ?norwegian 1) " +
+            "  (#$numericallyEqual ?milk 3) " +
+            "  (#$numericallyEqual ?ford ?yellow) " +
+            "  (#$numericallyEqual ?oldsmobile ?snails) " +
+            "  (#$numericallyEqual ?green (#$PlusFn ?ivory 1)) " +
+            "  (#$numericallyEqual ?ukranian ?eggnog) " +
+            "  (#$numericallyEqual ?cocoa ?green) " +
+            "  (#$numericallyEqual ?spaniard ?dog) " +
+            "  (#$numericallyEqual ?english ?red) " +
+            "  (#$different ?ford ?chevrolet ?oldsmobile ?mercedes-benz ?volkswagen) " +
+            "  (#$different ?orange-juice ?cocoa ?eggnog ?milk ?water) " +
+            "  (#$different ?dog ?snails ?horse ?fox ?zebra) " +
+            "  (#$different ?english ?spaniard ?norwegian ?japanese ?ukranian) " +
+            "  (#$different ?blue ?red ?green ?yellow ?ivory) " +
+            "  (#$elementOf ?blue (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?chevrolet (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?cocoa (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?dog (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?eggnog (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?english (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ford (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?fox (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?green (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?horse (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ivory (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?japanese (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?mercedes-benz (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?milk (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?norwegian (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?oldsmobile (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?orange-juice (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?red (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?snails (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?spaniard (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ukranian (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?volkswagen (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?water (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
+        System.out.println(problemString);
+        QueryProcessor problem = new QueryProcessor();
+        problem.setVerbosity(9);
+        // Request all solutions.
+        problem.nbrSolutionsRequested = null;
+        try {
+            problem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = problem.ask(problemString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor10 OK **");
     }
     /**
      * Tests the <tt>Backchainer</tt> class.

@@ -332,7 +332,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        zebraProblem.setVerbosity(9);
+        zebraProblem.setVerbosity(1);
         ArrayList solutions = null;
         try {
             solutions = zebraProblem.solve(zebraPuzzleCycList);
@@ -379,9 +379,6 @@ public class UnitTest extends TestCase {
         HashMap domainValueMarks = (HashMap) zebraProblem.valueDomains.domains.get(blue);
         Assert.assertTrue(domainValueMarks.containsKey(new Integer(1)));
         Assert.assertNotNull(domainValueMarks.get(new Integer(1)));
-
-        // test VariableDomainPopulator
-        Assert.assertTrue(zebraProblem.variableDomainPopulator.variableDomainPopulators.size() == 0);
 
         // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
         Assert.assertEquals(20, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());

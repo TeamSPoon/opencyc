@@ -66,12 +66,6 @@ public class ForwardCheckingSearcher {
     protected ValueDomains valueDomains;
 
     /**
-     * Reference to the <tt>VariableDomainPopulator</tt> object for the parent <tt>ConstraintProblem</tt>
-     * object.
-     */
-    protected VariableDomainPopulator variableDomainPopulator;
-
-    /**
      * When instantiating a rule having one variable left to instantiate for subsequent
      * asking the KB, this parameter sets the threshold beyond which a variable is used in the ask
      *  -- returning what bindings are known (or proven) in the KB.
@@ -96,7 +90,6 @@ public class ForwardCheckingSearcher {
         constraintRules = constraintProblem.constraintRules;
         solution = constraintProblem.solution;
         valueDomains = constraintProblem.valueDomains;
-        variableDomainPopulator = constraintProblem.variableDomainPopulator;
         verbosity = constraintProblem.verbosity;
     }
 
@@ -120,12 +113,6 @@ public class ForwardCheckingSearcher {
      */
     public boolean search(ArrayList variables, int level) throws IOException {
         CycVariable selectedVariable = selectVariable(variables);
-
-        // Handle the atypical case where a high cardinality variable is selected first.
-        if (this.variableDomainPopulator.isPostponedHighCardinalityDomain(selectedVariable) &&
-            this.variableDomainPopulator.getPopulatingRule(selectedVariable) == null)
-            constraintProblem.variableDomainPopulator.populatePostponedDomain(selectedVariable);
-
         ArrayList remainingDomain = valueDomains.getUnmarkedDomainValues(selectedVariable);
         ArrayList remainingVariables = (ArrayList) variables.clone();
         remainingVariables.remove(selectedVariable);
@@ -340,22 +327,6 @@ public class ForwardCheckingSearcher {
                          new VariablesByAscendingDomainSizeComparator(valueDomains));
         CycList instantiatedRule = rule.getFormula().subst(currentBinding.getValue(),
                                                         currentBinding.getCycVariable());
-        // For variables with high domain cardinality, use the first applicable
-        // rule to obtain the initial domain.
-        if (remainingRuleVariables.size() == 1) {
-            CycVariable variable = (CycVariable) remainingRuleVariables.get(0);
-            // one variable left to instantiate
-            if (variableDomainPopulator.isPostponedHighCardinalityDomain(variable))
-
-                // The one variable left has a high cardinality domain.
-                if (variableDomainPopulator.getPopulatingRule(variable) == null) {
-                    // A rule has not yet populated the high cardinality domain.
-                    if (verbosity > 2)
-                        System.out.println("Using " + instantiatedRule.cyclify() +
-                                           "\nto populate the domain of " + variable);
-                    variableDomainPopulator.setPopulatingRule(variable, rule);
-                }
-        }
         ArrayList bindingList = new ArrayList();
         bindingList.add(currentBinding);
         markPermittedRemainingBindings(instantiatedRule,
@@ -407,15 +378,12 @@ public class ForwardCheckingSearcher {
                     variable = binding.getCycVariable();
                     if (! variable.equals(selectedVariable)) {
                         value = binding.getValue();
-                    if ((! variableDomainPopulator.isPostponedHighCardinalityDomain(variable)) ||
-                        // initial population of high cardinality domain
-                        variableDomainPopulator.isPopulatingRule(currentRule, variable) ||
-                        // Other rules cannot extend a high cardinality domain.
-                        valueDomains.domainHasValue(variable, value))
-                        if (verbosity > 2)
-                            System.out.println("  " + binding.cyclify() + " is permitted by " +
-                                               currentBinding.cyclify());
-                        valueDomains.markDomain(variable, value, Boolean.TRUE);
+                        if (valueDomains.domainHasValue(variable, value)) {
+                            if (verbosity > 2)
+                                System.out.println("  " + binding.cyclify() + " is permitted by " +
+                                                   currentBinding.cyclify());
+                            valueDomains.markDomain(variable, value, Boolean.TRUE);
+                        }
                     }
                 }
             }
@@ -425,42 +393,7 @@ public class ForwardCheckingSearcher {
             // One variable left, handle the special cases where individual value
             // instantiation is not efficient.
             CycVariable variable = (CycVariable) remainingVariables.get(0);
-            boolean isHighCardinalityDomain =
-                variableDomainPopulator.isPostponedHighCardinalityDomain(variable);
-            if (verbosity > 2) {
-                System.out.println("ConstraintRule instantiation reached singleton " + variable);
-                System.out.println("  high cardinality? --> " + isHighCardinalityDomain);
-            }
-            if (isHighCardinalityDomain &&
-                variableDomainPopulator.isPopulatingRule(currentRule, variable)) {
-                // Special case where the rule is used to populate the values of an
-                // otherwise high cardinality domain.  Thus the constraint reasoner
-                // searches some subset of the potential domain values, where the
-                // subset is expected to have much smaller cardinality.
-                if (verbosity > 2)
-                    System.out.println("  high cardinality variable " + variable +
-                                       "\n  in " + instantiatedRule);
-                ArrayList permittedValues = askWithVariable(instantiatedRule, variable);
-                for (int i = 0; i < permittedValues.size(); i++) {
-                    Object value = permittedValues.get(i);
-                    Binding binding = new Binding(variable, value);
-                    if (valueDomains.domainHasValue(variable, value)) {
-                        if (verbosity > 2)
-                            System.out.println("  " + binding.cyclify() + " is permitted by " +
-                                               currentBinding.cyclify());
-                        valueDomains.markDomain(variable, value, Boolean.TRUE);
-                    }
-                    else {
-                        // initial population of high cardinality domain
-                        if (verbosity > 2)
-                            System.out.println("  " + binding.cyclify() + " is new and permitted by " +
-                                               currentBinding.cyclify());
-                        valueDomains.addDomainValue(variable, value);
-                        valueDomains.markDomain(variable, value, Boolean.TRUE);
-                    }
-                }
-            }
-            else if (valueDomains.getUnmarkedDomainSize(variable) > ASK_ALL_OR_INDIV_THRESHOLD) {
+            if (valueDomains.getUnmarkedDomainSize(variable) > ASK_ALL_OR_INDIV_THRESHOLD) {
                 // Special case it is more efficient to ask for all the bindings and mark
                 // them rather than to ask for them individually.
                 if (verbosity > 2)

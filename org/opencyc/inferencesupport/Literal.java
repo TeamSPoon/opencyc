@@ -308,10 +308,13 @@ public class Literal  implements Comparable{
     public boolean isEvaluatable() throws IOException {
         if (this.getArguments().size() < 2)
             return false;
+        if (this.getPredicate().equals(CycAccess.different))
+            return true;
         if (this.getPredicate().equals(CycAccess.numericallyEqual))
             return hasEvaluatableNumericalArgs();
-        else if (this.getPredicate().toString().equals("or") ||
-                 this.getPredicate().toString().equals("and")) {
+
+        if (this.getPredicate().toString().equals("or") ||
+             this.getPredicate().toString().equals("and")) {
             for (int i = 0; i < this.getArguments().size(); i++) {
                 Literal orArgument = new QueryLiteral((CycList) this.getArguments().get(i));
                 if (! orArgument.isEvaluatable())

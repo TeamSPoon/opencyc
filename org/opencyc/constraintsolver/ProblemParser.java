@@ -61,11 +61,6 @@ public class ProblemParser {
     protected ArgumentTypeConstrainer argumentTypeConstrainer;
 
     /**
-     * Reference to the constraint problem's VariableDomainPopulator object.
-     */
-    protected VariableDomainPopulator variableDomainPopulator;
-
-    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
@@ -83,7 +78,6 @@ public class ProblemParser {
         domainPopulationRules = constraintProblem.domainPopulationRules;
         constraintRules = constraintProblem.constraintRules;
         argumentTypeConstrainer = constraintProblem.argumentTypeConstrainer;
-        variableDomainPopulator = constraintProblem.variableDomainPopulator;
     }
 
     /**
@@ -97,46 +91,6 @@ public class ProblemParser {
     }
 
     /**
-     * Simplifies the input problem into its constituent <tt>ConstraintRule</tt> objects,
-     * then divides the input rules into those which populate the variable
-     * domains, and those which subsequently constrain the search for
-     * one or more solutions.  Obtains additional argument type constraints for the constraint
-     * rules.  If a ground fact discovered among the rule set is proven false, then immediately
-     * return the value false.  If a rule has no instances, then immediately return the value false
-     *
-     * @return <tt>false</tt> if no further backchaining is possible and a rule cannot be satisfied,
-     * otherwise return <tt>true</tt>
-     */
-     /*
-    public boolean extractRulesAndDomains() throws IOException {
-        simplifiedRules.addAll(ConstraintRule.simplifyConstraintRuleExpression(constraintProblem.problem));
-        // Sort by ascending arity to find likely unsatisfiable facts first.
-        Collections.sort(simplifiedRules);
-        for (int i = 0; i < simplifiedRules.size(); i++) {
-            ConstraintRule rule = (ConstraintRule) simplifiedRules.get(i);
-            if (! isRuleSatisfiable(rule))
-                return false;
-            if (rule.isExtensionalVariableDomainPopulatingConstraintRule())
-                // Extensional rules that explicitly define the value domain will rank best.
-                rule.nbrFormulaInstances = 1;
-            else
-                rule.nbrFormulaInstances =
-                    CycAccess.current().countUsingBestIndex(rule.getFormula(), constraintProblem.mt);
-            for (int j = 0; j < rule.getVariables().size(); j++) {
-                VariablePopulationItem variablePopulationItem =
-                    new VariablePopulationItem((CycVariable) rule.getVariables().get(j),
-                                               rule);
-                variableDomainPopulator.add(variablePopulationItem);
-            }
-        }
-        variableDomainPopulator.populateDomains();
-        if (verbosity > 1)
-            constraintProblem.displayConstraintRules();
-        return true;
-    }
-    */
-
-    /**
      * Simplifies the input problem into its constituent <tt>Rule</tt> objects,
      * then divides the input rules into those which populate the variable
      * domains, and those which subsequently constrain the search for
@@ -145,6 +99,8 @@ public class ProblemParser {
     protected void extractRulesAndDomains() throws IOException {
         constraintProblem.simplifiedRules =
             ConstraintRule.simplifyConstraintRuleExpression(constraintProblem.problem);
+        constraintProblem.domainPopulationRules = new ArrayList();
+        constraintProblem.constraintRules = new ArrayList();
         for (int i = 0; i < constraintProblem.simplifiedRules.size(); i++) {
             ConstraintRule rule = (ConstraintRule) constraintProblem.simplifiedRules.get(i);
             if (rule.isVariableDomainPopulatingRule())
@@ -157,51 +113,31 @@ public class ProblemParser {
     }
 
     /**
-     * Returns <tt>true</tt> iff the rule cannot be satisfied.
-     *
-     * @param rule the rule to check in the KB
-     * @return <tt>true</tt> iff the rule cannot be satisfied
+     * Initializes the value domains for each variable.
      */
-    /*
-    protected boolean isRuleSatisfiable(ConstraintRule rule) throws IOException {
-        if (rule.isGround()) {
-            if (verbosity > 3)
-                System.out.println("Ground fact with no backchaining possible\n" + rule);
-            boolean isTrueFact;
-            if (rule.isEvaluatable())
-                isTrueFact = ConstraintRule.evaluateConstraintRule(rule.getFormula());
-            else
-                isTrueFact = CycAccess.current().isQueryTrue(rule.getFormula(), constraintProblem.mt);
-            if (verbosity > 3)
-                System.out.println("  --> " + isTrueFact);
-            if (! isTrueFact)
-                return false;
+    protected void initializeDomains() throws IOException {
+        for (int i = 0; i < constraintProblem.domainPopulationRules.size(); i++) {
+            ConstraintRule rule = (ConstraintRule) constraintProblem.domainPopulationRules.get(i);
+            if (rule.isExtensionalVariableDomainPopulatingConstraintRule()) {
+                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
+                if (constraintProblem.valueDomains.domains.containsKey(cycVariable))
+                    throw new RuntimeException("Duplicate domain specifying rule for " + cycVariable);
+                constraintProblem.valueDomains.domains.put(cycVariable, null);
+                if (constraintProblem.valueDomains.varsDictionary.containsKey(cycVariable))
+                    throw new RuntimeException("Duplicate varsDictionary entry for " + cycVariable);
+                CycList theSet =  (CycList) rule.getFormula().third();
+                if (! (theSet.first().toString().equals("TheSet")))
+                    throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
+                ArrayList domainValues = new ArrayList(theSet.rest());
+                constraintProblem.valueDomains.varsDictionary.put(cycVariable, domainValues);
+                if (verbosity > 8)
+                    System.out.println("Initializing domain for " + cycVariable +
+                                       "\n  with " + domainValues);
+           }
         }
-        CycConstant term = null;
-        Integer argumentPostion = null;
-        for (int j = 0; j < rule.getArguments().size(); j++) {
-            Object argument = rule.getArguments().get(j);
-            if (argument instanceof CycConstant) {
-                term = (CycConstant) argument;
-                argumentPostion = new Integer(j + 1);
-                break;
-            }
-        }
-        if (term != null) {
-            boolean someInstancesExist =
-                CycAccess.current().hasSomePredicateUsingTerm(rule.getPredicate(),
-                                                              term,
-                                                              argumentPostion,
-                                                              constraintProblem.mt);
-            if (! someInstancesExist) {
-                if (verbosity > 3)
-                    System.out.println("No instances exist and with no backchaining possible\n" + rule);
-                return false;
-            }
-        }
-        return true;
+        if (verbosity > 1)
+            constraintProblem.valueDomains.displayVariablesAndDomains();
     }
-    */
 
     /**
      * Gathers the unique variables used in this constraint problem.

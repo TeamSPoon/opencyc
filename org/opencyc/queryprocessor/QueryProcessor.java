@@ -222,7 +222,7 @@ public class QueryProcessor {
                 constraintProblem.setVerbosity(verbosity);
                 constraintProblem.nbrSolutionsRequested = nbrSolutionsRequested;
                 ArrayList constraintSolutions =
-                    constraintProblem.solveUsingPartialSolution(solution, constraintRules);
+                    constraintProblem.solveUsingPartialSolution(solution, variables, constraintRules);
                 solution.setSolutions(constraintSolutions);
             }
         }

@@ -61,22 +61,16 @@ public class ImportDaml implements StatementHandler {
     protected ARP arp;
 
     /**
-     * The list of DAML web documents to import.
-     */
-    public static ArrayList documentsToImport = new ArrayList();
-
-    /**
      * Ontology library nicknames, which become namespace identifiers
      * upon import into Cyc.
      * namespace uri --> ontologyNickname
      */
-    protected HashMap ontologyNicknames = new HashMap();
+    protected HashMap ontologyNicknames;
 
     /**
-     * Ontology import microtheories.
-     * ontology url --> mt
+     * Ontology import microtheory name.
      */
-    protected HashMap ontologyMts = new HashMap();
+    protected String importMt;
 
     /**
      * The current DAML Restriction object being constructed from sequential
@@ -90,68 +84,29 @@ public class ImportDaml implements StatementHandler {
     protected CycAccess cycAccess;
 
     /**
-     * The KB Subset collection which identifies all DAML SONAT
-     * ontology import terms in Cyc.
+     * The name of the KB Subset collection which identifies ontology import
+     * terms in Cyc.
      */
-    protected CycConstant damlSonatConstant;
+    protected String kbSubsetCollectionName;
 
     /**
      * Constructs a new ImportDaml object.
+     *
+     * @param cycAccess the CycAccess instance which manages the connection
+     * to the Cyc server and provides Cyc API services
+     * @param ontologyNicknames the dictionary associating each ontology uri with
+     * the nickname used for the Cyc namespace qualifier
+     * @param kbSubsetCollectionName the name of the Cyc KbSubsetCollection
+     * which identifies each of the imported terms
      */
-    public ImportDaml() {
+    public ImportDaml(CycAccess cycAccess,
+                      HashMap ontologyNicknames,
+                      String kbSubsetCollectionName) {
+        this.cycAccess = cycAccess;
+        this.ontologyNicknames = ontologyNicknames;
+        this.kbSubsetCollectionName = kbSubsetCollectionName;
         arp = new ARP();
         arp.setStatementHandler(this);
-    }
-
-    /**
-     * Provides the main method for the ImportDaml application.
-     *
-     * @param args ignored.
-     */
-    public static void main(String[] args) {
-        Log.makeLog();
-        initializeDocumentsToImport();
-        for (int i = 16; i < 17; i++) {
-        //for (int i = 0; i < documentsToImport.size(); i++) {
-        //for (int i = 0; i < 5; i++) {
-            String damlPath = (String) documentsToImport.get(i);
-            ImportDaml importDaml = new ImportDaml();
-            try {
-            importDaml.initialize();
-            importDaml.importDaml(damlPath);
-            }
-            catch (Exception e) {
-                Log.current.printStackTrace(e);
-                System.exit(1);
-            }
-        }
-    }
-
-    /**
-     * Initializes the documents to import.
-     */
-    protected static void initializeDocumentsToImport () {
-        documentsToImport.add("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml");
-        documentsToImport.add("http://www.daml.org/2001/10/html/airport-ont.daml");
-        documentsToImport.add("http://www.daml.org/2001/09/countries/fips.daml");
-        documentsToImport.add("http://www.daml.org/2001/09/countries/fips-10-4.daml");
-        documentsToImport.add("http://www.daml.org/2001/12/factbook/factbook-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/agency-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/CINC-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/af-a.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/assessment-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/economic-elements-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/elements-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/information-elements-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/location-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/military-elements-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/objectives-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/operation-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/political-elements-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/social-elements-ont.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/example1.daml");
-        documentsToImport.add("http://www.daml.org/experiment/ontology/example2.daml");
     }
 
     /**
@@ -159,151 +114,20 @@ public class ImportDaml implements StatementHandler {
      */
     protected void initialize ()
         throws IOException, UnknownHostException, CycApiException {
-        initializeOntologyMts();
-        initializeOntologyNicknames();
-        cycAccess = new CycAccess();
-        initializeCycTerms();
     }
-
-    /**
-     * Initializes the Ontology url --> import mt mapping.
-     */
-    protected void initializeOntologyMts () {
-        ontologyMts.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml",
-                        "DamlSonatDrcVesOntologyMt");
-        ontologyMts.put("http://www.daml.org/2001/10/html/airport-ont.daml",
-                        "DamlSonatAirportOntologyMt");
-        ontologyMts.put("http://www.daml.org/2001/09/countries/fips.daml",
-                        "DamlSonatFipsOntologyMt");
-        ontologyMts.put("http://www.daml.org/2001/09/countries/fips-10-4.daml",
-                        "DamlSonatFips10-4OntologyMt");
-        ontologyMts.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml",
-                        "DamlSonatCiaFactbookOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/agency-ont.daml",
-                        "DamlSonatAgencyOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/CINC-ont.daml",
-                        "DamlSonatCincOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/af-a.daml",
-                        "DamlSonatAfghanistanAOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/assessment-ont.daml",
-                        "DamlSonatAssessmentOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/economic-elements-ont.daml",
-                        "DamlSonatEconomicElementsOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/elements-ont.daml",
-                        "DamlSonatElementsOfNationalPowerOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/information-elements-ont.daml",
-                        "DamlSonatInformationElementsOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                        "DamlSonatInfrastructureElementsOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/location-ont.daml",
-                        "DamlSonatLocationOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/military-elements-ont.daml",
-                        "DamlSonatMilitaryElementsOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/objectives-ont.daml",
-                        "DamlSonatObjectivesOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/operation-ont.daml",
-                        "DamlSonatOperationOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/political-elements-ont.daml",
-                        "DamlSonatPoliticalElementsOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/social-elements-ont.daml",
-                        "DamlSonatSocialElementsOntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/example1.daml",
-                        "DamlSonatExample1OntologyMt");
-        ontologyMts.put("http://www.daml.org/experiment/ontology/example2.daml",
-                        "DamlSonatExample2OntologyMt");
-    }
-
-    /**
-     * Initializes the Ontology nicknames mapping.
-     */
-    protected void initializeOntologyNicknames () {
-        ontologyNicknames.put("http://www.w3.org/1999/02/22-rdf-syntax-ns", "rdf");
-        ontologyNicknames.put("http://www.w3.org/2000/01/rdf-schema", "rdfs");
-        ontologyNicknames.put("http://www.w3.org/2000/10/XMLSchema", "xsd");
-
-        ontologyNicknames.put("http://www.daml.org/2001/03/daml+oil", "daml");
-
-        ontologyNicknames.put("http://orlando.drc.com/daml/Ontology/daml-extension/3.2/daml-ext-ont", "daml-ext");
-
-        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml", "factbook");
-
-        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml", "ves");
-        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont", "ves");
-
-        ontologyNicknames.put("http://www.daml.org/2001/10/html/airport-ont.daml", "airport");
-
-        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips-10-4-ont", "fips10-4");
-
-        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips.daml", "fips");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont.daml", "enp");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont", "enp");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/objectives-ont.daml", "obj");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/objectives-ont", "obj");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/social-elements-ont.daml", "soci");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/social-elements-ont", "soci");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/political-elements-ont.daml", "poli");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/political-elements-ont", "poli");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/economic-elements-ont.daml", "econ");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/economic-elements-ont", "econ");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml", "infr");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont", "infr");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/information-elements-ont.daml", "info");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/information-elements-ont", "info");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont.daml", "mil");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont", "mil");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/ona.xsd", "dt");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/location-ont.daml", "loc");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/location-ont", "loc");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/assessment-ont.daml", "assess");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/assessment-ont", "assess");
-
-        ontologyNicknames.put("http://www.daml.org/2001/02/geofile/geofile-dt.xsd", "geodt");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/CINC-ont.daml", "cinc");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/CINC-ont", "cinc");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/cinc-ont", "cinc");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/agency-ont.daml", "agent");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/agency-ont", "agent");
-
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont.daml", "oper");
-        ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont", "oper");
-    }
-
-
-    /**
-     * Initializes Cyc terms used in the DAML import.
-     */
-    protected void initializeCycTerms ()
-        throws IOException, CycApiException {
-        damlSonatConstant = cycAccess.getKnownConstantByName("DamlSonatConstant");
-    }
-
 
     /**
      * Parses and imports the given DAML URL.
      *
      * @param damlPath the URL to import
+     * @param importMt the microtheory into which DAML content is asserted
      */
-    protected void importDaml (String damlPath)
+    protected void importDaml (String damlPath,
+                               String importMt)
         throws IOException, CycApiException {
-        String mtName = (String) ontologyMts.get(damlPath);
-        if (mtName == null)
-            throw new RuntimeException("No mt for damlPath " + damlPath);
-        CycConstant importMt = cycAccess.getKnownConstantByName(mtName);
+        this.importMt = importMt;
         if (verbosity > 0)
-            Log.current.println("\nImporting " + damlPath + "\ninto " + importMt.cyclify());
+            Log.current.println("\nImporting " + damlPath + "\ninto " + importMt);
         Log.current.println("\nStatements\n");
         InputStream in;
         URL url;
@@ -453,7 +277,6 @@ public class ImportDaml implements StatementHandler {
     /**
      * Records the components of a DAML Restriction.
      *
-     *
      * @param subject the RDF Triple anonymous Subject
      * @param predicate the RDF Triple Predicate
      * @param object the RDF Triple Object
@@ -473,7 +296,6 @@ public class ImportDaml implements StatementHandler {
     /**
      * Records the components of a DAML Restriction.
      *
-     *
      * @param subject the RDF Triple anonymous Subject
      * @param predicate the RDF Triple Predicate
      * @param literal the RDF Triple Literal
@@ -492,7 +314,6 @@ public class ImportDaml implements StatementHandler {
 
     /**
      * Records the components of a DAML Restriction.
-     *
      *
      * @param subject the RDF Triple anonymous Subject
      * @param predicate the RDF Triple Predicate
@@ -563,10 +384,12 @@ public class ImportDaml implements StatementHandler {
     /**
      * Assert that the given term is an instance of the DamlSonatConstant KB
      * subset collection.
+     *
+     * @param cycConstantName the name of the Cyc constant
      */
-    protected void assertIsaDamlSonatConstant (CycConstant cycConstant)
+    protected void assertIsaDamlSonatConstant (String cycConstantName)
         throws IOException, CycApiException {
-        cycAccess.assertIsa(cycConstant, damlSonatConstant, cycAccess.bookkeepingMt);
+        cycAccess.assertIsa(cycConstantName, kbSubsetCollectionName, "BookkeepingMt");
     }
 
     /**

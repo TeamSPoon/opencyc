@@ -156,6 +156,9 @@ public class CycNart extends CycFort implements Comparable {
             catch (IOException e) {
                 throw new RuntimeException(e.getMessage());
             }
+            catch (CycApiException e) {
+                throw new RuntimeException(e.getMessage());
+            }
             functor = cycNart.functor;
             arguments = cycNart.arguments;
         }
@@ -183,6 +186,9 @@ public class CycNart extends CycFort implements Comparable {
                 cycNart = CycAccess.current().completeCycNart(this);
             }
             catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            catch (CycApiException e) {
                 throw new RuntimeException(e.getMessage());
             }
             functor = cycNart.functor;

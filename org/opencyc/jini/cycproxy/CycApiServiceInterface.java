@@ -32,6 +32,7 @@ package  org.opencyc.jini.cycproxy;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 import  java.rmi.*;
+import  java.io.IOException;
 import  net.jini.core.event.*;
 import  net.jini.core.lease.*;
 import  org.opencyc.jini.shared.*;
@@ -52,7 +53,7 @@ public interface CycApiServiceInterface extends GenericServiceInterface {
      *
      */
     public String cycApiRequest (Lease lease, String apiRequest)
-        throws RemoteException, LeaseDeniedException, CycApiException;
+        throws RemoteException, LeaseDeniedException, IOException, CycApiException;
 
 
 
@@ -66,7 +67,7 @@ public interface CycApiServiceInterface extends GenericServiceInterface {
      * @exception CycApiException if an error occurs during the Cyc API call.
      *
      */
-    public String cycApiRequest (String apiRequest) throws RemoteException, CycApiException;
+    public String cycApiRequest (String apiRequest) throws RemoteException, IOException, CycApiException;
 }
 
 

@@ -103,6 +103,9 @@ public class CycConstant extends CycFort implements Comparable {
         catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
+        catch (CycApiException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -121,6 +124,9 @@ public class CycConstant extends CycFort implements Comparable {
             return name;
         }
         catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        catch (CycApiException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -149,6 +155,9 @@ public class CycConstant extends CycFort implements Comparable {
             return guid;
         }
         catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        catch (CycApiException e) {
             throw new RuntimeException(e.getMessage());
         }
     }

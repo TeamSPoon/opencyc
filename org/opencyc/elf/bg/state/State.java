@@ -31,6 +31,9 @@ import java.util.Iterator;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class State {
+  
+  //// Constructors
+  
   /**
    * Constructs a new instance of this object.
    */
@@ -38,6 +41,28 @@ public class State {
     stateVariableDictionary = new Hashtable();
   }
 
+  //// Public Area
+    
+  /**
+   * state variable for procedure
+   */
+  public static final String PROCEDURE = "procedure";
+  
+  /**
+   * state variable for the list of parameter names
+   */
+  public static final String PARAMETER_NAMES = "parameter names";
+  
+  /**
+   * state variable for the list of parameter types
+   */
+  public static final String PARAMETER_TYPES = "parameter types";
+  
+  /**
+   * state variable for the list of parameter values
+   */
+  public static final String PARAMETER_VALUES = "parameter values";
+  
   /**
    * Returns true if the given object equals this state.
    * 
@@ -145,8 +170,7 @@ public class State {
    * Returns true if the given object is a state variable of this state.
    * 
    * @param obj the given object
-   * 
-   * @return DOCUMENT ME!
+   * @return true if the given object is a state variable of this state
    */
   public boolean isStateVariable(Object obj) {
     return stateVariableDictionary.containsKey(obj);

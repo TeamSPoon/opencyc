@@ -6,7 +6,6 @@ import org.opencyc.elf.a.ConsoleOutput;
 
 import org.opencyc.elf.bg.predicate.NotNull;
 
-import org.opencyc.elf.bg.planner.ConditionalScheduleSet;
 import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
 

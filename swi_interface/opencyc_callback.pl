@@ -64,12 +64,6 @@ mooBaseJavaClass('logicmoo.SwiMoo').
 :- use_module(library(qsave)).
 
 %:- use_module((javart)).
-:- use_module((opencyc)).
-:-cycInit.
-
-
-
-
 
 :- style_check(-singleton).
 :- style_check(-discontiguous).
@@ -87,6 +81,11 @@ mooBaseJavaClass('logicmoo.SwiMoo').
 :-set_prolog_flag(report_error,true).
 :-set_prolog_flag(verbose,normal).
 :-set_prolog_flag(unknown,error).
+
+
+
+:- use_module((opencyc)).
+:-cycInit.
 
 
 % ========================================================================================
@@ -155,7 +154,7 @@ writeFileToStream(Dest,Filename):-
 % ========================================================================================
 
 numbervars(X):-get_time(T),convert_time(T,A,B,C,D,E,F,G),!,numbervars(X,'$VAR',G,_).
-unnumbervars(X,Y):-term_to_atom(X,A),atom_to_term(A,Y,_).
+%unnumbervars(X,Y):-term_to_atom(X,A),atom_to_term(A,Y,_).
 
 
 % ========================================================================================
@@ -196,6 +195,8 @@ prologAtInitalization(V):-at_initialization(V),!,logOnFailureIgnore(V).
 % Semi-Prolog Dependant Code
 % ===================================================================
 sigma_ua(X):-processRequest(X).
+
+processRequest(X):-writeq(processRequest(X)),nl.
 
 
 % -------------------------------------------------------------------
@@ -321,18 +322,69 @@ serviceIO(In,Out):-
 
 serviceIOBasedOnChar('G',In,Out):-!,  
          serviceHttpRequest(In,Out).
+serviceIOBasedOnChar('P',In,Out):-!,
+         serviceHttpRequest(In,Out).
 
 serviceIOBasedOnChar('(',In,Out):-!,  
          serviceCycApiRequest(In,Out).
 
-serviceIOBasedOnChar('P',In,Out):-!,
-         serviceHttpRequest(In,Out).
-
 serviceIOBasedOnChar('<',In,Out):-!,
          serviceSoapRequest(In,Out).  % see moo_soap.pl
 
+serviceIOBasedOnChar('+',In,Out):-!,  
+         serviceJavaApiRequest(In,Out).
+
 serviceIOBasedOnChar(C,In,Out):-
-        serviceNativeRequest(C,In,Out).
+        serviceNativeRequestAsRDF(C,In,Out).
+
+
+% ===========================================================
+% PROLOGD for Java SERVICE
+% ===========================================================
+serviceJavaApiRequest(In,Out):-
+      get0(In,Plus),
+        getThread(Session),
+        retractall(isKeepAlive(Session)),
+        xmlClearTags,
+        repeat,
+                catch(
+                        read_term(In,PrologGoal,[variable_names(ToplevelVars),character_escapes(true),syntax_errors(error)]),
+                        E,
+                        writeErrMsg(Out,E)),
+                invokePrologCommand(Session,In,Out,PrologGoal,ToplevelVars,Returns),
+                notKeepAlive(Out,Session),!.
+
+invokePrologCommand(Session,In,Out,PrologGoal,ToplevelVars,Returns):-var(PrologGoal),!.
+
+invokePrologCommand(Session,In,Out,PrologGoal,ToplevelVars,Returns):-
+      %%  writeFmt(Out,'<prolog:solutions goal="~q">\n',[PrologGoal]),
+        set_output(Out),set_input(In),!,
+	ignore(catch(PrologGoal,_,true)),
+        xmlExitTags,!.
+
+% ===========================================================
+% PROLOGD for OpenCyc SERVICE
+% ===========================================================
+
+serviceCycApiRequest(In,Out):-
+       readCycL(In,Trim), 
+       isDebug(format('"~s"~n',[Trim])),
+       serviceCycApiRequestSubP(In,Trim,Out).
+   
+serviceCycApiRequestSubP(In,Trim,Out):-
+       getSurfaceFromChars(Trim,[Result],ToplevelVars),!,
+       balanceBinding(Result,PrologGoal),
+        getThread(Session),
+        retractall(isKeepAlive(Session)),
+        xmlClearTags,
+       invokePrologCommand(Session,In,Out,PrologGoal,ToplevelVars,Returns).
+
+serviceCycApiRequestSubP(Trim):-
+       getSurfaceFromChars(Trim,[Result],ToplevelVars),!,
+       balanceBinding(Result,PrologGoal),
+	 ignore(catch(PrologGoal,_,true)).
+
+
 
 % ===========================================================
 % HTTPD SERVICE
@@ -416,7 +468,7 @@ decodeRequestAtom(A,A):-!.
 % NATIVE SERVICE
 % ===========================================================
 
-serviceNativeRequest(_,In,Out):-
+serviceNativeRequestAsRDF(_,In,Out):-
         writeFmt(Out,'<?xml version="1.0" encoding="ISO-8859-1"?>\n',[]),
         getThread(Session),
         retractall(isKeepAlive(Session)),
@@ -450,7 +502,7 @@ invokePrologCommandRDF(Session,In,Out,PrologGoal,ToplevelVars,Returns):-
         flag(AnswersFlag,_,0),
         set_output(Out),set_input(In),!,
         getCputime(Start),
-        callNondeterministicPrologCommand(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars),
+        callNondeterministicPrologCommandRDF(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars),
         xmlExitTags,
         getCputime(End),
         flag(AnswersFlag,Returns,Returns),
@@ -460,7 +512,7 @@ invokePrologCommandRDF(Session,In,Out,PrologGoal,ToplevelVars,Returns):-
         Elapsed is End -Start,
         writeFmt(Out,'</prolog:solutions answers="~w" cputime="~g">\n',[Returns,Elapsed]),!.
 
-callNondeterministicPrologCommand(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars):-
+callNondeterministicPrologCommandRDF(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars):-
         ground(PrologGoal),!,
         catch(
                 (PrologGoal,
@@ -469,18 +521,14 @@ callNondeterministicPrologCommand(Session,AnswersFlag,In,Out,PrologGoal,Toplevel
                  ),
            Err,writeErrMsg(Out,Err,PrologGoal)),!.
 
-
-
-
-
-callNondeterministicPrologCommand(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars):-
+callNondeterministicPrologCommandRDF(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars):-
         catch(
                 (PrologGoal,
                  flag(AnswersFlag,Answers,Answers+1),
                  writePrologToplevelVarsXML(Out,PrologGoal,AnswersFlag,ToplevelVars),
                  fail),
            Err,writeErrMsg(Out,Err,PrologGoal)),!.
-callNondeterministicPrologCommand(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars):-!.
+callNondeterministicPrologCommandRDF(Session,AnswersFlag,In,Out,PrologGoal,ToplevelVars):-!.
 
 
 writePrologToplevelVarsXML(Out,PrologGoal,AnswersFlag,ToplevelVars):-

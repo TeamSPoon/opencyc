@@ -25,14 +25,17 @@
 	 cycAssert/1,
 	 cycAssert/2,
 	 cycRetract/1,
+	 balanceBinding/2,
 	 cycRetract/2,
 	 cycRetractAll/1,
 	 cycRetractAll/2,
 	 isDebug/0,
 	 makeConstant/1,
 	 ensureMt/1,
+	 readCycL/2,
 	 cyclify/2,
 	 cyclifyNew/2,
+	 unnumbervars/2,
 	 defaultAssertMt/1,
 	 mtAssertPred/2,
 	 isRegisterCycPred/3,
@@ -440,16 +443,31 @@ syncCycLVars([Binding|T],[PBinding|VV]):-
       balanceBinding(Binding,PBinding),syncCycLVars(T,VV),!.
 
 %list_to_term(X,Y):- balanceBinding(X,Y).
-list_to_term(X,Y):-list_to_terms(X,Y).
-list_to_terms(List,(A,B)):-list_to_terms(A,AL),list_to_terms(B,BL),append(AL,BL,List).
-list_to_terms(List,(A;B)):-list_to_terms(A,AL),list_to_terms(B,BL),append(AL,[or|BL],List).
+list_to_term(X,Y):-nonvar(X),var(Y),!,list_to_terms_lr(X,Y).
+list_to_term(X,Y):-list_to_terms_rl(X,Y).
+list_to_terms_rl(List,(A,B)):-list_to_terms_rl(A,AL),list_to_terms_rl(B,BL),append(AL,BL,List).
+list_to_terms_rl(List,(A;B)):-list_to_terms_rl(A,AL),list_to_terms_rl(B,BL),append(AL,[or|BL],List).
+list_to_terms_lr([],true):-!.
+list_to_terms_lr([T],T):-!.
+list_to_terms_lr([H|T],(H,TT)):-!,list_to_terms_lr(T,TT).
+   
 
 
-% (var(Binding);atom(Binding);number(Binding)),!.
-balanceBinding([A|L],Binding):- ((var(A);A=string(_)) -> Binding=[A|L];
-	 ( balanceBinding(A,AO),balanceBindingS(L,LO), Binding=..[AO|LO] )).
+balanceBinding(Binding,Binding):- (var(Binding);atom(Binding);number(Binding)),!.
+balanceBinding(string(B),string(B)):-!.
+balanceBinding([A|L],Binding):-balanceBindingCons(A,L,Binding).
 balanceBinding(Binding,Binding):-!.
+ 
+balanceBindingCons(A,L,[A|L]):- (var(A);A=string(_)),!.
+balanceBindingCons('and-also',L,Binding):-balanceBindingS(L,LO), list_to_term(LO,Binding),!.
+balanceBindingCons('#$and-also',L,Binding):-balanceBindingS(L,LO), list_to_term(LO,Binding),!.
 
+balanceBindingCons(A,L,Binding):-
+	 balanceBinding(A,AO),
+	 balanceBindingS(L,LO),
+	 Binding=..[AO|LO],!.
+
+balanceBindingS(Binding,Binding):- (var(Binding);atom(Binding);number(Binding)),!.
 balanceBindingS([],[]).
 balanceBindingS([A|L],[AA|LL]):-balanceBinding(A,AA),balanceBindingS(L,LL).
    

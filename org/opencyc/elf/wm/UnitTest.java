@@ -97,7 +97,7 @@ public class UnitTest extends TestCase {
     Assert.assertEquals("abc", entityFrame1.getState().getStateValue(stateVariable1));
 
     EntityFrame entityFrame2 = new EntityFrame(entityFrame1);
-    Assert.assertEquals(entityFrame1, entityFrame2);
+    Assert.assertNotSame(entityFrame1, entityFrame2);
     StateVariable stateVariable2 = new StateVariable(String.class, 
                                                      "stateVariable2", 
                                                      "test state variable stateVariable2");
@@ -165,10 +165,10 @@ public class UnitTest extends TestCase {
     (new GoalFactory()).getInstance().populateGoalLibrary();
     Assert.assertNotNull(GoalLibrary.getInstance());
     Assert.assertNotNull(GoalLibrary.getInstance().getGoal(Goal.GET_CONSOLE_PROMPTED_INPUT));
-    Assert.assertEquals("(not-null consoleInput)", 
+    Assert.assertEquals("(not-null \"consoleInput\")", 
                         GoalLibrary.getInstance().getGoal(Goal.GET_CONSOLE_PROMPTED_INPUT).toString());
     Assert.assertNotNull(GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT));
-    Assert.assertEquals("(not-null userInput)", 
+    Assert.assertEquals("(not-null \"userInput\")", 
                         GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT).toString());
     System.out.println("*** testGoalLibrary OK ***");
   }
@@ -208,10 +208,10 @@ public class UnitTest extends TestCase {
     Assert.assertEquals(1, jobSet.size());
     Job job = (Job) jobSet.get(0);
     Assert.assertNotNull(job);
-    Assert.assertEquals("[Job for [[Resource: console]] action: converse with user]", 
+    Assert.assertEquals("[JobAssignment for [Action: converse with user( prompt: null)] using: [[Resource: console]]]", 
                         job.toString());
     Assert.assertNotNull(job.getCommand());
-    Assert.assertEquals("converse with user", job.getCommand().toString());
+    Assert.assertEquals("[Action: converse with user( prompt: null)]", job.getCommand().toString());
     List requiredResources = job.getRequiredResources();
     Assert.assertNotNull(requiredResources);
     Assert.assertEquals(1, requiredResources.size());

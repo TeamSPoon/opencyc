@@ -71,7 +71,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    public static final int DEFAULT_VERBOSITY = 0;
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -339,7 +339,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
 
         Object [] response = {null, null};
         try {
-            cycAccess.traceOn();
+            //cycAccess.traceOn();
             response = cycAccess.getCycConnection().converse(apiRequest);
         }
         catch (Exception e) {
@@ -360,9 +360,8 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         else
             new RuntimeException("response[0] not Boolean " + response[0]);
         responseCycList.add(response[1]);
-        System.out.println("marshalling\n" + responseCycList.cyclify());
         try {
-            coAbsReplyAcl.setContentObject(Marshaller.marshall(responseCycList));
+            coAbsReplyAcl.setContentObject("\n" + Marshaller.marshall(responseCycList));
         }
         catch (IOException e) {
             Log.current.errorPrintln("Exception while marshalling " + responseCycList);
@@ -404,18 +403,12 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
             return agentRep;
         // create a Directory to use for lookups
         Directory directory = new Directory();
-        System.out.println("*** Looking up everything:");
         ServiceItem[] items = directory.lookup((net.jini.core.lookup.ServiceTemplate) null);
         for (int i = 0; i < items.length; i++) {
-            System.out.println();
-            System.out.println("Match " + (i + 1));
-            System.out.println("---------");
             ServiceItem si = items[i];
             Object service =  si.service;
-            System.out.println("Service (" + service.getClass() + ") = " + service);
             if (service instanceof AgentRep) {
                 agentRep = (AgentRep) service;
-                System.out.println("Agent name " + agentRep.getName());
                 if (agentName.equals(agentRep.getName())) {
                     agentRepCache.put(agentName, agentRep);
                     if (verbosity > 2)

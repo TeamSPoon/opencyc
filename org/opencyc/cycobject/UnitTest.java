@@ -266,6 +266,14 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycConstant4, (CycConstant) object);
             Assert.assertTrue(CycObjectFactory.unmarshall(cycConstantXMLString) ==
                               CycObjectFactory.unmarshall(cycConstantXMLString));
+            cycConstantXMLString =
+                "<constant>\n" +
+                "  <name>BiologicalTaxon</name>\n" +
+                "  <id>94</id>\n" +
+                "</constant>\n";
+            CycConstant cycConstant5 = (CycConstant) CycObjectFactory.unmarshall(cycConstantXMLString);
+            Assert.assertEquals("BiologicalTaxon", cycConstant5.getName());
+            Assert.assertEquals(new Integer(94), cycConstant5.getId());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -846,6 +854,21 @@ public class UnitTest extends TestCase {
             object = CycObjectFactory.unmarshall(cycListXMLString);
             Assert.assertTrue(object instanceof CycList);
             Assert.assertEquals(cycList48, (CycList) object);
+            cycListXMLString =
+                "\n<list>\n" +
+                "  <symbol>QUOTE</symbol>\n" +
+                "  <list>\n" +
+                "    <symbol>A</symbol>\n" +
+                "    <dotted-element>\n" +
+                "      <symbol>B</symbol>\n" +
+                "    </dotted-element>\n" +
+                "  </list>\n" +
+                "</list>\n";
+            object = CycObjectFactory.unmarshall(cycListXMLString);
+            Assert.assertTrue(object instanceof CycList);
+            CycList cycList49 = cycAccess.makeCycList("(QUOTE (A . B))");
+            Assert.assertEquals(cycList49, object);
+
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -947,5 +970,30 @@ public class UnitTest extends TestCase {
         }
 
         System.out.println("** testCycListVisitor OK **");
+    }
+    /**
+     * Tests the ByteArray class.
+     */
+    public void testByteArray() {
+        System.out.println("** testByteArray **");
+        byte[] bytes = {0, 1, 2, 3, 4, -128};
+        ByteArray byteArray1 = new ByteArray(bytes);
+        Assert.assertNotNull(byteArray1);
+        Assert.assertEquals(6, byteArray1.byteArrayValue().length);
+        Assert.assertEquals(0, byteArray1.byteArrayValue()[0]);
+        Assert.assertEquals(1, byteArray1.byteArrayValue()[1]);
+        Assert.assertEquals(2, byteArray1.byteArrayValue()[2]);
+        Assert.assertEquals(3, byteArray1.byteArrayValue()[3]);
+        Assert.assertEquals(4, byteArray1.byteArrayValue()[4]);
+        Assert.assertEquals(-128, byteArray1.byteArrayValue()[5]);
+        byte[] bytes2 = {0, 1, 2, 3, 4, -128};
+        ByteArray byteArray2 = new ByteArray(bytes2);
+        Assert.assertEquals(byteArray1, byteArray1);
+        Assert.assertEquals(byteArray1, byteArray2);
+        byte[] bytes3 = {0, -1, 2, 3, 4, -128};
+        ByteArray byteArray3 = new ByteArray(bytes3);
+        Assert.assertTrue(! byteArray1.equals(byteArray3));
+        Assert.assertEquals("[ByteArray len:6 0,1,2,3,4,-128]", byteArray1.toString());
+        System.out.println("** testByteArray OK**");
     }
 }

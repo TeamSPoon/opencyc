@@ -313,13 +313,14 @@ public class CoAbsCommunityAdapter
         String fromAgentName = "Unknown";
         if (agentRep != null)
             fromAgentName = agentRep.getName();
-        if (verbosity > 2)
-            Log.current.println("\n" + agentName + " received:\n" + message.toString() +
-                                "\n  ACL: " + message.getACL() +
-                                "\n  Time message received: " + time +
-                                "\n  Sender AgentRep: " + agentRep +
-                                "\n  From: " + fromAgentName);
-
+        if (verbosity > 2) {
+            Log.current.println("\n" + agentName + " received:\n" + message.toString());
+            if (verbosity > 3)
+                Log.current.println("  ACL: " + message.getACL() +
+                                    "\n  Time message received: " + time +
+                                    "\n  Sender AgentRep: " + agentRep +
+                                    "\n  From: " + fromAgentName);
+        }
         ACL acl = null;
         try {
             acl = new ACL(fixSenderReceiver(message.getRawText()));
@@ -376,18 +377,12 @@ public class CoAbsCommunityAdapter
             return agentRep;
         // create a Directory to use for lookups
         Directory directory = new Directory();
-        System.out.println("*** Looking up everything:");
         ServiceItem[] items = directory.lookup((net.jini.core.lookup.ServiceTemplate) null);
         for (int i = 0; i < items.length; i++) {
-            System.out.println();
-            System.out.println("Match " + (i + 1));
-            System.out.println("---------");
             ServiceItem si = items[i];
             Object service =  si.service;
-            System.out.println("Service (" + service.getClass() + ") = " + service);
             if (service instanceof AgentRep) {
                 agentRep = (AgentRep) service;
-                System.out.println("Agent name " + agentRep.getName());
                 if (agentName.equals(agentRep.getName())) {
                     agentRepCache.put(agentName, agentRep);
                     if (verbosity > 2)

@@ -150,7 +150,7 @@ public class RemoteCycConnection implements CycConnectionInterface {
                 apiRequest = CycAccess.sharedCycAccessInstance.makeCycList((String) message);
             else
                 apiRequest = (CycList) message;
-            apiRequestXml = apiRequest.toXMLString();
+            apiRequestXml = "\n" + apiRequest.toXMLString();
         }
         catch (Exception e) {
             Log.current.errorPrintln(e.getMessage());

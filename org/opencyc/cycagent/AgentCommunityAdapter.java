@@ -35,7 +35,7 @@ public interface AgentCommunityAdapter {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    public static final int DEFAULT_VERBOSITY = 0;
 
     /**
      * Sends an Agent Communication Language message.

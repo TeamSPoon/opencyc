@@ -556,27 +556,39 @@ public class CycObjectFactory {
      * @return the CycConstant
      */
     protected static CycConstant unmarshallCycConstant(Element cycConstantElement, Document document) {
+        CycConstant cycConstant = null;
         Guid guid = null;
         Element guidElement = cycConstantElement.getChild("guid");
-        if (guidElement != null)
+        if (guidElement != null) {
             guid = makeGuid(guidElement.getTextTrim());
-        CycConstant cycConstant = getCycConstantCacheByGuid(guid);
-        if (cycConstant != null)
-            return cycConstant;
-
+            cycConstant = getCycConstantCacheByGuid(guid);
+            if (cycConstant != null)
+                return cycConstant;
+        }
         String name = null;
         Element nameElement = cycConstantElement.getChild("name");
-        if (nameElement != null)
+        if (nameElement != null) {
             name = nameElement.getTextTrim();
+            cycConstant = getCycConstantCacheByName(name);
+            if (cycConstant != null)
+                return cycConstant;
+        }
         Integer id = null;
         Element idElement = cycConstantElement.getChild("id");
-        if (idElement != null)
+        if (idElement != null) {
             id = new Integer(idElement.getTextTrim());
+            cycConstant = getCycConstantCacheById(id);
+            if (cycConstant != null)
+                return cycConstant;
+        }
 
         cycConstant = new CycConstant(name, guid, id);
-        addCycConstantCacheByGuid(cycConstant);
-        addCycConstantCacheById(cycConstant);
-        addCycConstantCacheByName(cycConstant);
+        if (guid != null)
+            addCycConstantCacheByGuid(cycConstant);
+        if (id != null)
+            addCycConstantCacheById(cycConstant);
+        if (name != null)
+            addCycConstantCacheByName(cycConstant);
         return cycConstant;
     }
 
@@ -634,7 +646,7 @@ public class CycObjectFactory {
         for (int i = 0; i < elements.size(); i++) {
             Element element = (Element) elements.get(i);
             if (element.getName().equals("dotted-element"))
-                cycList.setDottedElement(element.getChildren().get(0));
+                cycList.setDottedElement(unmarshallElement((Element) element.getChildren().get(0), document));
             else
                 cycList.add(unmarshallElement(element, document));
         }

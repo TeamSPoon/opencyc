@@ -32,6 +32,9 @@ public class Marshaller {
 
     /**
      * Marshalls the given object into its CYC-ML XML representation.
+     *
+     * @param object the object for marshalling
+     * @return the CYC-ML XML representation string
      */
     public static String marshall(Object object) throws IOException {
         if (object instanceof Guid)
@@ -55,4 +58,5 @@ public class Marshaller {
         else
             throw new IOException("Invalid object for marshalling " + object);
     }
+
 }

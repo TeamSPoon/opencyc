@@ -73,19 +73,19 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
-        //testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
-        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
+        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
 
@@ -227,7 +227,7 @@ public class UnitTest extends TestCase {
                                           CycAccess.PERSISTENT_CONNECTION);
             else if (connectionMode == REMOTE_CYC_CONNECTION) {
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
-                System.out.println("RemoteCycConnection created");
+                //System.out.println("RemoteCycConnection created");
             }
             else
                 Assert.fail("Invalid connection mode " + connectionMode);

@@ -40,7 +40,7 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class SensoryPerception extends NodeComponent {
+public class SensoryPerception extends NodeComponent implements Sensor {
   
   //// Constructors
   
@@ -207,6 +207,26 @@ public class SensoryPerception extends NodeComponent {
     this.hypothesisFormer = hypothesisFormer;
   }
 
+  /** 
+   * Gets the name of the virtual sensor.
+   *
+   * @return the name of the virtual sensor
+   */
+  public String getName() {
+    return getNode().getName();
+  }
+  
+  /**
+   * Gets the resources required by this virtual sensor.
+   *
+   * @return the resources required by this virtual sensor
+   */
+  public ArrayList getResources() {
+    ArrayList resources = new ArrayList();
+    //TODO
+    return resources;
+  }
+  
   //// Protected Area
     
   /**

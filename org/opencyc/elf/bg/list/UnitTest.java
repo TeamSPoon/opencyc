@@ -76,20 +76,35 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(theEmptyList.evaluate(null, state));
     Assert.assertEquals(new ArrayList(), theEmptyList.evaluate(null, state));
     OperatorExpression operatorExpression1 = new OperatorExpression(theEmptyList);
+    Assert.assertEquals("(the-empty-list)", operatorExpression1.toString());
     Assert.assertEquals(new ArrayList(), operatorExpression1.evaluate(state));
+    
+    // TheList
+    new TheList();
+    Operator theList = TheList.getInstance();
+    operatorExpression1 = new OperatorExpression(theList, "xyz");
+    Assert.assertTrue(operatorExpression1.evaluate(state) instanceof List);
+    Assert.assertEquals(1, ((List) operatorExpression1.evaluate(state)).size());
+    List list = new ArrayList();
+    list.add("xyz");
+    Assert.assertEquals(list, operatorExpression1.evaluate(state));
+    operatorExpression1 = new OperatorExpression(theList, "xyz", new Integer(0), new Float(1.0));
+    Assert.assertEquals("(the-list xyz 0 1.0)", operatorExpression1.toString());
+    Assert.assertEquals(3, ((List) operatorExpression1.evaluate(state)).size());
     
     // LengthOfList
     new LengthOfList();
     Operator lengthOfList = LengthOfList.getInstance();
     operatorExpression1 = new OperatorExpression(lengthOfList, new ArrayList());
     Assert.assertEquals(new Integer(0), operatorExpression1.evaluate(state));
-    List list = new ArrayList();
+    list = new ArrayList();
     list.add("abc");
     list.add(new Double(100.0d));
     operatorExpression1 = new OperatorExpression(lengthOfList, list);
     Assert.assertEquals(new Integer(2), operatorExpression1.evaluate(state));
     StateVariable testStateVariable1 = new StateVariable(List.class, "test-state-variable1", "test state variable 1");
     operatorExpression1 = new OperatorExpression(lengthOfList, testStateVariable1);
+    Assert.assertEquals("(length-of-list test-state-variable1)", operatorExpression1.toString());
     state.setStateValue(testStateVariable1, new ArrayList());
     Assert.assertEquals(new Integer(0), operatorExpression1.evaluate(state));
     state.setStateValue(testStateVariable1, list);
@@ -105,6 +120,7 @@ public class UnitTest extends TestCase {
     list1.add(new Double(100.0d));
     operatorExpression1 = new OperatorExpression(joinLists, list1, new ArrayList());
     Assert.assertEquals(list1, operatorExpression1.evaluate(state));
+    Assert.assertEquals("(join-lists [abc, 100.0] [])", operatorExpression1.toString());
     operatorExpression1 = new OperatorExpression(joinLists, new ArrayList(), list1);
     Assert.assertEquals(list1, operatorExpression1.evaluate(state));
     List list2 = new ArrayList();
@@ -129,6 +145,7 @@ public class UnitTest extends TestCase {
     state.setStateValue(testStateVariable1, list2);
     operatorExpression1 = new OperatorExpression(firstInList, testStateVariable1);
     Assert.assertEquals(new Integer(0), operatorExpression1.evaluate(state));
+    Assert.assertEquals("(first-in-list test-state-variable1)", operatorExpression1.toString());
     
     // RestOfList
     new RestOfList();
@@ -137,14 +154,18 @@ public class UnitTest extends TestCase {
     List list3 = new ArrayList();
     list3.add(new Double(100.0d));
     Assert.assertEquals(list3, operatorExpression1.evaluate(state));
-    /*
+    Assert.assertEquals("(rest-of-list [abc, 100.0])", operatorExpression1.toString());
+    
+    // (join-lists (the-list (first-in-list [abc, 100.0])) (rest-of-list [abc, 100.0]))
     operatorExpression1 = new OperatorExpression(firstInList, list1);
     OperatorExpression operatorExpression2 = new OperatorExpression(restOfList, list1);
     OperatorExpression operatorExpression3 = 
-      new OperatorExpression(joinLists, operatorExpression1, operatorExpression2);
-    Assert.assertEquals(list1, operatorExpression3.evaluate(state));
-    */
-    
+      new OperatorExpression(theList, operatorExpression1);
+    OperatorExpression operatorExpression4 = 
+      new OperatorExpression(joinLists, operatorExpression3, operatorExpression2);
+    Assert.assertEquals("(join-lists (the-list (first-in-list [abc, 100.0])) (rest-of-list [abc, 100.0]))", 
+                        operatorExpression4.toString());
+    Assert.assertEquals(list1, operatorExpression4.evaluate(state));
     
     System.out.println("*** testOperatorExpression OK ***");
   }

@@ -59,7 +59,14 @@ public class FirstInList extends Operator {
   public String toString(List arguments) {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("(first-in-list ");
-    stringBuffer.append(arguments.get(0).toString());
+    Object obj = arguments.get(0);
+    if (obj instanceof String) {
+      stringBuffer.append('"');
+      stringBuffer.append(obj.toString());
+      stringBuffer.append('"');
+    }
+    else
+      stringBuffer.append(obj.toString());
     stringBuffer.append(")");
     return stringBuffer.toString();
   }

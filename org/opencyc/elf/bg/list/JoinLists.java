@@ -1,9 +1,6 @@
 package org.opencyc.elf.bg.list;
 
-
 //// Internal Imports
-import org.opencyc.elf.BehaviorEngineException;
-
 import org.opencyc.elf.bg.expression.Operator;
 
 import org.opencyc.elf.wm.state.State;
@@ -55,7 +52,7 @@ public class JoinLists extends Operator {
     List result = new ArrayList();
     Iterator iter = arguments.iterator();
     while (iter.hasNext()) {
-      List list = (List) iter.next();
+      List list = (List) evaluateArgument(iter.next(), state);
       result.addAll(list);
     }
     return result;

@@ -49,6 +49,8 @@ public class LengthOfList extends Operator {
    * @param state the given state
    */
   public Object evaluate(List arguments, State state) {
+    if (arguments.size() != 1)
+      throw new BehaviorEngineException("Only one argument accepted " + arguments);
     List list = (List) evaluateArgument(arguments.get(0), state);
     return new Integer(list.size());
   }

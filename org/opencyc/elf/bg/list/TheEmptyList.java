@@ -62,7 +62,6 @@ public class TheEmptyList extends Operator {
     return "(the-empty-list)";
   }
   
-  
   //// Public Area
   
   //// Protected Area

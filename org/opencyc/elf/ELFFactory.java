@@ -93,7 +93,7 @@ public class ELFFactory {
    */
   protected void assembleNode () {
     jobAssignerChannel = new BoundedBuffer(CHANNEL_CAPACITY);
-    sensoryProcessingChannel = new BoundedBuffer(CHANNEL_CAPACITY);
+    sensoryPerceptionChannel = new BoundedBuffer(CHANNEL_CAPACITY);
     makeBehaviorGenerationShell();
     node.setBehaviorGeneration(behaviorGeneration);
     makeWorldModelShell();
@@ -163,7 +163,7 @@ public class ELFFactory {
    * Makes a sensory perception shell.
    */
   protected void makeSensoryPerceptionShell () {
-    sensoryPerception = new SensoryPerception(sensoryProcessingChannel, null);
+    sensoryPerception = new SensoryPerception(sensoryPerceptionChannel, null);
     sensoryPerception.setNode(node);
     estimator = new Estimator();
     sensoryPerception.setEstimator(estimator);
@@ -308,13 +308,13 @@ public class ELFFactory {
   /**
    * the takable channel from which messages are input
    */
-  protected Channel sensoryProcessingChannel;
+  protected Channel sensoryPerceptionChannel;
 
   /**
    * the puttable channel to which sensory processing messages are output for the next
    * higher level
    */
-  protected Puttable nextHigherLevelSensoryProcessingChannel;
+  protected Puttable nextHigherLevelSensoryPerceptionChannel;
   
   //// Main
   

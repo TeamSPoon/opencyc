@@ -17,7 +17,9 @@ import org.opencyc.elf.message.KBObjectResponseMsg;
 //// External Imports
 import java.util.Hashtable;
 
+import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
+import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
  * <P>Knowledge Base contains the known entities and their attributes.
@@ -59,16 +61,18 @@ public class KnowledgeBase extends NodeComponent {
    */
   public KnowledgeBase(Takable knowledgeBaseChannel) {
     consumer = new Consumer(knowledgeBaseChannel, this);
+    executor = new ThreadedExecutor();
+    try {
+      executor.execute(consumer);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
   
   //// Public Area
-  
-  /**
-   * Provides the method to be executed when the thread is started.
-   */  
-  public void run() {
-  }
-  
+    
   //// Protected Area
   
   /**
@@ -96,7 +100,6 @@ public class KnowledgeBase extends NodeComponent {
                         NodeComponent nodeComponent) { 
       this.knowledgeBaseChannel = knowledgeBaseChannel;
       this.nodeComponent = nodeComponent;
-      
     }
 
     /**
@@ -160,6 +163,11 @@ public class KnowledgeBase extends NodeComponent {
    * the thread which processes the input channel of messages
    */
   Consumer consumer;
+  
+  /**
+   * the executor of the consumer thread
+   */
+  Executor executor;
   
   //// Main
   

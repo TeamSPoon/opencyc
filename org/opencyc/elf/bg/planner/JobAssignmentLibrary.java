@@ -40,6 +40,7 @@ public class JobAssignmentLibrary {
   
   /** Creates a new instance of JobLibrary. */
   public JobAssignmentLibrary() {
+    jobAssignmentLibrary = this;
   }
   
   //// Public Area
@@ -50,7 +51,7 @@ public class JobAssignmentLibrary {
    *
    * @return the singleton job assignment library instance
    */
-  public JobAssignmentLibrary getJobAssignmentLibrary () {
+  public JobAssignmentLibrary getInstance () {
     return jobAssignmentLibrary;
   }
 
@@ -62,7 +63,7 @@ public class JobAssignmentLibrary {
     JobAssignment jobAssignment = new JobAssignment();
     jobAssignment.setActionName(Action.CONVERSE_WITH_USER);
     ArrayList requiredResources = new ArrayList();
-    requiredResources.add(ResourcePool.getResource(Resource.CONSOLE));
+    requiredResources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     jobAssignment.setRequiredResources(requiredResources);
     ActionFactory actionFactory = new ActionFactory();
     Action action = actionFactory.makeConsolePromptedInput();

@@ -1,20 +1,21 @@
 package org.opencyc.elf;
 
 //// Internal Imports
-import org.opencyc.elf.bg.planner.JobAssignmentLibrary;
-import org.opencyc.elf.bg.planner.ResourcePool;
 import org.opencyc.elf.bg.planner.ScheduleLibrary;
 
 import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
 
+import org.opencyc.elf.wm.JobAssignmentLibrary;
+import org.opencyc.elf.wm.ResourcePool;
+
 //// External Imports
 import java.util.logging.Logger;
 
 /**
  * BehaviorEngine provides the main method for the behavior engine that
- * consists of a hierarchy of Elementary Loop Functioning (ELF) nodes.<br>
+ * consists of a hierarchy of Elementary Loop Functioning (ELF) nodes.
  * 
  * @version $Id$
  * @author Stephen L. Reed  

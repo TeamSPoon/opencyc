@@ -239,6 +239,15 @@ public class Interpreter {
         return currentEvent;
     }
 
+    /**
+     * Returns the Tree at the given active state.
+     *
+     * @param state the given active state
+     * @return the sub tree of active states rooted at the given active state
+     */
+    public DefaultMutableTreeNode getActiveSubstates (State state) {
+        //DefaultMutableTreeNode substateTreeNode
+    }
 
 
 

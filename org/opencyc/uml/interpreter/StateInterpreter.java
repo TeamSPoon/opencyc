@@ -29,15 +29,37 @@ import org.opencyc.uml.statemachine.*;
 
 public class StateInterpreter extends Thread {
 
+
+    /**
+     * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
+     * the parent state machine interpreter
+     */
+    protected Interpreter interpreter;
+
     /**
      * the interpreted active state
      */
     protected State state;
 
     /**
-     * Constructs a new StateInterpreter object.
+     * Constructs a new StateInterpreter object given the
+     * parent state machine interpreter.
+     *
+     * @param interpreter the parent state machine interpreter
      */
-    public StateInterpreter() {
+    public StateInterpreter(Interpreter interpreter) {
+        this.interpreter = interpreter;
     }
 
     /**
@@ -67,7 +89,18 @@ public class StateInterpreter extends Thread {
      * @param transition the transistion
      */
     public void interpretTransitionExit (Transition transition) {
+        if (isCompositeState()) {
+            exitActiveSubstates();
+        }
     }
+
+    /**
+     * Exits the active substates of the interpreted composite state.
+     */
+    protected void exitActiveSubstates() {
+        //interpreter
+    }
+
 
     /**
      * Gets the interpreted active state
@@ -94,6 +127,27 @@ public class StateInterpreter extends Thread {
      */
     public boolean isThreadRunning () {
         return isThreadRunning;
+    }
+
+    /**
+     * Gets whether the interpreted state is a composite
+     * state.
+     *
+     * @return true if the interpreted state is a composite
+     * state, otherwise returns false
+     */
+    public boolean isCompositeState () {
+        return state instanceof CompositeState;
+    }
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 
 }

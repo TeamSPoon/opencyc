@@ -57,8 +57,8 @@ public class ImportSonatDaml extends ImportDaml {
         String localHostName = InetAddress.getLocalHost().getHostName();
         Log.current.println("Connecting to Cyc server from " + localHostName);
         if (localHostName.equals("crapgame.cyc.com")) {
-            cycAccess = new CycAccess("crapgame.cyc.com",
-                                      3620,
+            cycAccess = new CycAccess("localhost",
+                                      3600,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);
             //cycAccess.traceNamesOn();

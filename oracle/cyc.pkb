@@ -248,6 +248,14 @@ AS LANGUAGE JAVA
 	NAME 'CycJsprocs.getKnownConstantByName( java.lang.String )
 		return java.lang.String';
 
+/***************************************************************************
+ *
+ * Kill a constant.
+ *
+ ***************************************************************************/
+PROCEDURE kill( constant_in IN VARCHAR2 )
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.kill( java.lang.String )';
 
 
 END cyc;

@@ -315,7 +315,7 @@ public class CycJsprocs {
             cycAccess.converseVoid( command );
         }
         catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+  //          throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -408,8 +408,22 @@ public class CycJsprocs {
         }
     }
 
-    
-
+    /**
+     * Kills a Cyc constant.  If CYCCONSTANT is a microtheory, then
+     * all the contained assertions are deleted from the KB, the Cyc Truth Maintenance System
+     * (TML) will automatically delete any derived assertions whose sole support is the killed
+     * term(s).
+     *
+     * @param cycConstant the constant term to be removed from the KB
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public static synchronized void kill (String name)
+        throws IOException, UnknownHostException, CycApiException {
+        CycConstant cycConstant = cycAccess.getKnownConstantByName (name);
+        cycAccess.kill(cycConstant);
+    }
 
     /**
      * Converses with Cyc to perform an API command whose result is returned is an list

@@ -90,6 +90,7 @@ RETURN cyclist_type;
 FUNCTION getKnownConstantByName( name_in IN VARCHAR2 )
 RETURN VARCHAR2;
 
+PROCEDURE kill( constant_in IN VARCHAR2 );
 
 END cyc;
 /

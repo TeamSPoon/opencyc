@@ -50,6 +50,15 @@ public class Multiplicity  {
     }
 
     /**
+     * Constructs a new Multiplicity object
+     */
+    public Multiplicity(int lower, long upper, boolean isUnlimited) {
+        this.lower = lower;
+        this.upper = upper;
+        this.isUnlimited = isUnlimited;
+    }
+
+    /**
      * Gets the non-negative lower limit of multiplicity
      *
      * @return the non-negative lower limit of multiplicity

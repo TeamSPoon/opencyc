@@ -53,7 +53,7 @@ public class Parameter extends ModelElement {
     /**
      * the type of this parameter
      */
-    protected Class type;
+    protected java.lang.Class type;
 
     /**
      * Constructs a new Parameter object.
@@ -120,7 +120,7 @@ public class Parameter extends ModelElement {
      *
      * @return the type of this parameter
      */
-    public Class getType () {
+    public java.lang.Class getType () {
         return type;
     }
 
@@ -129,7 +129,7 @@ public class Parameter extends ModelElement {
      *
      * @param type the type of this parameter
      */
-    public void setType (Class type) {
+    public void setType (java.lang.Class type) {
         this.type = type;
     }
 

@@ -5,6 +5,8 @@ import java.util.*;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.uml.core.*;
+import org.opencyc.uml.commonbehavior.*;
+import org.opencyc.uml.datatypes.Multiplicity;
 import org.opencyc.uml.action.*;
 import org.opencyc.uml.statemachine.*;
 import org.opencyc.util.*;
@@ -240,23 +242,79 @@ public class CycExtractor {
     }
 
     /**
-     * Extracts the context classifier from Cyc, which has the same name and
-     * comment as the state machine.
+     * Extracts the context classifier from Cyc.
      */
     protected void extractContextClassifier ()
         throws IOException, CycApiException, ClassNotFoundException {
-        String commentString = cycAccess.getComment(stateMachineTerm);
-        stateMachineFactory.associateClassifierToStateMachine(stateMachineName,
-                                                              commentString);
-        CycConstant classifier =
+        CycConstant classifierTerm =
                 (CycConstant) cycAccess.getArg2("umlContext",
                                                 stateMachineTerm,
                                                 stateMachineDefinitionMtTerm);
+        if (classifierTerm == null)
+            throw new CycApiException("Expected umlContext not found for \n  " +
+                                      stateMachineName + " in " +
+                                      stateMachineDefinitionMtTerm.cyclify());
+        String commentString = cycAccess.getComment(classifierTerm);
+        if (commentString == null)
+            throw new CycApiException("Expected comment not found for \n  " +
+                                      classifierTerm.cyclify() + " in " +
+                                      stateMachineDefinitionMtTerm.cyclify());
+        stateMachineFactory.associateClassifierToStateMachine(classifierTerm.toString(),
+                                                              commentString);
         // get the state variables and make them into attributes
-
+        CycList attributeTerms =
+            cycAccess.getArg2s("umlFeature",
+                               classifierTerm,
+                               stateMachineDefinitionMtTerm);
+        Iterator iter = attributeTerms.iterator();
+        while (iter.hasNext()) {
+            CycConstant attributeTerm = (CycConstant) iter.next();
+            commentString = cycAccess.getComment(attributeTerm);
+            CycConstant typeTerm =
+                    (CycConstant) cycAccess.getArg2("umlType",
+                                                    attributeTerm,
+                                                    stateMachineDefinitionMtTerm);
+            if (typeTerm == null)
+                throw new CycApiException("Expected umlType not found for \n  " +
+                                          attributeTerm.cyclify() + " in " +
+                                          stateMachineDefinitionMtTerm.cyclify());
+            Object type = translateType(typeTerm);
+            Expression initialValue = null;
+            CycConstant initialExpressionTerm =
+                    (CycConstant) cycAccess.getArg2("umlInitialExpression",
+                                                    attributeTerm,
+                                                    stateMachineDefinitionMtTerm);
+            if (initialExpressionTerm != null) {
+                initialValue = new Expression();
+                String language =
+                        (String) cycAccess.getArg2("umlLanguage",
+                                                    initialExpressionTerm,
+                                                    stateMachineDefinitionMtTerm);
+                if (language == null)
+                    throw new CycApiException("Expected umlLanguage not found for \n  " +
+                                              initialExpressionTerm.cyclify() + " in " +
+                                              stateMachineDefinitionMtTerm.cyclify());
+                initialValue.setLanguage(language);
+                CycList body =
+                        (CycList) cycAccess.getArg2("umlBody",
+                                                    initialExpressionTerm,
+                                                    stateMachineDefinitionMtTerm);
+                if (body == null)
+                    throw new CycApiException("Expected umlBody not found for \n  " +
+                                              initialExpressionTerm.cyclify() + " in " +
+                                              stateMachineDefinitionMtTerm.cyclify());
+                initialValue.setBody(body);
+            }
+            stateMachineFactory.addStateVariableToClassifier(attributeTerm.toString(),
+                                                             commentString,
+                                                             StructuralFeature.SK_INSTANCE,
+                                                             type,
+                                                             StructuralFeature.CK_CHANGEABLE,
+                                                             new Multiplicity(1, 1, false),
+                                                             StructuralFeature.OK_UNORDERED,
+                                                             initialValue);
+        }
     }
-
-
 
 
     /**

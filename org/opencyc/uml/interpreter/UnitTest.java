@@ -1,18 +1,20 @@
-package org.opencyc.uml.interpreter;
+package  org.opencyc.uml.interpreter;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import junit.framework.*;
-import koala.dynamicjava.interpreter.*;
-import koala.dynamicjava.parser.wrapper.*;
-import org.opencyc.api.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.util.*;
-import org.opencyc.uml.core.*;
-import org.opencyc.uml.action.*;
-import org.opencyc.uml.commonbehavior.*;
-import org.opencyc.uml.statemachine.*;
+import  java.util.*;
+import  java.net.*;
+import  java.io.*;
+import  junit.framework.*;
+import  koala.dynamicjava.interpreter.*;
+import  koala.dynamicjava.parser.wrapper.*;
+import  org.opencyc.api.*;
+import  org.opencyc.cycobject.*;
+import  org.opencyc.util.*;
+import  org.opencyc.uml.core.*;
+import  org.opencyc.uml.action.*;
+import  org.opencyc.uml.commonbehavior.*;
+import  org.opencyc.uml.datatypes.Multiplicity;
+import  org.opencyc.uml.statemachine.*;
+
 
 /**
  * Provides a unit test suite for the <tt>org.opencyc.uml.interpreter</tt> package<p>
@@ -38,13 +40,12 @@ import org.opencyc.uml.statemachine.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 public class UnitTest extends TestCase {
 
     /**
      * Creates a <tt>UnitTest</tt> object with the given name.
      */
-    public UnitTest(String name) {
+    public UnitTest (String name) {
         super(name);
     }
 
@@ -53,7 +54,7 @@ public class UnitTest extends TestCase {
      *
      * @return the test suite
      */
-    public static Test suite() {
+    public static Test suite () {
         TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testJavaInterpreter"));
         testSuite.addTest(new UnitTest("testExpressionEvaluation"));
@@ -61,13 +62,13 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testProcedureInterpretation"));
         testSuite.addTest(new UnitTest("testSimpleStateMachine"));
         testSuite.addTest(new UnitTest("testCycExtractor"));
-        return testSuite;
+        return  testSuite;
     }
 
     /**
      * Main method in case tracing is prefered over running JUnit.
      */
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         junit.textui.TestRunner.run(suite());
     }
 
@@ -84,23 +85,22 @@ public class UnitTest extends TestCase {
         Object result = interpreter.interpret(stringReader, "statement");
         Assert.assertTrue(result instanceof Integer);
         Assert.assertEquals(new Integer(2), result);
-
         StringBuffer statements = new StringBuffer();
         statements.append("String testString;\n");
         statements.append("testString = \"abcdef\";\n");
         statements.append("testString.substring(3);\n");
-        result = interpreter.interpret(new StringReader(statements.toString()), "statements");
+        result = interpreter.interpret(new StringReader(statements.toString()),
+                "statements");
         Assert.assertTrue(result instanceof String);
         Assert.assertEquals("def", result);
-
         statements = new StringBuffer();
         statements.append("String testString2;\n");
         statements.append("testString2 = testString + \"1234\";\n");
         statements.append("testString2.startsWith(\"abc\");\n");
-        result = interpreter.interpret(new StringReader(statements.toString()), "statements");
+        result = interpreter.interpret(new StringReader(statements.toString()),
+                "statements");
         Assert.assertTrue(result instanceof Boolean);
         Assert.assertEquals(Boolean.TRUE, result);
-
         System.out.println("\n**** testJavaInterpreter OK ****");
     }
 
@@ -109,23 +109,18 @@ public class UnitTest extends TestCase {
      */
     public void testExpressionEvaluation () {
         System.out.println("\n**** testExpressionEvaluation ****");
-
         try {
             String localHostName = InetAddress.getLocalHost().getHostName();
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
-                cycAccess = new CycAccess("localhost",
-                                          3620,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3620, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 //cycAccess.traceNamesOn();
                 cycAccess.setKePurpose("DAMLProject");
             }
             else if (localHostName.equals("thinker")) {
-                cycAccess = new CycAccess("localhost",
-                                          3600,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3600, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 cycAccess.setKePurpose("OpenCyc");
             }
             else {
@@ -133,61 +128,44 @@ public class UnitTest extends TestCase {
                 cycAccess.setKePurpose("OpenCyc");
             }
             cycAccess.setCyclist(cycAccess.getKnownConstantByName("Cyc"));
-            CycFort stateMt =
-                cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
-
+            CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
             cycAccess.unassertMtContentsWithoutTranscript(stateMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
-
-            ExpressionEvaluator expressionEvaluator =
-                new ExpressionEvaluator(cycAccess,
-                                        ExpressionEvaluator.QUIET_VERBOSITY);
-
+            ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(cycAccess,
+                    ExpressionEvaluator.QUIET_VERBOSITY);
             Expression expression = new Expression();
-            String expressionText =
-               "(#$ProgramAssignmentFn #$TestStateMachine-X 0)";
+            String expressionText = "(#$ProgramAssignmentFn #$TestStateMachine-X 0)";
             expression.setBody(cycAccess.makeCycList(expressionText));
             expressionEvaluator.evaluate(expression, stateMt);
-            String queryText =
-                "(#$softwareParameterValue #$TestStateMachine-X 0)";
+            String queryText = "(#$softwareParameterValue #$TestStateMachine-X 0)";
             CycList query = cycAccess.makeCycList(queryText);
             Assert.assertTrue(cycAccess.isQueryTrue(query, stateMt));
             Assert.assertEquals(1, cycAccess.getAllAssertionsInMt(stateMt).size());
-
-            queryText =
-                    "(#$evaluate ?X (#$PlusFn 1 2))";
+            queryText = "(#$evaluate ?X (#$PlusFn 1 2))";
             query = cycAccess.makeCycList(queryText);
             CycVariable variable = CycObjectFactory.makeCycVariable("?x");
             Object answer = cycAccess.askWithVariable(query, variable, stateMt);
             Assert.assertTrue(answer instanceof CycList);
-            Assert.assertEquals(1, ((CycList) answer).size());
-            answer = ((CycList) answer).first();
+            Assert.assertEquals(1, ((CycList)answer).size());
+            answer = ((CycList)answer).first();
             Assert.assertTrue(answer instanceof Integer);
-            Assert.assertEquals(3, ((Integer) answer).intValue());
-
-
-            queryText =
-                    "(#$evaluate ?X (#$GetParameterValueFn #$TestStateMachine-X))";
+            Assert.assertEquals(3, ((Integer)answer).intValue());
+            queryText = "(#$evaluate ?X (#$GetParameterValueFn #$TestStateMachine-X))";
             query = cycAccess.makeCycList(queryText);
             answer = cycAccess.askWithVariable(query, variable, stateMt);
             Assert.assertTrue(answer instanceof CycList);
-            Assert.assertEquals(1, ((CycList) answer).size());
-            answer = ((CycList) answer).first();
+            Assert.assertEquals(1, ((CycList)answer).size());
+            answer = ((CycList)answer).first();
             Assert.assertTrue(answer instanceof Integer);
-            Assert.assertEquals(0, ((Integer) answer).intValue());
-
+            Assert.assertEquals(0, ((Integer)answer).intValue());
             cycAccess.unassertMtContentsWithoutTranscript(stateMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
-
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
         }
-
         System.out.println("\n**** testExpressionEvaluation ****");
     }
-
 
     /**
      * Tests creation and destruction of evaluation context frames.
@@ -195,60 +173,55 @@ public class UnitTest extends TestCase {
     public void testContextFrames () {
         System.out.println("\n**** testContextFrames ****");
         Log.makeLog("unit-test.log");
-
         try {
             String localHostName = InetAddress.getLocalHost().getHostName();
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
-                cycAccess = new CycAccess("localhost",
-                                          3620,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3620, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 //cycAccess.traceNamesOn();
             }
             else if (localHostName.equals("thinker")) {
-                cycAccess = new CycAccess("localhost",
-                                          3600,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3600, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
             }
             else
                 cycAccess = new CycAccess();
-
-            ContextStackPool contextStackPool =
-                new ContextStackPool(cycAccess,
-                                     cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt"),
-                                     ContextStackPool.QUIET_VERBOSITY);
+            ContextStackPool contextStackPool = new ContextStackPool(cycAccess,
+                    cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt"),
+                    ContextStackPool.QUIET_VERBOSITY);
             Assert.assertEquals(ContextStackPool.DEFAULT_CONTEXT_FRAMES_COUNT, contextStackPool.contextFrames.size());
-
             CycConstant definitionMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
-            CycConstant contextFrame1 = contextStackPool.allocateContextFrame(null, definitionMt);
-            CycConstant contextFrame2 = contextStackPool.allocateContextFrame(contextFrame1, definitionMt);
-            CycConstant contextFrame3 = contextStackPool.allocateContextFrame(contextFrame2, definitionMt);
-            CycConstant contextFrame4 = contextStackPool.allocateContextFrame(contextFrame3, definitionMt);
-            CycConstant contextFrame5 = contextStackPool.allocateContextFrame(contextFrame4, definitionMt);
-            CycConstant contextFrame6 = contextStackPool.allocateContextFrame(contextFrame5, definitionMt);
-            CycConstant contextFrame7 = contextStackPool.allocateContextFrame(contextFrame6, definitionMt);
-            CycConstant contextFrame8 = contextStackPool.allocateContextFrame(contextFrame7, definitionMt);
-            CycConstant contextFrame9 = contextStackPool.allocateContextFrame(contextFrame8, definitionMt);
-            CycConstant contextFrame10 = contextStackPool.allocateContextFrame(contextFrame9, definitionMt);
-
-            Assert.assertEquals(contextFrame9,
-                                contextStackPool.getParentContextFrame(contextFrame10));
-
+            CycConstant contextFrame1 = contextStackPool.allocateContextFrame(null,
+                    definitionMt);
+            CycConstant contextFrame2 = contextStackPool.allocateContextFrame(contextFrame1,
+                    definitionMt);
+            CycConstant contextFrame3 = contextStackPool.allocateContextFrame(contextFrame2,
+                    definitionMt);
+            CycConstant contextFrame4 = contextStackPool.allocateContextFrame(contextFrame3,
+                    definitionMt);
+            CycConstant contextFrame5 = contextStackPool.allocateContextFrame(contextFrame4,
+                    definitionMt);
+            CycConstant contextFrame6 = contextStackPool.allocateContextFrame(contextFrame5,
+                    definitionMt);
+            CycConstant contextFrame7 = contextStackPool.allocateContextFrame(contextFrame6,
+                    definitionMt);
+            CycConstant contextFrame8 = contextStackPool.allocateContextFrame(contextFrame7,
+                    definitionMt);
+            CycConstant contextFrame9 = contextStackPool.allocateContextFrame(contextFrame8,
+                    definitionMt);
+            CycConstant contextFrame10 = contextStackPool.allocateContextFrame(contextFrame9,
+                    definitionMt);
+            Assert.assertEquals(contextFrame9, contextStackPool.getParentContextFrame(contextFrame10));
             contextStackPool.deallocateContextFrame(contextFrame10);
-
-            Assert.assertEquals(contextFrame10, contextStackPool.allocateContextFrame(contextFrame9, definitionMt));
-
-
+            Assert.assertEquals(contextFrame10, contextStackPool.allocateContextFrame(contextFrame9,
+                    definitionMt));
             contextStackPool.destroyContextStack();
             Assert.assertNull(contextStackPool.contextFrames);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
         }
-
         System.out.println("\n**** testContextFrames ****");
     }
 
@@ -257,23 +230,18 @@ public class UnitTest extends TestCase {
      */
     public void testProcedureInterpretation () {
         System.out.println("\n**** testProcedureInterpretation ****");
-
         try {
             String localHostName = InetAddress.getLocalHost().getHostName();
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
-                cycAccess = new CycAccess("localhost",
-                                          3620,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3620, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 //cycAccess.traceNamesOn();
                 cycAccess.setKePurpose("DAMLProject");
             }
             else if (localHostName.equals("thinker")) {
-                cycAccess = new CycAccess("localhost",
-                                          3600,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3600, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 cycAccess.setKePurpose("OpenCyc");
             }
             else {
@@ -283,37 +251,27 @@ public class UnitTest extends TestCase {
             //cycAccess.traceNamesOn();
             cycAccess.setCyclist(cycAccess.getKnownConstantByName("Cyc"));
             CycFort definitionMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
-            ContextStackPool contextStackPool =
-                new ContextStackPool(cycAccess,
-                                     cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt"),
-                                     ContextStackPool.QUIET_VERBOSITY);
-
+            ContextStackPool contextStackPool = new ContextStackPool(cycAccess,
+                    cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt"),
+                    ContextStackPool.QUIET_VERBOSITY);
             CycConstant stateMt = contextStackPool.allocateContextFrame(null, definitionMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
-
-            ProcedureInterpreter procedureInterpreter =
-                new ProcedureInterpreter(cycAccess,
-                                         definitionMt,
-                                         contextStackPool,
-                                         Interpreter.QUIET_VERBOSITY);
+            ProcedureInterpreter procedureInterpreter = new ProcedureInterpreter(cycAccess,
+                    definitionMt, contextStackPool, Interpreter.QUIET_VERBOSITY);
             Procedure initializeProcedure = new Procedure();
             initializeProcedure.setName("UMLProcedure-InitializeNumberToZero");
-            Object procedureBody =
-                cycAccess.getArg2("umlBody",
-                                  "UMLProcedure-InitializeNumberToZero",
-                                  "UMLProcedureDefinition-InitializeNumberToZeroMt");
+            Object procedureBody = cycAccess.getArg2("umlBody", "UMLProcedure-InitializeNumberToZero",
+                    "UMLProcedureDefinition-InitializeNumberToZeroMt");
             initializeProcedure.setBody(procedureBody);
             Transition transition1 = new Transition();
             transition1.setName("TestStateMachine-Transition1");
             transition1.setEffect(initializeProcedure);
             procedureInterpreter.interpretTransitionProcedure(transition1, stateMt);
             contextStackPool.destroyContextStack();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
         }
-
         System.out.println("\n**** testProcedureInterpretation ****");
     }
 
@@ -322,24 +280,18 @@ public class UnitTest extends TestCase {
      */
     public void testSimpleStateMachine () {
         System.out.println("\n**** testSimpleStateMachine ****");
-
-
         try {
             String localHostName = InetAddress.getLocalHost().getHostName();
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
-                cycAccess = new CycAccess("localhost",
-                                          3620,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3620, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 //cycAccess.traceNamesOn();
                 cycAccess.setKePurpose("DAMLProject");
             }
             else if (localHostName.equals("thinker")) {
-                cycAccess = new CycAccess("localhost",
-                                          3600,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3600, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 cycAccess.setKePurpose("OpenCyc");
             }
             else {
@@ -347,18 +299,12 @@ public class UnitTest extends TestCase {
                 cycAccess.setKePurpose("OpenCyc");
             }
             StateMachineFactory stateMachineFactory = new StateMachineFactory();
-
             //  state machine
             String namespaceName = "test namespace";
             String name = "TestStateMachine";
             String commentString = "This is the test comment for testStateMachine.";
-            Object context = this;
-
-            StateMachine stateMachine =
-                    stateMachineFactory.makeStateMachine(namespaceName,
-                    name,
-                    commentString,
-                    context);
+            StateMachine stateMachine = stateMachineFactory.makeStateMachine(namespaceName,
+                    name, commentString);
             Assert.assertTrue(stateMachine instanceof StateMachine);
             Assert.assertTrue(stateMachine.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, stateMachine.getNamespace().getName());
@@ -367,23 +313,34 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(stateMachine.getComment() instanceof Comment);
             Assert.assertEquals(commentString, stateMachine.getComment().getBody());
             Assert.assertEquals(stateMachine, stateMachine.getComment().getAnnotatedElement());
-            Assert.assertEquals(context, stateMachine.getContext());
-
+            CycConstant classifierTerm = cycAccess.getKnownConstantByName("TestStateMachineContext");
+            stateMachineFactory.associateClassifierToStateMachine(classifierTerm.toString(),
+                    commentString);
+            Assert.assertNotNull(stateMachine.getContext());
+            Assert.assertTrue(stateMachine.getContext() instanceof Classifier);
+            Assert.assertEquals(classifierTerm.toString(), stateMachine.getContext().getName());
+            name = "TestStateMachine-X";
+            commentString = "test state machine counter variable";
+            java.lang.Class type = null;
+            try {
+                type = java.lang.Class.forName("java.lang.String");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                Assert.fail();
+            }
+            Expression initialValue = null;
+            stateMachineFactory.addStateVariableToClassifier(name, commentString,
+                    StructuralFeature.SK_INSTANCE, type, StructuralFeature.CK_CHANGEABLE,
+                    new Multiplicity(1, 1, false), StructuralFeature.OK_UNORDERED,
+                    initialValue);
             //  procedures
             name = "UMLProcedure-InitializeNumberToZero";
             commentString = "Initializes the variable to the value zero.";
             String language = "CycL";
-            Object body =
-                cycAccess.getArg2("umlBody",
-                                  name,
-                                  "UMLProcedureDefinition-InitializeNumberToZeroMt");
+            Object body = cycAccess.getArg2("umlBody", name, "UMLProcedureDefinition-InitializeNumberToZeroMt");
             boolean isList = false;
-            Procedure initializeNumberToZero =
-                    stateMachineFactory.makeProcedure(name,
-                    commentString,
-                    language,
-                    body,
-                    isList);
+            Procedure initializeNumberToZero = stateMachineFactory.makeProcedure(name,
+                    commentString, language, body, isList);
             Assert.assertTrue(initializeNumberToZero instanceof Procedure);
             Assert.assertTrue(initializeNumberToZero.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, initializeNumberToZero.getNamespace().getName());
@@ -397,19 +354,15 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(isList, initializeNumberToZero.isList());
             name = "x";
             commentString = "the variable X initialized to zero.";
-            Class type = null;
+            type = null;
             try {
-                type = Class.forName("org.opencyc.uml.statemachine.PrimitiveInt");
-            }
-            catch (ClassNotFoundException e) {
+                type = java.lang.Class.forName("org.opencyc.uml.statemachine.PrimitiveInt");
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 Assert.fail();
             }
-            OutputPin outputPinX1 =
-                    stateMachineFactory.addOutputPinToProcedure(name,
-                    commentString,
-                    initializeNumberToZero,
-                    type);
+            OutputPin outputPinX1 = stateMachineFactory.addOutputPinToProcedure(name,
+                    commentString, initializeNumberToZero, type);
             Assert.assertTrue(outputPinX1 instanceof OutputPin);
             Assert.assertTrue(outputPinX1.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, outputPinX1.getNamespace().getName());
@@ -420,21 +373,13 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(outputPinX1, outputPinX1.getComment().getAnnotatedElement());
             Assert.assertTrue(initializeNumberToZero.getResult().contains(outputPinX1));
             Assert.assertEquals(initializeNumberToZero, outputPinX1.getProcedure());
-
             name = "UMLProcedure-IncrementNumber";
             commentString = "Increments the given number by one.";
             language = "CycL";
-            body =
-                cycAccess.getArg2("umlBody",
-                                  name,
-                                  "UMLProcedureDefinition-IncrementNumberMt");
+            body = cycAccess.getArg2("umlBody", name, "UMLProcedureDefinition-IncrementNumberMt");
             isList = false;
-            Procedure increment =
-                    stateMachineFactory.makeProcedure(name,
-                    commentString,
-                    language,
-                    body,
-                    isList);
+            Procedure increment = stateMachineFactory.makeProcedure(name, commentString,
+                    language, body, isList);
             Assert.assertTrue(increment instanceof Procedure);
             Assert.assertTrue(increment.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, increment.getNamespace().getName());
@@ -446,15 +391,10 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(language, increment.getLanguage());
             Assert.assertEquals(body, increment.getBody());
             Assert.assertEquals(isList, increment.isList());
-
-
             name = "x";
             commentString = "the given number to be incremented";
-            InputPin inputPinX =
-                    stateMachineFactory.addInputPinToProcedure(name,
-                    commentString,
-                    increment,
-                    type);
+            InputPin inputPinX = stateMachineFactory.addInputPinToProcedure(name,
+                    commentString, increment, type);
             Assert.assertTrue(inputPinX instanceof InputPin);
             Assert.assertTrue(inputPinX.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, inputPinX.getNamespace().getName());
@@ -465,13 +405,9 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(inputPinX, inputPinX.getComment().getAnnotatedElement());
             Assert.assertTrue(increment.getArgument().contains(inputPinX));
             Assert.assertEquals(increment, inputPinX.getProcedure());
-
             commentString = "the incremented number";
-            OutputPin outputPinX =
-                    stateMachineFactory.addOutputPinToProcedure(name,
-                    commentString,
-                    increment,
-                    type);
+            OutputPin outputPinX = stateMachineFactory.addOutputPinToProcedure(name,
+                    commentString, increment, type);
             Assert.assertTrue(outputPinX instanceof OutputPin);
             Assert.assertTrue(outputPinX.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, outputPinX.getNamespace().getName());
@@ -482,10 +418,8 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(outputPinX, outputPinX.getComment().getAnnotatedElement());
             Assert.assertTrue(increment.getResult().contains(outputPinX));
             Assert.assertEquals(increment, outputPinX.getProcedure());
-
             //  events (no events in this test)
             //  states
-
             name = "TestStateMachine-TopState";
             commentString = "Top state for the test state machine.";
             CompositeState container = null;
@@ -493,15 +427,8 @@ public class UnitTest extends TestCase {
             Procedure exit = null;
             Procedure doActivity = null;
             boolean isConcurrent = false;
-
-            CompositeState topState =
-                    stateMachineFactory.makeCompositeState(name,
-                    commentString,
-                    container,
-                    entry,
-                    exit,
-                    doActivity,
-                    isConcurrent);
+            CompositeState topState = stateMachineFactory.makeCompositeState(name,
+                    commentString, container, entry, exit, doActivity, isConcurrent);
             stateMachine.setTop(topState);
             Assert.assertTrue(topState instanceof CompositeState);
             Assert.assertTrue(topState.getNamespace() instanceof Namespace);
@@ -517,19 +444,14 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(doActivity, topState.getDoActivity());
             Assert.assertEquals(isConcurrent, topState.isConcurrent());
             Assert.assertEquals(0, topState.getDeferrableEvent().size());
-            Assert.assertTrue(! topState.isRegion());
+            Assert.assertTrue(!topState.isRegion());
             Assert.assertEquals(topState, stateMachine.getTop());
-
-
             name = "TestStateMachine-InitialState";
             commentString = "Initial state for the test state machine.";
             container = topState;
             int kind = PseudoState.PK_INITIAL;
-            PseudoState initialState =
-                    stateMachineFactory.makePseudoState(name,
-                    commentString,
-                    container,
-                    kind);
+            PseudoState initialState = stateMachineFactory.makePseudoState(name,
+                    commentString, container, kind);
             Assert.assertTrue(initialState instanceof PseudoState);
             Assert.assertTrue(initialState.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, initialState.getNamespace().getName());
@@ -541,16 +463,10 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(container, initialState.getContainer());
             Assert.assertEquals(kind, initialState.getKind());
             Assert.assertTrue(topState.getSubVertex().contains(initialState));
-
             name = "TestStateMachine-CounterState";
             commentString = "Counter state for the test state machine.";
-            SimpleState counterState =
-                    stateMachineFactory.makeSimpleState(name,
-                    commentString,
-                    container,
-                    entry,
-                    exit,
-                    doActivity);
+            SimpleState counterState = stateMachineFactory.makeSimpleState(name,
+                    commentString, container, entry, exit, doActivity);
             Assert.assertTrue(counterState instanceof SimpleState);
             Assert.assertTrue(counterState.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, counterState.getNamespace().getName());
@@ -565,16 +481,10 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(exit, counterState.getExit());
             Assert.assertEquals(doActivity, counterState.getDoActivity());
             Assert.assertEquals(0, counterState.getDeferrableEvent().size());
-
             name = "TestStateMachine-FinalState";
             commentString = "Final state for the test state machine.";
-            FinalState finalState =
-                    stateMachineFactory.makeFinalState(name,
-                    commentString,
-                    container,
-                    entry,
-                    exit,
-                    doActivity);
+            FinalState finalState = stateMachineFactory.makeFinalState(name, commentString,
+                    container, entry, exit, doActivity);
             Assert.assertTrue(finalState instanceof FinalState);
             Assert.assertTrue(finalState.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, finalState.getNamespace().getName());
@@ -589,10 +499,8 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(exit, finalState.getExit());
             Assert.assertEquals(doActivity, finalState.getDoActivity());
             Assert.assertEquals(0, finalState.getDeferrableEvent().size());
-
             //  state vertices (no state vertices in this test)
             //  transistions
-
             name = "TestStateMachine-Transition1";
             commentString = "Transition 1 for the test state machine.";
             String guardExpressionLanguage = null;
@@ -601,15 +509,9 @@ public class UnitTest extends TestCase {
             Event trigger = null;
             StateVertex source = initialState;
             StateVertex target = counterState;
-            Transition transition1 =
-                    stateMachineFactory.makeTransition(name,
-                    commentString,
-                    guardExpressionLanguage,
-                    guardExpressionBody,
-                    effect,
-                    trigger,
-                    source,
-                    target);
+            Transition transition1 = stateMachineFactory.makeTransition(name, commentString,
+                    guardExpressionLanguage, guardExpressionBody, effect, trigger,
+                    source, target);
             Assert.assertTrue(transition1 instanceof Transition);
             Assert.assertTrue(transition1.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition1.getNamespace().getName());
@@ -624,31 +526,21 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(target, transition1.getTarget());
             Assert.assertEquals(stateMachine, transition1.getStateMachine());
             Assert.assertEquals(trigger, transition1.getTrigger());
-            Assert.assertTrue(! transition1.isSelfTransition());
+            Assert.assertTrue(!transition1.isSelfTransition());
             Assert.assertTrue(initialState.getOutgoing().contains(transition1));
             Assert.assertTrue(counterState.getIncoming().contains(transition1));
-
-
             name = "TestStateMachine-Transition2";
             commentString = "Transition 2 for the test state machine.";
             guardExpressionLanguage = "CycL";
-            guardExpressionBody =
-                cycAccess.getArg2("umlBody",
-                                  "TestStateMachine-BooleanExpression1",
-                                  "UMLStateMachineTest01Mt");
+            guardExpressionBody = cycAccess.getArg2("umlBody", "TestStateMachine-BooleanExpression1",
+                    "UMLStateMachineTest01Mt");
             effect = increment;
             trigger = null;
             source = counterState;
             target = counterState;
-            Transition transition2 =
-                    stateMachineFactory.makeTransition(name,
-                    commentString,
-                    guardExpressionLanguage,
-                    guardExpressionBody,
-                    effect,
-                    trigger,
-                    source,
-                    target);
+            Transition transition2 = stateMachineFactory.makeTransition(name, commentString,
+                    guardExpressionLanguage, guardExpressionBody, effect, trigger,
+                    source, target);
             Assert.assertTrue(transition2 instanceof Transition);
             Assert.assertTrue(transition2.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition2.getNamespace().getName());
@@ -672,28 +564,19 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(stateMachine, transition2.getStateMachine());
             Assert.assertEquals(trigger, transition2.getTrigger());
             Assert.assertTrue(transition2.isSelfTransition());
-            Assert.assertTrue(((State) source).getInternalTransition().contains(transition2));
-
+            Assert.assertTrue(((State)source).getInternalTransition().contains(transition2));
             name = "TestStateMachine-Transition3";
             commentString = "Transition 3 for the test state machine.";
             guardExpressionLanguage = "CycL";
-            guardExpressionBody =
-                    cycAccess.getArg2("umlBody",
-                                      "TestStateMachine-BooleanExpression2",
-                                      "UMLStateMachineTest01Mt");
+            guardExpressionBody = cycAccess.getArg2("umlBody", "TestStateMachine-BooleanExpression2",
+                    "UMLStateMachineTest01Mt");
             effect = null;
             trigger = null;
             source = counterState;
             target = finalState;
-            Transition transition3 =
-                    stateMachineFactory.makeTransition(name,
-                    commentString,
-                    guardExpressionLanguage,
-                    guardExpressionBody,
-                    effect,
-                    trigger,
-                    source,
-                    target);
+            Transition transition3 = stateMachineFactory.makeTransition(name, commentString,
+                    guardExpressionLanguage, guardExpressionBody, effect, trigger,
+                    source, target);
             Assert.assertTrue(transition3 instanceof Transition);
             Assert.assertTrue(transition3.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition3.getNamespace().getName());
@@ -716,17 +599,14 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(target, transition3.getTarget());
             Assert.assertEquals(stateMachine, transition3.getStateMachine());
             Assert.assertEquals(trigger, transition3.getTrigger());
-            Assert.assertTrue(! transition3.isSelfTransition());
+            Assert.assertTrue(!transition3.isSelfTransition());
             Assert.assertTrue(source.getOutgoing().contains(transition3));
             Assert.assertTrue(target.getIncoming().contains(transition3));
-
             interpretStateMachine(stateMachine, cycAccess);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
         }
-
         System.out.println("\n**** testSimpleStateMachine ****");
     }
 
@@ -736,35 +616,25 @@ public class UnitTest extends TestCase {
      * @param stateMachine the given instantiated state machine
      * @param cycAccess the given cyc server connection
      */
-    protected void interpretStateMachine (StateMachine stateMachine,
-                                          CycAccess cycAccess) {
+    protected void interpretStateMachine (StateMachine stateMachine, CycAccess cycAccess) {
         Interpreter interpreter = null;
-
         try {
-            CycFort definitionMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
-            CycFort temporaryWorkspaceMt =
-                cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
+            CycFort temporaryWorkspaceMt = cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
             int verbosity = Interpreter.QUIET_VERBOSITY;
             ContextStackPool contextStackPool = new ContextStackPool(cycAccess,
-                                                                     temporaryWorkspaceMt,
-                                                                     ContextStackPool.QUIET_VERBOSITY);
-            interpreter = new Interpreter(stateMachine,
-                                          cycAccess,
-                                          definitionMt,
-                                          contextStackPool,
-                                          verbosity);
+                    temporaryWorkspaceMt, ContextStackPool.QUIET_VERBOSITY);
+            interpreter = new Interpreter(stateMachine, cycAccess, contextStackPool,
+                    verbosity);
             Assert.assertNotNull(interpreter);
             Assert.assertTrue(interpreter instanceof Interpreter);
             Assert.assertTrue(interpreter.eventQueue.isEmpty());
             Assert.assertNull(interpreter.getCurrentEvent());
             Assert.assertEquals(stateMachine, interpreter.getStateMachine());
-
             interpreter.formAllStatesConfiguration();
             if (verbosity > 2)
                 System.out.print(interpreter.displayAllStatesConfigurationTree());
             interpreter.formInitialStateConfiguration();
-            Assert.assertEquals(new Integer(0),
-                                interpreter.getStateVariableValue("TestStateMachine-X"));
+            Assert.assertEquals(new Integer(0), interpreter.getStateVariableValue("TestStateMachine-X"));
             if (verbosity > 2)
                 System.out.print(interpreter.displayStateConfigurationTree());
             interpreter.eventDispatcher();
@@ -774,40 +644,32 @@ public class UnitTest extends TestCase {
             interpreter.fireSelectedTransitions();
             interpreter.getStateMachineFactory().destroyEvent(interpreter.getCurrentEvent());
             interpreter.currentEvent = null;
-
             Assert.assertNotNull(stateMachine.getTop());
             Assert.assertTrue(stateMachine.getTop() instanceof CompositeState);
             Assert.assertNotNull(stateMachine.getTop().getStateInterpreter());
-            Assert.assertEquals(stateMachine.getTop(),
-                                stateMachine.getTop().getStateInterpreter().getState());
-
-            Assert.assertEquals(new Integer(1),
-                                interpreter.getStateVariableValue("TestStateMachine-X"));
+            Assert.assertEquals(stateMachine.getTop(), stateMachine.getTop().getStateInterpreter().getState());
+            Assert.assertEquals(new Integer(1), interpreter.getStateVariableValue("TestStateMachine-X"));
             if (verbosity > 2)
                 System.out.print(interpreter.displayStateConfigurationTree());
             for (int i = 2; i < 10; i++) {
                 interpreter.eventDispatcher();
                 interpreter.eventProcessor();
                 interpreter.fireSelectedTransitions();
-                Assert.assertEquals(new Integer(i),
-                                    interpreter.getStateVariableValue("TestStateMachine-X"));
+                Assert.assertEquals(new Integer(i), interpreter.getStateVariableValue("TestStateMachine-X"));
             }
             if (verbosity > 2)
                 System.out.print(interpreter.displayStateConfigurationTree());
             interpreter.eventDispatcher();
             interpreter.eventProcessor();
             interpreter.fireSelectedTransitions();
-
             if (verbosity > 2)
                 System.out.print(interpreter.displayStateConfigurationTree());
             contextStackPool.destroyContextStack();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
     }
-
 
     /**
      * Tests simple state machine extraction from Cyc.
@@ -815,27 +677,21 @@ public class UnitTest extends TestCase {
     public void testCycExtractor () {
         System.out.println("\n**** testCycExtractor ****");
         Log.makeLog("unit-test.log");
-
         try {
             String localHostName = InetAddress.getLocalHost().getHostName();
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
-                cycAccess = new CycAccess("localhost",
-                                          3620,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3620, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
                 //cycAccess.traceNamesOn();
             }
             else if (localHostName.equals("thinker")) {
-                cycAccess = new CycAccess("localhost",
-                                          3600,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                cycAccess = new CycAccess("localhost", 3600, CycConnection.DEFAULT_COMMUNICATION_MODE,
+                        true);
             }
             else
                 cycAccess = new CycAccess();
-            CycExtractor cycExtractor = new CycExtractor(cycAccess,
-                                                         CycExtractor.QUIET_VERBOSITY);
+            CycExtractor cycExtractor = new CycExtractor(cycAccess, CycExtractor.QUIET_VERBOSITY);
             StateMachine stateMachine = cycExtractor.extract("TestStateMachine");
             Assert.assertTrue(stateMachine instanceof StateMachine);
             Assert.assertTrue(stateMachine.getNamespace() instanceof Namespace);
@@ -844,24 +700,20 @@ public class UnitTest extends TestCase {
             Assert.assertEquals("TestStateMachine", stateMachine.getName());
             Assert.assertTrue(stateMachine.getComment() instanceof Comment);
             Assert.assertEquals("This is a test individual #$UMLStateMachine.",
-                                stateMachine.getComment().getBody());
+                    stateMachine.getComment().getBody());
             Assert.assertEquals(stateMachine, stateMachine.getComment().getAnnotatedElement());
-
             StateMachineReport stateMachineReport = new StateMachineReport(stateMachine);
             System.out.println("*------- state machine description -------*");
             stateMachineReport.report();
             System.out.println("*----- end state machine description -----*");
-
             interpretStateMachine(stateMachine, cycAccess);
-
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
         }
-
         System.out.println("\n**** testCycExtractor ****");
     }
-
-
 }
+
+
+

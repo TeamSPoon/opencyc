@@ -32,7 +32,7 @@ public abstract class Pin extends ModelElement {
     /**
      * the type of this pin
      */
-    protected Class type;
+    protected java.lang.Class type;
 
     /**
      * the number of values this pin may hold at any one time
@@ -59,7 +59,7 @@ public abstract class Pin extends ModelElement {
      *
      * @return the type of this pin
      */
-    public Class getType () {
+    public java.lang.Class getType () {
         return type;
     }
 
@@ -68,7 +68,7 @@ public abstract class Pin extends ModelElement {
      *
      * @param type the type of this pin
      */
-    public void setType (Class type) {
+    public void setType (java.lang.Class type) {
         this.type = type;
     }
 

@@ -7099,6 +7099,25 @@ public class CycAccess {
      * @return the list of arg2 terms from gafs having the specified
      * predicate and arg1 values
      */
+    public CycList getArg2s (String predicate,
+                             CycFort arg1,
+                             CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getArg2s(getKnownConstantByName(predicate),
+                        arg1,
+                        mt);
+    }
+
+    /**
+     * Returns the list of arg2 terms from gafs having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the list of arg2 terms from gafs having the specified
+     * predicate and arg1 values
+     */
     public CycList getArg2s (CycFort predicate,
                              CycFort arg1,
                              CycFort mt)

@@ -36,7 +36,6 @@ public class CycListParser  {
 
     // Read/scan functions' lexical analysis variables.
     private boolean endQuote = false;
-    private boolean endBackquote = false;
     private boolean endComma = false;
     private boolean dot = false;
     private boolean dotWord = false;
@@ -81,6 +80,7 @@ public class CycListParser  {
         st.ordinaryChar( '(' );
         st.ordinaryChar( ')' );
         st.ordinaryChar( '\'' );
+        st.ordinaryChar( '`' );
         st.ordinaryChar( '.' );
         st.wordChars( '=', '=' );
         st.wordChars( '+', '+' );
@@ -112,7 +112,6 @@ public class CycListParser  {
         int tok;
 
         endQuote = false;
-        endBackquote = false;
         endComma = false;
 
         // Read and parse a lisp symbolic expression.
@@ -127,12 +126,6 @@ public class CycListParser  {
                 if (endQuote) {
                     // Close a quoted expression by inserting a right paren.
                     endQuote = false;
-                    st.pushBack();
-                    scanRightParen();
-                    }
-                else if (endBackquote) {
-                    // Close a backquoted expression by inserting a right paren.
-                    endBackquote = false;
                     st.pushBack();
                     scanRightParen();
                     }
@@ -158,17 +151,24 @@ public class CycListParser  {
                         case 39:	// Quote.
                             scanQuote();
                             continue;
+                        case 96:	// Backquote.
+                            scanBackquote();
+                            continue;
                         case 40:	// Left Paren
                             ScanLeftParen();
                             continue;
                         case 41:	// Right Paren
                             scanRightParen();
                             break;
-                        case 45:	// ,
+                        case 44:	// ,
+                            scanComma();
+                            break;
+                        case 45:	// -
                             scanMinus();
                             break;
                         default:
-                            throw new RuntimeException("Invalid symbol: " + st.toString());
+                            throw new RuntimeException("Invalid symbol: " + st.toString() +
+                                                       " token: " + tok);
                     }
                 }
                 if ((readStack.sp > 0) && (parenLevel == 0)) {
@@ -202,13 +202,27 @@ public class CycListParser  {
 
         //System.out.println("'");
 
-        // Expand 's to (quote s .
         if ((parenLevel > 0) && (parenLevel != readStack.sp))
             readStack.push(consMarkerSymbol);
 
         readStack.push(consMarkerSymbol);
         quoteStack.push(new Integer(++parenLevel));
         readStack.push(CycObjectFactory.quote);
+    }
+
+    /**
+     * Expands `s to (backquote s  when reading.
+     */
+    private void scanBackquote() {
+        Integer i;
+
+        //System.out.println("`");
+        if ((parenLevel > 0) && (parenLevel != readStack.sp))
+            readStack.push(consMarkerSymbol);
+
+        readStack.push(consMarkerSymbol);
+        quoteStack.push(new Integer(++parenLevel));
+        readStack.push(CycObjectFactory.backquote);
     }
 
     /**
@@ -303,6 +317,21 @@ public class CycListParser  {
     private void scanMinus() {
         //System.out.println("-");
         CycSymbol w = CycObjectFactory.makeCycSymbol("-");
+
+        if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
+            // Within a list.
+            readStack.push(consMarkerSymbol);
+
+        readStack.push(w);
+        checkQuotes();
+    }
+
+    /**
+     * Scans a comma while reading.
+     */
+    private void scanComma() {
+        //System.out.println(",");
+        CycSymbol w = CycObjectFactory.makeCycSymbol(",");
 
         if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
             // Within a list.

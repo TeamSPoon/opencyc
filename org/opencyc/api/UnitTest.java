@@ -286,7 +286,7 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Invalid API Request: Operator NIL is not defined in the API\")",
+        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Operator NIL is not defined in the API\")",
                             response[1].toString());
 
         cycConnection.close();
@@ -1327,12 +1327,13 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(whyGenlParaphrase);
-        String oneExpectedGenlParaphrase = "every non-human animal is a sentient animal";
-        /*
+        String oneExpectedGenlParaphrase =
+            "every domesticated animal (existing object type) is a type of organism";
+
         for (int i = 0; i < whyGenlParaphrase.size(); i++) {
             System.out.println(whyGenlParaphrase.get(i));
         }
-        */
+
         Assert.assertTrue(whyGenlParaphrase.contains(oneExpectedGenlParaphrase));
 
         // getWhyCollectionsIntersect.
@@ -2211,11 +2212,61 @@ public class UnitTest extends TestCase {
         // SubL scripts
         try {
             cycAccess.traceOn();
-            // Assignment
-            String script = "(csetq a '(1 #$Dog #$Plant))";
+            String script;
+            Object responseObject;
+            CycList responseList;
+            boolean responseBoolean;
+
+            // definition
+            script =
+                "(define-in-api my-copy-tree (tree) \n" +
+                "  (ret (fif (atom tree) \n" +
+                "       tree \n" +
+                "       ;; else \n" +
+                "       (cons (my-copy-tree (first tree)) \n" +
+                "             (my-copy-tree (rest tree))))))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-copy-tree"), responseObject);
+            script = "(csetq a '(((#$Brazil #$Dog) #$Plant)))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(((#$Brazil #$Dog) #$Plant))"),
+                                responseList);
+            script = "(csetq b (my-copy-tree a))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(((#$Brazil #$Dog) #$Plant))"),
+                                responseList);
+            script = "(cand (equal a b) (cnot (eq a b)))";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            script =
+                "(define-in-api my-floor (x y) \n" +
+                "  (clet (results) \n" +
+                "    (csetq results (multiple-value-list (floor x y))) \n" +
+                "    (ret results)))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-floor"), responseObject);
+            script = "(my-floor 5 3)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
+
+            script =
+                "(defmacro-in-api my-macro (a b c) \n" +
+                "  (ret `(list ,a ,b ,c)))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-macro"), responseObject);
+            script = "(my-macro #$Dog #$Plant #$Brazil)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(#$Dog #$Plant #$Brazil)"), responseList);
+
+
+
+
+            // assignment
+            script = "(csetq a '(1 #$Dog #$Plant))";
             cycAccess.converseVoid(script);
             script = "(symbol-value 'a)";
-            CycList responseList = cycAccess.converseList(script);
+            responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
 
             script = "(cpush 4 a)";
@@ -2242,7 +2293,7 @@ public class UnitTest extends TestCase {
                      "  (csetq a 1) " +
                      "  (csetq b (+ a 3)) " +
                      "  b)";
-            Object responseObject = cycAccess.converseObject(script);
+            responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(new Integer(4), responseObject);
 
             script = "(clet ((a nil)) " +
@@ -2267,7 +2318,7 @@ public class UnitTest extends TestCase {
 
             // boolean expressions
             script = "(cand t nil t)";
-            boolean responseBoolean = cycAccess.converseBoolean(script);
+            responseBoolean = cycAccess.converseBoolean(script);
             Assert.assertTrue(! responseBoolean);
 
             script = "(cand t t t)";

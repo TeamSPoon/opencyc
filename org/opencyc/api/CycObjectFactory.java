@@ -48,6 +48,7 @@ public class CycObjectFactory {
     public static CycSymbol t = makeCycSymbol("T");
     public static CycSymbol nil = makeCycSymbol("NIL");
     public static CycSymbol quote = makeCycSymbol("QUOTE");
+    public static CycSymbol backquote = makeCycSymbol("BACKQUOTE");
     public static CycSymbol cons = makeCycSymbol("CONS");
     public static CycSymbol dot = makeCycSymbol(".");
 

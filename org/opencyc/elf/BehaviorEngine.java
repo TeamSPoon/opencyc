@@ -14,6 +14,8 @@ import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.PredicateClassFactory;
 import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
+import org.opencyc.elf.wm.StateVariableFactory;
+import org.opencyc.elf.wm.StateVariableLibrary;
 import org.opencyc.elf.wm.TaskFrameFactory;
 import org.opencyc.elf.wm.TaskFrameLibrary;
 
@@ -63,23 +65,31 @@ public class BehaviorEngine {
     logger.info("Initializing BehaviorEngine");
     (new ActuatorClassFactory()).getInstance().generate();
     (new PredicateClassFactory()).getInstance().generate();
+    createSingletonInstances();
+    
+    //TODO
+  }
+  
+  //// Protected Area
+  
+  /**
+   * Creates the singleton instances and populates the object libraries.
+   */
+  protected void createSingletonInstances () {
     new KnowledgeBase();
+    new StateVariableLibrary();
+    (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
     new ActionFactory();
     new GoalFactory();
     new ResourcePool();
     (new ResourceFactory()).getInstance().populateResourcePool();
-    StateVariable.initialize();
     new JobAssignmentLibrary();
     (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
     new TaskFrameLibrary();
     (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
     new ExperienceLibrary();
     new ELFFactory();
-    
-    //TODO
   }
-  
-  //// Protected Area
   
   //// Private Area
   

@@ -1,4 +1,5 @@
 package org.opencyc.cycobject;
+
 import junit.framework.*;
 import java.util.*;
 import org.opencyc.api.*;

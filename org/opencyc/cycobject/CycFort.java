@@ -1,6 +1,5 @@
 package org.opencyc.cycobject;
 
-
 import java.io.*;
 import org.opencyc.xml.XMLPrintWriter;
 

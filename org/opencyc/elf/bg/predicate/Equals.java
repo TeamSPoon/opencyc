@@ -1,7 +1,7 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
+import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 import java.util.List;
@@ -53,7 +53,12 @@ public class Equals extends Predicate {
    public boolean evaluate (List arguments, State state) {
      Object argument1 = evaluateArgument(arguments.get(0), state);
      Object argument2 = evaluateArgument(arguments.get(1), state);
-     return  argument1.equals(argument2);
+     if (argument1 == null)
+       return argument2 == null;
+     else if (argument2 == null)
+       return argument1 == null;
+     else
+       return  argument1.equals(argument2);
   }
   
   /**

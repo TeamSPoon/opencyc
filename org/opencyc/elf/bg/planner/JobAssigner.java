@@ -118,7 +118,6 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    * Returns true if the given object equals this object.
    * 
    * @param obj the given object
-   * 
    * @return true if the given object equals this object
    */
   public boolean equals(Object obj) {

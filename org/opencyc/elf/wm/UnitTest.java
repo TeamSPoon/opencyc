@@ -6,8 +6,6 @@ import org.opencyc.elf.a.ConsoleOutput;
 
 import org.opencyc.elf.bg.predicate.NotNull;
 
-import org.opencyc.elf.bg.state.StateVariable;
-
 import org.opencyc.elf.bg.planner.ConditionalScheduleSet;
 import org.opencyc.elf.bg.planner.JobAssignment;
 import org.opencyc.elf.bg.planner.Resource;
@@ -19,6 +17,8 @@ import org.opencyc.elf.goal.Goal;
 
 import org.opencyc.elf.s.ConsoleInput;
 import org.opencyc.elf.s.Sensor;
+
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 import java.util.*;

@@ -1,8 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
-import org.opencyc.elf.bg.state.StateVariable;
+import org.opencyc.elf.wm.state.State;
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 import java.util.List;

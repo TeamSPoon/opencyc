@@ -1,7 +1,7 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.StateVariable;
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 

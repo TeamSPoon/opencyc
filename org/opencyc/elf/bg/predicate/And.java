@@ -1,7 +1,7 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
+import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 import java.util.Iterator;

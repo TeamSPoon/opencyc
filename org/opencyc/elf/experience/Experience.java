@@ -2,7 +2,7 @@ package org.opencyc.elf.experience;
 
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
+import org.opencyc.elf.wm.state.State;
 
 import org.opencyc.elf.goal.Goal;
 import org.opencyc.elf.goal.Value;

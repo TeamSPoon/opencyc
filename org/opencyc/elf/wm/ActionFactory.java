@@ -1,9 +1,9 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
-
 import org.opencyc.elf.bg.taskframe.Action;
+
+import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 import java.util.ArrayList;

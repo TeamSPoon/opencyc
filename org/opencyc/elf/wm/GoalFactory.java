@@ -4,10 +4,10 @@ package org.opencyc.elf.wm;
 import org.opencyc.elf.bg.predicate.NotNull;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
 
-import org.opencyc.elf.bg.state.StateVariable;
-
 import org.opencyc.elf.goal.Goal;
 import org.opencyc.elf.goal.Importance;
+
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 

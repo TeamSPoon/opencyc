@@ -3,7 +3,7 @@ package org.opencyc.elf.bg.taskframe;
 //// Internal Imports
 import org.opencyc.elf.ELFException;
 
-import org.opencyc.elf.bg.state.State;
+import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 import java.util.Iterator;

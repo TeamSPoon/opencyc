@@ -1,7 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
+import org.opencyc.elf.wm.state.State;
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class PredicateExpression {
    * Creates a new instance of a binary PredicateExpression given the
    * predicate and two arguments.
    *
-   * @param predicate the unary predicate
+   * @param predicate the binary predicate
    * @param arg1 the first argument 
    * @param arg2 the second argument 
    */
@@ -79,6 +80,23 @@ public class PredicateExpression {
     arguments = new ArrayList();
     arguments.add(arg1);
     arguments.add(arg2);
+  }
+  
+  /** 
+   * Creates a new instance of a PredicateExpression given the
+   * predicate and three arguments.
+   *
+   * @param predicate the predicate
+   * @param arg1 the first argument 
+   * @param arg2 the second argument 
+   * @param arg3 the third argument 
+   */
+  public PredicateExpression(Predicate predicate, Object arg1, Object arg2, Object arg3) {
+    this.predicate = predicate;
+    arguments = new ArrayList();
+    arguments.add(arg1);
+    arguments.add(arg2);
+    arguments.add(arg3);
   }
   
   //// Public Area

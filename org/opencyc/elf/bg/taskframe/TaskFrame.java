@@ -282,9 +282,9 @@ public class TaskFrame {
    * plans, organized as a dictionary of execeptional states and associated
    * procedures for handling them
    * 
-   * @param schedules the plans for accomplishing the task, or procedures
-   *        for generating plans, organized as a dictionary of execeptional
-   *        states and associated procedures for handling them
+   * @param schedule the schedule of actions
+   * @param resources the resources required by the schedule
+   * @param actuators the actuators or virtual actuators (a lower level ELF) that achieves or accomplishes the schedule
    */
   public void addScheduleInfo (Schedule schedule,
                                ArrayList resources,

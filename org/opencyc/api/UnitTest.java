@@ -260,8 +260,9 @@ public class UnitTest extends TestCase {
             //cycConnection.trace = true;
         }
         catch (Exception e) {
-            System.out.println(CycAccess.current().cycConnection.connectionInfo());
             e.printStackTrace();
+            if (CycAccess.current() != null)
+                System.out.println(CycAccess.current().cycConnection.connectionInfo());
             Assert.fail(e.toString());
         }
 

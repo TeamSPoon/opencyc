@@ -102,7 +102,7 @@ public class XpathComputer {
 
     /**
      * Takes a starting DOM node and a local Xpath directive and returns the DOM
-     * node, if any, which can be reached following the directive from the input node.
+     * node, if any, which can be reached following the directive from the input node
      * It throws DOMExceptions if no node exists at the specified address or if the address
      * is not a valid local Xpath expression. We repeat here that this is a very limited
      * implementation of Xpath addressing which is guaranteed to handle all and *only* those
@@ -121,7 +121,7 @@ public class XpathComputer {
      * <leaf>friend</leaf>
      *
      * @throws throws DOMException.
-     * @return the DOM node that is reached following the input Xpath directive
+     * @return the DOM node that is reached following the input Xpath directiv
      * starting from the input node.
      */
     public static Node followLocalXpath (Node start, String localXpath) throws DOMException {
@@ -222,6 +222,9 @@ public class XpathComputer {
         return  current;
     }
 }
+
+
+
 
 
 

@@ -1,7 +1,7 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
-import org.opencyc.elf.s.Sensor;
+import org.opencyc.elf.s.DirectSensor;
 
 //// External Imports
 import java.util.HashMap;
@@ -54,8 +54,8 @@ public class SensorPool {
    * @param name the given sensor name
    * @return the sensor associated with the given sensor name
    */
-  public Sensor getSensor (String name) {
-    return (Sensor)  sensorDictionary.get(name);
+  public DirectSensor getSensor (String name) {
+    return (DirectSensor)  sensorDictionary.get(name);
   }
 
   /** Sets the sensor associated with the given sensor name.
@@ -63,7 +63,7 @@ public class SensorPool {
    * @param name the given sensor name
    * @param sensor the given sensor
    */
-  public void setSensor (String name, Sensor sensor) {
+  public void setSensor (String name, DirectSensor sensor) {
     sensorDictionary.put(name, sensor);
   }
   

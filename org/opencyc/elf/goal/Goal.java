@@ -1,10 +1,7 @@
 package org.opencyc.elf.goal;
 
 //// Internal Imports
-
 import org.opencyc.elf.ELFObject;
-
-import org.opencyc.elf.bg.state.State;
 
 //// External Imports
 import java.util.ArrayList;
@@ -48,44 +45,9 @@ public class Goal extends ELFObject {
    * @return a string representation of this object
    */
   public String toString() {
-    return "Goal for " + goalState.toString();
+    return goalPredicateExpression.toString();
   }
-  /**
-   * Gets the goal state
-   * 
-   * @return the goal state
-   */
-  public State getGoalState() {
-    return goalState;
-  }
-
-  /**
-   * Sets the goal state
-   * 
-   * @param goalState the goal state
-   */
-  public void setGoalState(State goalState) {
-    this.goalState = goalState;
-  }
-
-  /**
-   * Gets the list of states which if entered, indicate goal failure
-   * 
-   * @return the list of states which if entered, indicate goal failure
-   */
-  public ArrayList getGoalFailureStates() {
-    return goalFailureStates;
-  }
-
-  /**
-   * Sets the list of states which if entered, indicate goal failure
-   * 
-   * @param goalFailureStates the list of states which if entered, indicate
-   *        goal failure
-   */
-  public void setGoalFailureStates(ArrayList goalFailureStates) {
-    this.goalFailureStates = goalFailureStates;
-  }
+  
 
   /**
    * Gets the goal importance
@@ -111,11 +73,39 @@ public class Goal extends ELFObject {
   
   //// Internal Rep
   
-  /** the goal state */
-  protected State goalState;
+  /**
+   * GoalPredicateExpression contains an evaluatable symbol and an argument list of state variables
+   * and objects
+   */
+  class GoalPredicateExpression {
+    
+    /**
+     * the goal predicate
+     */
+    int goalPredicate;
+    
+    /**
+     * the argument list
+     */
+    ArrayList arguments;
+    
+    /**
+     * Returns a string representation of this object.
+     * 
+     * @return a string representation of this object
+     */
+    public String toString() {
+    }
+  }
+  
+  /**
+   * the goal predicate expression
+   */
+  GoalPredicateExpression goalPredicateExpression;
 
-  /** the list of states which if entered, indicate goal failure */
-  protected ArrayList goalFailureStates;
+  
+  /** the list of goal predicate expressions which if true, indicate goal failure */
+  protected ArrayList goalFailurePredicateExpressions;
 
   /** the goal importance */
   protected Importance importance;

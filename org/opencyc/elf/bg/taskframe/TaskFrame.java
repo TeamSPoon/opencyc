@@ -3,6 +3,7 @@ package org.opencyc.elf.bg.taskframe;
 //// Internal Imports
 import org.opencyc.elf.a.Actuator;
 
+import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.goal.Goal;
@@ -257,10 +258,15 @@ public class TaskFrame {
    */
   public ArrayList getTaskResources () {
     ArrayList taskResources = new ArrayList();
-    Iterator iter = scheduleInfos.iterator();
-    while (iter.hasNext()) {
-      ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
-      taskResources.addAll(scheduleInfo.resources);
+    Iterator scheduleIterator = scheduleInfos.iterator();
+    while (scheduleIterator.hasNext()) {
+      ScheduleInfo scheduleInfo = (ScheduleInfo) scheduleIterator.next();
+      Iterator resourceIterator = scheduleInfo.getResources().iterator();
+      while (resourceIterator.hasNext()) {
+        Resource resource = (Resource) resourceIterator.next();
+        if (! taskResources.contains(resource))
+          taskResources.add(resource);
+      }
     }
     return taskResources;
   }
@@ -302,16 +308,14 @@ public class TaskFrame {
    * procedures for handling them
    * 
    * @param schedule the schedule of actions
-   * @param resources the resources required by the schedule
    * @param actuator the actuator or virtual actuators(a lower level ELF) that achieves or accomplishes the schedule
    * @param sensor the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
    * of the schedule
    */
   public void addScheduleInfo (Schedule schedule,
-                               ArrayList resources,
                                Actuator actuator,
                                Sensor sensor) {
-    ScheduleInfo scheduleInfo = new ScheduleInfo (schedule, resources, actuator, sensor);
+    ScheduleInfo scheduleInfo = new ScheduleInfo (schedule, actuator, sensor);
     scheduleInfos.add(scheduleInfo);
   }
 
@@ -325,17 +329,14 @@ public class TaskFrame {
      * Constructs a new ScheduleInfo object given the schedule, resources and actuators.
      *
      * @param schedule the schedule of actions
-     * @param resources the resources required by the schedule
      * @param actuator the actuator or virtual actuators(a lower level ELF) that achieves or accomplishes the schedule
      * @param sensor the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
      * of the schedule
      */
     protected ScheduleInfo (Schedule schedule,
-                  ArrayList resources,
                   Actuator actuator,
                   Sensor sensor) {
       this.schedule = schedule;
-      this.resources = resources;
       this.actuator = actuator;
       this.sensor = sensor;
     }
@@ -345,7 +346,6 @@ public class TaskFrame {
      */
     public Object clone () {
       return new ScheduleInfo((Schedule) schedule.clone(),
-                              resources,
                               actuator,
                               sensor);
     }
@@ -365,6 +365,14 @@ public class TaskFrame {
      * @return the resources required by the schedule
      */
     public ArrayList getResources () {
+      ArrayList resources = new ArrayList();
+      resources.add(actuator.getResources());
+      Iterator iter = sensor.getResources().iterator();
+      while (iter.hasNext()) {
+        Resource resource = (Resource) iter.next();
+        if (! resources.contains(resource))
+          resources.add(resource);
+      }
       return resources;
     }
 
@@ -390,9 +398,6 @@ public class TaskFrame {
     
     /** the schedule of actions */
     public Schedule schedule;
-    
-    /** the resources required by the schedule */
-    public ArrayList resources;
     
     /** the actuator or virtual actuator (a lower level ELF) that achieves or accomplishes the schedule */
     public Actuator actuator;

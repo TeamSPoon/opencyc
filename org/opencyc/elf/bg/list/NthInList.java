@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.list;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycList;
+
 import org.opencyc.elf.BehaviorEngineException;
 
 import org.opencyc.elf.bg.expression.Operator;
@@ -69,8 +71,12 @@ public class NthInList extends Operator {
    */
   public String toString(List arguments) {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("(rest-of-list ");
-    stringBuffer.append(arguments.get(0).toString());
+    stringBuffer.append("(nth-in-list ");
+    Object obj = arguments.get(0);
+    if (obj instanceof CycList)
+      stringBuffer.append(((CycList) obj).cyclify());
+    else
+      stringBuffer.append(obj.toString());
     stringBuffer.append(")");
     return stringBuffer.toString();
   }

@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.list;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycList;
+
 import org.opencyc.elf.BehaviorEngineException;
 
 import org.opencyc.elf.bg.expression.Operator;
@@ -69,7 +71,16 @@ public class TheList extends Operator {
     Iterator iter = arguments.iterator();
     while (iter.hasNext()) {
       stringBuffer.append(" ");
-      stringBuffer.append(iter.next().toString());
+      Object obj = iter.next();
+      if (obj instanceof String) {
+        stringBuffer.append('"');
+        stringBuffer.append(obj);
+        stringBuffer.append('"');
+      }
+      else if (obj instanceof CycList)
+        stringBuffer.append(((CycList) obj).cyclify());
+      else
+        stringBuffer.append(obj.toString());
     }
     stringBuffer.append(")");
     return stringBuffer.toString();

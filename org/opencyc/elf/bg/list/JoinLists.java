@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.list;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycList;
+
 import org.opencyc.elf.bg.expression.Operator;
 
 import org.opencyc.elf.wm.state.State;
@@ -49,7 +51,7 @@ public class JoinLists extends Operator {
    * @param state the given state
    */
   public Object evaluate(List arguments, State state) {
-    List result = new ArrayList();
+    List result = new CycList();
     Iterator iter = arguments.iterator();
     while (iter.hasNext()) {
       List list = (List) evaluateArgument(iter.next(), state);
@@ -66,13 +68,15 @@ public class JoinLists extends Operator {
    */
   public String toString(List arguments) {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("(join-lists ");
+    stringBuffer.append("(join-lists");
     Iterator iter = arguments.iterator();
-    if (iter.hasNext())
-      stringBuffer.append(iter.next().toString());
     while (iter.hasNext()) {
       stringBuffer.append(" ");
-      stringBuffer.append(iter.next().toString());
+      Object obj = iter.next();
+      if (obj instanceof CycList)
+        stringBuffer.append(((CycList)obj).cyclify());
+      else
+        stringBuffer.append(obj.toString());
     }
     stringBuffer.append(")");
     return stringBuffer.toString();

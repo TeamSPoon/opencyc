@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.list;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycList;
+
 import org.opencyc.elf.bg.expression.Operator;
 
 import org.opencyc.elf.wm.state.State;
@@ -46,7 +48,7 @@ public class FirstInList extends Operator {
    * @param state the given state
    */
   public Object evaluate(List arguments, State state) {
-    List list = (List) evaluateArgument(arguments.get(0), state);
+    CycList list = (CycList) evaluateArgument(arguments.get(0), state);
     return list.get(0);
   }
   
@@ -60,11 +62,8 @@ public class FirstInList extends Operator {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("(first-in-list ");
     Object obj = arguments.get(0);
-    if (obj instanceof String) {
-      stringBuffer.append('"');
-      stringBuffer.append(obj.toString());
-      stringBuffer.append('"');
-    }
+    if (obj instanceof CycList)
+      stringBuffer.append(((CycList) obj).cyclify());
     else
       stringBuffer.append(obj.toString());
     stringBuffer.append(")");

@@ -28,13 +28,31 @@ package org.opencyc.uml.statemachine;
 public class SynchState extends StateVertex {
 
     /**
-     * bound of this synch state
+     * the bound of this synch state
      */
-    public long bound;
+    protected long bound;
 
     /**
      * Constructs a new SynchState object.
      */
     public SynchState() {
+    }
+
+    /**
+     * Gets the bound of this synch state
+     *
+     * @return the bound of this synch state
+     */
+    public long getBound () {
+        return bound;
+    }
+
+    /**
+     * Sets the bound of this synch state
+     *
+     * @param bound the bound of this synch state
+     */
+    public void setBound (long bound) {
+        this.bound = bound;
     }
 }

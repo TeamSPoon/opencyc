@@ -30,24 +30,83 @@ package org.opencyc.uml.core;
 public abstract class ModelElement extends Element {
 
     /**
-     * An identifier for the ModelElement within its containing
-     * namespace.
+     * the identifier for the ModelElement within its containing
+     * namespace
      */
-    String name;
+    protected String name;
 
     /**
-     * model elment namespace
+     * the model elment namespace
      */
-    String namespace;
+    protected String namespace;
 
     /**
-     * model element comment
+     * the model element comment
      */
-    Comment comment;
+    protected Comment comment;
 
     /**
      * Constructs a new Element object.
      */
     public ModelElement() {
+    }
+
+
+    /**
+     * Gets the identifier for the ModelElement within its containing
+     * namespace
+     *
+     * @return the identifier for the ModelElement within its containing
+     * namespace
+     */
+    public String getName () {
+        return name;
+    }
+
+    /**
+     * Sets the identifier for the ModelElement within its containing
+     * namespace
+     *
+     * @param name the identifier for the ModelElement within its containing
+     * namespace
+     */
+    public void setName (String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the model elment namespace
+     *
+     * @return the model elment namespace
+     */
+    public String getNamespace () {
+        return namespace;
+    }
+
+    /**
+     * Sets the model elment namespace
+     *
+     * @param namespace the model elment namespace
+     */
+    public void setNamespace (String namespace) {
+        this.namespace = namespace;
+    }
+
+    /**
+     * Gets the model element comment
+     *
+     * @return the model element comment
+     */
+    public Comment getComment () {
+        return comment;
+    }
+
+    /**
+     * Sets the model element comment
+     *
+     * @param comment the model element comment
+     */
+    public void setComment (Comment comment) {
+        this.comment = comment;
     }
 }

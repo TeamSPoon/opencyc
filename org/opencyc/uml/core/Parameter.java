@@ -31,14 +31,14 @@ import org.opencyc.uml.commonbehavior.*;
 public class Parameter extends ModelElement {
 
     /**
-     * default value for this parameter
+     * the default value for this parameter
      */
-    public Expression defaultValue;
+    protected Expression defaultValue;
 
     /**
      * the parameter direction kind
      */
-    public int kind;
+    protected int kind;
 
     public static final int PDK_IN = 1;
     public static final int PDK_INOUT = 2;
@@ -48,16 +48,90 @@ public class Parameter extends ModelElement {
     /**
      * the behavioral feature using this parameter
      */
-    public BehavioralFeature behavioralFeature;
+    protected BehavioralFeature behavioralFeature;
 
     /**
      * the type of this parameter
      */
-    public Class type;
+    protected Class type;
 
     /**
      * Constructs a new Parameter object.
      */
     public Parameter() {
     }
+
+
+    /**
+     * Gets the default value for this parameter
+     *
+     * @return the default value for this parameter
+     */
+    public Expression getDefaultValue () {
+        return defaultValue;
+    }
+
+    /**
+     * Sets the default value for this parameter
+     *
+     * @param defaultValue the default value for this parameter
+     */
+    public void setDefaultValue (Expression defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * Gets the parameter direction kind
+     *
+     * @return the parameter direction kind
+     */
+    public int getKind () {
+        return kind;
+    }
+
+    /**
+     * Sets the parameter direction kind
+     *
+     * @param kind the parameter direction kind
+     */
+    public void setKind (int kind) {
+        this.kind = kind;
+    }
+
+    /**
+     * Gets the behavioral feature using this parameter
+     *
+     * @return the behavioral feature using this parameter
+     */
+    public BehavioralFeature getBehavioralFeature () {
+        return behavioralFeature;
+    }
+
+    /**
+     * Sets the behavioral feature using this parameter
+     *
+     * @param behavioralFeature the behavioral feature using this parameter
+     */
+    public void setBehavioralFeature (BehavioralFeature behavioralFeature) {
+        this.behavioralFeature = behavioralFeature;
+    }
+
+    /**
+     * Gets the type of this parameter
+     *
+     * @return the type of this parameter
+     */
+    public Class getType () {
+        return type;
+    }
+
+    /**
+     * Sets the type of this parameter
+     *
+     * @param type the type of this parameter
+     */
+    public void setType (Class type) {
+        this.type = type;
+    }
+
 }

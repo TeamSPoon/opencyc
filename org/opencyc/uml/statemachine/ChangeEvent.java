@@ -39,4 +39,22 @@ public class ChangeEvent extends Event {
      */
     public ChangeEvent() {
     }
+
+    /**
+     * Gets the change expression for this change event
+     *
+     * @return the change expression for this change event
+     */
+    public BooleanExpression getChangeExpression () {
+        return changeExpression;
+    }
+
+    /**
+     * Sets the change expression for this change event
+     *
+     * @param changeExpression the change expression for this change event
+     */
+    public void setChangeExpression (BooleanExpression changeExpression) {
+        this.changeExpression = changeExpression;
+    }
 }

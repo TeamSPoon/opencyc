@@ -28,13 +28,32 @@ package org.opencyc.uml.commonbehavior;
 public class SendAction extends Action {
 
     /**
-     * signal for this send action
+     * the signal for this send action
      */
-    public Signal signal;
+    protected Signal signal;
 
     /**
      * Constructs a new SendAction object.
      */
     public SendAction() {
     }
+
+    /**
+     * Gets the signal for this send action.
+     *
+     * @return the signal for this send action
+     */
+    public Signal getSignal() {
+        return signal;
+    }
+
+    /**
+     * Sets the signal for this send action.
+     *
+     * @param signal the signal for this send action
+     */
+    public void setSignal (Signal signal) {
+        this.signal = signal;
+    }
+
 }

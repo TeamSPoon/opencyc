@@ -30,13 +30,31 @@ import org.opencyc.uml.commonbehavior.*;
 public class TimeEvent extends Event {
 
     /**
-     * time expression for this time event
+     * the time expression for this time event
      */
-    public TimeExpression when;
+    protected TimeExpression when;
 
     /**
      * Constructs a new TimeEvent object.
      */
     public TimeEvent() {
+    }
+
+    /**
+     * Gets the time expression for this time event
+     *
+     * @return the time expression for this time event
+     */
+    public TimeExpression getWhen () {
+        return when;
+    }
+
+    /**
+     * Sets the time expression for this time event
+     *
+     * @param when the time expression for this time event
+     */
+    public void setWhen (TimeExpression when) {
+        this.when = when;
     }
 }

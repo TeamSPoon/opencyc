@@ -2,6 +2,7 @@ package org.opencyc.uml.statemachine;
 
 import org.opencyc.uml.commonbehavior.*;
 
+
 /**
  * SignalEvent from the UML Common_Behavior package.
  *
@@ -28,14 +29,34 @@ import org.opencyc.uml.commonbehavior.*;
  */
 
 public class SignalEvent extends Event {
+
     /**
      * the signal of this signal event
      */
-    public Signal signal;
+    protected Signal signal;
 
     /**
      * Constructs a new SignalEvent object.
      */
     public SignalEvent() {
     }
+
+    /**
+     * Gets the signal of this signal event
+     *
+     * @return the signal of this signal event
+     */
+    public Signal getSignal () {
+        return signal;
+    }
+
+    /**
+     * Sets the signal of this signal event
+     *
+     * @param signal the signal of this signal event
+     */
+    public void setSignal (Signal signal) {
+        this.signal = signal;
+    }
+
 }

@@ -31,13 +31,32 @@ import org.opencyc.uml.core.*;
 public class Event extends ModelElement {
 
     /**
-     * parameters of this event
+     * the parameters of this event
      */
-    public ArrayList parameter = new ArrayList();
+    protected ArrayList parameter = new ArrayList();
 
     /**
      * Constructs a new Event object.
      */
     public Event() {
+    }
+
+
+    /**
+     * Gets the parameters of this event.
+     *
+     * @return the parameters of this event
+     */
+    public ArrayList getParameter () {
+        return parameter;
+    }
+
+    /**
+     * Sets the parameters of this event.
+     *
+     * @param parameter the parameters of this event
+     */
+    public void setParameter (ArrayList parameter) {
+        this.parameter = parameter;
     }
 }

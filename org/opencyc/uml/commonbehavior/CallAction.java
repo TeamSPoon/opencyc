@@ -30,13 +30,31 @@ import org.opencyc.uml.core.*;
 public class CallAction extends Action {
 
     /**
-     * operation for this call action
+     * the operation for this call action
      */
-    public Operation operation;
+    protected Operation operation;
 
     /**
      * Constructs a new CallAction object.
      */
-    public CallAction() {
+    protected CallAction() {
+    }
+
+    /**
+     * Gets the operation for this call action.
+     *
+     * @return the operation for this call action
+     */
+    public Operation getOperation () {
+        return operation;
+    }
+
+    /**
+     * Sets the operation for this call action.
+     *
+     * @param operation the operation for this call action.
+     */
+    public void setOperation (Operation operation) {
+        this.operation = operation;
     }
 }

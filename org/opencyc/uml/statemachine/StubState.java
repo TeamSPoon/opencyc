@@ -27,13 +27,31 @@ package org.opencyc.uml.statemachine;
 public class StubState {
 
     /**
-     * reference state for this stub state
+     * the reference state for this stub state
      */
-    public String referenceState;
+    protected String referenceState;
 
     /**
      * Constructs a new StubState object.
      */
     public StubState() {
+    }
+
+    /**
+     * Gets the reference state for this stub state
+     *
+     * @return the reference state for this stub state
+     */
+    public String getReferenceState () {
+        return referenceState;
+    }
+
+    /**
+     * Sets the reference state for this stub state
+     *
+     * @param referenceState the reference state for this stub state
+     */
+    public void setReferenceState (String referenceState) {
+        this.referenceState = referenceState;
     }
 }

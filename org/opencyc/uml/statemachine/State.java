@@ -31,29 +31,29 @@ import org.opencyc.uml.commonbehavior.*;
 public class State extends StateVertex {
 
     /**
-     * entry action for this state
+     * the entry action for this state
      */
-    public Action entry;
+    protected Action entry;
 
     /**
-     * exit action for this state
+     * the exit action for this state
      */
-    public Action exit;
+    protected Action exit;
 
     /**
-     * deferrable events for this state
+     * the deferrable events for this state
      */
-    public ArrayList deferrableEvent = new ArrayList();
+    protected ArrayList deferrableEvent = new ArrayList();
 
     /**
-     * do activity for this state
+     * the do activity for this state
      */
-    public Action doActivity;
+    protected Action doActivity;
 
     /**
-     * state machine for this state (if top)
+     * the state machine for this state (if top)
      */
-    public StateMachine stateMachine;
+    protected StateMachine stateMachine;
 
 
     /**
@@ -61,4 +61,96 @@ public class State extends StateVertex {
      */
     public State() {
     }
+
+
+    /**
+     * Gets the entry action for this state.
+     *
+     * @return the entry action for this state
+     */
+    public Action getEntry () {
+        return entry;
+    }
+
+    /**
+     * Sets the entry action for this state.
+     *
+     * @param entry the entry action for this state
+     */
+    public void setEntry (Action entry) {
+        this.entry = entry;
+    }
+
+    /**
+     * Gets the exit action for this state.
+     *
+     * @return the exit action for this state
+     */
+    public Action getExit () {
+        return exit;
+    }
+
+    /**
+     * Sets the exit action for this state.
+     *
+     * @param exit the exit action for this state
+     */
+    public void setExit (Action exit) {
+        this.exit = exit;
+    }
+
+    /**
+     * Gets the deferrable events for this state.
+     *
+     * @return the deferrable events for this state
+     */
+    public ArrayList getDeferrableEvent () {
+        return deferrableEvent;
+    }
+
+    /**
+     * Sets the deferrable events for this state.
+     *
+     * @param deferrableEvent the deferrable events for this state
+     */
+    public void setDeferrableEvent (ArrayList deferrableEvent) {
+        this.deferrableEvent = deferrableEvent;
+    }
+
+    /**
+     * Gets the do activity for this state.
+     *
+     * @return the do activity for this state
+     */
+    public Action getDoActivity () {
+        return doActivity;
+    }
+
+    /**
+     * Sets the do activity for this state.
+     *
+     * @param doActivity the do activity for this state
+     */
+    public void setDoActivity (Action doActivity) {
+        this.doActivity = doActivity;
+    }
+
+    /**
+     * Gets the state machine for this state (if top).
+     *
+     * @return the state machine for this state
+     */
+    public StateMachine getStateMachine () {
+        return stateMachine;
+    }
+
+    /**
+     * Sets the state machine for this state (if top).
+     *
+     * @param stateMachine the state machine for this state
+     */
+    public void setStateMachine (StateMachine stateMachine) {
+        this.stateMachine = stateMachine;
+    }
+
 }

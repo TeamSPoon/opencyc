@@ -28,13 +28,31 @@ package org.opencyc.uml.commonbehavior;
 public class CreateAction extends Action {
 
     /**
-     * class to instantiate
+     * the class to instantiate
      */
-    Class instantiation;
+    protected Class instantiation;
 
     /**
      * Constructs a new CreateAction object.
      */
     public CreateAction() {
+    }
+
+    /**
+     * Gets the class to instantiate
+     *
+     * @return the class to instantiate
+     */
+    public Class getInstantiation () {
+        return instantiation;
+    }
+
+    /**
+     * Sets the class to instantiate
+     *
+     * @param instantiation the class to instantiate
+     */
+    public void setInstantiation (Class instantiation) {
+        this.instantiation = instantiation;
     }
 }

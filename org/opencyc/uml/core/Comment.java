@@ -28,20 +28,54 @@ package org.opencyc.uml.core;
 public class Comment extends ModelElement {
 
     /**
-     * annotated element
+     * the annotated element
      */
-    public ModelElement annotatedElement;
+    protected ModelElement annotatedElement;
 
     /**
      * the comment
      */
-    String body;
-
-
+    protected String body;
 
     /**
      * Constructs a new Comment object.
      */
     public Comment() {
+    }
+
+    /**
+     * Gets the annotated element
+     *
+     * @return the annotated element
+     */
+    public ModelElement getAnnotatedElement () {
+        return annotatedElement;
+    }
+
+    /**
+     * Sets the annotated element
+     *
+     * @param annotatedElement the annotated element
+     */
+    public void setAnnotatedElement (ModelElement annotatedElement) {
+        this.annotatedElement = annotatedElement;
+    }
+
+    /**
+     * Gets the comment
+     *
+     * @return the comment
+     */
+    public String getBody () {
+        return body;
+    }
+
+    /**
+     * Sets the comment
+     *
+     * @param body the comment
+     */
+    public void setBody (String body) {
+        this.body = body;
     }
 }

@@ -34,22 +34,76 @@ public class StateVertex extends ModelElement {
     /**
      * the container of this state vertex
      */
-    public CompositeState container;
+    protected CompositeState container;
 
     /**
-     * outgoing transitions from this state vertex
+     * the outgoing Transitions from this state vertex
      */
-    public ArrayList outgoing = new ArrayList();
+    protected ArrayList outgoing = new ArrayList();
 
     /**
-     * incoming transitions into this state vertex
+     * the incoming Transitions into this state vertex
      */
-    public ArrayList incoming = new ArrayList();
+    protected ArrayList incoming = new ArrayList();
 
 
     /**
      * Constructs a new StateVertex object.
      */
     public StateVertex() {
+    }
+
+    /**
+     * Gets the container of this state vertex
+     *
+     * @return the container of this state vertex
+     */
+    public CompositeState getContainer () {
+        return container;
+    }
+
+    /**
+     * Sets the container of this state vertex
+     *
+     * @param container the container of this state vertex
+     */
+    public void setContainer (CompositeState container) {
+        this.container = container;
+    }
+
+    /**
+     * Gets the outgoing Transitions from this state vertex
+     *
+     * @return the outgoing Transitions from this state vertex
+     */
+    public List getOutgoing () {
+        return outgoing;
+    }
+
+    /**
+     * Sets the outgoing Transitions from this state vertex
+     *
+     * @param outgoing the outgoing Transitions from this state vertex
+     */
+    public void setOutgoing (ArrayList outgoing) {
+        this.outgoing = outgoing;
+    }
+
+    /**
+     * Gets the incoming Transitions into this state vertex
+     *
+     * @return the incoming Transitions into this state vertex
+     */
+    public List getIncoming () {
+        return incoming;
+    }
+
+    /**
+     * Sets the incoming Transitions into this state vertex
+     *
+     * @param incoming the incoming Transitions into this state vertex
+     */
+    public void setIncoming (ArrayList incoming) {
+        this.incoming = incoming;
     }
 }

@@ -4960,7 +4960,7 @@ public class CycAccess {
             "(clet ((*require-case-insensitive-name-uniqueness* nil)\n" +
             "       (*the-cyclist* " + cyclistName + ")\n" +
             "       (*ke-purpose* " + projectName + "))\n" +
-            "  (ke-create-now \"" + name + "\")))";
+            "  (ke-create-now \"" + constantName + "\")))";
         Object object = converseObject(command);
         if (object instanceof CycConstant)
             cycConstant = (CycConstant) object;

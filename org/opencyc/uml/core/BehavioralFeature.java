@@ -32,16 +32,52 @@ public class BehavioralFeature extends Feature {
     /**
      * indicates if this is a query
      */
-    public boolean isQuery;
+    protected boolean isQuery;
 
     /**
-     * parameters for this behavioral feature
+     * the parameters for this behavioral feature
      */
-    public ArrayList parameter;
+    protected ArrayList parameter;
 
     /**
      * Constructs a new BehavioralFeature object.
      */
     public BehavioralFeature() {
+    }
+
+    /**
+     * Indicates if this is a query.
+     *
+     * @return if this is a query
+     */
+    public boolean isQuery () {
+        return isQuery;
+    }
+
+    /**
+     * Sets whether this is a query.
+     *
+     * @param isQuery  whether this is a query
+     */
+    public void setIsQuery (boolean isQuery) {
+        this.isQuery = isQuery;
+    }
+
+    /**
+     * Gets the parameters for this behavioral feature.
+     *
+     * @return the parameters for this behavioral feature
+     */
+    public ArrayList getX () {
+        return parameter;
+    }
+
+    /**
+     * Sets the parameters for this behavioral feature.
+     *
+     * @param parameter the parameters for this behavioral feature
+     */
+    public void setX (ArrayList parameter) {
+        this.parameter = parameter;
     }
 }

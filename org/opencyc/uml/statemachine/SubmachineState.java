@@ -28,13 +28,31 @@ package org.opencyc.uml.statemachine;
 public class SubmachineState extends CompositeState {
 
     /**
-     * sub state machine
+     * the sub state machine
      */
-    public StateMachine submachine;
+    protected StateMachine submachine;
 
     /**
      * Constructs a new SubmachineState object.
      */
     public SubmachineState() {
+    }
+
+    /**
+     * Gets the sub state machine
+     *
+     * @return the sub state machine
+     */
+    public StateMachine getSubmachine () {
+        return submachine;
+    }
+
+    /**
+     * Sets the sub state machine
+     *
+     * @param submachine the sub state machine
+     */
+    public void setSubmachine (StateMachine submachine) {
+        this.submachine = submachine;
     }
 }

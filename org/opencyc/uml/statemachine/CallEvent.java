@@ -32,11 +32,30 @@ public class CallEvent extends Event {
     /**
      * the operation of this call event
      */
-    public Operation operation;
+    protected Operation operation;
 
     /**
      * Constructs a new CallEvent object.
      */
     public CallEvent() {
     }
+
+    /**
+     * Gets the operation of this call event
+     *
+     * @return the operation of this call event
+     */
+    public Operation getOperation () {
+        return operation;
+    }
+
+    /**
+     * Sets the operation of this call event
+     *
+     * @param operation the operation of this call event
+     */
+    public void setOperation (Operation operation) {
+        this.operation = operation;
+    }
+
 }

@@ -30,18 +30,54 @@ import org.opencyc.uml.interpreter.*;
 public class Expression {
 
     /**
-     * language of this expression
+     * the name of the language of this expression
      */
-    public String language;
+    protected String language;
 
     /**
-     * body of this expression
+     * the body of this expression
      */
-    public String body;
+    protected String body;
 
     /**
      * Constructs a new Expression object.
      */
     public Expression() {
+    }
+
+    /**
+     * Gets the name of the language of this expression.
+     *
+     * @return the name of the language of this expression
+     */
+    public String getLanguage () {
+        return language;
+    }
+
+    /**
+     * Sets the name of the language of this expression.
+     *
+     * @param language the name of the language of this expression
+     */
+    public void setLanguage (String language) {
+        this.language = language;
+    }
+
+    /**
+     * Gets the body of this expression.
+     *
+     * @return the body of this expression
+     */
+    public String getBody () {
+        return body;
+    }
+
+    /**
+     * Sets the body of this expression.
+     *
+     * @param body the body of this expression
+     */
+    public void setBody (String body) {
+        this.body = body;
     }
 }

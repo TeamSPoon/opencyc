@@ -35,7 +35,7 @@ public abstract class Feature extends ModelElement {
      * in in each Instance of the Classifier or whether it appears
      * only once for the entire Classifier.
      */
-    public int ownerScope;
+    protected int ownerScope;
 
     public static final int SK_INSTANCE = 1;
     public static final int SK_CLASSIFIER = 2;
@@ -43,11 +43,47 @@ public abstract class Feature extends ModelElement {
     /**
      * the Classifier declaring this feature
      */
-    public Class owner;
+    protected Class owner;
 
     /**
      * Constructs a new Feature object.
      */
     public Feature() {
+    }
+
+    /**
+     * Gets the owner scope of this feature.
+     *
+     * @return the owner scope of this feature
+     */
+    public int getOwnerScope () {
+        return ownerScope;
+    }
+
+    /**
+     * Sets the owner scope of this feature.
+     *
+     * @param ownerScope the owner scope of this feature
+     */
+    public void setOwnerScope (int ownerScope) {
+        this.ownerScope = ownerScope;
+    }
+
+    /**
+     * Gets the Classifier declaring this feature.
+     *
+     * @return the Classifier declaring this feature
+     */
+    public Class getOwner () {
+        return owner;
+    }
+
+    /**
+     * Sets the Classifier declaring this feature.
+     *
+     * @param owner the Classifier declaring this feature
+     */
+    public void setOwner (Class owner) {
+        this.owner = owner;
     }
 }

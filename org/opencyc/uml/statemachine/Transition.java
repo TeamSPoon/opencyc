@@ -1,5 +1,6 @@
 package org.opencyc.uml.statemachine;
 
+import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 
 /**
@@ -30,41 +31,149 @@ import org.opencyc.uml.commonbehavior.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Transition {
+public class Transition extends ModelElement {
 
     /**
      * the guard for this transition
      */
-    public Guard guard;
+    protected Guard guard;
 
     /**
      * the effect of this transition
      */
-    public Action effect;
+    protected Procedure effect;
 
     /**
      * the event which triggered this transition
      */
-    public Event trigger;
+    protected Event trigger;
 
     /**
-     * source state of this transition
+     * the source state of this transition
      */
-    public StateVertex source;
+    protected StateVertex source;
 
     /**
-     * target state of this transition
+     * the target state of this transition
      */
-    public StateVertex target;
+    protected StateVertex target;
 
     /**
-     * state machine containing this transition
+     * the state machine containing this transition
      */
-    public StateMachine stateMachine;
+    protected StateMachine stateMachine;
 
     /**
      * Constructs a new Transition object.
      */
     public Transition() {
+    }
+
+    /**
+     * Gets the guard for this transition
+     *
+     * @return the guard for this transition
+     */
+    public Guard getGuard () {
+        return guard;
+    }
+
+    /**
+     * Sets the guard for this transition
+     *
+     * @param guard the guard for this transition
+     */
+    public void setGuard (Guard guard) {
+        this.guard = guard;
+    }
+
+    /**
+     * Gets the effect of this transition
+     *
+     * @return the effect of this transition
+     */
+    public Procedure getEffect () {
+        return effect;
+    }
+
+    /**
+     * Sets the effect of this transition
+     *
+     * @param effect the effect of this transition
+     */
+    public void setEffect (Procedure effect) {
+        this.effect = effect;
+    }
+
+    /**
+     * Gets the event which triggered this transition
+     *
+     * @return the event which triggered this transition
+     */
+    public Event getTrigger () {
+        return trigger;
+    }
+
+    /**
+     * Sets the event which triggered this transition
+     *
+     * @param trigger the event which triggered this transition
+     */
+    public void setTrigger (Event trigger) {
+        this.trigger = trigger;
+    }
+
+    /**
+     * Gets the source state of this transition
+     *
+     * @return the source state of this transition
+     */
+    public StateVertex getSource () {
+        return source;
+    }
+
+    /**
+     * Sets source state of this transition
+     *
+     * @param sthe ource source state of this transition
+     */
+    public void setSource (StateVertex source) {
+        this.source = source;
+    }
+
+    /**
+     * Gets the target state of this transition
+     *
+     * @return the target state of this transition
+     */
+    public StateVertex getTarget () {
+        return target;
+    }
+
+    /**
+     * Sets the target state of this transition
+     *
+     * @param target the target state of this transition
+     */
+    public void setTarget (StateVertex target) {
+        this.target = target;
+    }
+
+    /**
+     * Gets the state machine containing this transition
+     *
+     * @return the state machine containing this transition
+     */
+    public StateMachine getStateMachine () {
+        return stateMachine;
+    }
+
+    /**
+     * Sets the state machine containing this transition
+     *
+     * @param xxxx the state machine containing this transition
+     */
+    public void setStateMachine (StateMachine stateMachine) {
+        this.stateMachine = stateMachine;
     }
 }

@@ -28,18 +28,57 @@ package org.opencyc.uml.commonbehavior;
 public class Argument {
 
     /**
-     * value of the argument
+     * the value of the argument
      */
-    public Expression value;
+    protected Expression value;
 
     /**
      * the action containing this argument
      */
-    public Action action;
+    protected Action action;
 
     /**
      * Constructs a new Argument object.
      */
     public Argument() {
     }
+
+    /**
+     * Gets the value of the argument
+     *
+     * @return the value of the argument
+     */
+    public Expression getValue () {
+        return value;
+    }
+
+    /**
+     * Sets the value of the argument
+     *
+     * @param xxxx the value of the argument
+     */
+    public void setValue (Expression value) {
+        this.value = value;
+    }
+
+    /**
+     * Gets the action containing this argument
+     *
+     * @return the action containing this argument
+     */
+    public Action getAction () {
+        return action;
+    }
+
+    /**
+     * Sets the action containing this argument
+     *
+     * @param action the action containing this argument
+     */
+    public void setAction (Action action) {
+        this.action = action;
+    }
+
+
+
 }

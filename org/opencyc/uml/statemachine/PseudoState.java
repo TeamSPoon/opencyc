@@ -28,9 +28,9 @@ package org.opencyc.uml.statemachine;
 public class PseudoState extends StateVertex {
 
     /**
-     * kind of PseudoState
+     * the kind of PseudoState
      */
-    public int kind;
+    protected int kind;
 
     public static final int PK_CHOICE = 1;
     public static final int PK_DEEPHISTORY = 2;
@@ -45,5 +45,23 @@ public class PseudoState extends StateVertex {
      * Constructs a new StateVertex object.
      */
     public PseudoState() {
+    }
+
+    /**
+     * Gets the kind of PseudoState
+     *
+     * @return the kind of PseudoState
+     */
+    public int getKind () {
+        return kind;
+    }
+
+    /**
+     * Sets the kind of PseudoState
+     *
+     * @param kind the kind of PseudoState
+     */
+    public void setKind (int kind) {
+        this.kind = kind;
     }
 }

@@ -30,16 +30,52 @@ public class CompositeState extends State {
     /**
      * indicates concurrent processes
      */
-    public boolean isConcurrent;
+    protected boolean isConcurrent;
 
     /**
-     * sub vertex
+     * the sub vertex
      */
-    public StateVertex subVertex;
+    protected StateVertex subVertex;
 
     /**
      * Constructs a new CompositeState object.
      */
-    public CompositeState() {
+    protected CompositeState() {
+    }
+
+    /**
+     * Gets whether concurrent processes
+     *
+     * @return whether concurrent processes
+     */
+    public boolean isConcurrent () {
+        return isConcurrent;
+    }
+
+    /**
+     * Sets whether concurrent processes
+     *
+     * @param isConcurrent whether concurrent processes
+     */
+    public void setIsConcurrent (boolean isConcurrent) {
+        this.isConcurrent = isConcurrent;
+    }
+
+    /**
+     * Gets the sub vertex
+     *
+     * @return the sub vertex
+     */
+    public StateVertex getSubVertex () {
+        return subVertex;
+    }
+
+    /**
+     * Sets the sub vertex
+     *
+     * @param subVertex the sub vertex
+     */
+    public void setSubVertex (StateVertex subVertex) {
+        this.subVertex = subVertex;
     }
 }

@@ -30,9 +30,9 @@ import org.opencyc.uml.statemachine.*;
 public class Operation extends BehavioralFeature {
 
     /**
-     * kind of concurrency
+     * the kind of concurrency
      */
-    public int concurrency;
+    protected int concurrency;
 
     public static final int CCK_SEQUENTIAL = 1;
     public static final int CCK_GUARDED = 2;
@@ -42,32 +42,150 @@ public class Operation extends BehavioralFeature {
      * When true, indicates that this operation must not inherit
      * a declaration of the same operation.
      */
-    public boolean isRoot;
+    protected boolean isRoot;
 
     /**
      * When true, indicates that the implementation of this operation
      * may not be overriden by a descendant class.
      */
-    public boolean isLeaf;
+    protected boolean isLeaf;
 
     /**
      * indicates whether this operation is abstract
      */
-    public boolean isAbstract;
+    protected boolean isAbstract;
 
     /**
-     * specification for this operation
+     * the specification for this operation
      */
-    public String specification;
+    protected String specification;
 
     /**
      * (Extension) the state machine implementing this Operation
      */
-    public StateMachine stateMachine;
+    protected StateMachine stateMachine;
 
     /**
      * Constructs a new Operation object.
      */
     public Operation() {
     }
+
+
+    /**
+     * Gets the kind of concurrency.
+     *
+     * @return the kind of concurrency
+     */
+    public int getConcurrency () {
+        return concurrency;
+    }
+
+    /**
+     * Sets the kind of concurrency.
+     *
+     * @param concurrency the kind of concurrency
+     */
+    public void setConcurrency (int concurrency) {
+        this.concurrency = concurrency;
+    }
+
+    /**
+     * Gets whether this operation must not inherit
+     * a declaration of the same operation
+     *
+     * @return whether this operation must not inherit
+     * a declaration of the same operation
+     */
+    public boolean isRoot () {
+        return isRoot;;
+    }
+
+    /**
+     * Sets whether this operation must not inherit
+     * a declaration of the same operation
+     *
+     * @param isLeaf whether this operation must not inherit
+     * a declaration of the same operation
+     */
+    public void setIsRoot (boolean isRoot) {
+        this.isRoot = isRoot;
+    }
+
+    /**
+     * Gets whether the implementation of this operation
+     * may not be overriden by a descendant class
+     *
+     * @return whether the implementation of this operation
+     * may not be overriden by a descendant class
+     */
+    public boolean isLeaf () {
+        return isLeaf;
+    }
+
+    /**
+     * Sets whether the implementation of this operation
+     * may not be overriden by a descendant class
+     *
+     * @param isLeaf whether the implementation of this operation
+     * may not be overriden by a descendant class
+     */
+    public void setIsLeaf (boolean isLeaf) {
+        this.isLeaf = isLeaf;
+    }
+
+    /**
+     * Gets whether this operation is abstract
+     *
+     * @return whether this operation is abstract
+     */
+    public boolean isAbstract () {
+        return isAbstract;
+    }
+
+    /**
+     * Sets whether this operation is abstract
+     *
+     * @param isAbstract whether this operation is abstract
+     */
+    public void setIsAbstract (boolean isAbstract) {
+        this.isAbstract = isAbstract;
+    }
+
+    /**
+     * Gets the specification for this operation
+     *
+     * @return the specification for this operation
+     */
+    public String getSpecification () {
+        return specification;
+    }
+
+    /**
+     * Sets the specification for this operation
+     *
+     * @param specification the specification for this operation
+     */
+    public void setSpecification (String specification) {
+        this.specification = specification;
+    }
+
+    /**
+     * Gets the state machine implementing this Operation
+     *
+     * @return the state machine implementing this Operation
+     */
+    public StateMachine getstateMachine () {
+        return stateMachine;
+    }
+
+    /**
+     * Sets the state machine implementing this Operation
+     *
+     * @param stateMachine the state machine implementing this Operation
+     */
+    public void setStateMachine (StateMachine stateMachine) {
+        this.stateMachine = stateMachine;
+    }
+
 }

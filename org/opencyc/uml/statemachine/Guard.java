@@ -31,12 +31,12 @@ import org.opencyc.uml.commonbehavior.*;
 public class Guard extends ModelElement {
 
     /**
-     * guard evaluatable expression
+     * the guard evaluatable expression
      */
     public BooleanExpression expression;
 
     /**
-     * transition to take if the guard expression evaluates
+     * the transition to take if the guard expression evaluates
      * to true.
      */
     public Transition transition;
@@ -45,5 +45,45 @@ public class Guard extends ModelElement {
      * Constucts a new Guard object.
      */
     public Guard() {
+    }
+
+    /**
+     * Gets the guard evaluatable expression.
+     *
+     * @return the guard evaluatable expression
+     */
+    public BooleanExpression getexpression () {
+        return expression;
+    }
+
+    /**
+     * Sets the guard evaluatable expression.
+     *
+     * @param expression the guard evaluatable expression
+     */
+    public void setexpression (BooleanExpression expression) {
+        this.expression = expression;
+    }
+
+    /**
+     * Gets the transition to take if the guard expression evaluates
+     * to true
+     *
+     * @return the transition to take if the guard expression evaluates
+     * to true
+     */
+    public Transition getTransition () {
+        return transition;
+    }
+
+    /**
+     * Sets the transition to take if the guard expression evaluates
+     * to true
+     *
+     * @param transition the transition to take if the guard expression evaluates
+     * to true
+     */
+    public void setTransition (Transition transition) {
+        this.transition = transition;
     }
 }

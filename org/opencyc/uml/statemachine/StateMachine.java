@@ -31,28 +31,101 @@ import org.opencyc.uml.core.*;
 public class StateMachine extends ModelElement {
 
     /**
-     * context of this state machine
+     * the context of this state machine
      */
-    public ModelElement context;
+    protected ModelElement context;
 
     /**
-     * top state of this state machine
+     * the top state of this state machine
      */
-    public State top;
+    protected State top;
 
     /**
-     * Transitions for this state machine
+     * the Transitions for this state machine
      */
-    public ArrayList transitions = new ArrayList();
+    protected ArrayList transitions = new ArrayList();
 
     /**
-     * submachine state for this state machine
+     * the submachine state for this state machine
      */
-    public SubmachineState submachineState;
+    protected SubmachineState submachineState;
 
     /**
      * Constructs a new StateMachine object.
      */
     public StateMachine() {
     }
+
+    /**
+     * Gets the context of this state machine
+     *
+     * @return the context of this state machine
+     */
+    public ModelElement getContext () {
+        return context;
+    }
+
+    /**
+     * Sets the context of this state machine
+     *
+     * @param context the context of this state machine
+     */
+    public void setContext (ModelElement context) {
+        this.context = context;
+    }
+
+    /**
+     * Gets the top state of this state machine
+     *
+     * @return the top state of this state machine
+     */
+    public State getTop () {
+        return top;
+    }
+
+    /**
+     * Sets the top state of this state machine
+     *
+     * @param top the top state of this state machine
+     */
+    public void setTop (State top) {
+        this.top = top;
+    }
+
+    /**
+     * Gets the Transitions for this state machine
+     *
+     * @return the Transitions for this state machine
+     */
+    public List getTransitions () {
+        return transitions;
+    }
+
+    /**
+     * Sets the Transitions for this state machine
+     *
+     * @param transitions the Transitions for this state machine
+     */
+    public void setTransitions (ArrayList transitions) {
+        this.transitions = transitions;
+    }
+
+    /**
+     * Gets the submachine state for this state machine
+     *
+     * @return the submachine state for this state machine
+     */
+    public SubmachineState getSubmachineState () {
+        return submachineState;
+    }
+
+    /**
+     * Sets the submachine state for this state machine
+     *
+     * @param submachineState the submachine state for this state machine
+     */
+    public void setSubmachineState (SubmachineState submachineState) {
+        this.submachineState = submachineState;
+    }
+
 }

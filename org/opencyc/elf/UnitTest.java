@@ -29,6 +29,7 @@ import org.opencyc.elf.vj.PlanEvaluator;
 import org.opencyc.elf.vj.ValueJudgement;
 
 import org.opencyc.elf.wm.ActionFactory;
+import org.opencyc.elf.wm.ActionLibrary;
 import org.opencyc.elf.wm.ExperienceLibrary;
 import org.opencyc.elf.wm.JobAssignmentFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
@@ -218,7 +219,8 @@ public class UnitTest extends TestCase {
     new KnowledgeBase();
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
-    new ActionFactory();
+    new ActionLibrary();
+    (new ActionFactory()).getInstance().populateActionLibrary();
     new GoalLibrary();
     (new GoalFactory()).getInstance().populateGoalLibrary();
     new ResourcePool();
@@ -232,7 +234,7 @@ public class UnitTest extends TestCase {
     Node node = ELFFactory.getInstance().makeNodeShell("test-node");
     
     ActionFactory actionFactory = new ActionFactory();
-    Action converseWithUserAction = actionFactory.makeConverseWithUser();
+    Action converseWithUserAction = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
     ArrayList parameterValues = new ArrayList();
     parameterValues.add(">");
     converseWithUserAction.setParameterValues(parameterValues);

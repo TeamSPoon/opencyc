@@ -65,7 +65,7 @@ public class JobAssignmentFactory {
     requiredResources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     jobAssignment.setRequiredResources(requiredResources);
     ActionFactory actionFactory = new ActionFactory();
-    Action action = actionFactory.makeConsolePromptedInput();
+    Action action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
     jobAssignment.setActionForScheduling(action);
     JobAssignmentLibrary.getInstance().setJobAssignment(Action.CONVERSE_WITH_USER, jobAssignment);
     

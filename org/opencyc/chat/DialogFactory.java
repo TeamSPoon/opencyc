@@ -1,5 +1,7 @@
 package org.opencyc.chat;
 
+import java.util.*;
+
 /**
  * Makes chat dialogs which can be interpreted by the DialogFsmInterpreter.<p>
  *
@@ -27,9 +29,6 @@ package org.opencyc.chat;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import java.util.*;
-
 public class DialogFactory {
 
     /**

@@ -1,9 +1,9 @@
 package org.opencyc.chat;
 
-import java.util.*;
+import junit.framework.*;
 
 /**
- * Makes events and uses a cache to create only unique instances.<p>
+ * Provides a unit test suite for the <tt>org.opencyc.chat</tt> package<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -26,41 +26,31 @@ import java.util.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DialogFsmEventFactory {
+public class UnitTest extends TestCase {
 
     /**
-     * Caches DialogFsmEvent objects to keep from making them twice.
-     * eventName --> DialogFsmEvent
+     * Creates a <tt>UnitTest</tt> object with the given name.
      */
-    static HashMap dialogFsmEventCache = new HashMap();
-
-    /**
-     * Creates a new DialogFsmEventFactory object.
-     */
-    public DialogFsmEventFactory() {
+    public UnitTest(String name) {
+        super(name);
     }
 
     /**
-     * Makes a new DialogFsmEvent object.
-     */
-    public DialogFsmEvent makeDialogFsmEvent (String eventName) {
-        DialogFsmEvent dialogFsmEvent = (DialogFsmEvent) dialogFsmEventCache.get(eventName);
-        if (dialogFsmEvent != null)
-            return dialogFsmEvent;
-        dialogFsmEvent = new DialogFsmEvent(eventName);
-        dialogFsmEventCache.put(eventName, dialogFsmEvent);
-        return dialogFsmEvent;
-    }
-
-    /**
-     * Returns a DialogFsmEvent object given the event name.
+     * Returns the test suite.
      *
-     * @param eventName the event name
-     * @return the DialogFsmEvent object having the event hame or null
-     * if it does not exist
+     * @return the test suite
      */
-    public DialogFsmEvent getDialogFsmEvent (String eventName) {
-        return (DialogFsmEvent) dialogFsmEventCache.get(eventName);
+    public static Test suite() {
+        TestSuite testSuite = new TestSuite();
+        testSuite.addTest(new UnitTest("testAsciiCycConnection"));
+        return testSuite;
+    }
+
+    /**
+     * Main method in case tracing is prefered over running JUnit.
+     */
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
     }
 
 }

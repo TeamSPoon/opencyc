@@ -1,5 +1,8 @@
 package org.opencyc.chat;
 
+import java.util.*;
+import java.io.*;
+
 /**
  * Contains a template for parsing a particular utterance, phrase or sentence
  * into an event and arguments.
@@ -25,7 +28,6 @@ package org.opencyc.chat;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 public class Template implements Comparable {
 
     /**
@@ -33,6 +35,11 @@ public class Template implements Comparable {
      * symbolic variables prefixed by question marks.
      */
     protected String templateExpression;
+
+    /**
+     * The words of the templater expression
+     */
+    protected ArrayList templateWords = new ArrayList();
 
     /**
      * the event associated with this template
@@ -50,6 +57,9 @@ public class Template implements Comparable {
                     DialogFsmEvent dialogFsmEvent) {
         this.templateExpression = templateExpression;
         this.dialogFsmEvent = dialogFsmEvent;
+        StringTokenizer stringTokenizer = new StringTokenizer(templateExpression);
+        while (stringTokenizer.hasMoreTokens())
+            templateWords.add(stringTokenizer.nextToken());
     }
 
     /**

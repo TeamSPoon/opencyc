@@ -1,5 +1,7 @@
 package org.opencyc.chat;
 
+import java.util.*;
+
 /**
  * Makes actions and uses a cache to create only unique instances.<p>
  *
@@ -24,9 +26,6 @@ package org.opencyc.chat;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import java.util.*;
-
 public class DialogFsmActionFactory {
 
     /**

@@ -9,29 +9,38 @@ BL (Behavior Language):
 ;; define the direct actions
 
 (define-action OutputTextToConsole
-  (:input-formal-parameters ((?OUTPUT-TEXT String))
-   :output-formal-parameters ()
-   :actuator ConsoleOutput))
+  (:input-formal-parameters ((:name ?OUTPUT-TEXT :type String))
+   :output-formal-parameters ())
+
+(define-action CycApiRequest
+  (:input-formal-parameters ((:name ?CYC_API_REQUEST :type CycList))
+   :output-formal-parameters ((:name ?CYC_API_RESPONSE :type Object))))
 
 ;; define the direct sensations
 
 (define-sensation ConsoleInput
+  (:type String))
 
-
+(define-sensation CycApiResponse
+  (:type Object))
 
 ;; define the direct sensors
 
 (define-direct-sensor ConsoleInput
   (:sensation ConsoleInput))
 
-;; define the actuator-sensors
+;; define the direct actuator-sensors
 
-(define-actuator-sensor CycApi
+(define-direct-actuator-sensor CycApi
   (:command-capabilities (CycApiRequest)
    :sensation CycApiResponse))
 
+;; define the direct actuators
 
+(define-direct-actuator ConsoleOutput
+  (:command-capabilities (ConsoleOutput)))
 
+;; define the goals
 
 (define-goal PerceiveSensation
   (:input-formal-parameters ((?PERCEIVED-SENSATION Object))
@@ -39,42 +48,27 @@ BL (Behavior Language):
 
 ;; define the schedule sets
 
-(define-schedule-set 
+(define-schedule-set ConverseWithUser
+  (:input-formal-parameters ((:name ?USER :type CycFort)))
+  (:output-formal-parameters ((:name ?USER-INPUT :type String)))
+  (:schedules
+    (:predicate-expression null
+     :commands
+       (:perform ConsolePromptedInput :input-paramter-values (">"))
+       (:achieve PerceiveSensation :input-parameter-values (?USER-INPUT)))))
 
-;; 
-(define-action ConverseWithUser
-  (:name "ConverseWithUser"
-   :input-formal-parameters ((?USER CycFort))
-   :output-formal-parameters ((?USER-INPUT String))
-   :sensor
-  (perform ConsolePromptedInput 
-    (:input-parameter-values (">"))
-  (achieve PerceiveSensation
-    (:input-parameter-values (?USER-INPUT)))
+(define-schedule-set GetCycImageId
+  (:input-formal-parameters ((:name ?CYC-ACCESS :type CycAccess)))
+  (:output-formal-parameters ((:name ?CYC-IMAGE-ID :type String)))
+  (:schedules
+    (:predicate-expression null
+     :commands
+       (:perform CycApiRequest 
+        :input-parameter-values ("(cyc-image-id)")
+        :output-state-variables (?CYC-IMAGE-ID)))))
+
     
 
-
-define ConverseWithUser
-  [command name: "ConverseWithUser"
-   input formal parameters: ?USER
-   output formal parameters: "?USER-INPUT" (String)
-   output state variables: "?USER-INPUT"]
-  
-  perform ConsolePromptedInput using ">" as ?PROMPT
-    [command name: "ConsolePromptedInput"
-     input formal parameters: ?PROMPT (String)]
-     
-  achieve PerceiveSensation using ?USER-INPUT as ?PERCEIVED-SENSATION
-    [command name: "PerceiveSensation"
-     input formal parameters: ?PERCEIVED-SENSATION (Object)
-     predicate expression: (not-null ?PERCEIVED-SENSATION)]
-
-
-The Schedule for ConverseWithUser
-
-(ConverseWithUser using SteveReed as ?User perceiving ?CONSOLE-INPUT as ?USER-INPUT)
-  (ConsolePromptedInput using ">")
-  (PerceiveSensation when (not-null ?CONSOLE-INPUT))
 
 
 

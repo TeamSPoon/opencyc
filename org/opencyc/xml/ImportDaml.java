@@ -1,6 +1,7 @@
 package org.opencyc.xml;
 
 import java.io.*;
+import java.util.*;
 import com.hp.hpl.jena.daml.*;
 import com.hp.hpl.jena.daml.common.DAMLModelImpl;
 import com.hp.hpl.mesa.rdf.jena.model.*;
@@ -63,20 +64,12 @@ public class ImportDaml {
      */
     public static void main(String[] argv) {
         Log.makeLog();
-        //String damlPath = "file:///opencyc/xml/test.daml";
-        String damlPath = "file:///G:/Jena-1.5.0/doc/tutorial/DAML/solutions/vcard-daml.rdf";
+        String damlPath = "file:///opencyc/xml/military-elements-ont-1.daml";
         //if (args.length > 0)
         //   umlModelPath = args[0];
         ImportDaml importDaml = new ImportDaml();
         importDaml.initialize();
-        DAMLModel model = new DAMLModelImpl();
-        try {
-            model.read(damlPath);
-        }
-        catch (RDFException e) {
-            e.printStackTrace();
-        }
-        System.out.println(model.toString());
+        importDaml.importDaml(damlPath);
     }
 
     /**
@@ -85,6 +78,39 @@ public class ImportDaml {
     protected void initialize () {
     }
 
+    /**
+     * Imports the DAML document.
+     */
+    protected void importDaml (String damlPath) {
+        DAMLModel damlModel = new DAMLModelImpl();
+        System.out.println("Loading " + damlPath);
+        try {
+            damlModel.read(damlPath);
+        }
+        catch (RDFException e) {
+            e.printStackTrace();
+        }
+        System.out.println(damlModel.toString());
+        System.out.println("\nProperties\n");
+
+        Iterator iter = damlModel.listDAMLProperties();
+        while (iter.hasNext()) {
+            DAMLProperty c = (DAMLProperty)iter.next();
+            System.out.println(c.toString());
+        }
+
+
+        System.out.println("\nClasses and Properties\n");
+        iter = damlModel.listDAMLClasses();
+        while (iter.hasNext()) {
+            DAMLClass damlClass = (DAMLClass)iter.next();
+            System.out.println(damlClass.toString());
+            Iterator iterProperties = damlClass.getDefinedProperties();
+            while (iterProperties.hasNext()) {
+                System.out.println("    "+iterProperties.next().toString());
+            }
+        }
+    }
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum

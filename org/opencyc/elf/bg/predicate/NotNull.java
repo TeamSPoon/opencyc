@@ -67,6 +67,16 @@ public class NotNull extends Predicate {
     return stringBuffer.toString();
   }
   
+ /**
+   * Returns true if the given object equals this object.
+   *
+   * @param obj the given object
+   * @return true if the given object equals this object
+   */
+  public boolean equals(Object obj) {
+    return obj instanceof NotNull;
+  }
+  
   //// Protected Area
   
   //// Private Area

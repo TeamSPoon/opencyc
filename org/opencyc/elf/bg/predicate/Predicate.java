@@ -62,6 +62,14 @@ public abstract class Predicate {
    */
   public abstract String toString(ArrayList arguments);
   
+ /**
+   * Returns true if the given object equals this object.
+   *
+   * @param obj the given object
+   * @return true if the given object equals this object
+   */
+  public abstract boolean equals(Object obj);
+  
   //// Protected Area
   
   //// Private Area

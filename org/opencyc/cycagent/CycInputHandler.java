@@ -131,6 +131,7 @@ class CycInputHandler implements Runnable {
             Log.current.println("Exception reading socket i/o: " + e);
             return;
         }
+
         CycList cycRequest = (CycList) cycRequestObject;
         if (! (cycRequest.first() instanceof CycSymbol)) {
             Log.current.println("Invalid cyc message directive " + cycRequestObject);

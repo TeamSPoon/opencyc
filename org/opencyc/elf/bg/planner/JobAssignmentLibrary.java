@@ -68,7 +68,7 @@ public class JobAssignmentLibrary {
     ActionFactory actionFactory = new ActionFactory();
     Action action = actionFactory.makeConsolePromptedInput();
     jobAssignment.setActionForScheduling(action);
-    jobAssignmentDictionary.put(Action.CONVERSE_WITH_USER, jobAssignment);
+    setJobAssignment(Action.CONVERSE_WITH_USER, jobAssignment);
     
   }
  
@@ -83,6 +83,16 @@ public class JobAssignmentLibrary {
   }
   
   //// Protected Area
+  
+  /**
+   * Sets the job assignment that accomplishes the given action name.
+   *
+   * @param action the given action name
+   * @param jobAssignment the job assignment that accomplishes the given action name
+   */
+  public void setJobAssignment (String actionName, JobAssignment jobAssignment) {
+    jobAssignmentDictionary.put(actionName, jobAssignment);
+  }
   
   //// Private Area
   

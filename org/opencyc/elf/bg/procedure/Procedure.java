@@ -52,8 +52,6 @@ public class Procedure {
     this.namespace = namespace;
     this.name = name;
     this.parameterTypes = parameterTypes;
-    state = new State();
-    register();
   }
 
   //// Public Area
@@ -69,30 +67,11 @@ public class Procedure {
     if (!(obj instanceof Procedure)) {
       return false;
     }
-
-    Procedure thatProcedure = (Procedure) obj;
-
-    //TODO
-    return true;
-  }
-
-
-  /**
-   * Gets the procedure state
-   *
-   * @return the procedure state
-   */
-  public State getState () {
-    return state;
-  }
-
-  /**
-   * Sets the procedure state
-   *
-   * @param state the procedure state
-   */
-  public void setState (State state) {
-    this.state = state;
+    Procedure that = (Procedure) obj;
+    if (! this.namespace.equals(that.namespace))
+      return false;
+    else
+      return (this.name.equals(that.name));
   }
 
   /**
@@ -187,19 +166,9 @@ public class Procedure {
   
   //// Protected Area
 
-  /**
-   * Registers this procedure's execute method so that it may be subsequently
-   * called with its parameter list and without its list of parameter types.
-   */
-  protected void register() {
-  }
-  
   //// Private Area
   
   //// Internal Rep
-  
-  /** the procedure state */
-  protected State state;
   
   /** the procedure name */
   protected String name;

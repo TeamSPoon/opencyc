@@ -31,7 +31,7 @@ import java.io.IOException;
  *
  * @see UnitTest#testRule
  */
-public class Rule {
+public class Rule  implements Comparable{
 
     /**
      * The constraint rule formula as an OpenCyc query.
@@ -208,6 +208,21 @@ public class Rule {
         Rule thatRule = (Rule) object;
         return this.rule.equals(thatRule.getRule());
     }
+
+    /**
+     * Compares this object with the specified object for order.
+     * Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param object the reference object with which to compare.
+     * @return a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object
+     */
+     public int compareTo (Object object) {
+        if (! (object instanceof Rule))
+            throw new ClassCastException("Must be a Rule object");
+        return (new Integer(this.getArity())).compareTo(new Integer(((Rule) object).getArity()));
+     }
 
     /**
      * Returns a value indicating the subsumption relationship, or lack of subsumption

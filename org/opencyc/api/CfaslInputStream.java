@@ -452,13 +452,17 @@ public class CfaslInputStream extends BufferedInputStream {
     }
 
     /**
-     * Reads the body of a Symbol from the CfaslInputStream.  The CFASL opcode
+     * Reads the body of a Symbol or EL variable from the CfaslInputStream.  The CFASL opcode
      * has already been read in at this point, so we only read in what follows.
      *
-     * @return the <tt>CycSymbol</tt> read
+     * @return the <tt>CycSymbol</tt> or EL <tt>CycVariable</tt>
      */
-    public CycSymbol readSymbol () throws IOException {
-        return  CycSymbol.makeCycSymbol((String)readObject());
+    public Object readSymbol () throws IOException {
+        String name = (String) readObject();
+        if (name.startsWith("?"))
+            return  CycVariable.makeCycVariable(name);
+        else
+            return  CycSymbol.makeCycSymbol(name);
     }
 
     /**

@@ -69,7 +69,8 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testConstraintProblem1"));
             //testSuite.addTest(new UnitTest("testConstraintProblem2"));
             //testSuite.addTest(new UnitTest("testConstraintProblem3"));
-            testSuite.addTest(new UnitTest("testBackchainer"));
+            //testSuite.addTest(new UnitTest("testBackchainer1"));
+            testSuite.addTest(new UnitTest("testBackchainer2"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -519,19 +520,20 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(hornClause1 != hornClause2);
 
         // substituteVariable
-        HornClause hornClause3 = (HornClause) hornClause1.clone();
-        hornClause3.substituteVariable(
-            CycVariable.makeCycVariable("?BOAT"),
-            CycVariable.makeCycVariable("?waterCraft"));
-        Assert.assertTrue(
-            ! (hornClause3.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
-        Assert.assertTrue(
-            hornClause3.getVariables().contains(CycVariable.makeCycVariable("?waterCraft")));
-        Assert.assertEquals(3, hornClause3.getAntecedantConjuncts().size());
-        Assert.assertEquals(2, hornClause3.getVariables().size());
-        Assert.assertTrue(
-            hornClause3.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
         try {
+            HornClause hornClause3 = (HornClause) hornClause1.clone();
+            hornClause3.substituteVariable(
+                CycVariable.makeCycVariable("?BOAT"),
+                CycVariable.makeCycVariable("?waterCraft"),
+                0);
+            Assert.assertTrue(
+                ! (hornClause3.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
+            Assert.assertTrue(
+                hornClause3.getVariables().contains(CycVariable.makeCycVariable("?waterCraft")));
+            Assert.assertEquals(3, hornClause3.getAntecedantConjuncts().size());
+            Assert.assertEquals(2, hornClause3.getVariables().size());
+            Assert.assertTrue(
+                hornClause3.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 hornClause3.getAntecedantConjuncts().contains(
                     new Rule("(#$isa ?waterCraft #$Watercraft-Surface)")));
@@ -545,7 +547,8 @@ public class UnitTest extends TestCase {
             HornClause hornClause4 = (HornClause) hornClause1.clone();
             hornClause4.substituteVariable(
                 CycVariable.makeCycVariable("?BOAT"),
-                cycAccess.makeCycConstant("#$Motorboat"));
+                cycAccess.makeCycConstant("#$Motorboat"),
+                0);
             Assert.assertTrue(
                 ! (hornClause4.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
             Assert.assertEquals(3, hornClause4.getAntecedantConjuncts().size());
@@ -567,27 +570,27 @@ public class UnitTest extends TestCase {
         }
 
         // renameVariables
-        HornClause hornClause5 = (HornClause) hornClause1.clone();
-        ArrayList otherVariables = new ArrayList();
-        Assert.assertTrue(hornClause5.equals(hornClause1));
-        hornClause5.renameVariables(otherVariables, 9);
-        Assert.assertTrue(hornClause5.equals(hornClause1));
-
-        otherVariables.add(CycVariable.makeCycVariable("?animal"));
-        hornClause5.renameVariables(otherVariables, 9);
-        Assert.assertTrue(hornClause5.equals(hornClause1));
-
-        otherVariables.add(CycVariable.makeCycVariable("?BOAT"));
-        hornClause5.renameVariables(otherVariables, 9);
-        Assert.assertEquals("(#$in-Floating ?BOAT_1 ?WATER)",
-                            hornClause5.consequent.cyclify());
-        Assert.assertEquals(3, hornClause5.getAntecedantConjuncts().size());
-        Assert.assertEquals(2, hornClause5.getVariables().size());
-        Assert.assertTrue(
-            ! (hornClause5.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
-        Assert.assertTrue(
-            hornClause5.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
         try {
+            HornClause hornClause5 = (HornClause) hornClause1.clone();
+            ArrayList otherVariables = new ArrayList();
+            Assert.assertTrue(hornClause5.equals(hornClause1));
+            hornClause5.renameVariables(otherVariables, 9);
+            Assert.assertTrue(hornClause5.equals(hornClause1));
+
+            otherVariables.add(CycVariable.makeCycVariable("?animal"));
+            hornClause5.renameVariables(otherVariables, 9);
+            Assert.assertTrue(hornClause5.equals(hornClause1));
+
+            otherVariables.add(CycVariable.makeCycVariable("?BOAT"));
+            hornClause5.renameVariables(otherVariables, 9);
+            Assert.assertEquals("(#$in-Floating ?BOAT_1 ?WATER)",
+                                hornClause5.consequent.cyclify());
+            Assert.assertEquals(3, hornClause5.getAntecedantConjuncts().size());
+            Assert.assertEquals(2, hornClause5.getVariables().size());
+            Assert.assertTrue(
+                ! (hornClause5.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
+            Assert.assertTrue(
+                hornClause5.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 ! (hornClause5.getAntecedantConjuncts().contains(
                     new Rule("(#$isa ?BOAT #$Watercraft-Surface)"))));
@@ -1005,10 +1008,10 @@ public class UnitTest extends TestCase {
     /**
      * Tests the <tt>Backchainer</tt> class.
      */
-    public void testBackchainer() {
-        System.out.println("** testBackchainer **");
+    public void testBackchainer1() {
+        System.out.println("** testBackchainer1 **");
 
-        // European Cathedrals with arg type discovery
+        // what is in Austin?
         String whatIsInAustinString =
             "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
         System.out.println(whatIsInAustinString);
@@ -1024,7 +1027,7 @@ public class UnitTest extends TestCase {
             whatIsInAustinProblem.problem = CycAccess.current().makeCycList(whatIsInAustinString);
             whatIsInAustinProblem.problemParser.extractRulesAndDomains();
             ArrayList backchainRules =
-                whatIsInAustinProblem.backchainer.backchain(whatIsInAustinProblem.domainPopulationRules);
+                whatIsInAustinProblem.backchainer.getBackchainRules(whatIsInAustinProblem.domainPopulationRules);
             Assert.assertNotNull(backchainRules);
         }
         catch (Exception e) {
@@ -1033,7 +1036,37 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testBackchainer OK **");
+        System.out.println("** testBackchainer1 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer2() {
+        System.out.println("** testBackchainer2 **");
+        // what is in Austin?
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
+        whatIsInAustinProblem.setVerbosity(8);
+        whatIsInAustinProblem.setMaxBackchainDepth(1);
+        // Request all solutions.
+        whatIsInAustinProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsInAustinProblem.solve(whatIsInAustinString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer2 OK **");
     }
 
 }

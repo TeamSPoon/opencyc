@@ -106,12 +106,31 @@ public class ProblemParser {
      * then divides the input rules into those which populate the variable
      * domains, and those which subsequently constrain the search for
      * one or more solutions.  Obtains additional argument type constraints for the constraint
-     * rules.
+     * rules.  If a ground fact discovered among the rule set is proven false, then immediately
+     * return the value false.
+     *
+     * @return <tt>false</tt> if a ground fact (rule with no variables) is proven false, otherwise
+     * return <tt>true</tt>
      */
-    public void extractRulesAndDomains() throws IOException {
+    public boolean extractRulesAndDomains() throws IOException {
         simplifiedRules.addAll(Rule.simplifyRuleExpression(constraintProblem.problem));
+        // Sort by ascending arity to find ground facts first.
+        Collections.sort(simplifiedRules);
         for (int i = 0; i < simplifiedRules.size(); i++) {
             Rule rule = (Rule) simplifiedRules.get(i);
+            if (rule.getArity() == 0) {
+                if (verbosity > 3)
+                    System.out.println("Ground fact\n" + rule);
+                boolean isTrueFact;
+                if (rule.isEvaluatable())
+                    isTrueFact = Rule.evaluateConstraintRule(rule.getRule());
+                else
+                    isTrueFact = CycAccess.current().isQueryTrue(rule.getRule(), constraintProblem.mt);
+                if (verbosity > 3)
+                    System.out.println("  --> " + isTrueFact);
+                if (! isTrueFact)
+                    return false;
+            }
             if (rule.isVariableDomainPopulatingRule())
                 placeDomainPopulatingRule(rule);
             else {
@@ -120,6 +139,7 @@ public class ProblemParser {
         }
         if (verbosity > 1)
             constraintProblem.displayConstraintRules();
+        return true;
     }
 
     /**
@@ -405,6 +425,19 @@ public class ProblemParser {
                                                              constraintProblem.mt);
                 ArrayList domainValues = new ArrayList();
                 domainValues.addAll(domainValuesCycList);
+
+                if (constraintProblem.backchainer.maxBackchainDepth >
+                    constraintProblem.backchainer.backchainDepth) {
+                    if (verbosity > 3)
+                        System.out.println("maxBackchainDepth " +
+                                           constraintProblem.backchainer.maxBackchainDepth +
+                                           " > " + constraintProblem.backchainer.backchainDepth +
+                                           "\n  for rule\n" + rule);
+                    ArrayList backchainDomainValues = constraintProblem.backchainer.backchain(rule);
+                    if (verbosity > 3)
+                        System.out.println("Adding backchain domain values " + backchainDomainValues +
+                                           "\n  for " + cycVariable);
+                }
                 valueDomains.varsDictionary.put(cycVariable, domainValues);
                 }
             }

@@ -1,6 +1,7 @@
 package org.opencyc.constraintsolver;
 
 import java.util.*;
+import java.io.*;
 import org.opencyc.cycobject.*;
 
 /**
@@ -67,7 +68,7 @@ public class Unifier {
      * @return an <tt>ArrayList</tt> of the antecedants with the required variable renamings and
      * substitutions if unification succeeds otherwise return <tt>null</tt>
      */
-    public ArrayList unify(Rule rule, HornClause hornClause) {
+    public ArrayList unify(Rule rule, HornClause hornClause) throws IOException {
         if (verbosity > 3)
             System.out.println("Attempting to unify \n" + rule + "\n" + hornClause);
         if (! (rule.getPredicate().equals(hornClause.getConsequent().getPredicate()))) {
@@ -76,7 +77,6 @@ public class Unifier {
                 " " + hornClause.getConsequent().getPredicate());
             return null;
         }
-
         // Clone a new horn clause having no variables in common with those variable which
         // are already included in the constraint problem.
         HornClause unifiedHornClause = (HornClause) hornClause.clone();
@@ -86,6 +86,7 @@ public class Unifier {
         // consequent.
         CycList consequentArguments = unifiedHornClause.getConsequent().getArguments();
         CycList ruleArguments = rule.getArguments();
+
         for (int i = 0; i < ruleArguments.size(); i++) {
             Object ruleArgument = ruleArguments.get(i);
             Object consequentArgument = consequentArguments.get(i);
@@ -93,7 +94,8 @@ public class Unifier {
                 if (consequentArgument instanceof CycVariable) {
                     // Unify a rule variable.
                     unifiedHornClause.substituteVariable((CycVariable) consequentArgument,
-                                                         ruleArgument);
+                                                         ruleArgument,
+                                                         verbosity);
                 if (verbosity > 3)
                     System.out.println("at argument position " + (i + 1) +
                                        ". " + ((CycVariable) ruleArgument).cyclify() +
@@ -111,12 +113,19 @@ public class Unifier {
             }
             else if (consequentArgument instanceof CycVariable) {
                 // Unify a horn clause consequent variable with a rule term.
-                unifiedHornClause.substituteVariable((CycVariable) consequentArgument,
-                                                     ruleArgument);
-                if (verbosity > 3)
-                    System.out.println("at argument position " + (i + 1) +
-                                       ". " + ruleArgument + " substituted for " +
-                                       ((CycVariable) consequentArgument).cyclify());
+                if (unifiedHornClause.substituteVariable((CycVariable) consequentArgument,
+                                                         ruleArgument,
+                                                         verbosity)) {
+                    if (verbosity > 3)
+                        System.out.println("at argument position " + (i + 1) +
+                                           ". " + ruleArgument + " substituted for " +
+                                           ((CycVariable) consequentArgument).cyclify());
+                }
+                else {
+                    if (verbosity > 3)
+                        System.out.println("  unification abandoned because formula not wff");
+                    return null;
+                }
             }
             else if (! (ruleArgument.equals(consequentArgument))) {
                 // Otherwise respective terms in the rule and horn clause consequent must be

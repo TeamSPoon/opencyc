@@ -1822,6 +1822,7 @@ public class UnitTest extends TestCase {
             //    System.out.println(((CycList) backchainRules.get(i)).cyclify());
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
 
@@ -1882,7 +1883,7 @@ public class UnitTest extends TestCase {
 
         // Narts in a list.
         try {
-            cycAccess.traceOn();
+            //cycAccess.traceOn();
             CycNart nart1 = cycAccess.getCycNartById(nartId);
             CycNart nart2 = cycAccess.getCycNartById(nartId);
             Assert.assertEquals(nart1, nart2);
@@ -1899,9 +1900,6 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(object instanceof CycList);
             CycList nartList1 = (CycList) object;
             Object element1 = nartList1.first();
-
-            System.out.println("element1 (" + element1.getClass() + ")");
-
             Assert.assertTrue((element1 instanceof CycNart) || (element1 instanceof CycList));
             if (element1 instanceof CycList)
                 element1 = CycNart.coerceToCycNart(element1);
@@ -1927,7 +1925,19 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-
+        // isWellFormedFormula
+        try {
+            Assert.assertTrue(cycAccess.isWellFormedFormula(cycAccess.makeCycList("(#$genls #$Dog #$Animal)")));
+            // Not true, but still well formed.
+            Assert.assertTrue(cycAccess.isWellFormedFormula(cycAccess.makeCycList("(#$genls #$Dog #$Plant)")));
+            Assert.assertTrue(cycAccess.isWellFormedFormula(cycAccess.makeCycList("(#$genls ?X #$Animal)")));
+            Assert.assertTrue(! cycAccess.isWellFormedFormula(cycAccess.makeCycList("(#$genls #$Dog #$Brazil)")));
+            Assert.assertTrue(! cycAccess.isWellFormedFormula(cycAccess.makeCycList("(#$genls ?X #$Brazil)")));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
     }
 }
 

@@ -199,6 +199,17 @@ public class ConstraintProblem {
     }
 
     /**
+     * Sets the maximum depth of backchaining from an input constraint rule. A value of zero indicates
+     * no backchaining.
+     *
+     * @param maxBackchainDepth the maximum depth of backchaining, or zero if no backchaing on the input
+     * constraint rules
+     */
+    public void setMaxBackchainDepth(int maxBackchainDepth) {
+        backchainer.setMaxBackchainDepth(maxBackchainDepth);
+    }
+
+    /**
      * Solves a constraint problem and return a list of solutions if one or more
      * was found, otherwise returns <tt>null</tt>.
      *
@@ -228,7 +239,14 @@ public class ConstraintProblem {
         long startMilliseconds = System.currentTimeMillis();
         this.problem = problem;
         try {
-            problemParser.extractRulesAndDomains();
+            if (! problemParser.extractRulesAndDomains()) {
+                long endMilliseconds = System.currentTimeMillis();
+                if (verbosity > 0) {
+                    System.out.println("No solution because an input fact was not true");
+                    System.out.println((endMilliseconds - startMilliseconds) + " milliseconds");
+                }
+                return new ArrayList();
+            }
             problemParser.gatherVariables();
             problemParser.initializeDomains();
             if (variables.size() > 1)

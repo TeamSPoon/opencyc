@@ -76,12 +76,6 @@ public class CycListParser  {
     public CycList read (String string) {
         StringReader stringReader = new StringReader(string);
         StreamTokenizer st = new StreamTokenizer(stringReader);
-/*
-        st.wordChars('#', '#');
-        st.wordChars('$', '$');
-        st.wordChars(':', ':');
-        st.wordChars('?', '?');
-*/
         st.commentChar( ';' );
         st.ordinaryChar( '(' );
         st.ordinaryChar( ')' );
@@ -90,6 +84,7 @@ public class CycListParser  {
         st.wordChars( '=', '=' );
         st.wordChars( '+', '+' );
         st.wordChars( '-', '-' );
+        st.wordChars( '_', '_' );
         st.wordChars( '<', '<' );
         st.wordChars( '>', '>' );
         st.wordChars( '*', '*' );

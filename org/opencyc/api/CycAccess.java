@@ -614,10 +614,11 @@ public class CycAccess {
     }
 
     /**
-     * Completes the instantiation of <tt>CycVariable</tt> returned by the binary api. The
-     * binary api sends only variable ids, and the variable name must be retrieved
+     * Completes the instantiation of HL <tt>CycVariable</tt> returned by the binary api. The
+     * binary api sends only HL variable ids, and the variable name must be retrieved
      * if the variable is not cached.  The variable id is not used when sending variables to
-     * the binary api, instead the variable is output as a symbol.
+     * the binary api, instead the variable is output as a symbol.  In the case where an EL
+     * variable is returned by the binary api, then then variable name is already present.
      *
      * @param cycVariable the <tt>CycVariable</tt> whose name is to be completed
      * @return the completed <tt>CycVariable</tt> object, or a reference to the previously
@@ -625,7 +626,8 @@ public class CycAccess {
      */
     public CycVariable completeCycVariable (CycVariable cycVariable)
         throws IOException, UnknownHostException {
-        cycVariable.name = getVariableName(cycVariable.id);
+        if (cycVariable.name == null)
+            cycVariable.name = getVariableName(cycVariable.id);
         CycVariable cachedVariable = CycVariable.getCache(cycVariable.name);
         if (cachedVariable == null) {
             CycVariable.addCache(cycVariable);
@@ -723,7 +725,7 @@ public class CycAccess {
         else
             cycAssertion = new CycAssertion(id);
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("assertion-formula"));
+        command.add(CycSymbol.makeCycSymbol("assertion-el-formula"));
         CycList command1 = new CycList();
         command.add(command1);
         command1.add(CycSymbol.makeCycSymbol("find-assertion-by-id"));
@@ -1703,7 +1705,7 @@ public class CycAccess {
         command.append("(clet (backchain-rules) ");
         command.append("  (with-mt " + mt.cyclify() + " ");
         command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :backward) ");
-        command.append("       (cpush (assertion-formula rule) backchain-rules))) ");
+        command.append("       (cpush (assertion-el-formula rule) backchain-rules))) ");
         command.append("   backchain-rules)");
         //this.traceOn();
         return converseList(command.toString());
@@ -1722,7 +1724,7 @@ public class CycAccess {
         command.append("(clet (forward-chain-rules) ");
         command.append("  (with-mt " + mt.cyclify() + " ");
         command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :forward) ");
-        command.append("       (cpush (assertion-formula rule) forward-chain-rules))) ");
+        command.append("       (cpush (assertion-el-formula rule) forward-chain-rules))) ");
         command.append("   forward-chain-rules)");
         return converseList(command.toString());
     }
@@ -1752,6 +1754,22 @@ public class CycAccess {
         command.add(cycSymbol);
         command.add(value);
         converseVoid(command);
+    }
+
+    /**
+     * Returns <tt>true</tt> iff <tt>CycList</tt> represents a well formed formula.
+     */
+    public boolean isWellFormedFormula (CycList cycList)  throws IOException, UnknownHostException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("with-all-mts"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("el-wff?"));
+        CycList command2 = new CycList();
+        command1.add(command2);
+        command2.add(CycSymbol.quote);
+        command2.add(cycList);
+        return converseBoolean(command);
     }
 
 

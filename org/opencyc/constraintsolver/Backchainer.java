@@ -7,7 +7,7 @@ import org.opencyc.api.*;
 
 /**
  * Provides additional constraint rules through backwards KB inference using the input constraint
- * rules as a starting point.  Only domain populating rules can be supplemented via backchaining,
+ * rules as a starting point.  Domain populating rules can be supplemented via backchaining,
  * because the answer to the query involves a search for bindings in the KB which are provided by
  * the domain populating rules.  Ordinary (non domain populating) rules on the other hand are not
  * supplemented by backchaining because they serve to restrict the domain values, as opposed to
@@ -56,9 +56,14 @@ public class Backchainer {
     protected Unifier unifier = new Unifier(this);
 
     /**
+     * current depth of backchaining from an input constraint rule.
+     */
+    protected int backchainDepth = 0;
+
+    /**
      * Maximum depth of backchaining from an input constraint rule.
      */
-    protected int maxBackchainDepth = 6;
+    protected int maxBackchainDepth = 1;
 
     /**
      * Constructs a new <tt>Backchainer</tt> object given the parent <tt>ConstraintProblem</tt>
@@ -71,46 +76,107 @@ public class Backchainer {
     }
 
     /**
+     * Solves a recursive constraint problem to obtain additional bindings for the variable in the given
+     * unary rule, via backchaining on the unary rule (which might be a partially instantiated form of
+     * a higher arity rule).
+     *
+     * @param rule the unary rule for which additional bindings are sought via backchaining
+     * @return the <tt>ArrayList</tt> of values found
+     */
+    public ArrayList backchain(Rule rule) throws IOException {
+        ArrayList values = new ArrayList();
+        if (rule.getVariables().size() != 1)
+            throw new RuntimeException("Attempt to backchain on non-unary rule " + rule);
+        CycVariable variable = (CycVariable) rule.getVariables().get(0);
+        if (verbosity > 3)
+            System.out.println("Backchaining on " + rule +
+                               "\n  to get bindings for " + variable);
+
+        ArrayList backchainRules = getBackchainRules(rule);
+        for (int i = 0; i < backchainRules.size(); i++) {
+            Rule backchainRule = (Rule) backchainRules.get(i);
+            if (verbosity > 3)
+                System.out.println("\n\nRecursive constraint problem to solve " + backchainRule);
+            ConstraintProblem backchainProblem = new ConstraintProblem();
+            backchainProblem.setVerbosity(verbosity);
+            // Request all solutions.
+            backchainProblem.nbrSolutionsRequested = null;
+            backchainProblem.mt = constraintProblem.mt;
+            // Keep the same limit on maximum backchain depth
+            backchainProblem.setMaxBackchainDepth(this.maxBackchainDepth);
+            // Increment the depth of backchaining.
+            backchainProblem.backchainer.backchainDepth = this.backchainDepth + 1;
+            ArrayList solutions = backchainProblem.solve(backchainRule.rule);
+            for (int j = 0; j < solutions.size(); j++) {
+                ArrayList solutionBindings = (ArrayList) solutions.get(j);
+                if (verbosity > 3)
+                    System.out.println("Found bindings " + solutionBindings +
+                                       "\n  for " + variable);
+                for (int k = 0; k < solutionBindings.size(); k++) {
+                    Binding binding = (Binding) solutionBindings.get(k);
+                    if (binding.getCycVariable().equals(variable)) {
+                        Object value = binding.getValue();
+                        if (verbosity > 3)
+                            System.out.println("  adding value " + value + " for " + variable);
+                        values.add(value);
+                    }
+                }
+            }
+        }
+        return values;
+    }
+
+    /**
      * Performs backchaining inference to augment the input constraint domain-populating
      * constraint rule set.
      *
      * @param domainPopulationRules collection of the rules which populate variable domains
      * @return the augmented input constraint domain-populating constraint rule set
      */
-    public ArrayList backchain(ArrayList domainPopulationRules) throws IOException {
+    public ArrayList getBackchainRules(ArrayList domainPopulationRules) throws IOException {
         ArrayList result = new ArrayList();
         for (int i = 0; i < domainPopulationRules.size(); i++) {
             Rule domainPopulationRule = (Rule) domainPopulationRules.get(i);
-            result.addAll(backchain(domainPopulationRule));
+            result.addAll(getBackchainRules(domainPopulationRule));
         }
         return result;
     }
 
     /**
-     * Returns the implication rules which can prove the given rule.
+     * Returns the sets of conjunctive antecentant rules which can prove the given rule.
      *
      * @param rule a rule is to be proven via backchaining
-     * @return the implication rules which can prove the given rule
+     * @return the sets of conjunctive antecentant rules which can prove the given rule
      */
-    public ArrayList backchain(Rule rule) throws IOException {
+    public ArrayList getBackchainRules(Rule rule) throws IOException {
         ArrayList result = new ArrayList();
-        int backchainDepth = rule.getBackchainDepth();
-        if (backchainDepth >= this.maxBackchainDepth) {
-            if (verbosity > 3)
-                System.out.println("backchaining limit reached for\n" + rule);
-            return result;
-        }
-        int newBackchainDepth = backchainDepth + 1;
         if (verbosity > 3)
-            System.out.println("backchaining on\n" + rule);
-
+            System.out.println("getting rules to conclude\n" + rule);
         ArrayList candidateImplicationRules = gatherRulesConcluding(rule);
-        for (int i = 0; i < candidateImplicationRules.size(); i++) {
-            // TODO implement rule filtering
+        int nbrAcceptedRules = 0;
+        int nbrCandidateRules = candidateImplicationRules.size();
+        for (int i = 0; i < nbrCandidateRules; i++) {
             Rule candidateImplicationRule = (Rule) candidateImplicationRules.get(i);
             if (verbosity > 3)
-                System.out.println("Considering implication rule\n" + candidateImplicationRule.cyclify());
+                System.out.println("\nConsidering implication rule\n" + candidateImplicationRule.cyclify());
+            HornClause hornClause = new HornClause(candidateImplicationRule);
+            ArrayList antecedants = unifier.unify(rule, hornClause);
+            if (antecedants != null) {
+                if (verbosity > 3)
+                    System.out.println("Unified antecedants\n" + antecedants);
+                nbrAcceptedRules++;
+                CycList conjunctiveAntecedantRule = new CycList();
+                conjunctiveAntecedantRule.add(CycAccess.and);
+                for (int j = 0; j < antecedants.size(); j++) {
+                    Rule antecedant = (Rule) antecedants.get(j);
+                    conjunctiveAntecedantRule.add(antecedant.getRule());
+                }
+                result.add(new Rule(conjunctiveAntecedantRule));
+            }
         }
+        if (verbosity > 3)
+            System.out.println("\nAccepted " + nbrAcceptedRules + " backchain rules from " +
+                               nbrCandidateRules + " candidates");
         return result;
     }
 
@@ -137,11 +203,16 @@ public class Backchainer {
         return result;
     }
 
-
-
-
-
-
+    /**
+     * Sets the maximum depth of backchaining from an input constraint rule. A value of zero indicates
+     * no backchaining.
+     *
+     * @param maxBackchainDepth the maximum depth of backchaining, or zero if no backchaing on the input
+     * constraint rules
+     */
+    public void setMaxBackchainDepth(int maxBackchainDepth) {
+        this.maxBackchainDepth = maxBackchainDepth;
+    }
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum

@@ -1,6 +1,7 @@
 package org.opencyc.constraintsolver;
 
 import java.util.*;
+import java.io.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 
@@ -72,17 +73,34 @@ public class HornClause {
     }
 
     /**
+     * Constructs a new <tt>HornClause</tt> object from the given implication <tt>Rule</tt>.
+     *
+     * @param rule the given implication <tt>Rule</tt>
+     */
+    public HornClause(Rule rule) {
+        this(rule.getRule());
+    }
+
+    /**
      * Constructs a new <tt>HornClause</tt> object from the given cyclified string representation.
      *
      * @param hornClauseString the cyclified string representation of the horn clause
      */
     public HornClause(String hornClauseString) {
-        CycList hornClause = CycAccess.current().makeCycList(hornClauseString);
+        this(CycAccess.current().makeCycList(hornClauseString));
+    }
+
+    /**
+     * Constructs a new <tt>HornClause</tt> object from the given <tt>CycList</tt> representation.
+     *
+     * @param cycList the <tt>CycList</tt> representation of the horn clause
+     */
+    public HornClause(CycList hornClause) {
         if (hornClause.size() != 3)
-            throw new RuntimeException("HornClause list is not length 3 " + hornClauseString);
+            throw new RuntimeException("HornClause list is not length 3 " + hornClause);
         CycConstant implies = (CycConstant) hornClause.first();
         if (! (implies.cyclify().equals("#$implies")))
-            throw new RuntimeException("HornClause string not an implication " + hornClauseString);
+            throw new RuntimeException("HornClause string not an implication " + hornClause);
         CycList antecedantCycList = (CycList) hornClause.second();
         CycList consequentCycList = (CycList) hornClause.third();
         antecedantConjuncts = new ArrayList();
@@ -147,8 +165,9 @@ public class HornClause {
      *
      * @param otherVariables the other variables with whom this horn clause will have no
      * variables in common
+     * @param verbosity a verbosity indicator, 0 = quiet ... 9 = most diagnostic output
      */
-    public void renameVariables(ArrayList otherVariables, int verbosity) {
+    public void renameVariables(ArrayList otherVariables, int verbosity) throws IOException {
         if (verbosity > 3)
             System.out.println("ensuring that variables for \n" + this.cyclify() +
                                "are different from " + otherVariables);
@@ -156,23 +175,29 @@ public class HornClause {
             CycVariable otherVariable = (CycVariable) otherVariables.get(i);
             if (variables.contains(otherVariable)) {
                 CycVariable uniqueVariable = CycVariable.makeUniqueCycVariable(otherVariable);
-                this.substituteVariable(otherVariable, uniqueVariable);
+                this.substituteVariable(otherVariable, uniqueVariable, verbosity);
                 if (verbosity > 3)
                     System.out.println("renamed " + otherVariable.cyclify() +
                                        " to " + uniqueVariable.cyclify());
-
             }
         }
     }
 
 
     /**
-     * Substitutes an object for a variable.
+     * Substitutes an object for a variable, returning <tt>true</tt> iff all argument type constraints
+     * are satisfied, otherwise <tt>false</tt> is returned at the point where the argument type
+     * conflict is found.
      *
      * @param oldVariable the variable to replaced
      * @parma newObject the <tt>Object</tt> to be substituted for the variable
+     * @param verbosity a verbosity indicator, 0 = quiet ... 9 = most diagnostic output
+     * @return <tt>true</tt> iff all argument type constraints
+     * are satisfied, otherwise <tt>false</tt> is returned at the point where the argument type
+     * conflict is found
      */
-    public void substituteVariable(CycVariable variable, Object newObject) {
+    public boolean substituteVariable(CycVariable variable, Object newObject, int verbosity)
+        throws IOException {
         if (! (variables.contains(variable))) {
             throw new RuntimeException(variable + " is not a variable of \n" + this.cyclify());
         }
@@ -183,9 +208,20 @@ public class HornClause {
             consequent.substituteVariable(variable, newObject);
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
             Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
-            if (antecedantConjunct.getVariables().contains(variable))
+            if (antecedantConjunct.getVariables().contains(variable)) {
                 antecedantConjunct.substituteVariable(variable, newObject);
+                if (! CycAccess.current().isWellFormedFormula(antecedantConjunct.getRule())) {
+                    if (verbosity > 3)
+                        System.out.println(antecedantConjunct.getRule() + "\n  is not well formed");
+                    return false;
+                }
+                else {
+                    if (verbosity > 3)
+                        System.out.println(antecedantConjunct.getRule() + "\n  is well formed");
+                }
+            }
         }
+        return true;
     }
 
     /**

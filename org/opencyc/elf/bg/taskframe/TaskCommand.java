@@ -120,7 +120,7 @@ public class TaskCommand {
    *
    * @param goalTime the goal time constraint plus modifiers such as tolerance
    */
-  public void setXXX (GoalTime goalTime) {
+  public void setGoalTime (GoalTime goalTime) {
     this.goalTime = goalTime;
   }
 

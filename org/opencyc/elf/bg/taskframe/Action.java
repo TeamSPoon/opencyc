@@ -80,6 +80,20 @@ public class Action {
   }
   
   /**
+   * Creates and returns a copy of this object.
+   *
+   * @return a partially instantiated copy of this object
+   */
+  public Object clone () {
+    Action action = new Action();
+    action.setName(name);
+    action.setParameterNames(parameterNames);
+    action.setParameterTypes(parameterTypes);
+    action.setOutputType(outputType);
+    return action;
+  }
+  
+  /**
    * Gets the name of the action
    *
    * @return name the name of the action

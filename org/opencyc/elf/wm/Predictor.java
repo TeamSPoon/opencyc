@@ -47,7 +47,7 @@ public class Predictor extends NodeComponent {
   
   /** 
    * Creates a new instance of Predictor with the given
-   * input channel.
+   * input and output channels.
    *
    * @param predictorChannel the takable channel from which messages are input
    */

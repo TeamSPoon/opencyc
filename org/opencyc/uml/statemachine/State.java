@@ -2,6 +2,7 @@ package org.opencyc.uml.statemachine;
 
 import java.util.*;
 import org.opencyc.uml.commonbehavior.*;
+import org.opencyc.uml.interpreter.*;
 
 /**
  * State from the UML State_Machines package.
@@ -55,6 +56,12 @@ public class State extends StateVertex {
      */
     protected StateMachine stateMachine;
 
+
+    /**
+     * the state interpreter for this state
+     */
+    protected StateInterpreter stateInterpreter;
+
     /**
      * Indicates whether this state is currently active during execution of
      * the state machine.  A state becomes active when it is entered as a
@@ -74,7 +81,6 @@ public class State extends StateVertex {
      */
     public State() {
     }
-
 
     /**
      * Gets the entry action for this state.
@@ -206,6 +212,24 @@ public class State extends StateVertex {
      */
     public void setDoActivityThread (Thread doActivityThread) {
         this.doActivityThread = doActivityThread;
+    }
+
+    /**
+     * Gets the state interpreter for this state.
+     *
+     * @return the state interpreter for this state
+     */
+    public StateInterpreter getStateInterpreter () {
+        return stateInterpreter;
+    }
+
+    /**
+     * Sets the state interpreter for this state.
+     *
+     * @param stateInterpreter the state interpreter for this state
+     */
+    public void setStateInterpreter (StateInterpreter stateInterpreter) {
+        this.stateInterpreter = stateInterpreter;
     }
 
 }

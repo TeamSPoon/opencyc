@@ -51,6 +51,31 @@ public abstract class ModelElement extends Element {
     public ModelElement() {
     }
 
+    /**
+     * Returns true if the given object is equal to this object, otherwise returns
+     * false.  Equality is determined by the namespace and name of the model element.
+     *
+     * @param object the given object
+     * @return true if the given object is equal to this object, otherwise returns
+     * false
+     */
+    public boolean equals (Object object) {
+        if (! this.getClass().equals(object.getClass()))
+            return false;
+        ModelElement that = (ModelElement) object;
+        if (! this.name.equals(that.name))
+            return false;
+        if (this.namespace == null) {
+            if (that.namespace == null)
+                return true;
+            else
+                return false;
+        }
+        if (that.namespace == null)
+            return false;
+        return this.namespace.equals(that.namespace);
+    }
+
 
     /**
      * Gets the identifier for the ModelElement within its containing

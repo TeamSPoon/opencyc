@@ -41,10 +41,32 @@ public class StateInterpreter extends Thread {
     }
 
     /**
+     * indicates whether a thread is running this state.
+     */
+    protected boolean isThreadRunning = false;
+
+    /**
      * Interprets the effects of a transition into the given state.
      */
     public void run () {
+        isThreadRunning = true;
 
+    }
+
+    /**
+     * Interprets a transition into this state.
+     *
+     * @param transition the transistion
+     */
+    public void interpretTransitionEntry (Transition transition) {
+    }
+
+    /**
+     * Interprets a transition from this state.
+     *
+     * @param transition the transistion
+     */
+    public void interpretTransitionExit (Transition transition) {
     }
 
     /**
@@ -64,4 +86,14 @@ public class StateInterpreter extends Thread {
     public void setState (State state) {
         this.state = state;
     }
+
+    /**
+     * Gets whether a thread is running this state
+     *
+     * @return whether a thread is running this state
+     */
+    public boolean isThreadRunning () {
+        return isThreadRunning;
+    }
+
 }

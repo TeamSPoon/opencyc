@@ -155,9 +155,7 @@ public class Interpreter {
                         }
                     }
                 }
-
             }
-
         }
     }
 
@@ -177,7 +175,22 @@ public class Interpreter {
      * actions to completion.
      */
     protected void fireSelectedTransitions () {
-
+        Iterator iter = selectedTransitions.iterator();
+        while (iter.hasNext()) {
+            Transition transition = (Transition) iter.next();
+            StateVertex source = transition.getSource();
+            if (source instanceof State)
+                ((State) source).getStateInterpreter().interpretTransitionExit(transition);
+            else {
+                //TODO handle vertices
+            }
+            StateVertex target = transition.getTarget();
+            if (target instanceof State)
+                ((State) target).getStateInterpreter().interpretTransitionEntry(transition);
+            else {
+                //TODO handle vertices
+            }
+        }
     }
 
     /**

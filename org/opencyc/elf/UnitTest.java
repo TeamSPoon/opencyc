@@ -12,6 +12,8 @@ import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
 
+import org.opencyc.elf.bg.state.StateVariable;
+
 import org.opencyc.elf.message.DoTaskMsg;
 
 import org.opencyc.elf.s.Sensor;
@@ -27,12 +29,18 @@ import org.opencyc.elf.vj.PlanEvaluator;
 import org.opencyc.elf.vj.ValueJudgement;
 
 import org.opencyc.elf.wm.ActionFactory;
+import org.opencyc.elf.wm.ExperienceLibrary;
+import org.opencyc.elf.wm.JobAssignmentFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
+import org.opencyc.elf.wm.ELFFactory;
+import org.opencyc.elf.wm.GoalFactory;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.PlanSimulator;
 import org.opencyc.elf.wm.Predictor;
-import org.opencyc.elf.wm.ScheduleLibrary;
+import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
+import org.opencyc.elf.wm.TaskFrameFactory;
+import org.opencyc.elf.wm.TaskFrameLibrary;
 import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
@@ -204,11 +212,19 @@ public class UnitTest extends TestCase {
     System.out.println("\n*** testBehaviorGeneration ***");
     
     logger.info("Testing behavior generation");
-    (new ResourcePool()).getInstance().initialize();
-    (new JobAssignmentLibrary()).getInstance().initialize();
-    (new ScheduleLibrary()).getInstance().initialize();
-    ELFFactory elfFactory = new ELFFactory();
-    Node node = elfFactory.makeNodeShell("test-node");
+    new KnowledgeBase();
+    new ActionFactory();
+    new GoalFactory();
+    new ResourcePool();
+    (new ResourceFactory()).getInstance().populateResourcePool();
+    StateVariable.initialize();
+    new JobAssignmentLibrary();
+    (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
+    new TaskFrameLibrary();
+    (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
+    new ExperienceLibrary();
+    new ELFFactory();
+    Node node = ELFFactory.getInstance().makeNodeShell("test-node");
     
     ActionFactory actionFactory = new ActionFactory();
     Action converseWithUserAction = actionFactory.makeConverseWithUser();
@@ -257,9 +273,7 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER));
     Assert.assertEquals("[JobAssignment for [[Resource: console]] action: converse with user]", 
                         JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER).toString());
-    Assert.assertNotNull(ScheduleLibrary.getInstance());
-    Assert.assertEquals("[[Schedule [[Action: console prompted input( prompt: null)]]]]", 
-                        ScheduleLibrary.getInstance().getSchedules(Action.CONVERSE_WITH_USER).toString());
+    //TODO add TaskFrame tests
     try {
       Thread.sleep(2000);
     }

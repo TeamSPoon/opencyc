@@ -81,6 +81,13 @@ public class NodeFactory {
   }
   
   /**
+   * Populates the node pool.
+   */
+  public void populateNodePool () {
+    //TODO
+  }
+
+  /**
    * Makes a shell node.
    *
    * @param name the node name

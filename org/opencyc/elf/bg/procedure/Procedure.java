@@ -37,7 +37,8 @@ import org.opencyc.elf.bg.state.State;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class Procedure {
+public class Procedure {
+  
   //// Constructors
 
   /**
@@ -200,20 +201,17 @@ public abstract class Procedure {
   /** the procedure state */
   protected State state;
   
-    /** the class dictionary of execute methods */
-  protected static HashMap executeMethodDictionary;
-
   /** the procedure name */
-  protected static String name;
+  protected String name;
 
   /** the procedure namespace */
   protected String namespace;
 
   /** the parameter names each of which is a String */
-  protected static ArrayList parameterNames;
+  protected ArrayList parameterNames;
 
   /** the parameter types each of which is a Class */
-  protected static ArrayList parameterTypes;
+  protected ArrayList parameterTypes;
 
   /** the output type */
   protected Class outputType;

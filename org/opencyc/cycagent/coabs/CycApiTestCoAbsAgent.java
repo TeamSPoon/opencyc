@@ -77,12 +77,12 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
     /**
      * the agent name.
      */
-    protected String agentName;
+    protected String agentName = "Agent2";
 
     /**
      * The Cyc Api Service Agent name.
      */
-    String cycApiServiceAgentName = "BalrogCycApiService-3600";
+    String cycApiServiceAgentName = "Agent1";
 
     /**
      * the CoABS AgentRestrationHelper object.
@@ -100,10 +100,9 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
     protected CycAccess cycAccess;
 
     /**
-     * Waits for CycApi response.
+     * The conversation state.
      */
-    protected boolean awaitingCycApiResponse = true;
-
+    protected String conversationState = "initial";
 
     /**
      * Constructs a new CycApiTestCoAbsAgent object.
@@ -115,18 +114,49 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
      * @param agentName the unique name of this Cyc proxy agent.
      */
     public CycApiTestCoAbsAgent(String agentName) throws IOException {
-        if (verbosity > 1)
-            Log.current.println("Starting CycApiTestCoAbsAgent");
         this.agentName = agentName;
+        execute();
+    }
+
+    /**
+     * Constructs a new CycApiTestCoAbsAgent object.
+     * This agent instantiates an AgentRegistrationHelper, which in turn
+     * instantiates a DefaultAgentRep, a MessageQueue, and GridAgentHelper.
+     * This object then makes itself a messageListener to the queue, adds an
+     * agent advertisement and registers itself.
+     */
+    public CycApiTestCoAbsAgent() throws IOException {
+        execute();
+    }
+
+    /**
+     * Executes the cyc api call.
+     */
+    protected void execute() throws IOException {
+        if (verbosity > 1)
+            Log.current.println("Starting CycApiTestCoAbsAgent " + agentName);
         regHelper = new AgentRegistrationHelper(agentName);
         regHelper.addMessageListener(this);
         Entry[] entries = {new AMSAgentDescription(agentName)};
         regHelper.addAdvertisedCapabilities(entries);
         count = 1;
-        register();
         ShutdownHandler.addHook(this);
+        conversationState = "register";
         register();
+        while (conversationState.equals("register"))
+            try {
+                Thread.sleep(500);
+            }
+            catch (InterruptedException e) {
+            }
+        conversationState = "api request sent";
         sendCycApiRequest();
+        while (conversationState.equals("api request sent"))
+            try {
+                Thread.sleep(500);
+            }
+            catch (InterruptedException e) {
+            }
     }
 
     /**
@@ -137,18 +167,12 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
             Log.makeLog();
         CycApiTestCoAbsAgent cycApiTestCoAbsAgent = null;
         try {
-            cycApiTestCoAbsAgent = new CycApiTestCoAbsAgent("ClientOfBalrogCycApi-3600");
+            cycApiTestCoAbsAgent = new CycApiTestCoAbsAgent();
         }
         catch (IOException e) {
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
         }
-        while (cycApiTestCoAbsAgent.awaitingCycApiResponse)
-            try {
-                Thread.sleep(1000);
-            }
-            catch (InterruptedException e) {
-            }
         cycApiTestCoAbsAgent.cleanup();
     }
 
@@ -158,7 +182,7 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
     public void cleanup() {
         if (regHelper.isRegistered()) {
             if (verbosity > 1)
-                Log.current.println("de-registering CoAbsCycProxy");
+                Log.current.println("de-registering" + regHelper.getAgentRep().getName());
             deregister();
         }
     }
@@ -272,19 +296,13 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
                                     ")";
         Message requestMessage = new BasicMessage(cycApiServiceAgentName,
                                                   regHelper.getAgentRep(),
-                                                  "FIPA-ACL",
+                                                  "CYC-API",
                                                   requestMessageText);
         if (verbosity > 2)
-            Log.current.println("\nRequesting " + requestMessage.toString());
+            Log.current.println("\nSending " + requestMessage.toString() +
+                                "\n  receiver: " + requestMessage.getReceiver());
         forward(requestMessage);
 
-        try {
-            cycAccess.close();
-        }
-        catch (Exception e) {
-            Log.current.errorPrintln(e.getMessage());
-            Log.current.printStackTrace(e);
-        }
     }
 
     /**
@@ -305,8 +323,27 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
                                 "\n  Time message received: " + time +
                                 "\n  Sender AgentRep: " + agentRep +
                                 "\n  From: " + fromAgentName);
-        if (fromAgentName.equals("BalrogCycApiService-3600"))
-            awaitingCycApiResponse = false;
+
+        if (message.getRawText().startsWith("(inform")) {
+            if (conversationState.equals("register")) {
+                conversationState = "registration reply received";
+                if (verbosity > 2)
+                    Log.current.println("Received reply for the registration request" +
+                                        "\n  now ready for Cyc Api calls");
+            }
+            else {
+                if (verbosity > 2)
+                    Log.current.println("Ignoring INFORM performative");
+            }
+            return;
+        }
+        if (conversationState.equals("api request sent"))
+            conversationState = "api request received";
+        else {
+            Log.current.errorPrintln("Conversation state not api request sent" +
+                                     conversationState);
+            return;
+        }
     }
 
     /**

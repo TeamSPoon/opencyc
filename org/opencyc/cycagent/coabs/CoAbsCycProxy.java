@@ -79,7 +79,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
     /**
      * the agent name.
      */
-    protected String agentName;
+    protected String agentName = "Agent1";
 
     /**
      * the CoABS AgentRestrationHelper object.
@@ -94,8 +94,12 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
     /**
      * The CycAccess object which manages the interface to the Cyc api.
      */
-    CycAccess cycAccess;
+    protected CycAccess cycAccess;
 
+    /**
+     * The conversation state.
+     */
+    protected String conversationState = "initial";
 
     /**
      * Constructs a new CoAbsCycProxy object.
@@ -107,14 +111,33 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * @param agentName the unique name of this Cyc proxy agent.
      */
     public CoAbsCycProxy(String agentName) throws IOException {
-        if (verbosity > 1)
-            Log.current.println("Starting CoAbsCycProxy");
         this.agentName = agentName;
+        execute();
+    }
+
+    /**
+     * Constructs a new CoAbsCycProxy object.
+     * This agent instantiates an AgentRegistrationHelper, which in turn
+     * instantiates a DefaultAgentRep, a MessageQueue, and GridAgentHelper.
+     * This object then makes itself a messageListener to the queue, adds an
+     * agent advertisement and registers itself.
+     */
+    public CoAbsCycProxy() throws IOException {
+        execute();
+    }
+
+    /**
+     * Executes the cyc api service.
+     */
+    protected void execute() throws IOException {
+        if (verbosity > 1)
+            Log.current.println("Starting CoAbsCycProxy " + agentName);
         regHelper = new AgentRegistrationHelper(agentName);
         regHelper.addMessageListener(this);
         Entry[] entries = {new AMSAgentDescription(agentName)};
         regHelper.addAdvertisedCapabilities(entries);
         count = 1;
+        conversationState = "register";
         register();
         ShutdownHandler.addHook(this);
     }
@@ -126,7 +149,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         if (Log.current == null)
             Log.makeLog();
         try {
-            CoAbsCycProxy coAbsCycProxy = new CoAbsCycProxy("BalrogCycApiService-3600");
+            CoAbsCycProxy coAbsCycProxy = new CoAbsCycProxy();
         }
         catch (IOException e) {
             Log.current.errorPrintln(e.getMessage());
@@ -147,7 +170,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
     public void cleanup() {
         if (regHelper.isRegistered()) {
             if (verbosity > 1)
-                Log.current.println("de-registering CoAbsCycProxy");
+                Log.current.println("de-registering " + regHelper.getAgentRep().getName());
             deregister();
         }
     }
@@ -268,17 +291,30 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
                                 "\n  Sender AgentRep: " + agentRep +
                                 "\n  From: " + fromAgentName);
         if (message.getRawText().startsWith("(inform")) {
-            if (verbosity > 2)
-                Log.current.println("No reply message to the INFORM performative");
+            if (conversationState.equals("register")) {
+                conversationState = "api ready";
+                if (verbosity > 2)
+                    Log.current.println("Received reply for the registration request" +
+                                        "\n  now ready for Cyc Api requests");
+            }
+            else {
+                if (verbosity > 2)
+                    Log.current.println("Ignoring INFORM performative");
+            }
             return;
         }
         if (message.getACL().equals("naturalLanguage")  &&
             (! message.getRawText().startsWith("("))) {
             if (verbosity > 2)
-                Log.current.println("No reply to a natural language message");
+                Log.current.println("Cannot parse api command " + message.getRawText());
             return;
         }
 
+        if (! conversationState.equals("api ready")) {
+            Log.current.errorPrintln("Conversation state not api ready" + conversationState);
+            return;
+        }
+        conversationState = "api request";
         String command = "(remove-duplicates (with-all-mts (isa #$Dog)))";
         Object [] response = {null, null};
         try {
@@ -313,6 +349,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
         }
+        conversationState = "api ready";
     }
 
     /**

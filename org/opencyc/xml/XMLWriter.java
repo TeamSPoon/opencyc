@@ -280,6 +280,37 @@ public abstract class XMLWriter {
     public void printXMLStartTag (String tag, int indent, boolean relative) throws IOException {
          indentPrint(tag, indent, relative);
     }
+
+
+    /**
+     * Prints to this <code>XMLWriter</code> an atomic XML tag with a single attribute.
+     * The tag is indented by @see #indent spaces either from the beginning of the
+     * line (if @see #relative is <code>false</code>) or relative to the current
+     * indentation level(if @see #relative is <code>true</code>).
+     *
+     * @param tag the name of the XML tag.
+     * @param attributeName the name of the attribute.
+     * @param attributeValue the value of the attribute.
+     * @param indent the number of spaces by which the tag needs to be indented.
+     * @param relative specifies whether the indentation is from the beginning
+     * of the line (if @see #relative is <code>false</code>) or from the current
+     * level of indentation (if @see #relative is <code>true</code>).
+     * @param newline specifies whether the line should be terminated after the tag
+     * has been printed
+     */
+    public void printXMLAtomicTag (String tag, String attributeName, String attributeValue, int indent,
+            boolean relative, boolean newline) throws java.io.IOException {
+        String attributeString = attributeName + "=\"" + attributeValue + "\"";
+        String xmltag = "<" + tag + " " + attributeString + "/>";
+        if (newline) {
+            this.indentPrintln(xmltag, indent, relative);
+        }
+        else {
+            this.indentPrint(xmltag, indent, relative);
+        }
+    }
+
+
     /**
      * Prints to this <code>XMLWriter</code> an XML start tag with no attributes.
      * The tag is indented by @see #indent spaces either from the beginning of the
@@ -335,6 +366,7 @@ public abstract class XMLWriter {
             this.indentPrint(xmltag, indent, relative);
         }
     }
+
 
     /**
      * Prints to this <code>XMLWriter</code> an XML start tag with a single attribute.

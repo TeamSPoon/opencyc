@@ -1,9 +1,3 @@
-/*
-
- * formatted with JxBeauty (c) johann.langhofer@nextra.at
- */
-
-
 package  org.opencyc.jini.admin;
 
 /**
@@ -32,6 +26,7 @@ package  org.opencyc.jini.admin;
  */
 import  java.awt.*;
 import  java.awt.event.*;
+import  java.io.*;
 import  javax.swing.*;
 import  java.rmi.RemoteException;
 import  javax.swing.border.*;
@@ -86,9 +81,10 @@ public class CycApiServiceAdminPanel extends JPanel {
                 String cycResponse = "";
                 try {
                     cycResponse = admin.cycApiRequest(apiRequest);
-                } catch (CycApiException e) {
+                }
+                catch (Exception e) {
                     cycResponse = e.getMessage();
-                } catch (RemoteException e) {}
+                }
                 Log.current.println("Cyc API response " + cycResponse);
                 txtpApiResponse.setText(cycResponse);
             }

@@ -275,7 +275,7 @@ public class CycAccess {
     /**
      * Closes the CycConnection object.
      */
-    public void close() throws IOException {
+    public void close() {
         if (cycConnection != null)
             cycConnection.close();
         cycAccessInstances.remove(Thread.currentThread());

@@ -495,6 +495,13 @@ public class CycConnection {
                 // Return the symbol.
                 return response;
             }
+            if (answer.endsWith("d0") &&
+                (ViolinStrings.Strings.indexOfAnyOf(answer.substring(0, answer.length() - 2), "0123456789") > -1)) {
+                String floatPart = answer.substring(0, answer.length() - 2);
+                response[1] = new Double(floatPart);
+                // Return the symbol.
+                return response;
+            }
             throw new RuntimeException("Ascii api response not understood " + answer);
         }
         else

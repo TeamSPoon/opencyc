@@ -9,9 +9,9 @@ fi
 
 cd `dirname $0`
 pwd
-cat */interface.pl */utilities.pl > opencyc.pl
+# cat */interface.pl */utilities.pl > opencyc.pl
 
-cat */e2c.pl > e2c.pl
+# cat */e2c.pl > e2c.pl
 
 cp *.pl  $SWI_HOME/library
 

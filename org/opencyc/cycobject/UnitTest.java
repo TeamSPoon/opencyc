@@ -437,6 +437,8 @@ public class UnitTest extends TestCase {
             Assert.assertEquals("((A . B) C . D)", cycList7b.toString());
             CycList cycList7c = cycAccess.makeCycList("((a . (b)) . (c . (d)))");
             Assert.assertEquals("((A B) C D)", cycList7c.toString());
+            CycList cycList7d = cycAccess.makeCycList("(a b c . d)");
+            Assert.assertEquals("(a b c . d)", cycList7c.toString());
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());

@@ -88,6 +88,7 @@ public class CycListParser  {
         st.wordChars( '<', '<' );
         st.wordChars( '>', '>' );
         st.wordChars( '*', '*' );
+        st.wordChars( '/', '/' );
         st.wordChars( '.', '.' );
         st.wordChars( '#', '#' );
         st.wordChars( ':', ':' );
@@ -190,8 +191,8 @@ public class CycListParser  {
      */
     private void scanQuote() {
         Integer i;
-
-        //System.out.println("'");
+        if (verbosity > 5)
+            System.out.println("'");
 
         if ((parenLevel > 0) && (parenLevel != readStack.sp))
             readStack.push(consMarkerSymbol);
@@ -207,7 +208,8 @@ public class CycListParser  {
     private void scanFunctionQuote() {
         Integer i;
 
-        //System.out.println("#'");
+        if (verbosity > 5)
+            System.out.println("#'");
 
         if ((parenLevel > 0) && (parenLevel != readStack.sp))
             readStack.push(consMarkerSymbol);
@@ -221,7 +223,8 @@ public class CycListParser  {
      * Scans a left parenthesis when reading.
      */
     private void ScanLeftParen() {
-        //System.out.println("(");
+        if (verbosity > 5)
+            System.out.println("(");
         // Begin a list.
         readStack.push(consMarkerSymbol );
         ++parenLevel;
@@ -235,7 +238,8 @@ public class CycListParser  {
         Object firstElement;
         Object remainingElements;
 
-        //System.out.println(")");
+        if (verbosity > 5)
+            System.out.println(")");
 
         if (parenLevel == 0)
             throw new RuntimeException( "read: Extra right parenthesis" );
@@ -284,7 +288,8 @@ public class CycListParser  {
         Integer i;
         Object n = null;
 
-        //System.out.println(st.nval );
+        if (verbosity > 5)
+            System.out.println(st.nval );
         // Try representing the scanned number as both java double and integer.
         if (positive) {
             d = new Double (st.nval);
@@ -313,7 +318,8 @@ public class CycListParser  {
      * Scans a minus while reading.
      */
     private void scanMinus() {
-        //System.out.println("-");
+        if (verbosity > 5)
+            System.out.println("-");
         CycSymbol w = CycObjectFactory.makeCycSymbol("-");
 
         if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
@@ -328,7 +334,8 @@ public class CycListParser  {
      * Scans a backquote while reading.
      */
     private void scanBackquote() {
-        //System.out.println("`");
+        if (verbosity > 5)
+            System.out.println("`");
         CycSymbol w = CycObjectFactory.makeCycSymbol("`");
 
         if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
@@ -345,11 +352,13 @@ public class CycListParser  {
     private void scanComma(StreamTokenizer st) throws IOException {
         CycSymbol w;
         if (st.nextToken() == '@') {
-            //System.out.println(",@");
+            if (verbosity > 5)
+                System.out.println(",@");
             w = CycObjectFactory.makeCycSymbol(",@");
         }
         else {
-            //System.out.println(",");
+            if (verbosity > 5)
+                System.out.println(",");
             w = CycObjectFactory.makeCycSymbol(",");
         }
         st.pushBack();
@@ -370,7 +379,8 @@ public class CycListParser  {
     private void scanWord(StreamTokenizer st)
         throws IOException {
 
-        //System.out.println(st.sval );
+        if (verbosity > 5)
+            System.out.println(st.sval);
         Object w = null;
         if (st.sval.startsWith("#$"))
             w = cycAccess.makeCycConstant(st.sval);
@@ -430,7 +440,8 @@ public class CycListParser  {
             string = line1 + "\r\n" + line2;
         }
 
-        //System.out.println(st.sval );
+        if (verbosity > 5)
+            System.out.println(st.sval );
         if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
             // Within a list.
             readStack.push(consMarkerSymbol );

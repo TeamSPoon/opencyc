@@ -75,6 +75,7 @@ public class CfaslInputStream extends BufferedInputStream {
     protected static final int CFASL_VARIABLE = 40;
     protected static final int CFASL_INDEX = 41;
     protected static final int CFASL_SPECIAL_OBJECT = 50;
+    protected static final int CFASL_DICTIONARY = 64;
     protected static final int CFASL_SERVER_DEATH = -1;
     protected static final int DEFAULT_READ_LIMIT = 1024;
     protected CycConnection cycConnection;
@@ -127,6 +128,7 @@ public class CfaslInputStream extends BufferedInputStream {
         cfaslOpcodeDescriptions.put(new Integer(40), "CFASL_VARIABLE");
         cfaslOpcodeDescriptions.put(new Integer(41), "CFASL_INDEX");
         cfaslOpcodeDescriptions.put(new Integer(50), "CFASL_SPECIAL_OBJECT");
+        cfaslOpcodeDescriptions.put(new Integer(64), "CFASL_DICTIONARY");
         cfaslOpcodeDescriptions.put(new Integer(-1), "CFASL_SERVER_DEATH");
     }
 
@@ -271,6 +273,11 @@ public class CfaslInputStream extends BufferedInputStream {
                     throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
                 case CFASL_SPECIAL_OBJECT:
                     throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                case CFASL_DICTIONARY:
+                    throw  new RuntimeException("Dictionaries are not supported on the client.\n" +
+                                                "Assign a new dictionary to a server side variable\n" +
+                                                "whose value is never returned to the client.  Then\n" +
+                                                "access the dictionary using server side SubL functions.");
                 case CFASL_SERVER_DEATH:
                     throw  new IOException("CFASL server closed connection.");
                 default:

@@ -80,6 +80,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
     protected static final int CFASL_VARIABLE = 40;
     protected static final int CFASL_INDEX = 41;
     protected static final int CFASL_SPECIAL_OBJECT = 50;
+    protected static final int CFASL_DICTIONARY = 64;
     protected static final int CFASL_SERVER_DEATH = -1;
 
     /**

@@ -7,6 +7,43 @@
 % Revision:  $Revision$
 % Revised At:   $Date$
 % ===================================================================
+
+:-module(opencyc,[
+	 getCycConnection/3,
+	 finishCycConnection/3,
+	 invokeSubL/1,
+	 invokeSubL/2,
+	 invokeSubLRaw/2,
+	 listCycStats/0,
+	 printSubL/2,
+	 formatCyc/3,
+	 toCycApiExpression/2,
+	 toCycApiExpression/3,
+	 cycQuery/1,
+	 cycQuery/2,
+	 cycAssert/1,
+	 cycAssert/2,
+	 cycRetract/1,
+	 cycRetract/2,
+	 cycRetractAll/1,
+	 cycRetractAll/2,
+	 isDebug/0,
+	 makeConstant/1,
+	 ensureMt/1,
+	 cyclify/2,
+	 cyclifyNew/2,
+	 defaultMt/1,
+	 mtForPred/2,
+	 isRegisterCycPred/3,
+	 registerCycPred/1,
+	 registerCycPred/2,
+	 registerCycPred/3,
+	 assertThrough/1,
+	 assertThrough/2,
+	 retractAllThrough/1,
+	 retractAllThrough/2,
+	 testOpenCyc/0]).
+
 :- style_check(-singleton).
 :- style_check(-discontiguous).
 :- style_check(-atom).
@@ -28,21 +65,17 @@ getCycConnection(SocketId,OutStream,InStream):-
       tcp_socket(SocketId),
       tcp_connect(SocketId,'127.0.0.1':3601),
       tcp_open_socket(SocketId, InStream, OutStream),!,
-      format(user_error,'Connected to Cyc TCP Server {~w,~w}\n',[InStream,OutStream]),
-      assertz(cycConnectionUsed(SocketId,OutStream,InStream)),!,
-      flush_output(user_error).
+      isDebug((format(user_error,'Connected to Cyc TCP Server {~w,~w}\n',[InStream,OutStream]),flush_output(user_error))),
+      assertz(cycConnectionUsed(SocketId,OutStream,InStream)),!.
 
 finishCycConnection(SocketId,OutStream,InStream):-
-      (at_end_of_stream(InStream);read_line_with_nl(InStream, Receive)),
+      (at_end_of_stream(InStream);readLineNl(InStream, Receive)),
       retractall(cycConnectionUsed(SocketId,OutStream,InStream)),
       asserta(cycConnection(SocketId,OutStream,InStream)),!.
       
-      
-
-cc:-
+listCycStats:- % will add more 
    listing(cycConnection),
    listing(cycConnectionUsed).
-
 
 % ===================================================================
 % Invoke SubL
@@ -55,17 +88,15 @@ cc:-
 
 invokeSubL(Send):-
       invokeSubLRaw(Send,Receive),
-      format('~s',[Receive]).
+      isDebug(format('~s',[Receive])).
 
 invokeSubL(Send,Receive):-
       invokeSubLRaw(Send,ReceiveCodes),
-      receiveCodes(ReceiveCodes,Receive).
-      
+      atom_codes(Receive,ReceiveCodes).
 
 invokeSubLRaw(Send,Receive):-
       getCycConnection(SocketId,OutStream,InStream),
       printSubL(OutStream,Send),
-      trace,
       readSubL(InStream,[A,B,C,D|Receive]),!,
       finishCycConnection(SocketId,OutStream,InStream),!,
       checkSubLError(Send,[A,B,C,D|Receive]).
@@ -74,6 +105,10 @@ checkSubLError(Send,[53,48,48,32|Info]):- %Error "500 "
       atom_codes(ErrorMsg,Info),
       throw(cyc_error(ErrorMsg,Send)).
 checkSubLError(_,_).
+
+% ===================================================================
+% Lowlevel printng
+% ===================================================================
 
 printSubL(OutStream,Send):-
       var(Send) ->
@@ -93,29 +128,30 @@ formatCyc(OutStream,Format,Args):-
       flush_output(OutStream),!.
 
 readSubL(InStream,Receive):-
-	 read_line_with_nl(InStream, Receive),!.
+	 readLineNl(InStream, Receive),!.
 
+% ===================================================================
+% Lowlevel readline
+% ===================================================================
 
-:-dynamic(isDebug).
-isDebug(Call):- isDebug -> Call ; true.
-
-% read_line_with_nl(-Stream,+Codes).
-read_line_with_nl(SocketId, Receive):- read_line_with_nl(SocketId, Receive, []).
-read_line_with_nl(Fd, Codes, Tail) :-
+% readLineNl(-Stream,+Codes).
+readLineNl(SocketId, Receive):- readLineNl(SocketId, Receive, []).
+readLineNl(Fd, Codes, Tail) :-
         get_code(Fd, C0),
-        read_line_with_nl(C0, Fd, Codes, Tail).
-read_line_with_nl(end_of_file, _, Tail, Tail) :- !.
-read_line_with_nl(-1, _, Tail, Tail) :- !.
-read_line_with_nl(10, _, [10|Tail], Tail) :- !.
-read_line_with_nl(13, _, [10|Tail], Tail) :- !.
-read_line_with_nl(C, Fd, [C|T], Tail) :-
+        readLineNl(C0, Fd, Codes, Tail).
+readLineNl(end_of_file, _, Tail, Tail) :- !.
+readLineNl(-1, _, Tail, Tail) :- !.
+readLineNl(10, _, [10|Tail], Tail) :- !.
+readLineNl(13, _, [10|Tail], Tail) :- !.
+readLineNl(C, Fd, [C|T], Tail) :-
         get_code(Fd, C2),
-        read_line_with_nl(C2, Fd, T, Tail).
+        readLineNl(C2, Fd, T, Tail).
 
-      
-is_string([A,B|_]):-integer(A),integer(B).
+% ===================================================================
+%  conversion toCycApiExpression
+% ===================================================================
 
-receiveCodes(ReceiveCodes,Receive):-atom_codes(Receive,ReceiveCodes).
+toCycApiExpression(Prolog,CycLStr):-toCycApiExpression(Prolog,[],CycLStr).
 
 toCycApiExpression(Prolog,Vars,Chars):-var(Prolog),!,toCycVar(Prolog,Vars,Chars).
 toCycApiExpression(Prolog,Vars,Prolog):-(atom(Prolog);number(Prolog)),!.
@@ -148,13 +184,17 @@ toCycVar(VAR,_,VarName):-
       atom_codes(AVAR,[95|CODES]),!,
       catch(sformat(VarName,'?HYP-~s',[CODES]),_,VarName='?HYP-VAR').
 
-
-cycReset:-discontinueConnection.
-   
+is_string([A,B|_]):-integer(A),integer(B).
 
 % ===================================================================
 %  Cyc Assert
 % ===================================================================
+
+cycAssert(Mt:CycL):-!,
+   cycAssert(CycL,Mt).
+cycAssert(CycL):-
+   mtForPred(CycL,Mt),
+   cycAssert(CycL,Mt).
 
 cycAssert(CycL,Mt):-
       retractall(cached_query(_,_)),
@@ -162,11 +202,18 @@ cycAssert(CycL,Mt):-
       cyclify(Mt,MtGood),
       invokeSubL('CYC-ASSERT'(quote(CycLGood),MtGood)).
 
+      
 % ===================================================================
 %  Cyc Unassert/Retract
 % ===================================================================
+cycRetract(CycL,Mt):-cycRetractAll(CycL,Mt).
+cycRetract(CycL):-cycRetractAll(CycL).
 
-cycRetract(CycL,Mt):-cycUnassert(CycL,Mt).
+cycRetractAll(CycL):-
+      mtForPred(CycL,Mt),
+      cycUnassert(CycL,Mt).
+
+cycRetractAll(CycL,Mt):-cycUnassert(CycL,Mt).
 cycUnassert(CycL,Mt):-
       retractall(cached_query(_,_)),
       cyclifyNew(CycL,CycLGood),
@@ -174,10 +221,32 @@ cycUnassert(CycL,Mt):-
       invokeSubL('CYC-UNASSERT'(quote(CycLGood),MtGood)).
 
 % ===================================================================
-%  Cyc Query
+%  Debugging Cyc 
 % ===================================================================
      
-isDebug.
+:-dynamic(isDebug).
+
+% Uncomment this next line to see Cyc debug messages
+
+% isDebug.
+
+isDebug(Call):- isDebug -> Call ; true.
+
+
+% ===================================================================
+%  Cyc Query Cache Control
+% ===================================================================
+
+
+:-dynamic(cachable_query/1).
+:-dynamic(cached_query/2).
+
+cachable_query(isa(_,_)).
+
+
+% ===================================================================
+%  Cyc Query
+% ===================================================================
 
 cycQuery(CycL):-cycQuery(CycL,'#$EverythingPSC',Result).
 cycQuery(CycL,Mt):-cycQuery(CycL,Mt,Result).
@@ -186,11 +255,6 @@ cycQuery(CycL,Mt,Result):-
       copy_term(CycL,Copy),
       numbervars(Copy,'$VAR',0,_),!,
       cycQuery(Copy,CycL,Mt,Result).
-
-:-dynamic(cachable_query/1).
-:-dynamic(cached_query/2).
-
-cachable_query(isa(_,_)).
 
 cycQuery(Copy,CycL,Mt,Result):-cached_query(Copy,Results),!,
       member(CycL,Results).
@@ -229,11 +293,16 @@ syncCycLVars(_,[]).
 syncCycLVars([[_, '.', Binding]|T],[Binding|VV]):-syncCycLVars(T,VV),!.
 syncCycLVars([[_|Binding]|T],[Binding|VV]):-syncCycLVars(T,VV),!.
 
-   
-
-      
-      
-      
+% ===================================================================
+%  Cyclification
+%
+%    cyclify(Before,After)
+%     Makes sure that atoms in Statement are prefixed witbh '#$' when comunicationg with Cyc
+%
+%    cyclifyNew(Before,After)
+%     same as cyclify/2 but adds the constant names with (CREATE-CONSTANT "~w")
+%
+% ===================================================================
 
 cyclify(Same,Same):-var(Same);number(Same).
 cyclify([],[]).
@@ -275,11 +344,6 @@ cyclifyNew('#',Before,Before).
 cyclifyNew('?',Before,Before).
 cyclifyNew('"',Before,Before).
 cyclifyNew(_,Before,After):-atom_concat('#$',Before,After),makeConstant(Before).
-
-makeConstant(Const):-
-   sformat(String,'(CREATE-CONSTANT "~w")',[Const]),
-   catch( invokeSubL(String),_,true).
-
       
 cyclifyNew_l([B],[A]):-cyclifyNew(B,A),!.
 cyclifyNew_l([],[]).
@@ -287,4 +351,149 @@ cyclifyNew_l([B|BL],[A|AL]):-
       cyclifyNew(B,A),
       cyclifyNew_l(BL,AL).
 
+
+% ============================================
+% Make new CycConstant
+% ============================================
+
+makeConstant(Const):-
+   sformat(String,'(CREATE-CONSTANT "~w")',[Const]),
+   catch( invokeSubL(String),_,true).
+
+% ============================================
+% Make new Microtheory
+% ============================================
+
+ensureMt(Const):-
+   cycAssert(isa(Const,'Microtheory'),'BaseKB').
+
+% ============================================
+% dynamic Default Microtheory
+% ============================================
+
+:-dynamic(defaultMt/1).
+
+defaultMt('PrologDataMt').
+
+:-defaultMt(Mt),
+   ensureMt(Mt). % Puts the defaultMt/1 into Cyc 
+
+% ===================================================================
+%  Predicates need and Assertion Mt
+% ===================================================================
+
+mtForPred(CycL,Mt):-
+   functor(CycL,Pred,_),
+   isRegisterCycPred(Mt,Pred,_),!.
+
+mtForPred(CycL,Mt):-defaultMt(Mt).
+
+% ============================================
+% Prolog to Cyc Predicate Mapping
+%
+%  the following will all do the same things:
+%
+% ?- registerCycPred('BaseKB':isa/2). 
+% ?- registerCycPred('BaseKB':isa(_,_)). 
+% ?- registerCycPred(isa(_,_),'BaseKB'). 
+% ?- registerCycPred('BaseKB',isa,2). 
+%
+%  Will make calls 
+% ?- isa(X,Y)
+%  Query into #$BaseKB for (#$isa ?X ?Y) 
+%
+% ============================================
+:-dynamic(isRegisterCycPred/3).
+
+% ?- registerCycPred('BaseKB':isa/2). 
+registerCycPred(Mt:Pred/Arity):-!,
+   registerCycPred(Mt,Pred,Arity).
+% ?- registerCycPred('BaseKB':isa(_,_)). 
+registerCycPred(Mt:Term):-
+   functor(Term,Pred,Arity),
+   registerCycPred(Mt,Pred,Arity).
+% ?- registerCycPred(isa(_,_),'BaseKB'). 
+registerCycPred(Term,Mt):-
+   functor(Term,Pred,Arity),
+   registerCycPred(Mt,Pred,Arity).
+   
+% ?- registerCycPred('BaseKB',isa,2). 
+registerCycPred(Mt,Pred,0):-!,registerCycPred(Mt,Pred,2).
+registerCycPred(Mt,Pred,Arity):-isRegisterCycPred(Mt,Pred,Arity),!.
+registerCycPred(Mt,Pred,Arity):-
+      functor(Term,Pred,Arity),
+      asserta((Term:-cycQuery(Term,Mt))),
+      assertz(isRegisterCycPred(Mt,Pred,Arity)),!.
+
+% ============================================
+% Assert Side Effect Prolog to Cyc Predicate Mapping
+%
+% ?- assert(isa('Fido','Dog')).
+% Will assert (#$isa #$Fido #$Dog) into #$BaseKB
+%
+% ?- assert('DogsMt':isa('Fido','Dog')).
+% Will assert (#$isa #$Fido #$Dog) into #$DogsMt
+% ============================================
+:-redefine_system_predicate(assert(_)).
+assert(Term):-assertThrough(Term).
+
+assertThrough(Mt:CycL):-
+      assertThrough(Mt,CycL).
+
+assertThrough(CycL):-
+      assertThrough(Mt,CycL).
+
+assertThrough(ToMt,CycL):-
+      functor(CycL,Pred,Arity),
+      isRegisterCycPred(Mt,Pred,Arity),!,
+      ignore(ToMt=Mt),
+      cycAssert(CycL,ToMt),!.
+
+assertThrough(ToMt,CycL):-
+      ignore(ToMt=user),
+      assertz(ToMt:CycL),!.
+
+% ============================================
+% Retract (All) Side Effect Prolog to Cyc Predicate Mapping
+%
+% ?- retractall(isa('Fido','Dog')).
+% Will retract (#$isa #$Fido #$Dog) from #$BaseKB
+%
+% ?- retractall('DogsMt':isa('Fido','Dog')).
+% Will retract (#$isa #$Fido #$Dog) from #$DogsMt
+% ============================================
+:-redefine_system_predicate(retractall(_)).
+retractall(Term):-retractAllThrough(Term).
+
+retractAllThrough(Mt:CycL):-
+      retractAllThrough(Mt,CycL).
+
+retractAllThrough(CycL):-
+      retractAllThrough(Mt,CycL).
+
+retractAllThrough(ToMt,CycL):-
+      functor(CycL,Pred,Arity),
+      isRegisterCycPred(Mt,Pred,Arity),!,
+      ignore(ToMt=Mt),
+      cycRetract(CycL,ToMt),!.
+
+retractAllThrough(ToMt,CycL):-
+      ignore(ToMt=user),
+      system:retractall(ToMt:CycL),!.
+            
+% ============================================
+% Register isa/genls (more for testing :)
+% ============================================
+
+% examples
+:-registerCycPred('BaseKB',isa,2).
+:-registerCycPred('BaseKB',genls,2).
+
+
+% ============================================
+% Testing 
+% ============================================
       
+testOpenCyc:-halt.
+
+

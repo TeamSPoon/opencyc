@@ -1,9 +1,9 @@
 % ===================================================================
-% File 'interface.pl'
+% File 'utilities.pl'
 % Purpose: Shared utilities for interfacing to OpenCyc from SWI-Prolog
 % Maintainer: Douglas Miles
 % Contact: $Author$@users.sourceforge.net ;
-% Version: 'interface.pl' 1.0.0
+% Version: 'utilities.pl' 1.0.0
 % Revision:  $Revision$
 % Revised At:   $Date$
 % ===================================================================
@@ -78,7 +78,7 @@ cyclAsciiRemap(X,X):-!.
 % CycL Term Parser
 % ===================================================================
 /*===================================================================
-% getSurfaceFromChars/3 is does less consistantsy checking then conv_to_sterm
+% getSurfaceFromChars/3 does less consistancy checking then conv_to_sterm
 
 Always a S-Expression: 'WFFOut' placing variables in 'VARSOut'
 
@@ -172,6 +172,7 @@ chars_to_term_s(CHARS,TERM,VARS):-
 ====================================================================*/
 
 getCycLTokens(X,Z):-is_list(X),!,  tokenize_chars(X,Y),convert_the_atoms(Y,Z).
+getCycLTokens(X,[X]). 
 
 convert_the_atoms([],[]):-!.
 convert_the_atoms([H|T],[HH|TT]):-!,  
@@ -183,7 +184,6 @@ convert_the_atoms([H|T],[HH|TT]):-!,
 convert_the_atom(H,H):-!.
 
 
-getCycLTokens(X,[X]). 
 
 /*===================================================================
 % Removes Leading whitespaces and not ANSI charset
@@ -463,5 +463,17 @@ sterm_to_pterm_list([S|STERM],[P|PTERM]):-!,
               sterm_to_pterm(S,P),
               sterm_to_pterm_list(STERM,PTERM).
 sterm_to_pterm_list(VAR,[VAR]).
+
+
+
+
+atom_junct(Atom,Words):-
+   concat_atom(Words1,' ',Atom),
+   atom_junct2(Words1,Words),!.
+
+atom_junct2([],[]).
+atom_junct2([W|S],[A,Mark|Words]):- member(Mark,['.',',','?']),atom_concat(A,Mark,W),not(A=''),!,atom_junct2(S,Words).
+atom_junct2([W|S],[Mark,A|Words]):- member(Mark,['.',',','?']),atom_concat(Mark,A,W),not(A=''),!,atom_junct2(S,Words).
+atom_junct2([W|S],[W|Words]):-atom_junct2(S,Words).
 
 

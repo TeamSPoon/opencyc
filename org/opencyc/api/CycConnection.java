@@ -434,7 +434,9 @@ public class CycConnection implements CycConnectionInterface {
             Object[] response = converseBinary(substituteCycList, timeout);
             if ((response[0].equals(Boolean.TRUE)) &&
                 (response[1] instanceof CycList)) {
-                return (CycList) response[1];
+                CycList backquoteExpression = (CycList) response[1];
+                return backquoteExpression.subst(CycObjectFactory.makeCycSymbol("api-bq-list"),
+                                                 CycObjectFactory.makeCycSymbol("bq-list"));
             }
             throw new CycApiException("Invalid backquote substitution in " + messageCycList +
                                       "\nstatus" + response[0] + "\nmessage " + response[1]);
@@ -787,6 +789,8 @@ public class CycConnection implements CycConnectionInterface {
             int ch = in.read();
             if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
+            if (ch == '\r')
+                break;
             if (ch == '\n')
                 break;
             result.append((char)ch);

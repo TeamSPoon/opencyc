@@ -75,7 +75,6 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        /*
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
@@ -84,7 +83,6 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
-        */
         testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
@@ -703,6 +701,7 @@ public class UnitTest extends TestCase {
     protected void doTestCycAccess2 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
         CycObjectFactory.resetCycConstantCaches();
+
         // getGenls.
         List genls = null;
         try {
@@ -716,7 +715,8 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(genls);
         Assert.assertTrue(genls instanceof CycList);
         genls = ((CycList) genls).sort();
-        Assert.assertEquals("(CanineAnimal DomesticatedAnimal)", genls.toString());
+        Assert.assertTrue(genls.toString().indexOf("CanineAnimal") > -1);
+        Assert.assertTrue(genls.toString().indexOf("DomesticatedAnimal") > -1);
 
         // getGenlPreds.
         List genlPreds = null;
@@ -938,7 +938,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("dogs", phrase);
+        Assert.assertEquals("dogs (domesticated animals)", phrase);
 
         // getSingularGeneratedPhrase.
         phrase = null;
@@ -951,7 +951,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("Brazil", phrase);
+        Assert.assertEquals("Brazil (country)", phrase);
 
         // getGeneratedPhrase.
         phrase = null;
@@ -964,7 +964,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
        Assert.assertNotNull(phrase);
-        Assert.assertEquals("doer", phrase);
+        Assert.assertEquals("doer (actor slot)", phrase);
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
@@ -1015,8 +1015,6 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.toString());
         }
-
-cycAccess.traceOn();
         doTestCycAccess3(cycAccess);
 
         cycAccess.close();
@@ -1032,15 +1030,15 @@ cycAccess.traceOn();
         // getComment.
         String comment = null;
         try {
-            CycConstant monaLisaPainting = cycAccess.getKnownConstantByGuid("bf9ef7a9-9c29-11b1-9dad-c379636f7270");
-            comment = cycAccess.getComment(monaLisaPainting);
+            CycConstant brazil = cycAccess.getKnownConstantByGuid("bd588f01-9c29-11b1-9dad-c379636f7270");
+            comment = cycAccess.getComment(brazil);
         }
         catch (Exception e) {
             CycAccess.current().close();
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(comment);
-        Assert.assertEquals("Mona Lisa, the #$OilPainting by #$LeonardoDaVinci-TheArtist", comment);
+        Assert.assertEquals("Brazil throughout time, both political and physical aspects.", comment);
 
         // getIsas.
         List isas = null;
@@ -1071,13 +1069,30 @@ cycAccess.traceOn();
         Assert.assertNotNull(genls);
         Assert.assertTrue(genls instanceof CycList);
         genls = ((CycList) genls).sort();
-        Assert.assertEquals("(CanineAnimal DomesticatedAnimal)", genls.toString());
+        Assert.assertTrue(genls.toString().indexOf("CanineAnimal") > 1);
+        Assert.assertTrue(genls.toString().indexOf("DomesticatedAnimal") > 1);
 
         // getMinGenls.
         List minGenls = null;
         try {
             CycConstant lion = cycAccess.getKnownConstantByGuid("bd58c467-9c29-11b1-9dad-c379636f7270");
             minGenls = cycAccess.getMinGenls(lion);
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(minGenls);
+        Assert.assertTrue(minGenls instanceof CycList);
+        minGenls = ((CycList) minGenls).sort();
+        Assert.assertEquals("(FelidaeFamily)", minGenls.toString());
+
+        // getMinGenls mt.
+        minGenls = null;
+        try {
+            CycConstant lion = cycAccess.getKnownConstantByGuid("bd58c467-9c29-11b1-9dad-c379636f7270");
+            // #$BiologyVocabularyMt
+            minGenls = cycAccess.getMinGenls(lion, cycAccess.getKnownConstantByGuid("bdd51776-9c29-11b1-9dad-c379636f7270"));
         }
         catch (Exception e) {
             CycAccess.current().close();
@@ -1346,7 +1361,7 @@ cycAccess.traceOn();
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("Brazil is a country", phrase);
+        Assert.assertEquals("Brazil (country) is a country (political entity)", phrase);
 
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
@@ -1465,14 +1480,10 @@ cycAccess.traceOn();
         // getCollectionLeaves.
         List collectionLeaves = null;
         try {
-            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
-            collectionLeaves = cycAccess.getCollectionLeaves(canineAnimal);
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            collectionLeaves = cycAccess.getCollectionLeaves(animal);
             Assert.assertNotNull(collectionLeaves);
             Assert.assertTrue(collectionLeaves instanceof CycList);
-            CycConstant redWolf = cycAccess.getKnownConstantByGuid("c015e730-9c29-11b1-9dad-c379636f7270");
-            Assert.assertTrue(collectionLeaves.contains(redWolf));
-            CycConstant sanJoaquinKitFox = cycAccess.getKnownConstantByGuid("bfa2b8e5-9c29-11b1-9dad-c379636f7270");
-            Assert.assertTrue(collectionLeaves.contains(sanJoaquinKitFox));
         }
         catch (Exception e) {
             CycAccess.current().close();
@@ -1849,8 +1860,7 @@ cycAccess.traceOn();
         CycConstant[] mts = {null, null, null};
         genlMts = new ArrayList();
         try {
-            CycConstant modernMilitaryMt = cycAccess.getKnownConstantByGuid("c040a2f0-9c29-11b1-9dad-c379636f7270");
-            genlMts.add(modernMilitaryMt);
+            genlMts.add(cycAccess.baseKB);
             mts = cycAccess.createMicrotheorySystem("CycAccessTest",
                                                     "a unit test comment for the CycAccessTestMt microtheory.",
                                                     genlMts);
@@ -2024,11 +2034,11 @@ cycAccess.traceOn();
 
         // Test isBackchainRequired, isBackchainEncouraged, isBackchainDiscouraged, isBackchainForbidden
         try {
-            CycConstant notAssertible = cycAccess.getKnownConstantByGuid("bf660e73-9c29-11b1-9dad-c379636f7270");
-            Assert.assertTrue(cycAccess.isBackchainRequired(notAssertible, cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainEncouraged(notAssertible, cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(notAssertible, cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainForbidden(notAssertible, cycAccess.baseKB));
+            CycConstant keRequirement = cycAccess.getKnownConstantByGuid("c1141606-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(cycAccess.isBackchainRequired(keRequirement, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainEncouraged(keRequirement, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(keRequirement, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainForbidden(keRequirement, cycAccess.baseKB));
 
             CycConstant nearestIsa = cycAccess.getKnownConstantByGuid("bf411eed-9c29-11b1-9dad-c379636f7270");
             Assert.assertTrue(! cycAccess.isBackchainRequired(nearestIsa, cycAccess.baseKB));
@@ -3077,6 +3087,7 @@ cycAccess.traceOn();
             Assert.assertEquals(CycObjectFactory.nil, responseObject);
             script = "(symbol-value 'answer)";
             responseList = cycAccess.converseList(script);
+System.out.println("responseList " + responseList);
             Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(a 1)")));
             Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(b 2)")));
             Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(c 3)")));

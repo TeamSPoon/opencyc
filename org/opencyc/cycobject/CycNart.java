@@ -256,7 +256,7 @@ public class CycNart extends CycFort implements Comparable {
             xmlWriter.printXMLEndTag(idXMLTag);
         }
         if (functor != null) {
-            xmlWriter.printXMLStartTag(functorXMLtag, 0, true, true);
+            xmlWriter.printXMLStartTag(functorXMLtag, indentLength, true, true);
             this.getFunctor().toXML(xmlWriter, indentLength, true);
             xmlWriter.printXMLEndTag(functorXMLtag, -indentLength, true);
         }
@@ -265,13 +265,9 @@ public class CycNart extends CycFort implements Comparable {
         while (iterator.hasNext()) {
             xmlWriter.printXMLStartTag(argXMLtag, 0, true, true);
             arg = iterator.next();
-            if (arg instanceof CycFort)
-                ((CycFort) arg).toXML(xmlWriter, indentLength, true);
-            else if (arg instanceof CycList)
-                ((CycList) arg).toXML(xmlWriter, indentLength, true);
-            else
-                xmlWriter.indentPrintln(arg.toString(), indentLength, true);
-            xmlWriter.printXMLEndTag(argXMLtag, -indentLength, true);
+            // Use a shared method with CycList for arbitrary elements.
+            CycList.toXML(arg, xmlWriter, indentLength, true);
+            xmlWriter.printXMLEndTag(argXMLtag, 0, true);
         }
         xmlWriter.printXMLEndTag(natXMLtag, -indentLength, true);
     }

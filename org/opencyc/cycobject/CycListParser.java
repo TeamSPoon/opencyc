@@ -73,7 +73,9 @@ public class CycListParser  {
      * @return the corresponding <tt>CycList</tt>
      */
     public CycList read (String string) throws CycApiException {
-        StringReader stringReader = new StringReader(string);
+        String tempString = Strings.change(string, '\r', ' ');
+        tempString = Strings.change(tempString, '\n', ' ');
+        StringReader stringReader = new StringReader(tempString);
         StreamTokenizer st = new StreamTokenizer(stringReader);
         st.commentChar( ';' );
         st.ordinaryChar( '(' );

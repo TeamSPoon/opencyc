@@ -115,11 +115,12 @@ public abstract class XMLWriter {
                         this.indentString = this.indentString.substring(abs);
                     }
                     else {
-                        throw  new RuntimeException("XMLWriter cannot have negative indentation!");
+                        //System.out.println("XMLWriter cannot have negative indentation");
+                        throw  new RuntimeException("XMLWriter cannot have negative indentation");
                     }
                 }
                 else {
-                    throw  new RuntimeException("XMLWriter cannot have negative indentation!");
+                    throw  new RuntimeException("XMLWriter cannot have negative indentation");
                 }
             }
         }

@@ -162,6 +162,11 @@ public class CycAccess {
      */
     public static CycConstant thing = null;
 
+    /**
+     * Convenient reference to #$InferencePSC.
+     */
+    public static CycConstant inferencePSC = null;
+
     private CycConstant cyclist = null;
     private CycConstant project = null;
 
@@ -514,6 +519,8 @@ public class CycAccess {
             different = getKnownConstantByGuid("bd63f343-9c29-11b1-9dad-c379636f7270");
         if (thing == null)
             thing = getKnownConstantByGuid("bd5880f4-9c29-11b1-9dad-c379636f7270");
+        if (inferencePSC == null)
+            inferencePSC = getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
     }
 
     /**
@@ -1046,6 +1053,14 @@ public class CycAccess {
     }
 
     /**
+     * Gets the imprecise paraphrase for a Cyc assertion.
+     */
+    public String getImpreciseParaphrase (CycList assertion)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseString("(with-precise-paraphrase-off (generate-phrase '" + assertion.cyclify() + "))");
+    }
+
+    /**
      * Gets the comment for a CycConstant.  Embedded quotes are replaced by spaces.
      */
     public String getComment (CycConstant cycConstant)
@@ -1055,7 +1070,6 @@ public class CycAccess {
             "         (with-all-mts (comment " + cycConstant.stringApiValue() + ")))) \n" +
             "  (fif comment-string \n" +
             "       (string-substitute \" \" \"\\\"\" comment-string) \n" +
-            "       ;; else \n" +
             "       \"\"))";
         return converseString(script);
     }
@@ -1074,6 +1088,19 @@ public class CycAccess {
     public CycList getGenls (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(remove-duplicates (with-all-mts (genls " + cycFort.stringApiValue() + ")))");
+    }
+
+    /**
+     * Gets a list of the minimum (most specific) genls for a CycFort collection.
+     *
+     * @param cycFort the collection
+     * @param mt the microtheory in which to look
+     * @return a list of the minimum (most specific) genls for a CycFort collection
+     */
+    public CycList getMinGenls (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(remove-duplicates (min-genls " + cycFort.stringApiValue() +
+                            " " + mt.stringApiValue() + "))");
     }
 
     /**
@@ -1548,7 +1575,21 @@ public class CycAccess {
     }
 
     /**
+     * Returns true if cycConstant is a microtheory.
+     *
+     * @param cycConstant the constant for determination as a microtheory
+     * @return <tt>true</tt> iff cycConstant is a microtheory
+     */
+    public boolean isMicrotheory (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(isa-in-any-mt? " + cycFort.stringApiValue() + " #$Microtheory)");
+    }
+
+    /**
      * Returns true if cycConstant is a Collection.
+     *
+     * @param cycConstant the constant for determination as a Collection
+     * @return <tt>true</tt> iff cycConstant is a Collection,
      */
     public boolean isCollection (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1686,7 +1727,7 @@ public class CycAccess {
     public CycList getPublicConstants ()
         throws IOException, UnknownHostException, CycApiException {
         // #$PublicConstant
-        return getKbSubset(this.getKnownConstantByGuid("bd7abd90-9c29-11b1-9dad-c379636f7270"));
+        return getKbSubset(getKnownConstantByGuid("bd7abd90-9c29-11b1-9dad-c379636f7270"));
     }
 
     /**
@@ -1761,6 +1802,23 @@ public class CycAccess {
     }
 
     /**
+     * Asserts the given sentence and also places it on the transcript queue
+     * with default strength and direction.
+     *
+     * @param sentence the given sentence for assertion
+     * @param mt the microtheory in which the assertion is placed
+     */
+    public void assertWithTranscript (CycList sentence, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String command =
+            "(clet ((*the-cyclist* " + cyclist.cyclify() + "))\n" +
+            "  (ke-assert-now\n" +
+            "    '" + sentence.cyclify() + "\n" +
+            "    " + mt.cyclify() + "))";
+        converseVoid(command);
+    }
+
+    /**
      * Returns a with-bookkeeping-info macro expresssion.
      */
     private String withBookkeepingInfo () {
@@ -1795,8 +1853,12 @@ public class CycAccess {
 
     /**
      * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
-     * will be added to the KB transcript for replication and archive.  Alternative method
-     * signatures accomodate various arities, and argument datatypes.
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param mt the microtheory in which the assertion is made
+     * @param predicate the binary predicate of the assertion
+     * @param arg1 the first argument of the predicate
+     * @param arg2 the second argument of the predicate
      */
     public void assertGaf (CycFort mt,
                            CycConstant predicate,
@@ -1812,6 +1874,15 @@ public class CycAccess {
             mt.stringApiValue() + "))";
         converseVoid(command);
     }
+    /**
+     * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param mt the microtheory in which the assertion is made
+     * @param predicate the binary predicate of the assertion
+     * @param arg1 the first argument of the predicate
+     * @param arg2 the second argument of the predicate, which is a string
+     */
     public void assertGaf (CycFort mt,
                            CycConstant predicate,
                            CycFort arg1,
@@ -1826,6 +1897,15 @@ public class CycAccess {
             mt.stringApiValue() + "))";
         converseVoid(command);
     }
+    /**
+     * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param mt the microtheory in which the assertion is made
+     * @param predicate the binary predicate of the assertion
+     * @param arg1 the first argument of the predicate
+     * @param arg2 the second argument of the predicate, which is a CycList
+     */
     public void assertGaf (CycFort mt,
                            CycConstant predicate,
                            CycFort arg1,
@@ -1840,6 +1920,15 @@ public class CycAccess {
             mt.stringApiValue() + "))";
         converseVoid(command);
     }
+    /**
+     * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param mt the microtheory in which the assertion is made
+     * @param predicate the binary predicate of the assertion
+     * @param arg1 the first argument of the predicate
+     * @param arg2 the second argument of the predicate, which is an int
+     */
     public void assertGaf (CycFort mt,
                            CycConstant predicate,
                            CycFort arg1,
@@ -1854,6 +1943,17 @@ public class CycAccess {
             mt.stringApiValue() + "))";
         converseVoid(command);
     }
+
+    /**
+     * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param mt the microtheory in which the assertion is made
+     * @param predicate the ternary predicate of the assertion
+     * @param arg1 the first argument of the predicate
+     * @param arg2 the second argument of the predicate
+     * @param arg3 the third argument of the predicate
+     */
     public void assertGaf (CycFort mt,
                            CycConstant predicate,
                            CycFort arg1,
@@ -1867,6 +1967,39 @@ public class CycAccess {
             arg1.stringApiValue() + " " +
             arg2.stringApiValue() + " " +
             arg3.stringApiValue() + ")" +
+            mt.stringApiValue() + "))";
+        converseVoid(command);
+    }
+
+    /**
+     * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * gaf the gaf in the form of a CycList
+     * @param mt the microtheory in which the assertion is made
+     */
+    public void assertGaf (CycList gaf,
+                           CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String command = withBookkeepingInfo() +
+            "(cyc-assert '" +
+            gaf.stringApiValue() +
+            mt.stringApiValue() + "))";
+        converseVoid(command);
+    }
+
+    /**
+     * Unasserts the given ground atomic formula (gaf) in the specified microtheory MT.
+     *
+     * gaf the gaf in the form of a CycList
+     * @param mt the microtheory in which the assertion is made
+     */
+    public void unassertGaf (CycList gaf,
+                           CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String command = withBookkeepingInfo() +
+            "(cyc-unassert '" +
+            gaf.stringApiValue() +
             mt.stringApiValue() + "))";
         converseVoid(command);
     }
@@ -2581,6 +2714,63 @@ public class CycAccess {
         command.add(CycObjectFactory.makeCycSymbol("generate-disambiguation-phrases-and-types"));
         command.addQuoted(objects);
         return converseList(command);
+    }
+
+    /**
+     * Returns the arity of the given predicate.
+     *
+     * @param predicate the given predicate whose number of arguments is sought
+     * @return the arity of the given predicate, or zero if the argument is not
+     * a predicate
+     */
+    public int getArity (CycFort predicate)
+        throws IOException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("with-all-mts"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycObjectFactory.makeCycSymbol("arity"));
+        command1.add(predicate);
+        Object object = this.converseObject(command);
+        if (object instanceof Integer)
+            return ((Integer) object).intValue();
+        else
+            return 0;
+    }
+
+    /**
+     * Returns the list of arg2 values of binary gafs, given the predicate
+     * and arg1, looking in all microtheories.
+     *
+     * @param predicate the given predicate for the gaf pattern
+     * @param arg1 the given first argument of the gaf
+     * @return the list of arg2 values of the binary gafs
+     */
+    public CycList getArg2s (CycFort predicate, Object arg1)
+        throws IOException, CycApiException {
+        CycList query = new CycList();
+        query.add(predicate);
+        query.add(arg1);
+        CycVariable variable = CycObjectFactory.makeCycVariable("?arg2");
+        query.add(variable);
+        return (CycList) askWithVariable(query, variable, inferencePSC);
+    }
+
+    /**
+     * Returns the single (first) arg2 value of a binary gaf, given the predicate
+     * and arg0, looking in all microtheories.  Return null if none found.
+     *
+     * @param predicate the given predicate for the gaf pattern
+     * @param arg1 the given first argument of the gaf
+     * @return the single (first) arg2 value of the binary gaf(s)
+     */
+    public Object getArg2 (CycFort predicate, Object arg1)
+        throws IOException, CycApiException {
+        CycList arg2s = getArg2s(predicate, arg1);
+        if (arg2s.isEmpty())
+            return null;
+        else
+            return arg2s.first();
     }
 
 }

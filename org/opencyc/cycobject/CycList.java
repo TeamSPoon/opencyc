@@ -752,7 +752,7 @@ public class CycList extends ArrayList {
      * -- or relative to the indentation currently specified in the indent_string field
      * of the xml_writer object, relative = true.
      */
-    protected void toXML(Object object, XMLWriter xmlWriter, int indent, boolean relative)
+    public static void toXML(Object object, XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException {
         int startingIndent = xmlWriter.getIndentLength();
         if (object instanceof Integer) {

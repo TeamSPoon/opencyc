@@ -56,6 +56,12 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public int trace = API_TRACE_NONE;
 
+    /**
+     * Parameter that when set true, causes CFASL object errors to be reported back as strings
+     * the caller.
+     */
+    public boolean reportCfaslErrors = false;
+
     protected static final int CFASL_IMMEDIATE_FIXNUM_CUTOFF = 128;
     protected static final int CFASL_IMMEDIATE_FIXNUM_OFFSET = 256 - CFASL_IMMEDIATE_FIXNUM_CUTOFF;
     protected static final int CFASL_P_8BIT_INT = 0;
@@ -239,7 +245,7 @@ public class CfaslInputStream extends BufferedInputStream {
                     o = readCons();
                     break;
                 case CFASL_VECTOR:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_STRING:
                     int off = 0;
                     int len = readInt();
@@ -253,15 +259,15 @@ public class CfaslInputStream extends BufferedInputStream {
                     o = new Character((char)read());
                     break;
                 case CFASL_HASHTABLE:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_BTREE_LOW_HIGH:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_BTREE_LOW:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_BTREE_HIGH:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_BTREE_LEAF:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_GUID:
                     o = readGuid();
                     break;
@@ -278,33 +284,30 @@ public class CfaslInputStream extends BufferedInputStream {
                     o = readAssertion();
                     break;
                 case CFASL_ASSERTION_SHELL:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_ASSERTION_DEF:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_SOURCE:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_SOURCE_DEF:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_AXIOM:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_AXIOM_DEF:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_VARIABLE:
                     o = readVariable();
                     break;
                 case CFASL_INDEX:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_SPECIAL_OBJECT:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_DICTIONARY:
-                    throw  new RuntimeException("Dictionaries are not supported on the client.\n" +
-                                                "Assign a new dictionary to a server side variable\n" +
-                                                "whose value is never returned to the client.  Then\n" +
-                                                "access the dictionary using server side SubL functions.");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 case CFASL_SERVER_DEATH:
-                    throw  new IOException("CFASL server closed connection.");
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
                 default:
-                    throw  new RuntimeException("Unknown cfasl opcode: " + cfaslOpcode);
+                    return reportUnhandledCfaslOpcode(cfaslOpcode);
             }
         }
         if (trace == API_TRACE_DETAILED) {
@@ -321,12 +324,18 @@ public class CfaslInputStream extends BufferedInputStream {
         return  o;
     }
 
-    /*
-     * The methods below read Java primative types without wrapping them
-     * in Objects.  Some, like readInt, may be called a lot, so the savings
-     * from not having to allocate heap space may be large.  This justifies
-     * the extra maintainence burden caused by code repetition.
+    /**
+     * Reports the unhandled cfasl opcode or throws an exception.
      */
+    protected Object reportUnhandledCfaslOpcode (int cfaslOpcode) {
+        if (reportCfaslErrors) {
+            System.out.println("Unknown cfasl opcode: " + cfaslOpcode);
+            return Integer.toString(cfaslOpcode);
+        }
+        else
+            throw  new RuntimeException("Unknown cfasl opcode: " + cfaslOpcode);
+    }
+
     /**
      * Reads an char from this CfaslInputStream.  If the next item
      * on the stream is not a char, throw an exception, and leave

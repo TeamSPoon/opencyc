@@ -6,16 +6,22 @@ import org.opencyc.elf.bg.state.StateVariable;
 import org.opencyc.elf.wm.ActuatorClassFactory;
 import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ActionLibrary;
-import org.opencyc.elf.wm.ELFFactory;
+import org.opencyc.elf.wm.ActuatorFactory;
+import org.opencyc.elf.wm.ActuatorPool;
+import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.ExperienceLibrary;
 import org.opencyc.elf.wm.GoalFactory;
 import org.opencyc.elf.wm.GoalLibrary;
 import org.opencyc.elf.wm.JobAssignmentFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
+import org.opencyc.elf.wm.NodeFactory;
+import org.opencyc.elf.wm.NodePool;
 import org.opencyc.elf.wm.PredicateClassFactory;
 import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
+import org.opencyc.elf.wm.SensorFactory;
+import org.opencyc.elf.wm.SensorPool;
 import org.opencyc.elf.wm.StateVariableFactory;
 import org.opencyc.elf.wm.StateVariableLibrary;
 import org.opencyc.elf.wm.TaskFrameFactory;
@@ -92,7 +98,12 @@ public class BehaviorEngine {
     new TaskFrameLibrary();
     (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
     new ExperienceLibrary();
-    new ELFFactory();
+    new ActuatorPool();
+    (new ActuatorFactory()).getInstance().populateActuatorPool();
+    new SensorPool();
+    (new SensorFactory()).getInstance().populateSensorPool();
+    new NodePool();
+    (new NodeFactory()).getInstance().populateNodePool();
   }
   
   //// Private Area

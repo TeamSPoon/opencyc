@@ -28,19 +28,27 @@ import org.opencyc.elf.vj.EntityEvaluator;
 import org.opencyc.elf.vj.PlanEvaluator;
 import org.opencyc.elf.vj.ValueJudgement;
 
+import org.opencyc.elf.wm.ActuatorClassFactory;
 import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ActionLibrary;
+import org.opencyc.elf.wm.ActuatorFactory;
+import org.opencyc.elf.wm.ActuatorPool;
+import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.ExperienceLibrary;
-import org.opencyc.elf.wm.JobAssignmentFactory;
-import org.opencyc.elf.wm.JobAssignmentLibrary;
-import org.opencyc.elf.wm.ELFFactory;
 import org.opencyc.elf.wm.GoalFactory;
 import org.opencyc.elf.wm.GoalLibrary;
+import org.opencyc.elf.wm.JobAssignmentFactory;
+import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
+import org.opencyc.elf.wm.NodeFactory;
+import org.opencyc.elf.wm.NodePool;
 import org.opencyc.elf.wm.PlanSimulator;
+import org.opencyc.elf.wm.PredicateClassFactory;
 import org.opencyc.elf.wm.Predictor;
 import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
+import org.opencyc.elf.wm.SensorFactory;
+import org.opencyc.elf.wm.SensorPool;
 import org.opencyc.elf.wm.StateVariableFactory;
 import org.opencyc.elf.wm.StateVariableLibrary;
 import org.opencyc.elf.wm.TaskFrameFactory;
@@ -103,21 +111,21 @@ public class UnitTest extends TestCase {
    */
   public static Test suite() {
     TestSuite testSuite = new TestSuite();
-    testSuite.addTest(new UnitTest("testELFFactory"));
+    testSuite.addTest(new UnitTest("testNodeFactory"));
     testSuite.addTest(new UnitTest("testBehaviorGeneration"));
     testSuite.addTest(new UnitTest("testBehaviorEngine"));
     return testSuite;
   }
 
   /**
-   * Tests ELFFactory object behavior.
+   * Tests NodeFactory object behavior.
    */
-  public void testELFFactory() {
-    System.out.println("\n*** testELFFactory ***");
+  public void testNodeFactory() {
+    System.out.println("\n*** testNodeFactory ***");
     
-    logger.info("Creating ELFFactory");
-    ELFFactory elfFactory = new ELFFactory();
-    Node node = elfFactory.makeNodeShell("test-node");
+    logger.info("Creating NodeFactory");
+    NodeFactory nodeFactory = new NodeFactory();
+    Node node = nodeFactory.makeNodeShell("test-node");
     
     Assert.assertNotNull(node.getLogger());
     Assert.assertTrue(node.getLogger() instanceof Logger);
@@ -206,7 +214,7 @@ public class UnitTest extends TestCase {
     }
     catch (InterruptedException e) {
     }
-    System.out.println("*** testELFFactory OK ***");
+    System.out.println("*** testNodeFactory OK ***");
   }
 
   /**
@@ -230,8 +238,13 @@ public class UnitTest extends TestCase {
     new TaskFrameLibrary();
     (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
     new ExperienceLibrary();
-    new ELFFactory();
-    Node node = ELFFactory.getInstance().makeNodeShell("test-node");
+    new ActuatorPool();
+    (new ActuatorFactory()).getInstance().populateActuatorPool();
+    new SensorPool();
+    (new SensorFactory()).getInstance().populateSensorPool();
+    new NodePool();
+    (new NodeFactory()).getInstance().populateNodePool();
+    Node node = NodeFactory.getInstance().makeNodeShell("test-node");
     
     ActionFactory actionFactory = new ActionFactory();
     Action converseWithUserAction = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);

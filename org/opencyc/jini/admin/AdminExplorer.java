@@ -475,13 +475,13 @@ public class AdminExplorer extends JPanel {
      * Class ServiceCellRenderer displays customized icons for services.
      */
     class ServiceCellRenderer extends DefaultTreeCellRenderer {
-        final Icon defaultServiceIcon = new ImageIcon("gr_ball.gif");
-        final Icon lookupServiceIcon = new ImageIcon("binoculars.gif");
-        final Icon unreachableServiceIcon = new ImageIcon("rd_diam.gif");
+        final Icon defaultServiceIcon = new ImageIcon(ClassLoader.getSystemResource("gr_ball.gif"));
+        final Icon lookupServiceIcon = new ImageIcon(ClassLoader.getSystemResource("binoculars.gif"));
+        final Icon unreachableServiceIcon = new ImageIcon(ClassLoader.getSystemResource("rd_diam.gif"));
 
         ServiceCellRenderer () {
             super();
-            leafIcon = new ImageIcon("small_red_ball.gif");
+            leafIcon = new ImageIcon(ClassLoader.getSystemResource("small_red_ball.gif"));
         }
 
         public Component getTreeCellRendererComponent (JTree tree, Object value, boolean sel, boolean expanded,

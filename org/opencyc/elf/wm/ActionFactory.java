@@ -53,7 +53,7 @@ public class ActionFactory {
    *
    * @return the action factory singleton instance
    */
-  public ActionFactory getInstance() {
+  public static ActionFactory getInstance() {
     return actionFactory;
   }
   

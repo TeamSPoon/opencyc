@@ -173,7 +173,7 @@ public class Scheduler extends BufferedNodeComponent {
     protected final Puttable jobAssignerChannel;
     
     /** the reference to this node component as a message sender */
-    protected NodeComponent sender;
+    protected NodeComponent thisScheduler;
           
     /** the node's controlled resources */
     protected List controlledResources;
@@ -183,15 +183,15 @@ public class Scheduler extends BufferedNodeComponent {
      * @param schedulerChannel the takable channel from which messages are input
      * @param jobAssignerChannel the puttable channel to which messages are output to the
      * job assigner
-     * @param sender the reference to this node component as a message sender
+     * @param thisScheduler the reference to this node component as a message sender
      */
     protected Consumer (Takable schedulerChannel,
                         Puttable jobAssignerChannel,
-                        NodeComponent sender) { 
+                        NodeComponent thisScheduler) { 
       getLogger().info("Creating Scheduler.Consumer");
       this.schedulerChannel = schedulerChannel;
       this.jobAssignerChannel = jobAssignerChannel;
-      this.sender = sender;
+      this.thisScheduler = thisScheduler;
     }
 
     /** Reads messages from the input queue and processes them. */
@@ -237,8 +237,8 @@ public class Scheduler extends BufferedNodeComponent {
       getLogger().info("Scheduler sending to executor " + schedule);
       controlledResources = new ArrayList();
       //TODO populate controlledResources
-      ExecuteScheduleMsg executeScheduleMsg = new ExecuteScheduleMsg(sender, schedule, controlledResources);
-      sender.sendMsgToRecipient(executor.getChannel(), executeScheduleMsg);
+      ExecuteScheduleMsg executeScheduleMsg = new ExecuteScheduleMsg(thisScheduler, schedule, controlledResources);
+      thisScheduler.sendMsgToRecipient(executor.getChannel(), executeScheduleMsg);
       
     }
                 
@@ -274,7 +274,7 @@ public class Scheduler extends BufferedNodeComponent {
      */
     protected void createExecutor(Schedule schedule) {
       Channel executorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
-      executor = new org.opencyc.elf.bg.executor.Executor(getNode(), executorChannel);
+      executor = new org.opencyc.elf.bg.executor.Executor(getNode(), executorChannel, (Scheduler) thisScheduler);
       executor.initialize((Puttable) schedulerChannel);
       getLogger().info("Created new executor: " + executor + " for schedule: " + schedule);
     }
@@ -296,8 +296,8 @@ public class Scheduler extends BufferedNodeComponent {
       if (status.isTrue(Status.SCHEDULE_FINISHED)) {
         status = new Status();
         status.setTrue(Status.SCHEDULE_FINISHED);
-        SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(sender, status);
-        sender.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
+        SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(thisScheduler, status);
+        thisScheduler.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
       }
       else if (status.isTrue(Status.EXECUTION_EXCEPTION)) 
         handleExecutorException(status);
@@ -317,14 +317,14 @@ public class Scheduler extends BufferedNodeComponent {
         Schedule schedule = (Schedule) scheduleIterator.next();
         PredicateExpression predicateExpression = schedule.getPredicateExpression();
         if (predicateExpression != null &&
-            predicateExpression.evaluate(sender.getNode().getWorldModel().getState())) {
-          ExecuteScheduleMsg executeScheduleMsg = new ExecuteScheduleMsg(sender, schedule, controlledResources);
-          sender.sendMsgToRecipient(executor.getChannel(), executeScheduleMsg);
+            predicateExpression.evaluate(thisScheduler.getNode().getWorldModel().getState())) {
+          ExecuteScheduleMsg executeScheduleMsg = new ExecuteScheduleMsg(thisScheduler, schedule, controlledResources);
+          thisScheduler.sendMsgToRecipient(executor.getChannel(), executeScheduleMsg);
           return;
         }
       }
-      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(sender, status);
-      sender.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
+      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(thisScheduler, status);
+      thisScheduler.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
     }
   
     /** Processes the schedule consistency message.
@@ -343,8 +343,8 @@ public class Scheduler extends BufferedNodeComponent {
       //TODO
       Status status = new Status();
       
-      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(sender, status);
-      sender.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
+      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(thisScheduler, status);
+      thisScheduler.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
     }
     
     /** Sends a schedule consistency request to a peer scheduler.
@@ -353,12 +353,12 @@ public class Scheduler extends BufferedNodeComponent {
      */
     protected void sendScheduleConsistencyRequestMsg (Scheduler peerScheduler) {
       ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg = 
-        new ScheduleConsistencyRequestMsg(sender,
+        new ScheduleConsistencyRequestMsg(thisScheduler,
                                           controlledResources,
                                           job.getCommand(),
                                           schedule);
       scheduleConsistencyRequestMsg.setReplyToChannel((Puttable) schedulerChannel);
-      sender.sendMsgToRecipient(peerScheduler.getChannel(), 
+      thisScheduler.sendMsgToRecipient(peerScheduler.getChannel(), 
                                 scheduleConsistencyRequestMsg);
     }    
 
@@ -369,9 +369,9 @@ public class Scheduler extends BufferedNodeComponent {
      */
     protected void sendScheduleConsistencyEvaluationMsg (ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg) {
       ScheduleConsistencyEvaluationMsg scheduleConsistencyEvaluationMsg = 
-        new ScheduleConsistencyEvaluationMsg(sender, schedule, controlledResources);
+        new ScheduleConsistencyEvaluationMsg(thisScheduler, schedule, controlledResources);
       scheduleConsistencyEvaluationMsg.setInReplyToMsg(scheduleConsistencyRequestMsg);
-      sender.sendMsgToRecipient(scheduleConsistencyRequestMsg.getReplyToChannel(),
+      thisScheduler.sendMsgToRecipient(scheduleConsistencyRequestMsg.getReplyToChannel(),
                                 scheduleConsistencyEvaluationMsg);
     }    
   }

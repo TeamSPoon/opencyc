@@ -51,17 +51,19 @@ public class Executor extends BufferedNodeComponent {
   
   //// Constructors
   
-  /** Creates a new instance of Executor with the given
-   * input and output channels.
+  /** Creates a new instance of Executor with the given input and output channels.
    *
    * @param node the containing ELF node
    * @param executorChannel the takable channel from which messages are input from the
    * associated scheduler
+   * @param scheduler the scheduler whose plans this executor executes
    */
   public Executor (Node node,
-                   Takable executorChannel) {
+                   Takable executorChannel,
+                   Scheduler scheduler) {
     setNode(node);
     this.executorChannel = executorChannel;         
+    this.scheduler = scheduler;
   }
 
   //// Public Area
@@ -94,54 +96,6 @@ public class Executor extends BufferedNodeComponent {
     return "Executor for " + node.getName();
   }
   
-  /** Gets the schedule to execute
-   * 
-   * @return the schedule to execute
-   */
-  public Schedule getScheduleToExecute() {
-    return scheduleToExecute;
-  }
-
-  /** Sets the schedule to execute
-   * 
-   * @param scheduleToExecute the schedule to execute
-   */
-  public void setScheduleToExecute(Schedule scheduleToExecute) {
-    this.scheduleToExecute = scheduleToExecute;
-  }
-
-  /** Gets the behavior generation instance
-   * 
-   * @return the behavior generation instance
-   */
-  public BehaviorGeneration getBehaviorGeneration() {
-    return behaviorGeneration;
-  }
-
-  /** Sets the behavior generation instance
-   * 
-   * @param behaviorGeneration the behavior generation instance
-   */
-  public void setBehaviorGeneration(BehaviorGeneration behaviorGeneration) {
-    this.behaviorGeneration = behaviorGeneration;
-  }
-
-  /** Gets the scheduler whose plans this executor executes
-   * 
-   * @return the scheduler whose plans this executor executes
-   */
-  public Scheduler getScheduler() {
-    return scheduler;
-  }
-
-  /** Sets the scheduler whose plans this executor executes
-   * 
-   * @param scheduler the scheduler whose plans this executor executes
-   */
-  public void setSchedulerr(Scheduler scheduler) {
-    this.scheduler = scheduler;
-  }
-
   //// Protected Area
   
   /** Thread which processes the input message channel. */
@@ -201,14 +155,23 @@ public class Executor extends BufferedNodeComponent {
      * @param executeSceduleMsg the execute schedule message
      */
     protected void processExecutorScheduleMsg(ExecuteScheduleMsg executeSceduleMsg) {
+      scheduleSequencer = new ScheduleSequencer();
+      scheduleSequencerExecutor = new ThreadedExecutor();
+      try {
+        scheduleSequencerExecutor.execute(scheduleSequencer);
+      }
+      catch (InterruptedException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
   }
   
   /** Interruptable thread which executes the input schedule. */
-  protected class ScheduleExecutor implements Runnable {
+  protected class ScheduleSequencer implements Runnable {
     
     /** Constructs a new ScheduleExecutor object */
-    ScheduleExecutor() {
+    ScheduleSequencer() {
     }
     
     /** Executes the input schedule. */
@@ -272,6 +235,12 @@ public class Executor extends BufferedNodeComponent {
 
   /** the consumer thread executor */
   protected EDU.oswego.cs.dl.util.concurrent.Executor consumerExecutor;
+  
+  /** the thread which sequences through the schedule and sends the commands to the actuator */
+  protected ScheduleSequencer scheduleSequencer;
+  
+  /** the schedule sequencer thread executor */
+  protected EDU.oswego.cs.dl.util.concurrent.Executor scheduleSequencerExecutor;
   
   /** the executor for this scheduler */
   protected org.opencyc.elf.bg.executor.Executor executor;

@@ -32,9 +32,10 @@ import junit.framework.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class UnitTest extends TestCase {
+  
   /**
    * Main method in case tracing is prefered over running JUnit.
-   * @param args DOCUMENT ME!
+   * @param args command line arguments (unused)
    */
   public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
@@ -51,7 +52,7 @@ public class UnitTest extends TestCase {
 
   /**
    * Runs the unit tests
-   * @return DOCUMENT ME!
+   * @return the test suite
    */
   public static Test suite() {
     TestSuite testSuite = new TestSuite();

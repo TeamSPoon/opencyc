@@ -39,6 +39,8 @@ import org.opencyc.elf.wm.PlanSimulator;
 import org.opencyc.elf.wm.Predictor;
 import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
+import org.opencyc.elf.wm.StateVariableFactory;
+import org.opencyc.elf.wm.StateVariableLibrary;
 import org.opencyc.elf.wm.TaskFrameFactory;
 import org.opencyc.elf.wm.TaskFrameLibrary;
 import org.opencyc.elf.wm.WorldModel;
@@ -213,11 +215,12 @@ public class UnitTest extends TestCase {
     
     logger.info("Testing behavior generation");
     new KnowledgeBase();
+    new StateVariableLibrary();
+    (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
     new ActionFactory();
     new GoalFactory();
     new ResourcePool();
     (new ResourceFactory()).getInstance().populateResourcePool();
-    StateVariable.initialize();
     new JobAssignmentLibrary();
     (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
     new TaskFrameLibrary();

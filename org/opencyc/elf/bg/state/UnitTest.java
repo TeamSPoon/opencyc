@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.state;
 
 //// Internal Imports
+import org.opencyc.elf.wm.StateVariableFactory;
+import org.opencyc.elf.wm.StateVariableLibrary;
 
 //// External Imports
 import java.util.*;
@@ -62,7 +64,8 @@ public class UnitTest extends TestCase {
    */
   public void testSituation() {
     System.out.println("\n*** testSituation ***");
-    StateVariable.initialize();
+    new StateVariableLibrary();
+    (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
     
     Situation situation1 = new Situation();
     StateVariable stateVariable1 = new StateVariable(String.class,

@@ -1,6 +1,8 @@
 package org.opencyc.elf;
 
 //// Internal Imports
+import org.opencyc.elf.bg.predicate.NotNull;
+
 import org.opencyc.elf.bg.state.StateVariable;
 
 import org.opencyc.elf.wm.ActuatorClassFactory;
@@ -65,9 +67,7 @@ public class BehaviorEngine {
   
   //// Public Area
   
-  /**
-   * Initializes the behavior engine.
-   */
+  /** Initializes the behavior engine. */
   public void initialize () {
     logger = Logger.getLogger("org.opencyc.elf");
     logger.info("Initializing BehaviorEngine");
@@ -80,13 +80,12 @@ public class BehaviorEngine {
   
   //// Protected Area
   
-  /**
-   * Creates the singleton instances and populates the object libraries.
-   */
+  /** Creates the singleton instances and populates the object libraries. */
   protected void createSingletonInstances () {
     new KnowledgeBase();
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
+    createPredicateSingletonInstances();
     new ActionLibrary();
     (new ActionFactory()).getInstance().populateActionLibrary();
     new GoalLibrary();
@@ -106,24 +105,26 @@ public class BehaviorEngine {
     (new NodeFactory()).getInstance().populateNodePool();
   }
   
+  /** Creates the predicate singleton instances. */
+  protected void createPredicateSingletonInstances () {
+    new NotNull();
+  }
+  
   //// Private Area
   
   //// Internal Rep
       
-  /**
-   * the logger
-   */
+  /** the logger */
   protected static Logger logger;
   
-  /**
-   * the behavior engine singleton instance
-   */
+  /** the behavior engine singleton instance */
   protected static BehaviorEngine behaviorEngine;
   
   //// Main
   
   /**
    * Provides the main method for the behavior engine.
+   *
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {

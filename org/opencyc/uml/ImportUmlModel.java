@@ -83,18 +83,54 @@ public class ImportUmlModel {
         Element content = root.getChild("XMI.content");
         Log.current.println("content: " + content.toString());
         importHeader(header);
+        importContent(content);
     }
 
     /**
      * Imports the UML model version info given the header element.
      *
-     * @param root the UML header element
+     * @param header the UML header element
      */
     public void importHeader (Element header) {
         Element modelVersion = header.getChild("XMI.model");
         Log.current.println("modelVersion: " + modelVersion.toString());
         Element metamodelVersion = header.getChild("XMI.metamodel");
         Log.current.println("metamodelVersion: " + metamodelVersion.toString());
+    }
+
+    /**
+     * Imports the UML content info given the content element.
+     *
+     * @param content the UML content element
+     */
+    public void importContent (Element content) {
+        Iterator iterator = content.getChildren().iterator();
+        Log.current.println("content: " + content.toString());
+        while (iterator.hasNext()) {
+            Element element = (Element) iterator.next();
+            String elementName = element.getName();
+            if (elementName.equals("Package"))
+                importPackage(element);
+            else {
+                Log.current.println("Unexpected element " + element);
+                Log.current.printStackTrace(new RuntimeException());
+                System.exit(1);
+            }
+        }
+    }
+
+    /**
+     * Imports the UML model version info given the package element.
+     *
+     * @param packageElement the UML package element
+     */
+    public void importPackage (Element packageElement) {
+        Log.current.println("package: " + packageElement);
+        Iterator attributes = packageElement.getAttributes().iterator();
+        while (attributes.hasNext()) {
+            Attribute attribute = (Attribute) attributes.next();
+            Log.current.println("  attribute " + attribute);
+        }
     }
 
 }

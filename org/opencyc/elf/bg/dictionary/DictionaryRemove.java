@@ -79,7 +79,7 @@ public class DictionaryRemove extends Operator {
       stringBuffer.append(obj);
       stringBuffer.append('"');
     }
-    if (obj instanceof CycList)
+    else if (obj instanceof CycList)
       stringBuffer.append(((CycList)obj).cyclify());
     else
       stringBuffer.append(obj.toString());

@@ -94,7 +94,49 @@ public class UnitTest extends TestCase {
     Assert.assertTrue(dictionary.containsKey("key"));
     
     // DictionaryLookup
-    //TODO
+    new DictionaryLookup();
+    Operator dictionaryLookup = DictionaryLookup.getInstance();
+    operatorExpression1 = new OperatorExpression(dictionaryLookup, "key", dictionary);
+    Assert.assertEquals("(dictionary-lookup \"key\" {key=value})", operatorExpression1.toString());
+    Assert.assertEquals("value", operatorExpression1.evaluate(state));
+    operatorExpression1 = new OperatorExpression(dictionaryLookup, new Integer(0), dictionary);
+    Assert.assertEquals(null, operatorExpression1.evaluate(state));
+    
+    // DictionaryRemove
+    new DictionaryRemove();
+    Operator dictionaryRemove = DictionaryRemove.getInstance();
+    operatorExpression1 = new OperatorExpression(dictionaryRemove, "key", dictionary);
+    Assert.assertEquals("(dictionary-remove \"key\" {key=value})", operatorExpression1.toString());
+    Assert.assertEquals("key", operatorExpression1.evaluate(state));
+    Assert.assertTrue(! dictionary.containsKey("key"));
+    
+    // DictionaryKeys
+    new DictionaryKeys();
+    Operator dictionaryKeys = DictionaryKeys.getInstance();
+    dictionary = new Hashtable();
+    dictionary.put("a", "A");
+    dictionary.put("b", "B");
+    dictionary.put("c", "C");
+    operatorExpression1 = new OperatorExpression(dictionaryKeys, dictionary);
+    Assert.assertEquals("(dictionary-keys {b=B, a=A, c=C})", operatorExpression1.toString());
+    Object result = operatorExpression1.evaluate(state);
+    Assert.assertNotNull(result);
+    Assert.assertTrue(result instanceof CycList);
+    Assert.assertEquals("(\"b\" \"a\" \"c\")", ((CycList) result).toString());
+    
+    // DictionaryValues
+    new DictionaryValues();
+    Operator dictionaryValues = DictionaryValues.getInstance();
+    dictionary = new Hashtable();
+    dictionary.put("a", "A");
+    dictionary.put("b", "B");
+    dictionary.put("c", "C");
+    operatorExpression1 = new OperatorExpression(dictionaryValues, dictionary);
+    Assert.assertEquals("(dictionary-values {b=B, a=A, c=C})", operatorExpression1.toString());
+    result = operatorExpression1.evaluate(state);
+    Assert.assertNotNull(result);
+    Assert.assertTrue(result instanceof CycList);
+    Assert.assertEquals("(\"B\" \"A\" \"C\")", ((CycList) result).toString());
     
     System.out.println("*** testOperatorExpression OK ***");
   }

@@ -181,7 +181,7 @@ public class GenericAgent implements MessageReceiver {
      */
     public void messageReceived (int remoteAgentCommunity, ACL acl) {
         if (verbosity > 0)
-            Log.current.println("FipaOsCommunityAdapter received\n" + acl);
+            Log.current.println("\nGenericAgent received\n" + acl);
         messageConsumed = false;
         if (acl.getOntology().equals(AgentCommunityAdapter.CYC_ECHO_ONTOLOGY)) {
             processEchoRequest(remoteAgentCommunity, acl);
@@ -200,15 +200,19 @@ public class GenericAgent implements MessageReceiver {
             Log.current.println("Processing echo request\n" + echoRequestAcl);
         ACL echoReplyAcl = (ACL) echoRequestAcl.clone();
         echoReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
-        echoReplyAcl.setSenderAID(echoRequestAcl.getReceiverAID());
-        echoReplyAcl.setReceiverAID(echoRequestAcl.getSenderAID());
+        echoReplyAcl.setSenderAID(getAID(remoteAgentCommunity));
+        echoReplyAcl.setReceiverAID(makeAID(echoRequestAcl.getSenderAID().getName(),
+                                    remoteAgentCommunity));
         echoReplyAcl.setReplyWith(null);
         echoReplyAcl.setInReplyTo(echoRequestAcl.getReplyWith());
+        if (verbosity > 0)
+            Log.current.println("\n\nEcho reply\n" + echoReplyAcl);
         try {
             if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
                 coAbsCommunityAdapter.sendMessage(echoReplyAcl);
-            else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY)
+            else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY) {
                 fipaOsCommunityAdapter.sendMessage(echoReplyAcl);
+            }
             else
                 Log.current.errorPrintln("Invalid remoteAgentCommunity " + remoteAgentCommunity);
         }
@@ -291,7 +295,7 @@ public class GenericAgent implements MessageReceiver {
             return agentID;
         }
         else
-            return this.fipaOsCommunityAdapter.getAID();
+            return fipaOsCommunityAdapter.getAID();
     }
 
     /**
@@ -308,6 +312,9 @@ public class GenericAgent implements MessageReceiver {
         }
         else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY) {
             agentID = (AgentID) fipaOsCommunityAdapter.getAID().clone();
+            int index = agentName.indexOf("@");
+            if (index > -1)
+                agentName = agentName.substring(0, index);
             agentID.setName(agentName);
             List addresses = agentID.getAddresses();
             ArrayList newAddresses = new ArrayList();

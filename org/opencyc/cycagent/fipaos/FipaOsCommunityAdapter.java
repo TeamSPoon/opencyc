@@ -430,12 +430,17 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
          * Starts this task, sends the agree, and  sends the reply.
          */
         protected void startTask() {
+            if (verbosity > 0)
+                Log.current.println("\n\nAgreeInformTask responding to fipaRequest\n" +
+                                    fipaRequest);
             ACL requestAcl =
                 fipaRequest.getACL(fipaRequest.getLatestMessageIndex());
             ACL agreeAcl = (ACL) requestAcl.clone();
             agreeAcl.setPerformative(FIPACONSTANTS.AGREE);
-            agreeAcl.setSenderAID(requestAcl.getReceiverAID());
+            agreeAcl.setSenderAID(getAID());
             agreeAcl.setReceiverAID(requestAcl.getSenderAID());
+            if (verbosity > 0)
+                Log.current.println("\nSending agree acl\n" + agreeAcl);
             forward(agreeAcl);
             waitingReplyThreads.put(requestAcl.getReplyWith(), Thread.currentThread());
             messageReceiver.messageReceived(AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY,

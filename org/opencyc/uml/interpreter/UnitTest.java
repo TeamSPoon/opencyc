@@ -56,11 +56,11 @@ public class UnitTest extends TestCase {
      */
     public static Test suite () {
         TestSuite testSuite = new TestSuite();
-        //testSuite.addTest(new UnitTest("testJavaInterpreter"));
-        //testSuite.addTest(new UnitTest("testExpressionEvaluation"));
-        //testSuite.addTest(new UnitTest("testContextFrames"));
-        //testSuite.addTest(new UnitTest("testProcedureInterpretation"));
-        //testSuite.addTest(new UnitTest("testSimpleStateMachine"));
+        testSuite.addTest(new UnitTest("testJavaInterpreter"));
+        testSuite.addTest(new UnitTest("testExpressionEvaluation"));
+        testSuite.addTest(new UnitTest("testContextFrames"));
+        testSuite.addTest(new UnitTest("testProcedureInterpretation"));
+        testSuite.addTest(new UnitTest("testSimpleStateMachine"));
         testSuite.addTest(new UnitTest("testCycExtractor"));
         return  testSuite;
     }
@@ -396,8 +396,12 @@ public class UnitTest extends TestCase {
                 e.printStackTrace();
                 Assert.fail();
             }
-            OutputPin outputPinX1 = stateMachineFactory.addOutputPinToProcedure(name,
-                    commentString, initializeNumberToZero, type);
+            OutputPin outputPinX1 = new OutputPin();
+            stateMachineFactory.addOutputPinToProcedure(outputPinX1,
+                                                        name,
+                                                        commentString,
+                                                        initializeNumberToZero,
+                                                         type);
             Assert.assertTrue(outputPinX1 instanceof OutputPin);
             Assert.assertTrue(outputPinX1.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, outputPinX1.getNamespace().getName());
@@ -434,11 +438,12 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(isList, increment.isList());
             name = "UMLProcedure-IncrementNumber-InputPin-X";
             commentString = "the given number to be incremented";
-            InputPin inputPinX =
-                stateMachineFactory.addInputPinToProcedure(name,
-                                                           commentString,
-                                                           increment,
-                                                           type);
+            InputPin inputPinX = new InputPin();
+            stateMachineFactory.addInputPinToProcedure(inputPinX,
+                                                       name,
+                                                       commentString,
+                                                       increment,
+                                                       type);
             Assert.assertTrue(inputPinX instanceof InputPin);
             Assert.assertTrue(inputPinX.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, inputPinX.getNamespace().getName());
@@ -451,11 +456,12 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(increment, inputPinX.getProcedure());
             name = "UMLProcedure-IncrementNumber-OutputPin-X";
             commentString = "the incremented number";
-            OutputPin outputPinX =
-                stateMachineFactory.addOutputPinToProcedure(name,
-                                                            commentString,
-                                                            increment,
-                                                            type);
+            OutputPin outputPinX = new OutputPin();
+            stateMachineFactory.addOutputPinToProcedure(outputPinX,
+                                                        name,
+                                                        commentString,
+                                                        increment,
+                                                        type);
             Assert.assertTrue(outputPinX instanceof OutputPin);
             Assert.assertTrue(outputPinX.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, outputPinX.getNamespace().getName());
@@ -576,15 +582,16 @@ public class UnitTest extends TestCase {
             Event trigger = null;
             StateVertex source = initialState;
             StateVertex target = counterState;
-            Transition transition1 =
-                stateMachineFactory.makeTransition(name,
-                                                   commentString,
-                                                   guardExpressionLanguage,
-                                                   guardExpressionBody,
-                                                   effect,
-                                                   trigger,
-                                                   source,
-                                                   target);
+            Transition transition1 = new Transition();
+            stateMachineFactory.addTransition(transition1,
+                                              name,
+                                              commentString,
+                                              guardExpressionLanguage,
+                                              guardExpressionBody,
+                                              effect,
+                                              trigger,
+                                              source,
+                                              target);
             Assert.assertTrue(transition1 instanceof Transition);
             Assert.assertTrue(transition1.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition1.getNamespace().getName());
@@ -617,15 +624,16 @@ public class UnitTest extends TestCase {
             trigger = null;
             source = counterState;
             target = counterState;
-            Transition transition2 =
-                stateMachineFactory.makeTransition(name,
-                                                   commentString,
-                                                   guardExpressionLanguage,
-                                                   guardExpressionBody,
-                                                   effect,
-                                                   trigger,
-                                                   source,
-                                                   target);
+            Transition transition2 = new Transition();
+            stateMachineFactory.addTransition(transition2,
+                                              name,
+                                              commentString,
+                                              guardExpressionLanguage,
+                                              guardExpressionBody,
+                                              effect,
+                                              trigger,
+                                              source,
+                                              target);
             Assert.assertTrue(transition2 instanceof Transition);
             Assert.assertTrue(transition2.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition2.getNamespace().getName());
@@ -672,15 +680,16 @@ public class UnitTest extends TestCase {
             trigger = null;
             source = counterState;
             target = finalState;
-            Transition transition3 =
-                stateMachineFactory.makeTransition(name,
-                                                   commentString,
-                                                   guardExpressionLanguage,
-                                                   guardExpressionBody,
-                                                   effect,
-                                                   trigger,
-                                                   source,
-                                                   target);
+            Transition transition3 = new Transition();
+            stateMachineFactory.addTransition(transition3,
+                                              name,
+                                              commentString,
+                                              guardExpressionLanguage,
+                                              guardExpressionBody,
+                                              effect,
+                                              trigger,
+                                              source,
+                                              target);
             Assert.assertTrue(transition3 instanceof Transition);
             Assert.assertTrue(transition3.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition3.getNamespace().getName());
@@ -727,8 +736,8 @@ public class UnitTest extends TestCase {
         Interpreter interpreter = null;
         try {
             CycFort temporaryWorkspaceMt = cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
-            //int verbosity = Interpreter.QUIET_VERBOSITY;
-            int verbosity = Interpreter.DEFAULT_VERBOSITY;
+            int verbosity = Interpreter.QUIET_VERBOSITY;
+            //int verbosity = Interpreter.DEFAULT_VERBOSITY;
             ContextStackPool contextStackPool =
                     new ContextStackPool(cycAccess,
                                          temporaryWorkspaceMt,
@@ -803,7 +812,10 @@ public class UnitTest extends TestCase {
             }
             else
                 cycAccess = new CycAccess();
-            CycExtractor cycExtractor = new CycExtractor(cycAccess, CycExtractor.QUIET_VERBOSITY);
+            //CycExtractor cycExtractor = new CycExtractor(cycAccess,
+            //                                             CycExtractor.QUIET_VERBOSITY);
+            CycExtractor cycExtractor = new CycExtractor(cycAccess,
+                                                         CycExtractor.DEFAULT_VERBOSITY);
             StateMachine stateMachine = cycExtractor.extract("TestStateMachine");
             Assert.assertTrue(stateMachine instanceof StateMachine);
             Assert.assertTrue(stateMachine.getNamespace() instanceof Namespace);

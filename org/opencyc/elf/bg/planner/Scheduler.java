@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.Result;
@@ -27,10 +28,8 @@ import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
- * <P>
  * Scheduler performs temporal task decomposition for a given assigned agent
  * and its allocated resources.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -53,22 +52,21 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Scheduler extends NodeComponent {
+  
   //// Constructors
 
-  /** Creates a new instance of Scheduler */
-  public Scheduler() {
-  }
-
-  /** 
-   * Creates a new instance of Scheduler with the given
+  /** Creates a new instance of Scheduler with the given
    * input and output channels.
    *
+   * @param node the containing ELF node
    * @param schedulerChannel the takable channel from which messages are input
    * @param jobAssignerChannel the puttable channel to which messages are output to the
    * job assigner
    */
-  public Scheduler (Takable schedulerChannel,
+  public Scheduler (Node node,
+                    Takable schedulerChannel,
                     Puttable jobAssignerChannel) {
+    setNode(node);
     this.schedulerChannel = schedulerChannel;           
     consumer = new Consumer(schedulerChannel,
                             jobAssignerChannel,
@@ -85,8 +83,7 @@ public class Scheduler extends NodeComponent {
 
   //// Public Area
 
-  /**
-   * Returns true if the given object equals this object.
+  /** Returns true if the given object equals this object.
    * 
    * @param obj the given object
    * 
@@ -101,8 +98,7 @@ public class Scheduler extends NodeComponent {
     return true;
   }
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -111,8 +107,7 @@ public class Scheduler extends NodeComponent {
     return "";
   }
 
-  /**
-   * Gets the executor for this sceduler
+  /** Gets the executor for this sceduler
    *
    * @return the executor for this sceduler
    */
@@ -120,8 +115,7 @@ public class Scheduler extends NodeComponent {
     return executor;
   }
 
-  /**
-   * Sets the executor for this sceduler
+  /** Sets the executor for this sceduler
    *
    * @param executor the executor for this sceduler
    */
@@ -129,8 +123,7 @@ public class Scheduler extends NodeComponent {
     this.executor = executor;
   }
 
-  /**
-   * Gets the puttable channel for this node component to which other node
+  /** Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
    * @return the puttable channel for this node component to which other node
@@ -140,8 +133,7 @@ public class Scheduler extends NodeComponent {
     return (Puttable) schedulerChannel;
   }
 
-  /**
-   * Gets the resources required by this scheduler.
+  /** Gets the resources required by this scheduler.
    *
    * @return the resources required by this scheduler
    */
@@ -153,9 +145,7 @@ public class Scheduler extends NodeComponent {
   
   //// Protected Area
   
-  /**
-   * Thread which processes the input message channel.
-   */
+  /** Thread which processes the input message channel. */
   protected class Consumer implements Runnable {
     
     /** the takable channel from which messages are input */
@@ -176,8 +166,7 @@ public class Scheduler extends NodeComponent {
     /** the schedule which is planned to accomplish the commanded task */
     protected Schedule schedule;
     
-    /**
-     * Creates a new instance of Consumer.
+    /** Creates a new instance of Consumer.
      *
      * @param schedulerChannel the takable channel from which messages are input
      * @param jobAssignerChannel the puttable channel to which messages are output to the
@@ -192,9 +181,7 @@ public class Scheduler extends NodeComponent {
       this.nodeComponent = nodeComponent;
     }
 
-    /**
-     * Reads messages from the input queue and processes them.
-     */
+    /** Reads messages from the input queue and processes them. */
     public void run () {
       try {
         while (true) { 
@@ -206,8 +193,7 @@ public class Scheduler extends NodeComponent {
      
     //TODO think about conversations and thread safety
     
-    /**
-     * Dispatches the given input channel message by type.
+    /** Dispatches the given input channel message by type.
      *
      * @param genericMsg the given input channel message
      */
@@ -222,8 +208,7 @@ public class Scheduler extends NodeComponent {
         processScheduleConsistencyRequestMsg((ScheduleConsistencyRequestMsg) genericMsg); 
     }
   
-    /**
-     * Processes the schedule job message.
+    /** Processes the schedule job message.
      *
      * @param scheduleJobMsg the schedule job message
      */
@@ -232,8 +217,7 @@ public class Scheduler extends NodeComponent {
       //TODO
     }
                 
-    /**
-     * Processes the replan message.
+    /** Processes the replan message.
      *
      * @param replanMsg the replan message
      */
@@ -241,8 +225,7 @@ public class Scheduler extends NodeComponent {
       //TODO
     }
         
-    /**
-     * Processes the executor status message.
+    /** Processes the executor status message.
      *
      * @param executorStatusMsg the executor status message
      */
@@ -251,8 +234,7 @@ public class Scheduler extends NodeComponent {
       Status status = executorStatusMsg.getStatus();
     }
     
-    /**
-     * Processes the schedule consistency message.
+    /** Processes the schedule consistency message.
      *
      * @param scheduleConsistencyRequestMsg the schedule consistency request message
      */
@@ -274,8 +256,7 @@ public class Scheduler extends NodeComponent {
       nodeComponent.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
     }
     
-    /**
-     * Sends a schedule consistency request to a peer scheduler.
+    /** Sends a schedule consistency request to a peer scheduler.
      *
      * @param peerScheduler the peer scheduler
      */
@@ -291,8 +272,7 @@ public class Scheduler extends NodeComponent {
                                        scheduleConsistencyRequestMsg);
     }    
 
-    /**
-     * Sends a schedule consistency evaluation message to a peer scheduler in
+    /** Sends a schedule consistency evaluation message to a peer scheduler in
      * response to its schedule consistency request.
      *
      * @param scheduleConsistencyRequestMsg the given schedule consistency request message

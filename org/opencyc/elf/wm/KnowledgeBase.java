@@ -1,6 +1,5 @@
 package org.opencyc.elf.wm;
 
-import EDU.oswego.cs.dl.util.concurrent.Takable;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
@@ -17,6 +16,8 @@ import org.opencyc.elf.message.KBObjectResponseMsg;
 
 //// External Imports
 import java.util.Hashtable;
+
+import EDU.oswego.cs.dl.util.concurrent.Takable;
 
 /**
  * <P>Knowledge Base contains the known entities and their attributes.
@@ -57,7 +58,7 @@ public class KnowledgeBase extends NodeComponent {
    * @param knowledgeBaseChannel the takable channel from which messages are input
    */
   public KnowledgeBase(Takable knowledgeBaseChannel) {
-    consumer = new Consumer(knowledgeBaseChannel);
+    consumer = new Consumer(knowledgeBaseChannel, this);
   }
   
   //// Public Area
@@ -81,10 +82,21 @@ public class KnowledgeBase extends NodeComponent {
     protected final Takable knowledgeBaseChannel;
 
     /**
-     * Creates a new instance of Consumer
+     * the parent node component
      */
-    protected Consumer (Takable knowledgeBaseChannel) { 
-      this.knowledgeBaseChannel = knowledgeBaseChannel; 
+    protected NodeComponent nodeComponent;
+    
+    /**
+     * Creates a new instance of Consumer.
+     *
+     * @param knowledgeBaseChannel the takable channel from which messages are input
+     * @param nodeComponent the parent node component
+     */
+    protected Consumer (Takable knowledgeBaseChannel, 
+                        NodeComponent nodeComponent) { 
+      this.knowledgeBaseChannel = knowledgeBaseChannel;
+      this.nodeComponent = nodeComponent;
+      
     }
 
     /**
@@ -110,29 +122,29 @@ public class KnowledgeBase extends NodeComponent {
       else if (genericMsg instanceof KBObjectPutMsg)
         processKBObjectPutMsg((KBObjectPutMsg) genericMsg);
     }
-  }
   
-  /**
-   * Processes the knowledge base object request message.
-   */
-  protected void processKBObjectRequestMsg(KBObjectRequestMsg kbObjectRequestMsg) {
-    KBObjectResponseMsg kbObjectResponseMsg = new KBObjectResponseMsg();
-    kbObjectResponseMsg.setSender(this);
-    kbObjectResponseMsg.setInReplyToMsg(kbObjectRequestMsg);
-    Object obj = kbObjectRequestMsg.getObj();
-    kbObjectResponseMsg.setObj(obj);
-    Object data = kbCache.get(obj);
-    kbObjectResponseMsg.setData(data);
-    sendMsgToRecipient(kbObjectRequestMsg.getReplyToChannel(), kbObjectResponseMsg);
-  }
-  
-  /**
-   * Processes the knowledge base object put message.
-   */
-  protected void processKBObjectPutMsg(KBObjectPutMsg kbObjectPutMsg) {
-    Object obj = kbObjectPutMsg.getObj();
-    Object data = kbObjectPutMsg.getData();
-    kbCache.put(obj, data);
+    /**
+     * Processes the knowledge base object request message.
+     */
+    protected void processKBObjectRequestMsg(KBObjectRequestMsg kbObjectRequestMsg) {
+      KBObjectResponseMsg kbObjectResponseMsg = new KBObjectResponseMsg();
+      kbObjectResponseMsg.setSender(nodeComponent);
+      kbObjectResponseMsg.setInReplyToMsg(kbObjectRequestMsg);
+      Object obj = kbObjectRequestMsg.getObj();
+      kbObjectResponseMsg.setObj(obj);
+      Object data = kbCache.get(obj);
+      kbObjectResponseMsg.setData(data);
+      sendMsgToRecipient(kbObjectRequestMsg.getReplyToChannel(), kbObjectResponseMsg);
+    }
+
+    /**
+     * Processes the knowledge base object put message.
+     */
+    protected void processKBObjectPutMsg(KBObjectPutMsg kbObjectPutMsg) {
+      Object obj = kbObjectPutMsg.getObj();
+      Object data = kbObjectPutMsg.getData();
+      kbCache.put(obj, data);
+    }
   }
   
   //// Private Area

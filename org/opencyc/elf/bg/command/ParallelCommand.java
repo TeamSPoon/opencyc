@@ -1,17 +1,14 @@
-package org.opencyc.elf.bg.list;
+package org.opencyc.elf.bg.command;
 
 //// Internal Imports
-import org.opencyc.cycobject.CycList;
-import org.opencyc.elf.BehaviorEngineException;
-import org.opencyc.elf.bg.expression.Operator;
-import org.opencyc.elf.wm.state.State;
 
 //// External Imports
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/** RestOfList is an arity one operator that returns the a new list consisting of all but the first 
- * element of its list argument.  An exception is thrown if the given list is empty.
+/**
+ * ParallelCommand is a command in which its subcommands may be executed in parallel.
  *
  * @version $Id$
  * @author  reed
@@ -34,46 +31,55 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class RestOfList extends Operator {
+public class ParallelCommand implements Command {
   
   //// Constructors
   
-  /** Creates a new instance of RestOfList. */
-  public RestOfList() {
-    super();
-  }
-  
-  /** Evaluates the given argument within the given state and returns all but the first element of the list.
-   *
-   * @param arguments the given arguments to evaluate
-   * @param state the given state
+  /** Creates a new instance of ParallelCommand.
+   * 
+   * @param name the name of this parallel command
+   * @param parallelCommands the subcommands that can be executed in parallel 
+   * by the executor
    */
-  public Object evaluate(List arguments, State state) {
-    CycList list = (CycList) evaluateArgument(arguments.get(0), state);
-    if (list.size() == 0)
-      throw new BehaviorEngineException("Cannot operation on an empty list " + arguments);
-    return list.rest();
-  }
-  
-  /** Returns a string representation of this operator given
-   * the arguments.
-   *
-   * @param arguments the given arguments to evaluate
-   * @return a string representation of this object
-   */
-  public String toString(List arguments) {
-    StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("(rest-of-list ");
-    Object obj = arguments.get(0);
-    if (obj instanceof CycList)
-      stringBuffer.append(((CycList) obj).cyclify());
-    else
-      stringBuffer.append(obj.toString());
-    stringBuffer.append(")");
-    return stringBuffer.toString();
+  public ParallelCommand(String name, List parallelCommands) {
+    this.name = name;
+    this.parallelCommands = parallelCommands;
   }
   
   //// Public Area
+  
+  /**
+   * Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ParallelCommand with ");
+    stringBuffer.append(parallelCommands.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
+  
+  /** Gets the name of the command
+   *
+   * @return name the name of the command
+   */
+  public String getName() {
+    return name;
+  }
+  
+  /** Creates and returns a copy of this object. 
+   *
+   * @return a copy of this object
+   */
+  public Object clone() {
+    List clonedParallelCommands = new ArrayList(parallelCommands.size());
+    Iterator iter = parallelCommands.iterator();
+    while (iter.hasNext())
+      clonedParallelCommands.add(((Command) iter.next()).clone());
+    return new ParallelCommand(name, clonedParallelCommands);
+  }
   
   //// Protected Area
   
@@ -81,6 +87,10 @@ public class RestOfList extends Operator {
   
   //// Internal Rep
   
-  //// Main
+  /** the name of this parallel command */
+  protected String name;
+  
+  /** the parallel commands */
+  protected List parallelCommands;
   
 }

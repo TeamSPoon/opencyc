@@ -1,19 +1,18 @@
-package org.opencyc.elf.bg.list;
+package org.opencyc.elf.bg.command;
 
 //// Internal Imports
-import org.opencyc.cycobject.CycList;
-import org.opencyc.elf.BehaviorEngineException;
-import org.opencyc.elf.bg.expression.Operator;
-import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 import java.util.List;
 
-/** TheEmptyList is a zero arity operator that returns an empty list.
+/** ChoiceCommand is the abstract superclass of all choice commands.  It provides
+ * the list of relevant state variables.
  *
- * @version $Id$
- * @author  reed
+ * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
+ * <BR>This software is the proprietary information of Cycorp, Inc.
+ * <P>Use is subject to license terms.
  *
+ * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
@@ -31,42 +30,38 @@ import java.util.List;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * @version $Id$
  */
-public class TheEmptyList extends Operator {
+public abstract class ChoiceCommand {
   
   //// Constructors
   
-  /** Creates a new instance of TheEmptyList. */
-  public TheEmptyList() {
-    super();
-  }
-  
-  /** Returns the empty list.
+  /** Creates a new instance of ChoiceCommand.
    *
-   * @param arguments the given arguments to evaluate
-   * @param state the given state
+   * @param relevantStateVariables the list of relevant state variables
    */
-  public Object evaluate(List arguments, State state) {
-    return new CycList();
-  }
-  
-  /** Returns a string representation of this operator given
-   * the arguments.
-   *
-   * @param arguments the given arguments to evaluate
-   * @return a string representation of this object
-   */
-  public String toString(List arguments) {
-    return "(the-empty-list)";
+  public ChoiceCommand(List relevantStateVariables) {
+    this.relevantStateVariables = relevantStateVariables;
   }
   
   //// Public Area
   
+  /** Gets the list of relevant state variables.
+   *
+   * @return the list of relevant state variables
+   */
+  public List getRelevantStateVariables () {
+    return relevantStateVariables;
+  }
+
   //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
+  
+  /** the list of relevant state variables */
+  protected List relevantStateVariables;
   
   //// Main
   

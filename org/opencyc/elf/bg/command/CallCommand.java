@@ -1,19 +1,19 @@
-package org.opencyc.elf.bg.list;
+package org.opencyc.elf.bg.command;
 
 //// Internal Imports
-import org.opencyc.cycobject.CycList;
-import org.opencyc.elf.BehaviorEngineException;
-import org.opencyc.elf.bg.expression.Operator;
-import org.opencyc.elf.wm.state.State;
+import org.opencyc.elf.bg.expression.ObjectMethodCall;
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
-import java.util.List;
 
-/** LengthOfList is an arity one operator that returns the length of its list argument.
+/** CallCommand is a command that applies the given method and evaluated arguments
+ * to the given object for side effect without assignment.
  *
- * @version $Id$
- * @author  reed
+ * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
+ * <BR>This software is the proprietary information of Cycorp, Inc.
+ * <P>Use is subject to license terms.
  *
+ * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
@@ -31,54 +31,60 @@ import java.util.List;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * @version $Id$
  */
-public class LengthOfList extends Operator {
+public class CallCommand implements Command {
   
   //// Constructors
   
-  /** Creates a new instance of LengthOfList. */
-  public LengthOfList() {
-    super();
-  }
-  
-  /** Evaluates the given argument within the given state and returns the length of the list.
+  /** Creates a new instance of CallCommand.
    *
-   * @param arguments the given arguments to evaluate
-   * @param state the given state
+   * @param name the name of this command
+   * @param objectMethodCall the object method call expression
    */
-  public Object evaluate(List arguments, State state) {
-    if (arguments.size() != 1)
-      throw new BehaviorEngineException("Only one argument accepted " + arguments);
-    List list = (List) evaluateArgument(arguments.get(0), state);
-    return new Integer(list.size());
-  }
-  
-  /** Returns a string representation of this operator given
-   * the arguments.
-   *
-   * @param arguments the given arguments to evaluate
-   * @return a string representation of this object
-   */
-  public String toString(List arguments) {
-    StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("(length-of-list ");
-    Object obj = arguments.get(0);
-    if (obj instanceof CycList)
-      stringBuffer.append(((CycList) obj).cyclify());
-    else
-      stringBuffer.append(obj.toString());
-    stringBuffer.append(")");
-    return stringBuffer.toString();
+  public CallCommand(String name, ObjectMethodCall objectMethodCall) {
+    this.name = name;
+    this.objectMethodCall = objectMethodCall;
   }
   
   //// Public Area
   
+  /**
+   * Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("(call ");
+    stringBuffer.append(objectMethodCall.toString());
+    stringBuffer.append(")");
+    return stringBuffer.toString();
+  }
+  
+  /** Gets the name of the command
+   *
+   * @return name the name of the command
+   *
+   */
+  public String getName() {
+    return name;
+  }
+  
+  /** Creates and returns a copy of this object. */
+  public Object clone() {
+    return new CallCommand(name, objectMethodCall);
+  }
+
   //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
   
-  //// Main
+  /** the name of this command */
+  protected final String name;
   
+  /** the object method call expression */
+  protected final ObjectMethodCall objectMethodCall;
 }

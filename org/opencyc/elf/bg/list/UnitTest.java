@@ -2,23 +2,18 @@ package org.opencyc.elf.bg.list;
 
 //// Internal Imports
 import org.opencyc.api.CycAccess;
-
 import org.opencyc.cycobject.CycList;
-
 import org.opencyc.elf.bg.expression.Operator;
 import org.opencyc.elf.bg.expression.OperatorExpression;
-
 import org.opencyc.elf.wm.state.State;
 import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 import java.util.List;
-
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 

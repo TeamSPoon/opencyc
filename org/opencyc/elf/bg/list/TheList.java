@@ -2,15 +2,11 @@ package org.opencyc.elf.bg.list;
 
 //// Internal Imports
 import org.opencyc.cycobject.CycList;
-
 import org.opencyc.elf.BehaviorEngineException;
-
 import org.opencyc.elf.bg.expression.Operator;
-
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,7 +48,7 @@ public class TheList extends Operator {
    * @param state the given state
    */
   public Object evaluate(List arguments, State state) {
-    List list = new ArrayList();
+    CycList list = new CycList();
     Iterator iter = arguments.iterator();
     while (iter.hasNext())
       list.add(evaluateArgument(iter.next(), state));

@@ -1,16 +1,11 @@
-package org.opencyc.elf.bg.list;
+package org.opencyc.elf.bg.command;
 
 //// Internal Imports
-import org.opencyc.cycobject.CycList;
-import org.opencyc.elf.bg.expression.Operator;
-import org.opencyc.elf.wm.state.State;
 
 //// External Imports
-import java.util.Iterator;
-import java.util.List;
 
-/** JoinLists is a variable arity operator that returns the list resulting from the concatenation of its
- * argument lists.
+/**
+ * Parameter contains the name and type of formal parameters for actions and goals.
  *
  * @version $Id$
  * @author  reed
@@ -33,54 +28,60 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class JoinLists extends Operator {
+public class Parameter {
   
   //// Constructors
   
-  /** Creates a new instance of JoinLists. */
-  public JoinLists() {
-    super();
-  }
-  
-  /** Evaluates the given arguments within the given state and returns the joined lists.
+  /** Creates a new instance of Parameter given the name and type.
    *
-   * @param arguments the given arguments to evaluate
-   * @param state the given state
+   * @param name the parameter name
+   * @param type the parameter type
    */
-  public Object evaluate(List arguments, State state) {
-    List result = new CycList();
-    Iterator iter = arguments.iterator();
-    while (iter.hasNext()) {
-      List list = (List) evaluateArgument(iter.next(), state);
-      result.addAll(list);
-    }
-    return result;
+  public Parameter(String name, Class type) {
+    this.name = name;
+    this.type = type;
   }
   
-  /** Returns a string representation of this operator given
-   * the arguments.
+  //// Public Area
+  
+  /**
+   * Returns a string representation of this object.
    *
-   * @param arguments the given arguments to evaluate
    * @return a string representation of this object
    */
-  public String toString(List arguments) {
+  public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("(join-lists");
-    Iterator iter = arguments.iterator();
-    while (iter.hasNext()) {
-      stringBuffer.append(" ");
-      Object obj = iter.next();
-      if (obj instanceof CycList)
-        stringBuffer.append(((CycList)obj).cyclify());
-      else
-        stringBuffer.append(obj.toString());
-    }
-    stringBuffer.append(")");
+    stringBuffer.append("[Parameter ");
+    stringBuffer.append(name);
+    stringBuffer.append(" (");
+    stringBuffer.append(type.toString());
+    stringBuffer.append(")]");
     return stringBuffer.toString();
   }
   
+  /**
+   * Gets the parameter name.
+   *
+   * @return the parameter name
+   */
+  public String getName () {
+    return name;
+  }
+
+  /**
+   * Gets the parameter type.
+   *
+   * @return the parameter type
+   */
+  public Class getType () {
+    return type;
+  }
+
+  /** the name of the prompt input parameter */
+  public static final String PROMPT = "?PROMPT"; 
   
-  //// Public Area
+  /** the name of the user input parameter */
+  public static final String USER_INPUT = "?USER-INPUT"; 
   
   //// Protected Area
   
@@ -88,6 +89,10 @@ public class JoinLists extends Operator {
   
   //// Internal Rep
   
-  //// Main
+  /** the parameter name */
+  protected final String name;
   
+  /** the parameter type */
+  protected final Class type;
+
 }

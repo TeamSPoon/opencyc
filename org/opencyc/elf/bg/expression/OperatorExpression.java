@@ -6,6 +6,7 @@ import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /** OperatorExpression contains an operator and arguments that can be
@@ -139,7 +140,16 @@ public class OperatorExpression implements Expression {
    * @return a string representation of this object
    */
   public String toString() {
-    return operator.toString(arguments);
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("(");
+    stringBuffer.append(operator.toString());
+    Iterator iter = arguments.iterator();
+    while (iter.hasNext()) {
+      stringBuffer.append(" ");
+      stringBuffer.append(iter.next().toString());
+    }
+    stringBuffer.append(")");
+    return stringBuffer.toString();
   }
  
   //// Protected Area

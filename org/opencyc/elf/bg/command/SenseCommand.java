@@ -1,19 +1,18 @@
-package org.opencyc.elf.bg.list;
+package org.opencyc.elf.bg.command;
 
 //// Internal Imports
-import org.opencyc.cycobject.CycList;
-import org.opencyc.elf.BehaviorEngineException;
-import org.opencyc.elf.bg.expression.Operator;
-import org.opencyc.elf.wm.state.State;
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
-import java.util.List;
 
-/** TheEmptyList is a zero arity operator that returns an empty list.
+/** SenseCommand is a command that causes a suitable sensor to perceive the
+ * given sensations and to assign the values to the given associated state variable.
  *
- * @version $Id$
- * @author  reed
+ * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
+ * <BR>This software is the proprietary information of Cycorp, Inc.
+ * <P>Use is subject to license terms.
  *
+ * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
@@ -31,43 +30,49 @@ import java.util.List;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * @version $Id$
  */
-public class TheEmptyList extends Operator {
+public class SenseCommand implements Command {
   
   //// Constructors
   
-  /** Creates a new instance of TheEmptyList. */
-  public TheEmptyList() {
-    super();
-  }
-  
-  /** Returns the empty list.
-   *
-   * @param arguments the given arguments to evaluate
-   * @param state the given state
-   */
-  public Object evaluate(List arguments, State state) {
-    return new CycList();
-  }
-  
-  /** Returns a string representation of this operator given
-   * the arguments.
-   *
-   * @param arguments the given arguments to evaluate
-   * @return a string representation of this object
-   */
-  public String toString(List arguments) {
-    return "(the-empty-list)";
+  /** Creates a new instance of SenseCommand */
+  public SenseCommand() {
   }
   
   //// Public Area
   
+  /**
+   * Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    //TODO
+    return "";
+  }
+  
+  /** Gets the name of the command
+   *
+   * @return name the name of the command
+   *
+   */
+  public String getName() {
+    return name;
+  }
+  
+  /** Creates and returns a copy of this object. */
+  public Object clone() {
+    return new AssignCommand(name, assignee, assignedObject);
+  }
+
   //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
   
-  //// Main
-  
+  /** the name of this command */
+  protected String name;
+ 
 }

@@ -2,9 +2,7 @@ package org.opencyc.elf.bg.list;
 
 //// Internal Imports
 import org.opencyc.cycobject.CycList;
-
 import org.opencyc.elf.bg.expression.Operator;
-
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
@@ -49,7 +47,7 @@ public class FirstInList extends Operator {
    */
   public Object evaluate(List arguments, State state) {
     CycList list = (CycList) evaluateArgument(arguments.get(0), state);
-    return list.get(0);
+    return list.first();
   }
   
   /** Returns a string representation of this operator given

@@ -35,7 +35,7 @@ import java.util.List;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @version $Id$
  */
-public class Action implements Command {
+public class Action implements Command, Cloneable {
   
   //// Constructors
   

@@ -35,6 +35,12 @@ import org.opencyc.util.*;
 public class ImportSonatDaml {
 
     /**
+     * When true, bypasses some KB assertion activities.
+     */
+    //public boolean quickTesting = true;
+    public boolean quickTesting = false;
+
+    /**
      * the list of DAML documents and import microtheories
      */
     protected ArrayList damlDocInfos = new ArrayList();
@@ -134,7 +140,7 @@ public class ImportSonatDaml {
                            equivalentDamlCycTerms,
                            kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
-        for (int i = 33; i < 34; i++) {
+        for (int i = 33; i < 35; i++) {
         //for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
@@ -256,13 +262,10 @@ public class ImportSonatDaml {
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/09/milservices/us",
                                          "DamlSonatUSMilitaryServicesInstancesMt"));
         // 33
-        damlDocInfos.add(new DamlDocInfo("file:///home/reed/open-directory.daml",
+        damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory.daml",
                                          "OpenDirectoryStructureMt"));
         // 34
-        damlDocInfos.add(new DamlDocInfo("file:///home/reed/tmp/structure.example.txt",
-                                         "OpenDirectoryStructureMt"));
-        // 35
-        damlDocInfos.add(new DamlDocInfo("file:///home/reed/target-ont.daml",
+        damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory-structure.daml",
                                          "OpenDirectoryStructureMt"));
     }
 
@@ -289,15 +292,16 @@ public class ImportSonatDaml {
 
         ontologyNicknames.put("http://dmoz.org/rdf", "dmoz");
         ontologyNicknames.put("http://dmoz.org/rdf/structure.example.txt", "dmoz");
-        ontologyNicknames.put("file:///g:/Dmoz/structure.rdf.u8", "dmoz");
-        ontologyNicknames.put("file:///home/reed/tmp/structure.example.txt", "dmoz");
 
-        ontologyNicknames.put("file:///home/reed/open-directory.daml", "dmoz");
-        ontologyNicknames.put("file:///home/reed/open-directory", "dmoz");
-        ontologyNicknames.put("file:/home/reed/open-directory.daml", "dmoz");
-        ontologyNicknames.put("file:/home/reed/open-directory", "dmoz");
+        ontologyNicknames.put("file:///H:/OpenCyc/open-directory-structure.daml", "dmoz");
+
+        ontologyNicknames.put("file:/H:/OpenCyc/open-directory-structure.daml", "dmoz");
+        ontologyNicknames.put("file:/H:/OpenCyc/open-directory-structure", "dmoz");
         ontologyNicknames.put("http://opencyc.sourceforge.net/open-directory", "dmoz");
 
+        ontologyNicknames.put("file:///H:/OpenCyc/open-directory.daml", "dmoz");
+        ontologyNicknames.put("file:/H:/OpenCyc", "dmoz");
+        ontologyNicknames.put("file:/H:/OpenCyc/open-directory.daml", "dmoz");
 
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2", "drc-dc");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2", "ves");
@@ -601,6 +605,33 @@ public class ImportSonatDaml {
                       "http://www.daml.org/2001/03/daml+oil",
                       "http://www.daml.org/2001/03/daml+oil#disjointWith",
                       "disjointWith");
+
+        // Open Directory Mappings
+        assertArgumentMapping("dmoz:narrow",
+                              "http://opencyc.sourceforge.net/open-directory",
+                              "http://opencyc.sourceforge.net/open-directory#narrow",
+                              "genls",
+                              "(2 1)");
+
+        assertArgumentMapping("dmoz:narrow1",
+                              "http://opencyc.sourceforge.net/open-directory",
+                              "http://opencyc.sourceforge.net/open-directory#narrow1",
+                              "genls",
+                              "(2 1)");
+
+        assertArgumentMapping("dmoz:narrow2",
+                              "http://opencyc.sourceforge.net/open-directory",
+                              "http://opencyc.sourceforge.net/open-directory#narrow2",
+                              "genls",
+                              "(2 1)");
+
+        assertMapping("dmoz:related",
+                      "http://opencyc.sourceforge.net/open-directory",
+                      "http://opencyc.sourceforge.net/open-directory#related",
+                      "conceptuallyRelated");
+
+
+
 /*
         // SONAT Mappings
         assertMapping("soci:Religion",
@@ -901,6 +932,8 @@ public class ImportSonatDaml {
                                                   damlTermName,
                                                   "DamlSonatSpindleHeadMt");
         CycFort damlTerm = cycAccess.findOrCreate(damlTermName);
+        if (quickTesting)
+            return;
         cycAccess.assertComment(damlTerm,
                                 damlTerm.cyclify() +
                                 " is an imported DAML/XML term equivalent to the Cyc term " +
@@ -920,6 +953,55 @@ public class ImportSonatDaml {
         cycAccess.assertGaf(cycAccess.bookkeepingMt,
                             cycAccess.getKnownConstantByName("damlURI"),
                             damlTerm,
+                            new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                                       damlURI));
+    }
+
+    /**
+     * Asserts that the given DAML/RDFS/RDF property is mapped to the
+     * given Cyc predicate with the arguments reversed.
+     *
+     * @param damlPropertyName the given DAML/RDFS/RDF property
+     * @param damlOntology the Uniform Resource Locator in which the definition of
+     * the daml term is found
+     * @param damlURI the Uniform Resource Locator which uniquely identifies the daml term
+     * @param cycBinaryPredicateName the given Cyc binary predicate
+     */
+    protected void assertArgumentMapping (String damlPropertyName,
+                                          String damlOntology,
+                                          String damlURI,
+                                          String cycBinaryPredicateName,
+                                          String argumentMappingList)
+        throws IOException, UnknownHostException, CycApiException {
+        CycFort cycBinaryPredicate = cycAccess.findOrCreate(cycBinaryPredicateName);
+        Log.current.println("Mapping " + damlPropertyName + " to " + cycBinaryPredicate.cyclify());
+        cycAccess.assertSynonymousExternalConcept(cycBinaryPredicateName,
+                                                  "WorldWideWeb-DynamicIndexedInfoSource",
+                                                  damlPropertyName,
+                                                  "DamlSonatSpindleHeadMt");
+        //TODO assert synonymousRelnArgs
+
+        CycFort damlProperty = cycAccess.findOrCreate(damlPropertyName);
+        cycAccess.assertComment(damlProperty,
+                                damlProperty.cyclify() +
+                                " is an imported DAML/XML property equivalent to the Cyc predicate " +
+                                cycBinaryPredicate.cyclify() +
+                                " (with the arguments reversed).",
+                                cycAccess.getKnownConstantByName("DamlSonatSpindleHeadMt"));
+        // assert (#$isa damlTerm #$DamlConstant) in BookkeepingMt
+        cycAccess.assertIsa(damlProperty,
+                            cycAccess.getKnownConstantByName("DamlConstant"),
+                            cycAccess.bookkeepingMt);
+        // assert (#$damlOntology damlProperty ontologyURL) in BookkeepingMt
+        cycAccess.assertGaf(cycAccess.bookkeepingMt,
+                            cycAccess.getKnownConstantByName("damlOntology"),
+                            damlProperty,
+                            new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                                       damlOntology));
+        // assert (#$damlURI damlProperty uri) in BookkeepingMt
+        cycAccess.assertGaf(cycAccess.bookkeepingMt,
+                            cycAccess.getKnownConstantByName("damlURI"),
+                            damlProperty,
                             new CycNart(cycAccess.getKnownConstantByName("URLFn"),
                                        damlURI));
     }
@@ -1035,11 +1117,22 @@ public class ImportSonatDaml {
         cycAccess.createIndivDenotingUnaryFunction(
             "URLFn",
             "An instance of both IndividualDenotingFunction and ReifiableFunction. " +
-            "Given a URL string as its single argument, URLFn returns the correspond " +
-            " instance of UniformResourceLocator.",
+            "Given a URL string as its single argument, URLFn returns the corresponding " +
+            "instance of UniformResourceLocator.",
             "BaseKB",
             "CharacterString",
             "UniformResourceLocator");
+
+        // #$OpenDirectoryTopicFn
+        cycAccess.createCollectionDenotingUnaryFunction(
+            "OpenDirectoryTopicFn",
+            "An instance of both CollectionDenotingFunction and ReifiableFunction. " +
+            "Given an Open Directory category ID string as its single argument, " +
+            "OpenDirectoryTopicFn returns the collection of Open Directory indexed " +
+            "web resources for that category.",
+            "BaseKB",
+            "CharacterString",
+            "Collection");
 /*
         // #$UsedInEventFn
         cycAccess.createCollectionDenotingBinaryFunction(

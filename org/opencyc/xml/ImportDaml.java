@@ -11,6 +11,7 @@ import com.hp.hpl.mesa.rdf.jena.model.*;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
+import ViolinStrings.Strings;
 
 /**
  * Imports DAML xml content.<p>
@@ -236,7 +237,7 @@ public class ImportDaml implements StatementHandler {
     public void statement(AResource subject, AResource predicate, AResource object) {
         try {
             if (subject.isAnonymous()) {
-                processRestrictionSubject(subject, predicate, object);
+            processRestrictionSubject(subject, predicate, object);
                 return;
             }
             if (object.isAnonymous()) {
@@ -254,8 +255,8 @@ public class ImportDaml implements StatementHandler {
                          objectTermInfo);
         }
         catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
-            System.exit(1);
         }
     }
 
@@ -282,12 +283,12 @@ public class ImportDaml implements StatementHandler {
                 importTriple(subjectTermInfo,
                              predicateTermInfo,
                              literalTermInfo);
-                }
             }
-            catch (Exception e) {
-                Log.current.printStackTrace(e);
-                System.exit(1);
-            }
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
     }
 
     /**
@@ -312,7 +313,11 @@ public class ImportDaml implements StatementHandler {
                 return;
             }
             if (damlPredicate.equals("genls")) {
-                importGenls(subjectTermInfo, objLitTermInfo);
+                // TODO generalize for argument order in KB.
+                if (predicateTermInfo.constantName.startsWith("dmoz:narrow"))
+                    importGenls(objLitTermInfo, subjectTermInfo);
+                else
+                    importGenls(subjectTermInfo, objLitTermInfo);
                 return;
             }
             if (damlPredicate.equals("daml:versionInfo")) {
@@ -373,11 +378,17 @@ public class ImportDaml implements StatementHandler {
         assertForwardArgConstraints(subject, arg1Constraints);
         CycList arg2Constraints =
             cycAccess.getArg2Isas((CycConstant) predicate, cycAccess.universalVocabularyMt);
-        arg2Constraints.addAllNew(cycAccess.getInterArgIsa1_2_forArg2((CycConstant) predicate,
-                                                                      subject,
-                                                                      cycAccess.universalVocabularyMt));
+
+        // TODO - remove OpenCyc condition when inter-arg-isa1-2 is in the api.
+        if (! cycAccess.isOpenCyc())
+            arg2Constraints.addAllNew(cycAccess.getInterArgIsa1_2_forArg2((CycConstant) predicate,
+                                                                          subject,
+                                                                          cycAccess.universalVocabularyMt));
+
         if (objLitTermInfo.isLiteral) {
-            importLiteralTriple(subject, predicate, objLitTermInfo, arg2Constraints);
+            if (! subjectTermInfo.hasEquivalentCycTerm())
+                // No need to make assertions about mapped Cyc terms.
+                importLiteralTriple(subject, predicate, objLitTermInfo, arg2Constraints);
             return;
         }
         CycFort object = cycAccess.getConstantByName(objLitTermInfo.toString());
@@ -411,7 +422,7 @@ public class ImportDaml implements StatementHandler {
             cycAccess.assertGaf(importMt,
                                 predicate,
                                 subject,
-                                (String) LiteralTermInfo.literal);
+                                (String) escaped(LiteralTermInfo.literal));
         }
         else {
             if (arg2Constraints.size() > 1) {
@@ -425,7 +436,7 @@ public class ImportDaml implements StatementHandler {
                 cycAccess.assertGaf(importMt,
                                     predicate,
                                     subject,
-                                    (String) LiteralTermInfo.literal);
+                                    (String) escaped(LiteralTermInfo.literal));
 
             }
             else if (arg2Constraint.equals(cycAccess.getKnownConstantByName("SubLRealNumber"))) {
@@ -470,6 +481,21 @@ public class ImportDaml implements StatementHandler {
         Log.current.println("(" + predicate.cyclify() + " " +
                             subject.cyclify() + " \"" +
                             (String) LiteralTermInfo.literal + "\")\n");
+    }
+
+    /**
+     * Returns the given string argument with embedded double quote characters
+     * escaped.
+     *
+     * @param string the given string
+     * @return the given string argument with embedded double quote characters
+     * escaped
+     */
+    protected String escaped (String text) {
+        String result = Strings.change(text, "\"", "\\\"");
+        result = Strings.change(result, "\n", " ");
+        result = Strings.change(result, "\r", " ");
+        return result;
     }
 
     /**
@@ -551,6 +577,12 @@ public class ImportDaml implements StatementHandler {
             cycAccess.assertIsaCollection(collection);
             Log.current.println("*** forward reference to collection " + collection.cyclify());
         }
+        if (subjectTermInfo.constantName.startsWith("dmoz:DMOZ-"))
+            term = new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
+                               term);
+        if (objectTermInfo.constantName.startsWith("dmoz:DMOZ-"))
+            collection = new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
+                                     collection);
         cycAccess.assertGenls(term,
                               collection);
         Log.current.println("(#$genls " +
@@ -762,7 +794,10 @@ public class ImportDaml implements StatementHandler {
         if (damlTermInfo.isURI) {
             cycFort = new CycNart(cycAccess.getKnownConstantByName("URLFn"),
                                   damlTermInfo.toString());
-            //Log.current.println("importing term: " + cycFort.cyclify());
+        }
+        else if (damlTermInfo.constantName.startsWith("dmoz:DMOZ-")) {
+            cycFort = new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
+                                  damlTermInfo.toString());
         }
         else {
             String term = damlTermInfo.toString();
@@ -903,7 +938,7 @@ public class ImportDaml implements StatementHandler {
             string.startsWith("http://") ||
             string.startsWith("https://") ||
             string.startsWith("ftp://") ||
-            string.startsWith("file://") ||
+            string.startsWith("file:/") ||
             string.startsWith("urn:");
     }
 
@@ -915,7 +950,7 @@ public class ImportDaml implements StatementHandler {
      * false
      */
     protected boolean hasUriNamespaceSyntax (String uri) {
-        return (uri.indexOf(":", 6) > -1) || (uri.indexOf("#") > -1);
+        return (uri.indexOf(":", 9) > -1) || (uri.indexOf("#") > -1);
     }
 
     /**
@@ -1226,7 +1261,8 @@ public class ImportDaml implements StatementHandler {
             if (parent.ontologyNicknames.containsKey(uri))
                 return true;
             if (uri.endsWith(".daml") ||
-               (uri.indexOf("daml+oil") > -1))
+                uri.startsWith("news:") ||
+                (uri.indexOf("daml+oil") > -1))
                 return true;
             return false;
         }

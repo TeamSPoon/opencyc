@@ -6020,7 +6020,7 @@ public class CycAccess {
                                                           String resultIsa)
         throws IOException, CycApiException {
         return createCollectionDenotingUnaryFunction (
-            getKnownConstantByName(unaryFunction),
+            findOrCreate(unaryFunction),
             comment,
             getKnownConstantByName(commentMt),
             getKnownConstantByName(arg1Isa),

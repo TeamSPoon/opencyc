@@ -5,6 +5,9 @@ import org.opencyc.uml.commonbehavior.*;
 /**
  * Transition from the UML State_Machines package.
  *
+ * The passing from one state to another is performed when a transition
+ * is triggered by an event that occurs.
+ *
  * @version $Id$
  * @author Stephen L. Reed
  *
@@ -40,7 +43,7 @@ public class Transition {
     public Action effect;
 
     /**
-     * the event triggered by this transition
+     * the event which triggered this transition
      */
     public Event trigger;
 

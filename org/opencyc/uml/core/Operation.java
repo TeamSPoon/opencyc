@@ -39,12 +39,14 @@ public class Operation extends BehavioralFeature {
     public static final int CCK_CONCURRENT = 3;
 
     /**
-     * indicates whether this operation is root
+     * When true, indicates that this operation must not inherit
+     * a declaration of the same operation.
      */
     public boolean isRoot;
 
     /**
-     * indicates whether this operation is a leaf
+     * When true, indicates that the implementation of this operation
+     * may not be overriden by a descendant class.
      */
     public boolean isLeaf;
 

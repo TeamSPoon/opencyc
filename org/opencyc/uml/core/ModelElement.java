@@ -1,7 +1,9 @@
 package org.opencyc.uml.core;
 
 /**
- * ModelElement from the UML Core Package
+ * ModelElement from the UML Core Package.
+ *
+ * An element is an atomic constitutent of a model.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -28,7 +30,8 @@ package org.opencyc.uml.core;
 public abstract class ModelElement extends Element {
 
     /**
-     * model element name
+     * An identifier for the ModelElement within its containing
+     * namespace.
      */
     String name;
 

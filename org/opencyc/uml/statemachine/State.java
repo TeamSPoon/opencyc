@@ -28,7 +28,7 @@ import org.opencyc.uml.commonbehavior.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class State {
+public class State extends StateVertex {
 
     /**
      * entry action for this state

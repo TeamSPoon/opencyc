@@ -3,6 +3,9 @@ package org.opencyc.uml.core;
 /**
  * Feature from the UML Core package.
  *
+ * A feature is a property, such as operation or attribute, which is
+ * encapsulated within a Classifier.
+ *
  * @version $Id$
  * @author Stephen L. Reed
  *
@@ -25,10 +28,12 @@ package org.opencyc.uml.core;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Feature extends ModelElement {
+public abstract class Feature extends ModelElement {
 
     /**
-     * owner scope of this feature
+     * Owner scope of this feature, specifying whether it appears
+     * in in each Instance of the Classifier or whether it appears
+     * only once for the entire Classifier.
      */
     public int ownerScope;
 
@@ -36,7 +41,7 @@ public class Feature extends ModelElement {
     public static final int SK_CLASSIFIER = 2;
 
     /**
-     * owner of this feature
+     * the Classifier declaring this feature
      */
     public Class owner;
 

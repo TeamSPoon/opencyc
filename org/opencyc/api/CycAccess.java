@@ -6089,7 +6089,8 @@ public class CycAccess {
      * @param comment the comment for the unary function
      * @param commentMt the microtheory in which the comment is asserted
      * @param isa the collection of which the new unary function is an instance
-     * @param arg1Isa the kind of objects this unary function takes as its argument
+     * @param arg1Isa the isa type constraint for the argument
+     * @param arg1Genl the genls type constraint for the argument if it is a collection
      * @param resultIsa the kind of object represented by this reified term
      * @return the new collection-denoting reifiable unary function term
      */
@@ -6097,13 +6098,20 @@ public class CycAccess {
                                                           String comment,
                                                           String commentMt,
                                                           String arg1Isa,
+                                                          String arg1GenlName,
                                                           String resultIsa)
         throws IOException, CycApiException {
+        CycFort arg1Genl;
+        if (arg1GenlName != null)
+            arg1Genl = getKnownConstantByName(arg1GenlName);
+        else
+            arg1Genl = null;
         return createCollectionDenotingUnaryFunction (
             findOrCreate(unaryFunction),
             comment,
             getKnownConstantByName(commentMt),
             getKnownConstantByName(arg1Isa),
+            arg1Genl,
             getKnownConstantByName(resultIsa));
         }
 
@@ -6113,8 +6121,8 @@ public class CycAccess {
      * @param unaryFunction the new collection
      * @param comment the comment for the unary function
      * @param commentMt the microtheory in which the comment is asserted
-     * @param isa the collection of which the new unary function is an instance
-     * @param arg1Isa the kind of objects this unary function takes as its argument
+     * @param arg1Isa the isa type constraint for the argument
+     * @param arg1Genl the genls type constraint for the argument if it is a collection
      * @param resultIsa the kind of object represented by this reified term
      * @return the new collection-denoting reifiable unary function term
      */
@@ -6122,6 +6130,7 @@ public class CycAccess {
                                                           String comment,
                                                           CycFort commentMt,
                                                           CycFort arg1Isa,
+                                                          CycFort arg1Genl,
                                                           CycFort resultIsa)
         throws IOException, CycApiException {
         assertComment(unaryFunction, comment, commentMt);
@@ -6138,6 +6147,8 @@ public class CycAccess {
         assertIsa(unaryFunction,
                   getKnownConstantByGuid("bd5c40b0-9c29-11b1-9dad-c379636f7270"));
         assertArgIsa(unaryFunction, 1, arg1Isa);
+        if (arg1Genl != null)
+            assertArg1Genl(unaryFunction, arg1Genl);
         assertResultIsa(unaryFunction, resultIsa);
         return unaryFunction;
         }
@@ -6360,8 +6371,15 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public boolean isOpenCyc ()
-        throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(cyc-opencyc-feature)");
+        throws IOException, UnknownHostException {
+        boolean answer;
+        try {
+            answer = converseBoolean("(cyc-opencyc-feature)");
+        }
+        catch (CycApiException e) {
+            answer = false;
+        }
+        return answer;
     }
 
     /**

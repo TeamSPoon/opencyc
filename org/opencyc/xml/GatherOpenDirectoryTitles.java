@@ -146,7 +146,9 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
             System.err.println("Error: " + damlOntologyDefiningURLString + ": " + ParseException.formatMessage(sax));
         }
         if (verbosity > 0)
-            Log.current.println("\nDone gathering titles from " + damlOntologyDefiningURLString + "\n");
+            Log.current.println("\nDone gathering " +
+                                odpTitles.size() + " titles from " +
+                                damlOntologyDefiningURLString + "\n");
     }
 
     /**

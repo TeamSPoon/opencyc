@@ -35,33 +35,9 @@ import org.opencyc.util.*;
 public class ImportSonatDaml extends ImportDaml {
 
     /**
-     * When true, bypasses some KB assertion activities.
-     */
-    //public boolean quickTesting = true;
-    public boolean quickTesting = false;
-
-    /**
      * the list of DAML documents and import microtheories
      */
     protected ArrayList damlDocInfos = new ArrayList();
-
-    /**
-     * CycAccess object to manage api connection the the Cyc server
-     */
-    protected CycAccess cycAccess;
-
-    /**
-     * Ontology library nicknames, which become namespace identifiers
-     * upon import into Cyc.
-     * namespace uri --> ontologyNickname
-     */
-    protected HashMap ontologyNicknames = new HashMap();
-
-    /**
-     * Cyc terms which have semantic counterparts in DAML.
-     * DAML term --> Cyc term
-     */
-    protected HashMap equivalentDamlCycTerms;
 
     /**
      * the name of the KB Subset collection which identifies ontology import
@@ -93,7 +69,7 @@ public class ImportSonatDaml extends ImportDaml {
                                       true);
         }
         else if (localHostName.equals("thinker")) {
-            cycAccess = new CycAccess("TURING",
+            cycAccess = new CycAccess("BABYCOMPUTER",
                                       3600,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);
@@ -101,7 +77,7 @@ public class ImportSonatDaml extends ImportDaml {
         else {
             cycAccess = new CycAccess();
         }
-
+        initializeCommonDamlVocabulary();
         initializeDamlVocabulary();
     }
 
@@ -138,9 +114,7 @@ public class ImportSonatDaml extends ImportDaml {
         initializeCommonMappedTerms();
         initializeMappedTerms();
 
-        //actuallyImport = false;
-        for (int i = 33; i < 35; i++) {
-        //for (int i = 0; i < damlDocInfos.size(); i++) {
+        for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
@@ -282,11 +256,12 @@ public class ImportSonatDaml extends ImportDaml {
                 "http://www.daml.org/experiment/ontology/social-elements-ont.daml#EthnicGroups",
                 "PersonTypeByEthnicity");
 
-        assertMapping(
-                "soci:Population",
-                "http://www.daml.org/experiment/ontology/social-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/social-elements-ont.daml#Population",
-                "(#$PopulationOfTypeFn #$Person)");
+        if (cycAccess.find("PopulationOfTypeFn") != null)
+            assertMapping(
+                    "soci:Population",
+                    "http://www.daml.org/experiment/ontology/social-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/social-elements-ont.daml#Population",
+                    "(#$PopulationOfTypeFn #$Person)");
 
         assertMapping(
                 "poli:GovernmentType",
@@ -299,6 +274,7 @@ public class ImportSonatDaml extends ImportDaml {
                 "http://www.daml.org/experiment/ontology/political-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/political-elements-ont.daml#PoliticalParty",
                 "PoliticalParty");
+
         assertMapping(
                 "poli:PressureGroup",
                 "http://www.daml.org/experiment/ontology/political-elements-ont.daml",
@@ -329,207 +305,215 @@ public class ImportSonatDaml extends ImportDaml {
                 "http://www.daml.org/experiment/ontology/economic-elements-ont.daml#NaturalResource",
                 "NaturalResource");
 
-        assertMapping(
-                "infr:EducationAndScience",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#EducationAndScience",
-                "(#$CollectionUnionFn \n" +
-                "  (#$InfrastructureFn (#$OfFn #$EducationalOrganization)) \n" +
-                "  (#$InfrastructureFn (#$OfFn #$AcademicOrganization)) \n" +
-                "  (#$InfrastructureFn (#$OfFn #$Science)))");
+        if (cycAccess.find("AcademicOrganization") != null)
+            assertMapping(
+                    "infr:EducationAndScience",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#EducationAndScience",
+                    "(#$CollectionUnionFn \n" +
+                    "  (#$InfrastructureOfFn #$EducationalOrganization) \n" +
+                    "  (#$InfrastructureOfFn #$AcademicOrganization) \n" +
+                    "  (#$InfrastructureOfFn #$Science))");
 
         assertMapping(
                 "infr:Airport",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Airport",
-                "(#$InfrastructureFn (#$OfFn #$Airport-Physical))");
+                "(#$InfrastructureOfFn #$Airport-Physical)");
 
         assertMapping(
                 "infr:Bridge",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Bridge",
-                "(#$InfrastructureFn (#$OfFn Bridge");
+                "(#$InfrastructureOfFn Bridge");
 
         assertMapping(
                 "infr:Railroad",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Railroad",
-                "(#$InfrastructureFn (#$OfFn #$Railway))");
+                "(#$InfrastructureOfFn #$Railway)");
 
         assertMapping(
                 "infr:Highway",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Highway",
-                "(#$InfrastructureFn (#$OfFn #$Highway))");
+                "(#$InfrastructureOfFn #$Highway)");
 
         assertMapping(
                 "infr:Port",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Port",
-                "(#$InfrastructureFn (#$OfFn #$PortFacility))");
+                "(#$InfrastructureOfFn #$PortFacility)");
 
         assertMapping(
                 "infr:OilRefinery",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#OilRefinery",
-                "(#$InfrastructureFn (#$OfFn #$OilRefinery))");
+                "(#$InfrastructureOfFn #$OilRefinery)");
 
         assertMapping(
                 "infr:PowerGrid",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#PowerGrid",
-                "(#$InfrastructureFn (#$OfFn #$ElectricalPowerGrid");
+                "(#$InfrastructureOfFn #$ElectricalPowerGrid)");
 
         assertMapping(
                 "infr:College",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.dam",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#College",
-                "(#$InfrastructureFn (#$OfFn #$College))");
+                "(#$InfrastructureOfFn #$College)");
 
         assertMapping(
                 "infr:GradeSchool",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#GradeSchool",
-                "(#$InfrastructureFn (#$OfFn #$ElementarySchoolInstitution))");
+                "(#$InfrastructureOfFn #$ElementarySchoolInstitution)");
 
         assertMapping(
                 "infr:HighSchool",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#HighSchool",
-                "(#$InfrastructureFn (#$OfFn #$HighSchoolInstitution))");
+                "(#$InfrastructureOfFn #$HighSchoolInstitution)");
 
         assertMapping(
                 "infr:JuniorCollege",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#JuniorCollege",
-                "(#$InfrastructureFn (#$OfFn #$College-2Year))");
+                "(#$InfrastructureOfFn #$College-2Year)");
 
         assertMapping(
                 "infr:Kindergarden",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Kindergarden",
-                "(#$InfrastructureFn (#$OfFn #$KindergartenInstitution))");
+                "(#$InfrastructureOfFn #$KindergartenInstitution)");
 
-        assertMapping(
-                "infr:School",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#School",
-                "(#$InfrastructureFn (#$OfFn #$AcademicOrganization))");
+        if (cycAccess.find("AcademicOrganization") != null)
+            assertMapping(
+                    "infr:School",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#School",
+                    "(#$InfrastructureOfFn #$AcademicOrganization)");
 
-        assertMapping(
-                "infr:SecondarySchool",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#SecondarySchool",
-                "(#$InfrastructureFn (#$OfFn #$HighSchoolInstitution))");
+        if (cycAccess.find("HighSchoolInstitution") != null)
+            assertMapping(
+                    "infr:SecondarySchool",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#SecondarySchool",
+                    "(#$InfrastructureOfFn #$HighSchoolInstitution)");
 
         assertMapping(
                 "infr:AstronomicalStation",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#AstronomicalStation",
-                "(#$InfrastructureFn (#$OfFn #$AstronomicalObservatory))");
+                "(#$InfrastructureOfFn #$AstronomicalObservatory)");
 
         assertMapping(
                 "infr:AtomicCenter",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#AtomicCenter",
-                "(#$InfrastructureFn (#$OfFn #$NuclearWeaponResearchFacility))");
+                "(#$InfrastructureOfFn #$NuclearWeaponResearchFacility)");
 
         assertMapping(
                 "infr:BoatYard",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#BoatYard",
-                "(#$InfrastructureFn (#$OfFn #$Shipyard))");
+                "(#$InfrastructureOfFn #$Shipyard)");
 
-        assertMapping(
-                "infr:Camp",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Camp",
-                "(#$InfrastructureFn (#$OfFn #$Campsite))");
+        if (cycAccess.find("Campsite") != null)
+            assertMapping(
+                    "infr:Camp",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Camp",
+                    "(#$InfrastructureOfFn #$Campsite)");
 
         assertMapping(
                 "infr:Capital",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Capital",
-                "(#$InfrastructureFn (#$OfFn #$CapitalCityOfRegion))");
+                "(#$InfrastructureOfFn #$CapitalCityOfRegion)");
 
         assertMapping(
                 "infr:City",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#City",
-                "(#$InfrastructureFn (#$OfFn #$City))");
+                "(#$InfrastructureOfFn #$City)");
 
-        assertMapping(
-                "infr:Clinic",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Clinic",
-                "(#$InfrastructureFn (#$OfFn #$MedicalClinic))");
+        if (cycAccess.find("MedicalClinic") != null)
+            assertMapping(
+                    "infr:Clinic",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Clinic",
+                    "(#$InfrastructureOfFn #$MedicalClinic)");
 
         assertMapping(
                 "infr:Dam",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Dam",
-                "(#$InfrastructureFn (#$OfFn #$Dam))");
+                "(#$InfrastructureOfFn #$Dam)");
 
         assertMapping(
                 "infr:Dike",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Dike",
-                "(#$InfrastructureFn (#$OfFn #$Dike))");
+                "(#$InfrastructureOfFn #$Dike)");
 
-        assertMapping(
-        "infr:Distribution",
-                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Distribution",
-                      "(#$InfrastructureFn (#$OfFn #$ProductDistributionOrganization))");
+        if (cycAccess.find("ProductDistributionOrganization") != null)
+            assertMapping(
+                    "infr:Distribution",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Distribution",
+                    "(#$InfrastructureOfFn #$ProductDistributionOrganization)");
 
         assertMapping(
                 "infr:Dock",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Dock",
-                "(#$InfrastructureFn (#$OfFn #$Dock))");
+                "(#$InfrastructureOfFn #$Dock)");
 
 
-        assertMapping(
-                "infr:Electricity",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Electricity",
-                "(#$InfrastructureFn (#$OfFn #$ElectricalPowerGeneration");
+        if (cycAccess.find("ElectricalPowerGeneration") != null)
+            assertMapping(
+                    "infr:Electricity",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Electricity",
+                    "(#$InfrastructureOfFn #$ElectricalPowerGeneration)");
 
         assertMapping(
                 "infr:Ferry",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Ferry",
-                "(#$InfrastructureFn (#$OfFn #$Ferry))");
+                "(#$InfrastructureOfFn #$Ferry)");
 
         assertMapping(
                 "infr:Fuel",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Fuel",
-                "(#$InfrastructureFn (#$OfFn #$FossilFuel))");
+                "(#$InfrastructureOfFn #$FossilFuel)");
 
         assertMapping(
                 "infr:FuelDepot",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#FuelDepot",
-                "(#$InfrastructureFn (#$OfFn #$FuelTank))");
+                "(#$InfrastructureOfFn #$FuelTank)");
 
         assertMapping(
                 "infr:Harbor",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Harbor",
-                "(#$InfrastructureFn (#$OfFn #$Harbor))");
+                "(#$InfrastructureOfFn #$Harbor)");
 
         assertMapping(
                 "infr:Hospital",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Hospital",
-                "(#$InfrastructureFn (#$OfFn #$Hospital))");
+                "(#$InfrastructureOfFn #$Hospital)");
 
-        assertMapping(
-                "infr:HydroElectric",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
-                "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#HydroElectric",
-                "(#$InfrastructureFn (#$OfFn #$Hydropower))");
+        if (cycAccess.find("Hydropower") != null)
+            assertMapping(
+                    "infr:HydroElectric",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                    "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#HydroElectric",
+                    "(#$InfrastructureOfFn #$Hydropower)");
 
         assertMapping(
                 "infr:Infrastructure",
@@ -541,13 +525,13 @@ public class ImportSonatDaml extends ImportDaml {
                 "infr:InfrastructureFacility",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#InfrastructureFacility",
-                "(#$InfrastructureFn (#$OfFn #$ConstructionArtifact))");
+                "(#$InfrastructureOfFn #$ConstructionArtifact)");
 
         assertMapping(
                 "infr:InlandWaterway",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                 "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#InlandWaterway",
-                "(#$InfrastructureFn (#$OfFn #$(#$CollectionUnionFn #$River #$Canal #$Lake)))");
+                "(#$InfrastructureOfFn #$(#$CollectionUnionFn #$River #$Canal #$Lake))");
 
 /*
         assertMapping("",
@@ -598,9 +582,18 @@ public class ImportSonatDaml extends ImportDaml {
     protected void initializeDamlVocabulary ()
         throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Creating SONAT DAML vocabulary");
+
+        // DamlConstant
+        String term = "DamlConstant";
+        String comment = "The KB subset collection of DAML terms.";
+        cycAccess.findOrCreate(term);
+        cycAccess.assertComment(term, comment, "BaseKB");
+        cycAccess.assertIsa(term, "VariableOrderCollection");
+        cycAccess.assertGenls(term, "CycLConstant");
+
         // DamlSonatConstant
-        String term = "DamlSonatConstant";
-        String comment = "The KB subset collection of DAML SONAT terms.";
+        term = "DamlSonatConstant";
+        comment = "The KB subset collection of DAML SONAT terms.";
         cycAccess.findOrCreate(term);
         cycAccess.assertComment(term, comment, "BaseKB");
         cycAccess.assertIsa(term, "VariableOrderCollection");
@@ -628,7 +621,35 @@ public class ImportSonatDaml extends ImportDaml {
                 "Microtheory",
                 genlMts);
         }
+        if (cycAccess.find("WorldWideWeb-DynamicIndexedInfoSource") == null)
+            cycAccess.createIndividual("WorldWideWeb-DynamicIndexedInfoSource",
+                                       "The WorldWideWeb-DynamicIndexedInfoSource is " +
+                                       "an instance of #$DynamicIndexedInfoSource. It " +
+                                       "is all of the information content of the " +
+                                       "WorldWideWeb-Concrete.",
+                                       "ComputerGMt",
+                                       "IndexedInformationSource");
+        else
+            cycAccess.assertIsa("WorldWideWeb-DynamicIndexedInfoSource",
+                                "IndexedInformationSource");
 
+        // #$InfrastructureOfFn
+        cycAccess.createCollectionDenotingUnaryFunction(
+            // function
+            "InfrastructureOfFn",
+            // comment
+            "An instance of both CollectionDenotingFunction and ReifiableFunction. " +
+            "(#$InfrastructureOfFn COLLECTION) results in the collection of elements " +
+            "denoting the infrastructure aspect of the elements of the argument " +
+            "COLLECTION.",
+            // comment mt
+            "BaseKB",
+            // arg1Isa
+            "Collection",
+            // arg1Genl
+            "PartiallyTangible",
+            // resultIsa
+            "Collection");
 /*
         // #$UsedInEventFn
         cycAccess.createCollectionDenotingBinaryFunction(

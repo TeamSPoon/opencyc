@@ -1598,7 +1598,15 @@ public abstract class ImportDaml implements StatementHandler {
                                   String cycTermName,
                                   String mappingMt)
         throws IOException, UnknownHostException, CycApiException {
-        CycFort cycTerm = cycAccess.findOrCreate(cycTermName);
+        CycFort cycTerm;
+        cycTermName = Strings.stripLeadingBlanks(cycTermName);
+        cycTermName = Strings.stripTrailingBlanks(cycTermName);
+        if (cycTermName.startsWith("(")) {
+            CycList cycNartList = cycAccess.makeCycList(cycTermName);
+            cycTerm = new CycNart(cycNartList);
+        }
+        else
+            cycTerm = cycAccess.findOrCreate(cycTermName);
         if (verbosity > 1)
             Log.current.println("Mapping " + damlTermName + " to " + cycTerm.cyclify());
         cycAccess.assertSynonymousExternalConcept(cycTermName,
@@ -1782,6 +1790,7 @@ public abstract class ImportDaml implements StatementHandler {
             "BaseKB",
             "PredicateCategory",
             "IrreflexiveBinaryPredicate");
+
         // #$DamlObjectProperty
         cycAccess.createCollection(
             "DamlObjectProperty",

@@ -111,11 +111,15 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
     }
     /**
      * Gathers the ODP topic titles.
+     *
+     * Win32 - file:///H:/OpenCyc/open-directory-structure.daml
+     *
+     * Linux - file:///home/reed/opencyc/open-directory.daml
      */
     protected void gatherOdpTitles () throws IOException {
         gatherOpenDirectoryTitles =
             new GatherOpenDirectoryTitles(ontologyNicknames);
-        gatherOpenDirectoryTitles.gatherTitles("file:///H:/OpenCyc/open-directory-structure.daml");
+        gatherOpenDirectoryTitles.gatherTitles("file:///home/reed/opencyc/open-directory-structure.daml");
     }
 
     /**
@@ -145,11 +149,11 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
      */
     protected void initializeDocumentsToImport () {
         // 0
-        damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory.daml",
+        damlDocInfos.add(new DamlDocInfo("file:///home/reed/opencyc/open-directory.daml",
                                          null,
                                          "OpenDirectoryStructureMt"));
         // 1
-        damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory-structure.daml",
+        damlDocInfos.add(new DamlDocInfo("file:///home/reed/opencyc/open-directory-structure.daml",
                                          "UTF-8",
                                          "OpenDirectoryStructureMt"));
     }
@@ -164,13 +168,13 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
         ontologyNicknames.put("http://purl.org/dc/elements/1.0/", "dublincore");
         ontologyNicknames.put("http://dmoz.org/rdf", "dmoz");
         ontologyNicknames.put("http://dmoz.org/rdf/structure.example.txt", "dmoz");
-        ontologyNicknames.put("file:///H:/OpenCyc/open-directory-structure.daml", "dmoz");
-        ontologyNicknames.put("file:/H:/OpenCyc/open-directory-structure.daml", "dmoz");
-        ontologyNicknames.put("file:/H:/OpenCyc/open-directory-structure", "dmoz");
+        ontologyNicknames.put("file:///home/reed/opencyc/open-directory-structure.daml", "dmoz");
+        ontologyNicknames.put("file:/home/reed/opencyc/open-directory-structure.daml", "dmoz");
+        ontologyNicknames.put("file:/home/reed/opencyc/open-directory-structure", "dmoz");
         ontologyNicknames.put("http://opencyc.sourceforge.net/open-directory", "dmoz");
-        ontologyNicknames.put("file:///H:/OpenCyc/open-directory.daml", "dmoz");
-        ontologyNicknames.put("file:/H:/OpenCyc", "dmoz");
-        ontologyNicknames.put("file:/H:/OpenCyc/open-directory.daml", "dmoz");
+        ontologyNicknames.put("file:///home/reed/opencyc/open-directory.daml", "dmoz");
+        ontologyNicknames.put("file:/home/reed/opencyc", "dmoz");
+        ontologyNicknames.put("file:/home/reed/opencyc/open-directory.daml", "dmoz");
 
     }
 
@@ -240,6 +244,7 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
             "web resources for that category.",
             "BaseKB",
             "CharacterString",
+            null,
             "Collection");
     }
 

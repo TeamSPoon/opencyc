@@ -69,8 +69,10 @@ public class TaskFrameFactory {
     ArrayList actuators = new ArrayList();
     taskFrame.addScheduleInfo(schedule, resources, actuators);
     
+    //TODO populate resource, actuator and sensor pool by name
+    //     then initialize these elements in the task frame
     
-    //TODO actuator pool, sensor pool?
+    
     //taskFrame.setTaskGoal(taskGoal);    
   }
   

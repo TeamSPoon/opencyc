@@ -297,6 +297,34 @@ public class CycConnection {
         }
     }
 
+  /**
+   * Return the name of the host to which the CycConnection is established.
+   * @return the name of the Host to which this <tt>CycConnection</tt> is
+   * connected.
+   */
+  public String getHostName() {return this.hostName;}
+  
+  /**
+   * Return the base port to which the CycConnection is established.
+   * @return the port to which this <tt>CycConnection</tt> is
+   * connected.
+   */
+  public int getBasePort() {return this.basePort;}
+
+  /**
+   * Return the ASCII port to which the CycConnection is established.
+   * @return the ASCII to which this <tt>CycConnection</tt> is
+   * connected.
+   */
+  public int getAsciiPort() {return this.asciiPort;}
+
+  /**
+   * Return the CFASL port to which the CycConnection is established.
+   * @return the CFASL port to which this <tt>CycConnection</tt> is
+   * connected.
+   */
+  public int getCfaslPort() {return this.cfaslPort;}
+
     /**
      * Send a message to Cyc and return the <tt>Boolean</tt> true as the first
      * element of an object array, and the cyc response Symbolic Expression as

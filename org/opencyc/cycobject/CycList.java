@@ -472,6 +472,39 @@ public class CycList extends ArrayList {
         return result.toString();
     }
 
+  /**
+   * Returns a `pretty-printed' <tt>String</tt> representation of this
+   * <tt>CycList</tt>.
+   * @param indent, the indent string that is added before the
+   * <tt>String</tt> representation this <tt>CycList</tt>
+   * @return a `pretty-printed' <tt>String</tt> representation of this
+   * <tt>CycList</tt>.
+   */  
+  public String toPrettyString(String indent) {
+    StringBuffer result = new StringBuffer(indent + "(");
+    for (int i = 0; i < this.size(); i++) {
+      if (i > 0)
+	result.append(" ");
+      Object element = this.get(i);
+      if (element instanceof String) {result.append("\"" + element + "\"");}
+      else if (element instanceof CycList) 
+	{result.append("\n" + ((CycList)element).toPrettyString(indent + "  "));}
+      else {result.append(element.toString());}
+    }
+    if (!isProperList) {
+      result.append(" . ");
+      if (dottedElement instanceof String) {
+	result.append("\"");
+	result.append(dottedElement);
+	result.append("\"");
+      }
+      else
+	result.append(this.dottedElement.toString());
+    }
+    result.append(")");
+    return result.toString();
+  }
+
     /**
      * Returns a cyclified string representation of the OpenCyc <tt>CycList</tt>.
      * Embedded constants are prefixed with ""#$".

@@ -84,6 +84,11 @@ public class NodeFactory {
    * Populates the node pool.
    */
   public void populateNodePool () {
+    // converse with user
+    Node node = makeNodeShell(Node.CONVERSE_WITH_USER);
+    
+    
+    
     //TODO
   }
 

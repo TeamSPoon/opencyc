@@ -43,7 +43,7 @@ public class SubsetChoiceCommand extends ChoiceCommand implements Command {
   /** Creates a new instance of SubsetChoiceCommand.
    * 
    * @param name the name of this subset choice command
-   * @param availableCommands he available commands from which a subset is chosen during scheduling
+   * @param availableCommands the available commands from which a subset is chosen during scheduling
    * @param relevantStateVariables the list of relevant state variables
    */
   public SubsetChoiceCommand(String name, List availableCommands, List relevantStateVariables) {

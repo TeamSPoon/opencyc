@@ -1,8 +1,15 @@
 package org.opencyc.elf.a;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
-import org.opencyc.elf.bg.procedure.Procedure;
 
+import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.message.ActuateMsg;
+
+//// External Imports
+import EDU.oswego.cs.dl.util.concurrent.Executor;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
+import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
  * Provides Actuators for the Elementary Loop Functioning (ELF).<br>
@@ -28,8 +35,8 @@ import org.opencyc.elf.bg.procedure.Procedure;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Actuator extends NodeComponent {
-  /** the commanded action */
-  protected Procedure commandedAction;
+  
+  //// Constructors
 
   /**
    * Constructs a new Actuator object.
@@ -37,6 +44,26 @@ public class Actuator extends NodeComponent {
   public Actuator() {
   }
 
+  /** 
+   * Creates a new instance of Actuator with the given
+   * input message channel.
+   *
+   * @param actuatorChannel the takable channel from which messages are input
+   */
+  public Actuator(Takable actuatorChannel) {
+    consumer = new Consumer(actuatorChannel, this);
+    executor = new ThreadedExecutor();
+    try {
+      executor.execute(consumer);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+
+  //// Public Area
+  
   /**
    * Returns a string representation of this object.
    * 
@@ -45,26 +72,73 @@ public class Actuator extends NodeComponent {
   public String toString() {
     return "Actuator for " + node.getName();
   }
-
-  /**
-   * Gets the commanded action
-   * 
-   * @return the commanded action
-   */
-  public Procedure getCommandedAction() {
-    return commandedAction;
-  }
-
-  /**
-   * Sets the commanded action
-   * 
-   * @param commandedAction the commanded action
-   */
-  public void setCommandedAction(Procedure commandedAction) {
-    this.commandedAction = commandedAction;
-  }
   
-  public void run() {
+  //// Protected Area
+  
+  /**
+   * Thread which processes the input channel of messages.
+   */
+  protected class Consumer implements Runnable {
+    
+    /**
+     * the takable channel from which messages are input
+     */
+    protected final Takable actuatorChannel;
+
+    /**
+     * the parent node component
+     */
+    protected NodeComponent nodeComponent;
+    
+    /**
+     * Creates a new instance of Consumer.
+     *
+     * @param actuatorChannel the takable channel from which messages are input
+     * @param nodeComponent the parent node component
+     */
+    protected Consumer (Takable actuatorChannel, 
+                        NodeComponent nodeComponent) { 
+      this.actuatorChannel = actuatorChannel;
+      this.nodeComponent = nodeComponent;
+    }
+
+    /**
+     * Reads messages from the input queue and processes them.
+     */
+    public void run () {
+      try {
+        while (true) { 
+          doAction((ActuateMsg) actuatorChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+
+    /**
+     * Performs the action on the given object using the command and parameters
+     * given by the actuation data.
+     *
+     * @param actuateMsg the given input channel message
+     */
+    void doAction (ActuateMsg actuateMsg) {
+      Object obj = actuateMsg.getObj();
+      Object data = actuateMsg.getData();
+      //TODO
+    }
+  
   }
+  //// Private Area
+  
+  //// Internal Rep
+
+  /**
+   * the thread which processes the input channel of messages
+   */
+  Consumer consumer;
+
+  /**
+   * the executor of the consumer thread
+   */
+  Executor executor;
   
 }

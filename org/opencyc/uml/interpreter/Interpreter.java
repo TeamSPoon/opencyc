@@ -188,9 +188,9 @@ public class Interpreter {
         this.cycAccess = cycAccess;
         this.contextStackPool = contextStackPool;
         this.verbosity = verbosity;
-        initialize();
         if (verbosity > 2)
             Log.current.println("Interpreting " + stateMachine.toString());
+        initialize();
     }
 
     /**
@@ -205,6 +205,12 @@ public class Interpreter {
         stateMachineFactory.setStateMachine(stateMachine);
         stateMachineFactory.setNamespace(stateMachine.getNamespace());
         CycFort stateMachineTerm = cycAccess.getKnownConstantByName(stateMachine.getName());
+        stateMachineDefinitionMt =
+            (CycFort) cycAccess.getArg2("umlStateMachineDefinition",
+                                       stateMachineTerm,
+                                       cycAccess.getKnownConstantByName("UMLStateMachineSpindleHeadMt"));
+        if (verbosity > 2)
+            Log.current.println("  defined in " + stateMachineDefinitionMt.cyclify());
         stateMt = contextStackPool.allocateStateMachineContextFrame(null,
                                                                     stateMachineDefinitionMt,
                                                                     stateMachineTerm);

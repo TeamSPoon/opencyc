@@ -86,11 +86,6 @@ public class ProcedureInterpreter {
     protected CycConstant contextFrame;
 
     /**
-     * the parent expression evaluation state context
-     */
-    protected CycConstant parentContextFrame;
-
-    /**
      * the procedure CycFort
      */
     protected CycFort procedureTerm;
@@ -152,14 +147,22 @@ public class ProcedureInterpreter {
 
     /**
      * Interprets the procedure using the procedure binding term.
+     *
+     * @param procedure the procedure to evaluate
+     * @param inputBindings the list of input pin bindings
+     * @param outputBindings the list of output pin bindings
+     * @param parentContextFrame the caller's context frame which becomes the parent
+     * of the context frame allocated for this procedure's evaluation
      */
     protected void interpretProcedure (Procedure procedure,
                                        ArrayList inputBindings,
-                                       ArrayList outputBindings)
+                                       ArrayList outputBindings,
+                                       CycConstant parentContextFrame)
         throws IOException, CycApiException, ExpressionEvaluationException {
         if (verbosity > 2)
             Log.current.println("Interpreting " + procedure.toString() +
                                 "\n  body: " + procedure.getBody());
+        procedureTerm = cycAccess.getKnownConstantByName(procedure.toString());
         contextFrame =
             contextStackPool.allocateProcedureContextFrame(parentContextFrame,
                                                            stateMachineDefinitionMt,
@@ -174,15 +177,17 @@ public class ProcedureInterpreter {
             CycNart inputPinParameter = new CycNart(softwareParameterFromSyntaxFn, inputPinTerm);
             Object valueExpression = inputBinding.getBoundInputValueExpression();
             Object value = null;
-            if (valueExpression instanceof CycConstant) {
+            if (valueExpression instanceof StateVariable) {
                 // lookup the value of the state variable
                 value = cycAccess.getArg2(softwareParameterValue,
-                                          (CycFort) valueExpression,
+                                          cycAccess.getKnownConstantByName(valueExpression.toString()),
                                           parentContextFrame);
             }
             else
                 // a literal
                 value = valueExpression;
+            if (verbosity > 2)
+                Log.current.println(value.toString() + " --> " + inputPinParameter.cyclify());
             //TODO interpret evaluatable expressions as inpput arguments
 
             CycList softwareParameterValueSentence = new CycList();
@@ -219,7 +224,7 @@ public class ProcedureInterpreter {
             cycAccess.unassertMatchingAssertionsWithoutTranscript(softwareParameterValue,
                                                                   stateVariableTerm,
                                                                   parentContextFrame);
-            if (verbosity > 0)
+            if (verbosity > 2)
                 Log.current.println("asserting " + softwareParameterValueSentence +
                                     " in " + parentContextFrame);
             cycAccess.assertWithBookkeepingAndWithoutTranscript(softwareParameterValueSentence,

@@ -329,7 +329,8 @@ public class ExpressionEvaluator {
                                     "\n  " + query.cyclify());
             CycList answer = cycAccess.askWithVariable(query, variable, evaluationContext);
             if (answer.isEmpty())
-                throw new RuntimeException("Unevaluatable object " + cycLObject);
+                throw new RuntimeException("Unevaluatable expression \n" + query.toPrettyString("") +
+                                           "\n in mt " + evaluationContext.cyclify());
             value = answer.first();
         }
         //TODO handle other kinds of evaluatable objects

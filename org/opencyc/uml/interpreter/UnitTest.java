@@ -59,9 +59,9 @@ public class UnitTest extends TestCase {
         //testSuite.addTest(new UnitTest("testJavaInterpreter"));
         //testSuite.addTest(new UnitTest("testExpressionEvaluation"));
         //testSuite.addTest(new UnitTest("testContextFrames"));
-        testSuite.addTest(new UnitTest("testProcedureInterpretation"));
+        //testSuite.addTest(new UnitTest("testProcedureInterpretation"));
         //testSuite.addTest(new UnitTest("testSimpleStateMachine"));
-        //testSuite.addTest(new UnitTest("testCycExtractor"));
+        testSuite.addTest(new UnitTest("testCycExtractor"));
         return  testSuite;
     }
 
@@ -260,7 +260,7 @@ public class UnitTest extends TestCase {
                     new ProcedureInterpreter(cycAccess,
                                              definitionMt,
                                              contextStackPool,
-                                             Interpreter.DEFAULT_VERBOSITY);
+                                             Interpreter.QUIET_VERBOSITY);
             Procedure initializeProcedure = new Procedure();
             initializeProcedure.setName("UMLProcedure-InitializeNumberToZero");
             Object procedureBody = cycAccess.getArg2("umlBody", "UMLProcedure-InitializeNumberToZero",
@@ -281,7 +281,10 @@ public class UnitTest extends TestCase {
             outputBindings.add(outputBinding);
             procedureInterpreter.interpretProcedure(initializeProcedure,
                                                     inputBindings,
-                                                    outputBindings);
+                                                    outputBindings,
+                                                    stateMt);
+            CycList query = cycAccess.makeCycList("(#$softwareParameterValue #$TestStateMachine-X 0)");
+            Assert.assertTrue(cycAccess.isQueryTrue(query, stateMt));
             contextStackPool.destroyContextStack();
         } catch (Exception e) {
             e.printStackTrace();
@@ -299,14 +302,18 @@ public class UnitTest extends TestCase {
             String localHostName = InetAddress.getLocalHost().getHostName();
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
-                cycAccess = new CycAccess("localhost", 3620, CycConnection.DEFAULT_COMMUNICATION_MODE,
-                        true);
+                cycAccess = new CycAccess("localhost",
+                                          3620,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
                 //cycAccess.traceNamesOn();
                 cycAccess.setKePurpose("DAMLProject");
             }
             else if (localHostName.equals("thinker")) {
-                cycAccess = new CycAccess("localhost", 3600, CycConnection.DEFAULT_COMMUNICATION_MODE,
-                        true);
+                cycAccess = new CycAccess("localhost",
+                                          3600,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
                 cycAccess.setKePurpose("OpenCyc");
             }
             else {
@@ -318,8 +325,10 @@ public class UnitTest extends TestCase {
             String namespaceName = "test namespace";
             String name = "TestStateMachine";
             String commentString = "This is the test comment for testStateMachine.";
-            StateMachine stateMachine = stateMachineFactory.makeStateMachine(namespaceName,
-                    name, commentString);
+            StateMachine stateMachine =
+                stateMachineFactory.makeStateMachine(namespaceName,
+                                                     name,
+                                                     commentString);
             Assert.assertTrue(stateMachine instanceof StateMachine);
             Assert.assertTrue(stateMachine.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, stateMachine.getNamespace().getName());
@@ -330,7 +339,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(stateMachine, stateMachine.getComment().getAnnotatedElement());
             CycConstant classifierTerm = cycAccess.getKnownConstantByName("TestStateMachineContext");
             stateMachineFactory.associateClassifierToStateMachine(classifierTerm.toString(),
-                    commentString);
+                                                                  commentString);
             Assert.assertNotNull(stateMachine.getContext());
             Assert.assertTrue(stateMachine.getContext() instanceof Classifier);
             Assert.assertEquals(classifierTerm.toString(), stateMachine.getContext().getName());
@@ -344,18 +353,29 @@ public class UnitTest extends TestCase {
                 Assert.fail();
             }
             Expression initialValue = null;
-            stateMachineFactory.addStateVariableToClassifier(name, commentString,
-                    StructuralFeature.SK_INSTANCE, type, StructuralFeature.CK_CHANGEABLE,
-                    new Multiplicity(1, 1, false), StructuralFeature.OK_UNORDERED,
-                    initialValue);
+            StateVariable stateVariable =
+                stateMachineFactory.addStateVariableToClassifier(name,
+                                                                 commentString,
+                                                                 StructuralFeature.SK_INSTANCE,
+                                                                 type,
+                                                                 StructuralFeature.CK_CHANGEABLE,
+                                                                 new Multiplicity(1, 1, false),
+                                                                 StructuralFeature.OK_UNORDERED,
+                                                                 initialValue);
             //  procedures
             name = "UMLProcedure-InitializeNumberToZero";
             commentString = "Initializes the variable to the value zero.";
             String language = "CycL";
-            Object body = cycAccess.getArg2("umlBody", name, "UMLProcedureDefinition-InitializeNumberToZeroMt");
+            Object body = cycAccess.getArg2("umlBody",
+                                            name,
+                                            "UMLProcedureDefinition-InitializeNumberToZeroMt");
             boolean isList = false;
-            Procedure initializeNumberToZero = stateMachineFactory.makeProcedure(name,
-                    commentString, language, body, isList);
+            Procedure initializeNumberToZero =
+                stateMachineFactory.makeProcedure(name,
+                                                 commentString,
+                                                 language,
+                                                 body,
+                                                 isList);
             Assert.assertTrue(initializeNumberToZero instanceof Procedure);
             Assert.assertTrue(initializeNumberToZero.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, initializeNumberToZero.getNamespace().getName());
@@ -367,7 +387,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(language, initializeNumberToZero.getLanguage());
             Assert.assertEquals(body, initializeNumberToZero.getBody());
             Assert.assertEquals(isList, initializeNumberToZero.isList());
-            name = "x";
+            name = "UMLProcedure-InitializeNumberToZero-OutputPin-X";
             commentString = "the variable X initialized to zero.";
             type = null;
             try {
@@ -391,10 +411,16 @@ public class UnitTest extends TestCase {
             name = "UMLProcedure-IncrementNumber";
             commentString = "Increments the given number by one.";
             language = "CycL";
-            body = cycAccess.getArg2("umlBody", name, "UMLProcedureDefinition-IncrementNumberMt");
+            body = cycAccess.getArg2("umlBody",
+                                     name,
+                                     "UMLProcedureDefinition-IncrementNumberMt");
             isList = false;
-            Procedure increment = stateMachineFactory.makeProcedure(name, commentString,
-                    language, body, isList);
+            Procedure increment =
+                stateMachineFactory.makeProcedure(name,
+                                                  commentString,
+                                                  language,
+                                                  body,
+                                                  isList);
             Assert.assertTrue(increment instanceof Procedure);
             Assert.assertTrue(increment.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, increment.getNamespace().getName());
@@ -406,10 +432,13 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(language, increment.getLanguage());
             Assert.assertEquals(body, increment.getBody());
             Assert.assertEquals(isList, increment.isList());
-            name = "x";
+            name = "UMLProcedure-IncrementNumber-InputPin-X";
             commentString = "the given number to be incremented";
-            InputPin inputPinX = stateMachineFactory.addInputPinToProcedure(name,
-                    commentString, increment, type);
+            InputPin inputPinX =
+                stateMachineFactory.addInputPinToProcedure(name,
+                                                           commentString,
+                                                           increment,
+                                                           type);
             Assert.assertTrue(inputPinX instanceof InputPin);
             Assert.assertTrue(inputPinX.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, inputPinX.getNamespace().getName());
@@ -420,9 +449,13 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(inputPinX, inputPinX.getComment().getAnnotatedElement());
             Assert.assertTrue(increment.getArgument().contains(inputPinX));
             Assert.assertEquals(increment, inputPinX.getProcedure());
+            name = "UMLProcedure-IncrementNumber-OutputPin-X";
             commentString = "the incremented number";
-            OutputPin outputPinX = stateMachineFactory.addOutputPinToProcedure(name,
-                    commentString, increment, type);
+            OutputPin outputPinX =
+                stateMachineFactory.addOutputPinToProcedure(name,
+                                                            commentString,
+                                                            increment,
+                                                            type);
             Assert.assertTrue(outputPinX instanceof OutputPin);
             Assert.assertTrue(outputPinX.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, outputPinX.getNamespace().getName());
@@ -442,8 +475,14 @@ public class UnitTest extends TestCase {
             Procedure exit = null;
             Procedure doActivity = null;
             boolean isConcurrent = false;
-            CompositeState topState = stateMachineFactory.makeCompositeState(name,
-                    commentString, container, entry, exit, doActivity, isConcurrent);
+            CompositeState topState =
+                stateMachineFactory.makeCompositeState(name,
+                                                       commentString,
+                                                       container,
+                                                       entry,
+                                                       exit,
+                                                       doActivity,
+                                                       isConcurrent);
             stateMachine.setTop(topState);
             Assert.assertTrue(topState instanceof CompositeState);
             Assert.assertTrue(topState.getNamespace() instanceof Namespace);
@@ -465,8 +504,11 @@ public class UnitTest extends TestCase {
             commentString = "Initial state for the test state machine.";
             container = topState;
             int kind = PseudoState.PK_INITIAL;
-            PseudoState initialState = stateMachineFactory.makePseudoState(name,
-                    commentString, container, kind);
+            PseudoState initialState =
+                stateMachineFactory.makePseudoState(name,
+                                                    commentString,
+                                                    container,
+                                                    kind);
             Assert.assertTrue(initialState instanceof PseudoState);
             Assert.assertTrue(initialState.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, initialState.getNamespace().getName());
@@ -480,8 +522,13 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(topState.getSubVertex().contains(initialState));
             name = "TestStateMachine-CounterState";
             commentString = "Counter state for the test state machine.";
-            SimpleState counterState = stateMachineFactory.makeSimpleState(name,
-                    commentString, container, entry, exit, doActivity);
+            SimpleState counterState =
+                stateMachineFactory.makeSimpleState(name,
+                                                    commentString,
+                                                    container,
+                                                    entry,
+                                                    exit,
+                                                    doActivity);
             Assert.assertTrue(counterState instanceof SimpleState);
             Assert.assertTrue(counterState.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, counterState.getNamespace().getName());
@@ -498,8 +545,13 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(0, counterState.getDeferrableEvent().size());
             name = "TestStateMachine-FinalState";
             commentString = "Final state for the test state machine.";
-            FinalState finalState = stateMachineFactory.makeFinalState(name, commentString,
-                    container, entry, exit, doActivity);
+            FinalState finalState =
+                stateMachineFactory.makeFinalState(name,
+                                                   commentString,
+                                                   container,
+                                                   entry,
+                                                   exit,
+                                                   doActivity);
             Assert.assertTrue(finalState instanceof FinalState);
             Assert.assertTrue(finalState.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, finalState.getNamespace().getName());
@@ -516,17 +568,23 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(0, finalState.getDeferrableEvent().size());
             //  state vertices (no state vertices in this test)
             //  transistions
-            name = "TestStateMachine-Transition1";
-            commentString = "Transition 1 for the test state machine.";
+            name = "TestStateMachine-InitializeTransition";
+            commentString = "Initialize transition for the test state machine.";
             String guardExpressionLanguage = null;
             Object guardExpressionBody = null;
             Procedure effect = initializeNumberToZero;
             Event trigger = null;
             StateVertex source = initialState;
             StateVertex target = counterState;
-            Transition transition1 = stateMachineFactory.makeTransition(name, commentString,
-                    guardExpressionLanguage, guardExpressionBody, effect, trigger,
-                    source, target);
+            Transition transition1 =
+                stateMachineFactory.makeTransition(name,
+                                                   commentString,
+                                                   guardExpressionLanguage,
+                                                   guardExpressionBody,
+                                                   effect,
+                                                   trigger,
+                                                   source,
+                                                   target);
             Assert.assertTrue(transition1 instanceof Transition);
             Assert.assertTrue(transition1.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition1.getNamespace().getName());
@@ -544,18 +602,30 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(!transition1.isSelfTransition());
             Assert.assertTrue(initialState.getOutgoing().contains(transition1));
             Assert.assertTrue(counterState.getIncoming().contains(transition1));
-            name = "TestStateMachine-Transition2";
-            commentString = "Transition 2 for the test state machine.";
+            stateMachineFactory.addEffectOutputBinding(transition1,
+                                                       outputPinX1,
+                                                       stateVariable);
+            Assert.assertEquals(0, transition1.getEffectInputBindings().size());
+            Assert.assertEquals(1, transition1.getEffectOutputBindings().size());
+            name = "TestStateMachine-CountingTransition";
+            commentString = "Counting transition for the test state machine.";
             guardExpressionLanguage = "CycL";
-            guardExpressionBody = cycAccess.getArg2("umlBody", "TestStateMachine-BooleanExpression1",
-                    "UMLStateMachineTest01Mt");
+            guardExpressionBody = cycAccess.getArg2("umlBody",
+                                                    "TestStateMachine-BooleanExpression1",
+                                                    "UMLStateMachineTest01Mt");
             effect = increment;
             trigger = null;
             source = counterState;
             target = counterState;
-            Transition transition2 = stateMachineFactory.makeTransition(name, commentString,
-                    guardExpressionLanguage, guardExpressionBody, effect, trigger,
-                    source, target);
+            Transition transition2 =
+                stateMachineFactory.makeTransition(name,
+                                                   commentString,
+                                                   guardExpressionLanguage,
+                                                   guardExpressionBody,
+                                                   effect,
+                                                   trigger,
+                                                   source,
+                                                   target);
             Assert.assertTrue(transition2 instanceof Transition);
             Assert.assertTrue(transition2.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition2.getNamespace().getName());
@@ -580,18 +650,37 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(trigger, transition2.getTrigger());
             Assert.assertTrue(transition2.isSelfTransition());
             Assert.assertTrue(((State)source).getInternalTransition().contains(transition2));
-            name = "TestStateMachine-Transition3";
-            commentString = "Transition 3 for the test state machine.";
+            Assert.assertEquals(0, transition2.getEffectInputBindings().size());
+            stateMachineFactory.addEffectInputBinding(transition2,
+                                                      inputPinX,
+                                                      stateVariable);
+            Assert.assertEquals(0, transition2.getEffectOutputBindings().size());
+            stateMachineFactory.addEffectOutputBinding(transition2,
+                                                       outputPinX,
+                                                       stateVariable);
+            Assert.assertEquals(1, transition2.getEffectInputBindings().size());
+            Assert.assertTrue(transition2.getEffectInputBindings().get(0) instanceof InputBinding);
+            Assert.assertEquals(1, transition2.getEffectOutputBindings().size());
+            Assert.assertTrue(transition2.getEffectOutputBindings().get(0) instanceof OutputBinding);
+            name = "TestStateMachine-TerminateTransition";
+            commentString = "Terminate transition for the test state machine.";
             guardExpressionLanguage = "CycL";
-            guardExpressionBody = cycAccess.getArg2("umlBody", "TestStateMachine-BooleanExpression2",
-                    "UMLStateMachineTest01Mt");
+            guardExpressionBody = cycAccess.getArg2("umlBody",
+                                                    "TestStateMachine-BooleanExpression2",
+                                                    "UMLStateMachineTest01Mt");
             effect = null;
             trigger = null;
             source = counterState;
             target = finalState;
-            Transition transition3 = stateMachineFactory.makeTransition(name, commentString,
-                    guardExpressionLanguage, guardExpressionBody, effect, trigger,
-                    source, target);
+            Transition transition3 =
+                stateMachineFactory.makeTransition(name,
+                                                   commentString,
+                                                   guardExpressionLanguage,
+                                                   guardExpressionBody,
+                                                   effect,
+                                                   trigger,
+                                                   source,
+                                                   target);
             Assert.assertTrue(transition3 instanceof Transition);
             Assert.assertTrue(transition3.getNamespace() instanceof Namespace);
             Assert.assertEquals(namespaceName, transition3.getNamespace().getName());
@@ -617,6 +706,9 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(!transition3.isSelfTransition());
             Assert.assertTrue(source.getOutgoing().contains(transition3));
             Assert.assertTrue(target.getIncoming().contains(transition3));
+            Assert.assertEquals(0, transition3.getEffectInputBindings().size());
+            Assert.assertEquals(0, transition3.getEffectOutputBindings().size());
+
             interpretStateMachine(stateMachine, cycAccess);
         } catch (Exception e) {
             e.printStackTrace();
@@ -635,11 +727,16 @@ public class UnitTest extends TestCase {
         Interpreter interpreter = null;
         try {
             CycFort temporaryWorkspaceMt = cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
-            int verbosity = Interpreter.QUIET_VERBOSITY;
-            ContextStackPool contextStackPool = new ContextStackPool(cycAccess,
-                    temporaryWorkspaceMt, ContextStackPool.QUIET_VERBOSITY);
-            interpreter = new Interpreter(stateMachine, cycAccess, contextStackPool,
-                    verbosity);
+            //int verbosity = Interpreter.QUIET_VERBOSITY;
+            int verbosity = Interpreter.DEFAULT_VERBOSITY;
+            ContextStackPool contextStackPool =
+                    new ContextStackPool(cycAccess,
+                                         temporaryWorkspaceMt,
+                                         ContextStackPool.QUIET_VERBOSITY);
+            interpreter = new Interpreter(stateMachine,
+                                          cycAccess,
+                                          contextStackPool,
+                                          verbosity);
             Assert.assertNotNull(interpreter);
             Assert.assertTrue(interpreter instanceof Interpreter);
             Assert.assertTrue(interpreter.eventQueue.isEmpty());

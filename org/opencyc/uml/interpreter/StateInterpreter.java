@@ -149,7 +149,8 @@ public class StateInterpreter extends Thread {
                 Log.current.println("Evaluating effect " + procedure.toString());
             procedureInterpreter.interpretProcedure(procedure,
                                                     transition.getEffectInputBindings(),
-                                                    transition.getEffectOutputBindings());
+                                                    transition.getEffectOutputBindings(),
+                                                    interpreter.getStateMt());
         }
         if (state instanceof FinalState) {
             state.getContainer().getStateInterpreter().complete();
@@ -218,7 +219,8 @@ public class StateInterpreter extends Thread {
         if (procedure != null)
             procedureInterpreter.interpretProcedure(procedure,
                                                     state.getEntryInputBindings(),
-                                                    state.getEntryOutputBindings());
+                                                    state.getEntryOutputBindings(),
+                                                    interpreter.getStateMt());
         if (state.getDoActivity() != null)
             new DoActivity(state);
     }
@@ -262,7 +264,8 @@ public class StateInterpreter extends Thread {
         if (procedure != null)
             procedureInterpreter.interpretProcedure(procedure,
                                                     state.getExitInputBindings(),
-                                                    state.getExitOutputBindings());
+                                                    state.getExitOutputBindings(),
+                                                    interpreter.getStateMt());
         DefaultMutableTreeNode stateNode =
             (DefaultMutableTreeNode) interpreter.getActiveStates().get(state);
         interpreter.getActiveStates().remove(state);

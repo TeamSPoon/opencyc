@@ -173,6 +173,9 @@ public class UnitTest extends TestCase {
     HypothesisFormer hypothesisFormer = sensoryPerception.getHypothesisFormer();
     Assert.assertEquals(node, hypothesisFormer.getNode());
     
+    Assert.assertNotNull(node.getLogger());
+    Assert.assertTrue(node.getLogger() instanceof Logger);
+    
     System.out.println("*** testELFFactory OK ***");
   }
 

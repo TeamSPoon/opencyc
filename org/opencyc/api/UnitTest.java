@@ -3545,7 +3545,6 @@ public class UnitTest extends TestCase {
 
             // List containing null is coerced to list containing NIL.
             if (cycAccess.communicationMode == CycConnection.BINARY_MODE) {
-                cycAccess.traceOn();
                 CycList script = new CycList();
                 script.add(CycObjectFactory.makeCycSymbol("csetq"));
                 script.add(CycObjectFactory.makeCycSymbol("a"));

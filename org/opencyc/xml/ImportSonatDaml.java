@@ -52,6 +52,12 @@ public class ImportSonatDaml {
     protected HashMap ontologyNicknames = new HashMap();
 
     /**
+     * Cyc terms which have semantic counterparts in DAML.
+     * DAML term --> Cyc term
+     */
+    protected HashMap equivalentDamlCycTerms;
+
+    /**
      * the name of the KB Subset collection which identifies ontology import
      * terms in Cyc
      */
@@ -77,7 +83,7 @@ public class ImportSonatDaml {
         Log.current.println("Connecting to Cyc server from " + localHostName);
         if (localHostName.equals("crapgame.cyc.com")) {
             cycAccess = new CycAccess("localhost",
-                                      3620,
+                                      3600,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);
         }
@@ -121,9 +127,11 @@ public class ImportSonatDaml {
 
         initializeDocumentsToImport();
         initializeOntologyNicknames();
+        initializeMappedTerms();
         ImportDaml importDaml =
             new ImportDaml(cycAccess,
                            ontologyNicknames,
+                           equivalentDamlCycTerms,
                            kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
         //for (int i = 29; i < damlDocInfos.size(); i++) {
@@ -374,6 +382,112 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.daml.org/2002/09/milservices/us", "milsvcs-us");
     }
 
+    protected void initializeMappedTerms ()
+        throws IOException, UnknownHostException, CycApiException {
+        assertMapping("daml:Thing", "Thing");
+        assertMapping("rdfs:Resource", "Thing");
+
+        assertMapping("daml:Class", "Collection");
+        assertMapping("rdfs:Class", "Collection");
+
+        assertMapping("daml:Ontology", "AbstractInformationStructure");
+
+        assertMapping("daml:DatatypeProperty", "DamlDatatypeProperty");
+
+        assertMapping("daml:ObjectProperty", "DamlObjectProperty");
+
+        assertMapping("daml:Property", "BinaryPredicate");
+        assertMapping("rdfs:Property", "BinaryPredicate");
+        assertMapping("rdf:Property", "BinaryPredicate");
+
+        assertMapping("daml:TransitiveProperty", "TransitiveBinaryPredicate");
+
+        assertMapping("daml:Literal", "SubLAtomicTerm");
+        assertMapping("rdfs:Literal", "SubLAtomicTerm");
+
+        assertMapping("xsd:string", "SubLString");
+        assertMapping("xsd:decimal", "SubLRealNumber");
+        assertMapping("xsd:integer", "SubLInteger");
+        assertMapping("xsd:float", "SubLRealNumber");
+        assertMapping("xsd:double", "SubLRealNumber");
+        assertMapping("xsd:date", "Date");
+        assertMapping("xsd:uriReference", "UniformResourceLocator");
+        assertMapping("xsd:anyURI", "UniformResourceLocator");
+
+        // Binary predicates
+        assertMapping("daml:subClassOf", "genls");
+        assertMapping("rdfs:subClassOf", "genls");
+
+        assertMapping("daml:type", "isa");
+        assertMapping("rdfs:type", "isa");
+        assertMapping("rdf:type", "isa");
+
+        assertMapping("daml:subPropertyOf", "genlPreds");
+        assertMapping("rdfs:subPropertyOf", "genlPreds");
+
+        assertMapping("daml:label", "nameString");
+        assertMapping("rdfs:label", "nameString");
+
+        assertMapping("daml:comment", "comment");
+        assertMapping("rdfs:comment", "comment");
+
+        assertMapping("daml:seeAlso", "conceptuallyRelated");
+        assertMapping("rdfs:seeAlso", "conceptuallyRelated");
+
+        assertMapping("daml:isDefinedBy", "containsInformationAbout");
+        assertMapping("rdfs:isDefinedBy", "containsInformationAbout");
+
+        assertMapping("daml:domain", "arg1Isa");
+        assertMapping("rdfs:domain", "arg1Isa");
+
+        assertMapping("daml:range", "arg2Isa");
+        assertMapping("rdfs:range", "arg2Isa");
+
+        assertMapping("daml:differentIndividualFrom", "different");
+
+        assertMapping("daml:samePropertyAs", "equalSymbols");
+
+        assertMapping("daml:disjointWith", "different");
+        getMappings();
+    }
+
+
+    /**
+     * Asserts that the given DAML/RDFS/RDF term is mapped to the
+     * given Cyc term.
+     *
+     * @param damlTerm the given DAML/RDFS/RDF term
+     * @param cycTerm the given Cyc term
+     */
+    protected void assertMapping (String damlTerm, String cycTerm)
+        throws IOException, UnknownHostException, CycApiException {
+        cycAccess.assertSynonymousExternalConcept(cycTerm,
+                                                  "WorldWideWeb-DynamicIndexedInfoSource",
+                                                  damlTerm,
+                                                  "DamlSonatSpindleHeadMt");
+    }
+
+    /**
+     * Gets the asserted mappings between DAML/RDFS/RDF terms and Cyc terms.
+     *
+     */
+    protected void getMappings ()
+        throws IOException, UnknownHostException, CycApiException {
+        equivalentDamlCycTerms = new HashMap();
+        CycList mappings =
+            cycAccess.getSynonymousExternalConcepts("WorldWideWeb-DynamicIndexedInfoSource",
+                                                    "DamlSonatSpindleHeadMt");
+        for (int i = 0; i < mappings.size(); i++) {
+            CycList pair = (CycList) mappings.get(i);
+            CycFort cycTerm = (CycFort) pair.first();
+            String damlTerm = (String) pair.second();
+            Log.current.println(damlTerm + " --> " + cycTerm.toString());
+            equivalentDamlCycTerms.put(damlTerm, cycTerm.toString());
+        }
+    }
+
+
+
     /**
      * Initializes the DAML ontology vocabulary if not present.
      */
@@ -396,15 +510,13 @@ public class ImportSonatDaml {
         cycAccess.assertIsa(term, "VariableOrderCollection");
         cycAccess.assertGenls(term, "CycLConstant");
 
-        if (cycAccess.isOpenCyc()) {
-            // DamlSonatConstant
-            term = "DamlSonatConstant";
-            comment = "The KB subset collection of DAML SONAT terms.";
-            cycAccess.findOrCreate(term);
-            cycAccess.assertComment(term, comment, "BaseKB");
-            cycAccess.assertIsa(term, "VariableOrderCollection");
-            cycAccess.assertGenls(term, "DamlConstant");
-        }
+        // DamlSonatConstant
+        term = "DamlSonatConstant";
+        comment = "The KB subset collection of DAML SONAT terms.";
+        cycAccess.findOrCreate(term);
+        cycAccess.assertComment(term, comment, "BaseKB");
+        cycAccess.assertIsa(term, "VariableOrderCollection");
+        cycAccess.assertGenls(term, "DamlConstant");
 
         // #$DamlDatatypeProperty
         cycAccess.createCollection("DamlDatatypeProperty",
@@ -420,6 +532,26 @@ public class ImportSonatDaml {
                                    "BaseKB",
                                    "PredicateCategory",
                                    "BinaryPredicate");
+
+        if (cycAccess.find("WorldWideWeb-DynamicIndexedInfoSource") == null)
+            // #$WorldWideWeb-DynamicIndexedInfoSource
+            cycAccess.createIndividual("WorldWideWeb-DynamicIndexedInfoSource",
+                                       "The WorldWideWeb-DynamicIndexedInfoSource is an instance of " +
+                                       "DynamicIndexedInfoSource. It is all of the information content " +
+                                       "of the WorldWideWeb-Concrete.",
+                                       "BaseKB",
+                                       "IndexedInformationSource");
+
+        if (cycAccess.find("DamlSonatSpindleHeadMt") == null) {
+            // #$DamlSonatSpindleHeadMt
+            ArrayList genlMts = new ArrayList();
+            genlMts.add("BaseKB");
+            cycAccess.createMicrotheory("DamlSonatSpindleHeadMt",
+                                        "The microtheory which is superior to all the DAML SONAT " +
+                                        " ontology microtheories.",
+                                        "Microtheory",
+                                        genlMts);
+        }
 
         // #$URLFn
         cycAccess.createIndivDenotingUnaryFunction(
@@ -457,7 +589,6 @@ public class ImportSonatDaml {
                                         "()"
                                         );
         // #$damlURI
-        genlPreds = null;
         cycAccess.createBinaryPredicate("damlURI",
                                         // predicate type
                                         null,
@@ -481,13 +612,29 @@ public class ImportSonatDaml {
                                         "()"
                                         );
 
-    /*
+        // #$xmlNameSpace
+        cycAccess.createBinaryPredicate("xmlNameSpace",
+                                        // predicate type
+                                        null,
+                                        // comment
+                                        "A predicate relating an imported XML namespace string with its " +
+                                        "source Uniform Resource Identifier.",
+                                        // arg1Isa
+                                        "SubLString",
+                                        // arg2Isa
+                                        "UniformResourceLocator",
+                                        // arg1Format
+                                        null,
+                                        // arg2Format
+                                        "SingleEntry",
+                                        // genlPreds
+                                        "conceptuallyRelated",
+                                        // genFormatString
+                                        "~a is an abbreviated reference for the xml namespace of ~a",
+                                        // genFormatList
+                                        "()"
+                                        );
 
-(xmlNameSpace <nickname> <url>)
-(#$synonymousExternalConcept <mapped-cyc-term>
-                             #$WorldWideWeb-DynamicIndexedInfoSource
-                             <namespace:localname>)
-    */
     }
 
     /**

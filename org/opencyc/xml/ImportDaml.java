@@ -145,9 +145,11 @@ public class ImportDaml implements StatementHandler {
      */
     public ImportDaml(CycAccess cycAccess,
                       HashMap ontologyNicknames,
+                      HashMap equivalentDamlCycTerms,
                       String kbSubsetCollectionName) {
         this.cycAccess = cycAccess;
         this.ontologyNicknames = ontologyNicknames;
+        this.equivalentDamlCycTerms = equivalentDamlCycTerms;
         this.kbSubsetCollectionName = kbSubsetCollectionName;
         arp = new ARP();
         arp.setStatementHandler(this);
@@ -158,78 +160,6 @@ public class ImportDaml implements StatementHandler {
      */
     protected void initialize ()
         throws IOException, UnknownHostException, CycApiException {
-        if (equivalentDamlCycTerms == null) {
-            equivalentDamlCycTerms = new HashMap();
-
-            //TODO - reify this mapping and discard this dictionary.
-
-            // Collections
-            equivalentDamlCycTerms.put("daml:Thing", "Thing");
-            equivalentDamlCycTerms.put("rdfs:Resource", "Thing");
-
-            equivalentDamlCycTerms.put("daml:Class", "Collection");
-            equivalentDamlCycTerms.put("rdfs:Class", "Collection");
-
-            equivalentDamlCycTerms.put("daml:Ontology", "AbstractInformationStructure");
-
-            equivalentDamlCycTerms.put("daml:DatatypeProperty", "DamlDatatypeProperty");
-
-            equivalentDamlCycTerms.put("daml:ObjectProperty", "DamlObjectProperty");
-
-            equivalentDamlCycTerms.put("daml:Property", "BinaryPredicate");
-            equivalentDamlCycTerms.put("rdfs:Property", "BinaryPredicate");
-            equivalentDamlCycTerms.put("rdf:Property", "BinaryPredicate");
-
-            equivalentDamlCycTerms.put("daml:TransitiveProperty", "TransitiveBinaryPredicate");
-
-            equivalentDamlCycTerms.put("daml:Literal", "SubLAtomicTerm");
-            equivalentDamlCycTerms.put("rdfs:Literal", "SubLAtomicTerm");
-
-            equivalentDamlCycTerms.put("xsd:string", "SubLString");
-            equivalentDamlCycTerms.put("xsd:decimal", "SubLRealNumber");
-            equivalentDamlCycTerms.put("xsd:integer", "SubLInteger");
-            equivalentDamlCycTerms.put("xsd:float", "SubLRealNumber");
-            equivalentDamlCycTerms.put("xsd:double", "SubLRealNumber");
-            equivalentDamlCycTerms.put("xsd:date", "Date");
-            equivalentDamlCycTerms.put("xsd:uriReference", "UniformResourceLocator");
-            equivalentDamlCycTerms.put("xsd:anyURI", "UniformResourceLocator");
-
-            // Binary predicates
-            equivalentDamlCycTerms.put("daml:subClassOf", "genls");
-            equivalentDamlCycTerms.put("rdfs:subClassOf", "genls");
-
-            equivalentDamlCycTerms.put("daml:type", "isa");
-            equivalentDamlCycTerms.put("rdfs:type", "isa");
-            equivalentDamlCycTerms.put("rdf:type", "isa");
-
-            equivalentDamlCycTerms.put("daml:subPropertyOf", "genlPreds");
-            equivalentDamlCycTerms.put("rdfs:subPropertyOf", "genlPreds");
-
-            equivalentDamlCycTerms.put("daml:label", "nameString");
-            equivalentDamlCycTerms.put("rdfs:label", "nameString");
-
-            equivalentDamlCycTerms.put("daml:comment", "comment");
-            equivalentDamlCycTerms.put("rdfs:comment", "comment");
-
-            equivalentDamlCycTerms.put("daml:seeAlso", "conceptuallyRelated");
-            equivalentDamlCycTerms.put("rdfs:seeAlso", "conceptuallyRelated");
-
-            equivalentDamlCycTerms.put("daml:isDefinedBy", "containsInformationAbout");
-            equivalentDamlCycTerms.put("rdfs:isDefinedBy", "containsInformationAbout");
-
-            equivalentDamlCycTerms.put("daml:domain", "arg1Isa");
-            equivalentDamlCycTerms.put("rdfs:domain", "arg1Isa");
-
-            equivalentDamlCycTerms.put("daml:range", "arg2Isa");
-            equivalentDamlCycTerms.put("rdfs:range", "arg2Isa");
-
-            equivalentDamlCycTerms.put("daml:differentIndividualFrom", "different");
-
-            equivalentDamlCycTerms.put("daml:samePropertyAs", "equalSymbols");
-
-            equivalentDamlCycTerms.put("daml:disjointWith", "different");
-
-        }
         kbSubsetCollection = cycAccess.getKnownConstantByName(kbSubsetCollectionName);
         bookkeepingMt = cycAccess.getKnownConstantByName("BookkeepingMt");
     }
@@ -252,6 +182,11 @@ public class ImportDaml implements StatementHandler {
             new CycNart(cycAccess.getKnownConstantByName("URLFn"),
                         damlOntologyDefiningURLString);
         Log.current.println("Defining URL " + damlOntologyDefiningURL.cyclify());
+        CycList gaf = new CycList();
+        gaf.add(cycAccess.getKnownConstantByName("xmlNameSpace"));
+        gaf.add(ontologyNicknames.get(damlOntologyDefiningURLString));
+        gaf.add(damlOntologyDefiningURL);
+        cycAccess.assertGaf(gaf, importMt);
         Log.current.println("\nStatements\n");
         //cycAccess.traceOn();
         InputStream in;

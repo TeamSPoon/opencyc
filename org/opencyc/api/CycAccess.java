@@ -5940,7 +5940,47 @@ public class CycAccess {
         assertIsa(collection, isa);
         assertGenls(collection, genls);
         return collection;
-        }
+    }
+
+    /**
+     * Creates a new individual term.
+     *
+     * @param individual the name of the new individual term
+     * @param comment the comment for the individual
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new individual is an instance
+     * @return the new individual term
+     */
+    public CycFort createIndividual (String IndividualName,
+                                     String comment,
+                                     String commentMt,
+                                     String isa)
+        throws IOException, CycApiException {
+        return createIndividual (IndividualName,
+                                 comment,
+                                 getKnownConstantByName(commentMt),
+                                 getKnownConstantByName(isa));
+    }
+
+    /**
+     * Creates a new individual term.
+     *
+     * @param individual the name of the new individual term
+     * @param comment the comment for the individual
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new individual is an instance
+     * @return the new individual term
+     */
+    public CycFort createIndividual (String IndividualName,
+                                     String comment,
+                                     CycFort commentMt,
+                                     CycFort isa)
+        throws IOException, CycApiException {
+        CycFort individual = findOrCreate(IndividualName);
+        assertComment(individual, comment, commentMt);
+        assertIsa(individual, isa);
+        return individual;
+    }
 
     /**
      * Creates a new individual-denoting reifiable unary function term.
@@ -6317,6 +6357,89 @@ public class CycAccess {
         sentence.add(new Integer(argPosition));
         sentence.add(argNFormat);
         assertGaf(sentence, baseKB);
+    }
+
+    /**
+     * Asserts that the given DAML imported term is mapped to the
+     * given Cyc term.
+     *
+     * @param cycTerm the mapped Cyc term
+     * @param informationSource the external indexed information source
+     * @param externalConcept the external concept within the information source
+     * @param mt the assertion microtheory
+     */
+    public void assertSynonymousExternalConcept (String cycTerm,
+                                                    String informationSource,
+                                                    String externalConcept,
+                                                    String mt)
+        throws IOException, UnknownHostException, CycApiException {
+        assertSynonymousExternalConcept (getKnownConstantByName(cycTerm),
+                                         getKnownConstantByName(informationSource),
+                                         externalConcept,
+                                         getKnownConstantByName(mt));
+    }
+
+    /**
+     * Asserts that the given DAML imported term is mapped to the
+     * given Cyc term.
+     *
+     * @param cycTerm the mapped Cyc term
+     * @param informationSource the external indexed information source
+     * @param externalConcept the external concept within the information source
+     * @param mt the assertion microtheory
+     */
+    public void assertSynonymousExternalConcept (CycFort cycTerm,
+                                                    CycFort informationSource,
+                                                    String externalConcept,
+                                                    CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList gaf = new CycList();
+        // #$synonymousExternalConcept
+        gaf.add(getKnownConstantByGuid("c0e2af4e-9c29-11b1-9dad-c379636f7270"));
+        gaf.add(cycTerm);
+        gaf.add(informationSource);
+        gaf.add(externalConcept);
+        assertGaf(gaf, mt);
+    }
+
+    /**
+     * Gets the list of mappings from the specified information source given the
+     * inference microtheory.  Each returned list item is the pair consisting of
+     * external concept string and synonymous Cyc term.
+     *
+     * @param informationSource the external indexed information source
+     * @param mt the assertion microtheory
+     */
+    public CycList getSynonymousExternalConcepts (String informationSource,
+                                                  String mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getSynonymousExternalConcepts (getKnownConstantByName(informationSource),
+                                              getKnownConstantByName(mt));
+    }
+
+    /**
+     * Gets the list of mappings from the specified information source given the
+     * inference microtheory.  Each returned list item is the pair consisting of
+     * external concept string and synonymous Cyc term.
+     *
+     * @param informationSource the external indexed information source
+     * @param mt the assertion microtheory
+     */
+    public CycList getSynonymousExternalConcepts (CycFort informationSource,
+                                                  CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList variables = new CycList();
+        CycVariable cycTermVar = CycObjectFactory.makeCycVariable("?cyc-term");
+        variables.add(cycTermVar);
+        CycVariable externalConceptVar = CycObjectFactory.makeCycVariable("?externalConcept");
+        variables.add(externalConceptVar);
+        CycList query = new CycList();
+        // #$synonymousExternalConcept
+        query.add(getKnownConstantByGuid("c0e2af4e-9c29-11b1-9dad-c379636f7270"));
+        query.add(cycTermVar);
+        query.add(informationSource);
+        query.add(externalConceptVar);
+        return askWithVariables(query, variables, mt);
     }
 
 

@@ -1,8 +1,8 @@
 package org.opencyc.elf.bg.procedure;
 
-//// External Imports
-
 //// Internal Imports
+
+//// External Imports
 
 /**
  * <P>

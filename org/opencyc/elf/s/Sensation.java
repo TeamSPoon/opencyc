@@ -32,17 +32,28 @@ public class Sensation {
   //// Constructors
   
   /** 
-   * Creates a new instance of Sensation given the object and sensed data associated with
+   * Creates a new instance of Sensation given the sensation name, object and sensed data associated with
    * the object. 
    *
+   * @param name the sensation name
    * @param obj the object for which data is sensed
    * @param data the data associated with the object
    */
-  public Sensation(Object obj, Object data) {
+  public Sensation(String name, Object obj, Object data) {
+    this.name = name;
     this.obj = obj;
     this.data = data;
   }
   
+  /**
+   * Gets the sensation name.
+   *
+   * @return the sensation name
+   */
+  public String getname () {
+    return name;
+  }
+
   /**
    * Gets the object for which data is sensed.
    *
@@ -61,20 +72,22 @@ public class Sensation {
     return data;
   }
 
+  /** the name of the console input sensation */
+  public static final String CONSOLE_INPUT = "console input";  
+  
   //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
   
-  /**
-   * the object for which data is sensed
-   */  
+  /** the sensation name */
+  protected String name;
+  
+  /** the object for which data is sensed */
   protected Object obj;
   
-  /**
-   * the sensed data associated with the object
-   */  
+  /** the sensed data associated with the object */
   protected Object data;
   
   //// Main

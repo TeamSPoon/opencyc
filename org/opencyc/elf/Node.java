@@ -52,6 +52,16 @@ public class Node extends ELFObject {
     logger = Logger.getLogger("org.opencyc.elf.Node");
   }
 
+  /**
+   * Constructs a new Node object with the given name.
+   *
+   * @param name the given node name
+   */
+  public Node(String name) {
+    this.name = name;
+    logger = Logger.getLogger("org.opencyc.elf.Node");
+  }
+  
   //// Public Area
   
   /**

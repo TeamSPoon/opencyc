@@ -6,6 +6,7 @@ import org.opencyc.elf.a.DirectActuator;
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.predicate.PredicateExpression;
+import org.opencyc.elf.bg.predicate.True;
 
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.Command;
@@ -63,9 +64,11 @@ public class ScheduleFactory {
   /** Populates the schedule library. */
   public void populateScheduleLibrary () {
     // converse with user
-    PredicateExpression predicateExpression; 
+    PredicateExpression predicateExpression = new PredicateExpression(new True()); 
     List plannedCommands = new ArrayList();
+    plannedCommands.add(ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT));
     List plannedTimeMilliseconds = new ArrayList();
+    plannedTimeMilliseconds.add(new Integer(300000));
     Schedule schedule = new Schedule(predicateExpression, 
                                      plannedCommands, 
                                      plannedTimeMilliseconds, 

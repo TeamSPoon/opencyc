@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.expression.Operator;
+
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
@@ -30,7 +32,7 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class NotNull extends Predicate {
+public class NotNull extends Operator implements Predicate {
   
   //// Constructors
   
@@ -47,7 +49,7 @@ public class NotNull extends Predicate {
    * @param state the given state
    * @return true if the first argument is not null
    */
-   public Boolean evaluate(List arguments, State state) {
+   public Object evaluate(List arguments, State state) {
     return new Boolean(evaluateArgument(arguments.get(0), state) != null);
   }
   

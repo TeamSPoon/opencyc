@@ -1,8 +1,10 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.wm.state.State;
 
 //// External Imports
+import java.util.List;
 
 /** Predicates are operators that return Boolean.TRUE or Boolean.FALSE.
  *
@@ -29,4 +31,20 @@ package org.opencyc.elf.bg.predicate;
  */
 public interface Predicate {
   
+  /** Evaluates the given arguments within the given state and returns the result.  The semantics
+   * of the predicate are defined by each implementing class.
+   *
+   * @param arguments the given arguments to evaluate
+   * @param state the given state
+   */
+  public abstract Object evaluate (List arguments, State state);
+  
+  /** Returns a string representation of this predicate given
+   * the arguments.
+   *
+   * @param arguments the given arguments to evaluate
+   * @return a string representation of this object
+   */
+  public abstract String toString(List arguments);
+
 }

@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.expression.Operator;
+
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
@@ -31,7 +33,7 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Different extends Predicate {
+public class Different extends Operator implements Predicate {
   
   //// Constructors
   
@@ -50,7 +52,7 @@ public class Different extends Predicate {
    * @param state the given state
    * @return true if the first and second are not equal to each other
    */
-   public Boolean evaluate(List arguments, State state) {
+   public Object evaluate(List arguments, State state) {
      Object argument1 = evaluateArgument(arguments.get(0), state);
      Object argument2 = evaluateArgument(arguments.get(1), state);
      if (argument1 == null) 

@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.expression.Operator;
+
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
@@ -31,7 +33,7 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Or extends Predicate {
+public class Or extends Operator implements Predicate {
   
   //// Constructors
   
@@ -48,7 +50,7 @@ public class Or extends Predicate {
    * @param state the given state
    * @return the result of evaluating the given predicate expressions
    */
-  public Boolean evaluate(List arguments, State state) {
+  public Object evaluate(List arguments, State state) {
     Iterator iter = arguments.iterator();
     while (iter.hasNext()) {
       PredicateExpression predicateExpression = (PredicateExpression) iter.next();

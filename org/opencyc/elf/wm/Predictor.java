@@ -38,6 +38,15 @@ public class Predictor extends NodeComponent {
   
   //// Public Area
   
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "Predictor for " + node.getName();
+  }
+  
   //// Protected Area
     
   //// Private Area

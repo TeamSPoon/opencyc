@@ -515,7 +515,7 @@ public class CycAccess {
      * Gets the name for the given constant id.
      *
      * @param id the id of the constant object for which the name is sought
-     * @return the Guid for the given CycConstant
+     * @return the name for the given CycConstant
      */
     public String getConstantName (Integer id)
         throws IOException, UnknownHostException {
@@ -525,6 +525,24 @@ public class CycAccess {
         CycList command1 = new CycList();
         command.add(command1);
         command1.add(CycSymbol.makeCycSymbol("find-constant-by-id"));
+        command1.add(id);
+        return converseString(command);
+    }
+
+    /**
+     * Gets the name for the given variable id.
+     *
+     * @param id the id of the variable object for which the name is sought
+     * @return the name for the given CycVariable
+     */
+    public String getVariableName (Integer id)
+        throws IOException, UnknownHostException {
+        // Optimized for the binary api.
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("variable-name"));
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("find-variable-by-id"));
         command1.add(id);
         return converseString(command);
     }
@@ -585,6 +603,28 @@ public class CycAccess {
     }
 
     /**
+     * Completes the instantiation of <tt>CycVariable</tt> returned by the binary api. The
+     * binary api sends only variable ids, and the variable name must be retrieved
+     * if the variable is not cached.  The variable id is not used when sending variables to
+     * the binary api, instead the variable is output as a symbol.
+     *
+     * @param cycVariable the <tt>CycVariable</tt> whose name is to be completed
+     * @return the completed <tt>CycVariable</tt> object, or a reference to the previously
+     * cached instance
+     */
+    public CycVariable completeCycVariable (CycVariable cycVariable)
+        throws IOException, UnknownHostException {
+        cycVariable.name = getVariableName(cycVariable.id);
+        CycVariable cachedVariable = CycVariable.getCache(cycVariable.name);
+        if (cachedVariable == null) {
+            CycVariable.addCache(cycVariable);
+            return cycVariable;
+        }
+        else
+            return cachedVariable;
+    }
+
+    /**
      * Completes the instantiation of objects contained in the given <tt>CycList</tt>. The
      * binary api sends only constant ids, and the constant names and guids must be retrieved if the constant is
      * not cached.
@@ -600,6 +640,9 @@ public class CycAccess {
             else if (element instanceof CycConstant)
                 // Replace element with the completed constant, which might be previously cached.
                 cycList.set(i, completeCycConstant((CycConstant) element));
+            else if (element instanceof CycVariable)
+                // Replace element with the completed variable, which might be previously cached.
+                cycList.set(i, completeCycVariable((CycVariable) element));
             else
                 completeObject(element);
         }

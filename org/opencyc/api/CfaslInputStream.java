@@ -265,7 +265,8 @@ public class CfaslInputStream extends BufferedInputStream {
                 case CFASL_AXIOM_DEF:
                     throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
                 case CFASL_VARIABLE:
-                    throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                    o = readVariable();
+                    break;
                 case CFASL_INDEX:
                     throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
                 case CFASL_SPECIAL_OBJECT:
@@ -526,9 +527,20 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return an incomplete <tt>CycConstant</tt> having the input id
      */
     public CycConstant readConstant () throws IOException {
-        CycConstant answer = new CycConstant();
-        answer.id = new Integer(readInt());
-        return  answer;
+        CycConstant cycConstant = new CycConstant();
+        cycConstant.id = new Integer(readInt());
+        return  cycConstant;
+    }
+
+    /**
+     * Reads a variable from the CfaslInputStream.
+     *
+     * @return an incomplete <tt>CycVariable</tt> having the input id
+     */
+    public CycVariable readVariable () throws IOException {
+        CycVariable cycVariable = new CycVariable();
+        cycVariable.id = new Integer(readInt());
+        return  cycVariable;
     }
 
     /**
@@ -537,9 +549,9 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return an incomplete <tt>CycConstant</tt> having the input id
      */
     public CycNart readNart () throws IOException {
-        CycNart answer = new CycNart();
-        answer.id = new Integer(readInt());
-        return  answer;
+        CycNart cycNart = new CycNart();
+        cycNart.id = new Integer(readInt());
+        return  cycNart;
     }
 
     /**

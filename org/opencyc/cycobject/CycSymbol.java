@@ -71,6 +71,8 @@ public class CycSymbol implements Comparable {
      * @param symbolName the <tt>String</tt> name of the <tt>CycSymbol</tt>.
      */
     private CycSymbol(String symbolName) {
+        if (! (symbolName.equals(symbolName.toUpperCase())))
+            throw new RuntimeException("symbol name must be upper case " + symbolName);
         this.symbolName = symbolName;
     }
 

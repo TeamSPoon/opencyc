@@ -94,7 +94,7 @@ public class UnitTest extends TestCase {
         System.out.println("** testCycSymbol **");
         CycSymbol.resetCache();
         Assert.assertEquals(4, CycSymbol.getCacheSize());
-        String symbolName = "why-isa?";
+        String symbolName = "WHY-ISA?";
         CycSymbol cycSymbol = CycSymbol.makeCycSymbol(symbolName);
         Assert.assertEquals(5, cycSymbol.getCacheSize());
         Assert.assertEquals(symbolName, cycSymbol.toString());
@@ -104,7 +104,7 @@ public class UnitTest extends TestCase {
         CycSymbol cycSymbol3 = CycSymbol.makeCycSymbol(symbolName);
         Assert.assertEquals(cycSymbol, cycSymbol3);
         Assert.assertEquals(5, CycSymbol.getCacheSize());
-        String symbolName4 = "why-isa?";
+        String symbolName4 = "WHY-ISA?";
         CycSymbol cycSymbol4 = CycSymbol.makeCycSymbol(symbolName4);
         Assert.assertEquals(cycSymbol.toString(), cycSymbol4.toString());
         Assert.assertEquals(cycSymbol, cycSymbol4);
@@ -115,7 +115,7 @@ public class UnitTest extends TestCase {
         symbols.add(CycSymbol.makeCycSymbol("define-private"));
         symbols.add(CycSymbol.makeCycSymbol("nil"));
         Collections.sort(symbols);
-        Assert.assertEquals("[define-private, isa?, nil]", symbols.toString());
+        Assert.assertEquals("[DEFINE-PRIVATE, ISA?, NIL]", symbols.toString());
 
         // isKeyword
         CycSymbol cycSymbol5 = CycSymbol.makeCycSymbol("nil");
@@ -374,11 +374,11 @@ public class UnitTest extends TestCase {
 
         try {
             CycList cycList7a = cycAccess.makeCycList("(a . (b . (c . (d))))");
-            Assert.assertEquals("(a b c d)", cycList7a.toString());
+            Assert.assertEquals("(A B C D)", cycList7a.toString());
             CycList cycList7b = cycAccess.makeCycList("((a . b) . (c . d))");
-            Assert.assertEquals("((a . b) c . d)", cycList7b.toString());
+            Assert.assertEquals("((A . B) C . D)", cycList7b.toString());
             CycList cycList7c = cycAccess.makeCycList("((a . (b)) . (c . (d)))");
-            Assert.assertEquals("((a b) c d)", cycList7c.toString());
+            Assert.assertEquals("((A B) C D)", cycList7c.toString());
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -397,7 +397,7 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("(Brazil . 1)", cycList9.toString());
 
         CycList cycList10 = CycList.construct(brazil, CycSymbol.makeCycSymbol("foo"));
-        Assert.assertEquals("(Brazil . foo)", cycList10.toString());
+        Assert.assertEquals("(Brazil . FOO)", cycList10.toString());
 
         // Parse strings to make CycLists.
         try {
@@ -410,21 +410,21 @@ public class UnitTest extends TestCase {
             listAsString = "(1 2 3 4 5)";
             CycList cycList13 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(listAsString, cycList13.toString());
-            listAsString = "(\"1\" \"bar\" A #$Brazil z 4.25 :keyword ?collection nil)";
+            listAsString = "(\"1\" \"bar\" A #$Brazil Z 4.25 :KEYWORD ?collection NIL)";
             CycList cycList14 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(listAsString, cycList14.cyclify());
-            listAsString = "((a))";
+            listAsString = "((A))";
             CycList cycList15 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(listAsString, cycList15.toString());
-            listAsString = "((a) (b c) (((d))))";
+            listAsString = "((A) (B C) (((D))))";
             CycList cycList16 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(listAsString, cycList16.toString());
             CycList cycList17 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(cycList17.toString(), cycList16.toString());
             Assert.assertEquals(cycList17.toString(), cycList16.toString());
-            Assert.assertEquals(cycAccess.makeCycList("(a)"), cycList17.first());
-            Assert.assertEquals(cycAccess.makeCycList("(b c)"), cycList17.second());
-            Assert.assertEquals(cycAccess.makeCycList("(((d)))"), cycList17.third());
+            Assert.assertEquals(cycAccess.makeCycList("(A)"), cycList17.first());
+            Assert.assertEquals(cycAccess.makeCycList("(B C)"), cycList17.second());
+            Assert.assertEquals(cycAccess.makeCycList("(((D)))"), cycList17.third());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -467,14 +467,14 @@ public class UnitTest extends TestCase {
 
         // list
         CycList cycList30 = CycList.list(CycSymbol.makeCycSymbol("a"));
-        Assert.assertEquals("(a)", cycList30.toString());
+        Assert.assertEquals("(A)", cycList30.toString());
         CycList cycList31 = CycList.list(CycSymbol.makeCycSymbol("a"),
                                          CycSymbol.makeCycSymbol("b"));
-        Assert.assertEquals("(a b)", cycList31.toString());
+        Assert.assertEquals("(A B)", cycList31.toString());
         CycList cycList32 = CycList.list(CycSymbol.makeCycSymbol("a"),
                                          CycSymbol.makeCycSymbol("b"),
                                          CycSymbol.makeCycSymbol("c"));
-        Assert.assertEquals("(a b c)", cycList32.toString());
+        Assert.assertEquals("(A B C)", cycList32.toString());
 
         // combinationsOf
         try {

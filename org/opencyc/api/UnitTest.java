@@ -583,9 +583,12 @@ public class UnitTest extends TestCase {
         // getCoExtensionals.
         List coExtensionals = null;
         try {
+            //cycAccess.traceOn();
             coExtensionals = cycAccess.getCoExtensionals(cycAccess.getConstantByName("#$CycLTerm"));
+            //cycAccess.traceOff();
         }
         catch (UnknownHostException e) {
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
         catch (IOException e) {

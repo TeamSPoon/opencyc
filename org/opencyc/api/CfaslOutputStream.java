@@ -423,12 +423,31 @@ public class CfaslOutputStream extends BufferedOutputStream {
     public void writeSymbol(CycSymbol cycSymbol) throws IOException {
         if (cycConnection.trace)
             System.out.println("writeSymbol = " + cycSymbol);
-        if (cycSymbol.equals(CycSymbol.nil))
+        if (cycSymbol.isKeyword()) {
+            writeKeyword(cycSymbol);
+            return;
+        }
+        if (cycSymbol.equals(CycSymbol.nil)) {
+            if (cycConnection.trace)
+                System.out.println("writing CFASL_NIL");
             write(CFASL_NIL);
+        }
         else {
             write(CFASL_SYMBOL);
             writeString(cycSymbol.toString().toUpperCase());
         }
+    }
+
+    /**
+     * Writes a keyword symbol object to this CfaslOutputStream.
+     *
+     * @param cycSymbol the keyword to be written
+     */
+    public void writeKeyword(CycSymbol cycSymbol) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeKeyword = " + cycSymbol);
+        write(CFASL_KEYWORD);
+        writeString(cycSymbol.toString().toUpperCase());
     }
 
     /**
@@ -439,6 +458,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
     public void writeVariable(CycVariable cycVariable) throws IOException {
         if (cycConnection.trace)
             System.out.println("writeVariable = " + cycVariable);
+        //write(CFASL_VARIABLE);
         write(CFASL_SYMBOL);
         writeString(cycVariable.toString().toUpperCase());
     }

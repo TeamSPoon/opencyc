@@ -38,7 +38,13 @@ public class CycVariable implements Comparable {
     /**
      * The variable represented as a <tt>String</tt>.
      */
-    protected String variableName;
+    public String name;
+
+    /**
+     * The ID of the <tt>CycVariable<tt> object which is an integer unique within an OpenCyc
+     * KB but not necessarily unique globally.
+     */
+    public Integer id;
 
     /**
      * A variable name suffix used to make unique names.
@@ -48,15 +54,15 @@ public class CycVariable implements Comparable {
     /**
      * Constructs a new <tt>CycVariable</tt> object using the variable name.
      *
-     * @param variableName a <tt>String</tt> name.
+     * @param name a <tt>String</tt> name.
      */
-    public static CycVariable makeCycVariable(String variableName) {
-        if (variableName.startsWith("?"))
-            variableName = variableName.substring(1);
-        CycVariable cycVariable = (CycVariable) cache.getElement(variableName);
+    public static CycVariable makeCycVariable(String name) {
+        if (name.startsWith("?"))
+            name = name.substring(1);
+        CycVariable cycVariable = (CycVariable) cache.getElement(name);
         if (cycVariable == null) {
-            cycVariable = new CycVariable(variableName);
-            cache.addElement(variableName, cycVariable);
+            cycVariable = new CycVariable(name);
+            cache.addElement(name, cycVariable);
         }
         return cycVariable;
     }
@@ -67,26 +73,32 @@ public class CycVariable implements Comparable {
      * @param modelCycVariable a <tt>CycVariable</tt> to suffix
      */
     public static CycVariable makeUniqueCycVariable(CycVariable modelCycVariable) {
-        String variableName = modelCycVariable.variableName + "_" + suffix++;
-        CycVariable cycVariable = (CycVariable) cache.getElement(variableName);
+        String name = modelCycVariable.name + "_" + suffix++;
+        CycVariable cycVariable = (CycVariable) cache.getElement(name);
         if (cycVariable == null) {
-            cycVariable = new CycVariable(variableName);
-            cache.addElement(variableName, cycVariable);
+            cycVariable = new CycVariable(name);
+            cache.addElement(name, cycVariable);
         }
         return cycVariable;
+    }
+
+    /**
+     * Constructs a new empty <tt>CycVariable</tt> object.
+     */
+    public CycVariable() {
     }
 
     /**
      * Constructs a new <tt>CycVariable</tt> object.  Non-public to enforce
      * use of the object cache.
      *
-     * @param variableName the <tt>String</tt> name of the <tt>CycVariable</tt>.
+     * @param name the <tt>String</tt> name of the <tt>CycVariable</tt>.
      */
-    protected CycVariable(String variableName) {
-        if (variableName.startsWith("?"))
-            this.variableName = variableName.substring(1);
+    protected CycVariable(String name) {
+        if (name.startsWith("?"))
+            this.name = name.substring(1);
         else
-            this.variableName = variableName;
+            this.name = name;
     }
 
     /**
@@ -96,7 +108,7 @@ public class CycVariable implements Comparable {
      */
     public String toString() {
         return cyclify();
-        //return variableName;
+        //return name;
     }
 
     /**
@@ -106,7 +118,7 @@ public class CycVariable implements Comparable {
      * <tt>String</tt> prefixed by "?"
      */
     public String cyclify() {
-        return "?" + variableName;
+        return "?" + name;
     }
 
     /**
@@ -118,7 +130,7 @@ public class CycVariable implements Comparable {
     public boolean equals(Object object) {
         if (! (object instanceof CycVariable))
             return false;
-        return ((CycVariable) object).variableName.equals(variableName);
+        return ((CycVariable) object).name.equals(name);
     }
 
     /**
@@ -133,7 +145,7 @@ public class CycVariable implements Comparable {
      public int compareTo (Object object) {
         if (! (object instanceof CycVariable))
             throw new ClassCastException("Must be a CycVariable object");
-        return this.variableName.compareTo(((CycVariable) object).variableName);
+        return this.name.compareTo(((CycVariable) object).name);
      }
 
     /**
@@ -144,23 +156,32 @@ public class CycVariable implements Comparable {
     }
 
     /**
-     * Retrieves the <tt>CycVariable</tt> with <tt>variableName</tt>,
+     * Adds the <tt>CycVariable<tt> to the cache.
+     */
+    public static void addCache(CycVariable cycVariable) {
+        if (cycVariable.name == null)
+            throw new RuntimeException("Invalid variable for caching " + cycVariable);
+        cache.addElement(cycVariable.name, cycVariable);
+    }
+
+    /**
+     * Retrieves the <tt>CycVariable</tt> with <tt>name</tt>,
      * returning null if not found in the cache.
      *
      * @return a <tt>CycVariable</tt> if found in the cache, otherwise
      * <tt>null</tt>
      */
-    public static CycVariable getCache(String variableName) {
-        return (CycVariable) cache.getElement(variableName);
+    public static CycVariable getCache(String name) {
+        return (CycVariable) cache.getElement(name);
     }
 
     /**
      * Removes the <tt>CycVariable</tt> from the cache if it is contained within.
      */
     public static void removeCache(CycVariable cycVariable) {
-        Object element = cache.getElement(cycVariable.variableName);
+        Object element = cache.getElement(cycVariable.name);
         if (element != null)
-            cache.addElement(cycVariable.variableName, null);
+            cache.addElement(cycVariable.name, null);
     }
 
     /**

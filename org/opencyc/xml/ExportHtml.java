@@ -79,6 +79,18 @@ public class ExportHtml {
      */
     public boolean includeUpwardClosure = false;
     /**
+     * Upward closure filtering kb subset collections guids.  These constrain the selected
+     * upward closure collection terms to be members of any of these kb subset
+     * collections.
+     */
+    public ArrayList upwardClosureKbSubsetCollectionGuids = new ArrayList();
+    /**
+     * Upward closure filtering kb subset collections.  These constrain the selected
+     * upward closure collection terms to be members of any of these kb subset
+     * collections.
+     */
+    protected  ArrayList upwardClosureKbSubsetCollections = new ArrayList();
+    /**
      * The CycKBSubsetCollection whose elements are exported to HTML.
      */
     public CycFort cycKbSubsetCollection = null;
@@ -103,6 +115,11 @@ public class ExportHtml {
      * The #$IKBConstant guid.
      */
     public static final Guid ikbConstantGuid = CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
+    /**
+     * The #$PublicConstant guid.
+     */
+    public static final Guid publicConstantGuid =
+        CycObjectFactory.makeGuid("bd7abd90-9c29-11b1-9dad-c379636f7270");
     /**
      * The CycKBSubsetCollection whose elements are exported to HTML.
      */
@@ -155,6 +172,10 @@ public class ExportHtml {
      */
     public String exportedHierarchyOutputPath = "exported-hierarchy.html";
     /**
+     * The NART note file name.
+     */
+    public String nartNoteOutputPath = "ontology-release-NARTs.html";
+        /**
      * the html document
      */
     protected HTMLDocument htmlDocument;
@@ -253,30 +274,31 @@ public class ExportHtml {
                 exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
                 exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
                 exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
+                exportHtml.upwardClosureKbSubsetCollectionGuids.add(eeldSharedOntologyCoreConstantGuid);
             }
             else if (choice.equals("eeld")) {
                 exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
                 exportHtml.exportedVocabularyOutputPath = "eeld-shared-vocabulary.html";
                 exportHtml.exportedHierarchyOutputPath = "eeld-shared-hierarchy.html";
+                exportHtml.upwardClosureKbSubsetCollectionGuids.add(eeldSharedOntologyConstantGuid);
             }
             else if (choice.equals("eeld-candidate")) {
                 exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCandidateConstantGuid;
                 exportHtml.exportedVocabularyOutputPath = "eeld-shared-candidate-vocabulary.html";
                 exportHtml.exportedHierarchyOutputPath = "eeld-shared-candidate-hierarchy.html";
+                exportHtml.upwardClosureKbSubsetCollectionGuids.add(eeldSharedOntologyCandidateConstantGuid);
             }
             else {
                 System.out.println("specified choice not found - " + choice);
                 System.exit(1);
             }
+            exportHtml.upwardClosureKbSubsetCollectionGuids.add(publicConstantGuid);
 
             Guid quaUnterestingWeaponSystemGuid =
                 CycObjectFactory.makeGuid("c1085b99-9c29-11b1-9dad-c379636f7270");
             Guid economicInterestTypeGuid =
                 CycObjectFactory.makeGuid("c02a0764-9c29-11b1-9dad-c379636f7270");
 
-            //exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCandidateConstantGuid);
-            //exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCoreConstantGuid);
-            //exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyConstantGuid);
             exportHtml.filterFromDirectInstanceGuids.add(quaUnterestingWeaponSystemGuid);
             exportHtml.filterFromDirectInstanceGuids.add(economicInterestTypeGuid);
             exportHtml.print_guid = false;
@@ -378,6 +400,10 @@ public class ExportHtml {
             Guid guid = (Guid) filterFromDirectInstanceGuids.get(i);
             filterFromDirectInstances.add(cycAccess.getKnownConstantByGuid(guid));
         }
+        for (int i = 0; i < upwardClosureKbSubsetCollectionGuids.size(); i++) {
+            Guid guid = (Guid) upwardClosureKbSubsetCollectionGuids.get(i);
+            upwardClosureKbSubsetCollections.add(cycAccess.getKnownConstantByGuid(guid));
+        }
     }
 
     /**
@@ -430,12 +456,14 @@ public class ExportHtml {
      * Creates a HTML node for a single Cyc Nart.
      * @parameter cycNart the CycNart from which the HTML node is created
      */
-    protected void createCycNartNode (CycNart cycNart) throws UnknownHostException, IOException, CycApiException {
+    protected void createCycNartNode (CycNart cycNart)
+        throws UnknownHostException, IOException, CycApiException {
         horizontalRule();
         HTMLFontElement htmlFontElement = new HTMLFontElementImpl((HTMLDocumentImpl)htmlDocument, "font");
         htmlFontElement.setSize("+1");
         htmlBodyElement.appendChild(htmlFontElement);
-        HTMLAnchorElement htmlAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+        HTMLAnchorElement htmlAnchorElement =
+            new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
         htmlAnchorElement.setName(cycNart.cyclify());
         htmlFontElement.appendChild(htmlAnchorElement);
         String generatedPhrase = cycAccess.getSingularGeneratedPhrase(cycNart);
@@ -446,6 +474,14 @@ public class ExportHtml {
         Element italicsGeneratedPhraseElement = italics(htmlAnchorElement);
         Node generatedPhraseNode = htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
         italicsGeneratedPhraseElement.appendChild(generatedPhraseNode);
+
+        HTMLAnchorElement natNoteAnchorElement =
+            new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+        natNoteAnchorElement.setHref("./" + nartNoteOutputPath);
+        htmlBodyElement.appendChild(natNoteAnchorElement);
+        Node natNoteTextNode = htmlDocument.createTextNode("Note On Non-Atomic Terms");
+        natNoteAnchorElement.appendChild(natNoteTextNode);
+
         Element blockquoteElement = htmlDocument.createElement("blockquote");
         htmlBodyElement.appendChild(blockquoteElement);
         createIsaNodes(cycNart, blockquoteElement);
@@ -597,7 +633,8 @@ public class ExportHtml {
      * @param cycConstant the CycConstant for which isa links are to be created
      * @param parentElement the parent HTML DOM element
      */
-    protected void createCommentNodes (CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
+    protected void createCommentNodes (CycConstant cycConstant, Element parentElement)
+        throws IOException, CycApiException {
         String comment = cycAccess.getComment(cycConstant);
         if (comment.equals("")) {
             hasComment = false;
@@ -900,6 +937,17 @@ public class ExportHtml {
         CycList genlPreds = filterSelectedConstants(cycAccess.getGenlPreds(cycConstant));
         if (verbosity > 4)
             Log.current.println("genlPreds " + genlPreds);
+        CycList tempList = new CycList();
+        for (int i = 0; i < genlPreds.size(); i++) {
+            CycConstant genlPred = (CycConstant)genlPreds.get(i);
+            if (selectedCycForts.contains(genlPred))
+                tempList.add(genlPred);
+        }
+        genlPreds = tempList;
+        if (verbosity > 4)
+            Log.current.println("after filtering, genlPreds " + genlPreds);
+        if (genlPreds.size() == 0)
+            return;
         lineBreak(parentElement);
         Element bElement = htmlDocument.createElement("b");
         parentElement.appendChild(bElement);
@@ -907,15 +955,14 @@ public class ExportHtml {
         bElement.appendChild(genlsPredsLabelTextNode);
         for (int i = 0; i < genlPreds.size(); i++) {
             CycConstant genlPred = (CycConstant)genlPreds.get(i);
-            if (selectedCycForts.contains(genlPred)) {
-                HTMLAnchorElement genlPredAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-                genlPredAnchorElement.setHref("#" + genlPred.cyclify());
-                parentElement.appendChild(genlPredAnchorElement);
-                Node genlPredTextNode = htmlDocument.createTextNode(genlPred.cyclify());
-                genlPredAnchorElement.appendChild(genlPredTextNode);
-                Node spacesTextNode = htmlDocument.createTextNode("  ");
-                parentElement.appendChild(spacesTextNode);
-            }
+            HTMLAnchorElement genlPredAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            genlPredAnchorElement.setHref("#" + genlPred.cyclify());
+            parentElement.appendChild(genlPredAnchorElement);
+            Node genlPredTextNode = htmlDocument.createTextNode(genlPred.cyclify());
+            genlPredAnchorElement.appendChild(genlPredTextNode);
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
+            parentElement.appendChild(spacesTextNode);
         }
     }
 
@@ -1073,7 +1120,8 @@ public class ExportHtml {
      * @return the updward closure of the selected CycForts with regard to genls
      * for collection terms, and with regard to genlPreds for predicate terms
      */
-    protected CycList gatherUpwardClosure (CycList selectedCycForts) throws UnknownHostException, IOException, CycApiException {
+    protected CycList gatherUpwardClosure (CycList selectedCycForts)
+        throws UnknownHostException, IOException, CycApiException {
         if (verbosity > 2) {
             Log.current.println("Sorting " + selectedCycForts.size() + " CycFort terms");
             Collections.sort(selectedCycForts);
@@ -1082,7 +1130,6 @@ public class ExportHtml {
         // Redundant HashSets for efficient contains() method below.
         HashSet selectedCycFortsSet = new HashSet(selectedCycForts);
         HashSet upwardClosureSet = new HashSet(selectedCycForts.size());
-        cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
         for (int i = 0; i < selectedCycForts.size(); i++) {
             CycFort cycFort = (CycFort)selectedCycForts.get(i);
             if (cycAccess.isCollection(cycFort)) {
@@ -1107,7 +1154,7 @@ public class ExportHtml {
                     }
                     if ((!upwardClosureSet.contains(isaGenl)) &&
                         (!selectedCycFortsSet.contains(isaGenl)) &&
-                        cycAccess.isa(isaGenl, cycKbSubsetFilter)) {
+                        isEligibleForUpwardClosureInclusion(isaGenl)) {
                         if (verbosity > 2)
                             Log.current.println(cycFort + " upward closure isa/genl " + isaGenl);
                         upwardClosure.add(isaGenl);
@@ -1121,8 +1168,9 @@ public class ExportHtml {
                 isasGenlPreds.addAllNew(cycAccess.getAllGenlPreds((CycConstant)cycFort));
                 for (int j = 0; j < isasGenlPreds.size(); j++) {
                     CycFort isaGenlPred = (CycFort)isasGenlPreds.get(j);
-                    if ((!upwardClosureSet.contains(isaGenlPred)) && (!selectedCycFortsSet.contains(isaGenlPred)) && cycAccess.isa(isaGenlPred,
-                            cycKbSubsetFilter)) {
+                    if ((!upwardClosureSet.contains(isaGenlPred)) &&
+                        (!selectedCycFortsSet.contains(isaGenlPred)) &&
+                        isEligibleForUpwardClosureInclusion(isaGenlPred)) {
                         if (verbosity > 2)
                             Log.current.println(cycFort + " upward closure isa/genlPred " + isaGenlPred);
                         upwardClosure.add(isaGenlPred);
@@ -1132,6 +1180,22 @@ public class ExportHtml {
             }
         }
         return  upwardClosure;
+    }
+
+    /**
+     * Returns true if the given term is eligible for incusion in the upward closure.
+     *
+     * @param cycFort the given term
+     * @return true if the given term is eligible for incusion in the upward closure
+     */
+    protected boolean isEligibleForUpwardClosureInclusion (CycFort cycFort)
+        throws UnknownHostException, IOException, CycApiException {
+        for (int i = 0; i < upwardClosureKbSubsetCollections.size(); i++) {
+            CycFort collection = (CycFort) upwardClosureKbSubsetCollections.get(i);
+            if (cycAccess.isa(cycFort, collection))
+                return true;
+        }
+        return false;
     }
 }
 

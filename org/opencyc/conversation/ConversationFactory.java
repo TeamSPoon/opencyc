@@ -202,8 +202,11 @@ public class ConversationFactory {
             return termQuery;
         termQuery = new Conversation("term-query");
 
+        State disambiguateTermsState = new State("disambiguate-terms");
+        termQuery.setInitialState(disambiguateTermsState);
+        termQuery.addState(disambiguateTermsState);
+
         State retrieveFactState = new State("retrieve-fact");
-        termQuery.setInitialState(retrieveFactState);
         termQuery.addState(retrieveFactState);
 
         State promptForMoreState = new State("prompt-for-more");
@@ -212,14 +215,24 @@ public class ConversationFactory {
         State doneState = new State("done");
         termQuery.addState(doneState);
 
+        Action disambiguateTermsAction =
+            actionFactory.makeAction("disambiguateTerms");
         Action replyWithFirstFactAction =
             actionFactory.makeAction("reply-with-first-fact");
         Action replyWithNextFactAction =
             actionFactory.makeAction("reply-with-next-fact");
 
         Performative termQueryPerformative = new Performative("term-query");
+        Performative disambiguateTermsPerformative = new Performative("disambiguateTerms");
         Performative morePerformative = new Performative("more");
         Performative donePerformative = new Performative("done");
+        /**
+         * 1. If we are in the disambiguate-terms state and get a term-query performative, transition
+         * to the prompt-for-more state and perform the reply-with-first-fact action.
+         */
+
+
+
         /**
          * 1. If we are in the retrieve-fact state and get a term-query performative, transition
          * to the prompt-for-more state and perform the reply-with-first-fact action.

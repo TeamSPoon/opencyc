@@ -55,6 +55,19 @@ public class State extends StateVertex {
      */
     protected StateMachine stateMachine;
 
+    /**
+     * Indicates whether this state is currently active during execution of
+     * the state machine.  A state becomes active when it is entered as a
+     * result of some transition, and becomes inactive if it is exited as a
+     * result of a transition.
+     */
+    protected boolean isActive;
+
+
+    /**
+     * the do activity thread for this state
+     */
+    protected Thread doActivityThread;
 
     /**
      * Constructs a new State object.
@@ -151,6 +164,48 @@ public class State extends StateVertex {
      */
     public void setStateMachine (StateMachine stateMachine) {
         this.stateMachine = stateMachine;
+    }
+
+
+    /**
+     * Gets whether this state is currently active during execution of
+     * the state machine.
+     *
+     * @return whether this state is currently active during execution of
+     * the state machine
+     */
+    public boolean isActive () {
+        return isActive;
+    }
+
+    /**
+     * Sets whether this state is currently active during execution of
+     * the state machine.
+     *
+     * @param isActive whether this state is currently active during execution of
+     * the state machine
+     */
+    public void setIsActive (boolean isActive) {
+        this.isActive = isActive;
+    }
+
+
+    /**
+     * Gets the do activity thread for this state.
+     *
+     * @return the do activity thread for this state
+     */
+    public Thread getDoActivityThread () {
+        return doActivityThread;
+    }
+
+    /**
+     * Sets the do activity thread for this state.
+     *
+     * @param doActivityThread the do activity thread for this state
+     */
+    public void setDoActivityThread (Thread doActivityThread) {
+        this.doActivityThread = doActivityThread;
     }
 
 }

@@ -1,5 +1,7 @@
 package org.opencyc.uml.statemachine;
 
+import java.util.*;
+
 /**
  * CompositeState from the UML State_Machines package.
  *
@@ -33,9 +35,15 @@ public class CompositeState extends State {
     protected boolean isConcurrent;
 
     /**
-     * the sub vertex
+     * A derived boolean value that indicates whether this composite state
+     * is a direct substate of a concurrent state.
      */
-    protected StateVertex subVertex;
+    protected boolean isRegion;
+
+    /**
+     * the set of state vertices that are owned by this composite state
+     */
+    protected ArrayList subVertex;
 
     /**
      * Constructs a new CompositeState object.
@@ -44,7 +52,7 @@ public class CompositeState extends State {
     }
 
     /**
-     * Gets whether concurrent processes
+     * Gets whether concurrent processes.
      *
      * @return whether concurrent processes
      */
@@ -53,7 +61,7 @@ public class CompositeState extends State {
     }
 
     /**
-     * Sets whether concurrent processes
+     * Sets whether concurrent processes.
      *
      * @param isConcurrent whether concurrent processes
      */
@@ -62,20 +70,42 @@ public class CompositeState extends State {
     }
 
     /**
-     * Gets the sub vertex
+     * Gets the set of state vertices that are owned by this composite state.
      *
-     * @return the sub vertex
+     * @return the set of state vertices that are owned by this composite state
      */
-    public StateVertex getSubVertex () {
+    public ArrayList getSubVertex () {
         return subVertex;
     }
 
     /**
-     * Sets the sub vertex
+     * Sets the set of state vertices that are owned by this composite state.
      *
-     * @param subVertex the sub vertex
+     * @param subVertex the set of state vertices that are owned by this composite state
      */
-    public void setSubVertex (StateVertex subVertex) {
+    public void setSubVertex (ArrayList subVertex) {
         this.subVertex = subVertex;
+    }
+
+    /**
+     * Gets whether this composite state
+     * is a direct substate of a concurrent state.
+     *
+     * @return whether this composite state
+     * is a direct substate of a concurrent state
+     */
+    public boolean isRegion () {
+        return isRegion;
+    }
+
+    /**
+     * Sets whether this composite state
+     * is a direct substate of a concurrent state.
+     *
+     * @param isRegion whether this composite state
+     * is a direct substate of a concurrent state
+     */
+    public void setIsRegion (boolean isRegion) {
+        this.isRegion = isRegion;
     }
 }

@@ -90,13 +90,13 @@ public class ConstraintProblem {
     public Integer nbrSolutionsRequested = new Integer(1);
 
     /**
-     * The default verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     public static final int DEFAULT_VERBOSITY = 3;
 
     /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     protected int verbosity = DEFAULT_VERBOSITY;
@@ -425,7 +425,7 @@ public class ConstraintProblem {
     }
 
     /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input

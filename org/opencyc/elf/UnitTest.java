@@ -26,7 +26,6 @@ import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
 import java.util.logging.Logger;
-import java.util.logging.LogManager;
 
 import junit.framework.*;
 
@@ -92,7 +91,10 @@ public class UnitTest extends TestCase {
     
     logger.info("Creating ELFFactory");
     ELFFactory elfFactory = new ELFFactory();
-    Node node = elfFactory.makeNodeShell();
+    Node node = elfFactory.makeNodeShell("test-node");
+    
+    Assert.assertNotNull(node.getLogger());
+    Assert.assertTrue(node.getLogger() instanceof Logger);
     
     Assert.assertNotNull(node.getBehaviorGeneration());
     Assert.assertTrue(node.getBehaviorGeneration() instanceof BehaviorGeneration);
@@ -173,8 +175,6 @@ public class UnitTest extends TestCase {
     HypothesisFormer hypothesisFormer = sensoryPerception.getHypothesisFormer();
     Assert.assertEquals(node, hypothesisFormer.getNode());
     
-    Assert.assertNotNull(node.getLogger());
-    Assert.assertTrue(node.getLogger() instanceof Logger);
     
     System.out.println("*** testELFFactory OK ***");
   }

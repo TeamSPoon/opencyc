@@ -1,6 +1,7 @@
 package org.opencyc.elf.wm.state;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycList;
 
 //// External Imports
 import java.util.Hashtable;
@@ -77,7 +78,15 @@ public class State {
       stringBuffer.append(": ");
 
       Object value = stateVariableDictionary.get(stateVariable);
-      stringBuffer.append(value.toString());
+      if (value instanceof String) {
+        stringBuffer.append('"');
+        stringBuffer.append(value);
+        stringBuffer.append('"');
+      }
+      else if (value instanceof CycList)
+        stringBuffer.append(((CycList) value).cyclify());
+      else
+        stringBuffer.append(value.toString());
       stringBuffer.append("]\n");
     }
 

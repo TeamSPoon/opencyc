@@ -1,6 +1,7 @@
 package org.opencyc.uml.statemachine;
 
 import java.util.*;
+import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.interpreter.*;
 
@@ -50,6 +51,11 @@ public class State extends StateVertex {
      * the do activity for this state
      */
     protected Procedure doActivity;
+
+    /**
+     * the internal transitions for this state
+     */
+    protected ArrayList internalTransition = new ArrayList();
 
     /**
      * the state machine for this state (if top)
@@ -213,6 +219,23 @@ public class State extends StateVertex {
         this.doActivityThread = doActivityThread;
     }
 
+    /**
+     * Gets the internal transitions for this state.
+     *
+     * @return the internal transitions for this state
+     */
+    public ArrayList getInternalTransition () {
+        return internalTransition;
+    }
+
+    /**
+     * Sets the internal transitions for this state.
+     *
+     * @param internalTransition the internal transitions for this state
+     */
+    public void setInternalTransition (ArrayList internalTransition) {
+        this.internalTransition = internalTransition;
+    }
     /**
      * Gets the state interpreter for this state.
      *

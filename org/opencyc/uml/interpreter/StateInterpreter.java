@@ -2,6 +2,7 @@ package org.opencyc.uml.interpreter;
 
 import java.util.*;
 import javax.swing.tree.*;
+import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.statemachine.*;
 

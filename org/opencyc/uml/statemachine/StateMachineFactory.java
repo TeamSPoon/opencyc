@@ -155,7 +155,7 @@ public class StateMachineFactory {
                                 commentString);
         outputPin.setType(type);
         outputPin.setProcedure(procedure);
-        procedure.getResult().add(inputPin);
+        procedure.getResult().add(outputPin);
     }
 
     /**
@@ -219,9 +219,6 @@ public class StateMachineFactory {
                                 name,
                                 commentString);
         BooleanExpression changeExpression = new BooleanExpression();
-        setNamespaceNameComment(changeExpression,
-                                name,
-                                commentString);
         changeExpression.setLanguage(language);
         changeExpression.setBody(body);
         changeEvent.setChangeExpression(changeExpression);
@@ -240,12 +237,56 @@ public class StateMachineFactory {
     public CompletionEvent makeCompletionEvent (String name,
                                                 String commentString,
                                                 State state) {
-        CompletionEvent completionEvent = new CompletionEvent();
+        CompletionEvent completionEvent = new CompletionEvent(state);
         setNamespaceNameComment(completionEvent,
                                 name,
                                 commentString);
-        completionEvent.setState(state);
         return completionEvent;
+    }
+
+    /**
+     * Makes a new SignalEvent object.
+     *
+     * @param name the identifier for the signal event within its containing
+     * namespace
+     * @param commentString the comment for this signal event
+     * @param signal the signal causing this event
+     * @return the new signal event object
+     */
+    public SignalEvent makeSignalEvent (String name,
+                                        String commentString,
+                                        Signal signal) {
+        SignalEvent signalEvent = new SignalEvent();
+        setNamespaceNameComment(signalEvent,
+                                name,
+                                commentString);
+        signalEvent.setSignal(signal);
+        return signalEvent;
+    }
+
+    /**
+     * Makes a new TimeEvent object.
+     *
+     * @param name the identifier for the change event within its containing
+     * namespace
+     * @param commentString the comment for this change event
+     * @param language the language of the boolean change expression
+     * @param body the body of the boolean change expression
+     * @return the new change event object
+     */
+    public TimeEvent makeTimeEvent (String name,
+                                        String commentString,
+                                        String language,
+                                        String body) {
+        TimeEvent timeEvent = new TimeEvent();
+        setNamespaceNameComment(timeEvent,
+                                name,
+                                commentString);
+        TimeExpression timeExpression = new TimeExpression();
+        timeExpression.setLanguage(language);
+        timeExpression.setBody(body);
+        timeEvent.setTimeExpression(timeExpression);
+        return timeEvent;
     }
 
     /**
@@ -265,29 +306,9 @@ public class StateMachineFactory {
         setNamespaceNameComment(parameter,
                                 name,
                                 commentString);
-        parameter.setBehavioralFeature(Event);
+        if (event instanceof CallEvent)
+            parameter.setBehavioralFeature(((CallEvent) event).getOperation());
         parameter.setType(type);
-    }
-
-    /**
-     * Makes a new state vertex object.
-     *
-     * @param name the identifier for the state vertex within its containing
-     * namespace
-     * @param commentString the comment for this state vertex
-     * @param container the container of this state vertex
-     * @return the new state vertex object
-     */
-    public StateVertex makeStateVertex (String name,
-                                        String commentString,
-                                        CompositeState container) {
-        StateVertex stateVertex = new StateVertex();
-        setNamespaceNameComment(stateVertex,
-                                name,
-                                commentString);
-        stateVertex.setContainer(container);
-        container.getSubVertex().add(stateVertex);
-        return stateVertex;
     }
 
     /**
@@ -365,6 +386,27 @@ public class StateMachineFactory {
     }
 
     /**
+     * Makes a new state vertex object.
+     *
+     * @param name the identifier for the state vertex within its containing
+     * namespace
+     * @param commentString the comment for this state vertex
+     * @param container the container of this state vertex
+     * @return the new state vertex object
+     */
+    public StateVertex makeStateVertex (String name,
+                                        String commentString,
+                                        CompositeState container) {
+        StateVertex stateVertex = new StateVertex();
+        setNamespaceNameComment(stateVertex,
+                                name,
+                                commentString);
+        stateVertex.setContainer(container);
+        container.getSubVertex().add(stateVertex);
+        return stateVertex;
+    }
+
+    /**
      * Sets the namespace, name and comment string for the new
      * model element.
      *
@@ -383,6 +425,59 @@ public class StateMachineFactory {
         comment.setBody(commentString);
         comment.setAnnotatedElement(modelElement);
         modelElement.setComment(comment);
+    }
+
+    /**
+     * Makes a new transition object.
+     *
+     * @param name the identifier for the transition within its containing
+     * namespace
+     * @param commentString the comment for this transition
+     * @param guardExpressionLanguage the language in which the guard
+     * expression is written
+     * @param guardExpressionBody the body of the guard expression, or null
+     * if no guard
+     * @param effect the procedure which is the effect of this transition, or
+     * null if no effect
+     * @param trigger the event which triggers this transition
+     * @param source the source state of this transition
+     * @param target the target state of this transition
+     */
+    public State makeTransition (String name,
+                                 String commentString,
+                                 String guardExpressionLanguage,
+                                 String guardExpressionBody,
+                                 Procedure effect,
+                                 Event trigger,
+                                 StateVertex source,
+                                 StateVertex target) {
+        Transition transition = new Transition();
+        setNamespaceNameComment(transition,
+                                name,
+                                commentString);
+        if (guardExpressionBody != null) {
+            Guard guard = new Guard();
+            setNamespaceNameComment(guard,
+                                    name,
+                                    commentString);
+            BooleanExpression guardExpression = new BooleanExpression();
+            guardExpression.setLanguage(guardExpressionLanguage);
+            guardExpression.setBody(guardExpressionBody);
+            guard.setexpression(guardExpression);
+            transition.setGuard(guard);
+        }
+        transition.setEffect(effect);
+        transition.setTrigger(trigger);
+        transition.setSource(source);
+        source.getOutgoing().add(transition);
+        transition.setTarget(target);
+        target.getIncoming().add(transition);
+        transition.setStateMachine(stateMachine);
+        stateMachine.getTransitions().add(transition);
+        if (source instanceof State &&
+            source.equals(target))
+            ((State) source).getInternalTransition().add(transition);
+        return transition;
     }
 
 

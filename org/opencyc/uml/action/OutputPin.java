@@ -1,10 +1,12 @@
-package org.opencyc.uml.interpreter;
+package org.opencyc.uml.action;
 
 import org.opencyc.uml.core.*;
-import org.opencyc.uml.commonbehavior.*;
 
 /**
- * Interprets a procedure of a UML StateMachine.
+ * OutputPin from the UML Action package.   This class is not completely implemented
+ * because procedure bodies are encoded in the surface language java which is
+ * interpreted by the dynamic java package, therefore no need to represent and
+ * interpret the details of UML Action Semantics.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -28,30 +30,34 @@ import org.opencyc.uml.commonbehavior.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ProcedureInterpreter {
+public class OutputPin extends Pin {
 
     /**
-     * the procedure to interpret
+     * the procedure that owns this pin as an output
      */
-    Procedure procedure;
+    protected Procedure procedure;
 
     /**
-     * Constructs a new ProcedureInterpreter object given the procedure
-     * to interpret.
-     *
-     * @param procedure the procedure to interpret
+     * Constructs a new OutputPin object.
      */
-    public ProcedureInterpreter(Procedure procedure) {
-        this.procedure = procedure;
+    public OutputPin() {
     }
 
     /**
-     * Gets the procedure to interpret.
+     * Gets the procedure that owns this pin as an output.
      *
-     * @return the procedure to interpret
+     * @return the procedure that owns this pin as an output
      */
     public Procedure getProcedure () {
         return procedure;
     }
 
+    /**
+     * Sets the procedure that owns this pin as an input.
+     *
+     * @param procedure the procedure that owns this pin as an input
+     */
+    public void setProcedure (Procedure procedure) {
+        this.procedure = procedure;
+    }
 }

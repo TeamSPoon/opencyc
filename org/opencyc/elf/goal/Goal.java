@@ -2,8 +2,7 @@ package org.opencyc.elf.goal;
 
 //// Internal Imports
 import org.opencyc.elf.bg.predicate.Predicate;
-
-import org.opencyc.elf.goal.PredicateExpression;
+import org.opencyc.elf.bg.predicate.PredicateExpression;
 
 //// External Imports
 import java.util.ArrayList;

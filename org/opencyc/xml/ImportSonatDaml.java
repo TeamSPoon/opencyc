@@ -134,8 +134,8 @@ public class ImportSonatDaml {
                            equivalentDamlCycTerms,
                            kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
-        //for (int i = 2; i < damlDocInfos.size(); i++) {
-        for (int i = 0; i < damlDocInfos.size(); i++) {
+        for (int i = 33; i < damlDocInfos.size(); i++) {
+        //for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
@@ -255,6 +255,9 @@ public class ImportSonatDaml {
         // 32
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/09/milservices/us",
                                          "DamlSonatUSMilitaryServicesInstancesMt"));
+        // 33
+        damlDocInfos.add(new DamlDocInfo("file:///g:/Dmoz/structure.rdf.u8",
+                                         "OpenDirectoryStructureMt"));
     }
 
     /**
@@ -264,6 +267,8 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.w3.org/1999/02/22-rdf-syntax-ns", "rdf");
         ontologyNicknames.put("http://www.w3.org/2000/01/rdf-schema", "rdfs");
         ontologyNicknames.put("http://www.w3.org/2000/10/XMLSchema", "xsd");
+        // DMOZ stale reference
+        ontologyNicknames.put("http://www.w3.org/TR/RDF/", "rdf");
 
         ontologyNicknames.put("http://www.daml.org/2001/03/daml+oil", "daml");
 
@@ -274,6 +279,9 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://xmlns.com/wordnet/1.6", "wn");
         ontologyNicknames.put("http://www.w3.org/2001/08/rdfweb", "rdfweb");
         ontologyNicknames.put("http://purl.org/dc/elements/1.1", "dublincore");
+        ontologyNicknames.put("http://purl.org/dc/elements/1.0/", "dublincore");
+        ontologyNicknames.put("http://dmoz.org/rdf", "dmoz");
+        ontologyNicknames.put("file:///g:/Dmoz/structure.rdf.u8", "dmoz");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2", "drc-dc");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2", "ves");
         ontologyNicknames.put("http://orlando.drc.com/daml/Ontology/daml-extension/3.2/daml-ext-ont", "daml-ext");
@@ -576,7 +584,7 @@ public class ImportSonatDaml {
                       "http://www.daml.org/2001/03/daml+oil",
                       "http://www.daml.org/2001/03/daml+oil#disjointWith",
                       "disjointWith");
-
+/*
         // SONAT Mappings
         assertMapping("soci:Religion",
                       "http://www.daml.org/experiment/ontology/social-elements-ont.daml",
@@ -847,7 +855,7 @@ public class ImportSonatDaml {
                       "",
                       "");
 
-
+*/
 
         // Get the above mappings plus any previously defined in the KB.
         getMappings();
@@ -1015,7 +1023,7 @@ public class ImportSonatDaml {
             "BaseKB",
             "CharacterString",
             "UniformResourceLocator");
-
+/*
         // #$UsedInEventFn
         cycAccess.createCollectionDenotingBinaryFunction(
             // function
@@ -1037,7 +1045,7 @@ public class ImportSonatDaml {
             "Event",
             // resultIsa
             "Collection");
-
+*/
         // #$damlOntology
         String genlPreds = null;
         if (! cycAccess.isOpenCyc())

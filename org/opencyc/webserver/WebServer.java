@@ -323,7 +323,8 @@ public class WebServer extends Thread {
                 if (map == null || httpGetPath.endsWith(".jar")) {
                     for (int j = 0; j < dirs.size(); j++) {
                         String dir = (String) dirs.get(j);
-                        String nativePath = dir + httpGetPath.replace('/', File.separatorChar);
+                        String nativePath = dir + httpGetPath;
+                        nativePath = nativePath.replace('/', File.separatorChar);
                         if (fileCache.containsKey(nativePath)) {
                             writeDataBytes((byte[]) fileCache.get(nativePath));
                             Log.current.println("...cached");

@@ -152,7 +152,41 @@ public class ImportDaml implements StatementHandler {
         this.equivalentDamlCycTerms = equivalentDamlCycTerms;
         this.kbSubsetCollectionName = kbSubsetCollectionName;
         arp = new ARP();
+        arp.setErrorHandler(new MyErrorHandler());
         arp.setStatementHandler(this);
+    }
+
+    /**
+     * Implements a SAX ErrorHandler to report the XML parsing errors.
+     */
+    protected class MyErrorHandler implements ErrorHandler {
+
+        /**
+         * Constructs a new MyErrorHandler object.
+         */
+        public MyErrorHandler () {
+        }
+
+        /**
+         * Handles SAX XML parsing warnings.
+         */
+        public void warning(SAXParseException exception) {
+            Log.current.println("SAX warning: " + exception.getMessage());
+        }
+
+        /**
+         * Handles SAX XML parsing errors.
+         */
+        public void error(SAXParseException exception) {
+            Log.current.println("SAX error: " + exception.getMessage());
+        }
+
+        /**
+         * Handles SAX XML parsing fatal errors.
+         */
+        public void fatalError(SAXParseException exception) {
+            Log.current.println("SAX fatal error: " + exception.getMessage());
+        }
     }
 
     /**
@@ -1379,5 +1413,6 @@ public class ImportDaml implements StatementHandler {
             return stringBuffer.toString();
         }
     }
+
 
 }

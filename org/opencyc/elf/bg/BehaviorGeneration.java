@@ -68,47 +68,60 @@ public class BehaviorGeneration extends NodeComponent {
   }
   
   /**
-   * Receives the task frame message forwarded from world model.
+   * Receives the task frame message forwarded from world model.  Subsequently,
+   * the task frame message is sent to job assigner
    */
   public void receiveTaskFrame () {
     //TODO
     //receive via channel from world model
     // TaskCommand taskCommand
     // TaskFrame taskFrame
+    // send receiveTaskFrame(taskCommand, taskFrame) to jobAssigner
   }
   
   /**
-   * Receives the schedule evaluation message from ?.
+   * Receives the schedule evaluation message from ?.  The message is sent
+   * to the plan selector.
    */
   public void receiveScheduleEvaluation () {
     //TODO
     // receive via channel from ?
+    // send via channel to the plan selector
     // ArrayList controlledResources
     // TaskFrame taskFrame
     // Schedule schedule
     // Result result
+    // send receiveScheduleEvaluation(controlledResources, taskFrame, schedule, result)
   }
   
   /**
-   * Receives the failure notification message forwarded from world model.
+   * Receives the simulation failure notification message forwarded from world model.  The
+   * message is sent to the appropriate scheduler.
    */
-  public void failureSimulationNotification () {
+  public void receiveSimulationFailureNotification () {
     //TODO
-    // receive via channel from ?
+    // receive via channel from world model
+    // send via channel to the appropriate scheduler
     // ArrayList controlledResources
     // TaskCommand taskCommand
+    // send receiveSimulationFailureNotification(taskCommand, schedule)
+    // to (the appropriate) scheduler
   }
   
   /**
-   * Receives the value judgement status message from value judgement.
+   * Receives the value judgement status message from value judgement and forwards
+   * it on to the appropriate scheduler.
    */
   public void receiveValueJudgementStatus () {
     //TODO
     // receive via channel from value judgement
+    // send via channel fto the appropriate scheduler
     // ArrayList controlledResources
     // TaskFrame taskFrame
     // Schedule schedule
     // Status status
+    // send receiveValueJudgementStatus(taskFrame, schedule, status) to
+    // (the appropriate) scheduler
   }
   
   /**
@@ -123,10 +136,11 @@ public class BehaviorGeneration extends NodeComponent {
   }
   
   /**
-   * Forwards the simulate schedule message to world model.
+   * Forwards the simulate schedule message from scheduler to the world model.
    */
   public void forwardSimulateSchedule () {
     //TODO
+    // receive via channel from scheduler
     // send via channel to world model
     // ArrayList controlledResources
     // TaskFrame taskFrame
@@ -135,7 +149,7 @@ public class BehaviorGeneration extends NodeComponent {
   }
   
   /**
-   * Forwards the post schedule message to world model.
+   * Forwards the post schedule message from the plan selector to the world model.
    */
   public void forwardPostSchedule (ArrayList controlledResources,
                                   TaskCommand taskCommand,
@@ -149,7 +163,7 @@ public class BehaviorGeneration extends NodeComponent {
   }
   
   /**
-   * Forwards the do subtask message to the node.
+   * Forwards the do subtask message received from the executor to the node.
    */
   public void forwardDoSubTask () {
     //TODO
@@ -161,10 +175,12 @@ public class BehaviorGeneration extends NodeComponent {
   
   /**
    * Sends the behavior generation status message to the node.  Receipt of this message by
-   * the node subsequently causes the node to send the status message to ?.
+   * the node subsequently causes the node to send the status message to ?.  This action
+   * is triggered by the receipt of the message from jobAssigner
    */
   public void behaviorGenerationStatus () {
     //TODO
+    // receive via channel from job assigner
     // send via channel to node (receiver not specified)
     // Status status
     // send status(status) message to node (receiver not specified)

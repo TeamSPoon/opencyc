@@ -125,7 +125,8 @@ public class Executor extends NodeComponent {
   }
   
   /**
-   * Performs the subtask.
+   * Sends the do subtask message to behavior generation, for subsequent forwarding to
+   * the next highest level node
    */
   protected void doSubTask () {
     // TODO

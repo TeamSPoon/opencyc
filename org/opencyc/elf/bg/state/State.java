@@ -1,5 +1,8 @@
 package org.opencyc.elf.bg.state;
 
+//// Internal Imports
+
+//// External Imports
 import java.util.Hashtable;
 import java.util.Iterator;
 

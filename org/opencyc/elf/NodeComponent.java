@@ -1,6 +1,8 @@
 package org.opencyc.elf;
 
+import java.util.*;
 import org.opencyc.util.*;
+import org.opencyc.uml.core.*;
 
 /**
  * Provides common attributes and behavior for Elementary Loop
@@ -49,6 +51,16 @@ public abstract class NodeComponent extends ELFObject {
     protected Node node;
 
     /**
+     * indicates a pending interruption
+     */
+    protected boolean pendingInterruption = false;
+
+    /**
+     * the interruption procedure to execute
+     */
+    protected Procedure interruptionRequest;
+
+    /**
      * Gets the ELF Node which contains this object.
      *
      * @return the ELF Node which contains this object
@@ -58,9 +70,33 @@ public abstract class NodeComponent extends ELFObject {
     }
 
     /**
+     * Requests an interruption of the current processing of this
+     * node component to execute the given procedure and to return
+     * the list of the output pin values.
+     *
+     * @param interruptionRequest the given interruption procedure to execute
+     * @return the list of the output pin values
+     */
+    public ArrayList interrupt(Procedure interruptionRequest) {
+        ArrayList values = new ArrayList();
+        this.interruptionRequest = interruptionRequest;
+        pendingInterruption = true;
+        try {
+            while (true) {
+                Thread.sleep(100);
+                if (! pendingInterruption)
+                    break;
+            }
+        }
+        catch (InterruptedException e) {
+        }
+        return interruptionRequest.getResult();
+    }
+
+    /**
      * Sets the ELF Node which contains this object.
      *
-     * @param xxx the ELF Node which contains this object
+     * @param node the ELF Node which contains this object
      */
     public void setNode (Node node) {
         this.node = node;

@@ -75,7 +75,6 @@ public abstract class State extends StateVertex {
      */
     protected boolean isActive;
 
-
     /**
      * the do activity thread for this state
      */

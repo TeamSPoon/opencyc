@@ -56,7 +56,8 @@ public class ScheduleLibrary {
    * Initializes the schedule library.
    */
   public void initialize() {
-    //TODO
+    // 
+    Schedule schedule = new Schedule();
   }
   
   /**
@@ -66,9 +67,37 @@ public class ScheduleLibrary {
    * @return the list of schedules that accomplish the given action name
    */
   public ArrayList getSchedules (String actionName) {
-    return (ArrayList) scheduleDictionary.get(actionName);
+    ArrayList schedules = (ArrayList) scheduleDictionary.get(actionName);
+    if (schedules == null)
+      return new ArrayList();
+    else
+      return schedules;
   }
   
+  /**
+   * Sets the list of schedules that accomplish the given action name.
+   *
+   * @param action the given action name
+   * @param schedules the list of schedules that accomplish the given action name
+   */
+  public void setSchedules (String actionName, ArrayList schedules) {
+    scheduleDictionary.put(actionName, schedules);
+  }
+
+  /**
+   * Adds a schedule to the list of schedules that accomplish the given action name.
+   *
+   * @param action the given action name
+   * @param schedule the schedule that accomplishes the given action name
+   */
+  public void addSchedule (String actionName, Schedule schedule) {
+    ArrayList schedules = (ArrayList) scheduleDictionary.get(actionName);
+    if (schedules == null)
+      schedules = new ArrayList();
+    schedules.add(schedule);
+    scheduleDictionary.put(actionName, schedules);
+  }
+
   //// Protected Area
    
   //// Private Area

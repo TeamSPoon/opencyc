@@ -58,7 +58,7 @@ public class Node extends ELFObject {
    */
   public void doTask (TaskCommand taskCommand) {
     //TODO
-    //send via channel bg.doTask(taskCommand)
+    //send via channel
   }
   
   /**

@@ -4016,10 +4016,13 @@ public class CycAccess {
      * @return the string form of the given term that is used in gaf assertions
      */
     protected String gafApiValue (CycFort cycFort) {
+        return cycFort.cyclify();
+        /*
         if (cycFort instanceof CycConstant)
             return cycFort.cyclify();
         else
             return cycFort.toString();
+            */
     }
 
 
@@ -4481,7 +4484,7 @@ public class CycAccess {
         throws IOException, UnknownHostException, CycApiException {
         CycConstant conceptuallyRelated =
             getKnownConstantByGuid("bd58803e-9c29-11b1-9dad-c379636f7270");
-        assertGaf(universalVocabularyMt,
+        assertGaf(mt,
                   conceptuallyRelated,
                   term1,
                   term2);

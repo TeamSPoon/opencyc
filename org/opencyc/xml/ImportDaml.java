@@ -143,14 +143,68 @@ public class ImportDaml implements StatementHandler {
         throws IOException, UnknownHostException, CycApiException {
         if (equivalentDamlCycTerms == null) {
             equivalentDamlCycTerms = new HashMap();
+
+            //TODO - reify this mapping and discard this dictionary.
+
+            // Collections
             equivalentDamlCycTerms.put("daml:Thing", "Thing");
+            equivalentDamlCycTerms.put("rdfs:Resource", "Thing");
+
             equivalentDamlCycTerms.put("daml:Class", "Collection");
             equivalentDamlCycTerms.put("rdfs:Class", "Collection");
+
             equivalentDamlCycTerms.put("daml:Ontology", "AbstractInformationStructure");
+
             equivalentDamlCycTerms.put("daml:DatatypeProperty", "DamlDatatypeProperty");
+
             equivalentDamlCycTerms.put("daml:ObjectProperty", "DamlObjectProperty");
+
+            equivalentDamlCycTerms.put("daml:Property", "BinaryPredicate");
+            equivalentDamlCycTerms.put("rdfs:Property", "BinaryPredicate");
             equivalentDamlCycTerms.put("rdf:Property", "BinaryPredicate");
+
+            equivalentDamlCycTerms.put("daml:TransitiveProperty", "TransitiveBinaryPredicate");
+
+            equivalentDamlCycTerms.put("daml:Literal", "SubLAtomicTerm");
+            equivalentDamlCycTerms.put("rdfs:Literal", "SubLAtomicTerm");
+
             equivalentDamlCycTerms.put("xsd:string", "CharacterString");
+
+            // Binary predicates
+            equivalentDamlCycTerms.put("daml:subClassOf", "genls");
+            equivalentDamlCycTerms.put("rdfs:subClassOf", "genls");
+
+            equivalentDamlCycTerms.put("daml:type", "isa");
+            equivalentDamlCycTerms.put("rdfs:type", "isa");
+            equivalentDamlCycTerms.put("rdf:type", "isa");
+
+            equivalentDamlCycTerms.put("daml:subPropertyOf", "genlPreds");
+            equivalentDamlCycTerms.put("rdfs:subPropertyOf", "genlPreds");
+
+            equivalentDamlCycTerms.put("daml:label", "nameString");
+            equivalentDamlCycTerms.put("rdfs:label", "nameString");
+
+            equivalentDamlCycTerms.put("daml:comment", "comment");
+            equivalentDamlCycTerms.put("rdfs:comment", "comment");
+
+            equivalentDamlCycTerms.put("daml:seeAlso", "conceptuallyRelated");
+            equivalentDamlCycTerms.put("rdfs:seeAlso", "conceptuallyRelated");
+
+            equivalentDamlCycTerms.put("daml:isDefinedBy", "containsInformationAbout");
+            equivalentDamlCycTerms.put("rdfs:isDefinedBy", "containsInformationAbout");
+
+            equivalentDamlCycTerms.put("daml:domain", "arg1Isa");
+            equivalentDamlCycTerms.put("rdfs:domain", "arg1Isa");
+
+            equivalentDamlCycTerms.put("daml:range", "arg2Isa");
+            equivalentDamlCycTerms.put("rdfs:range", "arg2Isa");
+
+            equivalentDamlCycTerms.put("daml:differentIndividualFrom", "different");
+
+            equivalentDamlCycTerms.put("daml:samePropertyAs", "equalSymbols");
+
+            equivalentDamlCycTerms.put("daml:disjointWith", "different");
+
         }
         kbSubsetCollection = cycAccess.getKnownConstantByName(kbSubsetCollectionName);
         bookkeepingMt = cycAccess.getKnownConstantByName("BookkeepingMt");
@@ -221,16 +275,12 @@ public class ImportDaml implements StatementHandler {
             Log.current.println();
         return;
         }
-
         DamlTermInfo subjectTermInfo = resource(subject, null);
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo objectTermInfo = resource(object, predicateTermInfo);
-
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       objectTermInfo);
-        Log.current.println();
-
         try {
             importTriple(subjectTermInfo,
                          predicateTermInfo,
@@ -253,17 +303,14 @@ public class ImportDaml implements StatementHandler {
     public void statement(AResource subject, AResource predicate, ALiteral literal) {
         if (subject.isAnonymous()) {
             processRestrictionSubject(subject, predicate, literal);
-            Log.current.println();
         }
         else {
             DamlTermInfo subjectTermInfo = resource(subject, null);
             DamlTermInfo predicateTermInfo = resource(predicate, null);
             DamlTermInfo literalTermInfo = literal(literal);
-
             displayTriple(subjectTermInfo,
                           predicateTermInfo,
                           literalTermInfo);
-            Log.current.println();
 
             try {
                 importTriple(subjectTermInfo,
@@ -293,12 +340,11 @@ public class ImportDaml implements StatementHandler {
             predicateTermInfo.coerceToNamespace();
         }
         String damlPredicate = predicateTermInfo.toString();
-        if (damlPredicate.equals("rdf:type")) {
+        if (damlPredicate.equals("isa")) {
             importIsa(subjectTermInfo, objLitTermInfo);
             return;
         }
-        if (damlPredicate.equals("rdfs:subClassOf") ||
-            damlPredicate.equals("daml:subClassOf")) {
+        if (damlPredicate.equals("genls")) {
             importGenls(subjectTermInfo, objLitTermInfo);
             return;
         }
@@ -310,40 +356,35 @@ public class ImportDaml implements StatementHandler {
             importImports(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:comment") ||
-                 damlPredicate.equals("daml:comment")) {
+        else if (damlPredicate.equals("comment")) {
             importComment(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:label") ||
-                 damlPredicate.equals("daml:label")) {
+        else if (damlPredicate.equals("nameString")) {
             importNameString(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("daml:samePropertyAs")) {
+        else if (damlPredicate.equals("equalSymbols")) {
             importEqualSymbols(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:domain") ||
-                 damlPredicate.equals("daml:domain")) {
+        else if (damlPredicate.equals("arg1Isa")) {
             importArg1Isa(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:range") ||
-                 damlPredicate.equals("daml:range")) {
+        else if (damlPredicate.equals("arg2Isa")) {
             importArg2Isa(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:seeAlso")) {
+        else if (damlPredicate.equals("conceptuallyRelated")) {
             importConceptuallyRelated(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:isDefinedBy")) {
-            importSubInformation(subjectTermInfo, objLitTermInfo);
+        else if (damlPredicate.equals("containsInformationAbout")) {
+            importContainsInformationAbout(subjectTermInfo, objLitTermInfo);
             return;
         }
-        else if (damlPredicate.equals("rdfs:subPropertyOf") ||
-                 damlPredicate.equals("daml:subPropertyOf")) {
+        else if (damlPredicate.equals("genlPreds")) {
             importGenlPreds(subjectTermInfo, objLitTermInfo);
             return;
         }
@@ -364,6 +405,9 @@ public class ImportDaml implements StatementHandler {
                                 predicate,
                                 subject,
                                 (String) objLitTermInfo.literal);
+            Log.current.println("(" + predicate.cyclify() + " " +
+                                subject.cyclify() + " \"" +
+                                (String) objLitTermInfo.literal + "\")\n");
             return;
         }
         CycFort object = cycAccess.getConstantByName(objLitTermInfo.toString());
@@ -373,7 +417,9 @@ public class ImportDaml implements StatementHandler {
                             predicate,
                             subject,
                             object);
-
+        Log.current.println("(" + predicate.cyclify() + " " +
+                            subject.cyclify() + " " +
+                            object.cyclify() + ")\n");
     }
 
     /**
@@ -387,8 +433,6 @@ public class ImportDaml implements StatementHandler {
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
         String collectionName = objectTermInfo.toString();
-        if (equivalentDamlCycTerms.containsKey(collectionName))
-            collectionName = (String) equivalentDamlCycTerms.get(collectionName);
         CycFort collection = cycAccess.getConstantByName(collectionName);
         if (collection == null) {
             Log.current.println("*** " + collectionName + " is undefined ***\n");
@@ -397,6 +441,9 @@ public class ImportDaml implements StatementHandler {
         }
         cycAccess.assertIsa(term,
                             collection);
+        Log.current.println("(#$isa " +
+                            term.cyclify() + " " +
+                            collection.cyclify() + ")\n");
     }
 
     /**
@@ -414,8 +461,6 @@ public class ImportDaml implements StatementHandler {
             return;
         }
         String collectionName = objectTermInfo.toString();
-        if (equivalentDamlCycTerms.containsKey(collectionName))
-            collectionName = (String) equivalentDamlCycTerms.get(collectionName);
         CycFort collection = cycAccess.getConstantByName(collectionName);
         if (collection == null) {
             Log.current.println("\n*** " + collectionName + " is undefined ***");
@@ -424,6 +469,9 @@ public class ImportDaml implements StatementHandler {
         }
         cycAccess.assertGenls(term,
                               collection);
+        Log.current.println("(#$genls " +
+                            term.cyclify() + " " +
+                            collection.cyclify() + ")\n");
     }
 
     /**
@@ -438,6 +486,9 @@ public class ImportDaml implements StatementHandler {
         importTerm(subjectTermInfo);
         cycAccess.assertEqualSymbols(subjectTermInfo.toString(),
                                      objectTermInfo.toString());
+        Log.current.println("(#$equalSymbols " +
+                            subjectTermInfo.cycFort.cyclify() + " " +
+                            objectTermInfo.cycFort.cyclify() + ")\n");
     }
 
     /**
@@ -452,6 +503,9 @@ public class ImportDaml implements StatementHandler {
         CycFort term1 = importTerm(subjectTermInfo);
         CycFort term2 = importTerm(objectTermInfo);
         cycAccess.assertArgIsa(term1, 1, term2);
+        Log.current.println("(#$arg1Isa " +
+                            term1.cyclify() + " " +
+                            term2.cyclify() + ")\n");
     }
 
     /**
@@ -466,6 +520,9 @@ public class ImportDaml implements StatementHandler {
         CycFort term1 = importTerm(subjectTermInfo);
         CycFort term2 = importTerm(objectTermInfo);
         cycAccess.assertArgIsa(term1, 2, term2);
+        Log.current.println("(#$arg2Isa " +
+                          term1.cyclify() + " " +
+                          term2.cyclify() + ")\n");
     }
 
     /**
@@ -482,6 +539,9 @@ public class ImportDaml implements StatementHandler {
         cycAccess.assertConceptuallyRelated(term1,
                                             term2,
                                             importMt);
+        Log.current.println("(#$conceptuallyRelated " +
+                          term1.cyclify() + " " +
+                          term2.cyclify() + ")\n");
     }
 
     /**
@@ -497,6 +557,9 @@ public class ImportDaml implements StatementHandler {
         CycFort genlPred = importTerm(objectTermInfo);
         cycAccess.assertGenlPreds(specPred,
                                   genlPred);
+        Log.current.println("(#$genlPreds " +
+                          specPred.cyclify() + " " +
+                          genlPred.cyclify() + ")\n");
     }
 
     /**
@@ -533,14 +596,13 @@ public class ImportDaml implements StatementHandler {
                                   DamlTermInfo literalTermInfo)
         throws IOException, UnknownHostException, CycApiException {
         CycFort term = importTerm(subjectTermInfo);
-        if (term == null) {
-            Log.current.println("\n*** " + subjectTermInfo.toString() + " is an invalid constant ***");
-            return;
-        }
         String comment = literalTermInfo.literalValue().replace('\n', ' ');
         cycAccess.assertComment(term,
                                 comment,
                                 importMt);
+        Log.current.println("(#$comment " +
+                          term.cyclify() + " \"" +
+                          comment + "\")\n");
     }
 
     /**
@@ -556,6 +618,9 @@ public class ImportDaml implements StatementHandler {
         cycAccess.assertNameString(term,
                                    literalTermInfo.literalValue(),
                                    importMt);
+        Log.current.println("(#$nameString " +
+                          term.cyclify() + " \"" +
+                          literalTermInfo.literalValue() + "\")\n");
     }
 
     /**
@@ -564,15 +629,18 @@ public class ImportDaml implements StatementHandler {
      * @param subjectTermInfo the subject DamlTermInfo object
      * @param literalTermInfo the object DamlTermInfo object
      */
-    protected void importSubInformation (DamlTermInfo subjectTermInfo,
-                                         DamlTermInfo uriTermInfo)
+    protected void importContainsInformationAbout (DamlTermInfo subjectTermInfo,
+                                                   DamlTermInfo uriTermInfo)
         throws IOException, UnknownHostException, CycApiException {
         CycFort term = importTerm(subjectTermInfo);
         CycFort resource = importTerm(uriTermInfo);
         cycAccess.assertGaf(importMt,
-                            cycAccess.getKnownConstantByName("subInformation"),
-                            term,
-                            resource);
+                            cycAccess.getKnownConstantByName("containsInformationAbout"),
+                            resource,
+                            term);
+        Log.current.println("(#$containsInformationAbout " +
+                            resource.cyclify() + " " +
+                            term.cyclify() + ")\n");
     }
 
     /**
@@ -627,12 +695,12 @@ public class ImportDaml implements StatementHandler {
                                   DamlTermInfo predicateTermInfo,
                                   DamlTermInfo objLitTermInfo) {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(subjectTermInfo.toString());
+        stringBuffer.append(subjectTermInfo.toOriginalString());
         stringBuffer.append(" ");
-        stringBuffer.append(predicateTermInfo.toString());
+        stringBuffer.append(predicateTermInfo.toOriginalString());
         stringBuffer.append(" ");
-        stringBuffer.append(objLitTermInfo.toString());
-        Log.current.print(stringBuffer.toString());
+        stringBuffer.append(objLitTermInfo.toOriginalString());
+        Log.current.println(stringBuffer.toString());
     }
 
     /**
@@ -682,6 +750,9 @@ public class ImportDaml implements StatementHandler {
         damlTermInfo.ontologyNickname = ontologyNickname;
         String constantName = ontologyNickname + ":" + localName;
         damlTermInfo.constantName = constantName;
+        if (equivalentDamlCycTerms.containsKey(constantName))
+            damlTermInfo.equivalentDamlCycTerm =
+                (String) equivalentDamlCycTerms.get(constantName);
         return damlTermInfo;
     }
 
@@ -693,9 +764,42 @@ public class ImportDaml implements StatementHandler {
      */
     protected DamlTermInfo literal(ALiteral literal) {
         DamlTermInfo damlTermInfo = new DamlTermInfo();
-        damlTermInfo.isLiteral = true;
-        damlTermInfo.literal = literal.toString();
+        String literalString = literal.toString();
+        if (this.isProbableUri(literalString)) {
+            damlTermInfo.isURI = true;
+            damlTermInfo.uri = literalString;
+        }
+        else {
+            damlTermInfo.isLiteral = true;
+            damlTermInfo.literal = literalString;
+        }
         return damlTermInfo;
+    }
+
+    /**
+     * Returns true if the given string is likely to be a URI.
+     *
+     * @param string the given string
+     * @return true if the given string is likely to be a URI
+     */
+    protected boolean isProbableUri (String string) {
+        return
+            string.startsWith("http://") ||
+            string.startsWith("https://") ||
+            string.startsWith("ftp://") ||
+            string.startsWith("file://") ||
+            string.startsWith("urn:");
+    }
+
+    /**
+     * Returns true if the given URI has embedded XML namespace separators.
+     *
+     * @param uri the URI
+     * @return true if the given URI has embedded XML namespace separators, otherwise
+     * false
+     */
+    protected boolean hasUriNamespaceSyntax (String uri) {
+        return (uri.indexOf(":", 6) > -1) || (uri.indexOf("#") > -1);
     }
 
     /**
@@ -714,10 +818,23 @@ public class ImportDaml implements StatementHandler {
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       objectTermInfo);
-        if (predicateTermInfo.toString().equals("rdf:type") &&
+        if (predicateTermInfo.toString().equals("isa") &&
             objectTermInfo.toString().equals("daml:Restriction")) {
             damlRestriction = new DamlRestriction(this);
             damlRestriction.anonymousId = subject.getAnonymousID();
+        }
+        else if (damlRestriction == null) {
+            // Not a Restriction, but an anonymous Class.
+            try {
+                importTriple(subjectTermInfo,
+                             predicateTermInfo,
+                             objectTermInfo);
+            }
+            catch (Exception e) {
+                Log.current.printStackTrace(e);
+                System.exit(1);
+            }
+            return;
         }
         else if (predicateTermInfo.toString().equals("daml:onProperty"))
             damlRestriction.property = objectTermInfo.toString();
@@ -736,16 +853,27 @@ public class ImportDaml implements StatementHandler {
      * @param literal the RDF Triple Literal
      */
     protected void processRestrictionSubject(AResource subject,
-                                            AResource predicate,
-                                            ALiteral literal) {
+                                             AResource predicate,
+                                             ALiteral literal) {
         DamlTermInfo subjectTermInfo = resource(subject, null);
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo literalTermInfo = literal(literal);
-
-
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       literalTermInfo);
+        if (damlRestriction == null) {
+            // Not a Restriction, but an anonymous Class.
+            try {
+                importTriple(subjectTermInfo,
+                             predicateTermInfo,
+                             literalTermInfo);
+            }
+            catch (Exception e) {
+                Log.current.printStackTrace(e);
+                System.exit(1);
+            }
+            return;
+        }
         throw new RuntimeException("Unexpected restriction triple \n" +
                                    subjectTermInfo.toString() + " " +
                                    predicateTermInfo.toString() + " " +
@@ -768,19 +896,35 @@ public class ImportDaml implements StatementHandler {
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       objectTermInfo);
-        if (predicateTermInfo.toString().equals("daml:subClassOf"))
+        if (damlRestriction == null) {
+            // Not a Restriction, but an anonymous Class.
+            try {
+                importTriple(subjectTermInfo,
+                             predicateTermInfo,
+                             objectTermInfo);
+            }
+            catch (Exception e) {
+                Log.current.printStackTrace(e);
+                System.exit(1);
+            }
+            return;
+        }
+        if (predicateTermInfo.toString().equals("genls"))
             damlRestriction.fromClass = subjectTermInfo.toString();
         else
             throw new RuntimeException("Unexpected restriction property " +
                                        predicateTermInfo.toString());
         try {
             damlRestriction.formInterArgIsaConstraint();
+            cycAccess.assertGaf(damlRestriction.interArgIsaConstraint,
+                                importMt);
         }
         catch (Exception e) {
             Log.current.printStackTrace(e);
             System.exit(1);
         }
-        Log.current.println("\n   DamlRestriction: " + damlRestriction.toString());
+        Log.current.println("\n" + damlRestriction.interArgIsaConstraint.cyclify());
+        damlRestriction = null;
     }
 
     /**
@@ -800,17 +944,6 @@ public class ImportDaml implements StatementHandler {
             nickname = "unknown";
         }
         return nickname;
-    }
-
-    /**
-     * Returns true if the given URI has embedded XML namespace separators.
-     *
-     * @param uri the URI
-     * @return true if the given URI has embedded XML namespace separators, otherwise
-     * false
-     */
-    protected boolean hasUriNamespaceSyntax (String uri) {
-        return (uri.indexOf(":", 6) > -1) || (uri.indexOf("#") > -1);
     }
 
     /**
@@ -857,6 +990,7 @@ public class ImportDaml implements StatementHandler {
         String constantName;
         String uri;
         String literal;
+        String equivalentDamlCycTerm;
         CycFort cycFort;
 
         /**
@@ -878,6 +1012,18 @@ public class ImportDaml implements StatementHandler {
         }
 
         /**
+         * Returns a non-substituted string representation of this object.
+         *
+         * @return a non-substituted string representation of this object
+         */
+        public String toOriginalString() {
+            if (equivalentDamlCycTerm == null)
+                return this.toString();
+            else
+                return constantName;
+        }
+
+        /**
          * Returns a string representation of this object.
          *
          * @return a string representation of this object
@@ -889,6 +1035,8 @@ public class ImportDaml implements StatementHandler {
                 return uri;
             else if (isLiteral)
                 return "\"" + literal + "\"";
+            else if (equivalentDamlCycTerm != null)
+                return equivalentDamlCycTerm;
             else
                 return constantName;
         }
@@ -914,6 +1062,8 @@ public class ImportDaml implements StatementHandler {
             int index = uri.lastIndexOf("/");
             nameSpace = uri.substring(0, index);
             localName = uri.substring(index + 1);
+            if (localName.equals(""))
+                return;
             ontologyNickname = (String) ontologyNicknames.get(nameSpace);
             if (ontologyNickname == null) {
                 Log.current.println("*** nickname not found for " + nameSpace +

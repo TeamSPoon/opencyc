@@ -7,17 +7,7 @@ import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
-import org.opencyc.elf.message.GenericMsg;
-import org.opencyc.elf.message.EvaluateScheduleMsg;
-import org.opencyc.elf.message.ScheduleEvaluationResultMsg;
-
 //// External Imports
-
-import EDU.oswego.cs.dl.util.concurrent.Executor;
-import EDU.oswego.cs.dl.util.concurrent.Puttable;
-import EDU.oswego.cs.dl.util.concurrent.Takable;
-import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
-
 import java.util.ArrayList;
 
 /**
@@ -52,134 +42,15 @@ public class PlanEvaluator extends NodeComponent {
   public PlanEvaluator() {
   }
   
-  /** 
-   * Creates a new instance of PlanEvaluator with the given
-   * input and output message channels.
-   *
-   * @param planEvaluationChannel the takable channel from which messages are input
-   * @param planSelectorChannel the puttable channel to which messages are output
-   */
-  public PlanEvaluator (Takable planEvaluatorChannel,
-                        Puttable planSelectorChannel) {
-    consumer = new Consumer(planEvaluatorChannel,
-                            planSelectorChannel,
-                            this);
-    executor = new ThreadedExecutor();
-    try {
-      executor.execute(consumer);
-    }
-    catch (InterruptedException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-  }
   
   //// Public Area
   
   //// Protected Area
-  
-  /**
-   * Thread which processes the input message channel.
-   */
-  protected class Consumer implements Runnable {
     
-    /**
-     * the takable channel from which messages are input
-     */
-    protected final Takable planEvaluatorChannel;
-    
-    /**
-     * the puttable channel to which messages are output for the plan selector
-     */
-    protected final Puttable planSelectorChannel;
-    
-    /**
-     * the parent node component
-     */
-    protected NodeComponent nodeComponent;
-    
-    /**
-     * the resources controlled by this node
-     */
-    protected ArrayList controlledResources;
-    
-    /**
-     * the node's commanded task
-     */
-    protected TaskCommand taskCommand;
-    
-    /**
-     * the proposed schedule for evaluation
-     */
-    protected Schedule schedule;
-      
-    /**
-     * Creates a new instance of Consumer.
-     *
-     * @param planEvaluatorChannel the takable channel from which messages are input
-     * @param planSelectorChannel the puttable channel to which messages are output
-     * @param nodeComponent the parent node component
-     */
-    protected Consumer (Takable planEvaluatorChannel,
-                        Puttable planSelectorChannel,
-                        NodeComponent nodeComponent) { 
-      this.planEvaluatorChannel = planEvaluatorChannel;
-      this.planSelectorChannel = planSelectorChannel;
-      this.nodeComponent = nodeComponent;
-    }
-
-    /**
-     * Reads messages from the input queue and processes them.
-     */
-    public void run () {
-      try {
-        while (true) { 
-          processEvaluateScheduleMsg((EvaluateScheduleMsg) planEvaluatorChannel.take()); 
-        }
-      }
-      catch (InterruptedException ex) {}
-    }
-      
-    /**
-     * Evaluates the schedule from the plan simulator and sends the result to the plan selector. 
-     */
-    protected void processEvaluateScheduleMsg(EvaluateScheduleMsg evaluateScheduleMsg) {
-      controlledResources = evaluateScheduleMsg.getControlledResources();
-      taskCommand = evaluateScheduleMsg.getTaskCommand();
-      schedule = evaluateScheduleMsg.getSchedule();
-      //TODO
-    }
-    
-    /**
-     * Sends the schedule evaluation result message to the plan selector.
-     */
-    protected void sendScheduleEvaluationResultMsg() {
-      //TODO
-      Object result = null;
-      
-      ScheduleEvaluationResultMsg scheduleEvaluationResultMsg = new ScheduleEvaluationResultMsg();
-      scheduleEvaluationResultMsg.setSender(nodeComponent);
-      scheduleEvaluationResultMsg.setControlledResources(controlledResources);
-      scheduleEvaluationResultMsg.setTaskCommand(taskCommand);
-      scheduleEvaluationResultMsg.setSchedule(schedule);
-      sendMsgToRecipient(planSelectorChannel, scheduleEvaluationResultMsg);
-    }
-  }
-  
   //// Private Area
   
   //// Internal Rep
-  
-  /**
-   * the thread which processes the input channel of messages
-   */
-  Consumer consumer;
-  
-  /**
-   * the executor of the consumer thread
-   */
-  Executor executor;
-  
+    
   //// Main
   
 }

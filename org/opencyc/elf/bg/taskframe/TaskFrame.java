@@ -12,6 +12,7 @@ import org.opencyc.elf.s.Sensor;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -109,7 +110,24 @@ public class TaskFrame {
    * @return the task name which is either an action name or a goal name
    */
   public String getTaskName () {
-    return taskName;
+    if (taskName.length() != 0)
+      return taskName;
+    HashSet scheduleNames = new HashSet();
+    Iterator scheduleInfoIterator = scheduleInfos.iterator();
+    while (scheduleInfoIterator.hasNext()) {
+      TaskFrame.ScheduleInfo scheduleInfo = 
+        (TaskFrame.ScheduleInfo) scheduleInfoIterator.next();
+      scheduleNames.add(scheduleInfo.getSchedule().getName());
+    }
+    StringBuffer stringBuffer = new StringBuffer();
+    Iterator scheduleNameIterator = scheduleNames.iterator();
+    while (scheduleNameIterator.hasNext()) {
+      stringBuffer.append(scheduleNameIterator.next().toString());
+      stringBuffer.append(" / ");
+    }
+    if (stringBuffer.length() > 0)
+      stringBuffer.deleteCharAt(stringBuffer.length() - 1);
+    return stringBuffer.toString();
   }
 
   /**
@@ -436,7 +454,7 @@ public class TaskFrame {
   //// Internal Rep
   
   /** the task name which is either an action name or a goal name */
-  protected String taskName;
+  protected String taskName = "";
 
   /** the task identifier consisting of a unique id for each task commanded */
   protected UUID taskId;

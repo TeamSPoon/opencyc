@@ -5,7 +5,11 @@ import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
 
+import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
+
+import org.opencyc.elf.message.DoTaskMsg;
 
 import org.opencyc.elf.wm.ActuatorClassFactory;
 import org.opencyc.elf.wm.ActionFactory;
@@ -31,7 +35,12 @@ import org.opencyc.elf.wm.TaskFrameFactory;
 import org.opencyc.elf.wm.TaskFrameLibrary;
 
 //// External Imports
+import java.util.ArrayList;
+import java.util.List;
+
 import java.util.logging.Logger;
+
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
  * BehaviorEngine provides the main method for the behavior engine that
@@ -75,15 +84,29 @@ public class BehaviorEngine {
     (new ActuatorClassFactory()).getInstance().generate();
     (new PredicateClassFactory()).getInstance().generate();
     createSingletonInstances();
+    TaskFrameLibrary.getInstance().setRootTaskFrame(TaskFrameLibrary.getInstance().getTaskFrame(Action.CONVERSE_WITH_USER));
   }
   
   /** Executes the behavior engine */
   public void execute() {
-    TaskFrame taskFrame = TaskFrameLibrary.getInstance().getRootTaskFrame(); 
-        
-    // instantiate a node to execute the root frame (the root frame probably 
-    // contains an iteration)
-    
+    TaskFrame rootTaskFrame = TaskFrameLibrary.getInstance().getRootTaskFrame(); 
+    List taskFrames = new ArrayList();
+    taskFrames.add(rootTaskFrame);
+    Node node = NodeFactory.getInstance().makeNode(taskFrames);  
+    // no node superior to the root node.
+    node.getSensoryPerception().initialize((Puttable) null);
+    node.getBehaviorGeneration().getJobAssigner().initialize((Puttable) null);
+    TaskCommand taskCommand = new TaskCommand();
+    taskCommand.setActionCommand(rootTaskFrame.getTaskAction());
+    taskCommand.setGoalCommand(rootTaskFrame.getTaskGoal());
+    DoTaskMsg doTaskMsg = new DoTaskMsg();
+    doTaskMsg.setTaskCommand(taskCommand);
+    try {
+      node.getBehaviorGeneration().getJobAssigner().getChannel().put(doTaskMsg);
+    }
+    catch (InterruptedException e) {
+      logger.severe(e.getMessage());
+    }    
   }
   
   //// Protected Area

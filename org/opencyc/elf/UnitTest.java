@@ -254,8 +254,9 @@ public class UnitTest extends TestCase {
     Assert.assertEquals("converse with user", converseWithUserAction.getName());
     Assert.assertEquals("prompt", converseWithUserAction.getParameterNames().get(0));
     Assert.assertEquals("[Action: converse with user( prompt: \">\")]", 
-                        converseWithUserAction.toString());
-    
+                        converseWithUserAction.toString());    
+    node.getSensoryPerception().initialize((Puttable) null);
+    node.getBehaviorGeneration().getJobAssigner().initialize((Puttable) null);
     //jobAssigner generates consolePromptedInput action for the ConsoleActuator
     TaskCommand taskCommand = new TaskCommand();
     taskCommand.setActionCommand(converseWithUserAction);
@@ -292,7 +293,7 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER));
     Assert.assertEquals("[JobAssignment for [[Resource: console]] action: converse with user]", 
                         JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER).toString());
-    //TODO add TaskFrame tests
+    behaviorEngine.execute();
     try {
       Thread.sleep(2000);
     }

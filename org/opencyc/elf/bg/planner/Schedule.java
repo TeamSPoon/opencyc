@@ -9,11 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <P>
  * Schedule contains the timing specification for a plan.  It can be
  * represented as a time-labeled or event-labeled sequence of actitivies or
  * events.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -43,6 +41,24 @@ public class Schedule {
   }
 
   //// Public Area
+
+  /**
+   * Gets the schedule name or description
+   *
+   * @return the schedule name or description
+   */
+  public String getName () {
+    return name;
+  }
+
+  /**
+   * Sets the schedule name or description
+   *
+   * @param name the schedule name or description
+   */
+  public void setName (String name) {
+    this.name = name;
+  }
 
   /**
    * Gets the list of planned actions
@@ -155,16 +171,19 @@ public class Schedule {
   
   //// Protected Area
 
+  // the schedule name or description
+  protected String name = "";
+  
   /** the list of planned actions */
-  protected List plannedActions;
+  protected List plannedActions = new ArrayList();
   
   /** the list of planned goals */
-  protected List plannedGoals;
+  protected List plannedGoals = new ArrayList();
   
   /**
    * the list of planned goal times, each of which is the planned duration of time in milliseconds to
    * elapse from the time the plan commences exectution until the planned goal is achieved
    */
-  protected List plannedGoalTimeMilliseconds;
+  protected List plannedGoalTimeMilliseconds = new ArrayList();
 
 }

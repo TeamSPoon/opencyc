@@ -19,6 +19,8 @@ import org.opencyc.elf.message.JobAssignmentStatus;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
 
+import org.opencyc.elf.wm.TaskFrameLibrary;
+
 //// External Imports
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -65,12 +67,15 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    *
    * @param node the containing ELF node
    * @param actionCapabilities the names of actions that this virtual actuator can accomplish
+   * @param jobAssignerChannel the takable channel from which messages are input
    */
   public JobAssigner (Node node,
-                      List actionCapabilities) {
+                      List actionCapabilities,
+                      Takable jobAssignerChannel) {
     setNode(node);
+    this.actionCapabilities = actionCapabilities;
+    this.jobAssignerChannel = jobAssignerChannel;
     node.getBehaviorGeneration().setJobAssigner(this);
-    getLogger().info("Creating JobAssigner");
   }
   
   //// Public Area
@@ -78,14 +83,11 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   /** 
    * Initializes with the given input and output channels and starts consuming task commands.
    *
-   * @param jobAssignerChannel the takable channel from which messages are input
    * @param executorChannel the puttable channel to which messages are output to the higher
    * level executor, or null if this is the highest level
    */
-  public void initialize (Takable jobAssignerChannel,
-                          Puttable executorChannel) {
+  public void initialize (Puttable executorChannel) {
     getLogger().info("Initializing JobAssigner");
-    this.jobAssignerChannel = jobAssignerChannel;
     consumer = new Consumer(jobAssignerChannel,
                             executorChannel,
                             this);
@@ -275,17 +277,23 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
      */
     protected void processDoTaskMsg (DoTaskMsg doTaskMsg) {
       getLogger().info("JobAssigner proccessing " + doTaskMsg);
+      //TODO handle goals if the task command is not specified
       taskCommand = doTaskMsg.getTaskCommand();
       getLogger().info("Do task: " + taskCommand);
-      //TODO
-      //get the task frame and figure out what is in it wrt Goal, TaskCommand and Action
+      TaskFrame taskFrame = TaskFrameLibrary.getInstance().getTaskFrame(taskCommand.getNextActionCommand().getName());
+      Iterator scheduleInfoIterator = taskFrame.getScheduleInfos().iterator();
+      while (scheduleInfoIterator.hasNext()) {
+        TaskFrame.ScheduleInfo scheduleInfo = 
+          (TaskFrame.ScheduleInfo) scheduleInfoIterator.next();
+        
+      }
       
       // find agents that can collectively execute the task
       
       // find the best schedule for each agent
       
     }
-                
+        
     /**
      * Processes the schedule status message.
      *

@@ -14,6 +14,8 @@ import org.opencyc.elf.s.Sensor;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.logging.Logger;
+
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
@@ -47,31 +49,33 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   //// Constructors
   
   /**
-   * Creates a new instance of SensoryPerception with the given name and
-   * the names of sensations that this virtual sensor can sense.
+   * Creates a new instance of SensoryPerception with the given name,
+   * the names of sensations that this virtual sensor can sense, and given
+   * input channel from which messages are input.
    *
    * @param name the sensory perception name
    * @param sensationCapabilities the names of sensations that this virtual sensor can sense
+   * @param sensoryPerceptionChannel the takable channel from which messages are input
    */
-  public SensoryPerception(String name, List sensationCapabilities) {
+  public SensoryPerception(String name, 
+                           List sensationCapabilities,
+                           Takable sensoryPerceptionChannel) {
     this.name = name;
     this.sensationCapabilities = sensationCapabilities;
-    node.setSensoryPerception(this);
+    this.sensoryPerceptionChannel = sensoryPerceptionChannel;
   }
   
   //// Public Area
   
   /** 
-   * Initializes with the given input and output message channels, and starts the message 
+   * Initializes with the given output message channels and starts the message 
    * consumer process.
    *
-   * @param sensoryPerceptionChannel the takable channel from which messages are input
    * @param nextHigherLevelSensoryPerceptionChannel the puttable channel to which messages are output
    * entity evaluator node component in value judgement
    */
-  public void initialize(Takable sensoryPerceptionChannel,
-                         Puttable nextHigherLevelSensoryPerceptionChannel) {
-    this.sensoryPerceptionChannel = sensoryPerceptionChannel;
+  public void initialize(Puttable nextHigherLevelSensoryPerceptionChannel) {
+    getLogger().info("Initializing SensoryPerception");
     consumer = new Consumer(sensoryPerceptionChannel,
                             nextHigherLevelSensoryPerceptionChannel,
                             this);

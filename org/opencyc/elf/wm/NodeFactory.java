@@ -9,6 +9,10 @@ import org.opencyc.elf.bg.BehaviorGeneration;
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 
+import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.TaskFrame;
+
+import org.opencyc.elf.s.Sensation;
 import org.opencyc.elf.s.Sensor;
 
 import org.opencyc.elf.sp.Estimator;
@@ -28,6 +32,8 @@ import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import java.util.logging.Logger;
@@ -88,8 +94,23 @@ public class NodeFactory {
    * @param taskFrameNames the set of task frames that it must process
    */
   public Node makeNode(List taskFrames) {
-    //TODO
-    return null;
+    HashSet scheduleNames = new HashSet();
+    Iterator taskFrameIterator = taskFrames.iterator();
+    while (taskFrameIterator.hasNext()) {
+      TaskFrame taskFrame = (TaskFrame) taskFrameIterator.next();
+      scheduleNames.add(taskFrame.getTaskName());
+    }
+    StringBuffer stringBuffer = new StringBuffer();
+    Iterator scheduleNameIterator = scheduleNames.iterator();
+    while (scheduleNameIterator.hasNext()) {
+      stringBuffer.append(scheduleNameIterator.next().toString());
+      stringBuffer.append(" / ");
+    }
+    if (stringBuffer.length() > 0)
+      stringBuffer.deleteCharAt(stringBuffer.length() - 1);
+    String name = stringBuffer.toString();
+    node = makeNodeShell(name);
+    return node;
   }
   
   /**
@@ -110,8 +131,6 @@ public class NodeFactory {
    * Assembles the given node.
    */
   protected void assembleNode () {
-    jobAssignerChannel = new BoundedBuffer(CHANNEL_CAPACITY);
-    sensoryPerceptionChannel = new BoundedBuffer(CHANNEL_CAPACITY);
     makeBehaviorGenerationShell();
     makeWorldModelShell();
     node.setWorldModel(worldModel);
@@ -126,8 +145,10 @@ public class NodeFactory {
    */
   protected void makeBehaviorGenerationShell () {
     behaviorGeneration = new BehaviorGeneration(node);
-    //TODO
-    //jobAssigner = new JobAssigner(node, jobAssignerChannel, null);
+    List actionCapabilities = new ArrayList();
+    actionCapabilities.add(Action.CONVERSE_WITH_USER);
+    Channel jobAssignerChannel = new BoundedBuffer(CHANNEL_CAPACITY);
+    jobAssigner = new JobAssigner(node, actionCapabilities, jobAssignerChannel);
     planSelector = new PlanSelector();
     planSelector.setNode(node);
     behaviorGeneration.setPlanSelector(planSelector);
@@ -168,10 +189,13 @@ public class NodeFactory {
    * Makes a sensory perception shell.
    */
   protected void makeSensoryPerceptionShell () {
-    //TODO
     List sensationCapabilities = new ArrayList();
+    sensationCapabilities.add(Sensation.CONSOLE_INPUT);
     String sensoryPerceptionName = "";
-    sensoryPerception = new SensoryPerception(sensoryPerceptionName, sensationCapabilities);
+    Channel sensoryPerceptionChannel = new BoundedBuffer(CHANNEL_CAPACITY);
+    sensoryPerception = new SensoryPerception(sensoryPerceptionName,               
+                                              sensationCapabilities,
+                                              sensoryPerceptionChannel);
     sensoryPerception.setNode(node);
     estimator = new Estimator();
     sensoryPerception.setEstimator(estimator);
@@ -255,21 +279,6 @@ public class NodeFactory {
    * communications channel
    */
   protected int CHANNEL_CAPACITY = 100;
-  
-  /** the job assigner channel */
-  protected Channel jobAssignerChannel;
-  
-  /** the higher level node's executor channel */
-  protected Takable executorChannel;
-  
-  /** the takable channel from which messages are input */
-  protected Channel sensoryPerceptionChannel;
-
-  /**
-   * the puttable channel to which sensory processing messages are output for the next
-   * higher level
-   */
-  protected Puttable nextHigherLevelSensoryPerceptionChannel;
   
   /** the node factory singleton instance */
   protected static NodeFactory nodeFactory;

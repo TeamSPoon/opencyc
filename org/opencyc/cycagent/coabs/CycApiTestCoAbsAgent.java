@@ -295,8 +295,7 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
                                     "  content: " + command + "\n" +
                                     ")";
         Message requestMessage = new BasicMessage(cycApiServiceAgentName,
-                                                  regHelper.getAgentRep(),
-                                                  "CYC-API",
+                                                  "naturalLanguage",
                                                   requestMessageText);
         if (verbosity > 2)
             Log.current.println("\nSending " + requestMessage.toString() +

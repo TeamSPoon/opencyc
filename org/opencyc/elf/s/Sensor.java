@@ -8,6 +8,8 @@ import org.opencyc.elf.sp.SensoryPerception;
 //// External Imports
 import java.util.List;
 
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+
 /** Sensor defines the sensor interface for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
@@ -50,6 +52,14 @@ public interface Sensor {
    */
   public List getSensationCapabilities ();
   
+  /** Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   */
+  public Puttable getChannel();
+
   /** the console input sensor name */
   public static final String CONSOLE_INPUT = "console input";
 }

@@ -7,6 +7,8 @@ import org.opencyc.elf.bg.planner.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+
 /** Actuator defines the actuator interface for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
@@ -42,6 +44,14 @@ public interface Actuator {
    * @return the resources required by this actuator or virtual actuator (job assigner)
    */
   public List getResources();
+  
+  /** Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   */
+  public Puttable getChannel();
   
   /** the console output actuator name */
   public static final String CONSOLE_OUTPUT = "console output";

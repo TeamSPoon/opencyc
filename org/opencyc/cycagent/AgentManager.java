@@ -10,7 +10,7 @@ import org.opencyc.util.*;
 
 
 
-// TO-DO combine with CycProxy
+// TO-DO reconcile with CycProxy
 
 
 

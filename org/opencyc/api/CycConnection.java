@@ -133,22 +133,22 @@ public class CycConnection implements CycConnectionInterface {
     protected int basePort;
 
     /**
-     * The tcp port assigned to the the ascii connection to the OpenCyc server.
+     * The tcp port assigned to the ascii connection to the OpenCyc server.
      */
     protected int asciiPort;
 
     /**
-     * The tcp port assigned to the the binary connection to the OpenCyc server.
+     * The tcp port assigned to the binary connection to the OpenCyc server.
      */
     protected int cfaslPort;
 
     /**
-     * The tcp socket assigned to the the ascii connection to the OpenCyc server.
+     * The tcp socket assigned to the ascii connection to the OpenCyc server.
      */
     protected Socket asciiSocket;
 
     /**
-     * The tcp socket assigned to the the binary connection to the OpenCyc server.
+     * The tcp socket assigned to the binary connection to the OpenCyc server.
      *
      */
     protected Socket cfaslSocket;
@@ -173,6 +173,25 @@ public class CycConnection implements CycConnectionInterface {
      * An indicator for ascii communications mode that strings should retain their quote delimiters.
      */
     protected boolean quotedStrings;
+
+    /**
+     * Constructs a new CycConnection using the given socket obtained from the parent AgentManager
+     * listener.
+     *
+     * @param cfaslSocket tcp socket which forms the binary connection to the OpenCyc server
+     */
+    public CycConnection (Socket cfaslSocket) throws IOException {
+        this.cfaslSocket = cfaslSocket;
+        hostName = cfaslSocket.getInetAddress().getHostName();
+        basePort = cfaslSocket.getPort() - CFASL_PORT_OFFSET;
+        asciiPort = basePort + ASCII_PORT_OFFSET;
+        communicationMode = BINARY_MODE;
+        cycAccess = null;
+        cfaslInputStream = new CfaslInputStream(cfaslSocket.getInputStream());
+        cfaslInputStream.trace = trace;
+        cfaslOutputStream = new CfaslOutputStream(cfaslSocket.getOutputStream());
+        cfaslOutputStream.trace = trace;
+    }
 
     /**
      * Constructs a new CycConnection object using the default host name, default base port number and

@@ -13,8 +13,10 @@ import  org.opencyc.util.*;
 
 /**
  * Provides a handler to read cyc image input and write message to the agent
- * message queue.  The handler closes its socket without reply after the message
- * is processed.<p>
+ * message queue.<p>
+ *
+ * The cyc image hosts one or more agent processes that can access the agent community
+ * via connection to the AgentManager.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -38,7 +40,7 @@ import  org.opencyc.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class CycInputHandler implements Runnable {
+class CycClientHandler implements Runnable {
 
     /**
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
@@ -53,68 +55,36 @@ class CycInputHandler implements Runnable {
     protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
-     * Automatically flush the PrintWriter object.
+     * Reference to parent's socket which is connected to a cyc client using the binary cfasl
+     * protocol.
      */
-    protected static final boolean AUTOFLUSH = true;
-
-    /**
-     * Reference to parent's socket which is connected to a cyc client.
-     */
-    protected Socket socket = null;
-
-    /**
-     * The binary interface input stream</tt>.
-     */
-    protected CfaslInputStream cfaslInputStream;
-
-    /**
-     * The binary interface output stream</tt>.
-     */
-    protected CfaslOutputStream cfaslOutputStream;
-
-    /**
-     * No api trace.
-     */
-    public static final int API_TRACE_NONE = 0;
-
-    /**
-     * Message-level api trace.
-     */
-    public static final int API_TRACE_MESSAGES = 1;
-
-    /**
-     * Detailed api trace.
-     */
-    public static final int API_TRACE_DETAILED = 2;
-
-    /**
-     * Parameter that, when true, causes a trace of the messages to and from the server.
-     */
-    protected int trace = API_TRACE_NONE;
+    protected Socket cfaslSocket = null;
 
     /**
      * Agent Communication Language
      */
-    private String acl = null;
+    protected String acl = null;
 
     /**
-     * Constructs a new CycInputHandler object given a reference to
+     * Manages connection to a cyc server.
+     */
+    protected CycConnection cycConnection;
+
+    /**
+     * Constructs a new CycClientHandler object given a reference to
      * the cyc client's socket connection.
      */
-    public CycInputHandler (Socket clientSocket) {
-        this.socket = clientSocket;
+    public CycClientHandler (Socket cfaslSocket) {
+        this.cfaslSocket = cfaslSocket;
     }
 
     /***
-     * Executes the CycInputHandler thread.
+     * Executes the CycClientHandler thread.
      */
     public void run () {
-        Log.current.println("Begin CycInputHandler thread");
+        Log.current.println("Begin CycClientHandler thread");
         try {
-            cfaslInputStream = new CfaslInputStream(socket.getInputStream());
-            cfaslInputStream.trace = trace;
-            cfaslOutputStream = new CfaslOutputStream(socket.getOutputStream());
-            cfaslOutputStream.trace = trace;
+            cycConnection = new CycConnection(cfaslSocket);
         }
         catch (Exception e) {
             Log.current.println("Exception creating socket i/o: " + e.getMessage());

@@ -40,7 +40,7 @@ public class QueryProcessor {
     /**
      * <tt>Backchainer</tt> for this <tt>QueryProcessor</tt>.
      */
-    protected Backchainer backchainer;
+    protected Backchainer backchainer = new Backchainer();
 
     /**
      * <tt>LiteralAsker</tt> for this <tt>QueryProcessor</tt>.
@@ -149,6 +149,7 @@ public class QueryProcessor {
             System.out.println("Cannot access OpenCyc server " + e.getMessage());
             System.exit(1);
         }
+        literalAsker = new LiteralAsker();
         hashJoiner = new HashJoiner();
     }
 
@@ -181,7 +182,7 @@ public class QueryProcessor {
     public ArrayList ask(CycList query) {
         long startMilliseconds = System.currentTimeMillis();
         this.query = query;
-        solution = new Solution(this.nbrSolutionsRequested);
+        solution = new Solution(this.nbrSolutionsRequested, verbosity);
         try {
             if (! queryParser.extractQueryLiterals()) {
                 long endMilliseconds = System.currentTimeMillis();
@@ -282,7 +283,8 @@ public class QueryProcessor {
         backchainer.setVerbosity(verbosity);
         hashJoiner.setVerbosity(verbosity);
         literalAsker.setVerbosity(verbosity);
-        solution.setVerbosity(verbosity);
+        if (solution != null)
+            solution.setVerbosity(verbosity);
     }
 
     /**

@@ -233,7 +233,7 @@ public class ConstraintProblem {
     public ArrayList solve(CycList problem) {
         long startMilliseconds = System.currentTimeMillis();
         this.problem = problem;
-        solution = new Solution(nbrSolutionsRequested);
+        solution = new Solution(nbrSolutionsRequested, verbosity);
         try {
             if (! problemParser.extractRulesAndDomains()) {
                 long endMilliseconds = System.currentTimeMillis();
@@ -363,7 +363,8 @@ public class ConstraintProblem {
         ruleEvaluator.setVerbosity(verbosity);
         if (forwardCheckingSearcher != null)
             forwardCheckingSearcher.setVerbosity(verbosity);
-        solution.setVerbosity(verbosity);
+        if (solution != null)
+            solution.setVerbosity(verbosity);
     }
 
     /**

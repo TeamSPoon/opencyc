@@ -59,9 +59,9 @@ public class UnitTest extends TestCase {
             testSuite = new TestSuite(UnitTest.class);
         else {
             testSuite = new TestSuite();
-            testSuite.addTest(new UnitTest("testQueryParser"));
-            testSuite.addTest(new UnitTest("testLiteralAsker"));
-            testSuite.addTest(new UnitTest("testHashJoiner"));
+            //testSuite.addTest(new UnitTest("testQueryParser"));
+            //testSuite.addTest(new UnitTest("testLiteralAsker"));
+            //testSuite.addTest(new UnitTest("testHashJoiner"));
             testSuite.addTest(new UnitTest("testQueryProcessor1"));
         }
         TestResult testResult = new TestResult();
@@ -75,6 +75,8 @@ public class UnitTest extends TestCase {
         System.out.println("** testQueryParser **");
 
         QueryProcessor queryProcessor = new QueryProcessor();
+        int verbosity = 3;
+        queryProcessor.solution = new Solution(null, verbosity);
         String queryString1 =
             "(#$and " +
             "  (#$isa ?country #$WesternEuropeanCountry) " +
@@ -93,6 +95,7 @@ public class UnitTest extends TestCase {
             queryParser.extractQueryLiterals();
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
         Assert.assertNotNull(queryProcessor.queryLiterals);
@@ -149,7 +152,7 @@ public class UnitTest extends TestCase {
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         System.out.println(europeanCathedralsString);
         QueryProcessor europeanCathedralsQuery = new QueryProcessor();
-        europeanCathedralsQuery.setVerbosity(1);
+        europeanCathedralsQuery.setVerbosity(9);
         // Request two solutions.
         // europeanCathedralsQuery.nbrSolutionsRequested = new Integer(2);
         // Request all solutions.

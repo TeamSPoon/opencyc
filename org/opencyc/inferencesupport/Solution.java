@@ -67,10 +67,11 @@ public class Solution {
      *
      * @param parent the parent <tt>ConstraintProblem</tt> or <tt>QueryProcessor</tt> object
      */
-    public Solution(Integer nbrSolutionsRequested) {
+    public Solution(Integer nbrSolutionsRequested, int verbosity) {
         this.nbrSolutionsRequested = nbrSolutionsRequested;
         solutions = new ArrayList();
         addSolution(new ArrayList());
+        this.verbosity = verbosity;
     }
 
     /**

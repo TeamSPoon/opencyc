@@ -801,7 +801,8 @@ public class UnitTest extends TestCase {
         System.out.println("** testSolution **");
 
         // constructor
-        Solution solution = new Solution(null);
+        int verbosity = 3;
+        Solution solution = new Solution(null, verbosity);
 
         // getCurrentSolution
         Assert.assertTrue(solution.getCurrentSolution().size() == 0);

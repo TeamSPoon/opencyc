@@ -1,11 +1,9 @@
 package org.opencyc.elf.wm;
 
-//// External Imports
-import java.util.Iterator;
-
 //// Internal Imports
 import org.opencyc.elf.bg.state.State;
 
+//// External Imports
 
 /**
  * <P>
@@ -90,7 +88,7 @@ public class EntityFrame {
     return state;
   }
 
-  /** DOCUMENT ME! */
+  /** the entity state */
   protected State state;
 
   //// Main

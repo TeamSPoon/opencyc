@@ -123,6 +123,43 @@ public class CycList extends ArrayList {
     }
 
     /**
+     * Creates and returns a copy of this <tt>CycList</tt>.
+     *
+     * @return a clone of this instance
+     */
+    public Object clone() {
+        CycList newClone = new CycList(this);
+        if (! this.isProperList())
+            newClone.setDottedElement(this.getDottedElement());
+        return newClone;
+    }
+
+    /**
+     * Creates and returns a deep copy of this <tt>CycList</tt>.  In a deep copy,
+     * directly embedded <tt>CycList</tt> objects are also deep copied.  Objects
+     * which are not CycLists are cloned.
+     *
+     * @return a deep copy of this <tt>CycList</tt>
+     */
+    public CycList deepCopy() {
+        CycList cycList = new CycList();
+        if (! this.isProperList()) {
+            if (this.dottedElement instanceof CycList)
+                cycList.setDottedElement(((CycList) this.dottedElement).deepCopy());
+            else
+                cycList.setDottedElement(this.getDottedElement());
+        }
+        for (int i = 0; i < this.size(); i++) {
+            Object element = this.get(i);
+            if (element instanceof CycList)
+                cycList.add(((CycList) element).deepCopy());
+            else
+                cycList.add(element);
+        }
+        return cycList;
+    }
+
+    /**
      * Gets the dotted element.
      *
      * @return the <tt>Object</tt> which forms the dotted element of this <tt>CycList</tt>
@@ -147,6 +184,7 @@ public class CycList extends ArrayList {
     public boolean isProperList() {
         return isProperList;
     }
+
     /**
      * Answers true iff the CycList contains valid elements.  This is a necessary, but
      * not sufficient condition for CycL well-formedness.
@@ -173,6 +211,51 @@ public class CycList extends ArrayList {
     }
 
     /**
+     * Creates a new <tt>CycList</tt> containing the given element.
+     *
+     * @param element the contents of the new <tt>CycList</tt>
+     * @return a new <tt>CycList</tt> containing the given element
+     */
+    public static CycList list(Object element) {
+        CycList result = new CycList();
+        result.add(element);
+        return result;
+    }
+
+    /**
+     * Creates a new <tt>CycList</tt> containing the given two elements.
+     *
+     * @param element1 the first item of the new <tt>CycList</tt>
+     * @param element2 the second item of the new <tt>CycList</tt>
+     * @return a new <tt>CycList</tt> containing the given two elements
+     */
+    public static CycList list(Object element1,
+                               Object element2) {
+        CycList result = new CycList();
+        result.add(element1);
+        result.add(element2);
+        return result;
+    }
+
+    /**
+     * Creates a new <tt>CycList</tt> containing the given three elements.
+     *
+     * @param element1 the first item of the new <tt>CycList</tt>
+     * @param element2 the second item of the new <tt>CycList</tt>
+     * @param element3 the third item of the new <tt>CycList</tt>
+     * @return a new <tt>CycList</tt> containing the given three elements
+     */
+    public static CycList list(Object element1,
+                               Object element2,
+                               Object element3) {
+        CycList result = new CycList();
+        result.add(element1);
+        result.add(element2);
+        result.add(element3);
+        return result;
+    }
+
+    /**
      * Returns the first element of the <tt>CycList</tt>.
      *
      * @return the <tt>Object</tt> which is the first element of the list.
@@ -186,11 +269,11 @@ public class CycList extends ArrayList {
     /**
      * Returns the second element of the <tt>CycList</tt>.
      *
-     * @return the <tt>Object</tt> which is the first second of the list.
+     * @return the <tt>Object</tt> which is the second element of the list.
      */
     public Object second() {
         if (size() < 1)
-            throw new RuntimeException("First element not available for an empty CycList");
+            throw new RuntimeException("Second element not available");
         return this.get(1);
     }
 
@@ -201,8 +284,19 @@ public class CycList extends ArrayList {
      */
     public Object third() {
         if (size() < 2)
-            throw new RuntimeException("First element not available for an empty CycList");
+            throw new RuntimeException("Third element not available");
         return this.get(2);
+    }
+
+    /**
+     * Returns the fourth element of the <tt>CycList</tt>.
+     *
+     * @return the <tt>Object</tt> which is the fourth element of the list.
+     */
+    public Object fourth() {
+        if (size() < 3)
+            throw new RuntimeException("Fourth element not available");
+        return this.get(3);
     }
 
     /**
@@ -219,7 +313,24 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Returns a new <tt>List</tt> whose elements are the reverse of
+     * Returns a new <tt>CycList</tt> whose elements are the reverse of
+     * this <tt>CycList</tt>, which is unaffected.
+     *
+     * @return new <tt>CycList</tt> with elements reversed.
+     */
+    public boolean containsDuplicates() {
+        if (! isProperList)
+            if (this.contains(this.dottedElement))
+                return true;
+        for (int i = 0; i < this.size(); i++)
+            for (int j = i + 1; j < this.size(); j++)
+                if (this.get(i).equals(this.get(j)))
+                    return true;
+        return false;
+    }
+
+    /**
+     * Returns a new <tt>CycList</tt> whose elements are the reverse of
      * this <tt>CycList</tt>, which is unaffected.
      *
      * @return new <tt>CycList</tt> with elements reversed.
@@ -230,6 +341,104 @@ public class CycList extends ArrayList {
         CycList result = new CycList();
         for (int i = (this.size() - 1); i >= 0; i--)
             result.add(this.get(i));
+        return result;
+    }
+
+    /**
+     * Returns a <tt>CycList</tt> of the length N combinations of sublists from this
+     * object.  This algorithm preserves the list order with the sublists.
+     *
+     * @param n the length of the sublist
+     * @return a <tt>CycList</tt> of the length N combinations of sublists from this
+     * object
+     */
+    public CycList combinationsOf(int n) {
+        if (! isProperList)
+           throw new RuntimeException(this + " is not a proper list");
+        CycList result = new CycList();
+        if (this.size() == 0 || n == 0)
+            return result;
+        return combinationsOfInternal(new CycList(this.subList(0, n)),
+                                      new CycList(this.subList(n, this.size())));
+    }
+
+    /**
+     * Provides the internal implementation <tt.combinationsOf</tt> using a recursive
+     * algorithm.
+     *
+     * @param selectedItems a window of contiguous items to be combined
+     * @param availableItems the complement of the selectedItems
+     * @return a <tt>CycList</tt> of the combinations of sublists from the
+     * selectedItems.
+     */
+    private static CycList combinationsOfInternal(CycList selectedItems, CycList availableItems) {
+        CycList result = CycList.list(selectedItems);
+        if (availableItems.size() == 0)
+            return result;
+        CycList combination = null;
+        for (int i = 0; i < (selectedItems.size() - 1); i++)
+            for (int j = 0; j < availableItems.size(); j++) {
+                Object availableItem = availableItems.get(j);
+                // Remove it (making copy), shift left, append replacement.
+                combination = (CycList) selectedItems.clone();
+                combination.remove(i + 1);
+                combination.add(availableItem);
+                result.add(combination);
+            }
+        CycList newSelectedItems = selectedItems.rest();
+        newSelectedItems.add(availableItems.first());
+        CycList newAvailableItems = availableItems.rest();
+        result.addAll(combinationsOfInternal(newSelectedItems, newAvailableItems));
+        return result;
+    }
+
+    /**
+     * Returns a random ordering of the <tt>CycList</tt> without recursion.
+     *
+     * @return a random ordering of the <tt>CycList</tt> without recursion
+     */
+    public CycList randomPermutation() {
+        Random random = new Random();
+        int randomIndex = 0;
+        CycList remainingList = (CycList) this.clone();
+        CycList permutedList = new CycList();
+        if (this.size() == 0)
+            return remainingList;
+        while (true) {
+            if (remainingList.size() == 1) {
+                permutedList.addAll(remainingList);
+                return permutedList;
+            }
+            randomIndex = random.nextInt(remainingList.size() - 1);
+            permutedList.add(remainingList.get(randomIndex));
+            remainingList.remove(randomIndex);
+        }
+
+    }
+
+
+    /**
+     * Returns a new <tt>CycList</tt> with every occurrance of <tt>Object</tt> oldObject
+     * replaced by <tt>Object</tt> newObject.  Substitute recursively into embedded
+     * <tt>CycList</tt> objects.
+     *
+     * @return a new <tt>CycList</tt> with every occurrance of <tt>Object</tt> oldObject
+     * replaced by <tt>Object</tt> newObject
+     */
+    public CycList subst(Object newObject, Object oldObject) {
+        CycList result = new CycList();
+        if (! isProperList)
+            if (dottedElement.equals(oldObject))
+                result.setDottedElement(newObject);
+        for (int i = 0; i < this.size(); i++) {
+            Object element = this.get(i);
+            if (element.equals(oldObject))
+                result.add(newObject);
+            else if (element instanceof CycList)
+                result.add(((CycList) element).subst(newObject, oldObject));
+            else
+                result.add(element);
+        }
         return result;
     }
 
@@ -313,7 +522,7 @@ public class CycList extends ArrayList {
      */
     public CycList sort() {
         CycList sortedList = new CycList(this);
-        Collections.sort(sortedList ,new CycListComparator());
+        Collections.sort(sortedList, new CycListComparator());
         return sortedList;
     }
 
@@ -326,4 +535,23 @@ public class CycList extends ArrayList {
         return new CycListVisitor(this);
     }
 
+    /**
+     * Returns <tt>true</tt> if the element is a member of this <tt>CycList</tt> and
+     * no element in <tt>CycList</tt> otherElements precede it.
+     *
+     * @param element the element under consideration
+     * @param otherElements the <tt>CycList</tt> of other elements under consideration
+     * @return <tt>true</tt> if the element is a member of this <tt>CycList</tt> and
+     * no elements in <tt>CycList</tt> otherElements contained in this <tt>CycList</tt>
+     * precede it
+     */
+    public boolean doesElementPrecedeOthers(Object element, CycList otherElements) {
+        for (int i = 0; i < this.size(); i++) {
+            if (element.equals(this.get(i)))
+                return true;
+            if (otherElements.contains(this.get(i)))
+                return false;
+        }
+        return false;
+    }
 }

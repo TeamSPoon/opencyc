@@ -286,6 +286,105 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(new CycList("(b c)"), cycList17.second());
         Assert.assertEquals(new CycList("(((d)))"), cycList17.third());
 
+        // subst
+        CycList cycList18 = new CycList("(b)");
+        CycList cycList19 = cycList18.subst(new CycSymbol("x"), new CycSymbol("a"));
+        Assert.assertEquals(new CycList("(b)"), cycList19);
+        CycList cycList20 = new CycList("(a)");
+        CycList cycList21 = cycList20.subst(new CycSymbol("x"), new CycSymbol("a"));
+        Assert.assertEquals(new CycList("(x)"), cycList21);
+        CycList cycList22 = new CycList("((a))");
+        CycList cycList23 = cycList22.subst(new CycSymbol("x"), new CycSymbol("a"));
+        Assert.assertEquals(new CycList("((x))"), cycList23);
+        CycList cycList24 = new CycList("((a) (b c) (((d))))");
+        CycList cycList25 = cycList24.subst(new CycSymbol("x"), new CycSymbol("a"));
+        Assert.assertEquals(new CycList("((x) (b c) (((d))))"), cycList25);
+
+        // containsDuplicates
+        CycList cycList26 = new CycList("(a b c d)");
+        Assert.assertTrue(! cycList26.containsDuplicates());
+        CycList cycList27 = new CycList("(a a c d)");
+        Assert.assertTrue(cycList27.containsDuplicates());
+        CycList cycList28 = new CycList("(a b c c)");
+        Assert.assertTrue(cycList28.containsDuplicates());
+        CycList cycList29 = new CycList("(a (b) (b) c)");
+        Assert.assertTrue(cycList29.containsDuplicates());
+
+        // list
+        CycList cycList30 = CycList.list(CycSymbol.makeCycSymbol("a"));
+        Assert.assertEquals("(a)", cycList30.toString());
+        CycList cycList31 = CycList.list(CycSymbol.makeCycSymbol("a"),
+                                         CycSymbol.makeCycSymbol("b"));
+        Assert.assertEquals("(a b)", cycList31.toString());
+        CycList cycList32 = CycList.list(CycSymbol.makeCycSymbol("a"),
+                                         CycSymbol.makeCycSymbol("b"),
+                                         CycSymbol.makeCycSymbol("c"));
+        Assert.assertEquals("(a b c)", cycList32.toString());
+
+        // combinationsOf
+        CycList cycList33 = new CycList("(1 2 3 4)");
+        Assert.assertEquals("((1) (2) (3) (4))", cycList33.combinationsOf(1).toString());
+        Assert.assertEquals("((1 2) (1 3) (1 4) (2 3) (2 4) (3 4))",
+                            cycList33.combinationsOf(2).toString());
+        Assert.assertEquals("((1 2 3 4))",
+                            cycList33.combinationsOf(4).toString());
+        Assert.assertEquals("()",
+                            cycList33.combinationsOf(0).toString());
+        Assert.assertEquals("()",
+                            (new CycList()).combinationsOf(4).toString());
+
+        // randomPermutation
+        CycList cycList34 = new CycList("(1 2 3 4 5 6 7 8 9 10)");
+        CycList permutedCycList = cycList34.randomPermutation();
+        Assert.assertEquals(10, permutedCycList.size());
+        Assert.assertTrue(permutedCycList.contains(new Long(2)));
+        Assert.assertTrue(! permutedCycList.containsDuplicates());
+
+        // doesElementPrecedeOthers
+        CycList cycList35 = new CycList("(1 2 3 4 5 6 7 8 9 10)");
+        Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Long(1),
+                                                             new CycList("(8 7 6)")));
+        Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Long(9),
+                                                             new CycList("(10)")));
+        Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Long(10),
+                                                             new CycList("(18 17 16)")));
+        Assert.assertTrue(! cycList35.doesElementPrecedeOthers(new Long(12),
+                                                             new CycList("(1 2 10)")));
+        Assert.assertTrue(! cycList35.doesElementPrecedeOthers(new Long(9),
+                                                             new CycList("(8 7 6)")));
+
+        // clone
+        CycList cycList36 = new CycList("(1 2 3 4 5)");
+        CycList cycList37 = (CycList) cycList36.clone();
+        Assert.assertEquals(cycList36, cycList37);
+        Assert.assertTrue(cycList36 != cycList37);
+        CycList cycList38 = new CycList("(1 2 3 4 5 . 6)");
+        CycList cycList39 = (CycList) cycList38.clone();
+        Assert.assertEquals(cycList38, cycList39);
+        Assert.assertTrue(cycList38 != cycList39);
+
+        // deepCopy
+        CycList cycList40 = new CycList("(1 2 3 4 5)");
+        CycList cycList41 = (CycList) cycList40.deepCopy();
+        Assert.assertEquals(cycList40, cycList41);
+        Assert.assertTrue(cycList40 != cycList41);
+        CycList cycList42 = new CycList("(1 2 3 4 5 . 6)");
+        CycList cycList43 = (CycList) cycList42.deepCopy();
+        Assert.assertEquals(cycList42, cycList43);
+        Assert.assertTrue(cycList42 != cycList43);
+        CycList cycList44 = new CycList("(1 (2 3) (4 5) ((6)))");
+        CycList cycList45 = (CycList) cycList44.deepCopy();
+        Assert.assertEquals(cycList44, cycList45);
+        Assert.assertTrue(cycList44 != cycList45);
+        Assert.assertEquals(cycList44.first(), cycList45.first());
+        Assert.assertTrue(cycList44.first() == cycList45.first());
+        Assert.assertEquals(cycList44.second(), cycList45.second());
+        Assert.assertTrue(cycList44.second() != cycList45.second());
+        Assert.assertEquals(cycList44.fourth(), cycList45.fourth());
+        Assert.assertTrue(cycList44.fourth() != cycList45.fourth());
+        Assert.assertEquals(((CycList) cycList44.fourth()).first(), ((CycList) cycList45.fourth()).first());
+        Assert.assertTrue(((CycList) cycList44.fourth()).first() != ((CycList) cycList45.fourth()).first());
+
         System.out.println("** testCycList OK **");
     }
 

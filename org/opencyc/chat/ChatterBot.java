@@ -94,7 +94,7 @@ public class ChatterBot {
      */
     protected ChatInterpreter makeCharInterpreter (String chatUserNickname,
                                                    String chatUserUniqueId) {
-        ChatInterpreter chatInterpreter = new ChatInterpreter();
+        ChatInterpreter chatInterpreter = new ChatInterpreter(cycAccess);
 
         //TODO add proper initialization
 

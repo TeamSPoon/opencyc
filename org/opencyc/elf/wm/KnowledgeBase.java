@@ -6,17 +6,8 @@ import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.planner.Schedule;
 
-import org.opencyc.elf.message.GenericMsg;
-import org.opencyc.elf.message.KBObjectPutMsg;
-import org.opencyc.elf.message.KBObjectRequestMsg;
-import org.opencyc.elf.message.KBObjectResponseMsg;
-
 //// External Imports
 import java.util.Hashtable;
-
-import EDU.oswego.cs.dl.util.concurrent.Executor;
-import EDU.oswego.cs.dl.util.concurrent.Takable;
-import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
  * <P>Knowledge Base contains the known entities and their attributes.
@@ -49,104 +40,32 @@ public class KnowledgeBase extends NodeComponent {
   /** Creates a new instance of KnowledgeBase. */
   public KnowledgeBase() {
   }
-  
-  /** 
-   * Creates a new instance of KnowledgeBase with the given
-   * input message channel.
-   *
-   * @param knowledgeBaseChannel the takable channel from which messages are input
-   */
-  public KnowledgeBase(Takable knowledgeBaseChannel) {
-    consumer = new Consumer(knowledgeBaseChannel, this);
-    executor = new ThreadedExecutor();
-    try {
-      executor.execute(consumer);
-    }
-    catch (InterruptedException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-  }
-  
+    
   //// Public Area
     
-  //// Protected Area
-  
   /**
-   * Thread which processes the input channel of messages.
+   * Gets the value for the given knowledge base object.
+   *
+   * @param obj the given knowledge base object
+   * @return the value for the given knowledge base object
    */
-  protected class Consumer implements Runnable {
-    
-    /**
-     * the takable channel from which messages are input
-     */
-    protected final Takable knowledgeBaseChannel;
-
-    /**
-     * the parent node component
-     */
-    protected NodeComponent nodeComponent;
-    
-    /**
-     * Creates a new instance of Consumer.
-     *
-     * @param knowledgeBaseChannel the takable channel from which messages are input
-     * @param nodeComponent the parent node component
-     */
-    protected Consumer (Takable knowledgeBaseChannel, 
-                        NodeComponent nodeComponent) { 
-      this.knowledgeBaseChannel = knowledgeBaseChannel;
-      this.nodeComponent = nodeComponent;
-    }
-
-    /**
-     * Reads messages from the input queue and processes them.
-     */
-    public void run () {
-      try {
-        while (true) { 
-          dispatchMsg((GenericMsg) knowledgeBaseChannel.take()); 
-        }
-      }
-      catch (InterruptedException ex) {}
-    }
-
-    /**
-     * Dispatches the given input channel message by type.
-     *
-     * @param genericMsg the given input channel message
-     */
-    void dispatchMsg (GenericMsg genericMsg) {
-      if (genericMsg instanceof KBObjectRequestMsg)
-        processKBObjectRequestMsg((KBObjectRequestMsg) genericMsg);
-      else if (genericMsg instanceof KBObjectPutMsg)
-        processKBObjectPutMsg((KBObjectPutMsg) genericMsg);
-    }
-  
-    /**
-     * Processes the knowledge base object request message.
-     */
-    protected void processKBObjectRequestMsg(KBObjectRequestMsg kbObjectRequestMsg) {
-      KBObjectResponseMsg kbObjectResponseMsg = new KBObjectResponseMsg();
-      kbObjectResponseMsg.setSender(nodeComponent);
-      kbObjectResponseMsg.setInReplyToMsg(kbObjectRequestMsg);
-      Object obj = kbObjectRequestMsg.getObj();
-      kbObjectResponseMsg.setObj(obj);
-      Object data = kbCache.get(obj);
-      kbObjectResponseMsg.setData(data);
-      sendMsgToRecipient(kbObjectRequestMsg.getReplyToChannel(), kbObjectResponseMsg);
-    }
-
-    /**
-     * Processes the knowledge base object put message.
-     */
-    protected void processKBObjectPutMsg(KBObjectPutMsg kbObjectPutMsg) {
-      Object obj = kbObjectPutMsg.getObj();
-      Object data = kbObjectPutMsg.getData();
-      kbCache.put(obj, data);
-    }
+  public Object get(Object obj) {
+    return kbCache.get(obj);
   }
-  
+
+  /**
+   * Stores the given knowledge base object and its associated data.  It the object
+   * currently exists, then its data is overwritten by the given data.
+   *
+   * @param obj the given knowledge base object
+   * @param data the data associated with the given object
+   */
+  public void put(Object obj, Object data) {
+    kbCache.put(obj, data);
+  }
+ 
+  //// Protected Area
+ 
   //// Private Area
   
   //// Internal Rep
@@ -155,17 +74,7 @@ public class KnowledgeBase extends NodeComponent {
    * the knowledge base cache associating obj --> data
    */
   protected Hashtable kbCache = new Hashtable();
-    
-  /**
-   * the thread which processes the input channel of messages
-   */
-  Consumer consumer;
-  
-  /**
-   * the executor of the consumer thread
-   */
-  Executor executor;
-  
+      
   //// Main
   
 }

@@ -4,8 +4,12 @@ package org.opencyc.elf.wm;
 import org.opencyc.elf.a.Actuator;
 import org.opencyc.elf.a.ConsoleOutput;
 
+import org.opencyc.elf.bg.planner.ConditionalScheduleSet;
 import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.planner.Schedule;
+
+import org.opencyc.elf.bg.predicate.PredicateExpression;
+import org.opencyc.elf.bg.predicate.True;
 
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
@@ -80,18 +84,14 @@ public class TaskFrameFactory {
     List plannedActions = new ArrayList();
     action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
     schedule.setPlannedActions(plannedActions);
-    Resource resource = ResourcePool.getInstance().getResource(Resource.CONSOLE);
-    List resources = new ArrayList();
-    resources.add(resource);
-    List actionCapabilities = new ArrayList();
-    actionCapabilities.add(Action.CONSOLE_PROMPTED_INPUT);
-    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources, actionCapabilities);
-    List sensationCapabilities = new ArrayList();
-    sensationCapabilities.add(Sensation.CONSOLE_INPUT);
-    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources, sensationCapabilities);
-    taskFrame.addScheduleInfo(schedule, 
-                              consoleOutput, 
-                              consoleInput);
+    schedule.setSensorName(Sensor.CONSOLE_INPUT);
+    schedule.setActuatorName(Actuator.CONSOLE_OUTPUT);
+    True truePredicate = new True();
+    PredicateExpression predicateExpression = new PredicateExpression(truePredicate);
+    List scheduleSet = new ArrayList();
+    scheduleSet.add(schedule);
+    ConditionalScheduleSet conditionalScheduleSet = new ConditionalScheduleSet(predicateExpression, scheduleSet);
+    taskFrame.addConditionalScheduleSet(conditionalScheduleSet);
     taskFrame.setTaskGoal(GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT));   
     TaskFrameLibrary.getInstance().addTaskFrame(taskFrame);
   }

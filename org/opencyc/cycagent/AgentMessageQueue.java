@@ -1,4 +1,4 @@
-package  org.opencyc.jini.cycproxy;
+package  org.opencyc.cycagent;
 
 /**
  * Contains the attributes and behavior of an agent message queue.
@@ -111,6 +111,9 @@ class AgentMessageQueue {
         return  agentMessageQueue.removeFirst();
     }
 }
+
+
+
 
 
 

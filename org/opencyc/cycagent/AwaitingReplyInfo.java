@@ -1,4 +1,4 @@
-package org.opencyc.jini.cycproxy;
+package  org.opencyc.cycagent;
 
 /**
  * Contains information required to route a response message back to the local

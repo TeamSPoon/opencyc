@@ -1,4 +1,4 @@
-package  org.opencyc.jini.cycproxy;
+package  org.opencyc.cycagent;
 
 /**
  * Provides an agent for OpenCyc using services provided by agents on
@@ -190,6 +190,9 @@ public class CycProxy extends GenericService
         cycAccess.converseVoid(command);
     }
 }
+
+
+
 
 
 

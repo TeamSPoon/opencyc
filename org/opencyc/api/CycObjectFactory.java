@@ -55,19 +55,19 @@ public class CycObjectFactory {
      * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
      * is returned instead of constructing a duplicate.  Indexed via the name, so is optimised for the ascii api.
      */
-    protected static Cache cycConstantCacheByName = new CacheLRU(500);
+    protected static Cache cycConstantCacheByName = new CacheLRU(10000);
 
     /**
      * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
      * is returned instead of constructing a duplicate.  Indexed via the id, so is optimised for the binary api.
      */
-    protected static Cache cycConstantCacheById = new CacheLRU(500);
+    protected static Cache cycConstantCacheById = new CacheLRU(10000);
 
     /**
      * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
      * is returned instead of constructing a duplicate.  Indexed via the guid.
      */
-    protected static Cache cycConstantCacheByGuid = new CacheLRU(500);
+    protected static Cache cycConstantCacheByGuid = new CacheLRU(10000);
 
     /**
      * Least Recently Used Cache of CycNarts, so that a reference to an existing <tt>CycNart</tt>

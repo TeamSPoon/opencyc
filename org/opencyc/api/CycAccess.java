@@ -1429,7 +1429,17 @@ public class CycAccess {
      * Gets a list of the public Cyc constants.
      */
     public CycList getPublicConstants ()  throws IOException, UnknownHostException {
-        return converseList("(ask-template '?X '(#$isa ?X #$PublicConstant) #$EverythingPSC)");
+        // #$PublicConstant
+        return getKbSubset(this.getKnownConstantByGuid("bd7abd90-9c29-11b1-9dad-c379636f7270"));
+    }
+
+    /**
+     * Gets a list of the elements of the given CycKBSubsetCollection.
+     */
+    public CycList getKbSubset (CycFort cycKbSubsetCollection)  throws IOException, UnknownHostException {
+        return converseList("(ask-template '?X '(#$isa ?X " +
+                            cycKbSubsetCollection.stringApiValue() +
+                            ") #$EverythingPSC)");
     }
 
     /**

@@ -59,7 +59,7 @@ public class ExportDaml {
     private Element rdfsComment = null;
     private Guid guid;
     private String name;
-    private Vector damlPublicConstants = new Vector();
+    private Vector damlSelectedConstants = new Vector();
     private CycConstant cycConstant;
     private String comment;
     private CycList isas;
@@ -123,15 +123,24 @@ public class ExportDaml {
 
         cycAccess = new CycAccess();
 
-        //cycAccess.traceOn();
 
         if (verbosity > 2)
             System.out.println("Getting terms from Cyc");
         CycFort cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
-        CycList selectedConstants = cycAccess.getKbSubset(cycKbSubsetCollection);
+        CycList selectedConstants = new CycList();
+        CycList selectedCycForts = cycAccess.getAllInstances(cycKbSubsetCollection);
         if (verbosity > 2)
-            System.out.println("Sorting terms");
+            System.out.println("Selected " + selectedCycForts.size() + " CycFort terms");
+        for (int i = 0; i < selectedCycForts.size(); i++) {
+            CycFort selectedCycFort = (CycFort) selectedCycForts.get(i);
+            if (selectedCycFort instanceof CycConstant)
+                selectedConstants.add(selectedCycFort);
+        }
+        if (verbosity > 2)
+            System.out.println("Sorting " + selectedConstants.size() + " CycConstant terms");
+        cycAccess.traceOn();
         Collections.sort(selectedConstants);
+        cycAccess.traceOff();
         if (verbosity > 2)
             System.out.println("Removing non-binary properties");
         for (int i = 0; i < selectedConstants.size(); i++) {
@@ -141,12 +150,12 @@ public class ExportDaml {
                 System.out.println("... " + cycConstant.cyclify());
             }
             if (cycAccess.isCollection(cycConstant))
-                damlPublicConstants.add(cycConstant);
+                damlSelectedConstants.add(cycConstant);
             else if (cycAccess.isUnaryPredicate(cycConstant))
                 // Do not export (for now) Cyc unary predicates, as they cannot be easily expressed in DAML.
                 continue;
             else if (cycAccess.isBinaryPredicate(cycConstant))
-                damlPublicConstants.add(cycConstant);
+                damlSelectedConstants.add(cycConstant);
             else if (cycAccess.isFunction(cycConstant))
                 // Do not export (for now) Cyc functions, as they cannot be expressed in DAML.
                 continue;
@@ -154,16 +163,16 @@ public class ExportDaml {
                 // Do not export Cyc (for now) arity 3+ predicates, as they cannot be easily expressed in DAML.
                 continue;
             else if (cycAccess.isIndividual(cycConstant))
-                damlPublicConstants.add(cycConstant);
+                damlSelectedConstants.add(cycConstant);
         }
 
         //createConstantNode("PhysicalDevice");
 
         if (verbosity > 2)
             System.out.println("Building DAML model");
-        for (int i = 0; i < damlPublicConstants.size(); i++) {
+        for (int i = 0; i < damlSelectedConstants.size(); i++) {
         //for (int i = 0; i < 20; i++) {
-            CycConstant cycConstant = (CycConstant) damlPublicConstants.elementAt(i);
+            CycConstant cycConstant = (CycConstant) damlSelectedConstants.elementAt(i);
             if (verbosity > 2)
                 System.out.print(cycConstant + "  ");
             if (cycAccess.isCollection(cycConstant)) {
@@ -182,7 +191,7 @@ public class ExportDaml {
                     String individualType = "  (type unknown)";
                     if (isas != null)
                         for (int j = 0; j < isas.size(); j++)
-                            if (! isas.get(j).equals(cycAccess.getKnownConstantByName("PublicConstant"))) {
+                            if (! isas.get(j).equals(cycKbSubsetCollection)) {
                                 individualType = (" (a " + isas.get(j) + ")");
                                 break;
                             }
@@ -424,13 +433,13 @@ public class ExportDaml {
         comment = cycAccess.getComment(cycConstant);
     }
 
-    private CycList filterPublicConstants (CycList constants) {
+    private CycList filterSelectedConstants (CycList constants) {
         if (constants.size() == 0)
             return constants;
         CycList result = new CycList();
         for (int i = 0; i < constants.size(); i++ ) {
             Object object = constants.get(i);
-            if (isFilteredDamlPublicConstant(object))
+            if (isFilteredDamlSelectedConstant(object))
                 result.add(object);
             else if (verbosity > 4)
                 System.out.println(" dropping " + cycConstant);
@@ -442,40 +451,40 @@ public class ExportDaml {
      * Return True iff the object is a daml public constant. (DAML does not now
      * contain non-binary predicates nor function terms.)
      */
-    private boolean isFilteredDamlPublicConstant(Object object) {
-        return damlPublicConstants.contains(object);
+    private boolean isFilteredDamlSelectedConstant(Object object) {
+        return damlSelectedConstants.contains(object);
     }
 
-    private boolean isFilteredPublicConstant(Object object)
+    private boolean isFilteredSelectedConstant(Object object)
         throws UnknownHostException, IOException {
         if (! (object instanceof CycConstant))
             return false;
         else
-            return cycAccess.isPublicConstant(cycConstant);
+            return cycAccess.isa(cycConstant, cycKbSubsetCollection);
     }
 
     private void populateIsas (CycConstant cycConstant)
         throws UnknownHostException, IOException {
         isas = cycAccess.getIsas(cycConstant);
-        isas = filterPublicConstants(isas);
+        isas = filterSelectedConstants(isas);
     }
 
     private void populateGenls (CycConstant cycConstant)
         throws UnknownHostException, IOException {
         genls = cycAccess.getGenls(cycConstant);
-        genls = filterPublicConstants(genls);
+        genls = filterSelectedConstants(genls);
     }
 
     private void populateGenlPreds (CycConstant cycConstant)
         throws UnknownHostException, IOException {
         genlPreds = cycAccess.getGenlPreds(cycConstant);
-        genlPreds = filterPublicConstants(genlPreds);
+        genlPreds = filterSelectedConstants(genlPreds);
     }
 
     private void populateArg1Isa (CycConstant cycConstant)
         throws UnknownHostException, IOException {
         CycList arg1Isas = cycAccess.getArg1Isas(cycConstant);
-        arg1Isas = filterPublicConstants(arg1Isas);
+        arg1Isas = filterSelectedConstants(arg1Isas);
         if (arg1Isas.size() > 0)
             arg1Isa = (CycConstant) arg1Isas.first();
     }
@@ -483,7 +492,7 @@ public class ExportDaml {
     private void populateArg2Isa (CycConstant cycConstant)
         throws UnknownHostException, IOException {
         CycList arg2Isas = cycAccess.getArg2Isas(cycConstant);
-        arg2Isas = filterPublicConstants(arg2Isas);
+        arg2Isas = filterSelectedConstants(arg2Isas);
         if (arg2Isas.size() > 0)
             arg2Isa = (CycConstant) arg2Isas.first();
     }
@@ -505,13 +514,13 @@ public class ExportDaml {
     private void populateDisjointWiths (CycConstant cycConstant)
         throws UnknownHostException, IOException {
         disjointWiths = cycAccess.getDisjointWiths(cycConstant);
-        disjointWiths = filterPublicConstants(disjointWiths);
+        disjointWiths = filterSelectedConstants(disjointWiths);
     }
 
     private void populateCoExtensionals (CycConstant cycConstant)
         throws UnknownHostException, IOException {
         coExtensionals = cycAccess.getCoExtensionals(cycConstant);
-        coExtensionals = filterPublicConstants(coExtensionals);
+        coExtensionals = filterSelectedConstants(coExtensionals);
     }
 
 }

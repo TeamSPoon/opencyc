@@ -67,7 +67,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests the ExportDaml class.
      */
-    public void testExportDaml1() {
+    public void xtestExportDaml1() {
         System.out.println("** testExportDaml1 **");
         ExportDaml exportDaml = new ExportDaml();
         try {

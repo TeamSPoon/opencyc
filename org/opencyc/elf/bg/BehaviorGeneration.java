@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg;
 
 //// Internal Imports
+import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
 
@@ -49,6 +50,16 @@ public class BehaviorGeneration extends NodeComponent {
   public BehaviorGeneration() {
   }
 
+  /**
+   * Constructs a new BehaviorGeneration object given the containing node.
+   *
+   * @param node the containing node
+   */
+  public BehaviorGeneration(Node node) {
+    setNode(node);
+    node.setBehaviorGeneration(this);
+  }
+
   //// Public Area
     
   /**
@@ -57,6 +68,7 @@ public class BehaviorGeneration extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
+    System.out.println("Accessing BehaviorGeneration node: " + node);
     return "BehaviorGeneration for " + node.getName();
   }
   

@@ -172,6 +172,16 @@ public class CycAccess {
      */
     public static CycConstant inferencePSC = null;
 
+    /**
+     * Convenient reference to #$UniversalVocabularyMt.
+     */
+    public static CycConstant universalVocabularyMt = null;
+
+    /**
+     * Convenient reference to #$bookkeepingMt.
+     */
+    public static CycConstant bookkeepingMt = null;
+
     private CycConstant cyclist = null;
     private CycConstant project = null;
 
@@ -3983,17 +3993,17 @@ public class CycAccess {
         throws IOException, UnknownHostException, CycApiException {
         CycConstant mt = getConstantByName(mtName);
         if (mt != null) {
-            this.kill(mt);
+            kill(mt);
         }
-        mt = this.createNewPermanent(mtName);
+        mt = createNewPermanent(mtName);
         assertComment(mt, comment, baseKB);
-        assertGaf(baseKB, isa, mt, isaMt);
+        assertGaf(universalVocabularyMt, isa, mt, isaMt);
         Iterator iterator = genlMts.iterator();
         while (true) {
             if (! iterator.hasNext())
                 break;
             CycFort aGenlMt = (CycFort) iterator.next();
-            assertGaf(baseKB, genlMt, mt, aGenlMt);
+            assertGaf(universalVocabularyMt, genlMt, mt, aGenlMt);
         }
     return mt;
     }
@@ -4059,16 +4069,16 @@ public class CycAccess {
      * Assert that the specified CycConstant is a collection in the specified defining microtheory MT.
      * The operation will be added to the KB transcript for replication and archive.
      *
-     * @param cycConstant the given collection term
+     * @param cycFort the given collection term
      * @param mt the assertion microtheory
      * @throws UnknownHostException if cyc server host not found on the network
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertIsaCollection (CycConstant cycConstant,
+    public void assertIsaCollection (CycFort cycFort,
                                      CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        assertGaf(mt, isa, cycConstant, collection);
+        assertGaf(mt, isa, cycFort, collection);
     }
 
     /**
@@ -4103,10 +4113,27 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public void assertIsa (CycFort cycFort,
-                             CycFort aCollection,
-                             CycFort mt)
+                           CycFort aCollection,
+                           CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(mt, isa, cycFort, aCollection);
+    }
+
+    /**
+     * Assert that the cycFort is a collection,
+     * in the UniversalVocabularyMt.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param cycFort the collection element
+     * @param aCollecton the collection
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertIsa (CycFort cycFort,
+                           CycFort aCollection)
+        throws IOException, UnknownHostException, CycApiException {
+        assertGaf(universalVocabularyMt, isa, cycFort, aCollection);
     }
 
     /**
@@ -4875,5 +4902,79 @@ public class CycAccess {
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(cycl-naut-p '" + formula.stringApiValue() + ")");
     }
+
+    /**
+     * Creates a new Collector microtheory and links it more general mts.
+     *
+     * @param mtName the name of the new collector microtheory
+     * @param comment the comment for the new collector microtheory
+     * @param genlMts the list of more general microtheories
+     */
+    public CycConstant createCollectorMt (String mtName,
+                                          String comment,
+                                          ArrayList genlMts)
+        throws IOException, CycApiException {
+        CycConstant collectorMt = getKnownConstantByName("CollectorMicrotheory");
+        return this.createMicrotheory(mtName, comment, collectorMt, genlMts);
+        }
+
+    /**
+     * Asserts each of the given list of forts to be instances of
+     * the given collection in the UniversalVocabularyMt
+     *
+     * @param forts the list of forts
+     * @param collection
+     */
+    public void assertIsas (ArrayList forts,
+                            CycFort collection)
+        throws IOException, CycApiException {
+        for (int i = 0; i < forts.size(); i++)
+            assertIsa((CycFort) forts.get(i), collection);
+    }
+
+    /**
+     * Creates a new spindle microtheory in the given spindle system.
+     *
+     * @param spindleMtName the name of the new spindle microtheory
+     * @param comment the comment for the new spindle microtheory
+     * @param spindleHeadMt the name of the spindle head microtheory
+     * @param spindleCollectorMt the name of the spindle head microtheory
+     */
+    public CycConstant createSpindleMt (String spindleMtName,
+                                        String comment,
+                                        CycFort spindleHeadMt,
+                                        CycFort spindleCollectorMt)
+        throws IOException, CycApiException {
+        CycConstant spindleMt = getKnownConstantByName("SpindleMicrotheory");
+        ArrayList genlMts = new ArrayList();
+        genlMts.add(spindleHeadMt);
+        CycConstant mt = this.createMicrotheory(spindleMtName,
+                                                comment,
+                                                spindleMt,
+                                                genlMts);
+        assertGaf(universalVocabularyMt,
+                  genlMt,
+                  spindleCollectorMt,
+                  mt);
+        return mt;
+        }
+
+    /**
+     * Creates a new KB subset collection term.
+     *
+     * @param constantName the name of the new KB subset collection
+     * @param comment the comment for the new KB subset collection
+     */
+    public CycConstant createKbSubsetCollection (String constantName,
+                                                 String comment)
+        throws IOException, CycApiException {
+        CycConstant kbSubsetCollection = getKnownConstantByName("KBSubsetCollection");
+        CycConstant cycConstant = getConstantByName(constantName);
+        if (cycConstant == null)
+            cycConstant = createNewPermanent(constantName);
+        assertIsa(cycConstant, kbSubsetCollection);
+        assertComment(cycConstant, comment, baseKB);
+        return cycConstant;
+        }
 
 }

@@ -7,6 +7,8 @@ import org.xml.sax.*;
 import com.hp.hpl.jena.rdf.arp.*;
 import com.hp.hpl.mesa.rdf.jena.common.*;
 import com.hp.hpl.mesa.rdf.jena.model.*;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
 
 /**
@@ -66,14 +68,32 @@ public class ImportDaml implements StatementHandler {
     /**
      * Ontology library nicknames, which become namespace identifiers
      * upon import into Cyc.
+     * namespace uri --> ontologyNickname
      */
     protected HashMap ontologyNicknames = new HashMap();
+
+    /**
+     * Ontology import microtheories.
+     * ontology url --> mt
+     */
+    protected HashMap ontologyMts = new HashMap();
 
     /**
      * The current DAML Restriction object being constructed from sequential
      * RDF triples.
      */
-    DamlRestriction damlRestriction;
+    protected DamlRestriction damlRestriction;
+
+    /**
+     * CycAccess object to manage api connection the the Cyc server.
+     */
+    protected CycAccess cycAccess;
+
+    /**
+     * The KB Subset collection which identifies all DAML SONAT
+     * ontology import terms in Cyc.
+     */
+    protected CycConstant damlSonatConstant;
 
     /**
      * Constructs a new ImportDaml object.
@@ -96,8 +116,14 @@ public class ImportDaml implements StatementHandler {
         //for (int i = 0; i < 5; i++) {
             String damlPath = (String) documentsToImport.get(i);
             ImportDaml importDaml = new ImportDaml();
+            try {
             importDaml.initialize();
             importDaml.importDaml(damlPath);
+            }
+            catch (Exception e) {
+                Log.current.printStackTrace(e);
+                System.exit(1);
+            }
         }
     }
 
@@ -131,12 +157,64 @@ public class ImportDaml implements StatementHandler {
     /**
      * Initializes the ImportDaml object.
      */
-    protected void initialize () {
+    protected void initialize ()
+        throws IOException, UnknownHostException, CycApiException {
+        initializeOntologyMts();
         initializeOntologyNicknames();
+        cycAccess = new CycAccess();
+        initializeCycTerms();
     }
 
     /**
-     * Initializes the ImportDaml object.
+     * Initializes the Ontology url --> import mt mapping.
+     */
+    protected void initializeOntologyMts () {
+        ontologyMts.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml",
+                        "DamlSonatDrcVesOntologyMt");
+        ontologyMts.put("http://www.daml.org/2001/10/html/airport-ont.daml",
+                        "DamlSonatAirportOntologyMt");
+        ontologyMts.put("http://www.daml.org/2001/09/countries/fips.daml",
+                        "DamlSonatFipsOntologyMt");
+        ontologyMts.put("http://www.daml.org/2001/09/countries/fips-10-4.daml",
+                        "DamlSonatFips10-4OntologyMt");
+        ontologyMts.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml",
+                        "DamlSonatCiaFactbookOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/agency-ont.daml",
+                        "DamlSonatAgencyOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/CINC-ont.daml",
+                        "DamlSonatCincOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/af-a.daml",
+                        "DamlSonatAfghanistanAOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/assessment-ont.daml",
+                        "DamlSonatAssessmentOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/economic-elements-ont.daml",
+                        "DamlSonatEconomicElementsOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/elements-ont.daml",
+                        "DamlSonatElementsOfNationalPowerOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/information-elements-ont.daml",
+                        "DamlSonatInformationElementsOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                        "DamlSonatInfrastructureElementsOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/location-ont.daml",
+                        "DamlSonatLocationOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/military-elements-ont.daml",
+                        "DamlSonatMilitaryElementsOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/objectives-ont.daml",
+                        "DamlSonatObjectivesOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/operation-ont.daml",
+                        "DamlSonatOperationOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/political-elements-ont.daml",
+                        "DamlSonatPoliticalElementsOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/social-elements-ont.daml",
+                        "DamlSonatSocialElementsOntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/example1.daml",
+                        "DamlSonatExample1OntologyMt");
+        ontologyMts.put("http://www.daml.org/experiment/ontology/example2.daml",
+                        "DamlSonatExample2OntologyMt");
+    }
+
+    /**
+     * Initializes the Ontology nicknames mapping.
      */
     protected void initializeOntologyNicknames () {
         ontologyNicknames.put("http://www.w3.org/1999/02/22-rdf-syntax-ns", "rdf");
@@ -205,13 +283,27 @@ public class ImportDaml implements StatementHandler {
 
 
     /**
+     * Initializes Cyc terms used in the DAML import.
+     */
+    protected void initializeCycTerms ()
+        throws IOException, CycApiException {
+        damlSonatConstant = cycAccess.getKnownConstantByName("DamlSonatConstant");
+    }
+
+
+    /**
      * Parses and imports the given DAML URL.
      *
      * @param damlPath the URL to import
      */
-    protected void importDaml (String damlPath) {
+    protected void importDaml (String damlPath)
+        throws IOException, CycApiException {
+        String mtName = (String) ontologyMts.get(damlPath);
+        if (mtName == null)
+            throw new RuntimeException("No mt for damlPath " + damlPath);
+        CycConstant importMt = cycAccess.getKnownConstantByName(mtName);
         if (verbosity > 0)
-            Log.current.println("\nImporting " + damlPath);
+            Log.current.println("\nImporting " + damlPath + "\ninto " + importMt.cyclify());
         Log.current.println("\nStatements\n");
         InputStream in;
         URL url;
@@ -435,7 +527,6 @@ public class ImportDaml implements StatementHandler {
                                        "\nResource " + resource.toString());
         }
         return nickname;
-
     }
 
     /**
@@ -455,7 +546,7 @@ public class ImportDaml implements StatementHandler {
      * @param aResource The ARP resource.
      * @return The Jena resource.
      */
-    static public Resource translateResource(AResource aResource) {
+    protected Resource translateResource(AResource aResource) {
         if (aResource.isAnonymous()) {
             String id = aResource.getAnonymousID();
             Resource rr = (Resource) aResource.getUserData();
@@ -470,6 +561,15 @@ public class ImportDaml implements StatementHandler {
     }
 
     /**
+     * Assert that the given term is an instance of the DamlSonatConstant KB
+     * subset collection.
+     */
+    protected void assertIsaDamlSonatConstant (CycConstant cycConstant)
+        throws IOException, CycApiException {
+        cycAccess.assertIsa(cycConstant, damlSonatConstant, cycAccess.bookkeepingMt);
+    }
+
+    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      *
@@ -478,7 +578,6 @@ public class ImportDaml implements StatementHandler {
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
-
 
     /**
      * Records the DAML term information for Cyc import.

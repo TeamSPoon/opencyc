@@ -49,76 +49,6 @@ public class JobAssigner extends NodeComponent {
   //// Public Area
 
   /**
-   * Receives the do task message from behavior generation.
-   */
-  public void doTask () {
-    //TODO
-    // received via channel from behavior generation
-    // TaskCommand taskCommand
-  }
-  
-  /**
-   * Receives the receive task frame message from behavior generation
-   */
-  public void receiveTaskFrame () {
-    //TODO
-    // received via channel from behavior generation
-    // TaskCommand taskCommand
-    // TaskFrame taskFrame
-  }
-
-  /**
-   * Receives the scheduler status message from a scheduler
-   */
-  public void schedulerStatus () {
-    //TODO
-    // received via channel from a scheduler
-    // ArrayList controlledResources
-    // Status status
-  }
-  
-  /**
-   * Receives the schedule job message from ?.  Subsequently the message is
-   * sent to the appropriate scheduler.
-   */
-  public void ScheduleJob (TaskCommand taskCommand) {
-    //TODO
-    // received via channel from ?
-    // send via channel to appropriate scheduler
-    // TaskCommand taskCommand
-    // send receiveScheduleJob(taskCommand) to (appropriate) scheduler
-  }
-  
-  /**
-   * Sends the fetch task frame message to behavior generation
-   */
-  public void fetchTaskFrame () {
-    //TODO
-    // send via channel to behavior generation
-    // TaskCommand taskCommand
-    // send forwardFetchTaskFrame(taskCommand) to behaviorGeneration
-  }
-  
-  /**
-   * Sends the decompose task frame message to ?.
-   */
-  public void decomposeTaskFrame (TaskFrame taskFrame) {
-    //TODO
-    // send via channel to ?
-    // TaskCommand taskCommand
-  }
-  
-  /**
-   * Sends the job assigner status message to behavior generation
-   */
-  public void JobAssignerStatus () {
-    //TODO
-    // send via channel to behavior generation
-    // Status status
-    // send behaviorGenerationStatus(status) to behaviorGeneration
-  }
-  
-  /**
    * Returns true if the given object equals this object.
    * 
    * @param obj the given object
@@ -143,8 +73,91 @@ public class JobAssigner extends NodeComponent {
     //TODO
     return "";
   }
-
+  
   //// Protected Area
+
+  /**
+   * Receives the do task message from behavior generation.  This
+   * triggers the fetch task message to be sent back to behavior generation.
+   */
+  protected void doTask () {
+    //TODO
+    // received via channel from behavior generation
+    // TaskCommand taskCommand
+    fetchTaskFrame();
+  }
+  
+  /**
+   * Receives the receive task frame message from behavior generation.  This triggers
+   * the decompose task frame message.
+   */
+  protected void receiveTaskFrame () {
+    //TODO
+    // received via channel from behavior generation
+    // TaskCommand taskCommand
+    // TaskFrame taskFrame
+    decomposeTaskFrame();
+  }
+
+  /**
+   * Receives the scheduler status message from a scheduler
+   */
+  protected void schedulerStatus () {
+    //TODO
+    // received via channel from a scheduler
+    // ArrayList controlledResources
+    // Status status
+  }
+  
+  /**
+   * Receives the schedule job message from ?.  Subsequently the message is
+   * sent to the appropriate scheduler.
+   */
+  protected void ScheduleJob (TaskCommand taskCommand) {
+    //TODO
+    // received via channel from ?
+    // send via channel to appropriate scheduler
+    // TaskCommand taskCommand
+    // send receiveScheduleJob(taskCommand) to (appropriate) scheduler
+  }
+  
+  /**
+   * Sends the fetch task frame message to behavior generation
+   */
+  protected void fetchTaskFrame () {
+    //TODO
+    // send via channel to behavior generation
+    // TaskCommand taskCommand
+    // send forwardFetchTaskFrame(taskCommand) to behaviorGeneration
+  }
+  
+  /**
+   * Sends the decompose task frame message to ?.
+   */
+  protected void decomposeTaskFrame () {
+    //TODO
+    // send via channel to ?
+    // TaskCommand taskCommand
+  }
+  
+  /**
+   * Decomposes the function for the current task frame.
+   */
+  protected void decomposeFunction () {
+    //TODO
+    // TaskCommand taskCommand
+  }
+  
+  /**
+   * Sends the job assigner status message to behavior generation
+   */
+  protected void JobAssignerStatus () {
+    //TODO
+    // send via channel to behavior generation
+    // Status status
+    // send behaviorGenerationStatus(status) to behaviorGeneration
+  }
+  
   //// Private Area
   //// Internal Rep
 }

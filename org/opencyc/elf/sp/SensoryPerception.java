@@ -136,7 +136,6 @@ public class SensoryPerception extends NodeComponent {
     // Object data
     // send sendSensoryPerceptionData(obj, data) to (this level) node
     // send receiveUpdate(obj, data) to valueJudgement
-    // send receiveUpdate(obj, data) to valueJudgement
   }
 
   //// Private Area

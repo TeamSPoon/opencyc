@@ -109,18 +109,18 @@ public class ForwardCheckingSearcher {
             CycVariable variable = (CycVariable) variables.get(i);
             remainingDomainSize = new Integer(constraintProblem.valueDomains.getUnmarkedDomainSize(variable));
             degree = new Integer(constraintDegree(variable, variables));
-            annotatedVariables.add(new VariableSelectionAttibutes(variable,
-                                                                  remainingDomainSize,
-                                                                  degree));
+            annotatedVariables.add(new VariableSelectionAttributes(variable,
+                                                                   remainingDomainSize,
+                                                                   degree));
         }
         Collections.sort(annotatedVariables);
         if (verbosity > 7) {
             System.out.println("\nHeuristic selection order");
             for (int i = 0; i < annotatedVariables.size(); i++) {
-                System.out.println("  " + (VariableSelectionAttibutes) annotatedVariables.get(i));
+                System.out.println("  " + (VariableSelectionAttributes) annotatedVariables.get(i));
             }
         }
-        return ((VariableSelectionAttibutes) annotatedVariables.get(0)).cycVariable;
+        return ((VariableSelectionAttributes) annotatedVariables.get(0)).cycVariable;
     }
 
     /**

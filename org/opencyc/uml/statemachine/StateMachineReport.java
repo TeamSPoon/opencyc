@@ -195,7 +195,7 @@ public class StateMachineReport {
                               transition.getGuard().getexpression().getBody());
         }
         if (transition.getEffect() != null) {
-            Log.current.print(" do " +
+            Log.current.print("\n    do " +
                               transition.getEffect().getBody());
         }
         Log.current.println();

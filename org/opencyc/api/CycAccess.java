@@ -5581,6 +5581,30 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
+    public CycList rkfPhraseReader (String text, String parsingMt, String domainMt)
+        throws IOException, CycApiException {
+        return rkfPhraseReader(text,
+                               getKnownConstantByName(parsingMt),
+                               getKnownConstantByName(domainMt));
+    }
+
+    /**
+     * Returns a list of parsing expressions, each consisting of a parsing span expression,
+     * and a list of parsed terms.
+     * <pre>
+     * (RKF-PHRASE-READER "penguins" #$RKFEnglishLexicalMicrotheoryPSC #$InferencePSC)
+     * ==>
+     * (((0) (#$Penguin #$PittsburghPenguins)))
+     * </pre>
+     *
+     * @param text the phrase to be parsed
+     * @param parsingMt the microtheory in which lexical info is asked
+     * @param domainMt the microtherory in which the info about candidate terms is asked
+     * @return a parsing expression consisting of a parsing span expression, and a list
+     * of parsed terms
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
     public CycList rkfPhraseReader (String text, CycFort parsingMt, CycFort domainMt)
         throws IOException, CycApiException {
         CycList command = new CycList();

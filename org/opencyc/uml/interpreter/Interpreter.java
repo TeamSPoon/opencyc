@@ -173,6 +173,8 @@ public class Interpreter {
         treeInterpreter.interpret(stringReader, "");
         stringReader = new StringReader("import org.opencyc.util.*;");
         treeInterpreter.interpret(stringReader, "");
+        stringReader = new StringReader("import org.opencyc.cycobject.*;");
+        treeInterpreter.interpret(stringReader, "");
         stringReader = new StringReader("import java.io.*;");
         treeInterpreter.interpret(stringReader, "");
         treeInterpreter.defineVariable("cycAccess", cycAccess);

@@ -42,6 +42,7 @@ public class OpenDirectoryToDaml {
      * diagnostic input.
      */
     protected static final int DEFAULT_VERBOSITY = 2;
+    //protected static final int DEFAULT_VERBOSITY = 3;
 
     /**
      * Sets verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
@@ -122,7 +123,7 @@ public class OpenDirectoryToDaml {
             openDirectoryInput =
                 new LineNumberReader(
                     new InputStreamReader(
-                        new GZIPInputStream(openDirectoryURL.openStream())));
+                        new GZIPInputStream(openDirectoryURL.openStream()), "UTF-8"));
             indexRDF();
             openDirectoryInput.close();
             if (verbosity > 0)
@@ -174,7 +175,8 @@ public class OpenDirectoryToDaml {
 
     /**
      * Translates the input OpenDirectory RDF (non-compliant) structure file into
-     * a DAML compliant format.
+     * a DAML compliant format.  UTF-8 character encoding is used by Open Directory
+     * for alternate language strings.
      */
     protected void translate () {
         URL openDirectoryURL = null;
@@ -185,10 +187,11 @@ public class OpenDirectoryToDaml {
             openDirectoryInput =
                 new LineNumberReader(
                     new InputStreamReader(
-                        new GZIPInputStream(openDirectoryURL.openStream())));
+                        new GZIPInputStream(openDirectoryURL.openStream()), "UTF-8"));
             damlOutput =
                 new PrintWriter(
-                    new FileOutputStream(damlOutputPathName));
+                    new OutputStreamWriter(
+                        new FileOutputStream(damlOutputPathName), "UTF8"));
         if (verbosity > 0)
             Log.current.println("DAML output file is " + damlOutputPathName);
 
@@ -225,7 +228,7 @@ public class OpenDirectoryToDaml {
         if (verbosity > 0)
             Log.current.println("Writing DAML header.");
         String xmlHeader =
-            "<?xml version='1.0' encoding='ISO-8859-1'?>";
+            "<?xml version='1.0' encoding='UTF-8'?>";
         damlOutput.println(xmlHeader);
         damlOutput.println();
         String dtdHeader =

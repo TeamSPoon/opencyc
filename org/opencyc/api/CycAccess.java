@@ -6615,6 +6615,29 @@ public class CycAccess {
         assertGaf(gaf, mt);
     }
 
+    /**
+     * Gets the list of name strings for the given CycFort.
+     *
+     * @param cycFort the given FORT
+     * @param mt the relevant inference microtheory
+     * @return the list of name strings for the given CycFort
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycList getNameStrings (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$nameString <cycFort> ?name-string)
+        CycList query = new CycList();
+        query.add(getKnownConstantByGuid("c0fdf7e8-9c29-11b1-9dad-c379636f7270"));
+        query.add(cycFort);
+        CycVariable variable = CycObjectFactory.makeCycVariable("?name-string");
+        query.add(variable);
+
+        return askWithVariable (query,
+                                variable,
+                                mt);
+    }
 
 
 

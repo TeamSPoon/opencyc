@@ -364,6 +364,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
         write(CFASL_STRING);
         writeInt(s.length());
         write(s.getBytes());
+        /**
+         * Enable when/if UTF-8 is supported by Cyc
+         */
+        //write(s.getBytes("UTF-8"));
     }
 
     /**

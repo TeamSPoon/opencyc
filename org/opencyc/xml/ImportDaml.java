@@ -137,6 +137,12 @@ public abstract class ImportDaml implements StatementHandler {
     protected CycConstant bookkeepingMt;
 
     /**
+     * Character encoding scheme of the DAML input (e.g. UTF-8), specified
+     * if not ASCII.
+     */
+    protected String characterEncoding = null;
+
+    /**
      * Constructs a new ImportDaml object.
      */
     public ImportDaml() {
@@ -160,12 +166,37 @@ public abstract class ImportDaml implements StatementHandler {
      * @param importMtName the microtheory into which DAML content is asserted
      */
     public void importDaml (String damlOntologyDefiningURLString,
-                               String importMtName)
+                            String importMtName)
+        throws IOException, CycApiException {
+        importDaml (damlOntologyDefiningURLString,
+                    importMtName,
+                    null);
+    }
+
+    /**
+     * Parses and imports the given DAML URL.
+     *
+     * @param damlOntologyDefiningURLString the URL to import
+     * @param importMtName the microtheory into which DAML content is asserted
+     * @param characterEncoding the character encoding scheme of the DAML imput
+     * (e.g. "UTF-8", used when not the default ASCII
+     */
+    public void importDaml (String damlOntologyDefiningURLString,
+                            String importMtName,
+                            String characterEncoding)
         throws IOException, CycApiException {
         this.damlOntologyDefiningURLString = damlOntologyDefiningURLString;
         this.importMtName = importMtName;
-        if (verbosity > 0)
-            Log.current.println("\nImporting " + damlOntologyDefiningURLString + "\ninto " + importMtName);
+        this.characterEncoding = characterEncoding;
+        if (verbosity > 0) {
+            if (characterEncoding == null)
+                Log.current.println("\nImporting " + damlOntologyDefiningURLString +
+                                    "\ninto " + importMtName);
+            else
+                Log.current.println("\nImporting " + damlOntologyDefiningURLString +
+                                    " encoding " + characterEncoding +
+                                    "\ninto " + importMtName);
+        }
         importMt = cycAccess.getKnownConstantByName(importMtName);
         damlOntologyDefiningURL =
             new CycNart(cycAccess.getKnownConstantByName("URLFn"),
@@ -182,17 +213,23 @@ public abstract class ImportDaml implements StatementHandler {
         cycAccess.assertGaf(gaf, importMt);
         Log.current.println("\nStatements\n");
         //cycAccess.traceOn();
-        InputStream in;
+        InputStreamReader in;
         URL url;
         try {
             File ff = new File(damlOntologyDefiningURLString);
-            in = new FileInputStream(ff);
+            if (characterEncoding == null)
+                in = new InputStreamReader(new FileInputStream(ff));
+            else
+                in = new InputStreamReader(new FileInputStream(ff), characterEncoding);
             url = ff.toURL();
         }
         catch (Exception ignore) {
             try {
                 url = new URL(damlOntologyDefiningURLString);
-                in = url.openStream();
+                if (characterEncoding == null)
+                    in = new InputStreamReader(url.openStream());
+                else
+                    in = new InputStreamReader(url.openStream(), characterEncoding);
             }
             catch (Exception e) {
                 System.err.println("ARP: Failed to open: " + damlOntologyDefiningURLString);
@@ -730,12 +767,23 @@ public abstract class ImportDaml implements StatementHandler {
                                      DamlTermInfo literalTermInfo)
         throws IOException, UnknownHostException, CycApiException {
         CycFort term = importTerm(subjectTermInfo);
+        String nameString = literalTermInfo.literalValue();
         cycAccess.assertNameString(term,
                                    literalTermInfo.literalValue(),
                                    importMt);
         Log.current.println("(#$nameString " +
                           term.cyclify() + " \"" +
-                          literalTermInfo.literalValue() + "\")\n");
+                          literalTermInfo.literalValue() + "\")");
+        CycList nameStrings = cycAccess.getNameStrings(term, importMt);
+        if (! nameStrings.contains(nameString)) {
+            if (verbosity > 1) {
+                Log.current.println("asserted " + nameString);
+                if (nameStrings.size() == 1)
+                    Log.current.println("queried  " + nameStrings.get(0));
+                else
+                    Log.current.println("queried  " + nameStrings);
+            }
+        }
     }
 
     /**

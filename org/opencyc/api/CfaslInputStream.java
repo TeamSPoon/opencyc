@@ -254,6 +254,10 @@ public class CfaslInputStream extends BufferedInputStream {
                         off += read(s, off, len - off);
                     }
                     o = new String(s);
+                    /**
+                     * Enable when/if UTF-8 is supported by Cyc
+                     */
+                    //o = new String(s, "UTF-8");
                     break;
                 case CFASL_CHARACTER:
                     o = new Character((char)read());

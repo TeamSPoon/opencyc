@@ -125,15 +125,18 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
         throws IOException, UnknownHostException, CycApiException {
 
         initializeDocumentsToImport();
-        initializeMappedTerms();
         //importDaml.actuallyImport = false;
         for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
+            String characterEncoding = damlDocInfo.getCharacterEncoding();
             String importMt = damlDocInfo.getImportMt();
             initializeDamlOntologyMt(importMt);
             initialize();
-            importDaml(damlPath, importMt);
+            if (characterEncoding == null)
+                importDaml(damlPath, importMt);
+            else
+                importDaml(damlPath, importMt, characterEncoding);
         }
     }
 
@@ -143,9 +146,11 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
     protected void initializeDocumentsToImport () {
         // 0
         damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory.daml",
+                                         null,
                                          "OpenDirectoryStructureMt"));
         // 1
         damlDocInfos.add(new DamlDocInfo("file:///H:/OpenCyc/open-directory-structure.daml",
+                                         "UTF-8",
                                          "OpenDirectoryStructureMt"));
     }
 
@@ -239,36 +244,6 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
     }
 
     /**
-     * Determines if the imported term should be wrapped with a functional
-     * expression and imported as a NART.  Overriden from the superclass for desired
-     * behavior.
-     *
-     * @param termName the daml term to be substituted and wrapped
-     */
-    protected boolean damlTermInfoWrapperTest (String termName) {
-        return termName.startsWith("dmoz:DMOZ-");
-    }
-
-    /**
-     * Wraps the impored term with the appropriate functional expression
-     * so that it can be imported as a NART.  Overriden from the superclass for desired
-     * behavior.
-     *
-     * @param termName the daml term to be substituted and wrapped
-     */
-    protected CycNart damlTermInfoWrapper (String termName)
-        throws IOException, CycApiException {
-        String wrappedOdpTopic =
-            (String) gatherOpenDirectoryTitles.odpTitles.get(termName);
-        if (wrappedOdpTopic == null) {
-            Log.current.println("No topic found for " + termName);
-            wrappedOdpTopic = "unknown";
-        }
-        return new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
-                                                            wrappedOdpTopic);;
-    }
-
-    /**
      * Asserts additional lexical assertions about the given term which are specific to
      * the import of Open Directory terms. Overriden from the superclass for desired
      * behavior.
@@ -277,13 +252,18 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
      */
     protected void additionalLexicalAssertions (CycFort term)
         throws IOException, CycApiException {
-        if (! (term instanceof CycNart))
+        String odpTopic =
+            (String) gatherOpenDirectoryTitles.odpTitles.get(term.toString());
+        if (odpTopic == null) {
+            if (verbosity > 3)
+                Log.current.println("No topic found for " + term.toString());
             return;
-        // (#$genPhrase <term> #$CountNoun #$plural "OPD <termString>")
-        String topic = "ODP " + (String) ((CycNart) term).getArguments().get(0);
+        }
+        // (#$genPhrase <term> #$CountNoun #$singular "OPD <odpTopic>")
+        String topic = "ODP " + odpTopic;
         if (verbosity > 1)
             Log.current.println("(#$genPhrase " + term.cyclify() +
-                                " #$CountNoun #$plural \"" + topic + "\"");
+                                " #$CountNoun #$singular \"" + topic + "\"");
         cycAccess.assertGenPhraseCountNounSingular(term, topic);
     }
 
@@ -298,12 +278,27 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
         protected String damlPath;
 
         /**
+         * character encoding (e.g. UTF-8)
+         */
+        protected String characterEncoding;
+
+        /**
          * microtheory into which DAML content is imported
          */
         protected String importMt;
 
-        public DamlDocInfo (String damlPath, String importMt) {
+        /**
+         * Constructs a new DamlDocInfo object
+         *
+         * @param damlPath the path to the DAML docuement - as a URI
+         * @param characterEncoding the character encoding scheme of the input DAML
+         * document or null if default ASCII encoding
+         * @param importMt the microtheory into which the non-definitional assertions are
+         * placed
+         */
+        public DamlDocInfo (String damlPath, String characterEncoding, String importMt) {
             this.damlPath = damlPath;
+            this.characterEncoding = characterEncoding;
             this.importMt = importMt;
         }
 
@@ -314,6 +309,17 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
          */
         public String getDamlPath () {
             return damlPath;
+        }
+
+        /**
+         * Returns the character encoding scheme of the input DAML
+         * document.
+         *
+         * @return the the character encoding scheme of the input DAML
+         * document
+         */
+        public String getCharacterEncoding () {
+            return characterEncoding;
         }
 
         /**

@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
 
 //// External Imports
 import java.util.ArrayList;
@@ -83,12 +84,12 @@ public class PredicateExpression {
   //// Public Area
   
   /** 
-   * Evaluates the predicate and arguments returning the result.
+   * Evaluates the predicate and arguments within the given state, returning the result.
    *
-   * @return the result of evaluating the predicate and arguments
+   * @return the result of evaluating the predicate and arguments within the given state
    */
-  public boolean evaluate() {
-    return predicate.evaluate(arguments);
+  public boolean evaluate(State state) {
+    return predicate.evaluate(arguments, state);
   }
   
   /**

@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
+import org.opencyc.elf.bg.state.StateVariable;
 
 //// External Imports
 import java.util.List;
@@ -53,12 +55,13 @@ public abstract class Predicate {
   }
   
   /**
-   * Evaluates the given arguments and returns the result.  The semantics
+   * Evaluates the given arguments within the given state and returns the result.  The semantics
    * of the predicate are defined by each implementing class.
    *
    * @param arguments the given arguments to evaluate
+   * @param state the given state
    */
-  public abstract boolean evaluate (List arguments);
+  public abstract boolean evaluate (List arguments, State state);
   
   /**
    * Returns a string representation of this predicate given
@@ -78,6 +81,23 @@ public abstract class Predicate {
   public abstract boolean equals(Object obj);
   
   //// Protected Area
+  
+  /**
+   * Dereferences the given argument within the given state if the argument is a state 
+   * variable.
+   *
+   * @param argument the given argument
+   * @param state the given state
+   * @return the value of the state variable when the given argument is a state variable,
+   * otherwise return the argument
+   */
+  protected Object evaluateArgument (Object argument, State state) {
+    if (argument instanceof StateVariable) {
+      return state.getStateValue((StateVariable) argument);
+    }
+    else
+      return argument;
+  }
   
   //// Private Area
   

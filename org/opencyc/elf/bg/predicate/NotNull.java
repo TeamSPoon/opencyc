@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
 
 //// External Imports
 import java.util.List;
@@ -45,10 +46,11 @@ public class NotNull extends Predicate {
    * Evaluates the given arguments and returns true if the first is not null.
    *
    * @param arguments the given arguments to evaluate
+   * @param state the given state
    * @return true if the first argument is not null
    */
-   public boolean evaluate (List arguments) {
-    return arguments.get(0)!= null;
+   public boolean evaluate (List arguments, State state) {
+    return evaluateArgument(arguments.get(0), state) != null;
   }
   
   /**

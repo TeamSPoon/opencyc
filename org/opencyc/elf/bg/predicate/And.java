@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
 
 //// External Imports
 import java.util.Iterator;
@@ -46,13 +47,14 @@ public class And extends Predicate {
    * Evaluates the given argument predicate expressions and returns the result.
    *
    * @param arguments the given predicate expressions to evaluate
+   * @param state the given state
    * @return the result of evaluating the given predicate expressions
    */
-  public boolean evaluate(List arguments) {
+  public boolean evaluate(List arguments, State state) {
     Iterator iter = arguments.iterator();
     while (iter.hasNext()) {
       PredicateExpression predicateExpression = (PredicateExpression) iter.next();
-      if (! predicateExpression.evaluate())
+      if (! predicateExpression.evaluate(state))
         return false;
     }
     return true;

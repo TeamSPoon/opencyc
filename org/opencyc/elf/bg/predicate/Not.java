@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
 
 //// External Imports
 import java.util.Iterator;
@@ -46,11 +47,12 @@ public class Not extends Predicate {
    * Evaluates the given argument predicate expression and returns the result.
    *
    * @param arguments the given predicate expressions to evaluate
+   * @param state the given state
    * @return the result of evaluating the given predicate expressions
    */
-  public boolean evaluate(List arguments) {
+  public boolean evaluate(List arguments, State state) {
     PredicateExpression predicateExpression = (PredicateExpression) arguments.get(0);
-    return ! predicateExpression.evaluate();
+    return ! predicateExpression.evaluate(state);
   }
   
   /** 

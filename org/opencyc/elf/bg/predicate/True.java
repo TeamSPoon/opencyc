@@ -1,8 +1,10 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
 
 //// External Imports
+import java.util.List;
 
 /**
  * True is a predicate of arity zero that always returns true.
@@ -44,8 +46,10 @@ public class True extends Predicate {
    * of the predicate are defined by each implementing class.
    *
    * @param arguments the given arguments to evaluate
+   * @param state the given state
+   * @return always true
    */
-  public boolean evaluate(java.util.List arguments) {
+  public boolean evaluate(List arguments, State state) {
     return true;
   }
   
@@ -56,7 +60,7 @@ public class True extends Predicate {
    * @param arguments the given arguments to evaluate
    * @return a string representation of this object
    */
-  public String toString(java.util.List arguments) {
+  public String toString(List arguments) {
     return "TRUE";
   }
   

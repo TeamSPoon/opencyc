@@ -173,11 +173,38 @@ public class UnitTest extends TestCase {
             Assert.assertNull(answer[1]);
 
             // create
-            answer = parser.parseUserInput("create \"my-term\".");
+            answer = parser.parseUserInput("create \"myTerm\".");
             Assert.assertNotNull(answer[0]);
             Assert.assertTrue(answer[0] instanceof CycList);
-            System.out.println(answer[0].toString());
-            Assert.assertEquals("(CYC-CREATE \"my-term\")", answer[0].toString());
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-CREATE-NEW-PERMANENT \"myTerm\")", answer[0].toString());
+            Assert.assertNull(answer[1]);
+
+            // rename
+            answer = parser.parseUserInput("rename #$Dog to \"MyDog\".");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-RENAME #$Dog \"MyDog\")",
+                                ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
+
+            // kill
+            answer = parser.parseUserInput("kill #$Dog.");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-KILL #$Dog)",
+                                ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
+
+            // assert
+            answer = parser.parseUserInput("assert (#$isa #$Dog #$Collection).");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-ASSERT (QUOTE (#$isa #$Dog #$Collection)))",
+                                ((CycList) answer[0]).cyclify());
             Assert.assertNull(answer[1]);
         }
         catch (Exception e) {

@@ -35,6 +35,7 @@ import org.opencyc.api.*;
 public class CycListParser  {
 
     // Read/scan functions' lexical analysis variables.
+    private int tok;
     private boolean endQuote = false;
     private boolean dot = false;
     private boolean dotWord = false;
@@ -44,10 +45,16 @@ public class CycListParser  {
     private StackWithPointer quoteStack = new StackWithPointer();
     private String currentString = "";
 
+
+    /**
+     * the stream tokenizer for the current string
+     */
+    protected StreamTokenizer st;
+
     /**
      * Cyc api support.
      */
-    CycAccess cycAccess;
+    protected CycAccess cycAccess;
 
     private static final String consMarkerSymbol = "**consMarkerSymbol**";
     private static final int STWORD = StreamTokenizer.TT_WORD;
@@ -75,8 +82,34 @@ public class CycListParser  {
      */
     public CycList read (String string) throws CycApiException {
         currentString = string;
-        StreamTokenizer st = makeStreamTokenizer(string);
+        st = makeStreamTokenizer(string);
         return read(st);
+    }
+
+    /**
+     * Returns the unused portion of the string after a CycList
+     * expression has been parsed.
+     *
+     * @return the unused portion of the string after a CycList
+     * expression has been parsed
+     */
+    public String remainingString () {
+        StringBuffer remainingStringBuffer = new StringBuffer();
+        if (tok == st.TT_EOF)
+            return "";
+        st.resetSyntax();
+        try {
+            while (true) {
+                tok = st.nextToken();
+                if (tok == st.TT_EOF)
+                    break;
+                remainingStringBuffer.append((char) tok);
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException (e.getMessage());
+        }
+        return remainingStringBuffer.toString();
     }
 
     /**
@@ -134,7 +167,6 @@ public class CycListParser  {
      * @return the corresponding <tt>CycList</tt>
      */
     public CycList read (StreamTokenizer st) throws CycApiException {
-        int tok;
         endQuote = false;
 
         // Read and parse a lisp symbolic expression.

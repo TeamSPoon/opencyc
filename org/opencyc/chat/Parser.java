@@ -121,9 +121,8 @@ public class Parser {
             constantNameBuffer.append(text.charAt(index++));
         }
         String constantName = constantNameBuffer.toString();
-        String script = "(cyc-create \"" + constantName + "\")";
-        CycList createCommand = cycAccess.makeCycList(script);
-        answer[0] = createCommand;
+        String script = "(cyc-create-new-permanent \"" + constantName + "\")";
+        answer[0] =  cycAccess.makeCycList(script);
         return answer;
     }
 
@@ -155,22 +154,59 @@ public class Parser {
             answer[0] = "I do not recognize the constant to be renamed.";
             return answer;
         }
-        StringBuffer constantNameBuffer = new StringBuffer();
+        StringBuffer oldConstantNameBuffer = new StringBuffer();
         text = text.substring(index);
         index = 0;
         while (true) {
             if (index >= text.length()) {
-                answer[0] = "I do not recognize the new constant name.";
+                answer[0] = "I do not recognize the old constant name.";
+                return answer;
+            }
+            if (text.charAt(index) == ' ') {
+                break;
+            }
+            oldConstantNameBuffer.append(text.charAt(index++));
+        }
+        String oldConstantName = oldConstantNameBuffer.toString();
+        index = text.indexOf(" to ", index);
+        if (index == -1) {
+            answer[0] = "I expected the word \"to\".";
+            return answer;
+        }
+        text = text.substring(index + 4);
+        index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "The new constant name is not properly quoted.";
                 return answer;
             }
             if (text.charAt(index) == '"') {
                 break;
             }
-            constantNameBuffer.append(text.charAt(index));
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "The new constant name is not properly quoted.";
+            return answer;
         }
-        String constantName = constantNameBuffer.toString();
-        String script = "(cyc-create \"" + constantName + "\")";
-        CycList createCommand = cycAccess.makeCycList(script);
+        StringBuffer newConstantNameBuffer = new StringBuffer();
+        if (index < text.length() - 1)
+            text = text.substring(index + 1);
+        index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "The new constant name is not properly quoted.";
+                return answer;
+            }
+            if (text.charAt(index) == '"') {
+                break;
+            }
+            newConstantNameBuffer.append(text.charAt(index++));
+        }
+        String newConstantName = newConstantNameBuffer.toString();
+        String script = "(cyc-rename " + oldConstantName + " \"" + newConstantName + "\")";
+        answer[0] = cycAccess.makeCycList(script);
         return answer;
     }
 
@@ -185,6 +221,35 @@ public class Parser {
     protected Object[] parseKillCommand (String userInput)
         throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
+        String text = userInput.substring(4);
+        int index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "I do not recognize the constant to be killed.";
+                return answer;
+            }
+            if (text.charAt(index) == '#') {
+                break;
+            }
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "I do not recognize the constant to be killed.";
+            return answer;
+        }
+        StringBuffer constantNameBuffer = new StringBuffer();
+        while (true) {
+            if (index >= text.length())
+                break;
+
+            if (text.charAt(index) == ' ' || text.charAt(index) == '.')
+                break;
+            constantNameBuffer.append(text.charAt(index++));
+        }
+        String constantName = constantNameBuffer.toString();
+        String script = "(cyc-kill " + constantName + ")";
+        answer[0] =  cycAccess.makeCycList(script);
         return answer;
     }
 
@@ -199,6 +264,35 @@ public class Parser {
     protected Object[] parseAssertCommand (String userInput)
         throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
+        String text = userInput.substring(6);
+        int index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "I do not recognize the CycL sentence to be asserted.";
+                return answer;
+            }
+            if (text.charAt(index) == '(') {
+                break;
+            }
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "I do not recognize the CycL sentence to be asserted.";
+            return answer;
+        }
+        text = text.substring(index);
+        CycListParser cycListParser = new CycListParser(cycAccess);
+        CycList assertionSentence = null;
+        try {
+            assertionSentence = cycListParser.read(text);
+        }
+        catch (Exception e) {
+            answer[0] = "I do not understand the CycL sentence to be asserted.";
+            return answer;
+        }
+        String script = "(cyc-assert '" + assertionSentence.cyclify() + ")";
+        answer[0] =  cycAccess.makeCycList(script);
         return answer;
     }
 

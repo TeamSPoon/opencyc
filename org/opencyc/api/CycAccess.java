@@ -93,6 +93,17 @@ public class CycAccess {
      */
     public int messagingMode = CycConnection.DEFAULT_MESSAGING_MODE;
 
+    /**
+     * Parameter indicating that compatibility with older versions of the OpenCyc api is desired.
+     */
+    protected boolean isLegacyMode = false;
+
+    /**
+     * Default value for isLegacyMode is no compatibility with older versions of the OpenCyc api.
+     */
+    public static final boolean DEFAULT_IS_LEGACY_MODE = false;
+
+
     protected String hostName;
     protected int port;
     protected int communicationMode;
@@ -234,7 +245,8 @@ public class CycAccess {
         this(CycConnection.DEFAULT_HOSTNAME,
              CycConnection.DEFAULT_BASE_PORT,
              CycConnection.DEFAULT_COMMUNICATION_MODE,
-             CycAccess.DEFAULT_CONNECTION);
+             CycAccess.DEFAULT_CONNECTION,
+             CycAccess.DEFAULT_IS_LEGACY_MODE);
     }
 
     /**
@@ -269,11 +281,13 @@ public class CycAccess {
         this(hostName,
              CycConnection.DEFAULT_BASE_PORT,
              CycConnection.DEFAULT_COMMUNICATION_MODE,
-             CycAccess.DEFAULT_CONNECTION);
+             CycAccess.DEFAULT_CONNECTION,
+             false);
     }
 
     /**
-     * Constructs a new CycAccess object given a host name, port, communication mode and persistence indicator.
+     * Constructs a new CycAccess object given a host name, port,
+     * communication mode, persistence indicator and legacy mode.
      *
      * @param hostName the host name
      * @param basePort the base (HTML serving) TCP socket port number
@@ -289,10 +303,38 @@ public class CycAccess {
                      int communicationMode,
                      boolean persistentConnection)
         throws IOException, UnknownHostException, CycApiException {
+        this(hostName,
+             basePort,
+             communicationMode,
+             persistentConnection,
+             false);
+    }
+
+    /**
+     * Constructs a new CycAccess object given a host name, port,
+     * communication mode, persistence indicator and legacy mode.
+     *
+     * @param hostName the host name
+     * @param basePort the base (HTML serving) TCP socket port number
+     * @param communicationMode either ASCII_MODE or BINARY_MODE
+     * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with
+     * the OpenCyc server
+     * @param isLegacyMode indicates if legacy OpenCyc server compatibility is desired
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycAccess(String hostName,
+                     int basePort,
+                     int communicationMode,
+                     boolean persistentConnection,
+                     boolean isLegacyMode)
+        throws IOException, UnknownHostException, CycApiException {
         this.hostName = hostName;
         this.port = basePort;
         this.communicationMode = communicationMode;
         this.persistentConnection = persistentConnection;
+        this.isLegacyMode = isLegacyMode;
         if (persistentConnection)
             cycConnection = new CycConnection(hostName, port, communicationMode, this);
         commonInitialization();
@@ -755,7 +797,7 @@ public class CycAccess {
             thing = getKnownConstantByGuid("bd5880f4-9c29-11b1-9dad-c379636f7270");
         if (inferencePSC == null)
             inferencePSC = getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
-        if (universalVocabularyMt == null)
+        if ((! isLegacyMode) && (universalVocabularyMt == null))
             universalVocabularyMt = getKnownConstantByGuid("dff4a041-4da2-11d6-82c0-0002b34c7c9f");
         if (bookkeepingMt == null)
             bookkeepingMt = getKnownConstantByGuid("beaed5bd-9c29-11b1-9dad-c379636f7270");
@@ -832,8 +874,12 @@ public class CycAccess {
      */
     public Integer getConstantId (String constantName)
         throws IOException, UnknownHostException, CycApiException {
-        String command = "(cand (boolean (find-constant \"" + constantName + "\"))\n" +
-                         "      (valid-constant (find-constant \"" + constantName + "\")))";
+        String command;
+        if (isLegacyMode)
+            command = "(boolean (find-constant \"" + constantName + "\"))";
+        else
+            command = "(cand (boolean (find-constant \"" + constantName + "\"))\n" +
+            "      (valid-constant (find-constant \"" + constantName + "\")))";
         boolean constantExists = converseBoolean(command);
         if (constantExists) {
             command = "(constant-internal-id (find-constant \"" + constantName + "\"))";

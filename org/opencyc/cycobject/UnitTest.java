@@ -711,6 +711,11 @@ public class UnitTest extends TestCase {
             listAsString = "(" + Double.toString(1.0E-05) + ")";
             CycList cycList19a = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(listAsString, cycList19a.cyclify());
+            CycListParser cycListParser = new CycListParser(cycAccess);
+            listAsString = "(1 2 3) 4 \"5 6\" 7 (8 9 10) 11 test";
+            CycList cycList19b = cycListParser.read(listAsString);
+            Assert.assertEquals("(1 2 3)", cycList19b.toString());
+            Assert.assertEquals(" 4 \"5 6\" 7 (8 9 10) 11 test", cycListParser.remainingString());
         }
         catch (Exception e) {
             e.printStackTrace();

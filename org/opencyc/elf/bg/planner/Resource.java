@@ -34,9 +34,7 @@ public class Resource {
 
   //// Constructors
 
-  /**
-   * Creates a new instance of Resource
-   */
+  /** Creates a new instance of Resource */
   public Resource() {
   }
 
@@ -89,10 +87,11 @@ public class Resource {
     this.resourceName = resourceName;
   }
 
-  /**
-   * the name of the console resource
-   */
+  /** the name of the console resource */
   public static final String CONSOLE = "console"; 
+  
+  /** the name of the user resource */
+  public static final String USER = "user"; 
   
   //// Protected Area
 

@@ -20,7 +20,9 @@ import org.opencyc.elf.message.JobAssignmentStatus;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
 
+import org.opencyc.elf.wm.ActionLibrary;
 import org.opencyc.elf.wm.TaskFrameLibrary;
+import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 import java.util.ArrayList;
@@ -34,12 +36,11 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
-/**
- * JobAssigner performs the non-temporal (for example spatial) task decomposition
+/** JobAssigner performs the non-temporal (for example spatial) task decomposition
  * among the available agents and resources.
- * 
+ *
  * @version $Id$
- * @author Stephen L. Reed  
+ * @author Stephen L. Reed
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
@@ -59,20 +60,17 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class JobAssigner extends BufferedNodeComponent implements Actuator {
-
+  
   //// Constructors
-
-  /**
-   * Creates a new instance of JobAssigner within the given node, that can accompish
+  
+  /** Creates a new instance of JobAssigner within the given node, that can accompish
    * the given named actions.
    *
    * @param node the containing ELF node
    * @param actionCapabilities the names of actions that this virtual actuator can accomplish
    * @param jobAssignerChannel the takable channel from which messages are input
    */
-  public JobAssigner (Node node,
-                      List actionCapabilities,
-                      Takable jobAssignerChannel) {
+  public JobAssigner(Node node, List actionCapabilities, Takable jobAssignerChannel) {
     setNode(node);
     this.actionCapabilities = actionCapabilities;
     this.jobAssignerChannel = jobAssignerChannel;
@@ -80,18 +78,15 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   }
   
   //// Public Area
-
-  /** 
-   * Initializes with the given input and output channels and starts consuming task commands.
+  
+  /** Initializes with the given input and output channels and starts consuming task commands.
    *
    * @param executorChannel the puttable channel to which messages are output to the higher
    * level executor, or null if this is the highest level
    */
-  public void initialize (Puttable executorChannel) {
+  public void initialize(Puttable executorChannel) {
     getLogger().info("Initializing JobAssigner");
-    consumer = new Consumer(jobAssignerChannel,
-                            executorChannel,
-                            this);
+    consumer = new Consumer(jobAssignerChannel, executorChannel, this);
     executor = new ThreadedExecutor();
     try {
       executor.execute(consumer);
@@ -101,9 +96,8 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       System.exit(1);
     }
   }
-
-  /** 
-   * Gets the puttable channel for this node component to which other node
+  
+  /** Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
    * @return the puttable channel for this node component to which other node
@@ -112,11 +106,10 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    */
   public Puttable getChannel() {
     return (Puttable) jobAssignerChannel;
-  }  
-
-  /**
-   * Returns true if the given object equals this object.
-   * 
+  }
+  
+  /** Returns true if the given object equals this object.
+   *
    * @param obj the given object
    * @return true if the given object equals this object
    */
@@ -124,14 +117,13 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
     if (!(obj instanceof JobAssigner)) {
       return false;
     }
-
+    
     //TODO
     return true;
   }
-
-  /**
-   * Returns a string representation of this object.
-   * 
+  
+  /** Returns a string representation of this object.
+   *
    * @return a string representation of this object
    */
   public String toString() {
@@ -139,26 +131,15 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
     return "";
   }
   
-  /**
-   * Gets the list of schedulers for this job assigner
+  /** Gets the list of scheduler infos for this job assigner
    *
-   * @return the list of schedulers for this job assigner
+   * @return the list of scheduler infos for this job assigner
    */
-  public List getSchedulers () {
-    return schedulers;
+  public List getSchedulerInfos() {
+    return schedulerInfos;
   }
-
-  /**
-   * Sets the list of schedulers for this job assigner
-   *
-   * @param schedulers the list of schedulers for this job assigner
-   */
-  public void setSchedulers (List schedulers) {
-    this.schedulers = schedulers;
-  }
-
-  /** 
-   * Gets the name of the virtual actuator.
+  
+  /** Gets the name of the virtual actuator.
    *
    * @return the name of the virtual actuator
    */
@@ -166,17 +147,17 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
     return getNode().getName();
   }
   
-  /**
-   * Gets the resources required by this virtual actuator by iterating over the 
+  /** Gets the resources required by this virtual actuator by iterating over the
    * resources required by the contained schedulers.
    *
    * @return the resources required by this virtual actuator
    */
   public List getResources() {
     List resources = new ArrayList();
-    Iterator schedulerIterator = schedulers.iterator();
+    Iterator schedulerIterator = schedulerInfos.iterator();
     while (schedulerIterator.hasNext()) {
-      Scheduler scheduler = (Scheduler) schedulerIterator.next();
+      JobAssigner.SchedulerInfo schedulerInfo = (JobAssigner.SchedulerInfo) schedulerIterator.next();
+      Scheduler scheduler = schedulerInfo.scheduler;
       Iterator resourceIterator = scheduler.getResources().iterator();
       while (resourceIterator.hasNext()) {
         Resource resource = (Resource) resourceIterator.next();
@@ -187,8 +168,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
     return resources;
   }
   
-  /**
-   * Gets the names of actions that this virtual actuator can accomplish.
+  /** Gets the names of actions that this virtual actuator can accomplish.
    *
    * @return names of the actions that this virtual actuator can accomplish
    */
@@ -197,85 +177,80 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   }
   
   //// Protected Area
-
+  
   /** Thread which processes the input message channel. */
   protected class Consumer implements Runnable {
     
     /** the takable channel from which messages are input */
     protected final Takable jobAssignerChannel;
     
-    /**
-     * the puttable channel to which messages are output to the higher
+    /** the puttable channel to which messages are output to the higher
      * level executor, or null if this is the highest level
      */
     protected Puttable executorChannel;
     
     /** the parent node component */
     protected NodeComponent nodeComponent;
-          
+    
     /** the node's commanded task */
     protected TaskCommand taskCommand;
     
     /** the task frame for the current task command */
     protected TaskFrame taskFrame;
     
-    /**
-     * Creates a new instance of Consumer.
+    /** Creates a new instance of Consumer.
      *
      * @param jobAssignerChannel the takable channel from which messages are input
      * @param executorChannel the puttable channel to which messages are output to the higher
      * level executor, or null if this is the highest level
      * @param nodeComponent the parent node component
      */
-    protected Consumer (Takable jobAssignerChannel,
-                        Puttable executorChannel,
-                        NodeComponent nodeComponent) { 
+    protected Consumer(Takable jobAssignerChannel,
+    Puttable executorChannel,
+    NodeComponent nodeComponent) {
       getLogger().info("Creating JobAssigner.Consumer");
       this.jobAssignerChannel = jobAssignerChannel;
       this.executorChannel = executorChannel;
       this.nodeComponent = nodeComponent;
     }
-
+    
     /** Reads messages from the input queue and processes them. */
-    public void run () {
+    public void run() {
       getLogger().info("Running JobAssigner.Consumer");
       try {
-        while (true) { 
-          dispatchMsg((GenericMsg) jobAssignerChannel.take()); 
+        while (true) {
+          dispatchMsg((GenericMsg) jobAssignerChannel.take());
         }
       }
       catch (InterruptedException ex) {}
     }
-     
-    /**
-     * Sets the puttable channel to which messages are output to the higher
+    
+    /** Sets the puttable channel to which messages are output to the higher
      * level executor
      *
      * @param executorChannel the puttable channel to which messages are output to the higher
      * level executor, or null if this is the highest level
      */
-    public void setExecutorChannel (Puttable executorChannel) {
+    public void setExecutorChannel(Puttable executorChannel) {
       this.executorChannel = executorChannel;
     }
     
-    /**
-     * Dispatches the given input channel message by type.
+    /** Dispatches the given input channel message by type.
      *
      * @param genericMsg the given input channel message
      */
-    void dispatchMsg (GenericMsg genericMsg) {
+    void dispatchMsg(GenericMsg genericMsg) {
       if (genericMsg instanceof DoTaskMsg)
         processDoTaskMsg((DoTaskMsg) genericMsg);
       else if (genericMsg instanceof SchedulerStatusMsg)
         processSchedulerStatusMsg((SchedulerStatusMsg) genericMsg);
     }
-  
-    /**
-     * Processes the do task message.
+    
+    /** Processes the do task message.
      *
      * @param doTaskMsg the do task message that contains the commanded task
      */
-    protected void processDoTaskMsg (DoTaskMsg doTaskMsg) {
+    protected void processDoTaskMsg(DoTaskMsg doTaskMsg) {
       getLogger().info("JobAssigner proccessing " + doTaskMsg);
       //TODO handle goals if the task command is not specified
       taskCommand = doTaskMsg.getTaskCommand();
@@ -284,31 +259,107 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       String taskFrameName = actionCommand.getName();
       getLogger().info("task name " + taskFrameName);
       TaskFrame taskFrame = TaskFrameLibrary.getInstance().getTaskFrame(taskFrameName);
-      
-      // how to initialize the state?
-      
-      // evaluate the schedule predicates to find the first true one
-      
+      List conditionalScheduleSets = determineBestScheduleSet(taskFrame);
+      List scheduleSet = determineScheduleSet(conditionalScheduleSets);
+      assignSchedulesToSchedulers(scheduleSet);
       
       
-      // find agents that can collectively execute the task
-      
-      // find the best schedule for each agent
       
     }
         
-    /**
-     * Processes the schedule status message.
+    /** Chooses the best of the alternative schedule sets.
+     *
+     * @param taskFrame the task frame
+     * @return the best of the alternative schedule sets 
+     */
+    protected List determineBestScheduleSet(TaskFrame taskFrame) {
+      //TODO Use the plan simulator and plan evaluator to chose the best schedule from the schedule set.
+      // For now just use the first one.
+      return (List) taskFrame.getScheduleAlternatives().get(0);
+    }
+    
+    /** Returns the schedule set for the first true schedule set predicate.
+     *
+     * @param conditionalScheduleSets the conditional schedule sets
+     * @return the schedule set for the first true schedule set predicate
+     */
+    protected List determineScheduleSet(List conditionalScheduleSets) {
+      State state = getNode().getWorldModel().getState();
+      Iterator iter = conditionalScheduleSets.iterator();
+      while (iter.hasNext()) {
+        ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) iter.next();
+        if (conditionalScheduleSet.getPredicateExpression().evaluate(state))
+          return conditionalScheduleSet.getScheduleSet();
+      }
+      throw new RuntimeException("no valid schedule for " + taskFrame);
+    }
+    
+    /** Assigns the given schedule set to the schedulers in two passes.  In the first pass schedules
+     * having direct actuators and sensors are assigned to schedulers (direct schedulers) which have 
+     * matching direct actuators and sensors.  New direct schedulers are created for new direct actuators
+     * and direct sensors appearing in the schedules.  Unmatched direct schedulers are releaseed.  In the
+     * second pass, schedules are assinged to the first available scheduler.  New schedulers are created
+     * in the event of an insufficient number of available schedulers.  Conversely, if any schedulers 
+     * remain available after all the schedules have been assigned, then these schedulers are released.
+     *
+     * @param scheduleSet the given schedule set to assign to schedulers
+     */
+    protected void assignSchedulesToSchedulers(List scheduleSet) {
+      // mark all schedulers as available
+      Iterator iter = schedulerInfos.iterator();
+      while (iter.hasNext()) {
+        JobAssigner.SchedulerInfo schedulerInfo = (JobAssigner.SchedulerInfo) iter.next();
+        schedulerInfo.isAvailable = true;
+      }
+      // pass one to assign matching direct schedules to existing direct schedulers
+      List unmatchedDirectSchedules = new ArrayList();
+      Iterator scheduleIterator = scheduleSet.iterator();
+      while (scheduleIterator.hasNext()) {
+        boolean foundMatchingScheduler = false;
+        Schedule schedule = (Schedule) scheduleIterator.next();
+        if (schedule.getActuatorName() == null &&
+            schedule.getSensorName() == null)
+          continue;
+        Iterator schedulerIterator = schedulerInfos.iterator();
+        while (schedulerIterator.hasNext()) {
+          JobAssigner.SchedulerInfo schedulerInfo = (JobAssigner.SchedulerInfo) schedulerIterator.next();
+          if (! schedulerInfo.isAvailable)
+            continue;
+          Schedule previousSchedule = schedulerInfo.schedule;
+          if ((schedule.getActuatorName() != null &&
+               previousSchedule.getActuatorName() != null &&
+               schedule.getActuatorName().equals(previousSchedule.getActuatorName())) ||
+              (schedule.getSensorName() != null &&
+               previousSchedule.getSensorName() != null &&
+               schedule.getSensorName().equals(previousSchedule.getSensorName()))) {
+            schedulerInfo.isAvailable = false;
+            schedulerInfo.schedule = schedule;
+            foundMatchingScheduler = true;
+            break;
+          }
+        }
+        if (! foundMatchingScheduler)
+          unmatchedDirectSchedules.add(schedule);
+      }
+      Iterator unmatchedDirectScheduleIterator = unmatchedDirectSchedules.iterator();
+      while (unmatchedDirectScheduleIterator.hasNext()) {
+        
+        //Scheduler scheduler = new Scheduler(getNode(), schedulerChannel, jobAssignerChannel);
+      }
+      // pass two to assign remaining schedules to existing schedulers
+    }
+    
+    /** Processes the schedule status message.
      *
      * @param schedulerStatusMsg he schedule status message
      */
-    protected void processSchedulerStatusMsg (SchedulerStatusMsg schedulerStatusMsg) {
+    protected void processSchedulerStatusMsg(SchedulerStatusMsg schedulerStatusMsg) {
       Status status = schedulerStatusMsg.getStatus();
       //TODO
     }
     
     /** Sends the job assignment status message to the higher-level executor. */
-    protected void sendJobAssignmentStatus () {
+    protected void sendJobAssignmentStatus() {
       //TODO
       Status status = new Status();
       
@@ -316,27 +367,38 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       jobAssignmentStatus.setSender(nodeComponent);
       jobAssignmentStatus.setStatus(status);
     }
-        
+    
+  }
+  
+  /** Contains the current schedulers and their assigned schedules. */
+  protected class SchedulerInfo {
+    /** the scheduler */
+    protected Scheduler scheduler;
+    
+    /** the schedule */
+    protected Schedule schedule;
+    
+    /** indicates that the scheduler is available for assigning a schedule */
+    protected boolean isAvailable;
   }
   
   /** Sends the decompose task frame message to ?. */
-  protected void decomposeTaskFrame () {
+  protected void decomposeTaskFrame() {
     //TODO
     // send via channel to ?
     // TaskCommand taskCommand
   }
   
-  /**
-   * Decomposes the function for the current task frame. (May return
+  /** Decomposes the function for the current task frame. (May return
    * a list of scheduler/job pairs.)
    */
-  protected void decomposeFunction () {
+  protected void decomposeFunction() {
     //TODO
     // TaskCommand taskCommand
   }
-    
+  
   //// Private Area
-
+  
   //// Internal Rep
   
   /** the names of actions that this virtual actuator can accomplish */
@@ -344,15 +406,15 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   
   /** the takable channel from which messages are input */
   protected Takable jobAssignerChannel;
-    
+  
   /** the thread which processes the input channel of messages */
   protected Consumer consumer;
   
   /** the executor of the consumer thread */
   protected Executor executor;
   
-  /** the list of schedulers for this job assigner */
-  protected List schedulers;
+  /** the list of scheduler infos for this job assigner */
+  protected List schedulerInfos;
   
   //// main
 }

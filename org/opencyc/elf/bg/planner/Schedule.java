@@ -107,8 +107,10 @@ public class Schedule {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[Schedule ");
     stringBuffer.append(plannedCommands.toString());
-    stringBuffer.append(" when: ");
-    stringBuffer.append(predicateExpression.toString());
+    if (predicateExpression != null) {
+      stringBuffer.append(" when: ");
+      stringBuffer.append(predicateExpression.toString());
+    }
     stringBuffer.append(" direct actuator: ");
     stringBuffer.append(directActuatorName);
     stringBuffer.append(" direct sensor: ");

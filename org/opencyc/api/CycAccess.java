@@ -4016,6 +4016,23 @@ public class CycAccess {
     }
 
     /**
+     * Finds a Cyc constant in the KB with the specified name
+     *
+     * @param constantName the name of the new constant
+     * @return the constant term or null if the argument name is null or if the
+     * term is not found
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycConstant find (String constantName)
+        throws IOException, UnknownHostException, CycApiException {
+        if (constantName == null)
+            return null;
+        return getConstantByName(constantName);
+    }
+
+    /**
      * Finds or creates a Cyc constant in the KB with the specified name.  The operation
      * will be added to the KB transcript for replication and archive.
      *
@@ -4335,6 +4352,35 @@ public class CycAccess {
                   this.getKnownConstantByGuid("c0fdf7e8-9c29-11b1-9dad-c379636f7270"),
                   cycFort,
                   nameString);
+    }
+
+    /**
+     * Assert a paraphrase format for the specified CycFort in the #$EnglishParaphraseMt.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param relation the given term
+     * @param genFormatString the genFormat string
+     * @param genFormatList the genFormat argument substitution sequence
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGenFormat (CycFort relation,
+                                 String genFormatString,
+                                 CycList genFormatList)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$genFormat <relation> <genFormatString> <genFormatList>)
+        CycList sentence = new CycList();
+        sentence.add(getKnownConstantByGuid("beed06de-9c29-11b1-9dad-c379636f7270"));
+        sentence.add(relation);
+        sentence.add(genFormatString);
+        if (genFormatList.size() == 0)
+            sentence.add(CycObjectFactory.nil);
+        else
+            sentence.add(genFormatList);
+        assertGaf(sentence,
+                  // #$EnglishParaphraseMt
+                  getKnownConstantByGuid("bda16220-9c29-11b1-9dad-c379636f7270"));
     }
 
     /**
@@ -5708,6 +5754,100 @@ public class CycAccess {
         }
 
     /**
+     * Creates a new binary predicate term.
+     *
+     * @param predicateName the name of the new binary predicate
+     * @param predicateType the type of binary predicate, for example
+     * #$TransitiveBinaryPredicate, which when null defaults to #$BinaryPredicate
+     * @param comment the comment for the new binary predicate, or null
+     * @param arg1Isa the argument position one type constraint, or null
+     * @param ar2Isa the argument position two type constraint, or null
+     * @param arg1Format the argument position one format constraint, or null
+     * @param arg2Format the argument position two format constraint, or null
+     * @param genlsPreds the more general binary predicate of which this new
+     * predicate is a specialization, that when null defaults to
+     * #$conceptuallyRelated
+     * @param genFormat the paraphrase generation string, or null
+     * @return the new binary predicate term
+     */
+    public CycConstant createBinaryPredicate (String predicateName,
+                                              String predicateTypeName,
+                                              String comment,
+                                              String arg1IsaName,
+                                              String arg2IsaName,
+                                              String arg1FormatName,
+                                              String arg2FormatName,
+                                              String genlPredsName,
+                                              String genFormatString,
+                                              String genFormatList)
+        throws IOException, CycApiException {
+        return createBinaryPredicate(predicateName,
+                                     find(predicateTypeName),
+                                     comment,
+                                     find(arg1IsaName),
+                                     find(arg2IsaName),
+                                     find(arg1FormatName),
+                                     find(arg2FormatName),
+                                     find(genlPredsName),
+                                     genFormatString,
+                                     makeCycList(genFormatList));
+        }
+
+    /**
+     * Creates a new binary predicate term.
+     *
+     * @param predicateName the name of the new binary predicate
+     * @param predicateType the type of binary predicate, for example
+     * #$TransitiveBinaryPredicate, which when null defaults to #$BinaryPredicate
+     * @param comment the comment for the new binary predicate, or null
+     * @param arg1Isa the argument position one type constraint, or null
+     * @param ar2Isa the argument position two type constraint, or null
+     * @param arg1Format the argument position one format constraint, or null
+     * @param arg2Format the argument position two format constraint, or null
+     * @param genlsPreds the more general binary predicate of which this new
+     * predicate is a specialization, that when null defaults to
+     * #$conceptuallyRelated
+     * @param genFormat the paraphrase generation string, or null
+     * @return the new binary predicate term
+     */
+    public CycConstant createBinaryPredicate (String predicateName,
+                                              CycFort predicateType,
+                                              String comment,
+                                              CycFort arg1Isa,
+                                              CycFort arg2Isa,
+                                              CycFort arg1Format,
+                                              CycFort arg2Format,
+                                              CycFort genlPreds,
+                                              String genFormatString,
+                                              CycList genFormatList)
+        throws IOException, CycApiException {
+        CycConstant predicate = findOrCreate(predicateName);
+        if (predicateType == null)
+            assertIsa(predicate, binaryPredicate);
+        else
+            assertIsa(predicate, predicateType);
+        if (comment != null)
+            assertComment(predicate, comment, baseKB);
+        if (arg1Isa != null)
+            assertArgIsa(predicate, 1, arg1Isa);
+        if (arg2Isa != null)
+            assertArgIsa(predicate, 2, arg2Isa);
+        if (arg1Format != null)
+            assertArgFormat(predicate, 1, arg1Format);
+        if (arg2Format != null)
+            assertArgFormat(predicate, 2, arg2Format);
+        if (genlPreds == null)
+            assertGenlPreds(predicate,
+                            // #$conceptuallyRelated
+                            getKnownConstantByGuid("bd58803e-9c29-11b1-9dad-c379636f7270"));
+        else
+            assertGenlPreds(predicate, genlPreds);
+        if (genFormatString != null && genFormatList != null)
+            assertGenFormat(predicate, genFormatString, genFormatList);
+        return predicate;
+        }
+
+    /**
      * Creates a new KB subset collection term.
      *
      * @param constantName the name of the new KB subset collection
@@ -6148,11 +6288,33 @@ public class CycAccess {
     public void assertArg1FormatSingleEntry (CycFort relation)
         throws IOException, UnknownHostException, CycApiException {
         // (#$arg1Format relation SingleEntry)
+        assertArgFormat(relation,
+                        1,
+                        getKnownConstantByGuid("bd5880eb-9c29-11b1-9dad-c379636f7270"));
+    }
+
+    /**
+     * Assert an argument format contraint for the given relation and argument position.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param relation the given relation
+     * @param argPosition the given argument position
+     * @param argNFormat the argument format constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertArgFormat (CycFort relation,
+                                 int argPosition,
+                                 CycFort argNFormat)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$argFormat relation argPosition argNFormat)
         CycList sentence = new CycList();
-        sentence.add(getKnownConstantByGuid("bd61886b-9c29-11b1-9dad-c379636f7270"));
+        sentence.add(getKnownConstantByGuid("bd8a36e1-9c29-11b1-9dad-c379636f7270"));
         sentence.add(relation);
-        sentence.add(getKnownConstantByGuid("bd5880eb-9c29-11b1-9dad-c379636f7270"));
-        assertGaf(sentence, universalVocabularyMt);
+        sentence.add(new Integer(argPosition));
+        sentence.add(argNFormat);
+        assertGaf(sentence, baseKB);
     }
 
 

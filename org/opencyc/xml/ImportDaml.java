@@ -86,6 +86,16 @@ public class ImportDaml implements StatementHandler {
     protected DamlTermInfo previousDamlTermInfo = null;
 
     /**
+     * URL string which defines the imported daml ontology
+     */
+    protected String damlOntologyDefiningURLString;
+
+    /**
+     * URL which defines the imported daml ontology
+     */
+    protected CycFort damlOntologyDefiningURL;
+
+    /**
      * Ontology import microtheory name.
      */
     protected String importMtName;
@@ -227,32 +237,37 @@ public class ImportDaml implements StatementHandler {
     /**
      * Parses and imports the given DAML URL.
      *
-     * @param damlPath the URL to import
+     * @param damlOntologyDefiningURLString the URL to import
      * @param importMtName the microtheory into which DAML content is asserted
      */
-    protected void importDaml (String damlPath,
+    protected void importDaml (String damlOntologyDefiningURLString,
                                String importMtName)
         throws IOException, CycApiException {
+        this.damlOntologyDefiningURLString = damlOntologyDefiningURLString;
         this.importMtName = importMtName;
         if (verbosity > 0)
-            Log.current.println("\nImporting " + damlPath + "\ninto " + importMtName);
+            Log.current.println("\nImporting " + damlOntologyDefiningURLString + "\ninto " + importMtName);
         importMt = cycAccess.getKnownConstantByName(importMtName);
+        damlOntologyDefiningURL =
+            new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                        damlOntologyDefiningURLString);
+        Log.current.println("Defining URL " + damlOntologyDefiningURL.cyclify());
         Log.current.println("\nStatements\n");
         //cycAccess.traceOn();
         InputStream in;
         URL url;
         try {
-            File ff = new File(damlPath);
+            File ff = new File(damlOntologyDefiningURLString);
             in = new FileInputStream(ff);
             url = ff.toURL();
         }
         catch (Exception ignore) {
             try {
-                url = new URL(damlPath);
+                url = new URL(damlOntologyDefiningURLString);
                 in = url.openStream();
             }
             catch (Exception e) {
-                System.err.println("ARP: Failed to open: " + damlPath);
+                System.err.println("ARP: Failed to open: " + damlOntologyDefiningURLString);
                 System.err.println("    " + ParseException.formatMessage(ignore));
                 System.err.println("    " + ParseException.formatMessage(e));
                 return;
@@ -262,13 +277,13 @@ public class ImportDaml implements StatementHandler {
             arp.load(in, url.toExternalForm());
         }
         catch (IOException e) {
-            System.err.println("Error: " + damlPath + ": " + ParseException.formatMessage(e));
+            System.err.println("Error: " + damlOntologyDefiningURLString + ": " + ParseException.formatMessage(e));
         }
         catch (SAXException sax) {
-            System.err.println("Error: " + damlPath + ": " + ParseException.formatMessage(sax));
+            System.err.println("Error: " + damlOntologyDefiningURLString + ": " + ParseException.formatMessage(sax));
         }
         if (verbosity > 0)
-            Log.current.println("\nDone importing " + damlPath + "\n");
+            Log.current.println("\nDone importing " + damlOntologyDefiningURLString + "\n");
     }
 
     /**
@@ -461,9 +476,11 @@ public class ImportDaml implements StatementHandler {
             if (arg2Constraints.size() > 1) {
             Log.current.println("*** ignoring extra literal argument constraints " +
                                 arg2Constraints.cyclify());
+            //TODO find most specific of the arg constraints.
             }
             CycFort arg2Constraint = (CycFort) arg2Constraints.first();
-            if (arg2Constraint.equals(cycAccess.getKnownConstantByName("SubLString"))) {
+            if (arg2Constraint.equals(cycAccess.getKnownConstantByName("SubLString")) ||
+                arg2Constraint.equals(cycAccess.getKnownConstantByName("CharacterString"))) {
                 cycAccess.assertGaf(importMt,
                                     predicate,
                                     subject,
@@ -795,7 +812,6 @@ public class ImportDaml implements StatementHandler {
         }
         else {
             String term = damlTermInfo.toString();
-            //Log.current.println("importing term: " + term);
             try {
                 cycFort = cycAccess.findOrCreate(term);
             }
@@ -807,9 +823,26 @@ public class ImportDaml implements StatementHandler {
             if (cycFort == null)
                 // error
                 return cycFort;
+            if (damlTermInfo.equivalentDamlCycTerm != null) {
+                // not an imported term, but an equivalent existing Cyc term
+                //Log.current.println("*** not importing " + cycFort.cyclify());
+                damlTermInfo.cycFort = cycFort;
+                previousDamlTermInfo = damlTermInfo;
+                return cycFort;
+            }
+            //Log.current.println("importing term: " + term);
             cycAccess.assertIsa(cycFort,
                                 kbSubsetCollection,
                                 bookkeepingMt);
+
+
+            // TODO be more selective about the defining assertion:
+            // use rdf:type (#$isa)
+
+            cycAccess.assertGaf(importMt,
+                                cycAccess.getKnownConstantByName("damlOntology"),
+                                cycFort,
+                                damlOntologyDefiningURL);
         }
         damlTermInfo.cycFort = cycFort;
         previousDamlTermInfo = damlTermInfo;

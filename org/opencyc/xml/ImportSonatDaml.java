@@ -83,7 +83,7 @@ public class ImportSonatDaml {
         }
         else if (localHostName.equals("thinker")) {
             cycAccess = new CycAccess("MCCARTHY",
-                                      4600,
+                                      3600,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);
         }
@@ -126,7 +126,7 @@ public class ImportSonatDaml {
                            ontologyNicknames,
                            kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
-        //for (int i = 16; i < damlDocInfos.size(); i++) {
+        //for (int i = 31; i < damlDocInfos.size(); i++) {
         for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
@@ -148,14 +148,14 @@ public class ImportSonatDaml {
      */
     protected void initializeDocumentsToImport () {
         // 0
-        damlDocInfos.add(new DamlDocInfo("http://xmlns.com/foaf/0.1/",
-                                         "DamlSonatFoafOntologyMt"));
+        damlDocInfos.add(new DamlDocInfo("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml",
+                                         "DamlSonatDrcVesOntologyMt"));
         // 1
         damlDocInfos.add(new DamlDocInfo("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont.daml",
                                          "DamlSonatDrcDcesOntologyMt"));
         // 2
-        damlDocInfos.add(new DamlDocInfo("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml",
-                                         "DamlSonatDrcVesOntologyMt"));
+        damlDocInfos.add(new DamlDocInfo("http://xmlns.com/foaf/0.1/",
+                                         "DamlSonatFoafOntologyMt"));
         // 3
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/10/html/airport-ont.daml",
                                          "DamlSonatAirportOntologyMt"));
@@ -397,14 +397,14 @@ public class ImportSonatDaml {
             cycAccess.setKePurpose("DAMLProject");
         }
 
-        // DamlDatatypeProperty
+        // #$DamlDatatypeProperty
         cycAccess.createCollection("DamlDatatypeProperty",
                                    "The collection of #$Predicates having a " +
                                    "SubLAtomicTerm as the second argument.",
                                    "BaseKB",
                                    "PredicateCategory",
                                    "IrreflexiveBinaryPredicate");
-        // DamlObjectProperty
+        // #$DamlObjectProperty
         cycAccess.createCollection("DamlObjectProperty",
                                    "The collection of #$Predicates not having a " +
                                    "SubLAtomicTerm as the second argument.",
@@ -412,7 +412,7 @@ public class ImportSonatDaml {
                                    "PredicateCategory",
                                    "BinaryPredicate");
 
-        // URLFn
+        // #$URLFn
         cycAccess.createIndivDenotingUnaryFunction(
             "URLFn",
             "An instance of both IndividualDenotingFunction and ReifiableFunction. " +
@@ -421,6 +421,32 @@ public class ImportSonatDaml {
             "BaseKB",
             "CharacterString",
             "UniformResourceLocator");
+
+        // #$damlOntology
+        String genlPreds = null;
+        if (! cycAccess.isOpenCyc())
+            genlPreds = "salientURL";
+        cycAccess.createBinaryPredicate("damlOntology",
+                                        // predicate type
+                                        null,
+                                        // comment
+                                        "A predicate relating an imported DAML (Darpa " +
+                                        "Agent Markup Language) concept with its source" +
+                                        "URL.",
+                                        // arg1Isa
+                                        "Thing",
+                                        // arg2Isa
+                                        "UniformResourceLocator",
+                                        // arg1Format
+                                        null,
+                                        // arg2Format
+                                        "SingleEntry",
+                                        genlPreds,
+                                        // genFormatString
+                                        "~a's DAML ontology URL is ~a",
+                                        // genFormatList
+                                        "()"
+                                        );
     }
 
     /**

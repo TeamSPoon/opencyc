@@ -5,8 +5,8 @@ import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.BehaviorGeneration;
 
-import org.opencyc.elf.bg.planner.Planner;
 import org.opencyc.elf.bg.planner.Schedule;
+import org.opencyc.elf.bg.planner.Scheduler;
 
 import org.opencyc.elf.bg.procedure.Procedure;
 
@@ -96,21 +96,21 @@ public class Executor extends NodeComponent {
   }
 
   /**
-   * Gets the planner whose plans this executor executes
+   * Gets the scheduler whose plans this executor executes
    * 
-   * @return the planner whose plans this executor executes
+   * @return the scheduler whose plans this executor executes
    */
-  public Planner getPlanner() {
-    return planner;
+  public Scheduler getScheduler() {
+    return scheduler;
   }
 
   /**
-   * Sets the planner whose plans this executor executes
+   * Sets the scheduler whose plans this executor executes
    * 
-   * @param planner the planner whose plans this executor executes
+   * @param scheduler the scheduler whose plans this executor executes
    */
-  public void setPlanner(Planner planner) {
-    this.planner = planner;
+  public void setSchedulerr(Scheduler scheduler) {
+    this.scheduler = scheduler;
   }
 
   //// Protected Area
@@ -170,6 +170,6 @@ public class Executor extends NodeComponent {
   /** the behavior generation instance which owns this executor */
   protected BehaviorGeneration behaviorGeneration;
 
-  /** the planner whose plans this executor executes */
-  protected Planner planner;
+  /** the scheduler whose plans this executor executes */
+  protected Scheduler scheduler;
 }

@@ -80,12 +80,12 @@ public class GenericAgent implements MessageReceiver {
     /**
      * the interface for interacting with the CoABS agent community
      */
-    protected CoAbsCommunityAdapter coAbsCommunityAdapter;
+    protected AgentCommunityAdapter coAbsCommunityAdapter;
 
     /**
      * the interface for interacting with the FIPA-OS agent community
      */
-    protected FipaOsCommunityAdapter fipaOsCommunityAdapter;
+    protected AgentCommunityAdapter fipaOsCommunityAdapter;
 
     /**
      * The interface to either the CoABS or FIPA-OS agent community.  This reference
@@ -152,9 +152,12 @@ public class GenericAgent implements MessageReceiver {
         if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY ||
             remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AND_COABS_AGENT_COMMUNITIES) {
             try {
-                coAbsCommunityAdapter = new CoAbsCommunityAdapter(this, verbosity);
+                Class coAbsCommunityAdapterClass =
+                    Class.forName("org.opencyc.cycagent.coabs.CoAbsCommunityAdapter");
+                coAbsCommunityAdapter = (AgentCommunityAdapter) coAbsCommunityAdapterClass.newInstance();
+                coAbsCommunityAdapter.initialize(this, verbosity);
             }
-            catch (IOException e) {
+            catch (Exception e) {
                 Log.current.errorPrintln("Error creating CoAbsCommunityAdapter " + e.getMessage());
                 if (coAbsCommunityAdapter != null)
                     coAbsCommunityAdapter.deregister();
@@ -216,7 +219,7 @@ public class GenericAgent implements MessageReceiver {
             else
                 Log.current.errorPrintln("Invalid remoteAgentCommunity " + remoteAgentCommunity);
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Log.current.errorPrintln("Exception " + e.getMessage() +
                                      "\nwhile replying to echo request with\n" + echoReplyAcl);
         }
@@ -252,7 +255,7 @@ public class GenericAgent implements MessageReceiver {
      *
      * @return the CoABS agent community adapter
      */
-    public CoAbsCommunityAdapter getCoAbsCommunityAdapter () {
+    public AgentCommunityAdapter getCoAbsCommunityAdapter () {
         return coAbsCommunityAdapter;
     }
 
@@ -261,7 +264,7 @@ public class GenericAgent implements MessageReceiver {
      *
      * @return the FIPA-OS agent community adapter
      */
-    public FipaOsCommunityAdapter getFipaOsCommunityAdapter () {
+    public AgentCommunityAdapter getFipaOsCommunityAdapter () {
         return fipaOsCommunityAdapter;
     }
 

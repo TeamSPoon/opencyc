@@ -7,6 +7,12 @@ import fipaos.parser.ParserException;
 /**
  * Provides a suite of JUnit test cases for the <tt>org.opencyc.cycagent.coabs</tt> package.<p>
  *
+ * The package org.opencyc.cycagent.coabs is an optional package for OpenCyc.  If the
+ * developer does not have access to the CoABS grid classes from Global Infotek, then
+ * the org.opencyc.cycagent.coabs package can be ommitted from the build.  The FIPA-OS
+ * agent community is freely available as open source and OpenCyc can be configured to
+ * work with it alone, or in combination with CoABS when available.
+ *
  * @version $Id$
  * @author Stephen L. Reed
  *

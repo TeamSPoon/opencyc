@@ -8,6 +8,7 @@ import net.jini.core.entry.Entry;
 import net.jini.lookup.ServiceIDListener;
 import net.jini.core.lookup.*;
 import fipaos.ont.fipa.*;
+import fipaos.ont.fipa.fipaman.*;
 import fipaos.parser.ParserException;
 import com.globalinfotek.coabsgrid.*;
 import com.globalinfotek.coabsgrid.entry.fipa98.AMSAgentDescription;
@@ -16,6 +17,12 @@ import org.opencyc.util.*;
 
 /**
  * Provides the interface for interacting with the CoABS agent community.<p>
+ *
+ * The package org.opencyc.cycagent.coabs is an optional package for OpenCyc.  If the
+ * developer does not have access to the CoABS grid classes from Global Infotek, then
+ * the org.opencyc.cycagent.coabs package can be ommitted from the build.  The FIPA-OS
+ * agent community is freely available as open source and OpenCyc can be configured to
+ * work with it alone, or in combination with CoABS when available.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -95,12 +102,23 @@ public class CoAbsCommunityAdapter
     Directory directory;
 
     /**
-     * Constructs a new CoAbsCommunityAdapter for the given CoAbs agent, with the given verbosity.
+     * Constructs a new CoAbsCommunityAdapter.
+     * The default constructor is required for convenient instantiation via the class newInstance method.
+     * The CoABS source package is optional when building OpenCyc and this object is contructed using
+     * its string name to avoid compilation errors when the org.opencyc.cycagent.coabs source package
+     * is ommited from the build.
+     */
+    public CoAbsCommunityAdapter() throws IOException {
+    }
+
+    /**
+     * Initializes the new CoAbsCommunityAdapter instance.
      *
+     * @param messageReceiver the parent application which can receive agent messages via a callback
      * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input
      */
-    public CoAbsCommunityAdapter(MessageReceiver messageReceiver, int verbosity) throws IOException {
+    public void initialize (MessageReceiver messageReceiver, int verbosity) throws IOException {
         myAgentName = messageReceiver.getMyAgentName();
         this.messageReceiver = messageReceiver;
         this.verbosity = verbosity;
@@ -505,6 +523,13 @@ public class CoAbsCommunityAdapter
         if (regHelper.isRegistered())
             deregister();
         regHelper.terminate();
+    }
+
+    /**
+     * Gets the AgentID of this Agent.  Not used by the CoAbsCommunityAdapter.
+     */
+    public AgentID getAID () {
+        return null;
     }
 
     /**

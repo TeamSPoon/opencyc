@@ -638,7 +638,7 @@ public class ExportHtml {
             directIsa = (CycFort) isas.get(i);
             if (selectedCycForts.contains(directIsa)) {
                 if (verbosity > 2)
-                    Log.current.println("traversed up from isa " + isa.cyclify() +
+                    Log.current.println("  traversed up from isa " + isa.cyclify() +
                                         " to find selected isa " + directIsa);
                 return directIsa;
             }

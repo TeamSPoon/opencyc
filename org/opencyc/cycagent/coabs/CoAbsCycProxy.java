@@ -5,6 +5,12 @@ import org.opencyc.cycagent.*;
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
  *
+ * The package org.opencyc.cycagent.coabs is an optional package for OpenCyc.  If the
+ * developer does not have access to the CoABS grid classes from Global Infotek, then
+ * the org.opencyc.cycagent.coabs package can be ommitted from the build.  The FIPA-OS
+ * agent community is freely available as open source and OpenCyc can be configured to
+ * work with it alone, or in combination with CoABS when available.<p>
+ *
  * An instance of this class is created for each unique cyc agent which makes
  * itself known to the agent manager.  A cyc image can host one or more cyc
  * agents.  Each message envelope from a cyc agent contains a parameter to

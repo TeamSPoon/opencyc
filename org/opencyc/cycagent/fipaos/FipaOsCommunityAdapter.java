@@ -128,6 +128,16 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
     }
 
     /**
+     * Not used in the FipaOsCommunityAdapter.
+     *
+     * @param messageReceiver the parent application which can receive agent messages via a callback
+     * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input
+     */
+    public void initialize (MessageReceiver messageReceiver, int verbosity) throws IOException {
+    }
+
+    /**
      * Registers the agent on the FIPA-OS agent community.
      */
     protected void register() {

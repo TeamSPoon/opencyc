@@ -3,6 +3,7 @@ package org.opencyc.cycagent;
 import java.io.IOException;
 import javax.naming.TimeLimitExceededException;
 import fipaos.ont.fipa.*;
+import fipaos.ont.fipa.fipaman.*;
 import org.opencyc.util.Timer;
 
 /**
@@ -88,6 +89,15 @@ public interface AgentCommunityAdapter {
     public static final String CYC_ECHO_ONTOLOGY = "cyc-echo";
 
     /**
+     * Initializes the new CoAbsCommunityAdapter instance.  Not used in the FipaOsCommunityAdapter.
+     *
+     * @param messageReceiver the parent application which can receive agent messages via a callback
+     * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input
+     */
+    public void initialize (MessageReceiver messageReceiver, int verbosity) throws IOException;
+
+    /**
      * Sends an Agent Communication Language message.
      *
      * @param acl the Agent Communication Language message to be sent
@@ -124,6 +134,11 @@ public interface AgentCommunityAdapter {
      * Terminate this agent.
      */
     public void terminate();
+
+    /**
+     * Gets the AgentID of this Agent.  Not used by the CoAbsCommunityAdapter.
+     */
+    public AgentID getAID ();
 
     /**
      * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum

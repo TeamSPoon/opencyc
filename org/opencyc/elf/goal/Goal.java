@@ -35,11 +35,8 @@ import org.opencyc.elf.bg.state.State;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Goal extends ELFObject {
-  /** the goal state, which is mutally exclusive with the goal procedure */
+  /** the goal state */
   protected State goalState;
-
-  /** the goal procedure, which is mutually exclusive with the goal state */
-  protected Procedure goalProcedure;
 
   /** the goal sentence stated in CycL */
   protected CycAssertion goalSentence;
@@ -84,24 +81,6 @@ public class Goal extends ELFObject {
    */
   public void setGoalState(State goalState) {
     this.goalState = goalState;
-  }
-
-  /**
-   * Gets the goal procedure
-   * 
-   * @return the goal procedure
-   */
-  public Procedure getGoalProcedure() {
-    return goalProcedure;
-  }
-
-  /**
-   * Sets the goal procedure
-   * 
-   * @param goalProcedure the goal procedure
-   */
-  public void setGoalProcedure(Procedure goalProcedure) {
-    this.goalProcedure = goalProcedure;
   }
 
   /**

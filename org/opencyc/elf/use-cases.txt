@@ -1,0 +1,20 @@
+Use Cases for Elementary Loop Functioning
+
+1. Emit a prompt and read the response from the console.
+1. emit the prompt (actuator)
+2. read the response (sensor)
+
+TaskCommand name: ConsolePromptRead
+
+Parameter: prompt
+Parameter type: String
+
+ELF Sensory Perception object: response
+ELF Sensory Perception data type: String
+
+Required resources: console input, console output, operator
+
+Rationale: With no learning and no choices, this is the simplest ELF use case.
+
+
+

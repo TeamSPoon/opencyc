@@ -70,7 +70,7 @@ public class ConsoleChat implements ChatSender {
     /**
      * Provides a console interface to the ChatterBot.
      */
-    protected void chat() throws CycApiException, IOException {
+    protected void chat() throws CycApiException, IOException, ChatException {
         while (true) {
             String userInput = receiveChatMessage();
             chatterBot.receiveChatMessage("console user",

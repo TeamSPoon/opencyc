@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 import ViolinStrings.*;
 import org.opencyc.api.*;
+import org.opencyc.chat.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.templateparser.*;
 import org.opencyc.util.*;
@@ -59,9 +60,14 @@ public class Performer {
     protected Interpreter interpreter;
 
     /**
-     * reference to the parent ConversationFactory object
+     * reference to the ConversationFactory object
      */
     protected ConversationFactory conversationFactory;
+
+    /**
+     * reference to the TemplateParser object
+     */
+    protected TemplateParser templateParser;
 
     /**
      * The context for RKF-related inferences involving all and only english lexical mts.
@@ -83,28 +89,52 @@ public class Performer {
     public Performer(Interpreter interpreter) {
         Log.makeLog();
         this.interpreter = interpreter;
-        if (interpreter.chatterBot != null)
+        if (interpreter.chatterBot != null) {
             this.conversationFactory = interpreter.chatterBot.conversationFactory;
+        }
         else {
             // When unit testing, no ChatterBot is present.
             conversationFactory = new ConversationFactory();
             conversationFactory.initialize();
         }
+        this.templateParser = interpreter.templateParser;
     }
 
     /**
-     * Performs the action given the current state and the action
+     * Performs the given sub conversation with the given current state.
+     *
+     * @param currentState the current state of the finite state machine
+     * @param subConversation the sub conversation to be performed.
+     */
+    protected void performArc (State currentState, Conversation subConversation)
+        throws CycApiException,
+               IOException,
+               UnknownHostException,
+               ChatException {
+        ArrayList arguments =
+            (ArrayList) interpreter.getStateAttribute("subConversation arguments");
+        interpreter.setupSubConversation(subConversation, arguments);
+    }
+
+    /**
+     * Performs the given action with the given current state.
      *
      * @param currentState the current state of the finite state machine
      * @param action the action to be performed
      */
     protected void performArc (State currentState, Action action)
-        throws CycApiException, IOException, UnknownHostException {
+        throws CycApiException,
+               IOException,
+               UnknownHostException,
+               ChatException {
         if (action.getName().equals("do-not-understand")) {
             doNotUnderstand(currentState, action);
         }
         else if (action.getName().equals("do-finalization")) {
             doFinalization();
+        }
+        else if (action.getName().equals("do-disambiguate-term-query")) {
+            doDisambiguateTermQuery(currentState, action);
         }
         else if (action.getName().equals("do-disambiguate-parse-term")) {
             doDisambiguateParseTermAction(currentState, action);
@@ -112,11 +142,14 @@ public class Performer {
         else if (action.getName().equals("do-disambiguate-term-choice")) {
             doDisambiguateTermChoiceAction(currentState, action);
         }
+        else if (action.getName().equals("do-disambiguate-choice-is-number")) {
+            doDisambiguateChoiceIsNumberAction(currentState, action);
+        }
+        else if (action.getName().equals("do-disambiguate-choice-is-phrase")) {
+            doDisambiguateChoiceIsPhraseAction(currentState, action);
+        }
         else if (action.getName().equals("do-disambiguate-term-done")) {
             doDisambiguateTermDoneAction(currentState);
-        }
-        else if (action.getName().equals("do-term-query")) {
-            doTermQuery(currentState, action);
         }
         else if (action.getName().equals("reply-with-first-fact")) {
             doReplyWithFirstFact(currentState, action);
@@ -135,7 +168,9 @@ public class Performer {
      * @param currentState the current conversation state
      * @param action the action object.
      */
-    protected void doNotUnderstand (State currentState, Action action) {
+    protected void doNotUnderstand (State currentState, Action action)
+        throws ChatException {
+        interpreter.chatterBot.sendChatMessage("I do not understand");
     }
 
     /**
@@ -161,16 +196,37 @@ public class Performer {
         String disambiguationPhrase = StringUtils.wordsToPhrase(disambiguationWords);
         CycList terms = parseTermsString(disambiguationPhrase);
         System.out.println("terms " + terms.cyclify());
-
-        // compare maximum disambiguation generated phrases
+        interpreter.setStateAttribute("disambiguation terms", terms);
         CycList disambiguationPhraseAndTypes =
             CycAccess.current().generateDisambiguationPhraseAndTypes(terms);
+        interpreter.setStateAttribute("disambiguation phrase and types",
+                                      disambiguationPhraseAndTypes);
         for (int i = 0; i < disambiguationPhraseAndTypes.size(); i++) {
             CycList disambiguationPhraseAndType = (CycList) disambiguationPhraseAndTypes.get(i);
             CycFort term = (CycFort) disambiguationPhraseAndType.first();
             String termString = (String) disambiguationPhraseAndType.second();
             CycFort type = (CycFort) disambiguationPhraseAndType.third();
-            CycFort typeString = (CycFort) disambiguationPhraseAndType.fourth();
+            String typeString = (String) disambiguationPhraseAndType.fourth();
+
+            if ((disambiguationPhraseAndTypes.size() == 1) ||
+                (termString.equals(disambiguationPhrase))) {
+                interpreter.setStateAttribute("disambiguated term",
+                                              term);
+                interpreter.setStateAttribute("disambiguated type string",
+                                              typeString);
+                interpreter.setNextPerformative(new Performative("term-match"));
+                return;
+            }
+            String pluralPhrase = CycAccess.current().getImprecisePluralGeneratedPhrase(term);
+            if ((disambiguationPhraseAndTypes.size() == 1) ||
+                (pluralPhrase.equals(disambiguationPhrase))) {
+                interpreter.setStateAttribute("disambiguated term",
+                                              term);
+                interpreter.setNextPerformative(new Performative("term-match"));
+                return;
+            }
+            interpreter.setNextPerformative(new Performative("term-choice"));
+            return;
         }
     }
 
@@ -210,7 +266,70 @@ public class Performer {
      * @param currentState the current conversation state
      * @param action the action object.
      */
-    protected void doDisambiguateTermChoiceAction (State currentState, Action action) {
+    protected void doDisambiguateTermChoiceAction (State currentState, Action action)
+        throws CycApiException, ChatException, IOException {
+        CycList disambiguationPhraseAndTypes =
+            (CycList) interpreter.getStateAttribute("disambiguation phrase and types");
+        CycFort knowsAbout =
+            CycAccess.current().getKnownConstantByGuid("bd59038b-9c29-11b1-9dad-c379636f7270");
+        CycFort cyc =
+            CycAccess.current().getKnownConstantByGuid("bd588065-9c29-11b1-9dad-c379636f7270");
+        ArrayList termDisambiguationTemplates = new ArrayList();
+        for (int i = 0; i < disambiguationPhraseAndTypes.size(); i++) {
+            CycList disambiguationPhraseAndType = (CycList) disambiguationPhraseAndTypes.get(i);
+            CycFort term = (CycFort) disambiguationPhraseAndType.first();
+            String termString = (String) disambiguationPhraseAndType.second();
+            CycFort type = (CycFort) disambiguationPhraseAndType.third();
+            String typeString = (String) disambiguationPhraseAndType.fourth();
+            CycList iKnowAbout = new CycList();
+            iKnowAbout.add(knowsAbout);
+            iKnowAbout.add(cyc);
+            iKnowAbout.add(term);
+            String response = CycAccess.current().getParaphrase(iKnowAbout);
+
+            interpreter.chatterBot.sendChatMessage(response);
+
+            Template choiceIsNumberTemplate =
+                TemplateFactory.makeChoiceIsNumberTemplate(new Integer(i + 1), term);
+            termDisambiguationTemplates.add(choiceIsNumberTemplate);
+            Template choiceIsPhraseTemplate =
+                TemplateFactory.makeChoiceIsPhraseTemplate(termString, term);
+            termDisambiguationTemplates.add(choiceIsPhraseTemplate);
+        }
+
+        termDisambiguationTemplates.add(TemplateFactory.makeDoneTemplate());
+        termDisambiguationTemplates.add(TemplateFactory.makeQuitTemplate());
+        templateParser.setRelevantTemplates(termDisambiguationTemplates);
+        interpreter.chatterBot.sendChatMessage("Please choose by phrase or position");
+
+    }
+
+    /**
+     * Performs the do-disambiguate-choice-is-number action
+     *
+     * @param currentState the current conversation state
+     * @param action the action containing the numeric choice
+     */
+    protected void doDisambiguateChoiceIsNumberAction (State currentState, Action action) {
+        Object [] content = (Object []) action.getContent();
+        CycFort term = (CycFort) content[1];
+        interpreter.setStateAttribute("disambiguated term",
+                                      term);
+        interpreter.setNextPerformative(new Performative("done"));
+    }
+
+    /**
+     * Performs the do-disambiguate-choice-is-phrase action
+     *
+     * @param currentState the current conversation state
+     * @param action the action containing the phrase choice
+     */
+    protected void doDisambiguateChoiceIsPhraseAction (State currentState, Action action) {
+        Object [] content = (Object []) action.getContent();
+        CycFort disambiguatedTerm = (CycFort) content[1];
+        interpreter.setStateAttribute("disambiguated term",
+                                      disambiguatedTerm);
+        interpreter.setNextPerformative(new Performative("done"));
     }
 
     /**
@@ -219,32 +338,36 @@ public class Performer {
      * @param currentState the current conversation state
      */
     protected void doDisambiguateTermDoneAction (State currentState) {
+        CycFort disambiguatedTerm = (CycFort) interpreter.getStateAttribute("disambiguated term");
+        interpreter.popConversationStateInfo();
+        interpreter.setStateAttribute("disambiguated term",
+                                      disambiguatedTerm);
     }
 
     /**
-     * Performs the do-term-query action.  First performs a disambiguate-term
-     * conversation to obtain the correct term for the query.
+     * Performs the do-disambiguate term-query action.  First performs a disambiguate-term
+     * subconversation to obtain the correct term for the query.
      *
      * @param currentState the current conversation state
      * @param action the action object.
      */
-    protected void doTermQuery (State currentState, Action action)
+    protected void doDisambiguateTermQuery (State currentState, Action action)
         throws CycApiException, IOException, UnknownHostException {
         ParseResults parseResults =
             (ParseResults) interpreter.getStateAttribute("parse results");
         ArrayList queryWords =
             parseResults.getTextBinding(CycObjectFactory.makeCycVariable("?term"));
         interpreter.setStateAttribute("query words", queryWords);
-        Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
+        //Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
         Object [] attributeValuePair = {"disambiguation words", queryWords};
         ArrayList arguments = new ArrayList();
         arguments.add(attributeValuePair);
-        interpreter.setupSubConversation(disambiguateTerm, arguments);
-        interpreter.setNextPerformative(disambiguateTerm.getDefaultPerformative());
+        //interpreter.setupSubConversation(disambiguateTerm, arguments);
+        //interpreter.setNextPerformative(disambiguateTerm.getDefaultPerformative());
     }
 
     /**
-     * Performs the repy-with-first-fact action.
+     * Performs the reply-with-first-fact action.
      *
      * @param currentState the current conversation state
      * @param action the action object.

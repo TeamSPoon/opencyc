@@ -8,6 +8,8 @@ import org.opencyc.cycobject.*;
 /**
  * Makes templates which are used by the TemplateParser to parser user input.<p>
  *
+ * All methods are static.
+ *
  * @version $Id$
  * @author Stephen L. Reed
  *
@@ -38,18 +40,6 @@ public class TemplateFactory {
     protected static HashMap templateCache = new HashMap();
 
     /**
-     * Constructs a new TemplateFactory object.
-     */
-    public TemplateFactory() {
-    }
-
-    /**
-    * Initializes this object.
-    */
-    public void initialize () {
-    }
-
-    /**
      * Returns the templates.
      *
      * @return the templates
@@ -66,9 +56,9 @@ public class TemplateFactory {
      * @param templateElements the template elements
      * @param performative the performative
      */
-    public Template makeTemplate(CycFort mt,
-                                 CycList templateElements,
-                                 Performative performative) {
+    public static Template makeTemplate(CycFort mt,
+                                        CycList templateElements,
+                                        Performative performative) {
         Template template = (Template) templateCache.get(templateElements);
         if (template != null)
             return template;
@@ -82,24 +72,24 @@ public class TemplateFactory {
      *
      * @param templateElements the template elements
      */
-    public Template getTemplate(CycList templateElements) {
+    public static Template getTemplate(CycList templateElements) {
         return (Template) templateCache.get(templateElements);
     }
 
     /**
      * Makes all templates.
      */
-    public void makeAllTemplates() {
+    public static void makeAllTemplates() {
         makeDoneTemplate();
         makeMoreTemplate();
         makeQuitTemplate();
-        makeTermQueryTemplate();
+        makeDisambiguateTermQueryTemplate();
     }
 
     /**
-     * Make a quit template
+     * Make the quit template
      */
-    public Template makeQuitTemplate () {
+    public static Template makeQuitTemplate () {
         CycList templateExpression = new CycList();
         templateExpression.add("quit");
         Template quitTemplate = (Template) templateCache.get(templateExpression);
@@ -113,9 +103,9 @@ public class TemplateFactory {
     }
 
     /**
-     * Make a more template
+     * Make the more template
      */
-    public Template makeMoreTemplate () {
+    public static Template makeMoreTemplate () {
         CycList templateExpression = new CycList();
         templateExpression.add("more");
         Template moreTemplate = (Template) templateCache.get(templateExpression);
@@ -128,9 +118,9 @@ public class TemplateFactory {
     }
 
     /**
-     * Make a done template
+     * Make the done template
      */
-    public Template makeDoneTemplate () {
+    public static Template makeDoneTemplate () {
         CycList templateExpression = new CycList();
         templateExpression.add("done");
         Template doneTemplate = (Template) templateCache.get(templateExpression);
@@ -143,9 +133,9 @@ public class TemplateFactory {
     }
 
     /**
-     * Make a term query template
+     * Make the term query template
      */
-    public Template makeTermQueryTemplate () {
+    public static Template makeDisambiguateTermQueryTemplate () {
         CycList templateExpression = new CycList();
         templateExpression.add("what");
         templateExpression.add("do");
@@ -153,13 +143,54 @@ public class TemplateFactory {
         templateExpression.add("know");
         templateExpression.add("about");
         templateExpression.add(CycObjectFactory.makeCycVariable("?term"));
-        Template termQueryTemplate = (Template) templateCache.get(templateExpression);
-        if (termQueryTemplate != null)
-            return termQueryTemplate;
-        Performative termQueryPerformative =
-            new Performative("term-query");
-        termQueryTemplate = new Template(null, templateExpression, termQueryPerformative);
-        templateCache.put(templateExpression, termQueryTemplate);
-        return termQueryTemplate;
+        Template disambiguateTermQueryTemplate = (Template) templateCache.get(templateExpression);
+        if (disambiguateTermQueryTemplate != null)
+            return disambiguateTermQueryTemplate;
+        Performative disambiguateTermQueryPerformative =
+            new Performative("disambiguate-term-query");
+        disambiguateTermQueryTemplate = new Template(null, templateExpression, disambiguateTermQueryPerformative);
+        templateCache.put(templateExpression, disambiguateTermQueryTemplate);
+        return disambiguateTermQueryTemplate;
     }
+
+    /**
+     * Make the choiceIsNumber template.  Not cached because the performative may
+     * vary for otherwise identical integer templates.
+     *
+     * @param number the integer to parse
+     * @param term the term that corresponds to the given integer
+     * @return the template that matches the given positive integer
+     */
+    public static Template makeChoiceIsNumberTemplate (Integer positiveInteger,
+                                                       CycFort term) {
+        CycList templateExpression = new CycList();
+        templateExpression.add(positiveInteger.toString());
+        Performative choiceIsNumberPerformative = new Performative("choice-is-number");
+        Object [] content = {positiveInteger, term};
+        choiceIsNumberPerformative.setContent(content);
+        return new Template(null, templateExpression, choiceIsNumberPerformative);
+    }
+
+    /**
+     * Make the choiceIsPhrase template.  Not cached because the performative may
+     * vary for otherwise identical phrase templates.
+     *
+     * @param number the phrase to parse
+     * @param term the term that corresponds to the given phrase
+     * @return the template that matches the given phrase
+     */
+    public static Template makeChoiceIsPhraseTemplate (String phrase,
+                                                       CycFort term) {
+        CycList templateExpression = new CycList();
+        templateExpression.add(phrase);
+        Performative choiceIsPhrasePerformative = new Performative("choice-is-phrase");
+        Object [] content = {phrase, term};
+        choiceIsPhrasePerformative.setContent(content);
+        return new Template(null, templateExpression, choiceIsPhrasePerformative);
+    }
+
+
+
+
+
 }

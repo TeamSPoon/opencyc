@@ -41,9 +41,37 @@ public class State implements Comparable {
 
     /**
      * Constructs a new State object.
+     *
+     * @param stateId unique state identifier within the conversation
      */
     public State(String stateId) {
         this.stateId = stateId;
+    }
+
+    /**
+     * Constructs a new State object.
+     *
+     * @param stateId unique state identifier within the conversation
+     * @param conversation the conversation containing this new state
+     */
+    public State(String stateId, Conversation conversation) {
+        this.stateId = stateId;
+        conversation.addState(this);
+    }
+
+    /**
+     * Constructs a new State object.
+     *
+     * @param stateId unique state identifier within the conversation
+     * @param conversation the conversation containing this new state
+     * @param isInitialState when true, this is the initial state of the
+     * conversation
+     */
+    public State(String stateId, Conversation conversation, boolean isInitialState) {
+        this.stateId = stateId;
+        conversation.addState(this);
+        if (isInitialState)
+            conversation.setInitialState(this);
     }
 
     /**

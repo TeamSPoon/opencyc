@@ -45,11 +45,6 @@ public class ConversationFactory {
     protected static ArrayList globalArcs = new ArrayList();
 
     /**
-     * Action object factory
-     */
-    protected ActionFactory actionFactory;
-
-    /**
      * Template object factory
      */
     protected TemplateFactory templateFactory;
@@ -61,7 +56,6 @@ public class ConversationFactory {
      * Constructs a new ConversationFactory object.
      */
     public ConversationFactory() {
-        actionFactory = new ActionFactory();
         templateFactory = new TemplateFactory();
     }
 
@@ -95,8 +89,10 @@ public class ConversationFactory {
      */
     protected void makeAllConversations () {
         makeChat();
-        makeDisambiguateTerm();
+        makeDisambiguateTermQuery();
+        makeDisambiguatePhrase();
         makeTermQuery();
+        fixupSubConversationForwardReferences();
     }
 
     /**
@@ -132,6 +128,7 @@ public class ConversationFactory {
             new Arc(currentState,
                     notUnderstandPerformative,
                     currentState,
+                    null,
                     doNotUnderstandAction);
         globalArcs.add(notUnderstandArc);
     }
@@ -151,6 +148,7 @@ public class ConversationFactory {
        Arc quitArc = new Arc(currentState,
                              quitPerformative,
                              finalState,
+                             null,
                              doFinalizationAction);
 
         globalArcs.add(quitArc);
@@ -159,8 +157,8 @@ public class ConversationFactory {
     /**
       * Makes a "chat" Conversation.
       * Initial state is ready.
-      * 1. If we are in the ready state and get a term-query performative, transition to the ready state
-      * and perform the do-term-query action. <br>
+      * 1. If we are in the ready state and get a disambiguate-term-query performative,
+      * transition to the ready state and perform the do-disambiguate-term-query action. <br>
       */
     public Conversation makeChat () {
         Conversation chat = (Conversation) conversationCache.get("chat");
@@ -171,120 +169,207 @@ public class ConversationFactory {
         chat.setInitialState(readyState);
         chat.addState(readyState);
 
-        Performative termQueryPerformative =
-            new Performative("term-query");
-        Action doTermQueryAction =
-            new Action("do-term-query");
+        Performative disambiguateTermQueryPerformative =
+            new Performative("disambiguate-term-query");
+        Conversation disambiguateTermQuery = new Conversation ("disambiguate-term-query");
+
         /**
-         * 1. If we are in the ready state and get a term-query performative, transition
-         * to the ready state and perform the do-term-query action.
+          * 1. If we are in the ready state and get a disambiguate-term-query performative,
+          * transition to the ready state and perform the do-disambiguate-term-query action. <br>
          */
         Arc arc1 = new Arc(readyState,
-                           termQueryPerformative,
+                           disambiguateTermQueryPerformative,
                            readyState,
-                           doTermQueryAction);
+                           disambiguateTermQuery,
+                           null);
         conversationCache.put(chat.name, chat);
         return chat;
     }
 
     /**
-     * Makes a "disambiguate-term" Conversation.
+     * Makes a "disambiguate-term-query" Sub Conversation.  <br>
+     * Input "disambiguation words" --> ArrayList disambiguationWords <br>
+     *
      * Initial state is start. <br>
-     * 1. If we are in the start state and get a start performative,
-     * transition to the disambiguate-term state and perform the
-     * disambiguate-parse-term action. <br>
-     * 2. If we are in the disambiguate-term state and get a term-match performative,
-     * transition to the done state and perform the
-     * disambiguate-term-done action. <br>
-     * 3. If we are in the disambiguate-term state and get a term-choice performative,
-     * transition to the term-choice state and perform the
-     * disambiguate-term-choice action. <br>
-     * 4. If we are in the term-choice state and get a term-chosen performative,
-     * transition to the done state and perform the
-     * disambiguate-term-done action. <br>
+     * 1. If we are in the start state and get a start-new-conversation performative,
+     * transition to the disambiguate-phrase state and perform the
+     * disambiguate-phrase sub conversation. <br>
+     *
+     * 2. If we are in the disambiguate-phrase state and get a resume-previous-conversation
+     * performative, transition to the term-query state and perform the
+     * term-query sub conversation. <br>
+     *
+     * 3. If we are in the term-query state and get a resume-previous-conversation performative,
+     * transition to the end state and perform the
+     * end-sub-conversation action. <br>
      */
-    public Conversation makeDisambiguateTerm () {
-        Conversation disambiguateTerm = (Conversation) conversationCache.get("disambiguate-term");
-        if (disambiguateTerm != null)
-            return disambiguateTerm;
-        disambiguateTerm = new Conversation("disambiguate-term");
+    public Conversation makeDisambiguateTermQuery () {
+        Conversation disambiguateTermQuery =
+            (Conversation) conversationCache.get("disambiguate-term-query");
+        if (disambiguateTermQuery != null)
+            return disambiguateTermQuery;
+        disambiguateTermQuery = new Conversation("disambiguate-term-query");
 
-        State startState = new State("start");
-        disambiguateTerm.addState(startState);
-        disambiguateTerm.setInitialState(startState);
-        State disambiguateTermState = new State("disambiguate-term");
-        disambiguateTerm.addState(disambiguateTermState);
-        State termChoiceState = new State("term-choice");
-        disambiguateTerm.addState(termChoiceState);
-        State doneState = new State("done");
-        disambiguateTerm.addState(doneState);
-
-        Action disambiguateParseTermAction =
-            actionFactory.makeAction("do-disambiguate-parse-term");
-        Action disambiguateTermDoneAction =
-            actionFactory.makeAction("do-disambiguate-term-done");
-        Action disambiguateTermChoiceAction =
-            actionFactory.makeAction("do-disambiguate-term-choice");
-
-        Performative startPerformative = new Performative("start");
-        Performative termMatchPerformative = new Performative("term-match");
-        Performative termChoicePerformative = new Performative("term-choice");
-        Performative termChosenPerformative = new Performative("term-chosen");
-
-        disambiguateTerm.setDefaultPerformative(startPerformative);
+        State startState = new State("start", disambiguateTermQuery, true);
+        State disambiguatePhraseState = new State("disambiguate-phrase", disambiguateTermQuery);
+        State termQueryState = new State("term-query-phrase", disambiguateTermQuery);
+        State endState = new State("end", disambiguateTermQuery);
 
         /**
-         * 1. If we are in the start state and get a start performative,
-         * transition to the disambiguate-term state and perform the
-         * disambiguate-parse-term action. <br>
+         * 1. If we are in the start state and get a start-new-conversation performative,
+         * transition to the disambiguate-phrase state and perform the
+         * disambiguate-phrase sub conversation.
          */
-        Arc arc1 = new Arc(startState,
-                           startPerformative,
-                           disambiguateTermState,
-                           disambiguateParseTermAction);
+        new Arc(startState,
+                new Performative("start"),
+                disambiguatePhraseState,
+                new Conversation("disambiguate-phrase"),
+                null);
 
         /**
-         * 2. If we are in the disambiguate-term state and get a term-match performative,
-         * transition to the done state and perform the
-         * disambiguate-term-done action.
+         * 2. If we are in the disambiguate-phrase state and get a resume-previous-conversation
+         * performative, transition to the term-query state and perform the
+         * term-query sub conversation.
          */
-        Arc arc2 = new Arc(disambiguateTermState,
-                           termMatchPerformative,
-                           doneState,
-                           disambiguateTermDoneAction);
+        new Arc(disambiguatePhraseState,
+                new Performative("resume-previous-conversation"),
+                termQueryState,
+                new Conversation("term-query"),
+                null);
 
         /**
-         * 3. If we are in the disambiguate-term state and get a term-choice performative,
-         * transition to the term-choice state and perform the
-         * disambiguate-term-choice action.
+         * 3. If we are in the term-query state and get a resume-previous-conversation performative,
+         * transition to the end state and perform the
+         * end-sub-conversation action.
          */
-        Arc arc3 = new Arc(disambiguateTermState,
-                           termChoicePerformative,
-                           termChoiceState,
-                           disambiguateTermChoiceAction);
-        /**
-         * 4. If we are in the term-choice state and get a term-chosen performative,
-         * transition to the done state and perform the
-         * disambiguate-term-done action.
-         */
-        Arc arc4 = new Arc(termChoiceState,
-                           termChosenPerformative,
-                           doneState,
-                           disambiguateTermDoneAction);
+        new Arc(termQueryState,
+                new Performative("resume-previous-conversation"),
+                endState,
+                new Conversation("end-sub-conversation"),
+                null);
 
-        conversationCache.put(disambiguateTerm.name, disambiguateTerm);
-        return disambiguateTerm;
+        conversationCache.put(disambiguateTermQuery.name, disambiguateTermQuery);
+        return disambiguateTermQuery;
     }
 
     /**
-     * Makes a "term-query" Conversation.
-     * Initial state is retrieve-fact. <br>
-     * 1. If we are in the retrieve-fact state and get a term-query performative, transition to the
-     * prompt-for-more state and perform the reply-with-first-fact action. <br>
-     * 2. If we are in the prompt-for-more state and get a more performative, transition to the
-     * prompt-for-more state and perform the reply-with-next-fact action. <br>
-     * 3. If we are in the prompt-for-more state and get a done performative, transition to the done
-     * state and perform no action.
+     * Makes a "disambiguate-phrase" Sub Conversation.  <br>
+     * Input "disambiguation words" --> ArrayList disambiguationWords <br>
+     * Output "disambiguated term" --> CycFort disambiguatedTerm <br>
+     *
+     * Initial state is start. <br>
+     * 1. If we are in the start state and get a start performative,
+     * transition to the disambiguate-phrase state and perform the
+     * do-disambiguate-parse-phase action. <br>
+     *
+     * 2. If we are in the disambiguate-phrase state and get a term-match performative,
+     * transition to the end state and perform the do-end-sub-conversation action. <br>
+     *
+     * 3. If we are in the disambiguate-phrase state and get a term-choice performative,
+     * transition to the term-choice state and perform the do-disambiguate-term-choice action. <br>
+     *
+     * 4. If we are in the term-choice state and get a choice-is-number performative,
+     * transition to (stay in) the term-choice state and perform the
+     * do-disambiguate-choice-is-number action. <br>
+     *
+     * 5. If we are in the term-choice state and get a choice-is-phrase performative,
+     * transition to (stay in) the term-choice state and perform the
+     * do-disambiguate-choice-is-term action. <br>
+     *
+     * 6. If we are in the term-choice state and get an end performative,
+     * transition to the end state and perform the do-end-sub-conversation action. <br>
+     */
+    public Conversation makeDisambiguatePhrase () {
+        Conversation disambiguatePhrase =
+            (Conversation) conversationCache.get("disambiguate-phrase");
+        if (disambiguatePhrase != null)
+            return disambiguatePhrase;
+        disambiguatePhrase = new Conversation("disambiguate-phrase");
+
+        State startState = new State("start", disambiguatePhrase, true);
+        State disambiguatePhraseState = new State("disambiguate-phrase", disambiguatePhrase);
+        State termChoiceState = new State("term-choice", disambiguatePhrase);
+        State endState = new State("end", disambiguatePhrase);
+
+        /**
+         * 1. If we are in the start state and get a start performative,
+         * transition to the disambiguate-phrase state and perform the
+         * do-disambiguate-parse-phrase action.
+         */
+        new Arc(startState,
+                new Performative("start"),
+                disambiguatePhraseState,
+                null,
+                new Action("do-disambiguate-parse-phrase"));
+
+        /**
+         * 2. If we are in the disambiguate-phrase state and get a term-match performative,
+         * transition to the end state and perform the do-end-sub-conversation action.
+         */
+        new Arc(disambiguatePhraseState,
+                new Performative("term-match"),
+                endState,
+                null,
+                new Action("do-end-sub-conversation"));
+
+        /**
+         * 3. If we are in the disambiguate-phrase state and get a term-choice performative,
+         * transition to the term-choice state and perform the do-disambiguate-term-choice action.
+         */
+        new Arc(disambiguatePhraseState,
+                new Performative("term-choice"),
+                termChoiceState,
+                null,
+                new Action("do-disambiguate-term-choice"));
+        /**
+         * 4. If we are in the term-choice state and get a choice-is-number performative,
+         * transition to (stay in) the term-choice state and perform the
+         * do-disambiguate-choice-is-number action.
+         */
+        new Arc(termChoiceState,
+                new Performative("choice-is-number"),
+                termChoiceState,
+                null,
+                new Action("do-disambiguate-choice-is-number"));
+        /**
+         * 5. If we are in the term-choice state and get a choice-is-phrase performative,
+         * transition to (stay in) the term-choice state and perform the
+         * do-disambiguate-choice-is-term action.
+         */
+        new Arc(termChoiceState,
+                new Performative("choice-is-phrase"),
+                termChoiceState,
+                null,
+                new Action("do-disambiguate-choice-is-term"));
+        /**
+         * 6. If we are in the term-choice state and get an end performative,
+         * transition to the end state and perform the do-end-sub-conversation action.
+         */
+        new Arc(termChoiceState,
+                new Performative("end"),
+                endState,
+                null,
+                new Action("do-end-sub-conversation"));
+
+        conversationCache.put(disambiguatePhrase.name, disambiguatePhrase);
+        return disambiguatePhrase;
+    }
+
+    /**
+     * Makes a "term-query" Conversation. <br>
+     *
+     * input "disambiguated term" --> CycFort disambiguatedTerm <br>
+     *
+     * Initial state is start. <br>
+     *
+     * 1. If we are in the start state and get a term-query performative, transition to the
+     * retrieve-first-fact state and perform the do-reply-with-first-fact action. <br>
+     *
+     * 2. If we are in the retrieve-first-fact state and get a more performative, transition to the
+     * prompt-for-more state and perform the do-reply-with-next-fact action. <br>
+     *
+     * 3. If we are in the prompt-for-more state and get a done performative, transition to the end
+     * state and perform the do-end-sub-conversation action.
      */
     public Conversation makeTermQuery () {
         Conversation termQuery = (Conversation) conversationCache.get("term-query");
@@ -292,52 +377,71 @@ public class ConversationFactory {
             return termQuery;
         termQuery = new Conversation("term-query");
 
-        State retrieveFactState = new State("retrieve-fact");
-        termQuery.setInitialState(retrieveFactState);
-        termQuery.addState(retrieveFactState);
-
-        State promptForMoreState = new State("prompt-for-more");
-        termQuery.addState(promptForMoreState);
-
-        State doneState = new State("done");
-        termQuery.addState(doneState);
-
-        Action replyWithFirstFactAction =
-            actionFactory.makeAction("do-reply-with-first-fact");
-        Action replyWithNextFactAction =
-            actionFactory.makeAction("do-reply-with-next-fact");
-
-        Performative termQueryPerformative = new Performative("term-query");
-        Performative morePerformative = new Performative("more");
-        Performative donePerformative = new Performative("done");
+        State startState = new State("start", termQuery, true);
+        State retrieveFactState = new State("retrieve-fact", termQuery);
+        State promptForMoreState = new State("prompt-for-more", termQuery);
+        State endState = new State("end", termQuery);
 
         /**
-         * 1. If we are in the retrieve-fact state and get a term-query performative, transition
-         * to the prompt-for-more state and perform the reply-with-first-fact action.
+         * 1. If we are in the start state and get a term-query performative, transition to the
+         * retrieve-first-fact state and perform the do-reply-with-first-fact action.
          */
-        Arc arc1 = new Arc(retrieveFactState,
-                           termQueryPerformative,
-                           promptForMoreState,
-                           replyWithFirstFactAction);
+        new Arc(startState,
+                new Performative("term-query"),
+                retrieveFactState,
+                null,
+                new Action("do-reply-with-first-fact"));
+
 
         /**
-         * 2. If we are in the prompt-for-more state and get a more performative, transition
-         * to the prompt-for-more state and perform the reply-with-next-fact action.
+         * 2. If we are in the retrieve-first-fact state and get a more performative, transition to the
+         * prompt-for-more state and perform the do-reply-with-next-fact action.
          */
-        Arc arc3 = new Arc(promptForMoreState,
-                           morePerformative,
-                           promptForMoreState,
-                           replyWithNextFactAction);
+        new Arc(retrieveFactState,
+                new Performative("more"),
+                promptForMoreState,
+                null,
+                new Action("do-reply-with-next-fact"));
         /**
-         * 3. If we are in the prompt-for-more state and get a done performative, transition to the done
-         * state and perform no action.
+         * 3. If we are in the prompt-for-more state and get a done performative, transition to the end
+         * state and perform the do-end-sub-conversation action.
          */
-        Arc arc4 = new Arc(promptForMoreState,
-                           donePerformative,
-                           doneState,
-                           null);
+        new Arc(promptForMoreState,
+                new Performative("done"),
+                endState,
+                null,
+                new Action("do-end-sub-conversation"));
 
         conversationCache.put(termQuery.name, termQuery);
         return termQuery;
+    }
+
+    /**
+     * Fixes up the sub conversation forward references.
+     */
+    protected void fixupSubConversationForwardReferences () {
+        Iterator conversations = conversationCache.values().iterator();
+        ArrayList conversationsList = new ArrayList();
+        while (conversations.hasNext())
+            conversationsList.add(conversations.next());
+        for (int j = 0; j < conversationsList.size(); j++) {
+            ArrayList statesList = new ArrayList();
+            Conversation conversation = (Conversation) conversationsList.get(j);
+            Iterator states = conversation.conversationFsmStates.values().iterator();
+            while (states.hasNext())
+                statesList.add(states.next());
+            for (int i = 0; i < statesList.size(); i++) {
+                State state = (State) statesList.get(i);
+                Iterator arcs = state.getArcs().iterator();
+                while (arcs.hasNext()) {
+                    Arc arc = (Arc) arcs.next();
+                    Conversation subConversation = arc.getSubConversation();
+                    if ((arc.getSubConversation() != null) &&
+                        (! conversationsList.contains(subConversation))) {
+                        arc.setSubConversation(this.getConversation(subConversation.getName()));
+                    }
+                }
+            }
+        }
     }
 }

@@ -15,7 +15,10 @@ import org.opencyc.util.*;
  * asynchronous receiving and sending of messages. This interpreter models the
  * chat interaction with nested conversations in a stack.  Mixed initiative is
  * supported by a dictionary of conversation stacks, one of which is active,
- * and the rest suspended.
+ * and the rest suspended.  Sub conversations are passed a list of attribute/value
+ * pairs which form the initial state attributes.  When done, sub conversations
+ * pass back result attribute/value pairs to the calling conversation's state
+ * attributes.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -138,16 +141,25 @@ public class Interpreter {
      * @param chatMessage the chat message
      */
     public void receiveChatMessage (String chatMessage)
-        throws CycApiException, IOException, UnknownHostException {
+        throws CycApiException,
+               IOException,
+               UnknownHostException,
+               ChatException {
         ParseResults parseResults = templateParser.parse(chatMessage);
         setStateAttribute("parse results", parseResults);
         Performative performative = parseResults.getPerformative();
         nextPerformative = performative;
         while (nextPerformative != null) {
             Arc arc = lookupArc(nextPerformative);
+            Action action = arc.getAction();
+            action.setContent(nextPerformative.getContent());
             nextPerformative = null;
             transitionState(arc);
-            performer.performArc(currentState, arc.getAction());
+            Conversation subConversation = arc.getSubConversation();
+            if (subConversation != null)
+                performer.performArc(currentState, subConversation);
+            else
+                performer.performArc(currentState, action);
         }
     }
 
@@ -163,13 +175,13 @@ public class Interpreter {
         for (int i = 0; i < ConversationFactory.globalArcs.size(); i++) {
             Arc arc =
                 (Arc) ConversationFactory.globalArcs.get(i);
-            if (performative.equals(arc.getPerformative()))
+            if (performative.getPerformativeName().equals(arc.getPerformative().getPerformativeName()))
                 return arc;
         }
         Iterator arcs = currentState.getArcs().iterator();
         while (arcs.hasNext()) {
             Arc arc = (Arc) arcs.next();
-            if (performative.equals(arc.getPerformative()))
+            if (performative.getPerformativeName().equals(arc.getPerformative().getPerformativeName()))
                 return arc;
         }
         Log.current.errorPrintln("No valid arc for state " +
@@ -260,10 +272,11 @@ public class Interpreter {
      * @param arguments a list of Object arrays of length two, the first array element is the
      * attribute and the second array element is its value
      */
-    public void setupSubConversation (Conversation conversation, ArrayList arguments) {
+    public void setupSubConversation (Conversation conversation,
+                                      ArrayList arguments) {
         ConversationStateInfo conversationStateInfo =
             new ConversationStateInfo(conversation,
-                                      (HashMap) stateAttributes.clone());
+                                      new HashMap());
         pushConversationStateInfo(conversationStateInfo);
         currentState = conversation.getInitialState();
         for (int i = 0; i < arguments.size(); i++) {
@@ -272,6 +285,7 @@ public class Interpreter {
             Object value = attributeValuePair[1];
             setStateAttribute(attribute, value);
         }
+        nextPerformative = new Performative("start-new-conversation");
     }
 
     /**
@@ -281,8 +295,11 @@ public class Interpreter {
      * @param conversationStateInfo the new conversation and its state
      */
     public void pushConversationStateInfo (ConversationStateInfo conversationStateInfo) {
-        if (conversationStack.size() > 0)
-            ((ConversationStateInfo) conversationStack.peek()).currentState = currentState;
+        if (conversationStack.size() > 0) {
+            ConversationStateInfo suspendedConversationStateInfo =
+                (ConversationStateInfo) conversationStack.peek();
+            suspendedConversationStateInfo.currentState = currentState;
+        }
         conversationStack.push(conversationStateInfo);
     }
 
@@ -291,11 +308,19 @@ public class Interpreter {
      * conversation state.
      */
     public void popConversationStateInfo () {
+        ArrayList results = (ArrayList) getStateAttribute("subConversation results");
         ConversationStateInfo conversationStateInfo =
             (ConversationStateInfo) conversationStack.pop();
         this.conversation = conversationStateInfo.conversation;
         this.currentState = conversationStateInfo.currentState;
         this.stateAttributes = conversationStateInfo.stateAttributes;
+        for (int i = 0; i < results.size(); i++) {
+            Object [] attributeValuePair = (Object []) results.get(i);
+            String attribute = (String) attributeValuePair[0];
+            Object value = attributeValuePair[1];
+            setStateAttribute(attribute, value);
+        }
+        nextPerformative = new Performative("resume-previous-conversation");
     }
 
 }

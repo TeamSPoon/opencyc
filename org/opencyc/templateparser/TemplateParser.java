@@ -49,7 +49,12 @@ public class TemplateParser {
     /**
      * the templates
      */
-    ArrayList templates = new ArrayList();
+    protected ArrayList templates = new ArrayList();
+
+    /**
+     * the relevant templates
+     */
+    protected ArrayList relevantTemplates = null;
 
     /**
      * Constructs a new TemplateParser object.
@@ -67,7 +72,9 @@ public class TemplateParser {
     }
 
     /**
-     * Parses the given text string using the first matching template.
+     * Parses the given text string using the first matching template.  If
+     * relevantTemplates is not null, then only the relevant templates are used,
+     * and reset to null when the parse is complete.
      *
      * @param inputText the text string to be parsed
      * @return the ParseResults
@@ -76,14 +83,20 @@ public class TemplateParser {
         Object [] answer = this.parseIntoWords(inputText);
         ArrayList inputWords = (ArrayList) answer[0];
         String terminalPunctuation = (String) answer[1];
-        for (int i = 0; i < templates.size(); i++) {
-            Template template = (Template) templates.get(i);
+        ArrayList templatesToBeUsed = null;
+        if (relevantTemplates != null)
+            templatesToBeUsed = relevantTemplates;
+        else
+            templatesToBeUsed = templates;
+        for (int i = 0; i < templatesToBeUsed.size(); i++) {
+            Template template = (Template) templatesToBeUsed.get(i);
             CycList templateElements = template.getTemplateElements();
             ParseResults parseResults = new ParseResults(inputText);
             parse (inputWords, templateElements, parseResults);
             if (parseResults.isCompleteParse) {
                 parseResults.setTemplate(template);
                 parseResults.setPerformative(template.getPerformative());
+                relevantTemplates = null;
                 return parseResults;
             }
         }
@@ -272,6 +285,24 @@ public class TemplateParser {
     protected boolean canParseChunkWithoutCapturing (ArrayList partialInputWords,
                                                      ArrayList templateWords) {
         return templateWords.equals(partialInputWords);
+    }
+
+    /**
+     * Returns the templates.
+     *
+     * @return the templates
+     */
+    public ArrayList getTemplates () {
+        return templates;
+    }
+
+    /**
+     * Sets the relevant templates.
+     *
+     * @param relevantTemplates the relevant templates for constrained parsing
+     */
+    public void setRelevantTemplates (ArrayList relevantTemplates) {
+        this.relevantTemplates = relevantTemplates;
     }
 
     /**

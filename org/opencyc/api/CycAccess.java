@@ -998,11 +998,27 @@ public class CycAccess {
     }
 
     /**
+     * Gets the imprecise plural generated phrase for a CycFort (intended for collections).
+     */
+    public String getImprecisePluralGeneratedPhrase (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseString("(with-precise-paraphrase-off (generate-phrase " + cycFort.stringApiValue() + " '(#$plural)))");
+    }
+
+    /**
      * Gets the plural generated phrase for a CycFort (intended for collections).
      */
     public String getPluralGeneratedPhrase (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
         return converseString("(with-precise-paraphrase-on (generate-phrase " + cycFort.stringApiValue() + " '(#$plural)))");
+    }
+
+    /**
+     * Gets the imprecise singular generated phrase for a CycFort (intended for individuals).
+     */
+    public String getImpreciseSingularGeneratedPhrase (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseString("(with-precise-paraphrase-off (generate-phrase " + cycFort.stringApiValue() + " '(#$singular)))");
     }
 
     /**

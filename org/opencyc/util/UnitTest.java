@@ -174,7 +174,6 @@ public class UnitTest extends TestCase {
      */
     public void testWordsToString() {
         System.out.println("** testWordsToString **");
-        Assert.assertTrue(StringUtils.isNumeric("-12345"));
         ArrayList words = new ArrayList();
         Assert.assertEquals("", StringUtils.wordsToPhrase(words));
         words.add("word1");

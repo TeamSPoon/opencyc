@@ -51,6 +51,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testPerformative"));
         testSuite.addTest(new UnitTest("testState"));
         testSuite.addTest(new UnitTest("testArc"));
+        testSuite.addTest(new UnitTest("testConversationFactory"));
         testSuite.addTest(new UnitTest("testInterpreter"));
         testSuite.addTest(new UnitTest("testPerformer"));
         return testSuite;
@@ -134,6 +135,7 @@ public class UnitTest extends TestCase {
         Arc arc1 = new Arc(readyState,
                            termQueryPerformative,
                            readyState,
+                           null,
                            doTermQueryAction);
         Assert.assertNotNull(readyState.arcs);
         Assert.assertEquals(1, readyState.getArcs().size());
@@ -146,6 +148,7 @@ public class UnitTest extends TestCase {
         Arc arc2 = new Arc(readyState,
                            quitPerformative,
                            finalState,
+                           null,
                            doFinalizationAction);
         Assert.assertEquals(2, readyState.getArcs().size());
         Assert.assertTrue(readyState.getArcs().contains(arc1));
@@ -183,6 +186,7 @@ public class UnitTest extends TestCase {
         Arc arc1 = new Arc(readyState,
                            termQueryPerformative,
                            readyState,
+                           null,
                            doTermQueryAction);
         Assert.assertNotNull(arc1);
         Assert.assertEquals(readyState, arc1.transitionFromState);
@@ -192,9 +196,10 @@ public class UnitTest extends TestCase {
         Arc arc1Clone = new Arc(readyState,
                                termQueryPerformative,
                                readyState,
+                               null,
                                doTermQueryAction);
         Assert.assertEquals(arc1, arc1Clone);
-        Assert.assertEquals("[ready, term-query, do-term-query, ready]", arc1.toString());
+        Assert.assertEquals("[ready, term-query, null, do-term-query, ready]", arc1.toString());
         /**
          * 2. If we are in the ready state and get a quit performative, transition
          * to the final state and perform the do-finalization action.
@@ -202,6 +207,7 @@ public class UnitTest extends TestCase {
         Arc arc2 = new Arc(readyState,
                           quitPerformative,
                           finalState,
+                          null,
                           doFinalizationAction);
         Assert.assertNotNull(arc2);
         Assert.assertEquals(readyState, arc2.transitionFromState);
@@ -209,7 +215,7 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(finalState, arc2.getTransitionToState());
         Assert.assertEquals(doFinalizationAction, arc2.getAction());
         Assert.assertTrue(! arc1.equals(arc2));
-        Assert.assertEquals("[ready, quit, do-finalization, final]", arc2.toString());
+        Assert.assertEquals("[ready, quit, null, do-finalization, final]", arc2.toString());
         ArrayList arcs = new ArrayList();
         arcs.add(arc1);
         arcs.add(arc2);
@@ -219,6 +225,51 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(arc1, arcs.get(1));
 
         System.out.println("**** testArc OK ****");
+    }
+
+    /**
+     * Tests the ConversationFactory object.
+     */
+    public void testConversationFactory () {
+        System.out.println("\n**** testConversationFactory ****");
+        ConversationFactory.reset();
+        ConversationFactory conversationFactory = new ConversationFactory();
+        conversationFactory.makeAllConversations();
+        Iterator conversations = conversationFactory.conversationCache.values().iterator();
+        ArrayList conversationsList = new ArrayList();
+        while (conversations.hasNext())
+            conversationsList.add(conversations.next());
+        for (int j = 0; j < conversationsList.size(); j++) {
+            ArrayList statesList = new ArrayList();
+            Conversation conversation = (Conversation) conversationsList.get(j);
+            Iterator states = conversation.conversationFsmStates.values().iterator();
+            while (states.hasNext())
+                statesList.add(states.next());
+            // all states have arcs from them.
+            Assert.assertTrue(statesList.size() > 0);
+            for (int i = 0; i < statesList.size(); i++) {
+                State state = (State) statesList.get(i);
+                Iterator arcs = state.getArcs().iterator();
+                while (arcs.hasNext()) {
+                    Arc arc = (Arc) arcs.next();
+                    // Each transitionFromState is a state in this conversation
+                    Assert.assertTrue(statesList.contains(arc.getTransitionFromState()));
+                    // Each transitionToState is a state in this conversation
+                    Assert.assertTrue(statesList.contains(arc.getTransitionToState()));
+                    Conversation subConversation = arc.getSubConversation();
+                    // No arc has both an action and a subConversation.
+                    Assert.assertTrue(arc.toString(),
+                                      ! ((arc.getAction() != null) &&
+                                         (subConversation != null)));
+                    if (arc.getSubConversation() != null) {
+                        // When specified, the sub conversation is a valid conversation
+                        Assert.assertTrue(conversationsList.contains(subConversation));
+                    }
+                }
+            }
+        }
+
+        System.out.println("**** testConversationFactory OK ****");
     }
 
     /**
@@ -279,7 +330,7 @@ public class UnitTest extends TestCase {
         parseResults = interpreter.templateParser.parse(chatMessage);
         Assert.assertTrue(parseResults.isCompleteParse);
         performative = parseResults.getPerformative();
-        Assert.assertEquals("term-query", performative.getPerformativeName());
+        Assert.assertEquals("disambiguate-term-query", performative.getPerformativeName());
         arc = interpreter.lookupArc(performative);
         interpreter.transitionState(arc);
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
@@ -288,20 +339,20 @@ public class UnitTest extends TestCase {
         ArrayList actualTextBinding =
             parseResults.getTextBinding(CycObjectFactory.makeCycVariable("term"));
         Assert.assertEquals(expectedTextBinding, actualTextBinding);
-        Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
+        Conversation disambiguatePhrase = conversationFactory.makeDisambiguatePhrase();
         CycList disambiguationWords = new CycList();
         disambiguationWords.add("penguins");
         Object [] attributeValuePair = {"disambiguation words", disambiguationWords};
         ArrayList arguments = new ArrayList();
         arguments.add(attributeValuePair);
-        interpreter.setupSubConversation(disambiguateTerm, arguments);
+        interpreter.setupSubConversation(disambiguatePhrase, arguments);
         Assert.assertEquals("ready", conversationStateInfo.getCurrentState().getStateId());
         Assert.assertEquals(2, conversationStack.size());
         Assert.assertTrue(conversationStack.peek() instanceof ConversationStateInfo);
         conversationStateInfo = (ConversationStateInfo) conversationStack.peek();
         Assert.assertNull(conversationStateInfo.getCurrentState());
-        Assert.assertEquals(disambiguateTerm, conversationStateInfo.getConversation());
-        Assert.assertEquals(interpreter.nextPerformative, disambiguateTerm.getDefaultPerformative());
+        Assert.assertEquals(disambiguatePhrase, conversationStateInfo.getConversation());
+        Assert.assertNotNull(interpreter.nextPerformative);
 
         System.out.println("**** testInterpreter OK ****");
     }

@@ -44,6 +44,11 @@ public class Arc implements Comparable {
     protected State transitionToState;
 
     /**
+     * finite state machine state sub conversation
+     */
+    protected Conversation subConversation;
+
+    /**
      * finite state machine state action
      */
     protected Action action;
@@ -53,18 +58,21 @@ public class Arc implements Comparable {
      * transition-to state and the action to take.  Hooks the new arc into
      * the current state.
      *
-     * @param transitionFromState the tranistion-from state
+     * @param transitionFromState the transition-from state
      * @param performative the transition trigger performative
      * @param transitionToState the transition-to state
+     * @param subConversation the sub conversation to perform (null if none)
      * @param action the action to take
      */
     public Arc (State transitionFromState,
                 Performative performative,
                 State transitionToState,
+                Conversation subConversation,
                 Action action) {
         this.transitionFromState = transitionFromState;
         this.performative = performative;
         this.transitionToState = transitionToState;
+        this.subConversation = subConversation;
         this.action = action;
         transitionFromState.addArc(this);
     }
@@ -94,6 +102,24 @@ public class Arc implements Comparable {
      */
     public State getTransitionToState () {
         return transitionToState;
+    }
+
+    /**
+     * Sets the finite state machine state sub conversation.
+     *
+     * @param subConversation the finite state machine state sub conversation
+     */
+    public void setSubConversation (Conversation subConversation) {
+        this.subConversation = subConversation;
+    }
+
+    /**
+     * Returns the finite state machine state sub conversation.
+     *
+     * @return the finite state machine state sub conversation
+     */
+    public Conversation getSubConversation () {
+        return subConversation;
     }
 
     /**
@@ -149,6 +175,8 @@ public class Arc implements Comparable {
         stringBuffer.append(transitionFromState);
         stringBuffer.append(", ");
         stringBuffer.append(performative);
+        stringBuffer.append(", ");
+        stringBuffer.append(subConversation);
         stringBuffer.append(", ");
         stringBuffer.append(action);
         stringBuffer.append(", ");

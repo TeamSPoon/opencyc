@@ -37,7 +37,7 @@ public class Performative implements Comparable {
     /**
      * optional content
      */
-    Object content;
+    protected Object content;
 
     /**
      * Constructs a new Performative object given its name.

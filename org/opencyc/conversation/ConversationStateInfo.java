@@ -90,5 +90,4 @@ public class ConversationStateInfo {
         return stateAttributes;
     }
 
-
 }

@@ -28,7 +28,15 @@ package org.opencyc.conversation;
 
 public class Action {
 
+    /**
+     * The unique identifying name of this action
+     */
     protected String name;
+
+    /**
+     * optional content
+     */
+    protected Object content;
 
     /**
      * Constructs a new Action object givent the action name.
@@ -49,6 +57,24 @@ public class Action {
     }
 
     /**
+     * Sets the action content.
+     *
+     * @param the action content
+     */
+    public void setContent (Object content) {
+        this.content = content;
+    }
+
+    /**
+     * Returns the performative content.
+     *
+     * @return the performative content
+     */
+    public Object getContent () {
+        return content;
+    }
+
+    /**
      * Returns <tt>true</tt> iff some object equals this object
      *
      * @param object the <tt>Object</tt> for equality comparison
@@ -57,8 +83,21 @@ public class Action {
     public boolean equals(Object object) {
         if (! (object instanceof Action))
             return false;
-        return ((Action) object).name.equals(name);
+        Action that = (Action) object;
+        if (! (this.name.equals(that.name)))
+            return false;
+        if (this.content != null) {
+            if (that.content != null)
+                return this.content.equals(that.content);
+            else
+                return false;
+        }
+        if (that.content == null)
+            return true;
+        else
+            return false;
     }
+
 
     /**
      * Returns the string representation of this action

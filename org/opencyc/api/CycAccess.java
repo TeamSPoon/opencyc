@@ -6063,7 +6063,109 @@ public class CycAccess {
         }
 
     /**
-     * Assert an argument contraint for the given relation and argument position.
+     * Creates a new collection-denoting reifiable binary function term.
+     *
+     * @param binaryFunction the new collection
+     * @param comment the comment for the binary function
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new binary function is an instance
+     * @param arg1Isa the kind of objects this binary function takes as its first
+     * argument, or null
+     * @param arg2Isa the kind of objects this binary function takes as its second
+     * argument, or null
+     * @param arg1Genls the general collections this binary function takes as its first
+     * argument, or null
+     * @param arg2Genls the general collections this binary function takes as its second
+     * argument, or null
+     * @param resultIsa the kind of object represented by this reified term
+     * @return the new collection-denoting reifiable binary function term
+     */
+    public CycFort createCollectionDenotingBinaryFunction (String binaryFunction,
+                                                           String comment,
+                                                           String commentMt,
+                                                           String arg1IsaName,
+                                                           String arg2IsaName,
+                                                           String arg1GenlsName,
+                                                           String arg2GenlsName,
+                                                           String resultIsa)
+        throws IOException, CycApiException {
+        CycFort arg1Isa = null;
+        CycFort arg2Isa = null;
+        CycFort arg1Genls = null;
+        CycFort arg2Genls = null;
+        if (arg1IsaName != null)
+            arg1Isa = getKnownConstantByName(arg1IsaName);
+        if (arg2IsaName != null)
+            arg1Isa = getKnownConstantByName(arg2IsaName);
+        if (arg1GenlsName != null)
+            arg1Genls = getKnownConstantByName(arg1GenlsName);
+        if (arg2GenlsName != null)
+            arg2Genls = getKnownConstantByName(arg2GenlsName);
+        return createCollectionDenotingBinaryFunction(
+            findOrCreate(binaryFunction),
+            comment,
+            getKnownConstantByName(commentMt),
+            arg1Isa,
+            arg2Isa,
+            arg1Genls,
+            arg2Genls,
+            getKnownConstantByName(resultIsa));
+        }
+
+    /**
+     * Creates a new collection-denoting reifiable binary function term.
+     *
+     * @param binaryFunction the new collection
+     * @param comment the comment for the binary function
+     * @param commentMt the microtheory in which the comment is asserted
+     * @param isa the collection of which the new binary function is an instance
+     * @param arg1Isa the kind of objects this binary function takes as its first
+     * argument, or null
+     * @param arg2Isa the kind of objects this binary function takes as its first
+     * argument, or null
+     * @param arg1Genls the general collections this binary function takes as its first
+     * argument, or null
+     * @param arg2Genls the general collections this binary function takes as its second
+     * argument, or null
+     * @param resultIsa the kind of object represented by this reified term
+     * @return the new collection-denoting reifiable binary function term
+     */
+    public CycFort createCollectionDenotingBinaryFunction (CycFort binaryFunction,
+                                                           String comment,
+                                                           CycFort commentMt,
+                                                           CycFort arg1Isa,
+                                                           CycFort arg2Isa,
+                                                           CycFort arg1Genls,
+                                                           CycFort arg2Genls,
+                                                           CycFort resultIsa)
+        throws IOException, CycApiException {
+        assertComment(binaryFunction, comment, commentMt);
+        // (#$isa binaryFunction #$BinaryFunction)
+        assertIsa(binaryFunction,
+                  getKnownConstantByGuid("c0e7247c-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa binaryFunction #$ReifiableFunction)
+        assertIsa(binaryFunction,
+                  getKnownConstantByGuid("bd588002-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa binaryFunction #$CollectionDenotingFunction)
+        assertIsa(binaryFunction,
+                  getKnownConstantByGuid("bd58806a-9c29-11b1-9dad-c379636f7270"));
+        // (#$isa binaryFunction #$Function-Denotational)
+        assertIsa(binaryFunction,
+                  getKnownConstantByGuid("bd5c40b0-9c29-11b1-9dad-c379636f7270"));
+        if (arg1Isa != null)
+            assertArgIsa(binaryFunction, 1, arg1Isa);
+        if (arg2Isa != null)
+            assertArgIsa(binaryFunction, 2, arg2Isa);
+        if (arg1Genls != null)
+            assertArg1Genl(binaryFunction, arg1Genls);
+        if (arg2Genls != null)
+            assertArg2Genl(binaryFunction, arg2Genls);
+        assertResultIsa(binaryFunction, resultIsa);
+        return binaryFunction;
+        }
+
+    /**
+     * Assert an argument isa contraint for the given relation and argument position.
      * The operation will be added to the KB transcript for replication and archive.
      *
      * @param relation the given relation
@@ -6083,6 +6185,69 @@ public class CycAccess {
         sentence.add(relation);
         sentence.add(new Integer(argPosition));
         sentence.add(argNIsa);
+        assertGaf(sentence, universalVocabularyMt);
+    }
+
+    /**
+     * Assert an argument one genls contraint for the given relation.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param relation the given relation
+     * @param argGenl the argument constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertArg1Genl (CycFort relation,
+                                CycFort argGenl)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$arg1Genl relation argGenl)
+        CycList sentence = new CycList();
+        sentence.add(getKnownConstantByGuid("bd588b1d-9c29-11b1-9dad-c379636f7270"));
+        sentence.add(relation);
+        sentence.add(argGenl);
+        assertGaf(sentence, universalVocabularyMt);
+    }
+
+    /**
+     * Assert an argument two genls contraint for the given relation.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param relation the given relation
+     * @param argGenl the argument constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertArg2Genl (CycFort relation,
+                                CycFort argGenl)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$arg2Genl relation argGenl)
+        CycList sentence = new CycList();
+        sentence.add(getKnownConstantByGuid("bd58dcda-9c29-11b1-9dad-c379636f7270"));
+        sentence.add(relation);
+        sentence.add(argGenl);
+        assertGaf(sentence, universalVocabularyMt);
+    }
+
+    /**
+     * Assert an argument three genls contraint for the given relation.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param relation the given relation
+     * @param argGenl the argument constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertArg3Genl (CycFort relation,
+                                CycFort argGenl)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$arg3Genl relation argGenl)
+        CycList sentence = new CycList();
+        sentence.add(getKnownConstantByGuid("bd58b8c3-9c29-11b1-9dad-c379636f7270"));
+        sentence.add(relation);
+        sentence.add(argGenl);
         assertGaf(sentence, universalVocabularyMt);
     }
 

@@ -1,8 +1,7 @@
-package org.opencyc.elf;
+package org.opencyc.elf.goal;
 
 /**
- * Provides Sensors for the Elementary Loop Functioning (ELF).<br>
- *
+ * Provides the Value container for the Elementary Loop Functioning (ELF).<br>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -26,21 +25,37 @@ package org.opencyc.elf;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Sensor extends NodeComponent {
+public class Value {
 
     /**
-     * Constructs a new Sensor object.
+     * Values range from -1 for most negative, to zero for neutral, to +1 for
+     * most positive.
      */
-    public Sensor() {
+    float value;
+
+    /**
+     * Constructs a new Value object.
+     */
+    public Value() {
     }
 
     /**
-     * Returns a string representation of this object.
+     * Gets the value
      *
-     * @return a string representation of this object
+     * @return the value
      */
-    public String toString() {
-        return "Sensor for " + node.name;
+    public float getValue () {
+        return value;
     }
 
+    /**
+     * Sets the value
+     *
+     * @param value the value
+     */
+    public void setValue (float value) {
+        if (value < -1.0 || value > 1.0)
+            throw new IllegalArgumentException(value + " is not in the range [-1.0 ... +1.0]");
+        this.value = value;
+    }
 }

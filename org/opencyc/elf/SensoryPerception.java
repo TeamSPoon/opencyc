@@ -28,12 +28,7 @@ import java.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class SensoryPerception {
-
-    /**
-     * Reference to the ELF Node which contains this object.
-     */
-    protected Node node;
+public class SensoryPerception extends NodeComponent {
 
     /**
      * Reference to the parent node's SensoryPerception object.  The
@@ -62,4 +57,39 @@ public class SensoryPerception {
         return "SensoryPerception for " + node.name;
     }
 
+    /**
+     * Gets the parent node's SensoryPerception object.
+     *
+     * @return the parent node's SensoryPerception object
+     */
+    public SensoryPerception getParentSensoryPerception () {
+        return parentSensoryPerception;
+    }
+
+    /**
+     * Sets the parent node's SensoryPerception object.
+     *
+     * @param parentSensoryPerception the parent node's SensoryPerception object
+     */
+    public void setParentSensoryPerception (SensoryPerception parentSensoryPerception) {
+        this.parentSensoryPerception = parentSensoryPerception;
+    }
+
+    /**
+     * Gets the child nodes' SensoryPerception objects.
+     *
+     * @return the child nodes' SensoryPerception objects
+     */
+    public ArrayList getChildrenSensoryPerception () {
+        return childrenSensoryPerception;
+    }
+
+    /**
+     * Sets the child nodes' SensoryPerception objects.
+     *
+     * @param childrenSensoryPerception the child nodes' SensoryPerception objects
+     */
+    public void setChildrenSensoryPerception (ArrayList childrenSensoryPerception) {
+        this.childrenSensoryPerception = childrenSensoryPerception;
+    }
 }

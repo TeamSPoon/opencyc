@@ -28,21 +28,16 @@ import java.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class BehaviorGeneration {
+public class BehaviorGeneration extends NodeComponent {
 
     /**
-     * Reference to the ELF Node which contains this object.
-     */
-    protected Node node;
-
-    /**
-     * Reference to the parent node's BehaviorGeneration object.  The
+     * the parent node's BehaviorGeneration object.  The
      * topmost BehaviorGeneration object has a value null here.
      */
     protected BehaviorGeneration parentBehaviorGeneration;
 
     /**
-     * Reference to the child nodes' BehaviorGeneration objects.  The
+     * the child nodes' BehaviorGeneration objects.  The
      * lowest level BehavoriGeneration object has a value null here.
      */
     protected ArrayList childrenBehaviorGeneration;
@@ -62,4 +57,39 @@ public class BehaviorGeneration {
         return "BehaviorGeneration for " + node.name;
     }
 
+    /**
+     * Gets the parent node's BehaviorGeneration object
+     *
+     * @return the parent node's BehaviorGeneration object
+     */
+    public BehaviorGeneration getParentBehaviorGeneration () {
+        return parentBehaviorGeneration;
+    }
+
+    /**
+     * Sets the parent node's BehaviorGeneration object
+     *
+     * @param parentBehaviorGeneration the parent node's BehaviorGeneration object
+     */
+    public void setParentBehaviorGeneration (BehaviorGeneration parentBehaviorGeneration) {
+        this.parentBehaviorGeneration = parentBehaviorGeneration;
+    }
+
+    /**
+     * Gets the child nodes' BehaviorGeneration objects
+     *
+     * @return the child nodes' BehaviorGeneration objects
+     */
+    public ArrayList getChildrenBehaviorGeneration () {
+        return childrenBehaviorGeneration;
+    }
+
+    /**
+     * Sets the child nodes' BehaviorGeneration objects
+     *
+     * @param childrenBehaviorGeneration the child nodes' BehaviorGeneration objects
+     */
+    public void setChildrenBehaviorGeneration (ArrayList childrenBehaviorGeneration) {
+        this.childrenBehaviorGeneration = childrenBehaviorGeneration;
+    }
 }

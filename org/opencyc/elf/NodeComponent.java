@@ -1,7 +1,8 @@
 package org.opencyc.elf;
 
 /**
- * Provides Sensors for the Elementary Loop Functioning (ELF).<br>
+ * Provides common attributes and behavior for Elementary Loop
+ * Functioning (ELF) node components.<br>
  *
  *
  * @version $Id$
@@ -26,21 +27,28 @@ package org.opencyc.elf;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Sensor extends NodeComponent {
+public abstract class NodeComponent extends ELFObject {
 
     /**
-     * Constructs a new Sensor object.
+     * Reference to the ELF Node which contains this object.
      */
-    public Sensor() {
-    }
+    protected Node node;
 
     /**
-     * Returns a string representation of this object.
+     * Gets the ELF Node which contains this object.
      *
-     * @return a string representation of this object
+     * @return the ELF Node which contains this object
      */
-    public String toString() {
-        return "Sensor for " + node.name;
+    public Node getNode () {
+        return node;
     }
 
+    /**
+     * Sets the ELF Node which contains this object.
+     *
+     * @param xxx the ELF Node which contains this object
+     */
+    public void setNode (Node node) {
+        this.node = node;
+    }
 }

@@ -26,12 +26,7 @@ package org.opencyc.elf;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ValueJudgement {
-
-    /**
-     * Reference to the ELF Node which contains this object.
-     */
-    protected Node node;
+public class ValueJudgement extends NodeComponent {
 
     /**
      * Constructs a new ValueJudgement object.

@@ -3,8 +3,6 @@ package org.opencyc.uml.core;
 /**
  * ModelElement from the UML Core Package.
  *
- * An element is an atomic constitutent of a model.
- *
  * @version $Id$
  * @author Stephen L. Reed
  *

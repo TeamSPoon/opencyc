@@ -1,8 +1,7 @@
-package org.opencyc.elf;
+package org.opencyc.elf.goal;
 
 /**
- * Provides Sensors for the Elementary Loop Functioning (ELF).<br>
- *
+ * Provides the Importance container for the Elementary Loop Functioning (ELF).<br>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -26,21 +25,37 @@ package org.opencyc.elf;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Sensor extends NodeComponent {
+public class Importance {
 
     /**
-     * Constructs a new Sensor object.
+     * Importances range from 0.0 for least important, to +1 for
+     * most important.
      */
-    public Sensor() {
+    float importance;
+
+    /**
+     * Constructs a new Importance object.
+     */
+    public Importance() {
     }
 
     /**
-     * Returns a string representation of this object.
+     * Gets the importance
      *
-     * @return a string representation of this object
+     * @return the importance
      */
-    public String toString() {
-        return "Sensor for " + node.name;
+    public float getImportance () {
+        return importance;
     }
 
+    /**
+     * Sets the importance
+     *
+     * @param importance the importance
+     */
+    public void setImportance (float importance) {
+        if (importance < 0.0 || importance > 1.0)
+            throw new IllegalArgumentException(importance + " is not in the range [0.0 ... +1.0]");
+        this.importance = importance;
+    }
 }

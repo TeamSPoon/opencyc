@@ -26,12 +26,7 @@ package org.opencyc.elf;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class WorldModel {
-
-    /**
-     * Reference to the ELF Node which contains this object.
-     */
-    protected Node node;
+public class WorldModel extends NodeComponent {
 
     /**
      * Constructs a new WorldModel object.

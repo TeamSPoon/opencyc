@@ -26,14 +26,9 @@ package org.opencyc.elf;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Actuator {
+public class Actuator extends NodeComponent {
 
-    /**
-     * Reference to the ELF Node which contains this object.
-     */
-    protected Node node;
-
-    /**
+   /**
      * Constructs a new Actuator object.
      */
     public Actuator() {

@@ -28,7 +28,7 @@ import java.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Node {
+public class Node extends ELFObject {
 
 
     /**
@@ -36,11 +36,6 @@ public class Node {
      * name --> Node
      */
     protected static HashMap nodes = new HashMap();
-
-    /**
-     * the unique name of this node
-     */
-    protected String name;
 
     /**
      * the purpose description

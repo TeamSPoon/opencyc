@@ -53,7 +53,7 @@ public class ImportDamlApp {
         Log.makeLog();
         Log.current.println("Starting ImportDamlApp");
         try {
-            final JFrame mainFrame = new JFrame("Import DAML");
+            final JFrame mainFrame = new JFrame("Import DAML into Cyc");
             mainFrame.addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent ev) {
                     terminate();

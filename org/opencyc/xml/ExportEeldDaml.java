@@ -71,17 +71,17 @@ public class ExportEeldDaml {
     public static void main (String[] args) {
         try {
             cycAccess =
-                /*
+
                 new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                               CycConnection.DEFAULT_BASE_PORT,
                               CycConnection.DEFAULT_COMMUNICATION_MODE,
                               CycAccess.DEFAULT_CONNECTION);
-                */
+            /*
                 new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                               3620,
                               CycConnection.DEFAULT_COMMUNICATION_MODE,
                               CycAccess.DEFAULT_CONNECTION);
-
+            */
             ExportDaml exportDaml = new ExportDaml(cycAccess);
             exportDaml.verbosity = ExportDaml.DEFAULT_VERBOSITY;
             //exportDaml.verbosity = 9;

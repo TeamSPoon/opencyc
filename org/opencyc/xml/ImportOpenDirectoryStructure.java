@@ -32,7 +32,7 @@ import org.opencyc.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ImportOpenDirectoryStructure {
+public class ImportOpenDirectoryStructure extends ImportDaml {
 
     /**
      * When true, bypasses some KB assertion activities.
@@ -123,11 +123,6 @@ public class ImportOpenDirectoryStructure {
         initializeDocumentsToImport();
         initializeOntologyNicknames();
         initializeMappedTerms();
-        ImportDaml importDaml =
-            new ImportDaml(cycAccess,
-                           ontologyNicknames,
-                           equivalentDamlCycTerms,
-                           kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
         for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);

@@ -88,7 +88,7 @@ public class ImportSonatDaml {
                                       true);
         }
         else if (localHostName.equals("thinker")) {
-            cycAccess = new CycAccess("MCCARTHY",
+            cycAccess = new CycAccess("TURING",
                                       3600,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);
@@ -134,17 +134,15 @@ public class ImportSonatDaml {
                            equivalentDamlCycTerms,
                            kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
-        //for (int i = 29; i < damlDocInfos.size(); i++) {
+        //for (int i = 2; i < damlDocInfos.size(); i++) {
         for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
             if(importDaml.actuallyImport) {
                 initializeDamlOntologyMt(importMt);
-                if (! cycAccess.isOpenCyc()) {
-                    cycAccess.assertGenlMt(importMt, damlSonatSpindleHeadMt);
-                    cycAccess.assertGenlMt(damlSonatSpindleCollectorMt, importMt);
-                }
+                cycAccess.assertGenlMt(importMt, damlSonatSpindleHeadMt);
+                cycAccess.assertGenlMt(damlSonatSpindleCollectorMt, importMt);
             }
             importDaml.initialize();
             importDaml.importDaml(damlPath, importMt);
@@ -270,6 +268,7 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.daml.org/2001/03/daml+oil", "daml");
 
         ontologyNicknames.put("http://xmlns.com/foaf/0.1", "foaf");
+        ontologyNicknames.put("http://xmlns.com/foaf/0.1/", "foaf");
         ontologyNicknames.put("http://xmlns.com/foaf", "foaf");
         ontologyNicknames.put("http://xmlns.com/wot/0.1", "wot");
         ontologyNicknames.put("http://xmlns.com/wordnet/1.6", "wn");
@@ -384,70 +383,201 @@ public class ImportSonatDaml {
 
     protected void initializeMappedTerms ()
         throws IOException, UnknownHostException, CycApiException {
-        assertMapping("daml:Thing", "Thing");
-        assertMapping("rdfs:Resource", "Thing");
+        assertMapping("daml:Thing",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#Thing",
+                      "Thing");
+        assertMapping("rdfs:Resource",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#Resource",
+                      "Thing");
 
-        assertMapping("daml:Class", "Collection");
-        assertMapping("rdfs:Class", "Collection");
+        assertMapping("daml:Class",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#Class",
+                      "Collection");
+        assertMapping("rdfs:Class",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#Class",
+                      "Collection");
 
-        assertMapping("daml:Ontology", "AbstractInformationStructure");
+        assertMapping("daml:Ontology",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#Ontology",
+                      "AbstractInformationStructure");
 
-        assertMapping("daml:DatatypeProperty", "DamlDatatypeProperty");
+        assertMapping("daml:DatatypeProperty",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#DatatypeProperty",
+                      "DamlDatatypeProperty");
 
-        assertMapping("daml:ObjectProperty", "DamlObjectProperty");
+        assertMapping("daml:ObjectProperty",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#ObjectProperty",
+                      "DamlObjectProperty");
 
-        assertMapping("daml:Property", "BinaryPredicate");
-        assertMapping("rdfs:Property", "BinaryPredicate");
-        assertMapping("rdf:Property", "BinaryPredicate");
+        assertMapping("daml:Property",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#Property",
+                      "BinaryPredicate");
+        assertMapping("rdfs:Property",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#Property",
+                      "BinaryPredicate");
+        assertMapping("rdf:Property",
+                      "http://www.w3.org/1999/02/22-rdf-syntax-ns",
+                      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
+                      "BinaryPredicate");
 
-        assertMapping("daml:TransitiveProperty", "TransitiveBinaryPredicate");
+        assertMapping("daml:TransitiveProperty",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#TransitiveProperty",
+                      "TransitiveBinaryPredicate");
 
-        assertMapping("daml:Literal", "SubLAtomicTerm");
-        assertMapping("rdfs:Literal", "SubLAtomicTerm");
+        assertMapping("daml:Literal",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#Literal",
+                      "SubLAtomicTerm");
+        assertMapping("rdfs:Literal",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#Literal",
+                      "SubLAtomicTerm");
 
-        assertMapping("xsd:string", "SubLString");
-        assertMapping("xsd:decimal", "SubLRealNumber");
-        assertMapping("xsd:integer", "SubLInteger");
-        assertMapping("xsd:float", "SubLRealNumber");
-        assertMapping("xsd:double", "SubLRealNumber");
-        assertMapping("xsd:date", "Date");
-        assertMapping("xsd:uriReference", "UniformResourceLocator");
-        assertMapping("xsd:anyURI", "UniformResourceLocator");
+        assertMapping("xsd:string",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#string",
+                      "SubLString");
+        assertMapping("xsd:decimal",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#decimal",
+                      "SubLRealNumber");
+        assertMapping("xsd:integer",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#integer",
+                      "SubLInteger");
+        assertMapping("xsd:float",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#float",
+                      "SubLRealNumber");
+        assertMapping("xsd:double",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#double",
+                      "SubLRealNumber");
+        assertMapping("xsd:date",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#date",
+                      "Date");
+        assertMapping("xsd:uriReference",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#uriReference",
+                      "UniformResourceLocator");
+        assertMapping("xsd:anyURI",
+                      "http://www.w3.org/2000/10/XMLSchema",
+                      "http://www.w3.org/2000/10/XMLSchema#anyURI",
+                      "UniformResourceLocator");
 
         // Binary predicates
-        assertMapping("daml:subClassOf", "genls");
-        assertMapping("rdfs:subClassOf", "genls");
+        assertMapping("daml:subClassOf",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#subClassOf",
+                      "genls");
+        assertMapping("rdfs:subClassOf",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                      "genls");
 
-        assertMapping("daml:type", "isa");
-        assertMapping("rdfs:type", "isa");
-        assertMapping("rdf:type", "isa");
+        assertMapping("daml:type",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#type",
+                      "isa");
+        assertMapping("rdfs:type",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#type",
+                      "isa");
+        assertMapping("rdf:type",
+                      "http://www.w3.org/1999/02/22-rdf-syntax-ns",
+                      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                      "isa");
 
-        assertMapping("daml:subPropertyOf", "genlPreds");
-        assertMapping("rdfs:subPropertyOf", "genlPreds");
+        assertMapping("daml:subPropertyOf",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#subPropertyOf",
+                      "genlPreds");
+        assertMapping("rdfs:subPropertyOf",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#subPropertyOf",
+                      "genlPreds");
 
-        assertMapping("daml:label", "nameString");
-        assertMapping("rdfs:label", "nameString");
+        assertMapping("daml:label",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#label",
+                      "nameString");
+        assertMapping("rdfs:label",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#label",
+                      "nameString");
 
-        assertMapping("daml:comment", "comment");
-        assertMapping("rdfs:comment", "comment");
+        assertMapping("daml:comment",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#comment",
+                      "comment");
+        assertMapping("rdfs:comment",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#comment",
+                      "comment");
 
-        assertMapping("daml:seeAlso", "conceptuallyRelated");
-        assertMapping("rdfs:seeAlso", "conceptuallyRelated");
+        assertMapping("daml:seeAlso",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#seeAlso",
+                      "conceptuallyRelated");
+        assertMapping("rdfs:seeAlso",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+                      "conceptuallyRelated");
 
-        assertMapping("daml:isDefinedBy", "containsInformationAbout");
-        assertMapping("rdfs:isDefinedBy", "containsInformationAbout");
+        assertMapping("daml:isDefinedBy",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#isDefinedBy",
+                      "containsInformationAbout");
+        assertMapping("rdfs:isDefinedBy",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#isDefinedBy",
+                      "containsInformationAbout");
 
-        assertMapping("daml:domain", "arg1Isa");
-        assertMapping("rdfs:domain", "arg1Isa");
+        assertMapping("daml:domain",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#domain",
+                      "arg1Isa");
+        assertMapping("rdfs:domain",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#domain",
+                      "arg1Isa");
 
-        assertMapping("daml:range", "arg2Isa");
-        assertMapping("rdfs:range", "arg2Isa");
+        assertMapping("daml:range",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#range",
+                      "arg2Isa");
+        assertMapping("rdfs:range",
+                      "http://www.w3.org/2000/01/rdf-schema",
+                      "http://www.w3.org/2000/01/rdf-schema#range",
+                      "arg2Isa");
 
-        assertMapping("daml:differentIndividualFrom", "different");
+        assertMapping("daml:differentIndividualFrom",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#differentIndividualFrom",
+                      "different");
 
-        assertMapping("daml:samePropertyAs", "equalSymbols");
+        assertMapping("daml:samePropertyAs",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#samePropertyAs",
+                      "synonymousExternalConcept");
 
-        assertMapping("daml:disjointWith", "different");
+        assertMapping("daml:disjointWith",
+                      "http://www.daml.org/2001/03/daml+oil",
+                      "http://www.daml.org/2001/03/daml+oil#disjointWith",
+                      "disjointWith");
+
+        // Get the above mappings plus any previously defined in the KB.
         getMappings();
     }
 
@@ -456,20 +586,49 @@ public class ImportSonatDaml {
      * Asserts that the given DAML/RDFS/RDF term is mapped to the
      * given Cyc term.
      *
-     * @param damlTerm the given DAML/RDFS/RDF term
-     * @param cycTerm the given Cyc term
+     * @param damlTermName the given DAML/RDFS/RDF term
+     * @param damlOntology the Uniform Resource Locator in which the definition of
+     * the daml term is found
+     * @param damlURI the Uniform Resource Locator which uniquely identifies the daml term
+     * @param cycTermName the given Cyc term
      */
-    protected void assertMapping (String damlTerm, String cycTerm)
+    protected void assertMapping (String damlTermName,
+                                  String damlOntology,
+                                  String damlURI,
+                                  String cycTermName)
         throws IOException, UnknownHostException, CycApiException {
-        cycAccess.assertSynonymousExternalConcept(cycTerm,
+        CycFort cycTerm = cycAccess.findOrCreate(cycTermName);
+        Log.current.println("Mapping " + damlTermName + " to " + cycTerm.cyclify());
+        cycAccess.assertSynonymousExternalConcept(cycTermName,
                                                   "WorldWideWeb-DynamicIndexedInfoSource",
-                                                  damlTerm,
+                                                  damlTermName,
                                                   "DamlSonatSpindleHeadMt");
+        CycFort damlTerm = cycAccess.findOrCreate(damlTermName);
+        cycAccess.assertComment(damlTerm,
+                                damlTerm.cyclify() +
+                                " is an imported DAML/XML term equivalent to the Cyc term " +
+                                cycTerm.cyclify(),
+                                cycAccess.getKnownConstantByName("DamlSonatSpindleHeadMt"));
+        // assert (#$isa damlTerm #$DamlConstant) in BookkeepingMt
+        cycAccess.assertIsa(damlTerm,
+                            cycAccess.getKnownConstantByName("DamlConstant"),
+                            cycAccess.bookkeepingMt);
+        // assert (#$damlOntology damlTerm ontologyURL) in BookkeepingMt
+        cycAccess.assertGaf(cycAccess.bookkeepingMt,
+                            cycAccess.getKnownConstantByName("damlOntology"),
+                            damlTerm,
+                            new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                                       damlOntology));
+        // assert (#$damlURI damlTerm uri) in BookkeepingMt
+        cycAccess.assertGaf(cycAccess.bookkeepingMt,
+                            cycAccess.getKnownConstantByName("damlURI"),
+                            damlTerm,
+                            new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                                       damlURI));
     }
 
     /**
      * Gets the asserted mappings between DAML/RDFS/RDF terms and Cyc terms.
-     *
      */
     protected void getMappings ()
         throws IOException, UnknownHostException, CycApiException {
@@ -485,8 +644,6 @@ public class ImportSonatDaml {
             equivalentDamlCycTerms.put(damlTerm, cycTerm.toString());
         }
     }
-
-
 
     /**
      * Initializes the DAML ontology vocabulary if not present.
@@ -533,6 +690,14 @@ public class ImportSonatDaml {
                                    "PredicateCategory",
                                    "BinaryPredicate");
 
+        // #$DamlAnonymousClass
+        cycAccess.createCollection("DamlAnonymousClass",
+                                   "The collection of DAML anonymous classes not having a " +
+                                   "Uniform Resource Identifier (URI).",
+                                   "BaseKB",
+                                   "ObjectType",
+                                   "IndeterminateTerm");
+
         if (cycAccess.find("WorldWideWeb-DynamicIndexedInfoSource") == null)
             // #$WorldWideWeb-DynamicIndexedInfoSource
             cycAccess.createIndividual("WorldWideWeb-DynamicIndexedInfoSource",
@@ -548,6 +713,16 @@ public class ImportSonatDaml {
             genlMts.add("BaseKB");
             cycAccess.createMicrotheory("DamlSonatSpindleHeadMt",
                                         "The microtheory which is superior to all the DAML SONAT " +
+                                        " ontology microtheories.",
+                                        "Microtheory",
+                                        genlMts);
+        }
+
+        if (cycAccess.find("DamlSonatSpindleCollectorMt") == null) {
+            // #$DamlSonatSpindleHeadMt
+            ArrayList genlMts = new ArrayList();
+            cycAccess.createMicrotheory("DamlSonatSpindleCollectorMt",
+                                        "The microtheory which is inferior to all the DAML SONAT " +
                                         " ontology microtheories.",
                                         "Microtheory",
                                         genlMts);

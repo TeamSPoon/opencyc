@@ -4667,46 +4667,6 @@ public class CycAccess {
     }
 
     /**
-     * Assert that symbol1 denotes the same concept as symbol2, asserted in the
-     * UniversalVocabularyMt
-     * The operation will be added to the KB transcript for replication and archive.
-     *
-     * @param symbolName1 the name of the first symbol
-     * @param symbolName2 the name of the second symbol
-     * @throws UnknownHostException if cyc server host not found on the network
-     * @throws IOException if a data communication error occurs
-     * @throws CycApiException if the api request results in a cyc server error
-     */
-    public void assertEqualSymbols (String symbolName1,
-                                    String symbolName2)
-        throws IOException, UnknownHostException, CycApiException {
-        assertEqualSymbols(getKnownConstantByName(symbolName1),
-                           getKnownConstantByName(symbolName2));
-    }
-
-    /**
-     * Assert that symbol1 denotes the same concept as symbol2, asserted in the
-     * UniversalVocabularyMt
-     * The operation will be added to the KB transcript for replication and archive.
-     *
-     * @param symbol1 the first symbol
-     * @param symbol2 the second symbol
-     * @throws UnknownHostException if cyc server host not found on the network
-     * @throws IOException if a data communication error occurs
-     * @throws CycApiException if the api request results in a cyc server error
-     */
-    public void assertEqualSymbols (CycConstant symbol1,
-                                    CycConstant symbol2)
-        throws IOException, UnknownHostException, CycApiException {
-        CycConstant equalSymbols =
-            getKnownConstantByGuid("c05e110e-9c29-11b1-9dad-c379636f7270");
-        assertGaf(universalVocabularyMt,
-                  equalSymbols,
-                  symbol1,
-                  symbol2);
-    }
-
-    /**
      * Assert that term1 is conceptually related to term2 in the specified microtheory.
      * The operation will be added to the KB transcript for replication and archive.
      *

@@ -184,7 +184,11 @@ public class ImportDaml implements StatementHandler {
         Log.current.println("Defining URL " + damlOntologyDefiningURL.cyclify());
         CycList gaf = new CycList();
         gaf.add(cycAccess.getKnownConstantByName("xmlNameSpace"));
-        gaf.add(ontologyNicknames.get(damlOntologyDefiningURLString));
+        String nickname = (String) ontologyNicknames.get(damlOntologyDefiningURLString);
+        if (nickname == null)
+            throw new RuntimeException("Nickname not found for " +
+                                       damlOntologyDefiningURLString);
+        gaf.add(nickname);
         gaf.add(damlOntologyDefiningURL);
         cycAccess.assertGaf(gaf, importMt);
         Log.current.println("\nStatements\n");
@@ -326,8 +330,8 @@ public class ImportDaml implements StatementHandler {
                 importNameString(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("equalSymbols")) {
-                importEqualSymbols(subjectTermInfo, objLitTermInfo);
+            if (damlPredicate.equals("synonymousExternalConcept")) {
+                importSynonymousExternalConcept(subjectTermInfo, objLitTermInfo);
                 return;
             }
             if (damlPredicate.equals("arg1Isa")) {
@@ -559,17 +563,20 @@ public class ImportDaml implements StatementHandler {
      * @param subjectTermInfo the subject DamlTermInfo object
      * @param objectTermInfo the object DamlTermInfo object
      */
-    protected void importEqualSymbols (DamlTermInfo subjectTermInfo,
-                                    DamlTermInfo objectTermInfo)
+    protected void importSynonymousExternalConcept (DamlTermInfo subjectTermInfo,
+                                                    DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         importTerm(subjectTermInfo);
         if (objectTermInfo.cycFort == null)
             importTerm(objectTermInfo);
-        cycAccess.assertEqualSymbols(subjectTermInfo.toString(),
-                                     objectTermInfo.toString());
-        Log.current.println("(#$equalSymbols " +
+        cycAccess.assertSynonymousExternalConcept(subjectTermInfo.toString(),
+                                                  "WorldWideWeb-DynamicIndexedInfoSource",
+                                                  objectTermInfo.toOriginalString(),
+                                                  "DamlSonatSpindleHeadMt");
+        Log.current.println("(#$synonymousExternalConcept " +
                             subjectTermInfo.cycFort.cyclify() + " " +
-                            objectTermInfo.cycFort.cyclify() + ")\n");
+                            "WorldWideWeb-DynamicIndexedInfoSource \"" +
+                            objectTermInfo.toOriginalString() + "\")\n");
     }
 
     /**
@@ -780,6 +787,10 @@ public class ImportDaml implements StatementHandler {
             cycAccess.assertIsa(cycFort,
                                 kbSubsetCollection,
                                 bookkeepingMt);
+            if (damlTermInfo.isAnonymous)
+                cycAccess.assertIsa(cycFort,
+                                    cycAccess.getKnownConstantByName("DamlAnonymousClass"),
+                                    importMt);
         }
         damlTermInfo.cycFort = cycFort;
         previousDamlTermInfo = damlTermInfo;

@@ -31,6 +31,11 @@ public abstract class CycFort implements Serializable {
 
 
     /**
+     * Field for storing the name of the XML tag for CycConstant objects
+     */
+    public static final String idXMLTag = "id";
+
+    /**
      * The ID of the <tt>CycFort<tt> object which is an integer unique within an OpenCyc
      * KB but not necessarily unique globally.
      */

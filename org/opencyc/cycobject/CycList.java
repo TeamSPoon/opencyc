@@ -4,7 +4,6 @@ import java.util.*;
 import java.io.*;
 import org.opencyc.util.*;
 import org.opencyc.api.*;
-import org.opencyc.cycobject.databinding.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc list, typically used
@@ -630,50 +629,4 @@ public class CycList extends ArrayList {
         return false;
     }
 
-    /**
-     * Returns the CycListXmlDataBindingImpl object which contains this CycList.  The
-     * xml databinding object can be subsequently serialized into xml.
-     *
-     * @return the CycListXmlDataBindingImpl object which contains this CycList
-     */
-    public CycListXmlDataBinding toCycListXmlDataBinding () {
-        CycListXmlDataBinding cycListXmlDataBindingImpl = new CycListXmlDataBindingImpl();
-        ArrayList elementList = new ArrayList();
-        for (int i = 0; i < this.size(); i++) {
-            Object element = this.get(i);
-            if (element instanceof CycConstant)
-                elementList.add(((CycConstant) element).toCycConstantXmlDataBinding());
-            else if (element instanceof CycNart)
-                elementList.add(((CycNart) element).toCycNartXmlDataBinding());
-            else if (element instanceof CycSymbol)
-                elementList.add(((CycSymbol) element).toCycSymbolXmlDataBinding());
-            else if (element instanceof CycVariable)
-                elementList.add(((CycVariable) element).toCycVariableXmlDataBinding());
-            else if (element instanceof Guid)
-                elementList.add(((Guid) element).toGuidXmlDataBinding());
-            else if (element instanceof CycList)
-                elementList.add(((CycList) element).toCycListXmlDataBinding());
-            else
-                elementList.add(element);
-        }
-        cycListXmlDataBindingImpl.setElementList(elementList);
-        cycListXmlDataBindingImpl.setIsProperListIndicator(this.isProperList);
-        if (dottedElement == null)
-            cycListXmlDataBindingImpl.setDottedElement(null);
-        else if (dottedElement instanceof CycConstant)
-            cycListXmlDataBindingImpl.setDottedElement(((CycConstant) dottedElement).toCycConstantXmlDataBinding());
-        else if (dottedElement instanceof CycNart)
-            cycListXmlDataBindingImpl.setDottedElement(((CycNart) dottedElement).toCycNartXmlDataBinding());
-        else if (dottedElement instanceof CycSymbol)
-            cycListXmlDataBindingImpl.setDottedElement(((CycSymbol) dottedElement).toCycSymbolXmlDataBinding());
-        else if (dottedElement instanceof CycVariable)
-            cycListXmlDataBindingImpl.setDottedElement(((CycVariable) dottedElement).toCycVariableXmlDataBinding());
-        else if (dottedElement instanceof Guid)
-            cycListXmlDataBindingImpl.setDottedElement(((Guid) dottedElement).toGuidXmlDataBinding());
-        else if (dottedElement instanceof CycList)
-            cycListXmlDataBindingImpl.setDottedElement(((CycList) dottedElement).toCycListXmlDataBinding());
-        else
-            cycListXmlDataBindingImpl.setDottedElement(dottedElement);
-        return cycListXmlDataBindingImpl;
-    }
 }

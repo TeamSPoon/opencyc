@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.io.*;
 import org.opencyc.xml.*;
 import org.opencyc.api.*;
-import org.opencyc.cycobject.databinding.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc Constant.
@@ -42,11 +41,6 @@ public class CycConstant extends CycFort implements Comparable {
      * Field for storing the name of the XML tag for the name of CycConstant objects
      */
     public static final String nameXMLTag = "name";
-
-    /**
-     * Field for storing the name of the XML tag for the GUID of CycConstant objects
-     */
-    public static final String guidXMLTag = "guid";
 
     /**
      * The default indentation for printing CycConstant objects to XML
@@ -177,18 +171,21 @@ public class CycConstant extends CycFort implements Comparable {
      * @param indent an int that specifies by how many spaces to indent
      * @param relative a boolean; if true indentation is relative, otherwise absolute
      */
-    /**
-     * Prints the XML representation of the CycFort to an <tt>XMLWriter</tt>
-     */
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws java.io.IOException {
         xmlWriter.printXMLStartTag(constantXMLTag, indent, relative, true);
-        xmlWriter.printXMLStartTag(guidXMLTag, indentLength, true, false);
-        xmlWriter.print(this.getGuid().toString());
-        xmlWriter.printXMLEndTag(guidXMLTag);
-        xmlWriter.printXMLStartTag(nameXMLTag, 0, true, false);
-        xmlWriter.print(this.getName());
-        xmlWriter.printXMLEndTag(nameXMLTag);
+        if (guid != null)
+            guid.toXML(xmlWriter, indentLength, true);
+        if (name != null) {
+            xmlWriter.printXMLStartTag(nameXMLTag, 0, true, false);
+            xmlWriter.print(this.getName());
+            xmlWriter.printXMLEndTag(nameXMLTag);
+        }
+        if (super.getId() != null) {
+            xmlWriter.printXMLStartTag(idXMLTag, 0, true, false);
+            xmlWriter.print(this.getId().toString());
+            xmlWriter.printXMLEndTag(idXMLTag);
+        }
         xmlWriter.printXMLEndTag(constantXMLTag, -indentLength, true);
     }
 
@@ -292,17 +289,4 @@ public class CycConstant extends CycFort implements Comparable {
         return answer;
     }
 
-    /**
-     * Returns the CycConstantXmlDataBindingImpl object which contains this CycConstant.  The
-     * xml databinding object can be subsequently serialized into xml.
-     *
-     * @return the CycConstantXmlDataBindingImpl object which contains this CycConstant
-     */
-    public CycConstantXmlDataBinding toCycConstantXmlDataBinding () {
-        CycConstantXmlDataBinding cycConstantXmlDataBindingImpl = new CycConstantXmlDataBindingImpl();
-        cycConstantXmlDataBindingImpl.setId(this.getId());
-        cycConstantXmlDataBindingImpl.setName(name);
-        cycConstantXmlDataBindingImpl.setGuidXmlDataBinding(guid.toGuidXmlDataBinding());
-        return cycConstantXmlDataBindingImpl;
-    }
 }

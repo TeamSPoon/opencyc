@@ -1,7 +1,5 @@
 package org.opencyc.cycobject;
 
-import org.opencyc.cycobject.databinding.*;
-
 /**
  * Provides the behavior and attributes of an OpenCyc symbol, typically used
  * to represent api function names, and non <tt>CycConstant</tt> parameters.
@@ -110,15 +108,4 @@ public class CycSymbol implements Comparable {
         return true;
     }
 
-    /**
-     * Returns the CycSymbolXmlDataBindingImpl object which contains this CycSymbol.  The
-     * xml databinding object can be subsequently serialized into xml.
-     *
-     * @return the CycSymbolXmlDataBindingImpl object which contains this CycSymbol
-     */
-    public CycSymbolXmlDataBinding toCycSymbolXmlDataBinding () {
-        CycSymbolXmlDataBinding cycSymbolXmlDataBindingImpl = new CycSymbolXmlDataBindingImpl();
-        cycSymbolXmlDataBindingImpl.setSymbolName(symbolName);
-        return cycSymbolXmlDataBindingImpl;
-    }
 }

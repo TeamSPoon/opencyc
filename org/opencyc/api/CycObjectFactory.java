@@ -4,7 +4,6 @@ import java.util.*;
 import java.io.*;
 import org.apache.oro.util.*;
 import org.opencyc.util.*;
-import org.opencyc.cycobject.databinding.*;
 import org.opencyc.cycobject.*;
 
 /**
@@ -100,45 +99,6 @@ public class CycObjectFactory {
     protected static Cache guidCache = new CacheLRU(500);
 
     /**
-     * Constructs a CycList from the given xml databinding object.
-     *
-     * @pararm cycListXmlDataBindingImpl the xml databinding object
-     */
-    public static CycList makeCycList (CycListXmlDataBinding cycListXmlDataBindingImpl) {
-        CycList cycList = new CycList();
-        for (int i = 0; i < cycListXmlDataBindingImpl.getElementList().size(); i++) {
-            Object element = cycListXmlDataBindingImpl.getElementList().get(i);
-            if (element instanceof CycConstantXmlDataBindingImpl)
-                cycList.add(makeCycConstant((CycConstantXmlDataBindingImpl) element));
-            else if (element instanceof CycNartXmlDataBindingImpl)
-                cycList.add(makeCycNart((CycNartXmlDataBindingImpl) element));
-            else if (element instanceof CycSymbolXmlDataBindingImpl)
-                cycList.add(makeCycSymbol((CycSymbolXmlDataBindingImpl) element));
-            else if (element instanceof CycVariableXmlDataBindingImpl)
-                cycList.add(makeCycConstant((CycConstantXmlDataBindingImpl) element));
-            else if (element instanceof GuidXmlDataBindingImpl)
-                cycList.add(makeGuid((GuidXmlDataBindingImpl) element));
-            else
-                cycList.add(element);
-        }
-        if (cycListXmlDataBindingImpl.getDottedElement() == null)
-            return cycList;
-        if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycConstantXmlDataBindingImpl)
-            cycList.setDottedElement(makeCycConstant((CycConstantXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycNartXmlDataBindingImpl)
-            cycList.setDottedElement(makeCycNart((CycNartXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycSymbolXmlDataBindingImpl)
-            cycList.setDottedElement(makeCycSymbol((CycSymbolXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycVariableXmlDataBindingImpl)
-            cycList.setDottedElement(makeCycVariable((CycVariableXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
-        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof GuidXmlDataBindingImpl)
-            cycList.setDottedElement(makeGuid((GuidXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement()));
-        else
-            cycList.setDottedElement(cycListXmlDataBindingImpl.getDottedElement());
-        return cycList;
-    }
-
-    /**
      * Constructs a new <tt>CycSymbol</tt> object.
      *
      * @param symbolName a <tt>String</tt> name.
@@ -150,19 +110,6 @@ public class CycObjectFactory {
             cycSymbol = new CycSymbol(symbolName);
             cycSymbolCache.addElement(symbolName, cycSymbol);
         }
-        return cycSymbol;
-    }
-
-    /**
-     * Constructs a CycSymbol from the given xml databinding object.
-     *
-     * @pararm cycSymbolXmlDataBindingImpl the xml databinding object
-     */
-    public static CycSymbol makeCycSymbol (CycSymbolXmlDataBinding cycSymbolXmlDataBindingImpl) {
-        CycSymbol cycSymbol = getCycSymbolCache(cycSymbolXmlDataBindingImpl.getSymbolName());
-        if (cycSymbol != null)
-            return cycSymbol;
-        cycSymbol = new CycSymbol(cycSymbolXmlDataBindingImpl.getSymbolName());
         return cycSymbol;
     }
 
@@ -211,26 +158,6 @@ public class CycObjectFactory {
         cycConstantCacheById = new CacheLRU(500);
         cycConstantCacheByName = new CacheLRU(500);
         cycConstantCacheByGuid = new CacheLRU(500);
-    }
-
-    /**
-     * Constructs a CycConstant from the given xml databinding object.
-     *
-     * @pararm cycConstantXmlDataBindingImpl the xml databinding object
-     */
-    public static CycConstant makeCycConstant (CycConstantXmlDataBinding cycConstantXmlDataBindingImpl) {
-        Guid guid = makeGuid(cycConstantXmlDataBindingImpl.getGuidXmlDataBinding().getGuidString());
-        CycConstant cycConstant =
-            getCycConstantCacheByGuid(guid);
-        if (cycConstant != null)
-            return cycConstant;
-        cycConstant = new CycConstant(cycConstantXmlDataBindingImpl.getName(),
-                                      guid,
-                                      cycConstantXmlDataBindingImpl.getId());
-        addCycConstantCacheByName(cycConstant);
-        addCycConstantCacheByGuid(cycConstant);
-        addCycConstantCacheById(cycConstant);
-        return cycConstant;
     }
 
     /**
@@ -325,38 +252,6 @@ public class CycObjectFactory {
      */
     public static void resetCycNartCache() {
         cycNartCache = new CacheLRU(500);
-    }
-
-    /**
-     * Constructs a CycNart from the given xml databinding object.
-     *
-     * @pararm cycNartXmlDataBindingImpl the xml databinding object
-     */
-    public static CycNart makeCycNart (CycNartXmlDataBinding cycNartXmlDataBindingImpl) {
-        Integer id = cycNartXmlDataBindingImpl.getId();
-        CycNart cycNart;
-        if (id != null) {
-            cycNart = getCycNartCache(cycNartXmlDataBindingImpl.getId());
-            if (cycNart != null)
-                return cycNart;
-        }
-        cycNart = new CycNart();
-        cycNart.setId(id);
-        FunctorXmlDataBinding functorXmlDataBinding = cycNartXmlDataBindingImpl.getFunctorXmlDataBinding();
-        if (functorXmlDataBinding.getCycConstantXmlDataBinding() != null) {
-            if (functorXmlDataBinding.getCycNartXmlDataBinding() != null)
-                throw new RuntimeException("Invalid " + functorXmlDataBinding);
-            CycConstant cycConstant = makeCycConstant(functorXmlDataBinding.getCycConstantXmlDataBinding());
-            cycNart.setFunctor(cycConstant);
-        }
-        else if (functorXmlDataBinding.getCycNartXmlDataBinding() != null) {
-            CycNart cycNartFunctor = makeCycNart(functorXmlDataBinding.getCycNartXmlDataBinding());
-            cycNart.setFunctor(cycNartFunctor);
-        }
-        else
-            throw new RuntimeException("Invalid functor " + functorXmlDataBinding + " of " + cycNartXmlDataBindingImpl);
-        cycNart.setArguments(makeCycList(cycNartXmlDataBindingImpl.getArguments()));
-        return cycNart;
     }
 
     /**
@@ -461,21 +356,6 @@ public class CycObjectFactory {
     }
 
     /**
-     * Constructs a CycVariable from the given xml databinding object.
-     *
-     * @pararm cycVariableXmlDataBindingImpl the xml databinding object
-     */
-    public static CycVariable makeCycVariable (CycVariableXmlDataBinding cycVariableXmlDataBindingImpl) {
-        CycVariable cycVariable = getCycVariableCache(cycVariableXmlDataBindingImpl.getName());
-        if (cycVariable != null)
-            return cycVariable;
-        cycVariable = new CycVariable();
-        cycVariable.id = cycVariableXmlDataBindingImpl.getId();
-        cycVariable.name = cycVariableXmlDataBindingImpl.getName();
-        return cycVariable;
-    }
-
-    /**
      * Resets the <tt>CycVariable</tt> cache.
      */
     public static void resetCycVariableCache() {
@@ -532,21 +412,6 @@ public class CycObjectFactory {
             guid = new Guid(guidString);
             guidCache.addElement(guidString, guid);
         }
-        return guid;
-    }
-
-    /**
-     * Constructs a Guid from the given xml databinding object.
-     *
-     * @pararm GuidXmlDataBindingImpl the xml databinding object
-     */
-    public static Guid makeGuid (GuidXmlDataBinding guidXmlDataBindingImpl) {
-        Guid guid =
-            makeGuid(guidXmlDataBindingImpl.getGuidString());
-        if (guid != null)
-            return guid;
-        guid = new Guid(guidXmlDataBindingImpl.getGuidString());
-        addGuidCache(guid);
         return guid;
     }
 

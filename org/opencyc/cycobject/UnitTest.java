@@ -4,7 +4,6 @@ import junit.framework.*;
 import java.io.*;
 import java.util.*;
 import org.opencyc.api.*;
-import org.opencyc.cycobject.databinding.*;
 
 
 /**
@@ -88,33 +87,7 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(guid, guid3);
         Assert.assertEquals(1, CycObjectFactory.getGuidCacheSize());
 
-        GuidXmlDataBinding guidXmlDataBindingImpl = guid.toGuidXmlDataBinding();
-        Guid guid4 = CycObjectFactory.makeGuid(guidXmlDataBindingImpl);
-        Assert.assertTrue(guid.equals(guid4));
-        String guidXml = null;
-        try {
-            guidXml = XMLDataBinding.zeusMarshall(guidXmlDataBindingImpl);
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("guidXml\n" + guidXml);
-        Object object = null;
-        try {
-            object = XMLDataBinding.zeusUnmarshall(guidXml, "org.opencyc.cycobject.databinding");
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        Assert.assertTrue(object instanceof GuidXmlDataBindingImpl);
-        GuidXmlDataBindingImpl guidXmlDataBindingImpl2 = (GuidXmlDataBindingImpl) object;
-        Guid guid5 = CycObjectFactory.makeGuid(guidXmlDataBindingImpl2);
-        Assert.assertTrue(guid.equals(guid5));
-        Assert.assertTrue(guid == guid5);
+
         System.out.println("** testGuid OK **");
     }
 
@@ -165,37 +138,6 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(! CycSymbol.isValidSymbolName(" "));
         Assert.assertTrue(! CycSymbol.isValidSymbolName("#$Brazil"));
         Assert.assertTrue(! CycSymbol.isValidSymbolName("\"a-string\""));
-
-        CycSymbol cycSymbol7 = CycObjectFactory.makeCycSymbol(":pos");
-        CycSymbolXmlDataBinding cycSymbolXmlDataBindingImpl = cycSymbol7.toCycSymbolXmlDataBinding();
-        CycSymbol cycSymbol8 = CycObjectFactory.makeCycSymbol(cycSymbolXmlDataBindingImpl);
-        Assert.assertEquals(cycSymbol7, cycSymbol8);
-        Assert.assertTrue(cycSymbol7 == cycSymbol8);
-        String cycSymbolXml = null;
-        try {
-            cycSymbolXml = XMLDataBinding.zeusMarshall(cycSymbolXmlDataBindingImpl);
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("cycSymbolXml\n" + cycSymbolXml);
-        Object object = null;
-        try {
-            object = XMLDataBinding.zeusUnmarshall(cycSymbolXml, "org.opencyc.cycobject.databinding");
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        Assert.assertTrue(object instanceof CycSymbolXmlDataBindingImpl);
-        CycSymbolXmlDataBindingImpl cycSymbolXmlDataBindingImpl2 =
-            (CycSymbolXmlDataBindingImpl) object;
-        CycSymbol cycSymbol9 = CycObjectFactory.makeCycSymbol(cycSymbolXmlDataBindingImpl2);
-        Assert.assertEquals(cycSymbol7, cycSymbol9);
-        Assert.assertTrue(cycSymbol7 == cycSymbol9);
 
 
         System.out.println("** testCycSymbol OK **");
@@ -271,34 +213,6 @@ public class UnitTest extends TestCase {
             new CycConstant("#$TransportationDevice-Vehicle",
                             CycObjectFactory.makeGuid("c0bce169-9c29-11b1-9dad-c379636f7270"),
                             new Integer(23927));
-
-        CycConstantXmlDataBinding cycConstantXmlDataBindingImpl = cycConstant4.toCycConstantXmlDataBinding();
-        CycConstant cycConstant5 = CycObjectFactory.makeCycConstant(cycConstantXmlDataBindingImpl);
-        Assert.assertEquals(cycConstant4, cycConstant5);
-        String cycConstantXml = null;
-        try {
-            cycConstantXml = XMLDataBinding.zeusMarshall(cycConstantXmlDataBindingImpl);
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("cycConstantXml\n" + cycConstantXml);
-        Object object = null;
-        try {
-            object = XMLDataBinding.zeusUnmarshall(cycConstantXml, "org.opencyc.cycobject.databinding");
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        Assert.assertTrue(object instanceof CycConstantXmlDataBindingImpl);
-        CycConstantXmlDataBindingImpl cycConstantXmlDataBindingImpl2 =
-            (CycConstantXmlDataBindingImpl) object;
-        CycConstant cycConstant6 = CycObjectFactory.makeCycConstant(cycConstantXmlDataBindingImpl2);
-        Assert.assertEquals(cycConstant4, cycConstant6);
 
         System.out.println("** testCycConstant OK **");
     }
@@ -393,34 +307,6 @@ public class UnitTest extends TestCase {
         cycList4.add(appleTree2);
         Assert.assertEquals(cycNart2, CycNart.coerceToCycNart(cycList4));
 
-        CycNartXmlDataBinding cycNartXmlDataBindingImpl = cycNart4.toCycNartXmlDataBinding();
-        CycNart cycNart5 = CycObjectFactory.makeCycNart(cycNartXmlDataBindingImpl);
-        Assert.assertEquals(cycNart4, cycNart5);
-        String cycNartXml = null;
-        try {
-            cycNartXml = XMLDataBinding.zeusMarshall(cycNartXmlDataBindingImpl);
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("cycNartXml\n" + cycNartXml);
-        Object object = null;
-        try {
-            object = XMLDataBinding.zeusUnmarshall(cycNartXml, "org.opencyc.cycobject.databinding");
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        Assert.assertTrue(object instanceof CycNartXmlDataBindingImpl);
-        CycNartXmlDataBindingImpl cycNartXmlDataBindingImpl2 =
-            (CycNartXmlDataBindingImpl) object;
-        CycNart cycNart6 = CycObjectFactory.makeCycNart(cycNartXmlDataBindingImpl2);
-        Assert.assertEquals(cycNart4, cycNart6);
-
         System.out.println("** testCycNart OK **");
     }
 
@@ -466,36 +352,6 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(x1.cyclify().startsWith("?x_"));
         Assert.assertTrue(x3.cyclify().startsWith("?x_"));
 
-        CycVariable cycVariable4 = CycObjectFactory.makeCycVariable("?myVariable");
-        CycVariableXmlDataBinding cycVariableXmlDataBindingImpl = cycVariable4.toCycVariableXmlDataBinding();
-        CycVariable cycVariable5 = CycObjectFactory.makeCycVariable(cycVariableXmlDataBindingImpl);
-        Assert.assertEquals(cycVariable4, cycVariable5);
-        Assert.assertTrue(cycVariable4 == cycVariable5);
-        String cycVariableXml = null;
-        try {
-            cycVariableXml = XMLDataBinding.zeusMarshall(cycVariableXmlDataBindingImpl);
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("cycVariableXml\n" + cycVariableXml);
-        Object object = null;
-        try {
-            object = XMLDataBinding.zeusUnmarshall(cycVariableXml, "org.opencyc.cycobject.databinding");
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        Assert.assertTrue(object instanceof CycVariableXmlDataBindingImpl);
-        CycVariableXmlDataBindingImpl cycVariableXmlDataBindingImpl2 =
-            (CycVariableXmlDataBindingImpl) object;
-        CycVariable cycVariable6 = CycObjectFactory.makeCycVariable(cycVariableXmlDataBindingImpl2);
-        Assert.assertEquals(cycVariable4, cycVariable6);
-        Assert.assertTrue(cycVariable4 == cycVariable6);
 
         System.out.println("** testCycVariable OK **");
     }

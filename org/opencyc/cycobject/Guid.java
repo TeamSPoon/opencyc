@@ -1,7 +1,7 @@
 package org.opencyc.cycobject;
 
 import org.opencyc.api.*;
-import org.opencyc.cycobject.databinding.*;
+import org.opencyc.xml.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc GUID (Globally Unique
@@ -29,6 +29,16 @@ import org.opencyc.cycobject.databinding.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Guid {
+
+    /**
+     * Field for storing the name of the XML tag for the GUID of CycConstant objects
+     */
+    public static final String guidXMLTag = "guid";
+
+    /**
+     * The default indentation for printing CycConstant objects to XML
+     */
+    public static int indentLength = 2;
 
     /**
      * The GUID in string form.
@@ -66,15 +76,16 @@ public class Guid {
     }
 
     /**
-     * Returns the GuidXmlDataBindingImpl object which contains this Guid.  The
-     * xml databinding object can be subsequently serialized into xml.
+     * Prints the XML representation of the CycConstant to an <code>XMLWriter</code>
      *
-     * @return the GuidXmlDataBindingImpl object which contains this Guid
+     * @param xmlWriter an <tt>XMLWriter</tt>
+     * @param indent an int that specifies by how many spaces to indent
+     * @param relative a boolean; if true indentation is relative, otherwise absolute
      */
-    public GuidXmlDataBinding toGuidXmlDataBinding () {
-        GuidXmlDataBinding guidXmlDataBindingImpl = new GuidXmlDataBindingImpl();
-        guidXmlDataBindingImpl.setGuidString(guidString);
-        return guidXmlDataBindingImpl;
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
+        throws java.io.IOException {
+        xmlWriter.printXMLStartTag(guidXMLTag, indent, relative, true);
+        xmlWriter.print(guidString);
+        xmlWriter.printXMLEndTag(guidXMLTag, -indentLength, true);
     }
-
 }

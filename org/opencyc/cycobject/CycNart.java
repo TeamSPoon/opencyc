@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 import org.opencyc.xml.XMLWriter;
 import org.opencyc.api.*;
-import org.opencyc.cycobject.databinding.*;
 
 /**
  * This class implements the behavior and attributes of a
@@ -240,6 +239,11 @@ public class CycNart extends CycFort implements Comparable {
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException {
         xmlWriter.printXMLStartTag(natXMLtag, indent, relative);
+        if (super.getId() != null) {
+            xmlWriter.printXMLStartTag(idXMLTag, 0, true, false);
+            xmlWriter.print(this.getId().toString());
+            xmlWriter.printXMLEndTag(idXMLTag);
+        }
         xmlWriter.printXMLStartTag(functorXMLtag, indentLength, true);
         this.getFunctor().toXML(xmlWriter, indentLength, true);
         xmlWriter.printXMLEndTag(functorXMLtag, -indentLength, true);
@@ -417,26 +421,6 @@ public class CycNart extends CycFort implements Comparable {
         return this.toString().compareTo(object.toString());
      }
 
-    /**
-     * Returns the CycNartXmlDataBindingImpl object which contains this CycNart.  The
-     * xml databinding object can be subsequently serialized into xml.
-     *
-     * @return the CycNartXmlDataBindingImpl object which contains this CycConstant
-     */
-    public CycNartXmlDataBinding toCycNartXmlDataBinding () {
-        CycNartXmlDataBinding cycNartXmlDataBindingImpl = new CycNartXmlDataBindingImpl();
-        cycNartXmlDataBindingImpl.setId(this.getId());
-        FunctorXmlDataBinding functorXmlDataBinding = new FunctorXmlDataBindingImpl();
-        if (functor instanceof CycConstant)
-            functorXmlDataBinding.setCycConstantXmlDataBinding(((CycConstant) functor).toCycConstantXmlDataBinding());
-        else if (functor instanceof CycNart)
-            functorXmlDataBinding.setCycNartXmlDataBinding(((CycNart) functor).toCycNartXmlDataBinding());
-        else
-            throw new RuntimeException("Invalid functor " + functor + " of " + this);
-        cycNartXmlDataBindingImpl.setFunctorXmlDataBinding(functorXmlDataBinding);
-        cycNartXmlDataBindingImpl.setArguments(arguments.toCycListXmlDataBinding());
-        return cycNartXmlDataBindingImpl;
-    }
 
 }
 

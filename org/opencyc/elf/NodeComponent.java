@@ -13,8 +13,8 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 /**
  * Provides common attributes and behavior for Elementary Loop Functioning
  * (ELF) node components.<br>
- * Each node component is a separate process that communicates with other node components
- * by sending asychronous messages.
+ * Each node component contains one or more process threads that communicates with other 
+ * node components by sending asychronous messages.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -36,17 +36,12 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class NodeComponent extends ELFObject implements Runnable {
+public abstract class NodeComponent extends ELFObject {
 
   //// Constructors
 
 
   //// Public Area
-  
-  /**
-   * Provides the method to be executed when the thread is started.
-   */
-  public abstract void run ();
   
   /**
    * Gets the ELF Node that contains this object.

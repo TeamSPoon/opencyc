@@ -1,6 +1,10 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
+
+import org.opencyc.elf.goal.Goal;
+import org.opencyc.elf.goal.GoalTime;
+
 //// External Imports
 
 /**
@@ -66,12 +70,145 @@ public class TaskCommandFrame {
     return "";
   }
 
+  /**
+   * Gets the action command plus modifiers
+   *
+   * @return the action command plus modifiers
+   */
+  public Action getActionCommand () {
+    return actionCommand;
+  }
+
+  /**
+   * Sets the action command plus modifiers
+   *
+   * @param actionCommand the action command plus modifiers
+   */
+  public void setActionCommand (Action actionCommand) {
+    this.actionCommand = actionCommand;
+  }
+
+  /**
+   * Gets the goal to be accomplish, or the state to be maintained, plus modifiers
+   *
+   * @return the goal to be accomplish, or the state to be maintained, plus modifiers
+   */
+  public Goal getGoalCommand () {
+    return goalCommand;
+  }
+
+  /**
+   * Sets the goal to be accomplish, or the state to be maintained, plus modifiers
+   *
+   * @param goalCommand the goal to be accomplish, or the state to be maintained, plus modifiers
+   */
+  public void setGoalCommand (Goal goalCommand) {
+    this.goalCommand = goalCommand;
+  }
+
+  /**
+   * Gets the goal time constraint plus modifiers such as tolerance
+   *
+   * @return the goal time constraint plus modifiers such as tolerance
+   */
+  public GoalTime getgoalTime () {
+    return goalTime;
+  }
+
+  /**
+   * Sets the goal time constraint plus modifiers such as tolerance
+   *
+   * @param goalTime the goal time constraint plus modifiers such as tolerance
+   */
+  public void setXXX (GoalTime goalTime) {
+    this.goalTime = goalTime;
+  }
+
+  /**
+   * Gets the planned next action command plus modifiers
+   *
+   * @return the planned next action command plus modifiers
+   */
+  public Action getNextActionCommand () {
+    return nextActionCommand;
+  }
+
+  /**
+   * Sets the planned next action command plus modifiers
+   *
+   * @param nextActionCommand the planned next action command plus modifiers
+   */
+  public void setNextActionCommand (Action nextActionCommand) {
+    this.nextActionCommand = nextActionCommand;
+  }
+
+  /**
+   * Gets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
+   *
+   * @return the planned next goal to be accomplish, or the state to be maintained, plus modifiers
+   */
+  public Goal getNextGoalCommand () {
+    return nextGoalCommand;
+  }
+
+  /**
+   * Sets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
+   *
+   * @param nextGoalCommand the planned next goal to be accomplish, or the state to be maintained, plus modifiers
+   */
+  public void setNextGoalCommand (Goal nextGoalCommand) {
+    this.nextGoalCommand = nextGoalCommand;
+  }
+
+  /**
+   * Gets the planned next goal time constraint plus modifiers such as tolerance
+   *
+   * @return the planned next goal time constraint plus modifiers such as tolerance
+   */
+  public GoalTime getNextGoalTime () {
+    return nextGoalTime;
+  }
+
+  /**
+   * Sets the planned next goal time constraint plus modifiers such as tolerance
+   *
+   * @param nextGoalTime the planned next goal time constraint plus modifiers such as tolerance
+   */
+  public void setNextGoalTime (GoalTime nextGoalTime) {
+    this.nextGoalTime = nextGoalTime;
+  }
+
   //// Protected Area
   
   /**
-   * the action command
+   * the action command plus modifiers
    */
-  //protected Action actionCommand;
+  protected Action actionCommand;
+  
+  /**
+   * the goal to be accomplish, or the state to be maintained, plus modifiers
+   */
+  protected Goal goalCommand;
+  
+  /**
+   * the goal time constraint plus modifiers such as tolerance
+   */
+  protected GoalTime goalTime;
+  
+  /**
+   * the planned next action command plus modifiers
+   */
+  protected Action nextActionCommand;
+  
+  /**
+   * the planned next goal to be accomplish, or the state to be maintained, plus modifiers
+   */
+  protected Goal nextGoalCommand;
+  
+  /**
+   * the planned next goal time constraint plus modifiers such as tolerance
+   */
+  protected GoalTime nextGoalTime;
   
   //// Private Area
   //// Internal Rep

@@ -577,7 +577,7 @@ public abstract class ImportDaml implements StatementHandler {
         }
         cycAccess.assertIsa(term,
                             collection);
-        Log.current.println("\n(#$isa " +
+        Log.current.println("(#$isa " +
                             term.cyclify() + " " +
                             collection.cyclify() + ")");
     }
@@ -914,6 +914,7 @@ public abstract class ImportDaml implements StatementHandler {
                                   DamlTermInfo objLitTermInfo) {
         if (verbosity < 1)
             return;
+        Log.current.println();
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(subjectTermInfo.toOriginalString());
         stringBuffer.append(" ");

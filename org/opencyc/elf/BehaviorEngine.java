@@ -1,6 +1,7 @@
 package org.opencyc.elf;
 
 //// Internal Imports
+import org.opencyc.elf.bg.command.Command;
 import org.opencyc.elf.bg.dictionary.DictionaryEnter;
 import org.opencyc.elf.bg.dictionary.DictionaryKeys;
 import org.opencyc.elf.bg.dictionary.DictionaryLookup;
@@ -24,7 +25,6 @@ import org.opencyc.elf.bg.predicate.NotNull;
 import org.opencyc.elf.bg.predicate.Or;
 import org.opencyc.elf.bg.predicate.True;
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.wm.ActionFactory;

@@ -2,10 +2,8 @@ package org.opencyc.elf.message;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
-
+import org.opencyc.elf.bg.command.Command;
 import org.opencyc.elf.bg.planner.Schedule;
-
-import org.opencyc.elf.bg.taskframe.Command;
 
 //// External Imports
 import java.util.List;

@@ -2,8 +2,9 @@ package org.opencyc.elf.a;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
+import org.opencyc.elf.bg.command.Command;
+import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.bg.planner.Resource;
-import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.wm.ResourcePool;

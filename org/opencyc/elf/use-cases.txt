@@ -89,6 +89,9 @@ CBL Grammar
                  <OPERATOR-EXPRESSION>
 <OPERATOR-EXPRESSION> ::= (<OPERATOR> [<ARGUMENT>*])
 <OPERATOR> ::=
+
+TODO
+
 <ARGUMENT> ::= <LITERAL> |
                <STATE-VARIABLE>
                <OPERATOR-EXPRESSION>
@@ -155,6 +158,10 @@ CBL Grammar
   (:input-formal-parameters <PARAMETER>*)
    :when <EXPRESSION>))
 
+;; job definition
+
+TODO
+
 ;; schedule set definition
 
 <SCHEDULE-PREDICATE-SPECIFICATION> ::= :default |
@@ -181,18 +188,20 @@ CBL Grammar
               <PARALLEL-COMMAND> |
               <RELEVANT-OBJECTS-COMMAND> |
               <RELEVANT-OBJECTS-LEARNING-COMMAND> |
+              <SENSE-COMMAND> |
               <SUBSET-CHOICE-COMMAND> 
 
 <ACTION-COMMAND> ::= 
   (:perform <ACTION-NAME> [:input-parameter-values <ARGUMENT>*]
         [:output-state-variables <ARGUMENT>*]
         [:required-resources <RESOURCE-REQUIREMENT>*])
-<ASSIGN-COMMAND> ::= (:assign <STATE-VARIABLE> <EXPRESSION>)
+<ASSIGN-COMMAND> ::= (:assign <EXPRESSION> :to <STATE-VARIABLE>)
 <CALL-COMMAND> ::= (:call (((<TYPE-HOLDER>) <SYMBOL-HOLDER>).<SYMBOL-HOLDER> <ARGUMENTS>*))
 <CONDITIONAL-COMMAND> ::= (:when <EXPRESSION> <COMMAND>*)
 <ITERATED-COMMAND> ::= (:while <EXPRESSION> <COMMAND>*)
 <MACRO-COMMAND> ::= (:expand <MACRO-NAME> <ARGUMENTS>*)
 <PARALLEL-COMMAND> ::= (:parallel <COMMAND>*)
+<SENSE-COMMAND> ::= (:sense <SENSATION> :into <STATE-VARIABLE>)
 
 <REWARD-SPECIFICATION> ::= (:when <EXPRESSION> :reward <EXPRESSION>)
 <LEARNING-EPISODE-COMMAND> ::= (:learn-while-doing <COMMAND>* :rewards <REWARD-SPECIFICATION>*)

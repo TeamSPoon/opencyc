@@ -2,6 +2,7 @@ package org.opencyc.elf;
 
 //// Internal Imports
 import org.opencyc.elf.bg.BehaviorGeneration;
+import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.bg.dictionary.*;
 import org.opencyc.elf.bg.expression.Minus;
 import org.opencyc.elf.bg.expression.Plus;
@@ -11,7 +12,6 @@ import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.predicate.*;
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.Parameter;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.sp.*;

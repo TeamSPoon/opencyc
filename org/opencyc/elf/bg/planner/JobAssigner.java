@@ -5,21 +5,16 @@ import org.opencyc.elf.BufferedNodeComponent;
 import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
-
 import org.opencyc.elf.a.Actuator;
-
+import org.opencyc.elf.bg.command.Command;
 import org.opencyc.elf.bg.planner.Resource;
-
-import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
-
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.JobAssignerStatusMsg;
 import org.opencyc.elf.message.ReleaseMsg;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
-
 import org.opencyc.elf.wm.JobLibrary;
 import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.state.State;
@@ -28,9 +23,7 @@ import org.opencyc.elf.wm.state.State;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import java.util.logging.Logger;
-
 import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
 import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Executor;

@@ -1,8 +1,8 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.Parameter;
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports

@@ -1,8 +1,7 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
-import org.opencyc.elf.bg.taskframe.Command;
-
+import org.opencyc.elf.bg.command.Command;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
 
 //// External Imports

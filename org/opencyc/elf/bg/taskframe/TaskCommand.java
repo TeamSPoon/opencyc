@@ -1,7 +1,7 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
-
+import org.opencyc.elf.bg.command.Command;
 import org.opencyc.elf.goal.Goal;
 import org.opencyc.elf.goal.GoalTime;
 

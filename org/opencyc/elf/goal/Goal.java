@@ -2,10 +2,10 @@ package org.opencyc.elf.goal;
 
 //// Internal Imports
 import org.opencyc.elf.BehaviorEngineException;
+import org.opencyc.elf.bg.command.Command;
+import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.bg.predicate.Predicate;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
-import org.opencyc.elf.bg.taskframe.Command;
-import org.opencyc.elf.bg.taskframe.Parameter;
 
 //// External Imports
 import java.util.ArrayList;

@@ -7,13 +7,9 @@ import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Result;
 import org.opencyc.elf.Status;
-
 import org.opencyc.elf.a.DirectActuator;
-
+import org.opencyc.elf.bg.command.Command;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
-
-import org.opencyc.elf.bg.taskframe.Command;
-
 import org.opencyc.elf.message.ExecuteScheduleMsg;
 import org.opencyc.elf.message.ExecutorStatusMsg;
 import org.opencyc.elf.message.GenericMsg;
@@ -22,9 +18,7 @@ import org.opencyc.elf.message.ScheduleConsistencyEvaluationMsg;
 import org.opencyc.elf.message.ScheduleConsistencyRequestMsg;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
-
 import org.opencyc.elf.s.DirectSensor;
-
 import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.ScheduleLibrary;
 
@@ -32,7 +26,6 @@ import org.opencyc.elf.wm.ScheduleLibrary;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
 import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;

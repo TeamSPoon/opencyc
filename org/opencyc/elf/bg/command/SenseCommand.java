@@ -63,7 +63,7 @@ public class SenseCommand implements Command {
   
   /** Creates and returns a copy of this object. */
   public Object clone() {
-    return new AssignCommand(name, assignee, assignedObject);
+    return new SenseCommand();
   }
 
   //// Protected Area

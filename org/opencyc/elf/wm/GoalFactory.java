@@ -1,10 +1,10 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.bg.predicate.NotNull;
 import org.opencyc.elf.bg.predicate.Predicate;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
-import org.opencyc.elf.bg.taskframe.Parameter;
 import org.opencyc.elf.goal.Goal;
 import org.opencyc.elf.goal.GoalTime;
 import org.opencyc.elf.goal.Importance;

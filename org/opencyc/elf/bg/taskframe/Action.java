@@ -2,6 +2,8 @@ package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
 import org.opencyc.elf.BehaviorEngineException;
+import org.opencyc.elf.bg.command.Command;
+import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.wm.state.State;
 import org.opencyc.elf.wm.state.StateVariable;
 

@@ -2,13 +2,11 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.a.DirectActuator;
-
+import org.opencyc.elf.bg.command.Command;
+import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
-
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.Command;
-
 import org.opencyc.elf.s.DirectSensor;
 
 //// External Imports

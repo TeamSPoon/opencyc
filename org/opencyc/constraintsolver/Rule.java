@@ -530,6 +530,15 @@ public class Rule  implements Comparable{
 
 
     /**
+     * Returns <tt>true</tt> if this is a ground formula having no variables.
+     *
+     * @return <tt>boolean</tt> if this is a ground formula having no variables
+     */
+    public boolean isGround() throws IOException {
+        return this.getArity() == 0;
+    }
+
+    /**
      * Returns <tt>true</tt> if this is an intensional variable domain populating <tt>Rule</tt>.
      * An extensional rule is one in which values are queried from the OpenCyc KB.
      *

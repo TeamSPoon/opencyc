@@ -3,6 +3,7 @@ package org.opencyc.constraintsolver;
 import java.util.*;
 import java.io.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * Provides attribute and behavior for a formula unifier, used by the constraint solver
@@ -68,7 +69,7 @@ public class Unifier {
      * @return an <tt>ArrayList</tt> of the antecedants with the required variable renamings and
      * substitutions if unification succeeds otherwise return <tt>null</tt>
      */
-    public ArrayList unify(Rule rule, HornClause hornClause) throws IOException {
+    public ArrayList semanticallyUnify(Rule rule, HornClause hornClause) throws IOException {
         if (verbosity > 3)
             System.out.println("Attempting to unify \n" + rule + "\n" + hornClause);
         if (! (rule.getPredicate().equals(hornClause.getConsequent().getPredicate()))) {
@@ -137,9 +138,39 @@ public class Unifier {
                 return null;
             }
         }
-        return unifiedHornClause.getAntecedantConjuncts();
+        if (anyFalseViaKbLookup(unifiedHornClause.getAntecedantConjuncts()))
+            return null;
+        else
+            return unifiedHornClause.getAntecedantConjuncts();
     }
 
+    /**
+     * Checks any ground antecedant conjuncts (having no variables) for truthfullness via KB
+     * lookup, returning <tt>false</tt> iff any ground conjunct is false;
+     *
+     * @param antecedantConjuncts
+     * @return <tt>false</tt> iff any ground conjunct is false
+     */
+    protected boolean anyFalseViaKbLookup(ArrayList antecedantConjuncts) throws IOException {
+        for (int i = 0; i < antecedantConjuncts.size(); i++) {
+            Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
+            if (antecedantConjunct.isGround()) {
+                boolean isAntecedantConjunctTrue =
+                    CycAccess.current().isQueryTrue(antecedantConjunct.getRule(),
+                                                    backchainer.constraintProblem.mt);
+                    if (verbosity > 8)
+                        System.out.println("asking KB about antecedant conjunct\n" +
+                                           antecedantConjunct + "\n  --> " + isAntecedantConjunctTrue);
+                if (! isAntecedantConjunctTrue) {
+                    if (verbosity > 3)
+                        System.out.println("  unification abandoned because antecedant conjunct is not true\n" +
+                                           antecedantConjunct);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum

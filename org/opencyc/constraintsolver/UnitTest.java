@@ -69,8 +69,11 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testConstraintProblem1"));
             //testSuite.addTest(new UnitTest("testConstraintProblem2"));
             //testSuite.addTest(new UnitTest("testConstraintProblem3"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem4"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem5"));
             //testSuite.addTest(new UnitTest("testBackchainer1"));
-            testSuite.addTest(new UnitTest("testBackchainer2"));
+            //testSuite.addTest(new UnitTest("testBackchainer2"));
+            testSuite.addTest(new UnitTest("testBackchainer3"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -675,19 +678,19 @@ public class UnitTest extends TestCase {
 
         // unify
         try {
-            Rule rule1 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)");
+            Rule rule1 = new Rule("(#$objectFoundInLocation ?what #$CityOfAustinTX)");
             String hornClauseString =
                 "(#$implies " +
                 " (#$and " +
-                "  (#$isa ?WATER #$BodyOfWater) " +
-                "  (#$in-Floating ?OBJ ?WATER)) " +
-                " (#$objectFoundInLocation ?OBJ ?WATER))";
+                "  (#$isa ?OBJECT #$CarvedArtwork) " +
+                "  (#$provenanceOfArtObject ?REGION ?OBJECT)) " +
+                " (#$objectFoundInLocation ?OBJECT ?REGION))";
             HornClause hornClause1 = new HornClause(hornClauseString);
-            ArrayList unifiedConjuncts = unifier.unify(rule1, hornClause1);
+            ArrayList unifiedConjuncts = unifier.semanticallyUnify(rule1, hornClause1);
             Assert.assertEquals(2, unifiedConjuncts.size());
             System.out.println("unified conjuncts: " + unifiedConjuncts);
-            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$in-Floating #$CityOfAustinTX ?where)")));
-            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa ?where #$BodyOfWater)")));
+            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa ?what #$CarvedArtwork)")));
+            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$provenanceOfArtObject #$CityOfAustinTX ?what)")));
 
             Rule rule2 = new Rule("(#$doneBy #$CityOfAustinTX ?what)");
             String hornClauseString2 =
@@ -697,7 +700,7 @@ public class UnitTest extends TestCase {
                 "  (#$in-Floating ?OBJ ?WATER)) " +
                 " (#$objectFoundInLocation ?OBJ ?WATER))";
             HornClause hornClause2 = new HornClause(hornClauseString2);
-            ArrayList unifiedConjuncts2 = unifier.unify(rule2, hornClause2);
+            ArrayList unifiedConjuncts2 = unifier.semanticallyUnify(rule2, hornClause2);
             Assert.assertNull(unifiedConjuncts2);
 
             Rule rule3 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)");
@@ -708,10 +711,11 @@ public class UnitTest extends TestCase {
                 "  (#$in-Floating ?OBJ ?WATER)) " +
                 " (#$objectFoundInLocation #$CityOfHoustonTX ?WATER))";
             HornClause hornClause3 = new HornClause(hornClauseString3);
-            ArrayList unifiedConjuncts3 = unifier.unify(rule3, hornClause3);
+            ArrayList unifiedConjuncts3 = unifier.semanticallyUnify(rule3, hornClause3);
             Assert.assertNull(unifiedConjuncts2);
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
 
@@ -1006,6 +1010,64 @@ public class UnitTest extends TestCase {
     }
 
     /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem4() {
+        System.out.println("** testConstraintProblem4 **");
+
+        // One variable query.
+        String oneVariableQueryString =
+            "(#$and (#$isa ?WHAT #$CarvedArtwork) (#$provenanceOfArtObject #$CityOfAustinTX ?WHAT))";
+        System.out.println(oneVariableQueryString);
+        ConstraintProblem oneVariableQueryProblem = new ConstraintProblem();
+        oneVariableQueryProblem.setVerbosity(9);
+        // Request all solutions.
+        oneVariableQueryProblem.nbrSolutionsRequested = null;
+        try {
+            oneVariableQueryProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = oneVariableQueryProblem.solve(oneVariableQueryString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem4 OK **");
+    }
+
+
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem5() {
+        System.out.println("** testConstraintProblem5 **");
+
+        // One variable query.
+        String oneVariableQueryString =
+            "(#$and (#$groupMembers ?C ?C) (#$objectFoundInLocation ?C #$CityOfAustinTX))";
+        System.out.println(oneVariableQueryString);
+        ConstraintProblem oneVariableQueryProblem = new ConstraintProblem();
+        oneVariableQueryProblem.setVerbosity(9);
+        // Request all solutions.
+        oneVariableQueryProblem.nbrSolutionsRequested = null;
+        try {
+            oneVariableQueryProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = oneVariableQueryProblem.solve(oneVariableQueryString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem5 OK **");
+    }
+    /**
      * Tests the <tt>Backchainer</tt> class.
      */
     public void testBackchainer1() {
@@ -1049,7 +1111,7 @@ public class UnitTest extends TestCase {
             "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
         System.out.println(whatIsInAustinString);
         ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
-        whatIsInAustinProblem.setVerbosity(8);
+        whatIsInAustinProblem.setVerbosity(3);
         whatIsInAustinProblem.setMaxBackchainDepth(1);
         // Request all solutions.
         whatIsInAustinProblem.nbrSolutionsRequested = null;
@@ -1067,6 +1129,36 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
         System.out.println("** testBackchainer2 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer3() {
+        System.out.println("** testBackchainer3 **");
+        // what is in Austin? to depth 2
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
+        whatIsInAustinProblem.setVerbosity(9);
+        whatIsInAustinProblem.setMaxBackchainDepth(2);
+        // Request all solutions.
+        whatIsInAustinProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsInAustinProblem.solve(whatIsInAustinString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer3 OK **");
     }
 
 }

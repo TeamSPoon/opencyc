@@ -168,48 +168,6 @@ public class ConstraintProblem {
     }
 
     /**
-     * Set the value of the variable value domain size beyond which the initial values
-     * are not all fetched from the KB using #$isa, rather some other more specific
-     * constraint rule populates the variable domain as needed.
-     *
-     * @param domainSizeThreshold an <tt>int</tt> which is the new threshold.
-     */
-    public void setDomainSizeThreshold(int domainSizeThreshold) {
-        highCardinalityDomains.domainSizeThreshold = domainSizeThreshold;
-    }
-
-    /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
-     * diagnostic input.
-     *
-     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
-     */
-    public void setVerbosity(int verbosity) {
-        this.verbosity = verbosity;
-        problemParser.setVerbosity(verbosity);
-        valueDomains.setVerbosity(verbosity);
-        highCardinalityDomains.setVerbosity(verbosity);
-        argumentTypeConstrainer.setVerbosity(verbosity);
-        backchainer.setVerbosity(verbosity);
-        nodeConsistencyAchiever.setVerbosity(verbosity);
-        ruleEvaluator.setVerbosity(verbosity);
-        if (forwardCheckingSearcher != null)
-            forwardCheckingSearcher.setVerbosity(verbosity);
-        solution.setVerbosity(verbosity);
-    }
-
-    /**
-     * Sets the maximum depth of backchaining from an input constraint rule. A value of zero indicates
-     * no backchaining.
-     *
-     * @param maxBackchainDepth the maximum depth of backchaining, or zero if no backchaing on the input
-     * constraint rules
-     */
-    public void setMaxBackchainDepth(int maxBackchainDepth) {
-        backchainer.setMaxBackchainDepth(maxBackchainDepth);
-    }
-
-    /**
      * Solves a constraint problem and return a list of solutions if one or more
      * was found, otherwise returns <tt>null</tt>.
      *
@@ -249,7 +207,7 @@ public class ConstraintProblem {
             }
             problemParser.gatherVariables();
             problemParser.initializeDomains();
-            if (variables.size() > 1)
+            if (variables.size() > 0)
                 nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();
             if (verbosity > 0) {
@@ -323,5 +281,47 @@ public class ConstraintProblem {
      */
     public void displayVariablesAndDomains() {
         valueDomains.displayVariablesAndDomains();
+    }
+
+    /**
+     * Set the value of the variable value domain size beyond which the initial values
+     * are not all fetched from the KB using #$isa, rather some other more specific
+     * constraint rule populates the variable domain as needed.
+     *
+     * @param domainSizeThreshold an <tt>int</tt> which is the new threshold.
+     */
+    public void setDomainSizeThreshold(int domainSizeThreshold) {
+        highCardinalityDomains.domainSizeThreshold = domainSizeThreshold;
+    }
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+        problemParser.setVerbosity(verbosity);
+        valueDomains.setVerbosity(verbosity);
+        highCardinalityDomains.setVerbosity(verbosity);
+        argumentTypeConstrainer.setVerbosity(verbosity);
+        backchainer.setVerbosity(verbosity);
+        nodeConsistencyAchiever.setVerbosity(verbosity);
+        ruleEvaluator.setVerbosity(verbosity);
+        if (forwardCheckingSearcher != null)
+            forwardCheckingSearcher.setVerbosity(verbosity);
+        solution.setVerbosity(verbosity);
+    }
+
+    /**
+     * Sets the maximum depth of backchaining from an input constraint rule. A value of zero indicates
+     * no backchaining.
+     *
+     * @param maxBackchainDepth the maximum depth of backchaining, or zero if no backchaing on the input
+     * constraint rules
+     */
+    public void setMaxBackchainDepth(int maxBackchainDepth) {
+        backchainer.setMaxBackchainDepth(maxBackchainDepth);
     }
 }

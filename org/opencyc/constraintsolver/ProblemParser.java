@@ -118,7 +118,7 @@ public class ProblemParser {
         Collections.sort(simplifiedRules);
         for (int i = 0; i < simplifiedRules.size(); i++) {
             Rule rule = (Rule) simplifiedRules.get(i);
-            if (rule.getArity() == 0) {
+            if (rule.isGround()) {
                 if (verbosity > 3)
                     System.out.println("Ground fact\n" + rule);
                 boolean isTrueFact;
@@ -399,47 +399,32 @@ public class ProblemParser {
                 valueDomains.varsDictionary.put(cycVariable, domainValues);
             }
             else if (rule.isIntensionalVariableDomainPopulatingRule()) {
+                System.out.println("\nIntensional variable domain populating rule\n" + rule);
                 CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
-                CycConstant collection = (CycConstant) rule.getArguments().second();
-                int nbrInstances =
-                    CycAccess.current().countAllInstances_Cached(collection,
-                                                                 constraintProblem.mt);
-                if (verbosity > 3) {
-                    System.out.println("\nIntensional variable domain populating rule\n" + rule);
-                    System.out.println("  nbrInstances " + nbrInstances);
+                if (rule.getPredicate().equals(CycAccess.isa) ||
+                    rule.getPredicate().equals(CycAccess.genls)) {
+                    CycConstant collection = (CycConstant) rule.getArguments().second();
+                    int nbrInstances =
+                        CycAccess.current().countAllInstances_Cached(collection,
+                                                                     constraintProblem.mt);
+                    if (verbosity > 3) {
+                        System.out.println("\nIntensional variable domain populating rule\n" + rule);
+                        System.out.println("  nbrInstances " + nbrInstances);
+                    }
+                    if (nbrInstances > highCardinalityDomains.domainSizeThreshold) {
+                        if (verbosity > 3)
+                            System.out.println("  domain size " + nbrInstances +
+                                               " exceeded high cardinality threshold of " +
+                                               highCardinalityDomains.domainSizeThreshold);
+                        highCardinalityDomains.setDomainSize(cycVariable,
+                                                             new Integer(nbrInstances));
+                        valueDomains.varsDictionary.put(cycVariable, new ArrayList());
+                    }
+                    else
+                        populateDomainViaQuery(rule, cycVariable);
                 }
-                if (nbrInstances > highCardinalityDomains.domainSizeThreshold) {
-                    if (verbosity > 3)
-                        System.out.println("  domain size " + nbrInstances +
-                                           " exceeded high cardinality threshold of " +
-                                           highCardinalityDomains.domainSizeThreshold);
-                    highCardinalityDomains.setDomainSize(cycVariable,
-                                                         new Integer(nbrInstances));
-                    valueDomains.varsDictionary.put(cycVariable, new ArrayList());
-                }
-                else {
-                    // Get the domain values by asking a query.
-                    CycList domainValuesCycList =
-                        CycAccess.current().askWithVariable (rule.getRule(),
-                                                             cycVariable,
-                                                             constraintProblem.mt);
-                ArrayList domainValues = new ArrayList();
-                domainValues.addAll(domainValuesCycList);
-
-                if (constraintProblem.backchainer.maxBackchainDepth >
-                    constraintProblem.backchainer.backchainDepth) {
-                    if (verbosity > 3)
-                        System.out.println("maxBackchainDepth " +
-                                           constraintProblem.backchainer.maxBackchainDepth +
-                                           " > " + constraintProblem.backchainer.backchainDepth +
-                                           "\n  for rule\n" + rule);
-                    ArrayList backchainDomainValues = constraintProblem.backchainer.backchain(rule);
-                    if (verbosity > 3)
-                        System.out.println("Adding backchain domain values " + backchainDomainValues +
-                                           "\n  for " + cycVariable);
-                }
-                valueDomains.varsDictionary.put(cycVariable, domainValues);
-                }
+                else
+                    populateDomainViaQuery(rule, cycVariable);
             }
             else {
                 if (verbosity > 1)
@@ -450,4 +435,29 @@ public class ProblemParser {
             valueDomains.displayVariablesAndDomains();
     }
 
+    /**
+     * Populates the domain by asking a query.
+     */
+    protected void populateDomainViaQuery(Rule rule, CycVariable cycVariable) throws IOException {
+        CycList domainValuesCycList =
+            CycAccess.current().askWithVariable (rule.getRule(),
+                                                 cycVariable,
+                                                 constraintProblem.mt);
+        ArrayList domainValues = new ArrayList();
+        domainValues.addAll(domainValuesCycList);
+
+        if (constraintProblem.backchainer.maxBackchainDepth >
+            constraintProblem.backchainer.backchainDepth) {
+            if (verbosity > 3)
+                System.out.println("maxBackchainDepth " +
+                                   constraintProblem.backchainer.maxBackchainDepth +
+                                   " > " + constraintProblem.backchainer.backchainDepth +
+                                   "\n  for rule\n" + rule);
+            ArrayList backchainDomainValues = constraintProblem.backchainer.backchain(rule);
+            if (verbosity > 3)
+                System.out.println("Adding backchain domain values " + backchainDomainValues +
+                                   "\n  for " + cycVariable);
+        }
+        valueDomains.varsDictionary.put(cycVariable, domainValues);
+    }
 }

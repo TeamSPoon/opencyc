@@ -259,9 +259,14 @@ public class ForwardCheckingSearcher {
     protected boolean checkForwardRules(ArrayList remainingVariables,
                                         int level,
                                         Binding currentBinding) throws IOException {
+        if (verbosity > 8)
+            System.out.println("check forward rules applicable to binding " + currentBinding);
         for (int i = 0; i < constraintRules.size(); i++) {
             Rule rule = (Rule) constraintRules.get(i);
             ArrayList ruleVariables = rule.getVariables();
+            if (verbosity > 8)
+                System.out.println("check forward rule \n  " + rule.cyclify() +
+                                   "  with variables " + ruleVariables);
             if ((rule.getArity() > 1) &&
                 ruleVariables.contains(currentBinding.getCycVariable())) {
                 // Rule applies to the selected variable.

@@ -63,7 +63,7 @@ public class Backchainer {
     /**
      * Maximum depth of backchaining from an input constraint rule.
      */
-    protected int maxBackchainDepth = 1;
+    protected int maxBackchainDepth = 0;
 
     /**
      * Constructs a new <tt>Backchainer</tt> object given the parent <tt>ConstraintProblem</tt>
@@ -99,6 +99,7 @@ public class Backchainer {
                 System.out.println("\n\nRecursive constraint problem to solve " + backchainRule);
             ConstraintProblem backchainProblem = new ConstraintProblem();
             backchainProblem.setVerbosity(verbosity);
+            //backchainProblem.setVerbosity(9);
             // Request all solutions.
             backchainProblem.nbrSolutionsRequested = null;
             backchainProblem.mt = constraintProblem.mt;
@@ -116,7 +117,7 @@ public class Backchainer {
                     Binding binding = (Binding) solutionBindings.get(k);
                     if (binding.getCycVariable().equals(variable)) {
                         Object value = binding.getValue();
-                        if (verbosity > 3)
+                        if (verbosity > 2)
                             System.out.println("  adding value " + value + " for " + variable);
                         values.add(value);
                     }
@@ -160,7 +161,7 @@ public class Backchainer {
             if (verbosity > 3)
                 System.out.println("\nConsidering implication rule\n" + candidateImplicationRule.cyclify());
             HornClause hornClause = new HornClause(candidateImplicationRule);
-            ArrayList antecedants = unifier.unify(rule, hornClause);
+            ArrayList antecedants = unifier.semanticallyUnify(rule, hornClause);
             if (antecedants != null) {
                 if (verbosity > 3)
                     System.out.println("Unified antecedants\n" + antecedants);

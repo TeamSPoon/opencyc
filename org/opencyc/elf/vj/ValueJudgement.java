@@ -71,6 +71,7 @@ public class ValueJudgement extends NodeComponent {
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // may call sendScheduleEvaluation();
   }
   
   /**

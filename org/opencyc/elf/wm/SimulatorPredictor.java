@@ -66,36 +66,41 @@ public class SimulatorPredictor extends NodeComponent {
   //// Protected Area
   
   /**
-   * Sends the request evaluate schedule message to ?.
+   * Sends the request evaluate schedule message to the world model, which forwards it
+   * to value judgement.
    */
   protected void requestEvaluateSchedule () {
     //TODO
-    // send via channel to ?
+    // send via channel to world model
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // send forwardRequestEvaluateSchedule(controlledResources, taskCommand, schedule)
+    // to worldModel
   }
   
   /**
-   * Receives the simulate schedule message from ?.
+   * Receives the simulate schedule message from the world model.
    */
   protected void receiveSimulateSchedule () {
     //TODO
-    // receive via channel from ?
+    // receive via channel from world model
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
   }
   
   /**
-   * Sends the simulation failure notification message to ?.
+   * Sends the simulation failure notification message to the world model.
    */
   protected void sendSimulationFailureNotification () {
     //TODO
-    // send via channel to ?
+    // send via channel to the world model
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // send forwardSimulationFailureNotification(controlledResources, taskCommand, schedule)
+    // to worldModel
   }
   
   /**

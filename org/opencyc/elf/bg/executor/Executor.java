@@ -115,7 +115,8 @@ public class Executor extends NodeComponent {
   }
 
   /**
-   * Receives the execute schedule message from ?.
+   * Receives the execute schedule message from plan selector. 
+   * (scheduler should be the intermediary)
    */
   protected void receiveExecuteSchedule () {
     // TODO

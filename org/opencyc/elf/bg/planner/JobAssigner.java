@@ -85,6 +85,8 @@ public class JobAssigner extends NodeComponent {
     // received via channel from behavior generation
     // TaskCommand taskCommand
     fetchTaskFrame();
+    // may trigger scheduleJob(TaskCommand)
+    // may trigger jobAssignerStatus(status)
   }
   
   /**
@@ -141,7 +143,8 @@ public class JobAssigner extends NodeComponent {
   }
   
   /**
-   * Decomposes the function for the current task frame.
+   * Decomposes the function for the current task frame. (May return
+   * a list of scheduler/job pairs.)
    */
   protected void decomposeFunction () {
     //TODO

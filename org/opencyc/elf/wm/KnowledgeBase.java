@@ -47,22 +47,23 @@ public class KnowledgeBase extends NodeComponent {
   //// Protected Area
   
   /**
-   * Receives the fetch task frame message from ?.
+   * Receives the fetch task frame message from world model.
    */
   protected void receiveFetchTaskFrame () {
     //TODO
-    // receive via channel from ?
+    // receive via channel from world model
     // TaskCommand taskCommand
   }
   
   /**
-   * Sends the task frame to ?
+   * Sends the task frame to the world model.
    */
   protected void sendTaskFrame () {
     //TODO
-    // send via channel to ?
+    // send via channel to the world model
     // TaskCommand taskCommand
     // TaskFrame taskFrame
+    // send forwardTaskFrame(taskCommand, taskFrame) to worldModel
   }
   
   /**

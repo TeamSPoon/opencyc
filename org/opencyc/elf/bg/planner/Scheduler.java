@@ -85,7 +85,7 @@ public class Scheduler extends NodeComponent {
   }
   
   /**
-   * Receives the plan selector status message from ?
+   * Receives the plan selector status message from the plan selector
    *
    * @param taskCommand the task command
    * @param schedule the schedule
@@ -93,7 +93,7 @@ public class Scheduler extends NodeComponent {
    */
   protected void receivePlanSelectorStatus () {
     //TODO
-    // receive via channel from ?
+    // receive via channel from the plan selector
     // TaskCommand taskCommand
     // Schedule schedule
     // Status status

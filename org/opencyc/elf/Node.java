@@ -52,128 +52,125 @@ public class Node extends ELFObject {
   //// Public Area
   
   /**
-   * Performs the commanded task.
-   *
-   * @taskCommand the commanded task
+   * Sends the do task message to behavior generation.
    */
-  public void doTask (TaskCommand taskCommand) {
+  public void doTask () {
     //TODO
-    //send via channel
+    //send via channel to behavior generation
+    // TaskCommand taskCommand
+    // send doTask(taskCommand) to behaviorGeneration
   }
   
   /**
-   * Receives data about an object from Sensory Perception.
-   *
-   * @param obj the perceived object
-   * @param data the sensed data for the perceived object
+   * Receives the sensory perception data message from the next lower level node.
    */
-  public void receiveSensoryPerceptionData (Object obj, Object data) {
+  public void receiveSensoryPerceptionData () {
     //TODO
-    //receive via channel
+    //receive via channelfrom the next lower level node
+    // Object obj
+    // Object data
   }
   
   /**
-   * Receives status from a subnode.
-   *
-   * @param status the subnode's status
+   * Receives subnode status message from ?
    */
-  public void receiveSubNodeStatus (Status status) {
+  public void receiveSubNodeStatus () {
     //TODO
-    //receive via channel
+    //receive via channel from ?
+    // Status status
   }
     
   /**
-   * Receives a request for a Knowledge Base object.
-   *
-   * @parm obj the object about which information is requested from the Knowledge Base
+   * Receives the request knowledge base object message from ?
    */
-  public void receiveRequestKBObject (Object obj) {
+  public void receiveRequestKBObject () {
     //TODO
-    //receive via channel
+    //receive via channel from ?
+    // Object obj
   }
 
   /**
-   * Receives the requested Knowledge Base object.
-   *
-   * @parm obj the requested Knowledge Base object
+   * Receives the knowledge base object message from ?
    */
-  public void receiveKBObject (Object obj) {
+  public void receiveKBObject () {
+    //TODO
+    //receive via channel from ?
+    // Object obj
+  }
+  
+  /**
+   * Receives operator input message from ?.
+   */
+  public void operatorInput() {
     //TODO
     //receive via channel
+    // String input
   }
   
   /**
-   * Receives operator input.
-   *
-   * @param input the input from the operator
+   * Sends the sensory perception data message to the next highest level node, on
+   * behalf of sensory perception.
    */
-  public void operatorInput(String input) {
+  public void sendSensoryPerceptionData () {
     //TODO
-    //receive via channel
+    //received via channel from sensory perception
+    //send via channel to the node at the next highest level
+    // Object obj
+    // Object data
+    // send receiveSensoryPerceptionData(obj, data) to (the next highest level) node
   }
   
   /**
-   * Sends Sensory Perception data about a perceived object.
-   *
-   * @param obj the perceived object
-   * @param data the data about the perceived object
+   * Sends the do subtask message to the appropriate subnode.  The message was received 
+   * from behavior generation and originated from an executor.
    */
-  public void sendSensoryPerceptionData (Object obj, Object data) {
+  public void doSubTask () {
     //TODO
-    //send via channel
+    //receive via channel from behavior generation
+    //send via channel to the appropriate sub node
+    // ArrayList controlledResources
+    // TaskCommand
+    //
   }
   
   /**
-   * Sends the given list of controlled resources and the given task command to
-   * a sub node.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param taskCommnd the given task command
+   * Forwards the request knowledge base object message from ? to ?
    */
-  public void doSubTask (ArrayList controlledResources, TaskCommand taskCommnd) {
+  public void forwardRequestKBObject () {
     //TODO
-    //send via channel
+    // receive via channel from ?
+    // send via channel to ?
+    // Object obj
   }
   
   /**
-   * Forwards a request for a Knowledge Base object.
-   *
-   * @parm obj the object about which information is requested from the Knowledge Base
+   * Sends the knowledge base object message to ?
    */
-  public void forwardRequestKBObject (Object obj) {
+  public void sendKBObject () {
     //TODO
-    //send via channel
+    //send via channel to ?
+    // Object obj
   }
   
   /**
-   * Sends the requested Knowledge Base object.
-   *
-   * @parm obj the requested Knowledge Base object
+   * Sends the status message to ?.  This message originates from the job
+   * assigner and is forwarded to the node by behavior generation.
    */
-  public void sendKBObject (Object obj) {
+  public void status () {
     //TODO
-    //send via channel
+    //received via channel from behavior generation
+    //send via channel to ?
+    // ArrayList controlledResources
+    // Status status
   }
   
   /**
-   * Sends the status of the given controlled resources.
-   *
-   * @param controlledResources the given list of controlled resources
-   * @param status the status
+   * Sends operator output message to ?
    */
-  public void status (ArrayList controlledResources, Status status) {
+  public void operatorOutput () {
     //TODO
-    //send via channel
-  }
-  
-  /**
-   * Sends the given string to the operator.
-   *
-   * @param output the output string for the operator
-   */
-  public void operatorOutput (String output) {
-    //TODO
-    //send via channel    
+    //send via channel to ?  
+    // String output
   }
   
   /**

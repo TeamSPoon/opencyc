@@ -60,15 +60,17 @@ public class PlanSelector extends NodeComponent {
   }
   
   /**
-   * Sends the plan selector status message to ?
+   * Sends the plan selector status message to the appropriate scheduler
    */
   protected void sendPlanSelectorStatus () {
     //TODO
-    // send via channel to ?
+    // send via channel to the appropriate scheduler
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
     // Status status
+    // send receivePlanSelectorStatus(taskCommand, schedule, status)
+    // to (appropriate) scheduler
   }
   
   /**
@@ -96,13 +98,14 @@ public class PlanSelector extends NodeComponent {
   }
   
   /**
-   * Sends the execute schedule message to ?
+   * Sends the execute schedule message to the appropriate executor.
    */
   protected void sendExecuteSchedule () {
     //TODO
-    // send via channel to ?
+    // send via channel to to the appropriate executor
     // TaskCommand taskCommand
     // Schedule schedule
+    // send receiveExecuteSchedule(taskCommand, schedule) to (appropriate) executor
   }
   
   //// Private Area

@@ -132,6 +132,7 @@ public class BehaviorGeneration extends NodeComponent {
     // TaskCommand taskCommand
     // send doTask(taskCommand) to jobAssigner
     // may trigger forwardDoSubTask(controlledResources, taskCommand)
+    // may trigger doTask(taskCommand) in jobAssigner
   }
   
   /**

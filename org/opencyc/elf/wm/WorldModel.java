@@ -63,14 +63,17 @@ public class WorldModel extends NodeComponent {
   protected void receiveFetchTaskFrame () {
     //TODO
     // received via channel from behavior generation
+    // send via channel to knowledge base
     // TaskCommand taskCommand
+    // send receiveFetchTaskFrame(taskCommand) to knowledgeBase
   }
   
   /**
-   * Forwards the task frame message from ? to behavior generation.
+   * Forwards the task frame message from the knowledge base to behavior generation.
    */
   protected void forwardTaskFrame () {
     //TODO
+    // received via channel from world model 
     // send via channel to behavior generation 
     // TaskCommand taskCommand
     // TaskFrame taskFrame
@@ -135,10 +138,11 @@ public class WorldModel extends NodeComponent {
   }
   
   /**
-   * Forwards the request evaluate schedule message from ? to  value judgement.
+   * Forwards the request evaluate schedule message from simulator/predictor to value judgement.
    */
   protected void forwardRequestEvaluateSchedule () {
     //TODO
+    // received via channel from simulator/predictor
     // send via channel to value judgement
     // ArrayList controlledResources
     // TaskCommand taskCommand
@@ -148,10 +152,12 @@ public class WorldModel extends NodeComponent {
   }
 
   /**
-   * Forwards the simulation failure notification message from ? to behavior generation.
+   * Forwards the simulation failure notification message from simulator/predictor to 
+   * behavior generation.
    */
   protected void forwardSimulationFailureNotification () {
     //TODO
+    // received via channel from simulator/predictor
     // send via channel to behavior generation
     // ArrayList controlledResources
     // TaskCommand taskCommand
@@ -170,14 +176,19 @@ public class WorldModel extends NodeComponent {
   }
   
   /**
-   * Receives the simulate schedule message forwarded from behavior generation.
+   * Receives the simulate schedule message forwarded from behavior generation.  The message
+   * is forwarded to the simulator/predictor.
    */
   protected void receiveSimulateSchedule () {
     //TODO
     // receive via channel from behavior generation
+    // send via channel to simulator/
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // may trigger forwardSimulationNotification(taskCommand, schedule)
+    // send receiveSimulateSchedule(controlledResources, taskCommand, schedule)
+    // to simulatorPredictor
   }
   
   

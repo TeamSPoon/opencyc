@@ -121,6 +121,11 @@ public class CycAccess {
      */
     public static CycConstant different = null;
 
+    /**
+     * Convenient reference to #$Thing.
+     */
+    public static CycConstant thing = null;
+
     private CycConstant cyclist = null;
     private CycConstant project = null;
 
@@ -442,6 +447,8 @@ public class CycAccess {
             plusFn = getConstantByName("PlusFn");
         if (different == null)
             different = getConstantByName("different");
+        if (thing == null)
+            thing = getConstantByName("Thing");
     }
 
     /**

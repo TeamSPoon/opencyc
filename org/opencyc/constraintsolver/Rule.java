@@ -219,7 +219,7 @@ public class Rule {
      * <tt>Rule.NO_SUBSUMPTION</tt> if this rule is neither subsumed by the given rule, nor
      * subsumes the given rule
      */
-    public int subsumes(Rule rule) throws IOException {
+    public int determineSubsumption(Rule rule) throws IOException {
         if (this.equals(rule))
             return SUBSUMES;
         if (! (this.getPredicate().equals(rule.getPredicate())))
@@ -282,6 +282,30 @@ public class Rule {
         else
             return answer;
     }
+
+    /**
+     * Returns whether this rule is subsumed by the given rule.
+     *
+     * @param rule the given rule for subsumption determination.
+     * @return <tt>true</tt> iff this rule is subsumed by the given <tt>Rule</tt> object.
+     */
+    public boolean isSubsumedBy(Rule rule) throws IOException {
+        if (this.equals(rule))
+            return true;
+        else
+            return this.determineSubsumption(rule) == Rule.SUBSUMED_BY;
+    }
+
+    /**
+     * Returns whether this rule subsumes the given rule.
+     *
+     * @param rule the given rule for subsumption determination.
+     * @return <tt>true</tt> iff this rule subsumes the given <tt>Rule</tt> object.
+     */
+    public boolean subsumes(Rule rule) throws IOException {
+        return this.determineSubsumption(rule) == Rule.SUBSUMES;
+    }
+
 
     /**
      * Creates and returns a copy of this <tt>Rule</tt>.

@@ -65,8 +65,9 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testSolution"));
             //testSuite.addTest(new UnitTest("testRuleEvaluator"));
             //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
-            testSuite.addTest(new UnitTest("testProblemParser"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem"));
+            //testSuite.addTest(new UnitTest("testProblemParser"));
+            testSuite.addTest(new UnitTest("testConstraintProblem1"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem2"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -94,12 +95,12 @@ public class UnitTest extends TestCase {
             "  (#$isa ?cathedral #$Cathedral) " +
             "  (#$countryOfCity ?country ?city) " +
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
-            Rule rule1 = null;
-            Rule rule2 = null;
-            Rule rule3 = null;
-            Rule rule4 = null;
-            Rule rule5 = null;
-            Rule rule6 = null;
+        Rule rule1 = null;
+        Rule rule2 = null;
+        Rule rule3 = null;
+        Rule rule4 = null;
+        Rule rule5 = null;
+        Rule rule6 = null;
         try {
             CycList problem1 = CycAccess.current().makeCycList(problemString1);
             constraintProblem.problem = problem1;
@@ -410,6 +411,46 @@ public class UnitTest extends TestCase {
             printWriter.println(((Rule) zebraPuzzleRules.get(i)).cyclify());
         }
         printWriter.close();
+
+        // subsumes
+        Rule rule31 = null;
+        Rule rule32 = null;
+        Rule rule33 = null;
+        Rule rule34 = null;
+        Rule rule35 = null;
+        Rule rule36 = null;
+        try {
+            rule31 = new Rule("(#$isa ?country #$WesternEuropeanCountry)");
+            rule32 = new Rule("(#$isa ?cathedral #$Cathedral)");
+            rule33 = new Rule("(#$countryOfCity ?country ?city)");
+            rule34 = new Rule("(#$objectFoundInLocation ?cathedral ?city)");
+            rule35 = new Rule("(#$isa ?city #$City)");
+            rule36 = new Rule("(#$isa ?country #$Country)");
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            Assert.assertEquals(Rule.SUBSUMES, rule31.determineSubsumption(rule31));
+            Assert.assertTrue(rule31.subsumes(rule31));
+            Assert.assertTrue(rule31.isSubsumedBy(rule31));
+            Assert.assertEquals(Rule.NO_SUBSUMPTION, rule31.determineSubsumption(rule32));
+            Assert.assertTrue(! rule31.subsumes(rule32));
+            Assert.assertTrue(! rule31.isSubsumedBy(rule32));
+            Assert.assertEquals(Rule.NO_SUBSUMPTION, rule31.determineSubsumption(rule33));
+            Assert.assertEquals(Rule.NO_SUBSUMPTION, rule31.determineSubsumption(rule34));
+            Assert.assertEquals(Rule.NO_SUBSUMPTION, rule31.determineSubsumption(rule35));
+            Assert.assertEquals(Rule.SUBSUMED_BY, rule31.determineSubsumption(rule36));
+            Assert.assertTrue(rule31.isSubsumedBy(rule36));
+            Assert.assertTrue(! (rule31.subsumes(rule36)));
+            Assert.assertEquals(Rule.SUBSUMES, rule36.determineSubsumption(rule31));
+            Assert.assertTrue(rule36.subsumes(rule31));
+            Assert.assertTrue(! (rule36.isSubsumedBy(rule31)));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         try {
             cycAccess.close();
@@ -746,31 +787,8 @@ public class UnitTest extends TestCase {
     /**
      * Tests the <tt>ConstraintProblem</tt> class.
      */
-    public void testConstraintProblem() {
-        System.out.println("** testConstraintProblem **");
-
-        // European Cathedrals with arg type discovery
-        String europeanCathedralsString2 =
-            "(#$and " +
-            "  (#$isa ?country #$WesternEuropeanCountry) " +
-            "  (#$isa ?cathedral #$Cathedral) " +
-            "  (#$countryOfCity ?country ?city) " +
-            "  (#$objectFoundInLocation ?cathedral ?city)) ";
-        System.out.println(europeanCathedralsString2);
-        ConstraintProblem europeanCathedralsProblem2 = new ConstraintProblem();
-        europeanCathedralsProblem2.setVerbosity(8);
-        // Request one solution.
-        europeanCathedralsProblem2.nbrSolutionsRequested = new Integer(1);
-        // Request all solutions.
-        //europeanCathedralsProblem2.nbrSolutionsRequested = null;
-        try {
-            europeanCathedralsProblem2.mt =
-                CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
-        }
-        catch (IOException e) {
-            Assert.fail(e.getMessage());
-        }
-        Assert.assertNotNull(europeanCathedralsProblem2.solve(CycAccess.current().makeCycList(europeanCathedralsString2)));
+    public void testConstraintProblem1() {
+        System.out.println("** testConstraintProblem1 **");
 
         //Zebra Puzzle
         String zebraPuzzleString =
@@ -835,12 +853,13 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        zebraProblem.setVerbosity(9);
+        zebraProblem.setVerbosity(1);
         ArrayList solutions = zebraProblem.solve(zebraPuzzleCycList);
         Assert.assertNotNull(solutions);
 
         // test extractRulesAndDomains()
-        Assert.assertEquals(19, zebraProblem.getNbrConstraintRules());
+        zebraProblem.displayConstraintRules();
+        Assert.assertEquals(17, zebraProblem.getNbrConstraintRules());
         Assert.assertEquals(25, zebraProblem.getNbrDomainPopulationRules());
 
         // test gatherVariables()
@@ -879,12 +898,46 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(zebraProblem.highCardinalityDomains.highCardinalityDomains.size() == 0);
 
         // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size() == 2);
+        Assert.assertEquals(27, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?milk")));
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?norwegian")));
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.allDifferentRules.size() == 5);
+        Assert.assertEquals(5, zebraProblem.nodeConsistencyAchiever.allDifferentRules.size());
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycVariable.makeCycVariable("milk")));
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycVariable.makeCycVariable("norwegian")));
+
+        System.out.println("** testConstraintProblem1 OK **");
+    }
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem2() {
+        System.out.println("** testConstraintProblem2 **");
+
+        // European Cathedrals with arg type discovery
+        String europeanCathedralsString2 =
+            "(#$and " +
+            "  (#$isa ?country #$WesternEuropeanCountry) " +
+            "  (#$isa ?cathedral #$Cathedral) " +
+            "  (#$countryOfCity ?country ?city) " +
+            "  (#$objectFoundInLocation ?cathedral ?city)) ";
+        System.out.println(europeanCathedralsString2);
+        ConstraintProblem europeanCathedralsProblem2 = new ConstraintProblem();
+        europeanCathedralsProblem2.setVerbosity(8);
+        // Request one solution.
+        europeanCathedralsProblem2.nbrSolutionsRequested = new Integer(1);
+        // Request all solutions.
+        //europeanCathedralsProblem2.nbrSolutionsRequested = null;
+        try {
+            europeanCathedralsProblem2.mt =
+                CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+            ArrayList solutions = europeanCathedralsProblem2.solve(CycAccess.current().makeCycList(europeanCathedralsString2));
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
 
         // European Cathedrals
         String europeanCathedralsString =
@@ -908,10 +961,11 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.getMessage());
         }
-        solutions = europeanCathedralsProblem.solve(cycAccess.makeCycList(europeanCathedralsString));
+        ArrayList solutions = europeanCathedralsProblem.solve(CycAccess.current().makeCycList(europeanCathedralsString));
         Assert.assertNotNull(solutions);
 
 
-        System.out.println("** testConstraintProblem OK **");
+        System.out.println("** testConstraintProblem2 OK **");
     }
+
 }

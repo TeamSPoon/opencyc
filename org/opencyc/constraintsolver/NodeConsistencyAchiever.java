@@ -131,10 +131,20 @@ public class NodeConsistencyAchiever {
             // Update the affected variable's domain values.
             constraintProblem.valueDomains.setDomainValues(affectedVariable,
                                                            outputDomainValues);
-            if (verbosity > 5)
-                System.out.println("domain of " + affectedVariable +
-                                   " restricted from " + inputDomainValues +
-                                   " to " + outputDomainValues);
+            // No longer consider the unary constraint after its one-time application.
+            constraintProblem.constraintRules.remove(rule);
+
+            if (verbosity > 5) {
+                if (inputDomainValues.size() > outputDomainValues.size())
+                    System.out.println("domain of " + affectedVariable +
+                                       " restricted from " + inputDomainValues +
+                                       " to " + outputDomainValues);
+                else
+                    System.out.println("domain of " + affectedVariable +
+                                       " unchanged ");
+                System.out.println("unary rule\n" + rule.cyclify() +
+                                   "  dropped after one-time application");
+            }
         }
         achieveAllDifferentConsistencyWrtSingletons();
         if (verbosity > 1) {

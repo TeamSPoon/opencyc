@@ -105,20 +105,6 @@ public class ConstraintProblem {
     protected int verbosity = 8;
 
     /**
-     * The input problem <tt>CycList</tt>.
-     */
-    protected CycList problem = null;
-
-    /**
-     * Collection of the simplified constraint rules derived
-     * from the input problem <tt>CycList</tt>.  These include
-     * <tt>#$elementOf</tt> predicates which populate variable
-     * domains and then are discarded from the constraint rule
-     * set.
-     */
-    protected ArrayList simplifiedRules;
-
-    /**
      * Collection of the rules which populate variable domains.
      */
     protected ArrayList domainPopulationRules = new ArrayList();
@@ -128,6 +114,15 @@ public class ConstraintProblem {
      * solution(s).
      */
     protected ArrayList constraintRules = new ArrayList();
+
+    /**
+     * Collection of the simplified constraint rules derived
+     * from the input problem <tt>CycList</tt>.  These include
+     * <tt>#$elementOf</tt> predicates which populate variable
+     * domains and then are discarded from the constraint rule
+     * set.
+     */
+    protected ArrayList simplifiedRules = new ArrayList();
 
     /**
      * <tt>ProblemParser</tt> object for this <tt>ConstraintProblem</tt>.
@@ -150,11 +145,18 @@ public class ConstraintProblem {
     protected int nbrAsks = 0;
 
     /**
+     * The input problem <tt>CycList</tt>.
+     */
+    protected CycList problem = null;
+
+    /**
      * Constructs a new <tt>ConstraintProblem</tt> object.
      */
     public ConstraintProblem() {
         try {
             cycAccess = new CycAccess();
+            if (verbosity > 3)
+                System.out.println("Initialized OpenCyc connection.");
             mt = cycAccess.makeCycConstant("EverythingPSC");
         }
         catch (Exception e) {

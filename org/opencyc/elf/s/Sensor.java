@@ -29,4 +29,13 @@ package org.opencyc.elf.s;
  */
 public interface Sensor {
   
+  /** 
+   * Gets the name of the sensor.
+   *
+   * @return the name of the sensor
+   */
+  public String getName();
+
+  /** the console input sensor name */
+  public static final String CONSOLE_INPUT = "console input";
 }

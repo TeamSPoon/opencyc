@@ -5,6 +5,7 @@ import  javax.naming.TimeLimitExceededException;
 import  fipaos.ont.fipa.*;
 import  fipaos.ont.fipa.fipaman.*;
 import  fipaos.util.*;
+import  org.jdom.JDOMException;
 import  org.opencyc.util.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.cycagent.*;
@@ -161,14 +162,27 @@ public class RemoteCycConnection implements CycConnectionInterface {
         acl.setOntology("cyc-api");
         acl.setReplyWith(agentCommunityAdapter.nextMessageId());
 
+        ACL replyAcl = null;
         try {
-            ACL replyAcl = agentCommunityAdapter.converseMessage(acl, thirtyMinutesDuration);
+            replyAcl = agentCommunityAdapter.converseMessage(acl, thirtyMinutesDuration);
         }
         catch (TimeLimitExceededException e) {
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
             return response;
         }
+        String contentXml = (String) replyAcl.getContentObject();
+        CycList apiResponse = null;
+        try {
+            apiResponse = (CycList) CycObjectFactory.unmarshall(contentXml);
+        }
+        catch (JDOMException e) {
+            throw new RuntimeException("JDOMException " + e.getMessage() + "\n" + contentXml);
+        }
+        if (apiResponse.size() != 2)
+            throw new RuntimeException("Invalid api response " + apiResponse);
+        response[0] = apiResponse.first();
+        response[1] = apiResponse.second();
 
         if (trace > API_TRACE_NONE)
             if (response[1] instanceof CycList)

@@ -890,7 +890,14 @@ public class CycAccess {
      * Gets the comment for a CycConstant.  Embedded quotes are replaced by spaces.
      */
     public String getComment (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return converseString("(string-substitute \" \" \"\\\"\" (with-all-mts (comment " + cycConstant.stringApiValue() + ")))");
+        String script =
+            "(clet ((comment-string \n" +
+            "         (with-all-mts (comment " + cycConstant.stringApiValue() + ")))) \n" +
+            "  (fif comment-string \n" +
+            "       (string-substitute \" \" \"\\\"\" comment-string) \n" +
+            "       ;; else \n" +
+            "       \"\"))";
+        return converseString(script);
     }
 
     /**
@@ -1317,7 +1324,15 @@ public class CycAccess {
      * Gets a list of the coExtensionals for a CycFort.  Limited to 120 seconds.
      */
     public CycList getCoExtensionals (CycFort cycFort)  throws IOException, UnknownHostException {
-        CycList answer = converseList("(ask-template '?X '(#$coExtensional " + cycFort.stringApiValue() + " ?X) #$EverythingPSC nil nil 120)");
+        CycList answer = null;
+        try {
+            answer = converseList("(ask-template '?X '(#$coExtensional " +
+                                  cycFort.stringApiValue() + " ?X) #$EverythingPSC nil nil 120)");
+        }
+        catch (IOException e) {
+            System.out.println("getCoExtensionals - ignoring:\n" + e.getMessage());
+            return new CycList();
+        }
         answer.remove(cycFort);
         return answer;
     }

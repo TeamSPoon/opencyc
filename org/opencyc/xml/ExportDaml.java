@@ -36,8 +36,6 @@ import org.opencyc.api.*;
 
 public class ExportDaml {
 
-    public static boolean verboseFiltering = false;
-
     private static final String rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String rdfsNamespace = "http://www.w3.org/2000/01/rdf-schema#";
     private static final String damlNamespace = "http://www.daml.org/2001/03/daml+oil#";
@@ -74,84 +72,99 @@ public class ExportDaml {
     private CycList disjointWiths;
     private CycList coExtensionals;
 
+    /**
+     * The default verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
+     * The DAML export path and file name.
+     */
+    public String outputPath = "export.daml";
+
     public ExportDaml() {
     }
     public static void main(String[] args) {
         ExportDaml exportDaml = new ExportDaml();
-        exportDaml.export();
-    }
-
-    public void export() {
-        createRdfNode();
-        createDamlOntologyNode();
-        createCycGuidNode();
-
-        cycAccess = null;
         try {
-            cycAccess = new CycAccess();
-        }
-        catch (UnknownHostException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        //cycAccess.traceOn();
-
-        CycList publicConstants = null;
-        try {
-            publicConstants = cycAccess.getPublicConstants();
+            exportDaml.export();
         }
         catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    public void export()
+        throws UnknownHostException, IOException {
+        createRdfNode();
+        createDamlOntologyNode();
+        createCycGuidNode();
+
+        cycAccess = new CycAccess();
+
+        //cycAccess.traceOn();
+
+        if (verbosity > 2)
+            System.out.println("Getting terms from Cyc");
+        CycList publicConstants = cycAccess.getPublicConstants();
+        if (verbosity > 2)
+            System.out.println("Sorting terms");
         Collections.sort(publicConstants);
-        // Remove non-binary properties.
+        if (verbosity > 2)
+            System.out.println("Removing non-binary properties");
         for (int i = 0; i < publicConstants.size(); i++) {
-            CycConstant cycConstant = null;
-            try {
-                cycConstant = (CycConstant) publicConstants.get(i);
-                if (cycAccess.isCollection(cycConstant))
-                    damlPublicConstants.add(cycConstant);
-                else if (cycAccess.isUnaryPredicate(cycConstant))
-                    // Do not export (for now) Cyc unary predicates, as they cannot be easily expressed in DAML.
-                    continue;
-                else if (cycAccess.isBinaryPredicate(cycConstant))
-                    damlPublicConstants.add(cycConstant);
-                else if (cycAccess.isFunction(cycConstant))
-                    // Do not export (for now) Cyc functions, as they cannot be expressed in DAML.
-                    continue;
-                else if (cycAccess.isPredicate(cycConstant))
-                    // Do not export Cyc (for now) arity 3+ predicates, as they cannot be easily expressed in DAML.
-                    continue;
-                else if (cycAccess.isIndividual(cycConstant))
-                    damlPublicConstants.add(cycConstant);
+            CycConstant cycConstant = (CycConstant) publicConstants.get(i);
+            if (verbosity > 2) {
+                if ((verbosity > 5) || (i % 20 == 0))
+                System.out.println("... " + cycConstant.cyclify());
             }
-            catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
+            if (cycAccess.isCollection(cycConstant))
+                damlPublicConstants.add(cycConstant);
+            else if (cycAccess.isUnaryPredicate(cycConstant))
+                // Do not export (for now) Cyc unary predicates, as they cannot be easily expressed in DAML.
+                continue;
+            else if (cycAccess.isBinaryPredicate(cycConstant))
+                damlPublicConstants.add(cycConstant);
+            else if (cycAccess.isFunction(cycConstant))
+                // Do not export (for now) Cyc functions, as they cannot be expressed in DAML.
+                continue;
+            else if (cycAccess.isPredicate(cycConstant))
+                // Do not export Cyc (for now) arity 3+ predicates, as they cannot be easily expressed in DAML.
+                continue;
+            else if (cycAccess.isIndividual(cycConstant))
+                damlPublicConstants.add(cycConstant);
         }
 
         //createConstantNode("PhysicalDevice");
 
-        //for (int i = 0; i < damlPublicConstants.size(); i++) {
-        for (int i = 0; i < 20; i++) {
-            CycConstant cycConstant = null;
-            try {
-                cycConstant = (CycConstant) damlPublicConstants.elementAt(i);
+        if (verbosity > 2)
+            System.out.println("Building DAML model");
+        for (int i = 0; i < damlPublicConstants.size(); i++) {
+        //for (int i = 0; i < 20; i++) {
+            CycConstant cycConstant = (CycConstant) damlPublicConstants.elementAt(i);
+            if (verbosity > 2)
                 System.out.print(cycConstant + "  ");
-                if (cycAccess.isCollection(cycConstant))
+            if (cycAccess.isCollection(cycConstant)) {
+                if (verbosity > 2)
                     System.out.println("Collection");
-                else if (cycAccess.isBinaryPredicate(cycConstant))
+            }
+            else if (cycAccess.isBinaryPredicate(cycConstant)) {
+                if (verbosity > 2)
                     System.out.println("BinaryPredicate");
-                else if (cycAccess.isIndividual(cycConstant)) {
+            }
+            else if (cycAccess.isIndividual(cycConstant)) {
+                if (verbosity > 2)
                     System.out.print("Individual");
-                    populateIsas(cycConstant);
+                populateIsas(cycConstant);
+                if (verbosity > 2) {
                     String individualType = "  (type unknown)";
                     if (isas != null)
                         for (int j = 0; j < isas.size(); j++)
@@ -161,30 +174,25 @@ public class ExportDaml {
                             }
                     System.out.println(individualType);
                 }
-                else {
+            }
+            else {
+                if (verbosity > 2)
                     System.out.println("other");
-                    continue;
-                }
+                continue;
+            }
             createConstantNode(cycConstant);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
         }
 
+        if (verbosity > 2)
+            System.out.println("Writing DAML output to " + outputPath);
         OutputFormat outputFormat = new OutputFormat(document, "UTF-8", true);
-        try {
-            BufferedWriter damlOut = new BufferedWriter(new FileWriter("/home/reed/cyc.daml"));
-            XMLSerializer xmlSerializer = new XMLSerializer(damlOut, outputFormat);
-            xmlSerializer.asDOMSerializer();
-            xmlSerializer.serialize(document);
-            damlOut.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        BufferedWriter damlOut = new BufferedWriter(new FileWriter(outputPath));
+        XMLSerializer xmlSerializer = new XMLSerializer(damlOut, outputFormat);
+        xmlSerializer.asDOMSerializer();
+        xmlSerializer.serialize(document);
+        damlOut.close();
+        if (verbosity > 2)
+            System.out.println("DAML export completed");
     }
 
     private void createRdfNode() {
@@ -208,56 +216,36 @@ public class ExportDaml {
         damlOntology.appendChild(rdfsComment);
     }
 
-    private void createConstantNode (String constantName) {
-        CycConstant cycConstant = null;
-        try {
-            cycConstant = cycAccess.getConstantByName(constantName);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        createConstantNode(cycConstant);
-    }
-
-    private void createConstantNode (CycConstant cycConstant) {
-        guid = cycConstant.guid;
+    private void createConstantNode (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        guid = cycConstant.getGuid();
         populateComment(cycConstant);
         populateIsas(cycConstant);
-        try {
-            if (cycAccess.isCollection(cycConstant))
-                createClassNode(cycConstant);
-            else if (cycAccess.isBinaryPredicate(cycConstant))
-                createPropertyNode(cycConstant);
-            else if (cycAccess.isIndividual(cycConstant))
-                createIndividualNode(cycConstant);
-            else
-                System.out.println("Unhandled constant: " + cycConstant.name);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
+        if (cycAccess.isCollection(cycConstant))
+            createClassNode(cycConstant);
+        else if (cycAccess.isBinaryPredicate(cycConstant))
+            createPropertyNode(cycConstant);
+        else if (cycAccess.isIndividual(cycConstant))
+            createIndividualNode(cycConstant);
+        else {
+            if (verbosity > 0)
+                System.out.println("Unhandled constant: " + cycConstant.toString());
         }
     }
 
     private void createClassNode(CycConstant cycConstant)
-    throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException {
         populateGenls(cycConstant);
         populateDisjointWiths(cycConstant);
         populateCoExtensionals(cycConstant);
         Element classNode = document.createElementNS(damlNamespace, "daml:Class");
         rdf.appendChild(classNode);
-        classNode.setAttributeNS(rdfNamespace, "rdf:ID", cycConstant.name);
+        classNode.setAttributeNS(rdfNamespace, "rdf:ID", cycConstant.toString());
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
         String label = null;
-        try {
-            label = cycAccess.getPluralGeneratedPhrase(cycConstant);
+        label = cycAccess.getPluralGeneratedPhrase(cycConstant);
+        if (verbosity > 2)
             System.out.println("  " + label);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
         labelNode.appendChild(document.createTextNode(label));
         classNode.appendChild(labelNode);
         Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
@@ -267,22 +255,22 @@ public class ExportDaml {
         guidNode.appendChild(document.createTextNode(guid.toString()));
         classNode.appendChild(guidNode);
         Element sameClassAsNode;
-        if (cycConstant.name.equals("Thing")) {
+        if (cycConstant.equals(cycAccess.thing)) {
             sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
             sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlThing);
             classNode.appendChild(sameClassAsNode);
         }
-        else if (cycConstant.name.equals("BinaryPredicate")) {
+        else if (cycConstant.equals(cycAccess.binaryPredicate)) {
             sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
             sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlProperty);
             classNode.appendChild(sameClassAsNode);
         }
-        else if (cycConstant.name.equals("TransitiveBinaryPredicate")) {
+        else if (cycConstant.equals(cycAccess.getKnownConstantByName("TransitiveBinaryPredicate"))) {
             sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
             sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlTransitiveProperty);
             classNode.appendChild(sameClassAsNode);
         }
-        else if (cycConstant.name.equals("Collection")) {
+        else if (cycConstant.equals(cycAccess.collection)) {
             sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
             sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlClass);
             classNode.appendChild(sameClassAsNode);
@@ -315,22 +303,17 @@ public class ExportDaml {
             }
     }
 
-    private void createIndividualNode(CycConstant cycConstant) {
+    private void createIndividualNode(CycConstant cycConstant)
+        throws UnknownHostException, IOException {
         if (isas == null || isas.size() == 0)
             return;
-        Element individualNode = document.createElement((String) isas.get(0));
+        Element individualNode = document.createElement(isas.get(0).toString());
         rdf.appendChild(individualNode);
-        individualNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.name);
+        individualNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
-        String label = null;
-        try {
-            label = cycAccess.getSingularGeneratedPhrase(cycConstant);
+        String label = cycAccess.getSingularGeneratedPhrase(cycConstant);
+        if (verbosity > 2)
             System.out.println("  " + label);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
         labelNode.appendChild(document.createTextNode(label));
         individualNode.appendChild(labelNode);
         Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
@@ -360,7 +343,7 @@ public class ExportDaml {
     }
 
     private void createPropertyNode(CycConstant cycConstant)
-    throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException {
         populateGenlPreds(cycConstant);
         populateArg1Isa(cycConstant);
         populateArg2Isa(cycConstant);
@@ -375,17 +358,12 @@ public class ExportDaml {
         else
             propertyNode = document.createElementNS(damlNamespace, "daml:Property");
         rdf.appendChild(propertyNode);
-        propertyNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.name);
+        propertyNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
         String label = null;
-        try {
-            label = cycAccess.getGeneratedPhrase(cycConstant);
+        label = cycAccess.getGeneratedPhrase(cycConstant);
+        if (verbosity > 2)
             System.out.println("  " + label);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
         labelNode.appendChild(document.createTextNode(label));
         propertyNode.appendChild(labelNode);
         Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
@@ -398,7 +376,7 @@ public class ExportDaml {
             for (int i = 0; i < genlPreds.size(); i++) {
                 Element subPropertyOfNode = document.createElementNS(damlNamespace, "daml:subPropertyOf");
                 subPropertyOfNode.setAttributeNS(rdfNamespace, "rdf:resource", "#" +
-                                                 ((CycConstant) genlPreds.get(i)).toString());
+                                                 genlPreds.get(i).toString());
                 propertyNode.appendChild(subPropertyOfNode);
             }
         if (arg1Isa != null) {
@@ -414,7 +392,7 @@ public class ExportDaml {
     }
 
     private String translateTerm (CycConstant cycConstant)
-    throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException {
         if (cycConstant.equals(cycAccess.thing))
             return damlThing;
         else if (cycConstant.equals(cycAccess.collection))
@@ -427,15 +405,9 @@ public class ExportDaml {
             return "#" + cycConstant.toString();
     }
 
-    private void populateComment (CycConstant cycConstant) {
-        comment = null;
-        try {
-            comment = cycAccess.getComment(cycConstant);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateComment (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        comment = cycAccess.getComment(cycConstant);
     }
 
     private CycList filterPublicConstants (CycList constants) {
@@ -446,7 +418,7 @@ public class ExportDaml {
             Object object = constants.get(i);
             if (isFilteredDamlPublicConstant(object))
                 result.add(object);
-            else if (verboseFiltering)
+            else if (verbosity > 4)
                 System.out.println(" dropping " + cycConstant);
         }
         return result;
@@ -460,130 +432,71 @@ public class ExportDaml {
         return damlPublicConstants.contains(object);
     }
 
-    private boolean isFilteredPublicConstant(Object object) {
+    private boolean isFilteredPublicConstant(Object object)
+        throws UnknownHostException, IOException {
         if (! (object instanceof CycConstant))
             return false;
-        try {
+        else
             return cycAccess.isPublicConstant(cycConstant);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        return false;
     }
 
-    private void populateIsas (CycConstant cycConstant) {
-        isas = null;
-        try {
-            isas = cycAccess.getIsas(cycConstant);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateIsas (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        isas = cycAccess.getIsas(cycConstant);
         isas = filterPublicConstants(isas);
     }
 
-    private void populateGenls (CycConstant cycConstant) {
-        genls = null;
-        try {
-            genls = cycAccess.getGenls(cycConstant);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateGenls (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        genls = cycAccess.getGenls(cycConstant);
         genls = filterPublicConstants(genls);
     }
 
-    private void populateGenlPreds (CycConstant cycConstant) {
-        genlPreds = null;
-        try {
-            genlPreds = cycAccess.getGenlPreds(cycConstant);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateGenlPreds (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        genlPreds = cycAccess.getGenlPreds(cycConstant);
         genlPreds = filterPublicConstants(genlPreds);
     }
 
-    private void populateArg1Isa (CycConstant cycConstant) {
-        arg1Isa = null;
-        try {
-            CycList arg1Isas = cycAccess.getArg1Isas(cycConstant);
-            arg1Isas = filterPublicConstants(arg1Isas);
-            if (arg1Isas.size() > 0)
-                arg1Isa = (CycConstant) arg1Isas.first();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateArg1Isa (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        CycList arg1Isas = cycAccess.getArg1Isas(cycConstant);
+        arg1Isas = filterPublicConstants(arg1Isas);
+        if (arg1Isas.size() > 0)
+            arg1Isa = (CycConstant) arg1Isas.first();
     }
 
-    private void populateArg2Isa (CycConstant cycConstant) {
-        arg2Isa = null;
-        try {
-            CycList arg2Isas = cycAccess.getArg2Isas(cycConstant);
-            arg2Isas = filterPublicConstants(arg2Isas);
-            if (arg2Isas.size() > 0)
-                arg2Isa = (CycConstant) arg2Isas.first();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateArg2Isa (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        CycList arg2Isas = cycAccess.getArg2Isas(cycConstant);
+        arg2Isas = filterPublicConstants(arg2Isas);
+        if (arg2Isas.size() > 0)
+            arg2Isa = (CycConstant) arg2Isas.first();
     }
 
-    private void populateArg1Format (CycConstant cycConstant) {
-        arg1Format = null;
-        try {
-            CycList arg1Formats = cycAccess.getArg1Formats(cycConstant);
-            if (arg1Formats.size() > 0)
-                arg1Format = (CycConstant) arg1Formats.first();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateArg1Format (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        CycList arg1Formats = cycAccess.getArg1Formats(cycConstant);
+        if (arg1Formats.size() > 0)
+            arg1Format = (CycConstant) arg1Formats.first();
     }
 
-    private void populateArg2Format (CycConstant cycConstant) {
-        arg2Format = null;
-        try {
-            CycList arg2Formats = cycAccess.getArg2Formats(cycConstant);
-            if (arg2Formats.size() > 0)
-                arg2Format = (CycConstant) arg2Formats.first();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateArg2Format (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        CycList arg2Formats = cycAccess.getArg2Formats(cycConstant);
+        if (arg2Formats.size() > 0)
+            arg2Format = (CycConstant) arg2Formats.first();
     }
 
-    private void populateDisjointWiths (CycConstant cycConstant) {
-        disjointWiths = null;
-        try {
-            disjointWiths = cycAccess.getDisjointWiths(cycConstant);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateDisjointWiths (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        disjointWiths = cycAccess.getDisjointWiths(cycConstant);
         disjointWiths = filterPublicConstants(disjointWiths);
     }
 
-    private void populateCoExtensionals (CycConstant cycConstant) {
-        coExtensionals = null;
-        try {
-            coExtensionals = cycAccess.getCoExtensionals(cycConstant);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    private void populateCoExtensionals (CycConstant cycConstant)
+        throws UnknownHostException, IOException {
+        coExtensionals = cycAccess.getCoExtensionals(cycConstant);
         coExtensionals = filterPublicConstants(coExtensionals);
     }
 

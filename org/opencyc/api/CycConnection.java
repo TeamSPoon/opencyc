@@ -295,15 +295,43 @@ public class CycConnection implements CycConnectionInterface {
                           int communicationMode,
                           CycAccess cycAccess)
         throws IOException, UnknownHostException, CycApiException {
+        this (hostName,
+              basePort,
+              communicationMode,
+              CycConnection.DEFAULT_MESSAGING_MODE,
+              cycAccess);
+    }
+
+    /**
+     * Constructs a new CycConnection object using a given host name, the given base port number,
+     * the given communication mode, and the given CycAccess object
+     *
+     * @param host the name of the computer hosting the OpenCyc server.
+     * @param basePort the base tcp port on which the OpenCyc server is listening for connections.
+     * @param communicationMode either ASCII_MODE or BINARY_MODE
+     * @param messagingMode either SERIAL_MESSAGING_MODE or CONCURRENT_MESSAGING_MODE
+     * @param cycAccess the given CycAccess object which provides api services over
+     * this CycConnection object
+     */
+    public CycConnection (String hostName,
+                          int basePort,
+                          int communicationMode,
+                          int messagingMode,
+                          CycAccess cycAccess)
+        throws IOException, UnknownHostException, CycApiException {
         this.hostName = hostName;
         this.basePort = basePort;
         asciiPort = basePort + ASCII_PORT_OFFSET;
         cfaslPort = basePort + CFASL_PORT_OFFSET;
-        this.communicationMode = communicationMode;
-        this.cycAccess = cycAccess;
         if ((communicationMode != ASCII_MODE)
                 && (communicationMode != BINARY_MODE))
             throw  new CycApiException("Invalid communication mode " + communicationMode);
+        this.communicationMode = communicationMode;
+        if ((messagingMode != SERIAL_MESSAGING_MODE)
+                && (messagingMode != CONCURRENT_MESSAGING_MODE))
+            throw  new CycApiException("Invalid messaging mode " + messagingMode);
+        this.messagingMode = messagingMode;
+        this.cycAccess = cycAccess;
         initializeApiConnections();
         //if (trace >= API_TRACE_NONE) {
         if (trace > API_TRACE_NONE) {
@@ -336,9 +364,12 @@ public class CycConnection implements CycConnectionInterface {
     }
 
     /**
-     * Initializes the concurrent processing mode.
+     * Initializes the concurrent processing mode.  Use serial messaging mode to
+     * ensure the Cyc task processors are initialized, then start this
+     * connection's taskProcessor response handler thread.
      */
-    protected void initializeConcurrentProcessing () {
+    protected void initializeConcurrentProcessing ()
+        throws IOException, UnknownHostException, CycApiException {
         if (communicationMode == ASCII_MODE) {
             taskProcessorAsciiResponseHandler = new TaskProcessorAsciiResponseHandler();
             taskProcessorAsciiResponseHandler.start();
@@ -487,9 +518,8 @@ public class CycConnection implements CycConnectionInterface {
      *
      * @param message the api command which must be a String or a CycList
      * @param timeout a <tt>Timer</tt> object giving the time limit for the api call
-     * @return an array of two objects, the first is an response status object
-     * either a Boolean (binary mode) or Integer (ascii mode), and the second is the
-     * response object or error string.
+     * @return an array of two objects, the first is a Boolean response status
+     * object, and the second is the response object or error string.
      */
     public synchronized Object[] converse (Object message, Timer timeout)
         throws IOException, TimeOutException, CycApiException {
@@ -507,7 +537,7 @@ public class CycConnection implements CycConnectionInterface {
             String messageString = messageCycList.cyclifyWithEscapeChars();
             return  converseAscii(messageString, timeout);
         }
-        else {
+        else { // Binary (CFASL) mode
             CycList messageCycList;
             if (message instanceof CycList)
                 messageCycList = (CycList) message;
@@ -613,10 +643,23 @@ public class CycConnection implements CycConnectionInterface {
                     break;
                 }
             }
-            Object[] answer = (Object[]) responseMessages.get(id);
+            Object[] answer =  {
+                null, null
+            };
+            CycList taskProcessorResponse = (CycList) responseMessages.get(id);
             responseMessages.remove(id);
-            //Object response = taskProcessorResponse.get(5);
-            //Object status = taskProcessorResponse.get(6);
+            Object response = taskProcessorResponse.get(5);
+            Object status = taskProcessorResponse.get(6);
+            if (status == CycObjectFactory.nil) {
+                // OK
+                answer[0] = Boolean.TRUE;
+                answer[1] = response;
+            }
+            else {
+                // Error, status contains the error message
+                answer[0] = Boolean.FALSE;
+                answer[1] = status;
+            }
             return answer;
         }
     }
@@ -847,7 +890,7 @@ public class CycConnection implements CycConnectionInterface {
         throws IOException, CycApiException, TimeOutException {
         if (trace > API_TRACE_NONE)
             System.out.println(message + " --> cyc");
-        if (this.messagingMode == SERIAL_MESSAGING_MODE) {
+        if (messagingMode == SERIAL_MESSAGING_MODE) {
             out.write(message);
             if (! message.endsWith("\n"))
                 out.newLine();
@@ -880,19 +923,19 @@ public class CycConnection implements CycConnectionInterface {
                 taskProcessorRequestBuffer.append(" ");
                 // priority
                 taskProcessorRequestBuffer.append((new Integer(DEFAULT_PRIORITY)).toString());
-                taskProcessorRequestBuffer.append(" ");
+                taskProcessorRequestBuffer.append(" \"");
                 // requestor
                 taskProcessorRequestBuffer.append(myClientName);
-                taskProcessorRequestBuffer.append(" ");
+                taskProcessorRequestBuffer.append("\" ");
                 // client-bindings
                 taskProcessorRequestBuffer.append(" nil)");
                 taskProcessorRequest = taskProcessorRequestBuffer.toString();
             }
+            waitingReplyThreads.put(id, Thread.currentThread());
             out.write(taskProcessorRequest);
             if (! taskProcessorRequest.endsWith("\n"))
                 out.newLine();
             out.flush();
-            waitingReplyThreads.put(id, Thread.currentThread());
             while (true) {
                 try {
                     Thread.sleep(10000);
@@ -901,8 +944,40 @@ public class CycConnection implements CycConnectionInterface {
                     break;
                 }
             }
-            Object[] answer = (Object[]) responseMessages.get(id);
+            Object[] answer =  {
+                null, null
+            };
+            CycList taskProcessorResponse = (CycList) responseMessages.get(id);
             responseMessages.remove(id);
+            String response = null;
+            Object responseObject = taskProcessorResponse.get(5);
+            if (responseObject instanceof CycFort) {
+                response = ((CycFort) responseObject).cyclify();
+                isSymbolicExpression = false;
+            }
+            else if (responseObject instanceof CycList) {
+                response = ((CycList) responseObject).cyclify();
+                isSymbolicExpression = true;
+            }
+            else if (responseObject instanceof String) {
+                response = "\"" + responseObject + "\"";
+                isSymbolicExpression = false;
+            }
+            else {
+                response = responseObject.toString();
+                isSymbolicExpression = false;
+            }
+            CycSymbol status = (CycSymbol) taskProcessorResponse.get(6);
+            if (status.equals(CycObjectFactory.nil)) {
+                // OK
+                answer[0] = Boolean.TRUE;
+                answer[1] = response;
+            }
+            else {
+                // Error, status contains the error message
+                answer[0] = Boolean.FALSE;
+                answer[1] = status;
+            }
             return answer;
         }
     }
@@ -1126,7 +1201,15 @@ public class CycConnection implements CycConnectionInterface {
                     System.err.println(e.getMessage());
                     e.printStackTrace();
                 }
-                taskProcessorResponse = (CycList) answer[1];
+                String taskProcessorResponseString = (String) answer[1];
+                if (cycAccess == null)
+                    throw new RuntimeException("CycAccess required for concurrent ascii mode.");
+                try {
+                    taskProcessorResponse = cycAccess.makeCycList(taskProcessorResponseString.trim());
+                }
+                catch (CycApiException e) {
+                   throw new RuntimeException("Error while parsing CycList " + taskProcessorResponseString);
+                }
                 Integer id = (Integer) taskProcessorResponse.get(2);
                 responseMessages.put(id, taskProcessorResponse);
                 Thread clientThread = (Thread) waitingReplyThreads.get(id);

@@ -252,6 +252,39 @@ public class CycAccess {
     }
 
     /**
+     * Constructs a new CycAccess object given a host name, port, communication mode,
+     * persistence indicator, and messaging mode
+     *
+     * @param hostName the host name
+     * @param basePort the base (HTML serving) TCP socket port number
+     * @param communicationMode either ASCII_MODE or BINARY_MODE
+     * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with
+     * the OpenCyc server
+     * @param messagingMode either SERIAL_MESSAGING_MODE or CONCURRENT_MESSAGING_MODE
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycAccess(String hostName,
+                     int basePort,
+                     int communicationMode,
+                     boolean persistentConnection,
+                     int messagingMode)
+        throws IOException, UnknownHostException, CycApiException {
+        this.hostName = hostName;
+        this.port = basePort;
+        this.communicationMode = communicationMode;
+        this.persistentConnection = persistentConnection;
+        if (persistentConnection)
+            cycConnection = new CycConnection(hostName,
+                                              port,
+                                              communicationMode,
+                                              messagingMode,
+                                              this);
+        commonInitialization();
+    }
+
+    /**
      * Provides common local and remote CycAccess object initialization.
      *
      * @throws IOException if a data communication error occurs

@@ -40,6 +40,11 @@ public abstract class SpecialForm extends Statement {
   //// Public Area
   
   /**
+   * Makes the singleton instance of this special form.
+   */
+  public abstract void makeInstance ();
+  
+  /**
    * Gets the singleton instance of this special form.
    *
    * @return the singleton instance of this special form
@@ -57,7 +62,7 @@ public abstract class SpecialForm extends Statement {
   /**
    * the singleton instance of this special form
    */
-  protected SpecialForm specialForm;
+  protected static SpecialForm specialForm;
   
   //// Main
   

@@ -1,5 +1,14 @@
 package org.opencyc.cycagent;
 
+import java.io.*;
+import java.util.*;
+import fipaos.ont.fipa.*;
+import fipaos.ont.fipa.fipaman.*;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
+import org.opencyc.util.*;
+import org.opencyc.xml.*;
+
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
  *
@@ -31,8 +40,159 @@ package org.opencyc.cycagent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class CycProxy {
+public class CycProxy extends GenericAgent {
+
+    /**
+     * Cached CycConnection objects which preserve Cyc session state.
+     * myAgentName --> CycConnection instance
+     */
+    protected static Hashtable cycConnectionCache = new Hashtable();
 
     public CycProxy() {
+        super();
+    }
+
+    /**
+     * Provides the main method.
+     */
+    public static void main(String[] args) {
+        if (Log.current == null)
+            Log.makeLog();
+        CycProxy cycProxy = new CycProxy();
+        cycProxy.remoteAgentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNTITY;
+        cycProxy.initializeAgentCommunity(AgentCommunityAdapter.QUIET_VERBOSITY);
+        while (true)
+            // Keep root thread running with minimal resource consumption, while awaiting
+            // cyc api requests.
+            try {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException e) {
+                break;
+            }
+        cycProxy.agentCommunityAdapter.deregister();
+        System.exit(0);
+    }
+
+    /**
+     * Notifies my agent that an Agent Communication Language message has been received.
+     *
+     * @param acl the Agent Communication Language message which has been received for my agent
+     */
+    public void messageReceived (ACL acl) {
+        super.messageReceived(acl);
+        if ((! messageConsumed) &&
+            (acl.getOntology().equals(AgentCommunityAdapter.CYC_API_ONTOLOGY)))
+                processApiRequest(acl);
+    }
+
+    /**
+     * Processes a cyc api request from another agent.
+     *
+     * @param processApiRequest the echo request Agent Communication Language message
+     */
+    public void processApiRequest (ACL apiRequestAcl) {
+        CycList apiRequest = null;
+        String senderName = apiRequestAcl.getSenderAID().getName();
+        CycConnection cycConnection = (CycConnection) cycConnectionCache.get(senderName);
+        try {
+            if (cycConnection == null) {
+                cycConnection = new CycConnection();
+                cycConnectionCache.put(senderName, cycConnection);
+                if (verbosity > 1)
+                    Log.current.print("created cyc connection to " + cycConnection.connectionInfo() +
+                                      "\nfor " + senderName);
+            }
+            String contentXml = (String) apiRequestAcl.getContentObject();
+            apiRequest = (CycList) CycObjectFactory.unmarshall(contentXml);
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            return;
+        }
+
+        if (apiRequest.first().equals(CycObjectFactory.makeCycSymbol("cyc-kill"))) {
+            CycObjectFactory.removeCaches((CycConstant) apiRequest.second());
+            if (verbosity > 2)
+                System.out.println("killed cached version of " + (CycConstant) apiRequest.second());
+        }
+
+        boolean cycConnectionEnded = false;
+        try {
+            if (apiRequest.equals(CycObjectFactory.END_CYC_CONNECTION)) {
+                if (verbosity > 0)
+                    Log.current.println("ending cyc connection for " + senderName);
+                    cycConnection.close();
+                cycConnectionCache.remove(senderName);
+                cycConnectionEnded = true;
+                }
+            }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
+
+        Object [] response = {null, null};
+        if (cycConnectionEnded) {
+            response[0] = Boolean.TRUE;
+            response[1] = CycObjectFactory.nil;
+        }
+        else {
+            try {
+                if (verbosity == 0)
+                    cycConnection.traceOff();
+                else if (verbosity < 3)
+                    cycConnection.traceOn();
+                else
+                    cycConnection.traceOnDetailed();
+                response = cycConnection.converse(apiRequest);
+            }
+            catch (Exception e) {
+                Log.current.errorPrintln(e.getMessage());
+                Log.current.printStackTrace(e);
+                return;
+            }
+        }
+        ACL apiReplyAcl = (ACL) apiRequestAcl.clone();
+        apiReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
+        apiReplyAcl.setSenderAID(apiRequestAcl.getReceiverAID());
+        apiReplyAcl.setReceiverAID(apiRequestAcl.getSenderAID());
+        CycList responseCycList = new CycList();
+        if (response[0].equals(Boolean.TRUE))
+            responseCycList.add(CycObjectFactory.t);
+        else if (response[0].equals(Boolean.FALSE))
+            responseCycList.add(CycObjectFactory.nil);
+        else
+            new RuntimeException("response[0] not Boolean " + response[0]);
+        responseCycList.add(response[1]);
+        try {
+            apiReplyAcl.setContentObject("\n" + Marshaller.marshall(responseCycList));
+        }
+        catch (IOException e) {
+            Log.current.errorPrintln("Exception while marshalling " + responseCycList);
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            return;
+        }
+        apiReplyAcl.setReplyWith(null);
+        apiReplyAcl.setInReplyTo(apiRequestAcl.getReplyWith());
+        try {
+            agentCommunityAdapter.sendMessage(apiReplyAcl);
+        }
+        catch (IOException e) {
+            Log.current.errorPrintln("Exception " + e.getMessage() +
+                                     "\nwhile replying to api request with\n" + apiReplyAcl);
+        }
+    }
+
+    /**
+     * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 }

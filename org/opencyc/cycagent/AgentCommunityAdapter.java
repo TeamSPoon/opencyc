@@ -33,16 +33,22 @@ import org.opencyc.util.Timer;
 public interface AgentCommunityAdapter {
 
     /**
-     * The quiet verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * Quiet verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     public static final int QUIET_VERBOSITY = 0;
 
     /**
+     * Low verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int LOW_VERBOSITY = 1;
+
+    /**
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 1;
+    public static final int DEFAULT_VERBOSITY = LOW_VERBOSITY;
 
     /**
      * Indicates the CoABS agent community.

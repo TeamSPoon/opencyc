@@ -39,6 +39,18 @@ import org.opencyc.util.*;
 public class GenericAgent implements MessageReceiver {
 
     /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 1;
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
      * name of the local agent
      */
     protected String myAgentName = "my agent";
@@ -77,6 +89,8 @@ public class GenericAgent implements MessageReceiver {
      * diagnostic input
      */
     public void initializeAgentCommunity(int verbosity) {
+        if (verbosity > 0)
+            Log.current.println("Initializing the agent community connection");
         if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNTITY) {
             try {
                 agentCommunityAdapter = new CoAbsCommunityAdapter(this, verbosity);
@@ -148,5 +162,15 @@ public class GenericAgent implements MessageReceiver {
      */
     public String getMyAgentName () {
         return myAgentName;
+    }
+
+    /**
+     * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 }

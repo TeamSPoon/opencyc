@@ -18,13 +18,6 @@ import org.opencyc.util.*;
 import org.opencyc.xml.*;
 import org.opencyc.cycagent.*;
 
-
-
-
-
-
-
-
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
  *

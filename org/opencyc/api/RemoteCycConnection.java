@@ -175,7 +175,12 @@ public class RemoteCycConnection implements CycConnectionInterface {
                 System.out.println(response[0] + " " + ((CycList) response[1]).cyclify());
             else
                 System.out.println(response[0] + " " + response[1]);
-
+        if (response[0].equals(CycObjectFactory.t))
+            response[0] = Boolean.TRUE;
+        else if (response[0].equals(CycObjectFactory.nil))
+            response[0] = Boolean.FALSE;
+        else
+            throw new RuntimeException("Invalid response[0] " + response[0]);
         return response;
     }
 
@@ -195,8 +200,8 @@ public class RemoteCycConnection implements CycConnectionInterface {
     public Object[] converse (Object message, Timer timeout)
         throws IOException, TimeOutException, CycApiException {
         Object [] response = {null, null};
-
-        return response;
+        throw new RuntimeException("not yet implemented");
+        //return response;
     }
 
     /**

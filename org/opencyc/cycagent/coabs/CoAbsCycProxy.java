@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import net.jini.core.entry.Entry;
-import net.jini.core.lookup.ServiceID;
+import net.jini.core.lookup.*;
 import net.jini.lookup.ServiceIDListener;
 import com.globalinfotek.coabsgrid.*;
 import com.globalinfotek.coabsgrid.entry.fipa98.AMSAgentDescription;
@@ -103,6 +103,12 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * The conversation state.
      */
     protected String conversationState = "initial";
+
+    /**
+     * Cached AgentRep objects which reduce lookup overhead.
+     * agentName --> agentRep
+     */
+    protected static Hashtable agentRepCache = new Hashtable();
 
     /**
      * Constructs a new CoAbsCycProxy object.
@@ -261,21 +267,6 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
     // FIPA ACC
 
     /**
-     * Forwards the message.
-     */
-    public void forward(Message message) {
-        try {
-            regHelper.getDirectory().forward(message,
-                                             regHelper.getAgentRep(),
-                                             "message" + count++);
-        }
-        catch (RemoteException e) {
-            Log.current.errorPrintln(e.getMessage());
-            Log.current.printStackTrace(e);
-        }
-    }
-
-    /**
      * Processes the Cyc API request message.  Replies with the Cyc API
      * result.
      *
@@ -317,7 +308,12 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
             Log.current.errorPrintln("Conversation state not api ready" + conversationState);
             return;
         }
-        this.processCycApiRequest(message);
+        try {
+            processCycApiRequest(message);
+        }
+        catch (RemoteException e) {
+            Log.current.errorPrintln(e.getMessage());
+        }
     }
 
     /**
@@ -325,7 +321,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      *
      * @param message the received cyc api request message
      */
-    protected void processCycApiRequest (Message apiRequestMessage) {
+    protected void processCycApiRequest (Message apiRequestMessage) throws RemoteException {
         conversationState = "api request";
         ACL coAbsRequestAcl = null;
         CycList apiRequest = null;
@@ -383,7 +379,8 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
                                                 coAbsReplyAcl.toString());
         if (verbosity > 2)
             Log.current.println("\nReplying with " + replyMessage.toString());
-        forward(replyMessage);
+        AgentRep requestingAgentRep = apiRequestMessage.getSenderAgentRep();
+        requestingAgentRep.addMessage(replyMessage);
 
         try {
             cycAccess.close();
@@ -394,6 +391,42 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         }
         conversationState = "api ready";
     }
+
+    /**
+     * Returns the AgentRep object for the given agent name.
+     *
+     * @param agentName the agent name
+     * @return the AgentRep object for the given agent name
+     */
+    protected AgentRep lookupAgentRep(String agentName) throws IOException {
+        AgentRep agentRep = (AgentRep) agentRepCache.get(agentName);
+        if (agentRep != null)
+            return agentRep;
+        // create a Directory to use for lookups
+        Directory directory = new Directory();
+        System.out.println("*** Looking up everything:");
+        ServiceItem[] items = directory.lookup((net.jini.core.lookup.ServiceTemplate) null);
+        for (int i = 0; i < items.length; i++) {
+            System.out.println();
+            System.out.println("Match " + (i + 1));
+            System.out.println("---------");
+            ServiceItem si = items[i];
+            Object service =  si.service;
+            System.out.println("Service (" + service.getClass() + ") = " + service);
+            if (service instanceof AgentRep) {
+                agentRep = (AgentRep) service;
+                System.out.println("Agent name " + agentRep.getName());
+                if (agentName.equals(agentRep.getName())) {
+                    agentRepCache.put(agentName, agentRep);
+                    if (verbosity > 2)
+                        Log.current.print("cached AgentRep for " + agentName);
+                    return agentRep;
+                }
+            }
+        }
+        throw new IOException("Agent not found " + agentName);
+    }
+
 
     /**
      * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum

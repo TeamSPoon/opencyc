@@ -240,6 +240,7 @@ public class CoAbsCommunityAdapter
         Message requestMessage = new BasicMessage(acl.getReceiverAID().getName(),
                                                   "fipa-xml",
                                                   acl.toString());
+        requestMessage.setSender(regHelper.getAgentRep());
         if (verbosity > 2)
             Log.current.println("\nSending " + requestMessage.toString() +
                                 "\n  receiver: " + requestMessage.getReceiver());
@@ -273,6 +274,7 @@ public class CoAbsCommunityAdapter
         Message requestMessage = new BasicMessage(acl.getReceiverAID().getName(),
                                                   "fipa-xml",
                                                   acl.toString());
+        requestMessage.setSender(regHelper.getAgentRep());
         if (verbosity > 2)
             Log.current.println("\nSending " + requestMessage.toString() +
                                 "\n  receiver: " + requestMessage.getReceiver());

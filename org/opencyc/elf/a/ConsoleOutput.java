@@ -148,7 +148,7 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
     protected void doAction (ActuateMsg actuateMsg) {
       Object obj = actuateMsg.getObj();
       Object data = actuateMsg.getData();
-      System.out.print(data.toString());
+      System.out.println(data);
       System.out.flush();
     }
   

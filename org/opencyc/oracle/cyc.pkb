@@ -85,6 +85,23 @@ AS LANGUAGE JAVA
 
 /***************************************************************************
  *
+ * Creates a new microtheory.
+ *
+ ***************************************************************************/
+PROCEDURE createMicrotheory(
+    mtname_in IN VARCHAR2,
+    comment_in IN VARCHAR2,
+    isamt_in IN VARCHAR2,
+    genlmts_in IN cyclist_type  )
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.createMicrotheory(
+	    java.lang.String,
+	    java.lang.String,
+	    java.lang.String,
+	    oracle.sql.ARRAY )';
+
+/***************************************************************************
+ *
  * Is a query True. Returns 1 if true, 0 if false.
  *
  ***************************************************************************/
@@ -111,10 +128,42 @@ AS LANGUAGE JAVA
  *
  ***************************************************************************/
 FUNCTION getBackChainRules( predicate_in IN VARCHAR2 )
-RETURN VARCHAR2
+RETURN cyclist_type
 AS LANGUAGE JAVA
 	NAME 'CycJsprocs.getBackChainRules( java.lang.String )
-		return java.lang.String';
+		return oracle.sql.ARRAY';
+
+/***************************************************************************
+ *
+ * Converse a command with the API that returns a cyclist
+ *
+ ***************************************************************************/
+FUNCTION converseList( command_in IN VARCHAR2 )
+RETURN cyclist_type
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.converseList( java.lang.String )
+		return oracle.sql.ARRAY';
+
+/***************************************************************************
+ *
+ * Converse a command with the API that returns no result.
+ *
+ ***************************************************************************/
+PROCEDURE converseVoid( command_in IN VARCHAR2 )
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.converseVoid( java.lang.String )';
+
+/***************************************************************************
+ *
+ * Converse a command with the API that returns nothing (but cycjsprocs returns a cyclist
+ *
+ ***************************************************************************/
+blaatFUNCTION converseVoid( command_in IN VARCHAR2 )
+RETURN cyclist_type
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.converseList( java.lang.String )
+		return oracle.sql.ARRAY';
+
 
 END cyc;
 /

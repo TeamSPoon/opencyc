@@ -4,29 +4,51 @@
 <b>This is a VERY INITIAL version!! Expect procedures and parameters to change.</b>
 <p>author: Yeb Havinga, date: June 5 2002<br>
 This document contains information on how to install and use the Oracle->OpenCyc interface.</p>
-<h1>Introduction</h1>
-<pre>
-Oracle:
- SQL
-   -> PL/SQL package "CYC"  (*)
-        -> Java Stored Procedures "CycJsproc" (*)
-              -> OpenCyc Java API classes "CycAccess"  ------+
-                                                             |
-                                                             V
-                                                    ascii and binary interface to
-                                                    OpenCyc                                                       
-(*) Oracle->OpenCYC Interface.
-</pre>
-<h1>Installation</h1>
-<h2>Prerequisites</h2>
+<a href="#intro">Introduction</a><br>
+<a href="#overview">&nbsp;&nbsp;&nbsp;&nbsp;Overview</a><br>
+<a href="#see">&nbsp;&nbsp;&nbsp;&nbsp;See also</a><br>
+<a href="#install">Installation</a><br>
+<a href="#pre">&nbsp;&nbsp;&nbsp;&nbsp;Prerequisites</a><br>
+<a href="#getting">&nbsp;&nbsp;&nbsp;&nbsp;Getting the files</a><br>
+<a href="#third">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Third party jars</a><br>
+<a href="#ooi">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Oracle->OpenCyc interface files</a><br>
+<a href="#load">&nbsp;&nbsp;&nbsp;&nbsp;Loading the stuff in Oracle</a><br>
+<a href="#prep">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prepare Oracle</a><br>
+<a href="#jars">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Load the jars into Oracle</a><br>
+<a href="#res">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Resolve CycAccess</a><br>
+<a href="#jsproc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Load CycJsproc.java</a><br>
+<a href="#pkb">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Load the CYC package</a><br>
+<a href="#usage">Usage</a><br>
+<a href="#first">&nbsp;&nbsp;&nbsp;&nbsp;The first query</a><br>
+<a href="#put">&nbsp;&nbsp;&nbsp;&nbsp;Oracle puts data in OpenCyc</a><br>
+<a href="#get">&nbsp;&nbsp;&nbsp;&nbsp;Oracle gets data from OpenCyc</a><br>
+<a href="#method">&nbsp;&nbsp;&nbsp;&nbsp;Method summary</a><br>
+<a href="#debug">&nbsp;&nbsp;&nbsp;&nbsp;Debugging</a><br>
+<a href="#excep">&nbsp;&nbsp;&nbsp;&nbsp;Exceptions</a><br>
+<a href="#end">End notes</a><br>
+<a href="#quality">&nbsp;&nbsp;&nbsp;&nbsp;Quality of this software</a><br>
+
+<a name="intro"><h1>Introduction</h1></a>
+<a name="overview"><h2>Overview</h2></a>
+&nbsp;&nbsp;<img src="ooi.png" width="577" height="356"><br>
+<p>The two rectangles with dotted lines are the Oracle->OpenCyc interface.</p>
+<a name="see"><h2>See Also</h2></a>
+<a href="http://www.opencyc.org/doc/cycapi">OpenCyc Api Documentation</a><br>
+<a href="http://www.cyc.com/doc/opencyc_api/java_api/">OpenCyc Java Api Documentation</a><br>
+<a href="http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90209/toc.htm">Oracle Java Developer's Guide</a><br>
+<a href="http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90210/toc.htm">Oracle Java Stored Procedures Developer's Guide</a> (especially part 3)<br>
+<a href="http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90211/toc.htm">Oracle JDBC Developer's Guide and Reference</a> (part 10 and 18 ->connecting to internal driver)<br>
+
+<a name="install"><h1>Installation</h1></a>
+<a name="pre"><h2>Prerequisites</h2></a>
 You need the following installed on a linux server :
 <ul>
 <li><a href="http://www.opencyc.org">OpenCyc</a></li>
 <li><a href="http://otn.oracle.com">Oracle 9i</a></li>
 <li><a href="http://www.blackdown.org">J2SDK</a></li>
 </ul>
-<h2>Getting the files</h2>
-<h3>Third party jars</h3>
+<a name="getting"><h2>Getting the files</h2></a>
+<a name="third"><h3>Third party jars</h3></a>
 <p>These jars are used by the OpenCyc Java Api interface, and need to be loaded into Oracle.
 The list is fairly small, because the <tt>oracle-opencyc.jar</tt> contains only a subset of the
 full org/opencyc tree.<br></p>
@@ -39,7 +61,7 @@ full org/opencyc tree.<br></p>
 </tt>
 </p><p>Let's assume you put all these jars into your <tt>opencyc-0.6.0/lib</tt> directory.
 </p>
-<h3>Oracle->OpenCyc interface files</h3>
+<a name="ooi"><h3>Oracle->OpenCyc interface files</h3></a>
 <p>The Oracle->OpenCyc interface consists of the following files :</p>
 <table><tr><td width=200><tt>oracle-opencyc.jar</tt></td>
 <td>This is a modified version of the official opencyc.jar, which has a slightly modified CycAccess.java
@@ -59,10 +81,10 @@ The PL/SQL CYC package specification.</td></tr>
 The PL/SQL CYC package body, contains call specifications for the Java Stored Procedures
 in CycJsprocs.java.</td></tr>
 </table>
-<p>You can get these files with CVS from <a href="http://sourceforge.net/projects/opencyc/">Sourceforge</a>. They're in the org/opencyc/oracle directory.</p>
+<p>You can get these files with CVS from <a href="http://sourceforge.net/projects/opencyc/">SourceForge</a>. Look in the org/opencyc/oracle directory.</p>
 
-<h2>Loading the stuff in Oracle</h2>
-<h3>Prepare Oracle</h3>
+<a name="load"><h2>Loading the stuff in Oracle</h2></a>
+<a name="prep"><h3>Prepare Oracle</h3></a>
 <p>Create a user to hold the Java classes to be loaded. Though it's possible to load the Java classes
 into an 'application user' schema, and use the classes from other users, this documentation 
 assumes that the classes are loaded into the schema of the current user.</p>
@@ -101,7 +123,7 @@ quit
 /
 </pre>
 <b>IMPORTANT! DON'T FORGET THE JAVAUSERPRIV PRIVILEGE!!</b>
-<h3>Load the jars into Oracle</h3>
+<a name="jars"><h3>Load the jars into Oracle</h3></a>
 <p>Edit the <tt>loadjars.sh</tt> script so it contains the right place where you put
 the downloaded jar files. Do a chmod +x loadjars.sh if it's not executable (I don't know
 what CVS does with file permissions, just to be sure), and call it:</p>
@@ -168,7 +190,7 @@ can be important, if not all necessary classes are loaded at before the first 'r
 happen that errors dissappear after dropping the user and loading all classes from scratch, though
 this happens very rarely.
 </p>
-<h3>Load CycJsproc.java</h3>
+<a name="jsproc"><h3>Load CycJsproc.java</h3></a>
 <p>Once <tt>CycAccess</tt> is resolved, the Java Stored Procedure wrapper methods can be loaded.
 You're still in the CVS org/opencyc/oracle directory? Then:
 <pre>
@@ -182,7 +204,7 @@ resolving: source CycJsprocs
 Note that this time a java source instead of class is loaded. Also, the class is now resolved at load time.
 If this fails, check the user_errors again.
 </p>
-<h3>Load the CYC package</h3>
+<a name="pkb"><h3>Load the CYC package</h3></a>
 <p>
 Once <tt>CycJsproc.java</tt> is loaded and resolved, you can load the CYC PL/SQL package. First load
 the package specification. Note that this file also creates the type <tt>cyclist_type</tt>:
@@ -194,11 +216,11 @@ Now load the package body:
 bash$ sqlplus cyctest/cyctest @cyc.pkb
 </pre>
 You should get the gentle message <tt>Package body created.</tt> <b>Now you're in business!</b>
-<h1>Usage</h1>
+<a name="usage"><h1>Usage</h1></a>
 <p>At this point, the power of OpenCyc is at your Oracle fingertips. Every function in the CYC
 package can be used in every SQL query (issued from SQLPlus, or for example a PHP script
 in a web page), and in PL/SQL you can call every function or procedure.<p>
-<h2>The first query</h2>
+<a name="first"><h2>The first query</h2></a>
 <p>
 All the following commands can be performed in sqlplus in the cyctest schema:<br>
 Connect to the database, and in the database session, connect to cyc:
@@ -221,9 +243,9 @@ SQL> begin cyc.makeconnection(); end;
 PL/SQL procedure successfully completed.
 
 </pre>
-What's this for strange thing? Begin and end in SQL? Well, it's actually PL/SQL. Oracle
+What's this? <tt>Begin</tt> and <tt>end</tt> in SQL? Well, it's actually PL/SQL. Oracle
 allows you to give 'anonymous' PL/SQL blocks (a block starts with BEGIN and ends with END)
-where a SQL query could be executed. This is the way to call a PL/SQL procedure from a 
+where a SQL query could be executed. This is the way a PL/SQL procedure is called from an 
 SQL frontend.</p>
 <p>Ok, now to the first question:<br>
 <i>is Dog a collection in Cyc?</i>
@@ -236,11 +258,11 @@ CYC.ISQUERYTRUE('(#$ISA#$DOG#$COLLECTION)','INFERENCEPSC')
                                                          1
 </pre>
 For the type mapping between the different Cyc and Oracle types, see CycJsproc.java
-and cyc.pkb. In this case, 1 means true.<br>
-Note that a query like this could also be put in e.g. a before trigger, and rease
+and cyc.pkb, or the summary below. Note that a query like this could also be put in
+e.g. a before trigger, and raise
 an exception if something is not true.
 </p>
-<h2>Data from Oracle into OpenCyc</h2>
+<a name="put"><h2>Oracle puts data in OpenCyc</h2></a>
 <p>
 Before OpenCyc can say anything interesting on your data, you have to put some information
 of your database into OpenCyc. Well, this is not a problem at all! In the Oracle demo user
@@ -301,7 +323,7 @@ think if you know a bit PL/SQL, calling cyc.assertGaf from a procedure in PL/SQL
 might be bit more proper.<br>
 Assertgaf returns the GAF, because functions are supposed to return something.
 </p>
-<h2>Data from Oracle into CYC</h2>
+<a name="get"><h2>Oracle gets data from OpenCyc</h2></a>
 <p>
 Now OpenCYC knows about the employees, we can ask stuff...<br>
 <i>Is Scott an employee?</i>
@@ -350,14 +372,54 @@ SQL> begin cyc.endconnection(); end;
 
 PL/SQL procedure successfully completed.
 </pre>
-<h1>End notes</h1>
-<h2>Exceptions</h2>
+<a name="types"><h2>Type mapping</h2></a>
+<table><tr><th>Java</th><th>Oracle</th></tr>
+<tr><td>java.lang.?</td><td>DATE</td></tr>
+<tr><td>boolean</td><td>NUMBER in [0,1]</td></tr>
+</table>
+
+
+ In this case, 1 means true. (yes, Oracle SQL doesn't know booleans. PL/SQL does
+however.) 
+
+
+<a name="method"><h2>Method summary</h2></a>
+
+At this point, you really must check the CycJsproc source.
+
+<h3>askwithvariable</h3>
+
+<h3>getbackchainrules</h3>
+
+<h3>converselist</h3>
+
+To get all hypothesized constants.
+select column_value from the
+(select cyc.converselist( '(constant-complete "HYP-")' ) from dual)
+
+select cyc.converselist( '(cyc-kill #$' || column_value || ')' ) from the
+(select cyc.converselist( '(constant-complete "HYP-")' ) from dual)
+-->
+
+
+
+<a name="debug"><h2>Debugging</h2></a>
+<p>
+In the beginning of the <tt>CycJsprocs.java</tt> source you'll find the method <tt>makeConnection()</tt>. At
+the end of this method is the call to <tt>CycAccess.traceOn</tt>. The trace of CycAccess is default off,
+so if you comment this call 
+Standard output (System.out.println) is dumped by oracle in trace files in the directory
+<tt>$ORACLE_BASE/admin/<instancename>/udump.</tt> Find the last trace file with <tt>ls -l --sort=time -r</tt>
+and then monitor the contents with less or tail -f.</p>
+
+<a name="excep"><h2>Exceptions</h2></a>
 <p>
 Exceptions. All java exceptions are catched and thrown to the caller. In Oracle, all
 java exceptions appear as ORA-29532 errors. At the end of the text of the errormessage
 you should see the java error. So, if there is an error in your CYC query, look good
 at the ORA-29532 errors!</p>
-<h2>Quality of this software</h2>
+<a name="end"><h1>End notes</h1></a>
+<a name="quality"><h2>Quality of this software</h2></a>
 <p>
 <b>There should be no problems installing this software, I tested the installation procedure while
 writing this documentation.<br>

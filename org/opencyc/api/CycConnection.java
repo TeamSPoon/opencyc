@@ -39,14 +39,12 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Default host name for the OpenCyc server.
      */
-    //public static final String DEFAULT_HOSTNAME = "localhost";
-    public static final String DEFAULT_HOSTNAME = "192.168.202.108";
+    public static final String DEFAULT_HOSTNAME = "localhost";
 
     /**
      * Default base tcp port for the OpenCyc server.
      */
     public static final int DEFAULT_BASE_PORT = 3600;
-    //public static final int DEFAULT_BASE_PORT = 3640;
 
     /**
      * HTTP port offset for the OpenCyc server.

@@ -1,6 +1,7 @@
 package org.opencyc.elf.s;
 
 //// Internal Imports
+import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
 
@@ -36,6 +37,13 @@ public interface Sensor {
    */
   public String getName();
 
+  /**
+   * Gets the object for which data is sensed.
+   *
+   * @return the object for which data is sensed
+   */
+  public Resource getSensedObject();
+  
   /** the console input sensor name */
   public static final String CONSOLE_INPUT = "console input";
 }

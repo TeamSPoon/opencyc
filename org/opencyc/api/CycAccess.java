@@ -1319,8 +1319,8 @@ public class CycAccess {
      */
     public boolean isGenlPredOf (CycFort genlPred, CycFort specPred)
         throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(genl-pred-in-any-mt? " + specPred.stringApiValue() +
-                               " " + genlPred.stringApiValue() + ")");
+        return converseBoolean("(with-all-mts (genl-pred? " + specPred.stringApiValue() +
+                               " " + genlPred.stringApiValue() + "))");
     }
 
     /**
@@ -1348,8 +1348,8 @@ public class CycAccess {
      */
     public boolean isGenlInverseOf (CycFort genlPred, CycFort specPred)
         throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(genl-inverse-in-any-mt? " + specPred.stringApiValue() +
-                               " " + genlPred.stringApiValue() + ")");
+        return converseBoolean("(with-all-mts (genl-inverse? " + specPred.stringApiValue() +
+                               " " + genlPred.stringApiValue() + "))");
     }
 
     /**

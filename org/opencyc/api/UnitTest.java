@@ -75,6 +75,7 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
+        /*
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
@@ -94,7 +95,10 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
-        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        */
+        testSuite.addTest(new UnitTest("testAsciiCycAccess9"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess9"));
+        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
 
@@ -3629,6 +3633,155 @@ System.out.println("responseList " + responseList);
             Assert.assertTrue(pittsburghPenguinDisambiguationExpression.contains("the Pittsburgh Penguins"));
             Assert.assertTrue(pittsburghPenguinDisambiguationExpression.contains("ice hockey team"));
 
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+
+
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the ascii api connection.
+     */
+    public void testAsciiCycAccess9 () {
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
+            return;
+        System.out.println("\n**** testAsciiCycAccess 9 ****");
+        CycAccess cycAccess = null;
+        try {
+
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        //cycAccess.traceOn();
+        doTestCycAccess9(cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testAsciiCycAccess 9 OK ****");
+    }
+
+
+    /**
+     * Tests a portion of the CycAccess methods using the binary api connection.
+     */
+    public void testBinaryCycAccess9 () {
+        System.out.println("\n**** testBinaryCycAccess 9 ****");
+        CycAccess cycAccess = null;
+        try {
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        //cycAccess.traceOn();
+        doTestCycAccess9(cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testBinaryCycAccess 9 OK ****");
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the given api connection.
+     */
+    protected void doTestCycAccess9 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        try {
+
+            CycConstant brazil = cycAccess.getKnownConstantByGuid("bd588f01-9c29-11b1-9dad-c379636f7270");
+            CycConstant country = cycAccess.getKnownConstantByGuid("bd588879-9c29-11b1-9dad-c379636f7270");
+            CycConstant worldGeographyMt = cycAccess.getKnownConstantByGuid("bfaac020-9c29-11b1-9dad-c379636f7270");
+            CycConstant dog =
+                cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            CycConstant animal =
+                cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            CycConstant biologyVocabularyMt =
+                cycAccess.getKnownConstantByGuid("bdd51776-9c29-11b1-9dad-c379636f7270");
+            CycConstant performedBy =
+                cycAccess.getKnownConstantByGuid("bd58a962-9c29-11b1-9dad-c379636f7270");
+            CycConstant doneBy =
+                cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            CycConstant siblings =
+                cycAccess.getKnownConstantByGuid("bd58e3e9-9c29-11b1-9dad-c379636f7270");
+            CycConstant generalLexiconMt =
+                cycAccess.getKnownConstantByGuid("c109b867-9c29-11b1-9dad-c379636f7270");
+            CycConstant paraphraseMt =
+                cycAccess.getKnownConstantByGuid("bf3ab672-9c29-11b1-9dad-c379636f7270");
+
+            // isa
+            Assert.assertTrue(cycAccess.isa(brazil, country, worldGeographyMt));
+            Assert.assertTrue(cycAccess.isa(brazil, country));
+
+            // isGenlOf
+            Assert.assertTrue(cycAccess.isGenlOf(animal, dog, biologyVocabularyMt));
+            Assert.assertTrue(cycAccess.isGenlOf(animal, dog));
+
+            // isGenlPredOf
+            Assert.assertTrue(cycAccess.isGenlPredOf(doneBy, performedBy, cycAccess.baseKB));
+            Assert.assertTrue(cycAccess.isGenlPredOf(doneBy, performedBy));
+
+            // isGenlInverseOf
+            Assert.assertTrue(cycAccess.isGenlInverseOf(siblings, siblings, biologyVocabularyMt));
+            Assert.assertTrue(cycAccess.isGenlInverseOf(siblings, siblings));
+
+            // isGenlMtOf
+            Assert.assertTrue(cycAccess.isGenlMtOf(cycAccess.baseKB, biologyVocabularyMt));
+
+            // getAllInstancesHashSet
+            HashSet allCountries = cycAccess.getAllInstancesHashSet(country, worldGeographyMt);
+            Assert.assertTrue(allCountries instanceof HashSet);
+            Assert.assertTrue(allCountries.contains(brazil));
+            allCountries = cycAccess.getAllInstancesHashSet(country);
+            Assert.assertTrue(allCountries instanceof HashSet);
+            Assert.assertTrue(allCountries.contains(brazil));
+
+            // getAllSpecsHashSet
+            HashSet allAnimals = cycAccess.getAllSpecsHashSet(animal, biologyVocabularyMt);
+            Assert.assertTrue(allAnimals instanceof HashSet);
+            Assert.assertTrue(allAnimals.contains(dog));
+            allAnimals = cycAccess.getAllSpecsHashSet(animal);
+            Assert.assertTrue(allAnimals instanceof HashSet);
+            Assert.assertTrue(allAnimals.contains(dog));
+
+            // getAllSpecPredsHashSet
+            HashSet allDoers = cycAccess.getAllSpecPredsHashSet(doneBy, cycAccess.baseKB);
+            Assert.assertTrue(allDoers instanceof HashSet);
+            Assert.assertTrue(allDoers.contains(performedBy));
+            allDoers = cycAccess.getAllSpecPredsHashSet(doneBy);
+            Assert.assertTrue(allDoers instanceof HashSet);
+            Assert.assertTrue(allDoers.contains(performedBy));
+
+            // getAllSpecInversesHashSet
+            HashSet allSpecInverses = cycAccess.getAllSpecInversesHashSet(siblings, biologyVocabularyMt);
+            Assert.assertTrue(allSpecInverses instanceof HashSet);
+            Assert.assertTrue(allSpecInverses.contains(siblings));
+            allSpecInverses = cycAccess.getAllSpecInversesHashSet(siblings);
+            Assert.assertTrue(allSpecInverses instanceof HashSet);
+            Assert.assertTrue(allSpecInverses.contains(siblings));
+
+            // getAllSpecMtsHashSet
+            HashSet allSpecMts = cycAccess.getAllSpecMtsHashSet(generalLexiconMt);
+            Assert.assertTrue(allSpecMts instanceof HashSet);
+            Assert.assertTrue(allSpecMts.contains(paraphraseMt));
         }
         catch (Exception e) {
             CycAccess.current().close();

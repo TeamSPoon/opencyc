@@ -33,6 +33,7 @@ import org.opencyc.elf.goal.GoalTime;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class TaskCommand {
+  
   //// Constructors
 
   /**

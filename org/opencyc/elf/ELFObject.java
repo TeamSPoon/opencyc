@@ -24,7 +24,7 @@ package org.opencyc.elf;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ELFObject {
+public abstract class ELFObject {
   /** the unique name of this ELF object */
   protected String name;
 
@@ -48,9 +48,7 @@ public class ELFObject {
    * 
    * @return a string representation of this object
    */
-  public String toString() {
-    return name;
-  }
+  public abstract String toString();
 
   /**
    * Sets the unique name of this ELF object

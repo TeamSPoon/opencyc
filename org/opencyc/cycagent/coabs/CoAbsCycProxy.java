@@ -1,20 +1,18 @@
 package org.opencyc.cycagent.coabs;
 
-import com.globalinfotek.coabsgrid.AgentRegistrationHelper;
-import com.globalinfotek.coabsgrid.AgentRep;
-import com.globalinfotek.coabsgrid.MessageListener;
-import com.globalinfotek.coabsgrid.Message;
-import com.globalinfotek.coabsgrid.BasicMessage;
-import com.globalinfotek.coabsgrid.ShutdownHook;
-import com.globalinfotek.coabsgrid.ShutdownHandler;
-import com.globalinfotek.coabsgrid.entry.fipa98.AMSAgentDescription;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Vector;
-import java.util.Date;
+import java.util.*;
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceID;
 import net.jini.lookup.ServiceIDListener;
+import com.globalinfotek.coabsgrid.*;
+import com.globalinfotek.coabsgrid.entry.fipa98.AMSAgentDescription;
+//import fipaos.ont.fipa.ACL;
+//import fipaos.parser.ParserException;
+import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
+import org.opencyc.util.*;
 
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
@@ -64,8 +62,19 @@ import net.jini.lookup.ServiceIDListener;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class CoAbsCycProxy implements MessageListener, AgentTestInterface,
-    ShutdownHook{
+public class CoAbsCycProxy implements MessageListener, ShutdownHook {
+
+    /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
      * the agent name.
@@ -78,145 +87,69 @@ public class CoAbsCycProxy implements MessageListener, AgentTestInterface,
     protected AgentRegistrationHelper regHelper;
 
     /**
-     * the message.
-     */
-    protected Message message;
-
-    /**
-     * message count
+     * message serial number.
      */
     protected int count;
 
     /**
-     * message listeners which are notified when messages are added to the
-     * message queue by the CoABS message transport.
+     * The CycAccess object which manages the interface to the Cyc api.
      */
-    protected Vector messageListeners;
+    CycAccess cycAccess;
 
-    /**
-     * Keeps track of modify state.
-     */
-    protected boolean modifyP;
 
     /**
      * Constructs a new CoAbsCycProxy object.
      * This agent instantiates an AgentRegistrationHelper, which in turn
      * instantiates a DefaultAgentRep, a MessageQueue, and GridAgentHelper.
      * This object then makes itself a messageListener to the queue, adds an
-     * agent advertisement, and creates the message that it will send.
+     * agent advertisement and registers itself.
      *
-     * @param agentName the name of this agent
-     * @param defaultRecipientName the name of the default recipient
-     * @param acl the agent communication language to use
-     * @param defaultMessageText the default message text sent by this agent
+     * @param agentName the unique name of this Cyc proxy agent.
      */
-    public CoAbsCycProxy(String agentName,
-                         String defaultRecipientName,
-                         String acl,
-                         String defaultMessageText) throws IOException {
+    public CoAbsCycProxy(String agentName) throws IOException {
+        if (verbosity > 1)
+            Log.current.println("Starting CoAbsCycProxy");
         this.agentName = agentName;
         regHelper = new AgentRegistrationHelper(agentName);
         regHelper.addMessageListener(this);
         Entry[] entries = {new AMSAgentDescription(agentName)};
         regHelper.addAdvertisedCapabilities(entries);
-        message = new BasicMessage(defaultRecipientName,
-                                   regHelper.getAgentRep(),
-                                   "naturalLanguage",
-                                   defaultMessageText);
         count = 1;
-        messageListeners = new Vector();
-        modifyP = false;
+        register();
         ShutdownHandler.addHook(this);
     }
 
-    public CoAbsCycProxy() throws IOException {
-        this ("Agent1",
-              "Agent2",
-              "naturalLanguage",
-              "[Sending message using\n" +
-                  " registryAgent.forward()]\n" +
-                  "Hi Agent2!\n" +
-                  "I provide the Cyc API service via CycAccess\n" +
-                  "- Agent1");
+    /**
+     * Provides the main method.
+     */
+    public static void main(String[] args) {
+        if (Log.current == null)
+            Log.makeLog();
+        try {
+            CoAbsCycProxy coAbsCycProxy = new CoAbsCycProxy("BalrogCycApi3600");
+        }
+        catch (IOException e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
+        while (true)
+            // Keep root thread running with minimal resource consumption.
+            try {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException e) {
+            }
     }
 
     /**
      * Deregisters this agent when the application is terminated.
      */
     public void cleanup() {
-        if (regHelper.isRegistered()) deregister();
-    }
-
-    /**
-     * Gets the agent name for the test GUI title.
-     */
-    public String getName() {
-        return agentName;
-    }
-
-    /**
-     * Gets the the message receiver for the test GUI.
-     */
-    public String getReceiver() {
-        return message.getReceiver();
-    }
-
-    /**
-     * Sets the message receiver.
-     * Used by the GUI when the user edits the message receiver.
-     *
-     * @param receiver the message receiver
-     */
-    public void setReceiver(String receiver) {
-        message.setReceiver(receiver);
-    }
-
-    /**
-     * Gets the message text. Used by the GUI to display the message text.
-     */
-    public String getRawText() {
-        return message.getRawText();
-    }
-
-    /**
-     * Sets the message text.
-     * Used by the GUI when the user edits the message text.
-     *
-     * @param text the message text
-     */
-    public void setRawText(String text) {
-        message.setRawText(text);
-    }
-
-    /**
-     * Adds a message listener.
-     * Just for working with the AgentTestFrame.
-     * Lets the frame be a listener for new messages on the queue
-     * so it can print them out.
-     *
-     * @param ml the message listener
-     */
-    public void addMessageListener(MessageListener ml) {
-        messageListeners.addElement(ml);
-    }
-
-    /**
-     * Notifies message listeners when messages are added to the queue.
-     * Just for working with the AgentTestFrame. Notifies the test frame when
-     * messages are added to the queue.
-     *
-     * @param message the message
-     */
-    private void notifyListeners(Message message) {
-        MessageListener ml;
-        for (int i=0; i<messageListeners.size(); i++) {
-            ml = (MessageListener) messageListeners.elementAt(i);
-            ml.messageAdded(message);
+        if (regHelper.isRegistered()) {
+            if (verbosity > 1)
+                Log.current.println("de-registering CoAbsCycProxy");
+            deregister();
         }
-    }
-
-    protected AgentRegistrationHelper getRegistrationHelper () {
-        return regHelper;
     }
 
     // FIPA AMS
@@ -226,28 +159,36 @@ public class CoAbsCycProxy implements MessageListener, AgentTestInterface,
      * Tests registry.registerAgent()
      */
     public void register() {
-        System.out.println(agentName +
-                           " calling AgentRegistrationHelper.registerAgent()...");
+        if (verbosity > 2)
+            Log.current.println(agentName +
+                                " calling AgentRegistrationHelper.registerAgent()...");
         String filename = agentName + "ServiceIDFile";
         try {
             regHelper.readServiceIDFromFile(filename);
-            System.out.println("Read ServiceID from file " + filename + ".");
+            if (verbosity > 2)
+                Log.current.println("Read ServiceID from file " + filename + ".");
         }
         catch (IOException e) {
-            System.out.println("Could not get ServiceID from file - " +
-                               "will get one from LUS.");
+            if (verbosity > 2)
+                Log.current.println("Could not get ServiceID from file - " +
+                                    "will get one from LUS.");
             addServiceIDListener(filename);
         }
         catch (ClassNotFoundException e) {
-            System.out.println("Could not get ServiceID from file - " +
-                               "will get one from LUS.");
+            if (verbosity > 2)
+                Log.current.println("Could not get ServiceID from file - " +
+                                    "will get one from LUS.");
             addServiceIDListener(filename);
         }
         try {
             // The agent version of registerAgent(), used below, sends a message
             // confirming that registration has been initiated.
-            regHelper.registerAgent ("message" + count++);}
-        catch (IOException e) {e.printStackTrace();}
+            regHelper.registerAgent ("message" + count++);
+        }
+        catch (IOException e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            }
     }
 
     /**
@@ -261,10 +202,12 @@ public class CoAbsCycProxy implements MessageListener, AgentTestInterface,
             public void serviceIDNotify(ServiceID id) {
                 try {
                     finalRegHelper.writeServiceIDToFile(filename);
-                    System.out.println("Wrote ServiceID to file " + filename + ".");
+                    if (verbosity > 2)
+                        Log.current.println("Wrote ServiceID to file " + filename + ".");
                 }
                 catch (IOException exc) {
-                    System.out.println("Couldn't save ServiceID to file.");
+                    if (verbosity > 2)
+                        Log.current.println("Couldn't save ServiceID to file.");
                 }
                 finalRegHelper.removeServiceIDListener(this);
             }
@@ -274,92 +217,111 @@ public class CoAbsCycProxy implements MessageListener, AgentTestInterface,
 
     /**
      * Deregisters this agent.
-     * Tests registry.deregisterAgent()
      */
     public void deregister() {
-        System.out.println(agentName +
-                           " calling AgentRegistrationHelper.deregisterAgent()...");
+        if (verbosity > 2)
+            Log.current.println(agentName +
+                                " calling AgentRegistrationHelper.deregisterAgent()...");
         try {
             regHelper.deregisterAgent(regHelper.getAgentRep(),
                                       "message" + count++);
-        } catch (RemoteException e) {e.printStackTrace();}
-    }
-
-    /**
-     * Modifies this agent's advertised capabilities.
-     * Tests registry.modifyAgent()
-     */
-    public void modify() {
-        System.out.println(agentName +
-                           " calling AgentRegistrationHelper.modifyAgent()...");
-        String state;
-        if (modifyP == false) {
-            state = "active";
-            modifyP = true;
         }
-        else {
-            state = "waiting";
-            modifyP = false;
+        catch (RemoteException e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
         }
-        Entry[] entries = regHelper.getAdvertisedCapabilities();
-        for (int i = 0; entries != null && i < entries.length; i++)
-        {
-            if (entries[i] instanceof AMSAgentDescription)
-            {
-                ((AMSAgentDescription) entries[i]).apState = state;
-                break;
-            }
-        }
-        regHelper.setAdvertisedCapabilities(entries);
-        try {regHelper.modifyAgent (regHelper.getAgentRep(),
-                                    "message" + count++);}
-        catch (RemoteException e) {e.printStackTrace();}
     }
 
     // FIPA ACC
 
     /**
      * Forwards the message.
-     * Tests registry.forward()
      */
-    public void forward() {
+    public void forward(Message message) {
         try {
-            regHelper.getDirectory().forward(message, regHelper.getAgentRep(),
+            regHelper.getDirectory().forward(message,
+                                             regHelper.getAgentRep(),
                                              "message" + count++);
-        } catch (RemoteException e) {e.printStackTrace();}
+        }
+        catch (RemoteException e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
     }
 
     /**
-     * Implements MessageListener Interface. When a message is received which
-     * has an agentRep in the sender attribute, a reply is created and
-     * sent directly to the sender.
+     * Processes the Cyc API request message.  Replies with the Cyc API
+     * result.
      *
      * @param message the message added to the message queue.
      */
     public void messageAdded(Message message) {
-        notifyListeners(message);
         Date time = regHelper.getTimeLastMessageReceived();
         AgentRep agentRep = message.getSenderAgentRep();
-        System.out.print("**** " + agentName + " received:\n" + message.toString());
-        System.out.println("**** Time message received: " + time);
-        System.out.println("**** Sender AgentRep: " + agentRep);
-        System.out.println();
-        if (agentRep != null) {
-            String recipientName = agentRep.getName();
-            String txt = "[Demonstrating reply using\n" +
-                "direct communication by calling\n" +
-                "message.getSenderAgentRep().addMessage()]\n" +
-                recipientName + ":\n" +
-                "  " + agentName + " acknowledging receipt\n" +
-                "  of your message at\n" +
-                "  " + time + "\ncontents:\n" + message.getRawText();
-            Message replyMessage = new BasicMessage(recipientName,
-                                                    "naturalLanguage",
-                                                    txt);
-            try {
-                agentRep.addMessage(replyMessage);
-            }
-            catch (RemoteException e) {e.printStackTrace();}
+        String fromAgentName = "Unknown";
+        if (agentRep != null)
+            fromAgentName = agentRep.getName();
+        if (verbosity > 2)
+            Log.current.println("\n" + agentName + " received:\n" + message.toString() +
+                                "\n  ACL: " + message.getACL() +
+                                "\n  Time message received: " + time +
+                                "\n  Sender AgentRep: " + agentRep +
+                                "\n  From: " + fromAgentName);
+        if (message.getRawText().startsWith("(inform")) {
+            if (verbosity > 2)
+                Log.current.println("No reply message to the INFORM performative");
+            return;
         }
+        if (message.getACL().equals("naturalLanguage")  &&
+            (! message.getRawText().startsWith("("))) {
+            if (verbosity > 2)
+                Log.current.println("No reply to a natural language message");
+            return;
+        }
+
+        String command = "(remove-duplicates (with-all-mts (isa #$Dog)))";
+        Object [] response = {null, null};
+        try {
+            cycAccess = new CycAccess();
+            cycAccess.traceOn();
+            response = cycAccess.getCycConnection().converse(command);
+            if (! response[0].equals(Boolean.TRUE))
+                throw new CycApiException(response[1].toString());
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
+
+        String replyMessageText = "(inform :\n" +
+                                  "  sender: " + agentName + "\n" +
+                                  "  receiver: " + fromAgentName + "\n" +
+                                  "  content: " + ((CycList) response[1]).cyclify() + "\n" +
+                                  ")";
+        Message replyMessage = new BasicMessage(fromAgentName,
+                                        regHelper.getAgentRep(),
+                                        message.getACL(),
+                                        replyMessageText);
+        if (verbosity > 2)
+            Log.current.println("\nReplying with " + replyMessage.toString());
+        forward(replyMessage);
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
+    }
+
+    /**
+     * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 }

@@ -75,8 +75,45 @@ public class StateMachineFactory {
         Comment comment = new Comment();
         comment.setBody(commentString);
         comment.setAnnotatedElement(stateMachine);
+        stateMachine.setComment(comment);
         stateMachine.setContext(context);
         return stateMachine;
+    }
+
+    /**
+     * Makes a new procedure object.
+     *
+     *
+     * @param namespace the state vertex namespace
+     * @param name the identifier for the state vertex within its containing
+     * namespace
+     * @param commentString the comment for this state vertex
+     * @param language the name of the language in which the body attribute is written
+     * @param isList true when the arguments to the procedure are passed as
+     * attributes of a single object, or false when passed separately
+     * @param expression the text of the procedure written in the given language
+     * @param method a method which is performed by the procedure
+     * @return the new procedure object
+     */
+    public Procedure makeProcedure (String namespace,
+                                    String name,
+                                    String commentString,
+                                    String language,
+                                    boolean isList,
+                                    Expression expression,
+                                    Method method) {
+        Procedure procedure = new Procedure();
+        procedure.setNamespace(namespace);
+        procedure.setName(name);
+        Comment comment = new Comment();
+        comment.setBody(commentString);
+        comment.setAnnotatedElement(procedure);
+        procedure.setComment(comment);
+        procedure.setLanguage(language);
+        procedure.setIsList(isList);
+        procedure.setExpression(expression);
+        procedure.setMethod(method);
+        return procedure;
     }
 
 
@@ -100,6 +137,7 @@ public class StateMachineFactory {
         Comment comment = new Comment();
         comment.setBody(commentString);
         comment.setAnnotatedElement(stateVertex);
+        stateVertex.setComment(comment);
         stateVertex.setContainer(container);
         container.getSubVertex().add(stateVertex);
         return stateVertex;
@@ -132,6 +170,7 @@ public class StateMachineFactory {
         Comment comment = new Comment();
         comment.setBody(commentString);
         comment.setAnnotatedElement(state);
+        state.setComment(comment);
         state.setContainer(container);
         if (container == null)
             state.setStateMachine(stateMachine);
@@ -171,6 +210,7 @@ public class StateMachineFactory {
         Comment comment = new Comment();
         comment.setBody(commentString);
         comment.setAnnotatedElement(compositeState);
+        compositeState.setComment(comment);
         compositeState.setContainer(container);
         compositeState.setIsRegion(false);
         if (container == null)

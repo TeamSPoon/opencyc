@@ -30,7 +30,7 @@ import org.opencyc.uml.core.*;
 public class Procedure extends ModelElement {
 
     /**
-     * Names the language in which the body attribute is written.
+     * the name of the language in which the body attribute is written.
      */
     protected String language;
 

@@ -81,7 +81,7 @@ public class ScheduleFactory {
                                      DirectSensor.CONSOLE_INPUT);
     List scheduleSet = new ArrayList();
     scheduleSet.add(schedule);
-    ScheduleLibrary.getInstance().addScheduleSet(Action.CONSOLE_PROMPTED_INPUT, scheduleSet);
+    ScheduleLibrary.getInstance().addScheduleSet(Action.CONVERSE_WITH_USER, scheduleSet);
   }
     
   //// Protected Area

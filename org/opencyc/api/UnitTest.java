@@ -2294,6 +2294,12 @@ public class UnitTest extends TestCase {
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
 
+            script = "(csetq a -1)";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'a)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(-1), responseObject);
+
             script =
                 "(csetq a '(1 #$Dog #$Plant) \n" +
                 "       b '(2 #$Dog #$Plant) \n" +
@@ -2308,6 +2314,18 @@ public class UnitTest extends TestCase {
             script = "(symbol-value 'c)";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(new Integer(3), responseObject);
+
+            script = "(clet ((a 0)) (cinc a) a)";
+            Assert.assertEquals(new Integer(1), cycAccess.converseObject(script));
+
+            script = "(clet ((a 0)) (cinc a 10) a)";
+            Assert.assertEquals(new Integer(10), cycAccess.converseObject(script));
+
+            script = "(clet ((a 0)) (cdec a) a)";
+            Assert.assertEquals(new Integer(-1), cycAccess.converseObject(script));
+
+            script = "(clet ((a 0)) (cdec a 10) a)";
+            Assert.assertEquals(new Integer(-10), cycAccess.converseObject(script));
 
             script = "(cpush 4 a)";
             cycAccess.converseVoid(script);
@@ -2354,6 +2372,34 @@ public class UnitTest extends TestCase {
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(new Integer(5), responseObject);
             script = "(eval 'a)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(5), responseObject);
+
+            script = "(fi-eval '(csetq a 4))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(4), responseObject);
+            script = "(fi-eval 'a)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(4), responseObject);
+
+            script = "(fi-eval (list 'csetq 'a 5))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(5), responseObject);
+            script = "(fi-eval 'a)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(5), responseObject);
+
+            script = "(fi-local-eval '(csetq a 4))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(4), responseObject);
+            script = "(fi-local-eval 'a)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(4), responseObject);
+
+            script = "(fi-local-eval (list 'csetq 'a 5))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(5), responseObject);
+            script = "(fi-local-eval 'a)";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(new Integer(5), responseObject);
 
@@ -2408,14 +2454,34 @@ public class UnitTest extends TestCase {
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(CycObjectFactory.nil, responseObject);
 
-            script = "(cmultiple-value-bind (a b) " +
-                     "    (floor 5 3) " +
-                     "  (csetq answer (list a b))";
+            script = "(cmultiple-value-bind (a b) \n" +
+                     "    (floor 5 3) \n" +
+                     "  (csetq answer (list a b)))";
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
             script = "(symbol-value 'answer)";
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
+
+            script =
+                "(define-in-api my-multiple-value-fn (arg1 arg2) \n" +
+                "  (ret (values arg1 arg2 (list arg1 arg2) 0)))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-multiple-value-fn"), responseObject);
+
+            script = "(my-multiple-value-fn #$Brazil #$Dog)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(cycAccess.getKnownConstantByGuid("bd588f01-9c29-11b1-9dad-c379636f7270"),
+                                responseObject);
+
+            script = "(cmultiple-value-bind (a b c d) \n" +
+                     "    (my-multiple-value-fn #$Brazil #$Dog) \n" +
+                     "  (csetq answer (list a b c d)))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(#$Brazil #$Dog (#$Brazil #$Dog) 0)"), responseList);
+            script = "(symbol-value 'answer)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(#$Brazil #$Dog (#$Brazil #$Dog) 0)"), responseList);
 
             // trace and untrace
             script = "(untrace)";
@@ -2544,6 +2610,15 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(cycAccess.converseBoolean(script));
 
             // sequence
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script = "(get-environment)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("\n", responseString);
+            script = "(csetq a nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
             script = "(progn (csetq a nil) (csetq a (list a)) (csetq a (list a)))";
             cycAccess.converseVoid(script);
             script = "(symbol-value 'a)";
@@ -2641,7 +2716,6 @@ public class UnitTest extends TestCase {
             responseBoolean = cycAccess.converseBoolean(script);
             Assert.assertTrue(responseBoolean);
 
-cycAccess.traceOn();
             // conditional sequencing
             script = "(clear-environment)";
             cycAccess.converseVoid(script);
@@ -2689,7 +2763,7 @@ cycAccess.traceOn();
             Assert.assertEquals("clause 3 true", responseString);
 
             script = "(pif (string= \"abc\" \"abc\") \n" +
-                     "     (csetq answer \"clause 1 true\")) \n" +
+                     "     (csetq answer \"clause 1 true\") \n" +
                      "     ;; else \n" +
                      "     (csetq answer \"clause 2 true\"))";
             responseString = cycAccess.converseString(script);
@@ -2699,7 +2773,7 @@ cycAccess.traceOn();
             Assert.assertEquals("clause 1 true", responseString);
 
             script = "(pif (string> \"abc\" \"abc\") \n" +
-                     "     (csetq answer \"clause 1 true\")) \n" +
+                     "     (csetq answer \"clause 1 true\") \n" +
                      "     ;; else \n" +
                      "     (csetq answer \"clause 2 true\"))";
             responseString = cycAccess.converseString(script);
@@ -2730,47 +2804,122 @@ cycAccess.traceOn();
             responseString = cycAccess.converseString(script);
             Assert.assertEquals("clause 2 true", responseString);
 
-            script = "(csetq answer \"clause 1 true\") \n" +
-                     "(pwhen (string= \"abc\" \"abc\") \n" +
-                     "       (csetq answer \"clause 2 true\"))";
+            script = "(progn \n" +
+                     "  (csetq answer \"clause 1 true\") \n" +
+                     "  (pwhen (string= \"abc\" \"abc\") \n" +
+                     "         (csetq answer \"clause 2 true\")))";
             responseString = cycAccess.converseString(script);
             Assert.assertEquals("clause 2 true", responseString);
             script = "(symbol-value 'answer)";
             responseString = cycAccess.converseString(script);
             Assert.assertEquals("clause 2 true", responseString);
 
-            script = "(csetq answer \"clause 1 true\") \n" +
-                     "(pwhen (string> \"abc\" \"abc\") \n" +
-                     "       (csetq answer \"clause 2 true\"))";
-            responseString = cycAccess.converseString(script);
-            Assert.assertEquals("clause 1 true", responseString);
+            script = "(progn \n" +
+                     "  (csetq answer \"clause 1 true\") \n" +
+                     "  (pwhen (string> \"abc\" \"abc\") \n" +
+                     "         (csetq answer \"clause 2 true\")))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
             script = "(symbol-value 'answer)";
             responseString = cycAccess.converseString(script);
             Assert.assertEquals("clause 1 true", responseString);
 
-            script = "(csetq answer \"clause 1 true\") \n" +
-                     "(punless (string> \"abc\" \"abc\") \n" +
-                     "         (csetq answer \"clause 2 true\"))";
+            script = "(progn \n" +
+                     "  (csetq answer \"clause 1 true\") \n" +
+                     "  (punless (string> \"abc\" \"abc\") \n" +
+                     "           (csetq answer \"clause 2 true\")))";
             responseString = cycAccess.converseString(script);
             Assert.assertEquals("clause 2 true", responseString);
             script = "(symbol-value 'answer)";
             responseString = cycAccess.converseString(script);
             Assert.assertEquals("clause 2 true", responseString);
 
-            script = "(csetq answer \"clause 1 true\") \n" +
-                     "(punless (string= \"abc\" \"abc\") \n" +
-                     "         (csetq answer \"clause 2 true\"))";
-            responseString = cycAccess.converseString(script);
-            Assert.assertEquals("clause 1 true", responseString);
+            script = "(progn \n" +
+                     "  (csetq answer \"clause 1 true\") \n" +
+                     "  (punless (string= \"abc\" \"abc\") \n" +
+                     "           (csetq answer \"clause 2 true\")))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
             script = "(symbol-value 'answer)";
             responseString = cycAccess.converseString(script);
             Assert.assertEquals("clause 1 true", responseString);
 
             // iteration
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script = "(get-environment)";
+            responseString = cycAccess.converseString(script);
+            Assert.assertEquals("\n", responseString);
+            script = "(csetq answer nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
 
-            // definition
+            script = "(clet ((i 11)) \n" +
+                     "  (csetq answer -10) \n" +
+                     "  ;;(break \"environment\") \n" +
+                     "  (while (> i 0) \n" +
+                     "    (cdec i) \n" +
+                     "    (cinc answer)))";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'answer)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(1), responseObject);
 
-            // misc
+            script = "(csetq answer nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+            script = "(progn \n" +
+                     "  (cdo ((x 0 (add1 x)) \n" +
+                     "        (y (+ 0 1) (+ y 2)) \n" +
+                     "        (z -10 (- z 1))) \n" +
+                     "       ((> x 3)) \n" +
+                     "    (cpush (list 'x x 'y y 'z z) answer)) \n" +
+                     "  (csetq answer (nreverse answer)))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("((x 0 y 1 z -10) " +
+                                                      " (x 1 y 3 z -11) " +
+                                                      " (x 2 y 5 z -12) " +
+                                                      " (x 3 y 7 z -13))"),
+                                responseList);
+
+            script = "(csetq answer nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+            script = "(progn \n" +
+                     "  (clet ((x '(1 2 3))) \n" +
+                     "    (cdo nil ((null x) (csetq x 'y)) \n" +
+                     "      (cpush x answer) \n" +
+                     "      (cpop x)) \n" +
+                     "    x) \n" +
+                     "  (csetq answer (reverse answer)))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("((1 2 3) " +
+                                                      " (2 3) " +
+                                                      " (3))"),
+                                responseList);
+
+            script = "(csetq answer nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+            script = "(cdolist (x '(1 2 3 4)) \n" +
+                     "  (cpush x answer))";
+            Assert.assertEquals(CycObjectFactory.nil, cycAccess.converseObject(script));
+            script = "(symbol-value 'answer)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(4 3 2 1)"), responseList);
+
+cycAccess.traceOn();
+            // mapping
+            script = "(mapcar #'list '(a b c))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("((a) (b) (c))"), responseList);
+
+            script = "(mapcar #'list '(a b c) '(d e f))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("((a d) (b e) (c f))"), responseList);
+
+
+
 
 
 

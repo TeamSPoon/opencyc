@@ -134,7 +134,7 @@ public class CycListParser  {
                             scanWord(st);
                             break;
                         case STNUMBER:
-                            scanNumber(st);
+                            scanNumber(st, true);
                             break;
                         case 34:	// "
                             scanString(st);
@@ -279,15 +279,21 @@ public class CycListParser  {
      *
      * @param the input <tt>StreamTokenizer</tt> from which to get the numerical value.
      */
-    private void scanNumber(StreamTokenizer st) {
+    private void scanNumber(StreamTokenizer st, boolean positive) {
         Double d;
         Integer i;
         Object n = null;
 
         //System.out.println(st.nval );
         // Try representing the scanned number as both java double and integer.
-        d = new Double (st.nval);
-        i = new Integer(d.intValue());
+        if (positive) {
+            d = new Double (st.nval);
+            i = new Integer(d.intValue());
+        }
+        else {
+            d = new Double (- st.nval);
+            i = new Integer(- d.intValue());
+        }
 
         // Choose integer if no loss of accuracy.
         if ( i.doubleValue() == d.doubleValue() )
@@ -380,6 +386,16 @@ public class CycListParser  {
                 st.pushBack();
                 w = CycObjectFactory.makeCycSymbol(st.sval);
             }
+        }
+        else if (st.sval.equals("-")) {
+            int nextTok = st.nextToken();
+            st.pushBack();
+            if (nextTok == STNUMBER) {
+                scanNumber(st, false);
+                return;
+            }
+            else
+                w = CycObjectFactory.makeCycSymbol(st.sval);
         }
         else
             w = CycObjectFactory.makeCycSymbol(st.sval);

@@ -76,7 +76,7 @@ public abstract class Procedure {
   /** the procedure namespace */
   protected String namespace;
 
-  /** the parameter types */
+  /** the parameter types each of which is a Class */
   protected ArrayList parameterTypes;
 
   /** the output type */

@@ -6,8 +6,7 @@ import java.util.*;
 import java.io.*;
 
 /**
- * <tt>BindingSet</tt> object to contain bindings for query literals.  This object is
- * created in an unpopulated state and is populated during query processing.<p>
+ * <tt>BindingSet</tt> object to contain bindings for query literals.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -43,8 +42,7 @@ public class BindingSet implements Comparable {
     protected CycFort mt;
 
     /**
-     * The list of binding value lists associated with each variable.  The value <tt>null</tt>
-     * means that the bindings for this query literal have not yet been determined.
+     * The list of binding value lists associated with each variable.
      */
     protected ArrayList bindingValues;
 
@@ -54,9 +52,12 @@ public class BindingSet implements Comparable {
      * @param queryLiteral the literal for which bindings are obtained
      * @param mt the microtheory in which the variable bindings are obtained
      */
-    public BindingSet(QueryLiteral queryLiteral, CycFort mt) {
+    public BindingSet(QueryLiteral queryLiteral, CycFort mt) throws IOException {
         this.queryLiteral = queryLiteral;
         this.mt = mt;
+        if (queryLiteral.nbrFormulaInstances == -1)
+            queryLiteral.nbrFormulaInstances =
+                CycAccess.current().countUsingBestIndex(queryLiteral.formula, mt);
     }
 
     /**
@@ -87,11 +88,33 @@ public class BindingSet implements Comparable {
     }
 
     /**
+     * Adds a binding value list to the binding set.
+     *
+     * @param bindingValueList the list of values to be added to the binding set.  The values are
+     * ordered to correspond with the order of the variables for this binding set's query literal.
+     */
+    public void add(CycList bindingValueList) {
+        if (bindingValues == null)
+            bindingValues = new ArrayList();
+        bindingValues.add(bindingValueList);
+    }
+
+    /**
+     * Adds a list of binding value lists to the binding set.
+     *
+     * @param bindingValueLists the list of binding value lists to be added to the binding set
+     */
+    public void addAll(ArrayList bindingValueLists) {
+        for (int i = 0; i < bindingValueLists.size(); i++)
+            this.add((CycList) bindingValueLists.get(i));
+    }
+
+    /**
      * Sets the number of instances of this literal in the KB.
      *
      * @param nbrFormulaInstances the number of instances of this literal in the KB
      */
-    public void getNbrInstances(int nbrFormulaInstances) {
+    public void setNbrInstances(int nbrFormulaInstances) {
         queryLiteral.nbrFormulaInstances = nbrFormulaInstances;
     }
 
@@ -101,13 +124,19 @@ public class BindingSet implements Comparable {
      * @return the number of instances matching this literal formula in the KB. Value of -1
      * indicates the variable is not yet set
      */
-    public int getNbrInstances() throws IOException {
-        int nbrFormulaInstances = queryLiteral.nbrFormulaInstances;
-        if (nbrFormulaInstances == -1)
-            nbrFormulaInstances = CycAccess.current().countUsingBestIndex(queryLiteral.getFormula(),
-                                                                          mt);
-        queryLiteral.nbrFormulaInstances = nbrFormulaInstances;
-        return nbrFormulaInstances;
+    public int getNbrInstances() {
+        return queryLiteral.nbrFormulaInstances;
+    }
+
+    /**
+     * Returns <tt>true</tt> iff the asking of the binding values has been postponed (due to the
+     * estimated number of KB instances exceeding a user-controlled threshold).
+     *
+     * @return  <tt>true</tt> iff the asking of the binding values has been postponed (due to the
+     * estimated number of KB instances exceeding a user-controlled threshold)
+     */
+    public boolean isBindingPostponed() {
+        return bindingValues == null;
     }
 
     /**
@@ -116,7 +145,10 @@ public class BindingSet implements Comparable {
      * @return the size of the binding set for this literal
      */
     public int size() {
-        return bindingValues.size();
+        if (bindingValues == null)
+            return this.getNbrInstances();
+        else
+            return bindingValues.size();
     }
 
     /**
@@ -144,10 +176,27 @@ public class BindingSet implements Comparable {
         System.out.println("Binding Set for " + this.getQueryLiteral().cyclify() +
                             " in " + mt.cyclify());
         System.out.println("  variables " + this.getVariables());
-        for (int i = 0; i < this.getBindingValues().size(); i++) {
-            CycList bindingList = (CycList) getBindingValues().get(i);
-            System.out.println("  " + bindingList.cyclify());
+        if (bindingValues != null) {
+            for (int i = 0; i < this.getBindingValues().size(); i++) {
+                CycList bindingList = (CycList) getBindingValues().get(i);
+                System.out.println("  " + bindingList.cyclify());
+            }
         }
+        else
+            System.out.println("  binding is postponed");
+    }
+
+    /**
+     * Returns <tt>true</tt> if the object equals this object.
+     *
+     * @param object the object for comparison
+     * @return <tt>boolean</tt> indicating equality of an object with this object.
+     */
+    public boolean equals(Object object) {
+        if (! (object instanceof BindingSet))
+            return false;
+        QueryLiteral thatQueryLiteral = ((BindingSet) object).getQueryLiteral();
+        return this.queryLiteral.equals(thatQueryLiteral);
     }
 
     /**
@@ -166,38 +215,15 @@ public class BindingSet implements Comparable {
      }
 
     /**
-     * Provides the hash code appropriate for the <tt>BindingSet</tt>.
+     * Returns a <tt>String</tt> representation of the <tt>BindingSet</tt> object.
      *
-     * @return the hash code for the <tt>BindingSet</tt>
-     */
-    public int hashCode() {
-        return this.queryLiteral.hashCode();
-    }
-
-    /**
-     * Returns <tt>true</tt> some object equals this <tt>BindingSet</tt>
-     *
-     * @param object the <tt>Object</tt> for equality comparison
-     * @return equals <tt>boolean</tt> value indicating equality or non-equality.
-     */
-    public boolean equals(Object object) {
-        if (object instanceof BindingSet &&
-            this.queryLiteral.equals(((BindingSet)object).queryLiteral)) {
-            return true;
-        }
-        else
-            return false;
-    }
-
-    /**
-     * Returns a string representation of this object.
-     *
-     * @return a string representation of this object
+     * @return a <tt>String</tt> representation of the <tt>BindingSet</tt> object.
      */
     public String toString() {
-        return this.queryLiteral.cyclify();
+        if (bindingValues != null)
+            return queryLiteral.cyclify() + " with estimated size " + this.getNbrInstances() +
+                " and actual size " + this.size();
+        else
+            return queryLiteral.cyclify() + " with estimated size " + this.getNbrInstances();
     }
-
-
-
 }

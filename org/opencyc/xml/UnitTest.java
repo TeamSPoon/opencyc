@@ -75,7 +75,7 @@ public class UnitTest extends TestCase {
             // Export #$PublicConstant terms to DAML.
             exportDaml.cycKbSubsetCollectionGuid =
                 CycObjectFactory.makeGuid("bd7abd90-9c29-11b1-9dad-c379636f7270");
-            exportDaml.export();
+            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -95,7 +95,7 @@ public class UnitTest extends TestCase {
             // Export #$IKBConstant terms to DAML.
             exportDaml.cycKbSubsetCollectionGuid =
                 CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
-            exportDaml.export();
+            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
         }
         catch (Exception e) {
             e.printStackTrace();

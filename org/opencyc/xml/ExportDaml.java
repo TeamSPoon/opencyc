@@ -9,7 +9,6 @@ import  java.util.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.api.*;
 
-
 /**
  * DAML+OIL export for OpenCyc.
  *
@@ -35,40 +34,109 @@ import  org.opencyc.api.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ExportDaml {
+
+    /**
+     * Command indicating that the DAML export contains only the marked KB
+     * subset terms.  cycKbSubsetCollectionGuid contains the KB subset collection's
+     * guid.  cycKbSubsetFilterGuid contains the guid for the KB subset term that
+     * filters membership in the upward closure.
+     */
+    public static final int EXPORT_KB_SUBSET = 1;
+
+    /**
+     * Command indicating that the DAML export contains the marked KB
+     * subset terms plus all the terms in the upward closure to #$Thing.
+     * cycKbSubsetCollectionGuid contains the KB subset collection's
+     * guid.
+     */
+    public static final int EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE = 2;
+
+    /**
+     * Command indicating that the DAML export contains the collections whose
+     * direct or indirect genl is the collection term indentified by rootTermGuid.
+     * cycKbSubsetFilterGuid contains the guid for the KB subset term that
+     * filters membership in the export set.
+     */
+    public static final int EXPORT_KB_SUBSET_BELOW_TERM = 3;
+
+    /**
+     * The command performed by the DAML extract process.
+     */
+    protected int exportCommand = 0;
+
     /**
      * The default verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     protected static final int DEFAULT_VERBOSITY = 3;
+
     /**
      * Sets verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     public int verbosity = DEFAULT_VERBOSITY;
+
     /**
      * Indicates whether the upward closure of terms should be exported.  If so, the
-     * upward closure terms are filtered by cycUpwardClosureGuid below.
+     * upward closure terms are filtered by cycKbSubsetFilterGuid below.
      */
-    public boolean includeUpwardClosure = true;
+    public boolean includeUpwardClosure = false;
+
     /**
      * The CycKBSubsetCollection whose elements are exported to DAML.
      */
     public CycFort cycKbSubsetCollection = null;
+
+    /**
+     * The #$CounterTerrorismConstant guid.
+     */
+    public static final Guid counterTerrorismConstantGuid =
+        CycObjectFactory.makeGuid("bfe31c38-9c29-11b1-9dad-c379636f7270");
+
+    /**
+     * The #$IKBConstant guid.
+     */
+    public static final Guid ikbConstantGuid =
+        CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
+
     /**
      * The CycKBSubsetCollection whose elements are exported to DAML.
-     * #$CounterTerrorismConstant (not in OpenCyc)
      */
-    public Guid cycKbSubsetCollectionGuid = CycObjectFactory.makeGuid("bfe31c38-9c29-11b1-9dad-c379636f7270");
+    public Guid cycKbSubsetCollectionGuid = null;
+
+    /**
+     * The guid which identifies the CycKBSubsetCollection whose elements are exported to DAML if they
+     * also generalizations of cycKbSubsetCollectionGuid collections or predicates above.
+     * #$IKBConstant (not in OpenCyc)
+     */
+    public Guid cycKbSubsetFilterGuid = null;
+
     /**
      * The CycKBSubsetCollection whose elements are exported to DAML if they
      * also generalizations of cycKbSubsetCollectionGuid collections or predicates above.
      * #$IKBConstant (not in OpenCyc)
      */
-    public Guid cycUpwardClosureGuid = CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
+    protected CycFort cycKbSubsetFilter = null;
+
+    /**
+     * Used in the export command EXPORT_KB_SUBSET_BELOW_TERM.
+     * The DAML export contains the collections whose direct or indirect genl is
+     * the collection term indentified by this value.
+     */
+    public Guid rootTermGuid = null;
+
+    /**
+     * Used in the export command EXPORT_KB_SUBSET_BELOW_TERM.
+     * The DAML export contains the collections whose direct or indirect genl is
+     * this collection term.
+     */
+    public CycFort rootTerm = null;
+
     /**
      * The DAML export path and file name.
      */
     public String outputPath = "export.daml";
+
     private static final String rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String rdfsNamespace = "http://www.w3.org/2000/01/rdf-schema#";
     private static final String damlNamespace = "http://www.daml.org/2001/03/daml+oil#";
@@ -90,7 +158,7 @@ public class ExportDaml {
     private Element rdfsComment = null;
     private Guid guid;
     private String name;
-    private Vector damlSelectedConstants = new Vector();
+    private ArrayList damlSelectedConstants = new ArrayList();
     private CycConstant cycConstant;
     private String comment;
     private CycList isas;
@@ -111,12 +179,17 @@ public class ExportDaml {
 
     /**
      * Provides the main method for a DAML export.
+     *
      * @parameter args the optional command line arguments
      */
     public static void main (String[] args) {
         ExportDaml exportDaml = new ExportDaml();
         try {
-            exportDaml.export();
+            Guid transportationDeviceGuid =
+                CycObjectFactory.makeGuid("bd58d540-9c29-11b1-9dad-c379636f7270");
+            exportDaml.rootTermGuid = transportationDeviceGuid;
+            exportDaml.cycKbSubsetFilterGuid = ExportDaml.counterTerrorismConstantGuid;
+            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -126,16 +199,22 @@ public class ExportDaml {
     /**
      * Exports the desired KB content into DAML.
      */
-    public void export () throws UnknownHostException, IOException, CycApiException {
-        createRdfNode();
-        createDamlOntologyNode();
-        createCycGuidNode();
-        cycAccess = new CycAccess();
+    public void export (int exportCommand) throws UnknownHostException, IOException, CycApiException {
+        this.exportCommand = exportCommand;
+        setup();
         if (verbosity > 2)
             System.out.println("Getting terms from Cyc");
-        CycFort cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
         CycList selectedConstants = new CycList();
-        CycList selectedCycForts = cycAccess.getAllInstances(cycKbSubsetCollection);
+        CycList selectedCycForts = null;
+        if ((exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
+            (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
+            selectedCycForts = cycAccess.getAllInstances(cycKbSubsetCollection);
+        }
+        else {
+            // EXPORT_KB_SUBSET_BELOW_TERM
+            selectedCycForts = cycAccess.getAllSpecs(rootTerm);
+            selectedCycForts.add(rootTerm);
+        }
         if (verbosity > 2)
             System.out.println("Selected " + selectedCycForts.size() + " CycFort terms");
         if (includeUpwardClosure) {
@@ -153,39 +232,47 @@ public class ExportDaml {
         }
         if (verbosity > 2)
             System.out.println("Sorting " + selectedConstants.size() + " CycConstant terms");
-        cycAccess.traceOn();
         Collections.sort(selectedConstants);
-        cycAccess.traceOff();
-        if (verbosity > 2)
-            System.out.println("Removing non-binary properties");
-        for (int i = 0; i < selectedConstants.size(); i++) {
-            CycConstant cycConstant = (CycConstant)selectedConstants.get(i);
-            if (verbosity > 2) {
-                if ((verbosity > 5) || (i%20 == 0))
-                    System.out.println("... " + cycConstant.cyclify());
+        if ((exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
+            (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
+            if (verbosity > 2)
+                System.out.println("Removing non-binary properties");
+            for (int i = 0; i < selectedConstants.size(); i++) {
+                CycConstant cycConstant = (CycConstant)selectedConstants.get(i);
+                if (verbosity > 2) {
+                    if ((verbosity > 5) || (i % 20 == 0))
+                        System.out.println("... " + cycConstant.cyclify());
+                }
+                if (cycAccess.isCollection(cycConstant))
+                    damlSelectedConstants.add(cycConstant);
+                else if (cycAccess.isUnaryPredicate(cycConstant))
+                    // Do not export (for now) Cyc unary predicates, as they cannot be easily expressed in DAML.
+                    continue;
+                else if (cycAccess.isBinaryPredicate(cycConstant))
+                    damlSelectedConstants.add(cycConstant);
+                else if (cycAccess.isFunction(cycConstant))
+                    // Do not export (for now) Cyc functions, as they cannot be expressed in DAML.
+                    continue;
+                else if (cycAccess.isPredicate(cycConstant))
+                    // Do not export Cyc (for now) arity 3+ predicates, as they cannot be easily expressed in DAML.
+                    continue;
+                else if (cycAccess.isIndividual(cycConstant))
+                    damlSelectedConstants.add(cycConstant);
             }
-            if (cycAccess.isCollection(cycConstant))
-                damlSelectedConstants.add(cycConstant);
-            else if (cycAccess.isUnaryPredicate(cycConstant))
-                // Do not export (for now) Cyc unary predicates, as they cannot be easily expressed in DAML.
-                continue;
-            else if (cycAccess.isBinaryPredicate(cycConstant))
-                damlSelectedConstants.add(cycConstant);
-            else if (cycAccess.isFunction(cycConstant))
-                // Do not export (for now) Cyc functions, as they cannot be expressed in DAML.
-                continue;
-            else if (cycAccess.isPredicate(cycConstant))
-                // Do not export Cyc (for now) arity 3+ predicates, as they cannot be easily expressed in DAML.
-                continue;
-            else if (cycAccess.isIndividual(cycConstant))
-                damlSelectedConstants.add(cycConstant);
         }
+        else {
+            // EXPORT_KB_SUBSET_BELOW_TERM
+            damlSelectedConstants = applyCycKbSubsetFilter(selectedConstants);
+            if (verbosity > 2)
+                System.out.println("Filtered " + damlSelectedConstants.size() + " CycConstant terms");
+        }
+
         //createConstantNode("PhysicalDevice");
         if (verbosity > 2)
             System.out.println("Building DAML model");
         for (int i = 0; i < damlSelectedConstants.size(); i++) {
             //for (int i = 0; i < 20; i++) {
-            CycConstant cycConstant = (CycConstant)damlSelectedConstants.elementAt(i);
+            CycConstant cycConstant = (CycConstant)damlSelectedConstants.get(i);
             if (verbosity > 2)
                 System.out.print(cycConstant + "  ");
             if (cycAccess.isCollection(cycConstant)) {
@@ -229,6 +316,44 @@ public class ExportDaml {
         if (verbosity > 2)
             System.out.println("DAML export completed");
     }
+
+    /**
+     * Sets up the DAML export process.
+     */
+    protected void setup () throws UnknownHostException, IOException, CycApiException {
+        createRdfNode();
+        createDamlOntologyNode();
+        createCycGuidNode();
+        cycAccess = new CycAccess();
+        if (exportCommand == ExportDaml.EXPORT_KB_SUBSET) {
+            cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
+            includeUpwardClosure = false;
+            if (verbosity > 1)
+                System.out.println("Exporting KB subset " + cycKbSubsetCollection.cyclify());
+        }
+        else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE) {
+            cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
+            cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
+            includeUpwardClosure = true;
+            if (verbosity > 1)
+                System.out.println("Exporting KB subset " + cycKbSubsetCollection.cyclify() +
+                                   "\n  plus upward closure to #$Thing filtered by " + cycKbSubsetFilter.cyclify());
+        }
+        else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM) {
+            rootTerm = cycAccess.getKnownConstantByGuid(rootTermGuid);
+            cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
+            cycKbSubsetCollection = cycKbSubsetFilter;
+            includeUpwardClosure = false;
+            if (verbosity > 1)
+                System.out.println("Exporting KB collections below root term " + rootTerm.cyclify() +
+                                   "\n  filtered by " + cycKbSubsetFilter.cyclify());
+        }
+        else {
+            System.err.println("Invalid export comand " + exportCommand);
+            System.exit(1);
+        }
+    }
+
 
     /**
      * Creates an RDF node.
@@ -352,6 +477,7 @@ public class ExportDaml {
 
     /**
      * Creates a DAML individual node for a single Cyc individual.
+     *
      * @parameter cycConstant the Cyc individual from which the DAML individual node is created
      */
     protected void createIndividualNode (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -398,6 +524,7 @@ public class ExportDaml {
 
     /**
      * Creates a DAML property node for a single Cyc binary predicate.
+     *
      * @parameter cycConstant the Cyc binary predicate from which the DAML property node is created
      */
     protected void createPropertyNode (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -450,6 +577,7 @@ public class ExportDaml {
     /**
      * Translates a Cyc term into a kind of DAML node: DAML Thing, DAML class, DAML property or
      * DAML transitive property.
+     *
      * @parameter cycConstant the Cyc term which is to be translated into a kind of DAML node.
      * @return the kind of DAML node: DAML Thing, DAML class, DAML property or
      * DAML transitive property
@@ -470,6 +598,7 @@ public class ExportDaml {
 
     /**
      * Populates the comment for a Cyc term.
+     *
      * @parameter cycConstant the Cyc term for which the comment is obtained.
      */
     protected void populateComment (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -478,7 +607,32 @@ public class ExportDaml {
     }
 
     /**
+     * Removes terms from the given list which are not elements of cycKbSubsetFilter.
+     *
+     * @parameter constants the given list of constants which is to be filtered
+     * @return the filtered list
+     */
+    protected ArrayList applyCycKbSubsetFilter (CycList constants)
+        throws UnknownHostException, IOException, CycApiException{
+        if (verbosity > 2)
+            System.out.println("Applying " + cycKbSubsetFilter.cyclify() + " filter");
+        if (constants.size() == 0)
+            return  constants;
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < constants.size(); i++) {
+            Object object = constants.get(i);
+            if ((object instanceof CycConstant) &&
+                cycAccess.isa((CycConstant) object, cycKbSubsetFilter))
+                    result.add(object);
+            else if (verbosity > 4)
+                System.out.println(" dropping " + cycConstant);
+        }
+        return  result;
+    }
+
+    /**
      * Removes unselected terms from the given list.
+     *
      * @parameter constants the given list of constants which is to be filtered
      * @return the filtered list
      */
@@ -499,6 +653,7 @@ public class ExportDaml {
     /**
      * Return True iff the object is a selected constant. (DAML does not now
      * contain non-binary predicates nor function terms.)
+     *
      * @parameter object the object under consideration as a selected constant
      * @return True iff the object is a selected constant
      */
@@ -508,6 +663,7 @@ public class ExportDaml {
 
     /**
      * Return True iff the object is a instance of the desired KB subset collection
+     *
      * @parameter object the object under consideration as an instance of the desired KB
      * subset collection
      */
@@ -521,6 +677,7 @@ public class ExportDaml {
 
     /**
      * Populates the isas for a Cyc term.
+     *
      * @parameter cycConstant the Cyc term for which the isas are obtained.
      */
     protected void populateIsas (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -531,6 +688,7 @@ public class ExportDaml {
 
     /**
      * Populates the genls for a Cyc term.
+     *
      * @parameter cycConstant the Cyc term for which the genls are obtained.
      */
     protected void populateGenls (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -541,6 +699,7 @@ public class ExportDaml {
 
     /**
      * Populates the genlPreds for a Cyc predicate.
+     *
      * @parameter cycConstant the Cyc predicate for which the genlPreds are obtained.
      */
     protected void populateGenlPreds (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -551,6 +710,7 @@ public class ExportDaml {
 
     /**
      * Populates the argument 1 type constaint for a Cyc predicate.
+     *
      * @parameter cycConstant the Cyc predicate for which the argument 1 type constaint is obtained.
      */
     protected void populateArg1Isa (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -575,6 +735,7 @@ public class ExportDaml {
 
     /**
      * Populates the argument 1 format for a Cyc predicate.
+     *
      * @parameter cycConstant the Cyc predicate for which the argument 1 format is obtained.
      */
     protected void populateArg1Format (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -586,6 +747,7 @@ public class ExportDaml {
 
     /**
      * Populates the argument 2 format for a Cyc predicate.
+     *
      * @parameter cycConstant the Cyc predicate for which the argument 2 format is obtained.
      */
     protected void populateArg2Format (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -597,6 +759,7 @@ public class ExportDaml {
 
     /**
      * Populates the disjointWiths for a Cyc collection.
+     *
      * @parameter cycConstant the Cyc collection for which the disjointWiths are obtained.
      */
     protected void populateDisjointWiths (CycConstant cycConstant) throws UnknownHostException, IOException,
@@ -607,6 +770,7 @@ public class ExportDaml {
 
     /**
      * Populates the coExtensionals for a Cyc collection.
+     *
      * @parameter cycConstant the Cyc collection for which the coExtensionals are obtained.
      */
     protected void populateCoExtensionals (CycConstant cycConstant) throws UnknownHostException, IOException {
@@ -623,6 +787,7 @@ public class ExportDaml {
     /**
      * Gather the updward closure of the selected CycForts with regard to isas and genls
      * for collection terms, and with regard to genlPreds for predicate terms.
+     *
      * @parameter the selected CycForts
      * @return the updward closure of the selected CycForts with regard to genls
      * for collection terms, and with regard to genlPreds for predicate terms
@@ -630,7 +795,7 @@ public class ExportDaml {
     protected CycList gatherUpwardClosure (CycList selectedCycForts) throws UnknownHostException, IOException,
             CycApiException {
         CycList upwardClosure = new CycList();
-        CycConstant upwardClosureConstant = cycAccess.getKnownConstantByGuid(cycUpwardClosureGuid);
+        cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
         for (int i = 0; i < selectedCycForts.size(); i++) {
             CycFort cycFort = (CycFort)selectedCycForts.get(i);
             if (cycAccess.isCollection(cycFort)) {
@@ -647,7 +812,7 @@ public class ExportDaml {
                         continue;
                     }
                     if ((!upwardClosure.contains(genl)) && (!selectedCycForts.contains(genl)) && cycAccess.isa(genl,
-                            upwardClosureConstant)) {
+                            cycKbSubsetFilter)) {
                         if (verbosity > 2)
                             System.out.println("Upward closure genl " + genl);
                         upwardClosure.add(genl);
@@ -659,7 +824,7 @@ public class ExportDaml {
                 for (int j = 0; j < genlPreds.size(); j++) {
                     CycFort genlPred = (CycFort)genlPreds.get(j);
                     if ((!upwardClosure.contains(genlPred)) && (!selectedCycForts.contains(genlPred))
-                            && cycAccess.isa(genlPred, upwardClosureConstant)) {
+                            && cycAccess.isa(genlPred, cycKbSubsetFilter)) {
                         if (verbosity > 2)
                             System.out.println("Upward closure genlPred " + genlPred);
                         upwardClosure.add(genlPred);

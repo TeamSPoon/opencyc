@@ -1,0 +1,253 @@
+package org.opencyc.conversation;
+
+import junit.framework.*;
+import java.util.*;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
+import org.opencyc.templateparser.*;
+
+/**
+ * Provides a unit test suite for the <tt>org.opencyc.conversation</tt> package<p>
+ *
+ * @version $Id$
+ * @author Stephen L. Reed
+ *
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+public class UnitTest extends TestCase {
+
+    /**
+     * Creates a <tt>UnitTest</tt> object with the given name.
+     */
+    public UnitTest(String name) {
+        super(name);
+    }
+
+    /**
+     * Returns the test suite.
+     *
+     * @return the test suite
+     */
+    public static Test suite() {
+        TestSuite testSuite = new TestSuite();
+        testSuite.addTest(new UnitTest("testAction"));
+        testSuite.addTest(new UnitTest("testPerformative"));
+        testSuite.addTest(new UnitTest("testState"));
+        testSuite.addTest(new UnitTest("testArc"));
+        testSuite.addTest(new UnitTest("testInterpreter"));
+        return testSuite;
+    }
+
+    /**
+     * Main method in case tracing is prefered over running JUnit GUI.
+     */
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
+    /**
+     * Tests the Action object.
+     */
+    public void testAction () {
+        System.out.println("\n**** testAction ****");
+        String name = "my-action";
+        Action action = new Action(name);
+        Assert.assertNotNull(action);
+        Assert.assertEquals(name, action.getName());
+        Assert.assertEquals(name, action.toString());
+        Action action2 = new Action(name);
+        Assert.assertEquals(action, action2);
+
+        System.out.println("**** testAction OK ****");
+    }
+
+    /**
+     * Tests the Performative object.
+     */
+    public void testPerformative () {
+        System.out.println("\n**** testPerformative ****");
+        String performativeName = "my-performative";
+        Performative performative =
+            new Performative(performativeName);
+        Assert.assertNotNull(performative);
+        Assert.assertEquals(performativeName, performative.getPerformativeName());
+        Assert.assertEquals(performativeName, performative.toString());
+        Performative performative2 =
+            new Performative(performativeName);
+        Assert.assertEquals(performative, performative2);
+        performative.setContent(new CycList());
+        Assert.assertTrue(! performative.equals(performative2));
+        performative2.setContent(new CycList());
+        Assert.assertTrue(performative.equals(performative2));
+
+        ArrayList performatives = new ArrayList();
+        performatives.add(performative);
+
+        performative2.performativeName = "a-performative";
+        performatives.add(performative2);
+        Collections.sort(performatives);
+        Assert.assertEquals(2, performatives.size());
+        Assert.assertEquals(performative2, performatives.get(0));
+        Assert.assertEquals(performative, performatives.get(1));
+
+        System.out.println("**** testPerformative OK ****");
+    }
+
+    /**
+     * Tests the State object.
+     */
+    public void testState () {
+        System.out.println("\n**** testState ****");
+
+        State readyState = new State("ready");
+        Assert.assertNotNull(readyState);
+        Assert.assertEquals("ready", readyState.getStateId());
+        State finalState = new State("final");
+        Assert.assertEquals("final", finalState.getStateId());
+
+        Action doTermQueryAction = new Action("do-term-query");
+        Action doFinalizationAction = new Action("do-finalization");
+        Performative termQueryPerformative = new Performative("term-query");
+        Performative quitPerformative = new Performative("quit");
+        /**
+         * 1. If we are in the ready state and get a term-query performative, transition
+         * to the ready state and perform the do-term-query action.
+         */
+        Arc arc1 = new Arc(readyState,
+                           termQueryPerformative,
+                           readyState,
+                           doTermQueryAction);
+        Assert.assertNotNull(readyState.arcs);
+        Assert.assertEquals(1, readyState.getArcs().size());
+        Assert.assertTrue(readyState.getArcs().contains(arc1));
+        Assert.assertEquals(arc1, readyState.getArc(termQueryPerformative));
+        /**
+         * 2. If we are in the ready state and get a quit performative, transition
+         * to the final state and perform the do-finalization action.
+         */
+        Arc arc2 = new Arc(readyState,
+                           quitPerformative,
+                           finalState,
+                           doFinalizationAction);
+        Assert.assertEquals(2, readyState.getArcs().size());
+        Assert.assertTrue(readyState.getArcs().contains(arc1));
+        Assert.assertTrue(readyState.getArcs().contains(arc2));
+        Assert.assertEquals(arc1, readyState.getArc(termQueryPerformative));
+        Assert.assertEquals(arc2, readyState.getArc(quitPerformative));
+
+        ArrayList states = new ArrayList();
+        states.add(readyState);
+        states.add(finalState);
+        Collections.sort(states);
+        Assert.assertEquals(2, states.size());
+        Assert.assertEquals(finalState, states.get(0));
+        Assert.assertEquals(readyState, states.get(1));
+
+        System.out.println("**** testState OK ****");
+    }
+
+    /**
+     * Tests the Arc object.
+     */
+    public void testArc () {
+        System.out.println("\n**** testArc ****");
+
+        State readyState = new State("ready");
+        State finalState = new State("final");
+        Action doTermQueryAction = new Action("do-term-query");
+        Action doFinalizationAction = new Action("do-finalization");
+        Performative termQueryPerformative = new Performative("term-query");
+        Performative quitPerformative = new Performative("quit");
+        /**
+         * 1. If we are in the ready state and get a term-query performative, transition
+         * to the ready state and perform the do-term-query action.
+         */
+        Arc arc1 = new Arc(readyState,
+                           termQueryPerformative,
+                           readyState,
+                           doTermQueryAction);
+        Assert.assertNotNull(arc1);
+        Assert.assertEquals(readyState, arc1.transitionFromState);
+        Assert.assertEquals(termQueryPerformative, arc1.getPerformative());
+        Assert.assertEquals(readyState, arc1.getTransitionToState());
+        Assert.assertEquals(doTermQueryAction, arc1.getAction());
+        Arc arc1Clone = new Arc(readyState,
+                               termQueryPerformative,
+                               readyState,
+                               doTermQueryAction);
+        Assert.assertEquals(arc1, arc1Clone);
+        Assert.assertEquals("[ready, term-query, do-term-query, ready]", arc1.toString());
+        /**
+         * 2. If we are in the ready state and get a quit performative, transition
+         * to the final state and perform the do-finalization action.
+         */
+        Arc arc2 = new Arc(readyState,
+                          quitPerformative,
+                          finalState,
+                          doFinalizationAction);
+        Assert.assertNotNull(arc2);
+        Assert.assertEquals(readyState, arc2.transitionFromState);
+        Assert.assertEquals(quitPerformative, arc2.getPerformative());
+        Assert.assertEquals(finalState, arc2.getTransitionToState());
+        Assert.assertEquals(doFinalizationAction, arc2.getAction());
+        Assert.assertTrue(! arc1.equals(arc2));
+        Assert.assertEquals("[ready, quit, do-finalization, final]", arc2.toString());
+        ArrayList arcs = new ArrayList();
+        arcs.add(arc1);
+        arcs.add(arc2);
+        Collections.sort(arcs);
+        Assert.assertEquals(2, arcs.size());
+        Assert.assertEquals(arc2, arcs.get(0));
+        Assert.assertEquals(arc1, arcs.get(1));
+
+        System.out.println("**** testArc OK ****");
+    }
+
+    /**
+     * Tests the Interpreter object.
+     */
+    public void testInterpreter () {
+        System.out.println("\n**** testInterpreter ****");
+
+        Interpreter interpreter = new Interpreter();
+        Assert.assertNotNull(interpreter);
+        ConversationFactory.reset();
+        ConversationFactory conversationFactory = new ConversationFactory();
+        conversationFactory.initialize();
+        Conversation chat = conversationFactory.makeChat();
+        interpreter.setCurrentState(chat.getInitialState());
+        Assert.assertEquals("ready", interpreter.currentState.getStateId());
+        String chatMessage = "xxxx";
+        ParseResults parseResults = interpreter.templateParser.parse(chatMessage);
+        Assert.assertTrue(! parseResults.isCompleteParse);
+        Performative performative = parseResults.getPerformative();
+        Assert.assertEquals("not-understand", performative.getPerformativeName());
+        Arc arc = interpreter.lookupArc(performative);
+        interpreter.transitionState(arc);
+
+
+
+
+
+
+        System.out.println("**** testInterpreter OK ****");
+    }
+
+
+}

@@ -4,6 +4,7 @@ import junit.framework.*;
 import java.io.*;
 import java.util.*;
 import org.opencyc.api.*;
+import org.opencyc.xml.*;
 
 
 /**
@@ -74,7 +75,7 @@ public class UnitTest extends TestCase {
      * Tests <tt>Guid</tt> object behavior.
      */
     public void testGuid() {
-        System.out.println("** testGuid **");
+        System.out.println("\n** testGuid **");
         CycObjectFactory.resetGuidCache();
         Assert.assertEquals(0, CycObjectFactory.getGuidCacheSize());
         String guidString = "bd58c19d-9c29-11b1-9dad-c379636f7270";
@@ -87,6 +88,24 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(guid, guid3);
         Assert.assertEquals(1, CycObjectFactory.getGuidCacheSize());
 
+        // toXML, toXMLString, unmarshall
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        try {
+            guid.toXML(xmlStringWriter, 0, false);
+            Assert.assertEquals("<guid>bd58c19d-9c29-11b1-9dad-c379636f7270</guid>\n", xmlStringWriter.toString());
+            Assert.assertEquals("<guid>bd58c19d-9c29-11b1-9dad-c379636f7270</guid>\n", guid.toXMLString());
+            String guidXMLString = guid.toXMLString();
+            CycObjectFactory.resetGuidCache();
+            Object object = CycObjectFactory.unmarshall(guidXMLString);
+            Assert.assertTrue(object instanceof Guid);
+            Assert.assertEquals(guid, (Guid) object);
+            Assert.assertTrue(CycObjectFactory.unmarshall(guidXMLString) ==
+                              CycObjectFactory.unmarshall(guidXMLString));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testGuid OK **");
     }
@@ -95,7 +114,7 @@ public class UnitTest extends TestCase {
      * Tests <tt>CycSymbol</tt> object behavior.
      */
     public void testCycSymbol() {
-        System.out.println("** testCycSymbol **");
+        System.out.println("\n** testCycSymbol **");
         CycObjectFactory.resetCycSymbolCache();
         Assert.assertEquals(4, CycObjectFactory.getCycSymbolCacheSize());
         String symbolName = "WHY-ISA?";
@@ -139,6 +158,21 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(! CycSymbol.isValidSymbolName("#$Brazil"));
         Assert.assertTrue(! CycSymbol.isValidSymbolName("\"a-string\""));
 
+        // toXML, toXMLString, unmarshall
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        try {
+            cycSymbol6.toXML(xmlStringWriter, 0, false);
+            Assert.assertEquals("<symbol>:POS</symbol>\n", xmlStringWriter.toString());
+            Assert.assertEquals("<symbol>:POS</symbol>\n", cycSymbol6.toXMLString());
+            String cycSymbolXMLString = cycSymbol6.toXMLString();
+            Object object = CycObjectFactory.unmarshall(cycSymbolXMLString);
+            Assert.assertTrue(object instanceof CycSymbol);
+            Assert.assertEquals(cycSymbol6, (CycSymbol) object);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testCycSymbol OK **");
     }
@@ -147,7 +181,7 @@ public class UnitTest extends TestCase {
      * Tests <tt>CycConstant</tt> object behavior.
      */
     public void testCycConstant() {
-        System.out.println("** testCycConstant **");
+        System.out.println("\n** testCycConstant **");
         CycObjectFactory.resetCycConstantCaches();
         Assert.assertEquals(0, CycObjectFactory.getCycConstantCacheByIdSize());
         Assert.assertEquals(0, CycObjectFactory.getCycConstantCacheByNameSize());
@@ -214,6 +248,30 @@ public class UnitTest extends TestCase {
                             CycObjectFactory.makeGuid("c0bce169-9c29-11b1-9dad-c379636f7270"),
                             new Integer(23927));
 
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        try {
+            cycConstant4.toXML(xmlStringWriter, 0, false);
+            String expectedXML =
+                "<constant>\n" +
+                "  <guid>c0bce169-9c29-11b1-9dad-c379636f7270</guid>\n" +
+                "  <name>TransportationDevice-Vehicle</name>\n" +
+                "  <id>23927</id>\n" +
+                "</constant>\n";
+            Assert.assertEquals(expectedXML, xmlStringWriter.toString());
+            Assert.assertEquals(expectedXML, cycConstant4.toXMLString());
+            String cycConstantXMLString = cycConstant4.toXMLString();
+            CycObjectFactory.resetCycConstantCaches();
+            Object object = CycObjectFactory.unmarshall(cycConstantXMLString);
+            Assert.assertTrue(object instanceof CycConstant);
+            Assert.assertEquals(cycConstant4, (CycConstant) object);
+            Assert.assertTrue(CycObjectFactory.unmarshall(cycConstantXMLString) ==
+                              CycObjectFactory.unmarshall(cycConstantXMLString));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
         System.out.println("** testCycConstant OK **");
     }
 
@@ -221,7 +279,7 @@ public class UnitTest extends TestCase {
      * Tests <tt>CycNart</tt> object behavior.
      */
     public void testCycNart() {
-        System.out.println("** testCycNart **");
+        System.out.println("\n** testCycNart **");
         CycConstant fruitFn =
             new CycConstant("FruitFn",
                             CycObjectFactory.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f7270"),
@@ -307,6 +365,42 @@ public class UnitTest extends TestCase {
         cycList4.add(appleTree2);
         Assert.assertEquals(cycNart2, CycNart.coerceToCycNart(cycList4));
 
+        // toXML, toXMLString
+        cycNart4.setId(new Integer(1234));
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        try {
+            cycNart4.toXML(xmlStringWriter, 0, false);
+            //System.out.println(xmlStringWriter.toString());
+            String expectedXML =
+                "<nat>\n" +
+                "  <id>1234</id>\n" +
+                "  <functor>\n" +
+                "    <constant>\n" +
+                "      <guid>bd58c19d-9c29-11b1-9dad-c379636f7270</guid>\n" +
+                "      <name>FruitFn</name>\n" +
+                "      <id>10614</id>\n" +
+                "    </constant>\n" +
+                "  </functor>\n" +
+                "  <arg>\n" +
+                "    <constant>\n" +
+                "      <guid>bd58c19d-9c29-11b1-9dad-c379636f0000</guid>\n" +
+                "      <name>AppleTree</name>\n" +
+                "      <id>16797</id>\n" +
+                "    </constant>\n" +
+                "  </arg>\n" +
+                "</nat>\n";
+            Assert.assertEquals(expectedXML, xmlStringWriter.toString());
+            Assert.assertEquals(expectedXML, cycNart4.toXMLString());
+            String cycNartXMLString = cycNart4.toXMLString();
+            Object object = CycObjectFactory.unmarshall(cycNartXMLString);
+            Assert.assertTrue(object instanceof CycNart);
+            Assert.assertEquals(cycNart4, (CycNart) object);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
         System.out.println("** testCycNart OK **");
     }
 
@@ -314,7 +408,7 @@ public class UnitTest extends TestCase {
      * Tests <tt>CycVariable</tt> object behavior.
      */
     public void testCycVariable() {
-        System.out.println("** testCycVariable **");
+        System.out.println("\n** testCycVariable **");
         CycVariable cycVariable1 = new CycVariable("?X");
         Assert.assertNotNull(cycVariable1);
         Assert.assertEquals("?X", cycVariable1.toString());
@@ -352,6 +446,24 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(x1.cyclify().startsWith("?x_"));
         Assert.assertTrue(x3.cyclify().startsWith("?x_"));
 
+        // toXML, toXMLString, unmarshall
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        try {
+            x.toXML(xmlStringWriter, 0, false);
+            Assert.assertEquals("<variable>x</variable>\n", xmlStringWriter.toString());
+            Assert.assertEquals("<variable>x</variable>\n", x.toXMLString());
+            String cycVariableXMLString = x.toXMLString();
+            CycObjectFactory.resetCycVariableCache();
+            Object object = CycObjectFactory.unmarshall(cycVariableXMLString);
+            Assert.assertTrue(object instanceof CycVariable);
+            Assert.assertEquals(x, (CycVariable) object);
+            Assert.assertTrue(CycObjectFactory.unmarshall(cycVariableXMLString) ==
+                              CycObjectFactory.unmarshall(cycVariableXMLString));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testCycVariable OK **");
     }
@@ -360,7 +472,7 @@ public class UnitTest extends TestCase {
      * Tests <tt>CycList</tt> object behavior.
      */
     public void testCycList() {
-        System.out.println("** testCycList **");
+        System.out.println("\n** testCycList **");
 
 
         // Simple empty list constructor.
@@ -682,6 +794,61 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
+        // toXML, toXMLString
+        try {
+            String listAsString = "(\"1\" A (#$Brazil . Z) 4.25 :KEYWORD ?collection NIL . #$Dog)";
+            CycList cycList47 = cycAccess.makeCycList(listAsString);
+            XMLStringWriter xmlStringWriter = new XMLStringWriter();
+            cycList47.toXML(xmlStringWriter, 0, false);
+            //System.out.println(xmlStringWriter.toString());
+            String expectedXML =
+                "<list>\n" +
+                "  <string>1</string>\n" +
+                "  <symbol>A</symbol>\n" +
+                "  <list>\n" +
+                "    <constant>\n" +
+                "      <guid>bd588f01-9c29-11b1-9dad-c379636f7270</guid>\n" +
+                "      <name>Brazil</name>\n" +
+                "      <id>3841</id>\n" +
+                "    </constant>\n" +
+                "    <dotted-element>\n" +
+                "      <symbol>Z</symbol>\n" +
+                "    </dotted-element>\n" +
+                "  </list>\n" +
+                "  <double>4.25</double>\n" +
+                "  <symbol>:KEYWORD</symbol>\n" +
+                "  <variable>collection</variable>\n" +
+                "  <symbol>NIL</symbol>\n" +
+                "  <dotted-element>\n" +
+                "    <constant>\n" +
+                "      <guid>bd58daa0-9c29-11b1-9dad-c379636f7270</guid>\n" +
+                "      <name>Dog</name>\n" +
+                "      <id>2055</id>\n" +
+                "    </constant>\n" +
+                "  </dotted-element>\n" +
+                "</list>\n";
+
+            Assert.assertEquals(expectedXML, xmlStringWriter.toString());
+            Assert.assertEquals(expectedXML, cycList47.toXMLString());
+            String cycListXMLString = cycList47.toXMLString();
+            Object object = CycObjectFactory.unmarshall(cycListXMLString);
+            Assert.assertTrue(object instanceof CycList);
+            Assert.assertEquals(cycList47, (CycList) object);
+
+            CycList cycList48 =
+                cycAccess.makeCycList("(#$BiologicalTaxon " +
+                                      "#$BiologicalSpecies " +
+                                      "#$OrganismClassificationType " +
+                                      "#$PublicConstant " +
+                                      "#$DomesticatedAnimalType)");
+            cycListXMLString = Marshaller.marshall(cycList48);
+            System.out.println(cycListXMLString);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
         try {
             cycAccess.close();
         }
@@ -696,7 +863,7 @@ public class UnitTest extends TestCase {
      * Tests <tt>CycListVisitor</tt> object behavior.
      */
     public void testCycListVisitor() {
-        System.out.println("** testCycListVisitor **");
+        System.out.println("\n** testCycListVisitor **");
 
         CycAccess cycAccess = null;
         try {

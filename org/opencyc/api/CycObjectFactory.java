@@ -3,6 +3,8 @@ package org.opencyc.api;
 import java.util.*;
 import java.io.*;
 import org.apache.oro.util.*;
+import org.jdom.*;
+import org.jdom.input.*;
 import org.opencyc.util.*;
 import org.opencyc.cycobject.*;
 
@@ -457,5 +459,188 @@ public class CycObjectFactory {
     public static int getGuidCacheSize() {
         return guidCache.size();
     }
+
+    /**
+     * Unmarshalls a cyc object from an XML representation.
+     *
+     * @param xmlString the XML representation of the cyc object
+     * @return the cyc object
+     */
+    public static Object unmarshall (String xmlString) throws JDOMException, IOException {
+        Object object = null;
+        SAXBuilder saxBuilder = new SAXBuilder(false);
+        Document document = saxBuilder.build(new StringReader(xmlString));
+        Element root = document.getRootElement();
+        return unmarshallElement(root, document);
+    }
+
+    /**
+     * Unmarshalls a cyc object from the given element in an XML Document object.
+     *
+     * @param element the element representing the cyc object
+     * @param document the XML document containing the element
+     * @return the cyc object
+     */
+    protected static Object unmarshallElement(Element element, Document document) throws IOException {
+        String elementName = element.getName();
+        if (elementName.equals("guid"))
+            return unmarshallGuid(element);
+        else if (elementName.equals("symbol"))
+            return unmarshallCycSymbol(element);
+        else if (elementName.equals("variable"))
+            return unmarshallCycVariable(element);
+        else if (elementName.equals("constant"))
+            return unmarshallCycConstant(element, document);
+        else if (elementName.equals("nat"))
+            return unmarshallCycNart(element, document);
+        else if (elementName.equals("list"))
+            return unmarshallCycList(element, document);
+        else if (elementName.equals("string"))
+            return element.getTextTrim();
+        else if (elementName.equals("integer"))
+            return new Integer(element.getTextTrim());
+        else if (elementName.equals("double"))
+            return new Double(element.getTextTrim());
+        else
+            throw new IOException("Invalid element name " + elementName);
+    }
+
+    /**
+     * Unmarshalls a Guid from the given element in an XML Document object.
+     *
+     * @param guidElement the guid xml element
+     * @return the guid or cached reference to an existing guid object
+     */
+    protected static Guid unmarshallGuid (Element guidElement) {
+        String guidString = guidElement.getTextTrim();
+        Guid guid = getGuidCache(guidString);
+        if (guid != null)
+            return guid;
+        return makeGuid(guidString);
+    }
+
+    /**
+     * Unmarshalls a CycSymbol from the given element in an XML Document object.
+     *
+     * @param cycSymbolElement the CycSymbol xml element
+     * @return the CycSymbol or cached reference to an existing CycSymbol object
+     */
+    protected static CycSymbol unmarshallCycSymbol (Element cycSymbolElement) {
+        String symbolName = cycSymbolElement.getTextTrim();
+        CycSymbol cycSymbol = getCycSymbolCache(symbolName);
+        if (cycSymbol != null)
+            return cycSymbol;
+        return makeCycSymbol(symbolName);
+    }
+
+    /**
+     * Unmarshalls a CycVariable from the given element in an XML Document object.
+     *
+     * @param cycVariableElement the CycVariable xml element
+     * @return the CycVariable or cached reference to an existing CycVariable object
+     */
+    protected static CycVariable unmarshallCycVariable (Element cycVariableElement) {
+        String name = cycVariableElement.getTextTrim();
+        CycVariable cycVariable = getCycVariableCache(name);
+        if (cycVariable != null)
+            return cycVariable;
+        return makeCycVariable(name);
+    }
+
+
+    /**
+     * Unmarshalls a CycConstant from the given element in an XML Document object.
+     *
+     * @param cycConstantElement the element representing the CycConstant
+     * @param document the XML document containing the element
+     * @return the CycConstant
+     */
+    protected static CycConstant unmarshallCycConstant(Element cycConstantElement, Document document) {
+        Guid guid = null;
+        Element guidElement = cycConstantElement.getChild("guid");
+        if (guidElement != null)
+            guid = makeGuid(guidElement.getTextTrim());
+        CycConstant cycConstant = getCycConstantCacheByGuid(guid);
+        if (cycConstant != null)
+            return cycConstant;
+
+        String name = null;
+        Element nameElement = cycConstantElement.getChild("name");
+        if (nameElement != null)
+            name = nameElement.getTextTrim();
+        Integer id = null;
+        Element idElement = cycConstantElement.getChild("id");
+        if (idElement != null)
+            id = new Integer(idElement.getTextTrim());
+
+        cycConstant = new CycConstant(name, guid, id);
+        addCycConstantCacheByGuid(cycConstant);
+        addCycConstantCacheById(cycConstant);
+        addCycConstantCacheByName(cycConstant);
+        return cycConstant;
+    }
+
+    /**
+     * Unmarshalls a CycNart from the given element in an XML Document object.
+     *
+     * @param cycNartElement the element representing the CycNart
+     * @param document the XML document containing the element
+     * @return the CycNart
+     */
+    protected static CycNart unmarshallCycNart(Element cycNartElement, Document document)
+        throws IOException {
+        Integer id = null;
+        Element idElement = cycNartElement.getChild("id");
+        if (idElement != null)
+            id = new Integer(idElement.getTextTrim());
+        CycFort functor = null;
+        Element functorElement = cycNartElement.getChild("functor");
+        if (functorElement == null)
+            throw new IOException("Missing functor from CycNart " + cycNartElement);
+        Element cycConstantFunctorElement = functorElement.getChild("constant");
+        Element cycNartFunctorElement = functorElement.getChild("nat");
+        if (cycConstantFunctorElement != null) {
+            if (cycNartFunctorElement != null)
+                throw new IOException("Invalid CycNart functor" + functorElement);
+            functor = unmarshallCycConstant(cycConstantFunctorElement, document);
+        }
+        else if (cycNartFunctorElement != null)
+            functor = unmarshallCycNart(cycNartFunctorElement, document);
+        else
+            throw new IOException("Missing functor constant/nart from CycNart " + cycNartElement);
+
+        List argElements = cycNartElement.getChildren("arg");
+        CycList arguments = new CycList();
+        for (int i = 0; i < argElements.size(); i++) {
+            Element argElement = (Element) argElements.get(i);
+            arguments.add(unmarshallElement((Element) argElement.getChildren().get(0), document));
+        }
+        CycNart cycNart = new CycNart(functor, arguments);
+        cycNart.setId(id);
+        return cycNart;
+    }
+
+    /**
+     * Unmarshalls a CycList from the given element in an XML Document object.
+     *
+     * @param cycListElement the element representing the CycList
+     * @param document the XML document containing the element
+     * @return the CycNart
+     */
+    protected static CycList unmarshallCycList(Element cycListElement, Document document)
+        throws IOException {
+        List elements = cycListElement.getChildren();
+        CycList cycList = new CycList();
+        for (int i = 0; i < elements.size(); i++) {
+            Element element = (Element) elements.get(i);
+            if (element.getName().equals("dotted-element"))
+                cycList.setDottedElement(element.getChildren().get(0));
+            else
+                cycList.add(unmarshallElement(element, document));
+        }
+        return cycList;
+    }
+
+
 
 }

@@ -415,9 +415,6 @@ public abstract class XMLWriter {
 
     /**
      * Prints to this <code>XMLWriter</code> an XML end tag.
-     * The tag is indented by @see #indent spaces either from the beginning of the
-     * line (if @see #relative is <code>false</code>) or relative to the current
-     * indentation level(if @see #relative is <code>true</code>).
      *
      * @param tag the name of the XML tag.
      */

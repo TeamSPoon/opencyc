@@ -1,5 +1,8 @@
 package org.opencyc.cycobject;
 
+import java.io.*;
+import org.opencyc.xml.*;
+
 /**
  * Provides the behavior and attributes of an OpenCyc symbol, typically used
  * to represent api function names, and non <tt>CycConstant</tt> parameters.
@@ -26,6 +29,11 @@ package org.opencyc.cycobject;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class CycSymbol implements Comparable {
+
+    /**
+     * The name of the XML tag for this object.
+     */
+    public static final String cycSymbolXMLTag = "symbol";
 
     /**
      * The symbol represented as a <tt>String</tt>.
@@ -108,4 +116,28 @@ public class CycSymbol implements Comparable {
         return true;
     }
 
+    /**
+     * Returns the XML representation of this object.
+     *
+     * @return the XML representation of this object
+     */
+    public String toXMLString () throws IOException {
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        toXML(xmlStringWriter, 0, false);
+        return xmlStringWriter.toString();
+    }
+
+    /**
+     * Prints the XML representation of the CycSymbol to an <code>XMLWriter</code>
+     *
+     * @param xmlWriter an <tt>XMLWriter</tt>
+     * @param indent an int that specifies by how many spaces to indent
+     * @param relative a boolean; if true indentation is relative, otherwise absolute
+     */
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
+        throws IOException {
+        xmlWriter.printXMLStartTag(cycSymbolXMLTag, indent, relative, false);
+        xmlWriter.print(symbolName);
+        xmlWriter.printXMLEndTag(cycSymbolXMLTag);
+    }
 }

@@ -1,5 +1,6 @@
 package org.opencyc.cycobject;
 
+import java.io.*;
 import org.opencyc.api.*;
 import org.opencyc.xml.*;
 
@@ -31,14 +32,9 @@ import org.opencyc.xml.*;
 public class Guid {
 
     /**
-     * Field for storing the name of the XML tag for the GUID of CycConstant objects
+     * The name of the XML tag for this object.
      */
     public static final String guidXMLTag = "guid";
-
-    /**
-     * The default indentation for printing CycConstant objects to XML
-     */
-    public static int indentLength = 2;
 
     /**
      * The GUID in string form.
@@ -76,16 +72,27 @@ public class Guid {
     }
 
     /**
-     * Prints the XML representation of the CycConstant to an <code>XMLWriter</code>
+     * Returns the XML representation of this object.
+     *
+     * @return the XML representation of this object
+     */
+    public String toXMLString () throws IOException {
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        toXML(xmlStringWriter, 0, false);
+        return xmlStringWriter.toString();
+    }
+
+    /**
+     * Prints the XML representation of the Guid to an <code>XMLWriter</code>
      *
      * @param xmlWriter an <tt>XMLWriter</tt>
      * @param indent an int that specifies by how many spaces to indent
      * @param relative a boolean; if true indentation is relative, otherwise absolute
      */
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
-        throws java.io.IOException {
-        xmlWriter.printXMLStartTag(guidXMLTag, indent, relative, true);
+        throws IOException {
+        xmlWriter.printXMLStartTag(guidXMLTag, indent, relative, false);
         xmlWriter.print(guidString);
-        xmlWriter.printXMLEndTag(guidXMLTag, -indentLength, true);
+        xmlWriter.printXMLEndTag(guidXMLTag);
     }
 }

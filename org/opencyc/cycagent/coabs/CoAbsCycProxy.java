@@ -15,6 +15,7 @@ import fipaos.parser.ParserException;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 import org.opencyc.util.*;
+import org.opencyc.xml.*;
 
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
@@ -331,10 +332,8 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         try {
             cycAccess = new CycAccess();
             coAbsRequestAcl = new ACL(apiRequestMessage.getRawText());
-            Object contentXml = coAbsRequestAcl.getContentObject();
-            apiRequest =
-                (CycList) XMLDataBinding.zeusUnmarshall((String) contentXml,
-                                                        "org.opencyc.cycobject");
+            String contentXml = (String) coAbsRequestAcl.getContentObject();
+            apiRequest = (CycList) CycObjectFactory.unmarshall(contentXml);
         }
         catch (Exception e) {
             Log.current.errorPrintln(e.getMessage());
@@ -359,13 +358,22 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         coAbsReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
         coAbsReplyAcl.setSenderAID(coAbsRequestAcl.getReceiverAID());
         coAbsReplyAcl.setReceiverAID(coAbsRequestAcl.getSenderAID());
-        coAbsReplyAcl.setContentObject(response[1]);
+        System.out.println("marshalling\n" + response[1]);
+        try {
+            coAbsReplyAcl.setContentObject(Marshaller.marshall(response[1]));
+        }
+        catch (IOException e) {
+            Log.current.errorPrintln("Exception while marshalling " + response[1]);
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            return;
+        }
         coAbsReplyAcl.setReplyWith(null);
         coAbsReplyAcl.setInReplyTo(coAbsRequestAcl.getReplyWith());
 
         Message replyMessage = new BasicMessage(coAbsRequestAcl.getSenderAID().getName(),
                                                 regHelper.getAgentRep(),
-                                                "fipa-acl",
+                                                "fipa-xml",
                                                 coAbsReplyAcl.toString());
         if (verbosity > 2)
             Log.current.println("\nReplying with " + replyMessage.toString());

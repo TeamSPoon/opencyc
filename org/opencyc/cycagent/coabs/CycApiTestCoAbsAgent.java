@@ -311,7 +311,7 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
         try {
             apiRequest =
                 cycAccess.makeCycList("(remove-duplicates (with-all-mts (isa #$Dog)))");
-            apiRequestXml = XMLDataBinding.zeusMarshall(apiRequest);
+            apiRequestXml = apiRequest.toXMLString();
         }
         catch (Exception e) {
             Log.current.errorPrintln(e.getMessage());
@@ -323,7 +323,7 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
         acl.setOntology("cyc-api");
         acl.setReplyWith("message" + count);
         Message requestMessage = new BasicMessage(cycApiServiceAgentName,
-                                                  "fipa-acl",
+                                                  "fipa-xml",
                                                   acl.toString());
         if (verbosity > 2)
             Log.current.println("\nSending " + requestMessage.toString() +

@@ -165,6 +165,17 @@ public class CycConstant extends CycFort implements Comparable {
     }
 
     /**
+     * Returns the XML representation of this object.
+     *
+     * @return the XML representation of this object
+     */
+    public String toXMLString () throws IOException {
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        toXML(xmlStringWriter, 0, false);
+        return xmlStringWriter.toString();
+    }
+
+    /**
      * Prints the XML representation of the CycConstant to an <code>XMLWriter</code>
      *
      * @param xmlWriter an <tt>XMLWriter</tt>
@@ -172,7 +183,7 @@ public class CycConstant extends CycFort implements Comparable {
      * @param relative a boolean; if true indentation is relative, otherwise absolute
      */
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
-        throws java.io.IOException {
+        throws IOException {
         xmlWriter.printXMLStartTag(constantXMLTag, indent, relative, true);
         if (guid != null)
             guid.toXML(xmlWriter, indentLength, true);

@@ -2,7 +2,7 @@ package org.opencyc.cycobject;
 
 import java.io.*;
 import java.util.*;
-import org.opencyc.xml.XMLWriter;
+import org.opencyc.xml.*;
 import org.opencyc.api.*;
 
 /**
@@ -207,6 +207,17 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
+     * Returns the XML representation of this object.
+     *
+     * @return the XML representation of this object
+     */
+    public String toXMLString () throws IOException {
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        toXML(xmlStringWriter, 0, false);
+        return xmlStringWriter.toString();
+    }
+
+    /**
      * Prints the XML representation of the <ttt>CycNart</tt> to an <tt>XMLWriter</tt>
      * It is supposed to look like this:<p>
      * <pre>
@@ -238,19 +249,19 @@ public class CycNart extends CycFort implements Comparable {
      */
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException {
-        xmlWriter.printXMLStartTag(natXMLtag, indent, relative);
+        xmlWriter.printXMLStartTag(natXMLtag, indent, relative, true);
         if (super.getId() != null) {
-            xmlWriter.printXMLStartTag(idXMLTag, 0, true, false);
+            xmlWriter.printXMLStartTag(idXMLTag, indentLength, true, false);
             xmlWriter.print(this.getId().toString());
             xmlWriter.printXMLEndTag(idXMLTag);
         }
-        xmlWriter.printXMLStartTag(functorXMLtag, indentLength, true);
+        xmlWriter.printXMLStartTag(functorXMLtag, 0, true, true);
         this.getFunctor().toXML(xmlWriter, indentLength, true);
         xmlWriter.printXMLEndTag(functorXMLtag, -indentLength, true);
         ListIterator iterator = this.getArguments().listIterator();
         Object arg;
         while (iterator.hasNext()) {
-            xmlWriter.printXMLStartTag(argXMLtag, 0, true);
+            xmlWriter.printXMLStartTag(argXMLtag, 0, true, true);
             arg = iterator.next();
             if (arg instanceof CycFort) {
                 ((CycFort) arg).toXML(xmlWriter, indentLength, true);

@@ -3,6 +3,7 @@ package org.opencyc.cycobject;
 import java.util.*;
 import java.io.*;
 import org.opencyc.util.*;
+import org.opencyc.xml.*;
 import org.opencyc.api.*;
 
 /**
@@ -31,6 +32,20 @@ import org.opencyc.api.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class CycList extends ArrayList {
+
+    /**
+     * XML serialization tags.
+     */
+    public static final String cycListXMLTag = "list";
+    public static final String integerXMLTag = "integer";
+    public static final String doubleXMLTag = "double";
+    public static final String stringXMLTag = "string";
+    public static final String dottedElementXMLTag = "dotted-element";
+
+    /**
+     * XML serialization indentation.
+     */
+    public static int indentLength = 2;
 
     private boolean isProperList = true;
     private Object dottedElement;
@@ -627,6 +642,98 @@ public class CycList extends ArrayList {
                 return false;
         }
         return false;
+    }
+
+    /**
+     * Returns the XML representation of this object.
+     *
+     * @return the XML representation of this object
+     */
+    public String toXMLString () throws IOException {
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        toXML(xmlStringWriter, 0, false);
+        return xmlStringWriter.toString();
+    }
+
+    /**
+     * Prints the XML representation of the <ttt>CycList</tt> to an <tt>XMLWriter</tt>
+     *
+     * @param xmlWriter the output XML serialization writer
+     * @param indent specifies by how many spaces the XML output should be indented
+     * @param relative specifies whether the indentation should be absolute --
+     * indentation with respect to the beginning of a new line, relative = false
+     * -- or relative to the indentation currently specified in the indent_string field
+     * of the xml_writer object, relative = true.
+     */
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
+        throws IOException {
+        int startingIndent = xmlWriter.getIndentLength();
+        xmlWriter.printXMLStartTag(cycListXMLTag, indent, relative, true);
+        Iterator iterator = this.iterator();
+        Object arg;
+        while (iterator.hasNext()) {
+            arg = iterator.next();
+            toXML(arg, xmlWriter, indentLength, true);
+        }
+        if (! isProperList) {
+            xmlWriter.printXMLStartTag(dottedElementXMLTag, indentLength, relative, true);
+            toXML(dottedElement, xmlWriter, indentLength, true);
+            xmlWriter.printXMLEndTag(dottedElementXMLTag, 0, true);
+            xmlWriter.setIndent(-indentLength, true);
+        }
+        xmlWriter.printXMLEndTag(cycListXMLTag, 0, true);
+        /*
+        if (startingIndent != xmlWriter.getIndentLength())
+            throw new RuntimeException("Starting indent " + startingIndent +
+                                       " is not equal to ending indent " + xmlWriter.getIndentLength());
+                                       */
+    }
+
+    /**
+     * Writes a CycList element the the given XML output stream.
+     *
+     * @param object the object to be serialized as XML
+     * @param xmlWriter the output XML serialization writer
+     * @param indent specifies by how many spaces the XML output should be indented
+     * @param relative specifies whether the indentation should be absolute --
+     * indentation with respect to the beginning of a new line, relative = false
+     * -- or relative to the indentation currently specified in the indent_string field
+     * of the xml_writer object, relative = true.
+     */
+    protected void toXML(Object object, XMLWriter xmlWriter, int indent, boolean relative)
+        throws IOException {
+        int startingIndent = xmlWriter.getIndentLength();
+        if (object instanceof Integer) {
+            xmlWriter.printXMLStartTag(integerXMLTag, indentLength, true, false);
+            xmlWriter.print(object.toString());
+            xmlWriter.printXMLEndTag(integerXMLTag);
+        }
+        else if (object instanceof String) {
+            xmlWriter.printXMLStartTag(stringXMLTag, indentLength, true, false);
+            xmlWriter.print((String) object);
+            xmlWriter.printXMLEndTag(stringXMLTag);
+        }
+        else if (object instanceof Double) {
+            xmlWriter.printXMLStartTag(doubleXMLTag, indentLength, true, false);
+            xmlWriter.print(object.toString());
+            xmlWriter.printXMLEndTag(doubleXMLTag);
+        }
+        else if (object instanceof CycFort)
+             ((CycFort) object).toXML(xmlWriter, indentLength, true);
+        else if (object instanceof CycVariable)
+             ((CycVariable) object).toXML(xmlWriter, indentLength, true);
+        else if (object instanceof CycSymbol)
+             ((CycSymbol) object).toXML(xmlWriter, indentLength, true);
+        else if (object instanceof Guid)
+             ((Guid) object).toXML(xmlWriter, indentLength, true);
+        else if (object instanceof CycList)
+             ((CycList) object).toXML(xmlWriter, indentLength, true);
+        else
+            throw new RuntimeException("Invalid CycList object " + object);
+        xmlWriter.setIndent(-indentLength, true);
+        if (startingIndent != xmlWriter.getIndentLength())
+            throw new RuntimeException("Starting indent " + startingIndent +
+                                       " is not equal to ending indent " + xmlWriter.getIndentLength());
     }
 
 }

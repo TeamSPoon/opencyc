@@ -29,6 +29,13 @@ package org.opencyc.elf.a;
  */
 public interface Actuator {
   
+  /** 
+   * Gets the name of the actuator.
+   *
+   * @return the name of the actuator
+   */
+  public String getName();
+  
   /** the console output actuator name */
   public static final String CONSOLE_OUTPUT = "console output";
   

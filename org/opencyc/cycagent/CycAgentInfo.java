@@ -1,4 +1,5 @@
-package org.opencyc.jini.cycproxy;
+package  org.opencyc.cycagent;
+
 /**
  * Contains the attributes of a cyc agent.
  * Instances are stored in the cycAgents and cycImages hashtables. More than one agent
@@ -29,12 +30,10 @@ package org.opencyc.jini.cycproxy;
 
 class CycAgentInfo {
 
-    public CycProxy cycProxy;
     public int basePort;
     public String cycImageId;
 
     public CycAgentInfo () {
-        cycProxy = null;
         basePort = 0;
         cycImageId = "";
     }

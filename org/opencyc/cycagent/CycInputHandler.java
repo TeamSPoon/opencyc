@@ -1,8 +1,9 @@
-package  org.opencyc.jini.cycproxy;
+package  org.opencyc.cycagent;
 
 /**
  * Provides a handler to read cyc image input and write message to the agent
- * message queue.  The cyc image closes its socket after the message is processed.<p>
+ * message queue.  The handler closes its socket without reply after the message
+ * is processed.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -29,12 +30,26 @@ import  java.net.Socket;
 import  java.io.PrintWriter;
 import  java.io.*;
 import  java.util.Collection;
+import  fipaos.ont.fipa.*;
+import  fipaos.parser.*;
 import  org.opencyc.api.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.util.*;
 
 
 class CycInputHandler implements Runnable {
+    /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
     /**
      * Automatically flush the PrintWriter object.
      */
@@ -122,34 +137,24 @@ class CycInputHandler implements Runnable {
             throw new RuntimeException("Invalid cyc message directive " + cycRequestObject);
         }
         CycSymbol cycMessageDirective = (CycSymbol) cycRequest.first();
-        if (cycMessageDirective.equals(CycObjectFactory.makeCycSymbol("CYC-TO-GRID-NOWAIT"))) {
+        if (cycMessageDirective.equals(CycObjectFactory.makeCycSymbol("FIPA-ENVELOPE"))) {
             Log.current.println("Processing the message without waiting for the reply");
-            String ampString = ((CycList) cycRequest.second()).cyclify();
-            Log.current.println("ampString: " + ampString);
-            // Register the sender of the message.
-            Amp amp = new Amp(ampString);
-            // Place message on agent message queue and find a handler for it.
-            AgentManager.agentMessageQueue.add(amp);
-            AgentManager.dispatchAgentMessageQueue();
+            String aclString = ((CycList) cycRequest.second()).cyclify();
+            Log.current.println("aclString: " + aclString);
+            ACL acl = null;
+            try {
+                acl = new ACL(aclString);
+            }
+            catch (ParserException e) {
+                Log.current.println("Cannot parse message " + aclString + e.getMessage());
+            }
+            AgentManager.agentManager.forward(acl);
         }
         else {
             Log.current.println("Invalid cyc message directive " + cycRequestObject);
             throw new RuntimeException("Invalid cyc message directive " + cycRequestObject);
         }
-    }
-
-    /**
-     * Replies to the awaiting cyc client.
-     *
-     * @param message the response message.
-     */
-    public void write(Object message) {
-        try {
-            cfaslOutputStream.writeObject(message);
-        }
-        catch (Exception e) {
-            Log.current.println("Exception writing socket i/o: " + e);
-        }
+        close();
     }
 
     /**
@@ -164,7 +169,19 @@ class CycInputHandler implements Runnable {
         }
     }
 
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+    }
 }
+
+
+
 
 
 

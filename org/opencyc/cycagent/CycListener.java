@@ -1,4 +1,4 @@
-package  org.opencyc.jini.cycproxy;
+package  org.opencyc.cycagent;
 
 /**
  * Provides a a listener for input connections from Cyc images.<p>
@@ -33,6 +33,18 @@ import  org.opencyc.util.*;
 class CycListener implements Runnable {
 
     /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
      * The socket which listens for new connections.
      */
     protected ServerSocket listenerSocket = null;
@@ -65,9 +77,11 @@ class CycListener implements Runnable {
         try {
             listenerSocket = new ServerSocket(LOCAL_CLIENT_LISTENER_PORT, MAX_LOCAL_CLIENT_CLIENTS);
             while (localClientKeepRunning) {
-                Log.current.println("Listening");
+                if (verbosity > 2)
+                    Log.current.println("Listening on port " + LOCAL_CLIENT_LISTENER_PORT);
                 Socket cycSocket = listenerSocket.accept();
-                Log.current.println("Cyc Connection accepted " + cycSocket);
+                if (verbosity > 2)
+                    Log.current.println("Cyc Connection accepted " + cycSocket);
                 // Spawn child thread to read from the socket.
                 CycInputHandler cycInputHandler =
                     new CycInputHandler(cycSocket);
@@ -87,7 +101,20 @@ class CycListener implements Runnable {
             }
         }
     }
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+    }
 }
+
+
+
 
 
 

@@ -50,13 +50,6 @@ public abstract class ELFObject {
   }
 
   /**
-   * Returns a string representation of this object.
-   * 
-   * @return a string representation of this object
-   */
-  public abstract String toString();
-
-  /**
    * Sets the unique name of this ELF object
    * 
    * @param name the unique name of this ELF object
@@ -65,6 +58,13 @@ public abstract class ELFObject {
     this.name = name;
   }
   
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public abstract String toString();
+
   //// Protected Area
   
   //// Private Area

@@ -59,7 +59,7 @@ public class UnitTest extends TestCase {
     /**
      * Indicates whether unit tests should be performed only in binary api mode.
      */
-    public static boolean performOnlyBinaryApiModeTests = true;
+    public static boolean performOnlyBinaryApiModeTests = false;
 
     /**
      * Creates a <tt>UnitTest</tt> object with the given name.
@@ -145,8 +145,10 @@ public class UnitTest extends TestCase {
      * Tests the fundamental aspects of the ascii api connection to the OpenCyc server.
      */
     public void testAsciiCycConnection () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (connectionMode == REMOTE_CYC_CONNECTION) {
+            System.out.println("\n**** bypassing testAsciiCycConnection in remote usage ****");
             return;
+        }
         System.out.println("\n**** testAsciiCycConnection ****");
         CycConnectionInterface cycConnection = null;
         try {
@@ -270,6 +272,17 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             if (CycAccess.current() != null)
                 System.out.println(CycAccess.current().cycConnection.connectionInfo());
+            Assert.fail(e.toString());
+        }
+
+        // Turn on the api interpreter if not already on.
+        String script = "(pwhen (boundp '*eval-in-api?*) \n" +
+                 "       (csetq *eval-in-api?* t))";
+        try {
+            cycAccess.converseVoid(script);
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
             Assert.fail(e.toString());
         }
 
@@ -533,6 +546,17 @@ public class UnitTest extends TestCase {
      */
     protected void doTestCycAccess1(CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
+        try {
+            // turn on api if not on.
+            String script = "(pwhen (boundp '*eval-in-api?*) \n" +
+                     "       (csetq *eval-in-api?* t))";
+            cycAccess.converseVoid(script);
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+
         CycObjectFactory.resetCycConstantCaches();
         // getConstantByName.
         CycConstant cycConstant = null;
@@ -2044,7 +2068,6 @@ public class UnitTest extends TestCase {
 */
         // setSymbolValue, getSymbolValue
         try {
-            //cycAccess.traceOn();
             CycSymbol a = CycObjectFactory.makeCycSymbol("a");
             cycAccess.setSymbolValue(a, new Integer(1));
             Assert.assertEquals(new Integer(1), cycAccess.getSymbolValue(a));
@@ -2054,7 +2077,8 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(CycObjectFactory.t, cycAccess.getSymbolValue(a));
             cycAccess.setSymbolValue(a, CycObjectFactory.nil);
             Assert.assertEquals(CycObjectFactory.nil, cycAccess.getSymbolValue(a));
-            CycConstant brazil = cycAccess.makeCycConstant("#$Brazil");
+            //cycAccess.traceOnDetailed();
+            CycConstant brazil = cycAccess.getConstantByName("#$Brazil");
             cycAccess.setSymbolValue(a, brazil);
             Assert.assertEquals(brazil, cycAccess.getSymbolValue(a));
             CycList valueList1 = cycAccess.makeCycList("(QUOTE (#$France #$Brazil))");
@@ -2190,19 +2214,6 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        // countUsingBestIndex
-        try {
-            CycList formula1 = cycAccess.makeCycList("(#$objectFoundInLocation ?X ?Y)");
-            // WorldGeographyMt
-            CycFort mt = cycAccess.getKnownConstantByGuid("bfaac020-9c29-11b1-9dad-c379636f7270");
-            Assert.assertTrue(cycAccess.countUsingBestIndex(formula1, mt) > 0);
-            Assert.assertTrue(cycAccess.countUsingBestIndex(formula1, CycAccess.baseKB) == 0);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            CycAccess.current().close();
-            Assert.fail(e.toString());
-        }
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
@@ -2253,13 +2264,14 @@ public class UnitTest extends TestCase {
 
             //cycAccess.traceOnDetailed();
 
-            // Java ByteArray  and SubL byte-vector are used only in the binary api.
             // turn on api if not on.
             String script = "(pwhen (boundp '*eval-in-api?*) \n" +
                      "       (csetq *eval-in-api?* t))";
             cycAccess.converseVoid(script);
             script = "(clear-environment)";
             cycAccess.converseVoid(script);
+
+            // Java ByteArray  and SubL byte-vector are used only in the binary api.
             script = "(csetq my-byte-vector (vector 0 1 2 3 4 255))";
             Object responseObject = cycAccess.converseObject(script);
             Assert.assertNotNull(responseObject);

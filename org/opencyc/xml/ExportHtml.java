@@ -7,6 +7,7 @@ import  org.w3c.dom.*;
 import  org.w3c.dom.html.*;
 import  org.apache.html.dom.*;
 import  org.apache.xml.serialize.*;
+import  ViolinStrings.Strings;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.api.*;
 import  org.opencyc.util.*;
@@ -470,7 +471,23 @@ public class ExportHtml {
         HTMLAnchorElement htmlAnchorElement;
         while (st.hasMoreTokens()) {
             String word = st.nextToken();
+            boolean wordHasLeadingLeftParen = false;
+            if (word.startsWith("(#$")) {
+                wordHasLeadingLeftParen = true;
+                word = word.substring(1);
+            }
             if (word.startsWith("#$")) {
+                StringBuffer nonNameChars = new StringBuffer();
+                while (true) {
+                    // Move trailing non-name characters.
+                    char ch = word.charAt(word.length() - 1);
+                    if (Character.isLetterOrDigit(ch))
+                        break;
+                    word = Strings.stripTrailing(word, ch);
+                    nonNameChars.insert(0, ch);
+                    if (word.length() == 0)
+                        break;
+                }
                 commentConstant = CycAccess.current().getConstantByName(word);
                 if (commentConstant != null &&
                     selectedCycForts.contains(commentConstant)) {
@@ -481,8 +498,13 @@ public class ExportHtml {
                     htmlAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
                     htmlAnchorElement.setHref("#" + commentConstant.cyclify());
                     parentElement.appendChild(htmlAnchorElement);
-                    linkTextNode = htmlDocument.createTextNode(word);
+                    if (wordHasLeadingLeftParen)
+                        stringBuffer.append('(');
+                    stringBuffer.append(word);
+                    stringBuffer.append(nonNameChars.toString());
+                    linkTextNode = htmlDocument.createTextNode(stringBuffer.toString());
                     htmlAnchorElement.appendChild(linkTextNode);
+                    stringBuffer = new StringBuffer();
                 }
                 else if (commentConstant == null &&
                          word.endsWith("s")) {
@@ -497,13 +519,28 @@ public class ExportHtml {
                         htmlAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
                         htmlAnchorElement.setHref("#" + commentConstant.cyclify());
                         parentElement.appendChild(htmlAnchorElement);
-                        linkTextNode = htmlDocument.createTextNode(word);
+                        if (wordHasLeadingLeftParen)
+                            stringBuffer.append('(');
+                        stringBuffer.append(word);
+                        stringBuffer.append(nonNameChars.toString());
+                        linkTextNode = htmlDocument.createTextNode(stringBuffer.toString());
                         htmlAnchorElement.appendChild(linkTextNode);
+                        stringBuffer = new StringBuffer();
+                    }
+                    else {
+                        stringBuffer.append(" ");
+                        if (wordHasLeadingLeftParen)
+                            stringBuffer.append('(');
+                        stringBuffer.append(word);
+                        stringBuffer.append(nonNameChars.toString());
                     }
                 }
                 else {
                     stringBuffer.append(" ");
+                    if (wordHasLeadingLeftParen)
+                        stringBuffer.append('(');
                     stringBuffer.append(word);
+                    stringBuffer.append(nonNameChars.toString());
                 }
             }
             else {
@@ -544,7 +581,7 @@ public class ExportHtml {
      */
     protected void createIsaNodes (CycFort cycFort, Element parentElement)
         throws IOException, CycApiException {
-        CycList isas = filterSelectedConstants(cycAccess.getIsas(cycFort));
+        CycList isas = cycAccess.getIsas(cycFort);
         if (verbosity > 4)
             Log.current.println("isas " + isas);
         lineBreak(parentElement);
@@ -552,19 +589,72 @@ public class ExportHtml {
         parentElement.appendChild(bElement);
         Node isasLabelTextNode = htmlDocument.createTextNode("direct instance of: ");
         bElement.appendChild(isasLabelTextNode);
+        ArrayList createdIsas = new ArrayList();
         for (int i = 0; i < isas.size(); i++) {
             CycFort isa = (CycFort) isas.get(i);
-            if (selectedCycForts.contains(isa)) {
-                HTMLAnchorElement isaAnchorElement =
-                    new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
-                isaAnchorElement.setHref("#" + isa.cyclify());
-                parentElement.appendChild(isaAnchorElement);
-                Node isaTextNode = htmlDocument.createTextNode(isa.cyclify());
-                isaAnchorElement.appendChild(isaTextNode);
-                Node spacesTextNode = htmlDocument.createTextNode("  ");
-                parentElement.appendChild(spacesTextNode);
+            if (! selectedCycForts.contains(isa)) {
+                isa = findSelectedIsa(isa);
+                if (isa == null)
+                    continue;
+            }
+            if (createdIsas.contains(isa))
+                continue;
+            else
+                createdIsas.add(isa);
+            HTMLAnchorElement isaAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+            isaAnchorElement.setHref("#" + isa.cyclify());
+            parentElement.appendChild(isaAnchorElement);
+            Node isaTextNode = htmlDocument.createTextNode(isa.cyclify());
+            isaAnchorElement.appendChild(isaTextNode);
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
+            parentElement.appendChild(spacesTextNode);
+        }
+    }
+
+    /**
+     * Returns the first indirect isa above the given term which is a member of the selected
+     * terms.
+     *
+     * @param isa the cyc collection which is not a member of the selected terms.
+     * @return the first indirect isa above the given term which is a member of the selected
+     * terms
+     */
+    protected CycFort findSelectedIsa (CycFort isa)
+        throws IOException, CycApiException {
+        if (cycAccess.isa(isa, cycAccess.getKnownConstantByName("CycKBSubsetCollection"))) {
+            if (verbosity > 4)
+                Log.current.println("  ignoring isa for " + isa);
+            return null;
+        }
+        if (cycAccess.isa(isa, cycAccess.getKnownConstantByName("CycSecureConstant"))) {
+            if (verbosity > 2)
+                Log.current.println("  ignoring isa for " + isa);
+            return null;
+        }
+        CycList isas = cycAccess.getIsas(isa);
+        CycFort directIsa;
+        for (int i = 0; i < isas.size(); i++) {
+            directIsa = (CycFort) isas.get(i);
+            if (selectedCycForts.contains(directIsa)) {
+                if (verbosity > 2)
+                    Log.current.println("traversed up from isa " + isa.cyclify() +
+                                        " to find selected isa " + directIsa);
+                return directIsa;
             }
         }
+        CycFort selectedIsa;
+        for (int i = 0; i < isas.size(); i++) {
+            directIsa = (CycFort) isas.get(i);
+            selectedIsa = findSelectedIsa(directIsa);
+            if (selectedIsa != null) {
+                if (verbosity > 2)
+                    Log.current.println("traversed up from isa " + isa.cyclify() +
+                                        " to find selected isa " + directIsa);
+                return selectedIsa;
+            }
+        }
+        return null;
     }
 
     /**

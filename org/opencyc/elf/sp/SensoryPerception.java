@@ -6,7 +6,6 @@ import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.ObservedInputMsg;
 import org.opencyc.elf.message.PerceivedSensoryInputMsg;
-import org.opencyc.elf.message.PredictedInputMsg;
 
 import org.opencyc.elf.s.Sensor;
 
@@ -58,18 +57,12 @@ public class SensoryPerception extends NodeComponent {
    *
    * @param sensoryProcessingChannel the takable channel from which messages are input
    * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
-   * @param predictorChannel the predictor channel to which messages are output
-   * @param entityEvaluatorChannel the puttable channel to which messages are output for the 
    * entity evaluator node component in value judgement
    */
   public SensoryPerception(Takable sensoryProcessingChannel,
-                           Puttable nextHigherLevelSensoryProcessingChannel,
-                           Puttable predictorChannel,
-                           Puttable entityEvaluatorChannel) {
+                           Puttable nextHigherLevelSensoryProcessingChannel) {
     consumer = new Consumer(sensoryProcessingChannel,
                             nextHigherLevelSensoryProcessingChannel,
-                            predictorChannel,
-                            entityEvaluatorChannel,
                             this);
     executor = new ThreadedExecutor();
     try {
@@ -142,17 +135,6 @@ public class SensoryPerception extends NodeComponent {
     protected final Takable sensoryProcessingChannel;
     
     /**
-     * the predictor channel to which messages are output
-     */
-    protected final Puttable predictorChannel;
-    
-    /**
-     * the puttable channel to which messages are output for the entity evaluator node
-     * component in value judgement
-     */
-    protected final Puttable entityEvaluatorChannel;
-    
-    /**
      * the puttable channel to which sensory processing messages are output for the next
      * higher level
      */
@@ -168,19 +150,12 @@ public class SensoryPerception extends NodeComponent {
      *
      * @param sensoryProcessingChannel the takable channel from which messages are input
      * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
-     * @param predictorChannel the predictor channel to which messages are output
-     * @param entityEvaluatorChannel the puttable channel to which messages are output for the 
-     * entity evaluator node component in value judgement
      * @param nodeComponent the parent node component
      */
     protected Consumer (Takable sensoryProcessingChannel,
                         Puttable nextHigherLevelSensoryProcessingChannel,
-                        Puttable predictorChannel,
-                        Puttable entityEvaluatorChannel,
                         NodeComponent nodeComponent) { 
       this.sensoryProcessingChannel = sensoryProcessingChannel;
-      this.predictorChannel = predictorChannel;
-      this.entityEvaluatorChannel = entityEvaluatorChannel;
       this.nextHigherLevelSensoryProcessingChannel = nextHigherLevelSensoryProcessingChannel;
       this.nodeComponent = nodeComponent;
     }
@@ -204,22 +179,11 @@ public class SensoryPerception extends NodeComponent {
      */
     void dispatchMsg (GenericMsg genericMsg) {
       if (genericMsg instanceof ObservedInputMsg)
-        processPredictedInputMsg((PredictedInputMsg) genericMsg);
-      else if (genericMsg instanceof PerceivedSensoryInputMsg)
-        processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
+        processObservedInputMsg((ObservedInputMsg) genericMsg);
       else if (genericMsg instanceof PerceivedSensoryInputMsg)
         processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
     }
-  
-    /**
-     * Processes the predicted input message.
-     */
-    protected void processPredictedInputMsg(PredictedInputMsg predictedInputMsg) {
-      Object obj = predictedInputMsg.getObj();
-      Object data = predictedInputMsg.getData();
-      //TODO
-    }
-    
+      
     /**
      * Processes the observed input message.
      */
@@ -254,8 +218,6 @@ public class SensoryPerception extends NodeComponent {
       perceivedSensoryInputMsg.setObj(obj);
       perceivedSensoryInputMsg.setData(data);
       sendMsgToRecipient(nextHigherLevelSensoryProcessingChannel, perceivedSensoryInputMsg);
-      sendMsgToRecipient(predictorChannel, perceivedSensoryInputMsg);
-      sendMsgToRecipient(entityEvaluatorChannel, perceivedSensoryInputMsg);
     }
   }
   

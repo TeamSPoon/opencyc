@@ -76,7 +76,7 @@ public class Log {
     /**
      * Default file name for the log file.
      */
-    protected static final String DEFAULT_LOG_FILENAME = "agent.log";
+    protected static final String DEFAULT_LOG_FILENAME = "cyc.log";
 
     /**
      * Constructs a new Log object and store a reference to it at the Log class.

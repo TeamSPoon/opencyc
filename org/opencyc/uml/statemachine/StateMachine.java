@@ -31,12 +31,12 @@ import org.opencyc.uml.core.*;
 public class StateMachine extends ModelElement {
 
     /**
-     * The context class of this state machine, which contains the
+     * The context Classifier of this state machine, which contains the
      * variables that distinguish the state, and the operations which
-     * can be performed upon state transitions.  Note that java Class
+     * can be performed upon state transitions.  Note that java Object
      * directly represents UML Classifier for ease of interpretation.
      */
-    protected Class context;
+    protected Object context;
 
     /**
      * the top state of this state machine
@@ -64,7 +64,7 @@ public class StateMachine extends ModelElement {
      *
      * @return the context of this state machine
      */
-    public Class getContext () {
+    public Object getContext () {
         return context;
     }
 
@@ -73,7 +73,7 @@ public class StateMachine extends ModelElement {
      *
      * @param context the context of this state machine
      */
-    public void setContext (Class context) {
+    public void setContext (Object context) {
         this.context = context;
     }
 

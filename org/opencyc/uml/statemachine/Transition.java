@@ -176,4 +176,15 @@ public class Transition extends ModelElement {
     public void setStateMachine (StateMachine stateMachine) {
         this.stateMachine = stateMachine;
     }
+
+    /**
+     * Gets whether this is a self transition, meaning that the source
+     * and target states are the same state.
+     *
+     * @return  whether this is a self transition, meaning that the source
+     * and target states are the same state
+     */
+    public boolean isSelfTransition () {
+        return source.equals(target);
+    }
 }

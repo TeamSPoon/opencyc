@@ -56,7 +56,6 @@ public class State extends StateVertex {
      */
     protected StateMachine stateMachine;
 
-
     /**
      * the state interpreter for this state
      */

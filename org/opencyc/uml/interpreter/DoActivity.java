@@ -39,6 +39,8 @@ public class DoActivity extends Thread {
      */
     public DoActivity(State state) {
         this.state = state;
+        state.setDoActivityThread(this);
+        this.start();
     }
 
     /**

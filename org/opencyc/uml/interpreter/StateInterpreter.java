@@ -86,9 +86,41 @@ public class StateInterpreter extends Thread {
         Procedure procedure = transition.getEffect();
         if (procedure != null)
             new ProcedureInterpreter(procedure);
-        state.setIsActive(true);
-        if (state.getEntry() != null)
-            new ActionInterpreter(state.getEntry());
+        if (! transition.isSelfTransition())
+            performEntryActions(transition);
+    }
+
+    /**
+     * Performs entry actions for the given entry state and for each of
+     * its superstates disjoint from the superstates of the transition
+     * source state.
+     *
+     * @param transition the transition
+     */
+    protected void performEntryActions (Transition transition) {
+        State[] statesFromRootToTarget = interpreter.getStatesFromRootTo(state);
+        //TODO think more about how to handle complex tranistions whose source is a vertex
+        State source = (State)transition.getSource();
+        State[] statesFromRootToSource = interpreter.getStatesFromRootTo(source);
+        for (int i = 0; i < statesFromRootToTarget.length; i++) {
+            if ((i > statesFromRootToSource.length) ||
+                (! statesFromRootToSource[i].equals(statesFromRootToTarget[i]))) {
+                    enterState(statesFromRootToTarget[i]);
+            }
+        }
+    }
+
+    /**
+     * Enters the given state, performing the entry action and the do-activity.
+     *
+     * @param stateToEnter the given state to enter
+     */
+    protected void enterState (State stateToEnter) {
+        stateToEnter.setIsActive(true);
+        if (stateToEnter.getEntry() != null)
+            new ActionInterpreter(stateToEnter.getEntry());
+        if (stateToEnter.getDoActivity() != null)
+            new DoActivity(stateToEnter);
     }
 
     /**
@@ -97,16 +129,11 @@ public class StateInterpreter extends Thread {
      * @param transition the transistion
      */
     public void interpretTransitionExit (Transition transition) {
-        if (isCompositeState()) {
-            exitActiveSubstates();
+        if (! isCompositeState()) {
+            exitState(state);
+            return;
         }
-    }
-
-    /**
-     * Exits the active substates of the interpreted composite state.
-     */
-    protected void exitActiveSubstates() {
-        DefaultMutableTreeNode treeNode = interpreter.getActiveSubstates(state);
+        DefaultMutableTreeNode treeNode = interpreter.getActiveStatesRootedAt(state);
         ArrayList activeSubstateList = new ArrayList();
         Stack treeNodeStack = new Stack();
         treeNodeStack.push(treeNode);
@@ -118,20 +145,20 @@ public class StateInterpreter extends Thread {
                 treeNodeStack.push(children.nextElement());
         }
         for (int i = activeSubstateList.size() - 1; i > -1; i--)
-            exitActiveSubstate((State) activeSubstateList.get(i));
+            exitState((State) activeSubstateList.get(i));
     }
 
     /**
-     * Exits the active substate of the given state.
+     * Exits the given state.
      *
-     * @param state the given state to exit
+     * @param stateToExit the given state to exit
      */
-    protected void exitActiveSubstate (State state) {
-        DoActivity doActivityThread = state.getDoActivityThread();
+    protected void exitState (State stateToExit) {
+        DoActivity doActivityThread = stateToExit.getDoActivityThread();
         doActivityThread.terminate();
-        if (state.getExit() != null)
+        if (stateToExit.getExit() != null)
             new ActionInterpreter(state.getExit());
-        CompletionEvent completionEvent = new CompletionEvent(state);
+        CompletionEvent completionEvent = new CompletionEvent(stateToExit);
         interpreter.enqueueEvent(completionEvent);
     }
 

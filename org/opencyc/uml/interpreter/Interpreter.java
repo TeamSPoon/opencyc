@@ -243,7 +243,7 @@ public class Interpreter {
      * @param state the given active state
      * @return the sub tree of active states rooted at the given active state
      */
-    public DefaultMutableTreeNode getActiveSubstates (State state) {
+    public DefaultMutableTreeNode getActiveStatesRootedAt (State state) {
         Iterator activeStatesIter = activeStates.keySet().iterator();
         while (activeStatesIter.hasNext()) {
             State activeState = (State) activeStatesIter.next();
@@ -254,7 +254,18 @@ public class Interpreter {
         return null;
     }
 
-
+    /**
+     * Returns the list of states from the root down to the given state
+     * in the active state configuration tree.
+     *
+     * @param state the given state
+     * @return the list of states from the root down to the given state
+     * in the active state configuration tree
+     */
+    protected State[] getStatesFromRootTo (State state) {
+        DefaultMutableTreeNode stateTreeNode = (DefaultMutableTreeNode) activeStates.get(state);
+        return (State[]) stateTreeNode.getUserObjectPath();
+    }
 
 
 }

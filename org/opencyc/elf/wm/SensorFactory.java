@@ -1,7 +1,10 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.elf.s.ConsoleInput;
 import org.opencyc.elf.s.Sensor;
+
+import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
 
@@ -52,11 +55,11 @@ public class SensorFactory {
     return sensorFactory;
   }
     
-  /**
-   * Populates the sensor pool.
-   */
+  /** Populates the sensor pool. */
   public void populateSensorPool() {
-    //TODO
+    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, 
+                                                    ResourcePool.getInstance().getResource(Resource.CONSOLE));
+    SensorPool.getInstance().setSensor(consoleInput.getName(), consoleInput);
   }
   //// Protected Area
   
@@ -64,8 +67,6 @@ public class SensorFactory {
   
   //// Internal Rep
   
-  /**
-   * the singleton sensor factory instance
-   */
+  /** the singleton sensor factory instance */
   protected static SensorFactory sensorFactory;
 }

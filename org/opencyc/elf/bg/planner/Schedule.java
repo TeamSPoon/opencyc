@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
+
 //// External Imports
 
 /**
@@ -34,7 +36,7 @@ public class Schedule {
   //// Constructors
 
   /**
-   * Creates a new instance of Job
+   * Creates a new instance of Schedule
    */
   public Schedule() {
   }
@@ -53,8 +55,9 @@ public class Schedule {
       return false;
     }
 
-    //TODO
-    return true;
+    Schedule thatSchedule = (Schedule) obj;
+
+    return getOutputTimeTrajectoryOfMotion().equals(thatSchedule.getOutputTimeTrajectoryOfMotion());
   }
 
   /**
@@ -63,11 +66,102 @@ public class Schedule {
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[Schedule ");
+    stringBuffer.append(getOutputTimeTrajectoryOfMotion().toString());
+    stringBuffer.append("]");
+
+    return stringBuffer.toString();
+  }
+
+  /**
+   * Gets the state of the schedule
+   * 
+   * @return the state of the schedule
+   */
+  public State getState() {
+    return state;
+  }
+
+  /**
+   * Sets the state of the schedule
+   * 
+   * @param state the state of the schedule
+   */
+  public void setState(State state) {
+    this.state = state;
+  }
+
+  /**
+   * Gets the value of the state variable for the output time-trajectory of
+   * motion which constists of a pair (Object[]) of ordered lists, the first
+   * being a list of vectors and the second a list of time instances
+   * 
+   * @return the output time-trajectory of motion
+   */
+  public Object[] getOutputTimeTrajectoryOfMotion() {
+    return (Object[]) state.getStateValue(State.OUTPUT_TIME_TRAJECTORY_OF_MOTION);
+  }
+
+  /**
+   * Sets the value of the state variable for the output time-trajectory of
+   * motion which constists of a pair (Object[]) of ordered lists, the first
+   * being a list of vectors and the second a list of time instances
+   * 
+   * @param outputTimeTrajectoryOfMotion the output time-trajectory of motion
+   */
+  public void setOutputTimeTrajectoryOfMotion(Object[] outputTimeTrajectoryOfMotion) {
+    state.setStateValue(State.OUTPUT_TIME_TRAJECTORY_OF_MOTION, outputTimeTrajectoryOfMotion);
+  }
+
+  /**
+   * Gets the value of the state variable for the trajectory of the action
+   * vector, which consists of a pair (Object[]) of ordered lists, the first
+   * being a list of vectors and the second a list of time instances
+   * 
+   * @return the trajectory of the action vector
+   */
+  public Object[] getActionVectorTrajectory() {
+    return (Object[]) state.getStateValue(State.ACTION_VECTOR_TRAJECTORY);
+  }
+
+  /**
+   * Sets the value of the state variable for the trajectory of the action
+   * vector, which constists of a pair (Object[]) of ordered lists, the first
+   * being a list of vectors and the second a list of time instances
+   * 
+   * @param actionVectorTrajectory the action vector trajectory
+   */
+  public void setActionVectorTrajectory(Object[] actionVectorTrajectory) {
+    state.setStateValue(State.OUTPUT_TIME_TRAJECTORY_OF_MOTION, actionVectorTrajectory);
+  }
+
+  /**
+   * Gets the value of the state variable for the trajectory of the input
+   * control vector, which consists of a pair (Object[]) of ordered lists, the
+   * first being a list of vectors and the second a list of time instances
+   * 
+   * @return the trajectory of the input control vector
+   */
+  public Object[] getInputContolVectorTrajectory() {
+    return (Object[]) state.getStateValue(State.INPUT_CONTROL_VECTOR_TIME_TRAJECTORY);
+  }
+
+  /**
+   * Sets the value of the state variable for the trajectory of the input
+   * control vector, which consists of a pair (Object[]) of ordered lists, the
+   * first being a list of vectors and the second a list of time instances
+   * 
+   * @param inputControlVectorTrajectory the trajectory of the input control
+   *        vector
+   */
+  public void setInputControlVectorTrajectory(Object[] inputControlVectorTrajectory) {
+    state.setStateValue(State.INPUT_CONTROL_VECTOR_TIME_TRAJECTORY, inputControlVectorTrajectory);
   }
 
   //// Protected Area
-  //// Private Area
-  //// Internal Rep
+
+  /** the state of the plan */
+  protected State state;
+
 }

@@ -76,6 +76,7 @@ public class ActionFactory {
     ArrayList parameterTypes = new ArrayList();
     parameterTypes.add(String.class);
     action.setParameterTypes(parameterTypes);
+    ActionLibrary.getInstance().setAction(action.getName(), action);
     
     // converse with user
     action = new Action();
@@ -86,6 +87,7 @@ public class ActionFactory {
     parameterTypes = new ArrayList();
     parameterTypes.add(String.class);
     action.setParameterTypes(parameterTypes);
+    ActionLibrary.getInstance().setAction(action.getName(), action);
     
     // emergency stop
     action = new Action();
@@ -102,28 +104,6 @@ public class ActionFactory {
     ActionLibrary.getInstance().setAction(action.getName(), action);
   }
     
-  /**
-   * Makes a new emergency stop action having no arguments and having no return value.
-   */
-  public Action makeEmergencyStop () {
-    Action emergencyStopAction = new Action();
-    emergencyStopAction.setName(Action.EMERGENCY_STOP);
-    emergencyStopAction.setParameterNames(new ArrayList());
-    emergencyStopAction.setParameterTypes(new ArrayList());
-    return emergencyStopAction;
-  }
-  
-  /**
-   * Makes a new init action having no arguments and having no return value.
-   */
-  public Action makeInit () {
-    Action initAction = new Action();
-    initAction.setName(Action.INIT);
-    initAction.setParameterNames(new ArrayList());
-    initAction.setParameterTypes(new ArrayList());
-    return initAction;
-  }
-  
   //// Protected Area
   
   //// Private Area

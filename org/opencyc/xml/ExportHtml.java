@@ -265,6 +265,7 @@ public class ExportHtml {
             Log.current.println("Ommiting ontology hierarchy export page");
         if (verbosity > 0)
             Log.current.println("HTML export completed");
+        cycAccess.close();
     }
 
     /**

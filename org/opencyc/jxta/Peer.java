@@ -54,15 +54,39 @@ public class Peer implements QueryHandler {
     public static final String JXTA_CREDENTIALS = "JXTACRED";
 
     /**
+     * outbound message serial number.
+     */
+    public int msgSerialNumber = 0;
+
+    /**
      * jxta peer group
      */
     protected PeerGroup peerGroup = null;
+
+    /**
+     * CycAccess connection to the local cyc server.
+     */
+    protected CycAccess cycAccess;
 
     /**
      * Constructs a new Peer object.
      */
     public Peer () {
         Log.makeLog();
+        cycAccess = new CycAccess();
+    }
+
+    /**
+     * Closes the peer's local cyc connection and disconnects the peer from JXTA.
+     */
+    public close () {
+        if (verbosity > 2)
+            Log.current.println("Closing the peer's Cyc connection");
+        if (cycAccess != null)
+            cycAccess.close();
+        if (verbosity > 2)
+            Log.current.println("Stopping the peer's JXTA services");
+        peerGroup.stopApp();
     }
 
     /**
@@ -72,10 +96,12 @@ public class Peer implements QueryHandler {
      */
     public static void main (String args[]) {
         Log.makeLog();
-        Log.current.println("Starting JXTA ....");
+        if (verbosity > 2)
+            Log.current.println("Starting the peer's JXTA services");
         Peer peer = new Peer();
         peer.startJxta();
         peer.test();
+        peer.close();
         System.exit(0);
     }
 
@@ -96,10 +122,13 @@ public class Peer implements QueryHandler {
         // Register the handler with the resolver service.
         Log.current.errorPrintln("Registering with ResolverService");
         resolverService.registerHandler(HANDLER_NAME, this);
-        double base = 0.0;
-        double power = 0.0;
-        double answer = 0;
-        CycApiResponseMsg cycApiResponseMsg = new CycApiResponseMsg(base, power, answer);
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("cconcatenate"));
+        command.add("hello");
+        command.add(" ");
+        command.add("world!");
+
+        CycApiResponseMsg cycApiResponseMsg = new CycApiResponseMsg(queryAcl);
         ResolverResponse resolverResponse = new ResolverResponse(HANDLER_NAME,
                                                                  JXTA_CREDENTIALS,
                                                                  0,
@@ -124,6 +153,93 @@ public class Peer implements QueryHandler {
             catch (Exception e) {
             }
         }
+    }
+
+    /**
+     * Sends the echo message, and displays the echo response.
+     *
+     * @param echoMessageText
+     */
+    public void doEcho (String echoMessageText) {
+        ACL acl = new ACL();
+        acl.setPerformative(FIPACONSTANTS.REQUEST);
+        AgentID senderAid = getAID(remoteAgentCommunity);
+        acl.setSenderAID(senderAid);
+        AgentID receiverAid = this.makeAID(remoteAgentName, remoteAgentCommunity);
+        acl.addReceiverAID(receiverAid);
+        String echoRequestXml =
+            "\n<list>\n" +
+            "  <symbol>ECHO</symbol>\n" +
+            "  <string>" + TextUtil.doEntityReference(echoMessageText) + "</string>\n" +
+            "</list>";
+        acl.setContentObject(echoRequestXml, ACL.BYTELENGTH_ENCODING);
+        acl.setLanguage(FIPACONSTANTS.XML);
+        acl.setOntology(AgentCommunityAdapter.CYC_ECHO_ONTOLOGY);
+        acl.setReplyWith(nextMessageId());
+        acl.setProtocol(FIPACONSTANTS.FIPA_REQUEST);
+        System.out.println("\nSending to remote agent " + remoteAgentName + ":" + echoRequestXml);
+        ACL replyAcl = null;
+        try {
+            //Timer timer = new Timer(this.oneMinuteDuration);
+            Timer timer = new Timer(10000);
+            replyAcl = converseMessage(acl, timer);
+        }
+        catch (TimeLimitExceededException e) {
+            Log.current.errorPrintln("No reply from " + remoteAgentName + " within the time limit");
+            System.exit(1);
+        }
+        catch (IOException e) {
+            Log.current.errorPrintln("Error communicating with " + remoteAgentName + "\n" + e.getMessage());
+            System.exit(1);
+        }
+        String echoReplyXml = (String) replyAcl.getContentObject();
+        Log.current.println("\nReceived from remote agent " + remoteAgentName + ":" + echoReplyXml);
+    }
+
+    /**
+     * Sends an Agent Communication Language message and returns the reply.
+     *
+     * @param acl the Agent Communication Language message to be sent
+     * @param timer the Timer object controlling the maximum wait time for a reply message,
+     * after which an excecption is thrown.
+     * @return the Agent Communication Language reply message which has been received for my agent
+     *
+     * @thows TimeLimitExceededException when the time limit is exceeded before a reply message
+     * is received.
+     */
+    public ACL converseMessage (ACL acl, org.opencyc.util.Timer timer)
+        throws TimeLimitExceededException, IOException {
+        Message requestMessage = new BasicMessage(acl.getReceiverAID().getName(),
+                                                  "fipa-xml",
+                                                  acl.toString());
+        requestMessage.setSender(regHelper.getAgentRep());
+        if (verbosity > 2)
+            Log.current.println("\nSending " + requestMessage.toString() +
+                                "\n  receiver: " + requestMessage.getReceiver());
+        String replyWith = acl.getReplyWith();
+        waitingReplyThreads.put(replyWith, Thread.currentThread());
+        String receiverName = acl.getReceiverAID().getName();
+        AgentRep receivingAgentRep = this.lookupAgentRep(receiverName);
+        if (receivingAgentRep == null)
+            throw new IOException("Receiving agent " + receiverName + " not found");
+        waitingReplyThreads.put(replyWith, Thread.currentThread());
+        receivingAgentRep.addMessage(requestMessage);
+        while (true)
+            try {
+                Thread.sleep(500);
+                if (timer.isTimedOut())
+                    throw new IOException("Time limit exceeded - " + timer.getElapsedSeconds() +
+                                          " seconds, while awaiting reply message to " + replyWith);
+            }
+            catch (InterruptedException e) {
+                ACL replyAcl = (ACL) replyMessages.get(replyWith);
+                if (replyAcl == null)
+                    throw new RuntimeException("No reply message for " + replyWith);
+                waitingReplyThreads.remove(replyWith);
+                if (verbosity > 2)
+                    Log.current.println("\nReceived reply to " + replyWith + "\n" + replyAcl);
+                return replyAcl;
+            }
     }
 
     /**
@@ -166,7 +282,7 @@ public class Peer implements QueryHandler {
         }
 
         // Perform the calculation.
-        answer = Math.pow(cycApiQueryMsg.getBase(), cycApiQueryMsg.getPower());
+        //answer = Math.pow(cycApiQueryMsg.getBase(), cycApiQueryMsg.getPower());
 
         // Create the response message.
         CycApiResponseMsg cycApiResponseMsg = new CycApiResponseMsg(cycApiQueryMsg.getBase(),
@@ -207,6 +323,16 @@ public class Peer implements QueryHandler {
             // do nothing.
         }
     }
+
+    /**
+     * Returns the next message serial number identifier.
+     *
+     * @return the next message serial number identifier
+     */
+    public String nextMessageId () {
+        return "message" + ++msgSerialNumber;
+    }
+
 }
 
 

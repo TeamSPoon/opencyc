@@ -2,8 +2,12 @@ package  org.opencyc.jxta;
 
 import  java.io.*;
 import  java.util.Enumeration;
+import  fipaos.ont.fipa.*;
+import  fipaos.ont.fipa.fipaman.*;
+import  fipaos.parser.ParserException;
 import  net.jxta.document.*;
-
+import  org.opencyc.cycobject.*;
+import  org.opencyc.api.*;
 
 /**
  * Provides a container for the JXTA Cyc api response.<p>
@@ -36,17 +40,14 @@ import  net.jxta.document.*;
  */
 public class CycApiResponseMsg {
     /**
-     * The base from the original query.
+     * the Agent Communication Language response
      */
-    private double base = 0.0;
+    public ACL responseAcl;
+
     /**
-     * The power from the original query.
+     * the Agent Communication Language response
      */
-    private double power = 0.0;
-    /**
-     * The answer value for the response.
-     */
-    private double answer = 0;
+    public CycList response;
 
     /**
      * Constructs a new CycApiResponseMsg object.
@@ -55,14 +56,14 @@ public class CycApiResponseMsg {
     }
 
     /**
-     * Creates a response object using the given answer value.
+     * Creates a response object using the Agent Communication Language response.
      *
-     * @param   anAnswer the answer for the response.
+     * @param   responseAcl the Agent Communication Language response
      */
-    public CycApiResponseMsg (double aBase, double aPower, double anAnswer) {
-        this.base = aBase;
-        this.power = aPower;
-        this.answer = anAnswer;
+    public CycApiResponseMsg (ACL responseAcl) {
+        this.responseAcl = responseAcl;
+        String contentXml = (String) responseAcl.getContentObject();
+        response = (CycList) CycObjectFactory.unmarshall(contentXml);
     }
 
     /**
@@ -71,69 +72,20 @@ public class CycApiResponseMsg {
      * @param   stream the InputStream source of the response data.
      */
     public CycApiResponseMsg (InputStream stream) throws Exception {
-        StructuredTextDocument document = (StructuredTextDocument)StructuredDocumentFactory.newStructuredDocument(new MimeMediaType("text/xml"),
+        StructuredTextDocument document =
+            (StructuredTextDocument) StructuredDocumentFactory.newStructuredDocument(
+                new MimeMediaType("text/xml"),
                 stream);
         Enumeration elements = document.getChildren();
         while (elements.hasMoreElements()) {
             TextElement element = (TextElement)elements.nextElement();
-            if (element.getName().equals("answer")) {
-                answer = Double.valueOf(element.getTextValue()).doubleValue();
-                continue;
-            }
-            if (element.getName().equals("base")) {
-                base = Double.valueOf(element.getTextValue()).doubleValue();
-                continue;
-            }
-            if (element.getName().equals("power")) {
-                power = Double.valueOf(element.getTextValue()).doubleValue();
-                continue;
+            if (element.getName().equals("acl")) {
+                responseAcl = new ACL(element.getTextValue());
+                String contentXml = (String) responseAcl.getContentObject();
+                response = (CycList) CycObjectFactory.unmarshall(contentXml);
+                break;
             }
         }
-    }
-
-    /**
-     * Returns the answer for the response.
-     *
-     * @return  the answer value for the response.
-     */
-    public double getAnswer () {
-        return  answer;
-    }
-
-    /**
-     * Returns the base for the query.
-     *
-     * @return  the base value for the query.
-     */
-    public double getBase () {
-        return  base;
-    }
-
-    /**
-     * Returns a Document representation of the response.
-     *
-     * @param   asMimeType the desired MIME type representation for the response.
-     * @return  a Document form of the response in the specified MIME representation.
-     */
-    public Document getDocument (MimeMediaType asMimeType) throws Exception {
-        Element element;
-        StructuredDocument document = (StructuredTextDocument)StructuredDocumentFactory.newStructuredDocument(asMimeType, "example:ExampleResponse");
-        element = document.createElement("base", Double.toString(getBase()));
-        document.appendChild(element);
-        element = document.createElement("power", Double.toString(getPower()));
-        document.appendChild(element);
-        element = document.createElement("answer", (new Double(getAnswer()).toString()));
-        document.appendChild(element);
-        return  document;
-    }
-
-    /**
-     * Returns the power for the query.
-     *
-     * @return  the power value for the query.
-     */
-    public double getPower () {
-        return  power;
     }
 
     /**
@@ -142,14 +94,7 @@ public class CycApiResponseMsg {
      * @return  the XML String representing this response.
      */
     public String toString () {
-        try {
-            StringWriter buffer = new StringWriter();
-            StructuredTextDocument document = (StructuredTextDocument)getDocument(new MimeMediaType("text/xml"));
-            document.sendToWriter(buffer);
-            return  buffer.toString();
-        } catch (Exception e) {
-            return  "";
-        }
+        return responseAcl.toString();
     }
 }
 

@@ -2,7 +2,12 @@ package  org.opencyc.jxta;
 
 import  java.io.*;
 import  java.util.Enumeration;
+import  fipaos.ont.fipa.*;
+import  fipaos.ont.fipa.fipaman.*;
+import  fipaos.parser.ParserException;
 import  net.jxta.document.*;
+import  org.opencyc.cycobject.*;
+import  org.opencyc.api.*;
 
 
 /**
@@ -37,13 +42,14 @@ import  net.jxta.document.*;
 public class CycApiQueryMsg {
 
     /**
-     * The base for query.
+     * the Agent Communication Language query
      */
-    private double base = 0.0;
+    public ACL queryAcl;
+
     /**
-     * The power for the query.
+     * the Agent Communication Language query
      */
-    private double power = 0.0;
+    public CycList query;
 
     /**
      * Constructs a new CycApiQueryMsg object.
@@ -52,14 +58,14 @@ public class CycApiQueryMsg {
     }
 
     /**
-     * Creates a query object using the given base and power.
+     * Creates a query object using the Agent Communication Language query.
      *
-     * @param   aBase the base for the query.
-     * @param   aPower the power for the query.
+     * @param   queryAcl the Agent Communication Language query
      */
-    public CycApiQueryMsg (double aBase, double aPower) {
-        this.base = aBase;
-        this.power = aPower;
+    public CycApiQueryMsg (ACL queryAcl) {
+        this.queryAcl = queryAcl;
+        String contentXml = (String) queryAcl.getContentObject();
+        query = (CycList) CycObjectFactory.unmarshall(contentXml);
     }
 
     /**
@@ -69,54 +75,19 @@ public class CycApiQueryMsg {
      */
     public CycApiQueryMsg (InputStream stream) throws Exception {
         StructuredTextDocument document =
-        (StructuredTextDocument) StructuredDocumentFactory.newStructuredDocument(new MimeMediaType("text/xml"),
-                                                                                 stream);
+            (StructuredTextDocument) StructuredDocumentFactory.newStructuredDocument(
+                new MimeMediaType("text/xml"),
+                stream);
         Enumeration elements = document.getChildren();
         while (elements.hasMoreElements()) {
             TextElement element = (TextElement)elements.nextElement();
-            if (element.getName().equals("base")) {
-                base = Double.valueOf(element.getTextValue()).doubleValue();
-                continue;
-            }
-            if (element.getName().equals("power")) {
-                power = Double.valueOf(element.getTextValue()).doubleValue();
-                continue;
+            if (element.getName().equals("acl")) {
+                queryAcl = new ACL(element.getTextValue());
+                String contentXml = (String) queryAcl.getContentObject();
+                query = (CycList) CycObjectFactory.unmarshall(contentXml);
+                break;
             }
         }
-    }
-
-    /**
-     * Returns the base for the query.
-     *
-     * @return  the base value for the query.
-     */
-    public double getBase () {
-        return  base;
-    }
-
-    /**
-     * Returns a Document representation of the query.
-     *
-     * @param   asMimeType the desired MIME type representation for the query.
-     * @return  a Document form of the query in the specified MIME representation.
-     */
-    public Document getDocument (MimeMediaType asMimeType) throws Exception {
-        StructuredDocument document = (StructuredTextDocument)StructuredDocumentFactory.newStructuredDocument(asMimeType, "example:ExampleQuery");
-        Element element;
-        element = document.createElement("base", Double.toString(getBase()));
-        document.appendChild(element);
-        element = document.createElement("power", Double.toString(getPower()));
-        document.appendChild(element);
-        return  document;
-    }
-
-    /**
-     * Returns the power for the query.
-     *
-     * @return  the power value for the query.
-     */
-    public double getPower () {
-        return  power;
     }
 
     /**
@@ -125,14 +96,7 @@ public class CycApiQueryMsg {
      * @return  the XML String representing this query.
      */
     public String toString () {
-        try {
-            StringWriter out = new StringWriter();
-            StructuredTextDocument doc = (StructuredTextDocument)getDocument(new MimeMediaType("text/xml"));
-            doc.sendToWriter(out);
-            return  out.toString();
-        } catch (Exception e) {
-            return  "";
-        }
+        return queryAcl.toString();
     }
 }
 

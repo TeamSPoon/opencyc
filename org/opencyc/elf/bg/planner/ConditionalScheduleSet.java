@@ -1,10 +1,12 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -52,6 +54,37 @@ public class ConditionalScheduleSet {
   //// Public Area
   
   /**
+   * Creates and returns a copy of this object as initialized by the task frame factory
+   * when the task frame library is populated.  The remaining instance variables in the
+   * cloned task frame are set by the job assinger according to the commanded task.
+   */
+  public Object clone () {
+    List clonedScheduleSet = new ArrayList();
+    Iterator iter = scheduleSet.iterator();
+    while (iter.hasNext()) {
+      Schedule schedule = (Schedule) iter.next();
+      clonedScheduleSet.add(schedule.clone());
+    }
+    return new ConditionalScheduleSet(predicateExpression, clonedScheduleSet);
+  }
+  
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString () {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ConditionalScheduleSet condition: ");
+    stringBuffer.append(predicateExpression.toString());
+    stringBuffer.append(" scheduleSet: ");
+    stringBuffer.append(scheduleSet);
+    stringBuffer.append("]");
+
+    return stringBuffer.toString();
+  }
+  
+  /**
    * Gets  the predicate expression 
    *
    * @return  the predicate expression 
@@ -67,6 +100,38 @@ public class ConditionalScheduleSet {
    */
   public List getScheduleSet () {
     return scheduleSet;
+  }
+
+  /**
+   * Gets all names of the actuators that are responsible for carrying out the task
+   * 
+   * @return all names of the actuators that are responsible for carrying out the task
+   */
+  public List getActuatorNames () {
+    List actuatorNames = new ArrayList();
+    Iterator iter = scheduleSet.iterator();
+    while (iter.hasNext()) {
+      Schedule schedule = (Schedule) iter.next();
+      if (! actuatorNames.contains(schedule.getActuatorName()))
+        actuatorNames.add(schedule.getActuatorName());
+    }
+    return actuatorNames;
+  }
+
+  /**
+   * Gets all the names of the sensors that are responsible for sensing phenomena related to the task
+   * 
+   * @return all the names of the sensors that are responsible for sensing phenomena related to the task
+   */
+  public List getSensorNames () {
+    List sensorNames = new ArrayList();
+    Iterator iter = scheduleSet.iterator();
+    while (iter.hasNext()) {
+      Schedule schedule = (Schedule) iter.next();
+      if (! sensorNames.contains(schedule.getSensorName()))
+        sensorNames.add(schedule.getSensorName());
+    }
+    return sensorNames;
   }
 
   //// Protected Area

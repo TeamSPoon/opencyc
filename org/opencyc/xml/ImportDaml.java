@@ -61,6 +61,12 @@ public class ImportDaml implements StatementHandler {
     protected ARP arp;
 
     /**
+     * Cyc terms which have semantic counterparts in DAML.
+     * DAML term --> Cyc term
+     */
+    protected static HashMap equivalentDamlCycTerms;
+
+    /**
      * Ontology library nicknames, which become namespace identifiers
      * upon import into Cyc.
      * namespace uri --> ontologyNickname
@@ -114,6 +120,15 @@ public class ImportDaml implements StatementHandler {
      */
     protected void initialize ()
         throws IOException, UnknownHostException, CycApiException {
+        if (equivalentDamlCycTerms == null) {
+            equivalentDamlCycTerms = new HashMap();
+            equivalentDamlCycTerms.put("daml:Thing", "Thing");
+            equivalentDamlCycTerms.put("daml:Class", "Collection");
+            equivalentDamlCycTerms.put("daml:Ontology", "AbstractInformationStructure");
+            equivalentDamlCycTerms.put("daml:DatatypeProperty", "BinaryPredicate");
+            equivalentDamlCycTerms.put("daml:ObjectProperty", "BinaryPredicate");
+            equivalentDamlCycTerms.put("rdf:Property", "BinaryPredicate");
+        }
     }
 
     /**
@@ -181,6 +196,17 @@ public class ImportDaml implements StatementHandler {
             displayTriple(subjectTermInfo,
                           predicateTermInfo,
                           objectTermInfo);
+
+            try {
+                importTriple(subjectTermInfo,
+                             predicateTermInfo,
+                             objectTermInfo);
+            }
+            catch (Exception e) {
+                Log.current.printStackTrace(e);
+                System.exit(1);
+
+            }
         }
         Log.current.println();
     }
@@ -203,8 +229,121 @@ public class ImportDaml implements StatementHandler {
             displayTriple(subjectTermInfo,
                           predicateTermInfo,
                           literalTermInfo);
+
+            try {
+                importTriple(subjectTermInfo,
+                             predicateTermInfo,
+                             literalTermInfo);
+            }
+            catch (Exception e) {
+                Log.current.printStackTrace(e);
+                System.exit(1);
+
+            }
         }
         Log.current.println();
+    }
+
+    /**
+     * Imports the RDF triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param predicateTermInfo the predicate DamlTermInfo object
+     * @param objLitTermInfo the object or literal DamlTermInfo object
+     */
+    protected void importTriple (DamlTermInfo subjectTermInfo,
+                                  DamlTermInfo predicateTermInfo,
+                                  DamlTermInfo objLitTermInfo)
+        throws IOException, UnknownHostException, CycApiException {
+        String predicate = predicateTermInfo.toString();
+        if (predicate.equals("rdf:type")) {
+            importIsa(subjectTermInfo, objLitTermInfo);
+        }
+        else if (predicate.equals("daml:versionInfo")) {
+            importVersionInfo(subjectTermInfo, objLitTermInfo);
+        }
+        else if (predicate.equals("daml:imports")) {
+            importVersionInfo(subjectTermInfo, objLitTermInfo);
+        }
+        else if (predicate.equals("rdfs:comment")) {
+            importComment(subjectTermInfo, objLitTermInfo);
+        }
+        else if (predicate.equals("rdfs:label")) {
+            importNameString(subjectTermInfo, objLitTermInfo);
+        }
+        else
+            Log.current.println("\nUnhandled predicate: " + predicate);
+    }
+
+    /**
+     * Imports the rdf:type triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param objectTermInfo the object DamlTermInfo object
+     */
+    protected void importIsa (DamlTermInfo subjectTermInfo,
+                              DamlTermInfo objectTermInfo) {
+    }
+
+    /**
+     * Imports the daml:versionInfo triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param literalTermInfo the object DamlTermInfo object
+     */
+    protected void importVersionInfo (DamlTermInfo subjectTermInfo,
+                                      DamlTermInfo literalTermInfo) {
+    }
+
+    /**
+     * Imports the rdfs:comment triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param literalTermInfo the object DamlTermInfo object
+     */
+    protected void importComment (DamlTermInfo subjectTermInfo,
+                                  DamlTermInfo literalTermInfo)
+        throws IOException, UnknownHostException, CycApiException {
+        importTerm(subjectTermInfo);
+        cycAccess.assertComment(subjectTermInfo.toString(),
+                                literalTermInfo.toString(),
+                                importMt);
+    }
+
+    /**
+     * Imports the rdfs:label triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param literalTermInfo the object DamlTermInfo object
+     */
+    protected void importNameString (DamlTermInfo subjectTermInfo,
+                                     DamlTermInfo literalTermInfo) {
+    }
+
+
+
+    /**
+     * Imports the given term.
+     *
+     * @param damlTermInfo the given daml term information
+     */
+    protected void importTerm (DamlTermInfo damlTermInfo)
+        throws IOException, UnknownHostException, CycApiException {
+        String term;
+        if (damlTermInfo.isURI) {
+            //term = "(StringMentionFn + term
+        }
+        else {
+            term = damlTermInfo.toString();
+            try {
+                cycAccess.findOrCreate(term);
+            }
+            catch (CycApiException e) {
+                Log.current.println("importing term: " + damlTermInfo.toString());
+                Log.current.printStackTrace(e);
+            }
+        }
+        cycAccess.assertIsa(term, kbSubsetCollectionName);
     }
 
     /**
@@ -288,9 +427,11 @@ public class ImportDaml implements StatementHandler {
         DamlTermInfo predicateTermInfo = resource(predicate);
         DamlTermInfo objectTermInfo = resource(object);
 
+        /*
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       objectTermInfo);
+                      */
     }
 
     /**
@@ -307,9 +448,11 @@ public class ImportDaml implements StatementHandler {
         DamlTermInfo predicateTermInfo = resource(predicate);
         DamlTermInfo literalTermInfo = literal(literal);
 
+        /*
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       literalTermInfo);
+                      */
     }
 
     /**
@@ -326,9 +469,11 @@ public class ImportDaml implements StatementHandler {
         DamlTermInfo predicateTermInfo = resource(predicate);
         DamlTermInfo objectTermInfo = resource(object);
 
+        /*
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       objectTermInfo);
+                      */
     }
 
     /**

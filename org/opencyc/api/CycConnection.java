@@ -87,8 +87,8 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Parameter that, when true, causes a trace of the messages to and from the server.
      */
-    //protected int trace = API_TRACE_NONE;
-    protected int trace = API_TRACE_MESSAGES;
+    protected int trace = API_TRACE_NONE;
+    //protected int trace = API_TRACE_MESSAGES;
 
     /**
      * Ascii mode connnection to the OpenCyc server.

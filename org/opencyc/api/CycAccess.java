@@ -3759,6 +3759,21 @@ public class CycAccess {
     }
 
     /**
+     * Finds or creates a Cyc constant in the KB with the specified name.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param constantName the name of the new constant
+     * @return the new constant term
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycConstant findOrCreate (String constantName)
+        throws IOException, UnknownHostException, CycApiException {
+        return createNewPermanent(constantName);
+    }
+
+    /**
      * Creates a new permanent Cyc constant in the KB with the specified name.  The operation
      * will be added to the KB transcript for replication and archive.
      *
@@ -4074,6 +4089,42 @@ public class CycAccess {
     }
 
     /**
+     * Create a microtheory MT, with a comment, isa <mt type> and CycFort genlMts.
+     * An existing microtheory with
+     * the same name is killed first, if it exists.
+     *
+     * @param mtName the name of the microtheory term
+     * @param comment the comment for the new microtheory
+     * @param isMt the type (as a string) of the new microtheory
+     * @param genlMts the list of more general microtheories (as strings)
+     * @return the new microtheory term
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycConstant createMicrotheory (String mtName,
+                                          String comment,
+                                          String isaMtName,
+                                          ArrayList genlMts)
+        throws IOException, UnknownHostException, CycApiException {
+        CycConstant mt = getConstantByName(mtName);
+        if (mt != null) {
+            kill(mt);
+        }
+        mt = createNewPermanent(mtName);
+        assertComment(mt, comment, baseKB);
+        assertIsa(mtName, isaMtName);
+        Iterator iterator = genlMts.iterator();
+        while (true) {
+            if (! iterator.hasNext())
+                break;
+            String genlMtName = (String) iterator.next();
+            assertGenlMt(mtName, genlMtName);
+        }
+    return mt;
+    }
+
+    /**
      * Create a microtheory system for a new mt.  Given a root mt name, create a theory <Root>Mt,
      * create a vocabulary <Root>VocabMt, and a data <Root>DataMt.  Establish genlMt links for the
      * theory mt and data mt.  Assert that the theory mt is a genlMt of the WorldLikeOursCollectorMt.
@@ -4222,6 +4273,65 @@ public class CycAccess {
                              CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(mt, genls, specCollection, genlsCollection);
+    }
+
+    /**
+     * Assert that the more general micortheory is a genlMt of the more specialized
+     * microtheory, asserted in the UniversalVocabularyMt
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param specMtName the name of the more specialized microtheory
+     * @param genlMtName the name of the more generalized microtheory
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGenlMt (String specMtName,
+                              String genlsMtName)
+        throws IOException, UnknownHostException, CycApiException {
+        assertGaf(universalVocabularyMt,
+                  genlMt,
+                  getKnownConstantByName(specMtName),
+                  getKnownConstantByName(genlsMtName));
+    }
+
+    /**
+     * Assert that the more general micortheory is a genlMt of the more specialized
+     * microtheory, asserted in the UniversalVocabularyMt
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param specMtName the more specialized microtheory
+     * @param genlMtName the more generalized microtheory
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGenlMt (CycFort specMt,
+                              CycFort genlsMt)
+        throws IOException, UnknownHostException, CycApiException {
+        assertGaf(universalVocabularyMt,
+                  genlMt,
+                  specMt,
+                  genlsMt);
+    }
+
+    /**
+     * Assert that the cycFort is a collection in the UniversalVocabularyMt.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param cycFortName the collection element name
+     * @param collectionName the collection name
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertIsa (String cycFortName,
+                           String collectionName)
+        throws IOException, UnknownHostException, CycApiException {
+        assertGaf(universalVocabularyMt,
+                  isa,
+                  getKnownConstantByName(cycFortName),
+                  getKnownConstantByName(collectionName));
     }
 
     /**

@@ -87,6 +87,7 @@ public class ImportSonatDaml {
 
         initializeDocumentsToImport();
         initializeOntologyNicknames();
+        cycAccess = new CycAccess();
         ImportDaml importDaml =
             new ImportDaml(cycAccess,
                            ontologyNicknames,
@@ -97,6 +98,7 @@ public class ImportSonatDaml {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
+            initializeDamlOntologyMt(importMt);
             importDaml.initialize();
             importDaml.importDaml(damlPath, importMt);
         }
@@ -216,6 +218,19 @@ public class ImportSonatDaml {
 
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont.daml", "oper");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont", "oper");
+    }
+
+    /**
+     * Initializes the DAML ontology mt.
+     */
+    protected void initializeDamlOntologyMt (String mtName)
+        throws IOException, UnknownHostException, CycApiException {
+        Log.current.println("Creating " + mtName);
+        String comment = "A microtheory to contain imported SONAT DAML assertions.";
+        ArrayList genlMts = new ArrayList();
+        genlMts.add("BaseKB");
+        String isaMtName = "ApplicationContext";
+        cycAccess.createMicrotheory(mtName, comment, isaMtName, genlMts);
     }
 
     /**

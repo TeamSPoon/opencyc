@@ -36,6 +36,7 @@ public class ResourcePool {
   
   /** Creates a new instance of ResourcePool */
   public ResourcePool() {
+    resourcePool = this;
   }
   
   //// Public Area

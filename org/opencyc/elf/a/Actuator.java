@@ -46,9 +46,9 @@ public interface Actuator {
   public ArrayList getResources();
   
   /**
-   * Gets the actions that this actuator can accomplish.
+   * Gets the actions that this actuator or virtual actuator (job assigner) can accomplish.
    *
-   * @return the actions that this actuator can accomplish
+   * @return the actions that this actuator or virtual actuator (job assigner) can accomplish
    */
   public ArrayList getActionCapabilities();
   

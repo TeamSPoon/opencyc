@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cat */interface.pl > opencyc.pl
+cat */interface.pl utilities.pl > opencyc.pl
 
 cat */e2c.pl > e2c.pl
 

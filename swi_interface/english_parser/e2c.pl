@@ -1,40 +1,51 @@
+% ===================================================================
+% File 'e2c.pl'
+% Purpose: Attempto Controlled English to CycL conversions from SWI-Prolog
+% Maintainer: Douglas Miles
+% Contact: $Author$@users.sourceforge.net ;
+% Version: 'interface.pl' 1.0.0
+% Revision:  $Revision$
+% Revised At:   $Date$
+
+% ===================================================================
 :- style_check(-singleton).
 :- style_check(-discontiguous).
 :- style_check(-atom).
 :- style_check(-string).
-% ?-sentence(Parsetree,[the.mouse,hated,the,cat],[]).
+
+:-ensure_module_loaded(library(opencyc)).
 
 % Semantic Interpretation
 /* from Bratko chapter 17 page 455.
    This comes from Pereira and Warren paper, AI journal, 1980 */
 
-/* when using sentence we need to pass 3 arguments, 
+/* 
+   when using sentence we need to pass 3 arguments, 
    the first will match CycL in the head of the DGC clause
    the second is the list containing the words in the sentence
    the third is the empty list.
-     
-     
-     
-     */
+*/
 
-e2c(English,CycL):-atom(English),
+e2c(English):-
+      e2c(English,CycLOut),
+      format('~w~n',[CycLOut]).
+
+
+e2c(English,CycLOut):-atom(English),
    atom_junct(English,[Eng|Lish]),!,
-   e2c([Eng|Lish],CycL).
+   e2c([Eng|Lish],CycLOut).
 
-e2c([Eng|Lish],MeaningO):-atom(Eng),!,
+e2c([Eng|Lish],CycLOut):-atom(Eng),!,
    try_e2c([Eng|Lish],CycL),
-   gen_meaning(CycL,MeaningO).
+   toCycApiExpression(CycLIn,[],CycLOut)..
    
    
 try_e2c(English,CycL):-sentence(CycL,English,[]),!.
+
 try_e2c(English,CycL):-noun_phrase('?Var','?SomeRelation',CycL,English,[]),!.
 
-%gen_meaning(CycL,CycL):-!.
-%gen_meaning(CycL,CycL):-atom(CycL),!.
-%gen_meaning([P|L],CycL):-gen_meaning_list([P|L],CycL)
+gen_meaning(CycLIn,CycLOut):-
 
-gen_meaning(CycLIn,CycL):-toMarkUp(chat,CycLIn,[],MeaningO),
-	 clean_out_chat(MeaningO,CycL).
 
 %clean_out_chat(CycL,CycLO):-sformat(CycLO,'~q',[CycL]).
 

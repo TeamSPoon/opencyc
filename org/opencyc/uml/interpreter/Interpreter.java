@@ -1,5 +1,8 @@
 package org.opencyc.uml.interpreter;
 
+import org.apache.commons.collections.*;
+import org.opencyc.uml.statemachine.*;
+
 /**
  * Interprets a UML StateMachine.
  *
@@ -28,9 +31,27 @@ package org.opencyc.uml.interpreter;
 public class Interpreter {
 
     /**
+     * the event queue
+     */
+    protected UnboundedFifoBuffer eventQueue = new UnboundedFifoBuffer();
+
+    /**
+     * the state machine
+     */
+    protected StateMachine stateMachine;
+
+    /**
      * Constructs a new Interpreter object.
      */
     public Interpreter() {
+    }
+
+    /**
+     * Constructs a new Interpreter object given a state machine
+     * to interpret.
+     */
+    public Interpreter(StateMachine stateMachine) {
+        this.stateMachine = stateMachine;
     }
 
     /**
@@ -41,4 +62,19 @@ public class Interpreter {
     public static void main(String[] args) {
         Interpreter interpreter = new Interpreter();
     }
+
+    /**
+     * Selects and dequeues event instances from the event queue for
+     * processing.
+     */
+    protected void eventDispatcher () {
+    }
+
+    /**
+     * Processes dispatched event instances according to the general semantics
+     * of UML state machines and the specific form of this state machine.
+     */
+    protected void eventProcessor () {
+    }
+
 }

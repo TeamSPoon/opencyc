@@ -72,7 +72,6 @@ public class ActionFactory {
     ArrayList parameterTypes = new ArrayList();
     parameterTypes.add(String.class);
     consolePromptedInputAction.setParameterTypes(parameterTypes);
-    consolePromptedInputAction.setOutpuType(null);
     return consolePromptedInputAction;
   }
   

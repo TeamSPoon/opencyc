@@ -1,13 +1,12 @@
 package org.opencyc.elf;
 
 //// Internal Imports
-import org.opencyc.elf.bg.planner.ScheduleLibrary;
-
 import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
 
 import org.opencyc.elf.wm.JobAssignmentLibrary;
+import org.opencyc.elf.wm.ScheduleLibrary;
 import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports

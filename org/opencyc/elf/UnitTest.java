@@ -12,7 +12,6 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
-import org.opencyc.elf.bg.planner.ScheduleLibrary;
 
 import org.opencyc.elf.message.DoTaskMsg;
 
@@ -32,6 +31,7 @@ import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.PlanSimulator;
 import org.opencyc.elf.wm.Predictor;
+import org.opencyc.elf.wm.ScheduleLibrary;
 import org.opencyc.elf.wm.ResourcePool;
 import org.opencyc.elf.wm.WorldModel;
 

@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
+import org.opencyc.elf.bg.state.State;
 
 //// External Imports
 import java.util.ArrayList;
@@ -46,27 +47,50 @@ public class ActionFactory {
   //// Public Area
   
   /**
-   * Makes a new init action having no arguments and having no return value.
-   */
-  public Action makeInit () {
-    Action initAction = new Action();
-    initAction.setName("init");
-    initAction.setParameterTypes(new ArrayList());
-    initAction.setParameterValues(new ArrayList());
-    initAction.setOutpuType(null);
-    return initAction;
-  }
-  
-  /**
    * Makes a new abort action having no arguments and having no return value.
    */
   public Action makeAbort () {
     Action abortAction = new Action();
+    abortAction.setState(new State());
     abortAction.setName("abort");
+    abortAction.setParameterNames(new ArrayList());
     abortAction.setParameterTypes(new ArrayList());
-    abortAction.setParameterValues(new ArrayList());
-    abortAction.setOutpuType(null);
     return abortAction;
+  }
+  
+  /**
+   * Makes a new console prompted input action having a prompt and having a string
+   * return value.
+   */
+  public Action makeConsolePromptedInput () {
+    Action consolePromptedInputAction = new Action();
+    consolePromptedInputAction.setState(new State());
+    consolePromptedInputAction.setName("converse with user");
+    ArrayList parameterNames = new ArrayList();
+    parameterNames.add("prompt");
+    consolePromptedInputAction.setParameterNames(parameterNames);
+    ArrayList parameterTypes = new ArrayList();
+    parameterTypes.add(String.class);
+    consolePromptedInputAction.setParameterTypes(parameterTypes);
+    consolePromptedInputAction.setOutpuType(null);
+    return consolePromptedInputAction;
+  }
+  
+  /**
+   * Makes a new converse with user action having a prompt and having a string
+   * return value.
+   */
+  public Action makeConverseWithUser () {
+    Action converseWithUserAction = new Action();
+    converseWithUserAction.setState(new State());
+    converseWithUserAction.setName("converse with user");
+    ArrayList parameterNames = new ArrayList();
+    parameterNames.add("prompt");
+    converseWithUserAction.setParameterNames(parameterNames);
+    ArrayList parameterTypes = new ArrayList();
+    parameterTypes.add(String.class);
+    converseWithUserAction.setParameterTypes(parameterTypes);
+    return converseWithUserAction;
   }
   
   /**
@@ -74,11 +98,23 @@ public class ActionFactory {
    */
   public Action makeEmergencyStop () {
     Action emergencyStopAction = new Action();
+    emergencyStopAction.setState(new State());
     emergencyStopAction.setName("emergency stop");
+    emergencyStopAction.setParameterNames(new ArrayList());
     emergencyStopAction.setParameterTypes(new ArrayList());
-    emergencyStopAction.setParameterValues(new ArrayList());
-    emergencyStopAction.setOutpuType(null);
     return emergencyStopAction;
+  }
+  
+  /**
+   * Makes a new init action having no arguments and having no return value.
+   */
+  public Action makeInit () {
+    Action initAction = new Action();
+    initAction.setState(new State());
+    initAction.setName("init");
+    initAction.setParameterNames(new ArrayList());
+    initAction.setParameterTypes(new ArrayList());
+    return initAction;
   }
   
   //// Protected Area

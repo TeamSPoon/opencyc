@@ -49,7 +49,7 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    * required resources.
    *
    * @param name the actuator name
-   * @param actuatedObject the resources requried by this actuator
+   * @param resources the resources requried by this actuator
    */
   public ConsoleOutput(String name, ArrayList resources) {
     this.name = name;

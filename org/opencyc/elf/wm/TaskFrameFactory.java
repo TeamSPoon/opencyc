@@ -31,7 +31,7 @@ public class TaskFrameFactory {
   
   //// Constructors
   
-  /** Creates a new instance of TaskFrameFactory. */
+  /** Creates a new instance of TaskFrameFactory and stores it in the singleton instance. */
   public TaskFrameFactory() {
     taskFrameFactory = this; 
   }
@@ -52,6 +52,17 @@ public class TaskFrameFactory {
    */
   public void populateTaskFrameLibrary () {
     //TODO
+    /*
+    Schedule schedule = new Schedule();
+    ActionFactory actionFactory = new ActionFactory();
+    
+    // convserse with user --> console prompted input
+    ArrayList plannedActions = new ArrayList();
+    plannedActions.add(actionFactory.makeConsolePromptedInput());
+    schedule.setPlannedActions(plannedActions);
+    ArrayList plannedGoals = new ArrayList();
+    addSchedule(Action.CONVERSE_WITH_USER, schedule);
+    */
   }
   
   //// Protected Area

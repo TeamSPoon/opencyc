@@ -105,7 +105,7 @@ public class HornClause {
         CycList consequentCycList = (CycList) hornClause.third();
         antecedantConjuncts = new ArrayList();
         if (antecedantCycList.first().toString().equals("and")) {
-            antecedantCycList = antecedantCycList.rest();
+            antecedantCycList = (CycList) antecedantCycList.rest();
             for (int i = 0; i < antecedantCycList.size(); i++)
                 antecedantConjuncts.add(new QueryLiteral((CycList) antecedantCycList.get(i)));
         }
@@ -340,7 +340,7 @@ public class HornClause {
             return false;
         CycList antecedantCycList = (CycList) cycList.second();
         if (antecedantCycList.first().equals(CycAccess.current().getKnownConstantByName("#$and"))) {
-            antecedantCycList = antecedantCycList.rest();
+            antecedantCycList = (CycList) antecedantCycList.rest();
             for (int i = 0; i < antecedantCycList.size(); i++)
                 if (! QueryLiteral.isValidConstraintRuleExpression((CycList) antecedantCycList.get(i)))
                     return false;

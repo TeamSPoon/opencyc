@@ -927,7 +927,7 @@ public class CycAccess {
             command1.add(id);
             CycList formula = converseList(command);
             cycNart.setFunctor((CycFort) formula.first());
-            cycNart.setArguments(formula.rest());
+            cycNart.setArguments((CycList) formula.rest());
         }
         else {
             command.add(CycObjectFactory.makeCycSymbol("nart-el-formula"));
@@ -937,7 +937,7 @@ public class CycAccess {
             command1.add(id);
             CycList formula = converseList(command);
             cycNart.setFunctor((CycFort) formula.first());
-            cycNart.setArguments(formula.rest());
+            cycNart.setArguments((CycList) formula.rest());
             List arguments = cycNart.getArguments();
             for (int i = 0; i < arguments.size(); i++) {
                 Object argument = arguments.get(i);

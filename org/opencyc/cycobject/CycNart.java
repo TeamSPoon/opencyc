@@ -121,7 +121,7 @@ public class CycNart extends CycFort implements Comparable {
         if (! (cycList.first() instanceof CycFort))
             throw new RuntimeException("CycNart functor must be a CycFort");
         functor = (CycFort) cycList.first();
-        arguments.addAll(cycList.rest());
+        arguments.addAll((CycList) cycList.rest());
     }
 
     /**

@@ -335,7 +335,7 @@ public class Literal  implements Comparable{
      * @return <tt>true</tt> if this <tt>Literal</tt> has simple evaluatable numerical arguments
      */
     public boolean hasEvaluatableNumericalArgs() throws IOException {
-        CycList args = this.getFormula().rest();
+        CycList args = (CycList) this.getFormula().rest();
         for (int i = 0; i < args.size(); i++) {
             Object arg = args.get(i);
             if (arg instanceof CycVariable)

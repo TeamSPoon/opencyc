@@ -533,7 +533,11 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("(Brazil)", cycList5.toString());
         Assert.assertEquals("(#$Brazil)", cycList5.cyclify());
         Assert.assertEquals(cycList5.first(), brazil);
-        Assert.assertTrue(cycList5.rest().size() == 0);
+        Assert.assertTrue(((CycList) (cycList5.rest())).size() == 0);
+        CycList cycList5a = new CycList();
+        cycList5a.add("a");
+        cycList5a.setDottedElement("b");
+        Assert.assertEquals("b", cycList5a.rest());
 
         // reverse()
         Assert.assertEquals(cycList5.toString(), cycList5.reverse().toString());

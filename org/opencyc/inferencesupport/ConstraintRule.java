@@ -110,7 +110,7 @@ public class ConstraintRule extends Literal implements Comparable{
             return true;
         }
         else if (predicate.equals(CycAccess.or)) {
-            CycList args = instantiatedConstraintRule.rest();
+            CycList args = (CycList) instantiatedConstraintRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
                 if (evaluateConstraintRule(arg))
@@ -119,7 +119,7 @@ public class ConstraintRule extends Literal implements Comparable{
             return false;
         }
         else if (predicate.equals(CycAccess.and)) {
-            CycList args = instantiatedConstraintRule.rest();
+            CycList args = (CycList) instantiatedConstraintRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
                 if (! evaluateConstraintRule(arg))

@@ -318,13 +318,17 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Returns the CycList after removing the first element.
+     * Returns the CycList after removing the first element, in in the case of a
+     * dotted pair, returns the dotted element.
      *
-     * @return new <tt>CycList</tt> with first element removed.
+     * @return the CycList after removing the first element, in in the case of a
+     * dotted pair, returns the dotted element.
      */
-    public CycList rest() {
+    public Object rest() {
         if (this.size() == 0)
             throw new RuntimeException("Cannot remove first element of an empty list.");
+        else if ((this.size() == 1) && (! this.isProperList))
+            return this.getDottedElement();
         CycList cycList = new CycList(this);
         cycList.remove(0);
         return cycList;
@@ -422,9 +426,9 @@ public class CycList extends ArrayList {
                 combination.add(availableItem);
                 result.add(combination);
             }
-        CycList newSelectedItems = selectedItems.rest();
+        CycList newSelectedItems = (CycList) selectedItems.rest();
         newSelectedItems.add(availableItems.first());
-        CycList newAvailableItems = availableItems.rest();
+        CycList newAvailableItems = (CycList) availableItems.rest();
         result.addAll(combinationsOfInternal(newSelectedItems, newAvailableItems));
         return result;
     }

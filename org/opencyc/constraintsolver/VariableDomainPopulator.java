@@ -290,7 +290,7 @@ public class VariableDomainPopulator {
             CycList theSet =  (CycList) rule.getFormula().third();
             if (! (theSet.first().toString().equals("TheSet")))
                 throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
-            ArrayList domainValues = new ArrayList(theSet.rest());
+            ArrayList domainValues = new ArrayList((CycList) theSet.rest());
             valueDomains.varsDictionary.put(cycVariable, domainValues);
         }
         else if (rule.getArity() == 1) {

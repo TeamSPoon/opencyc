@@ -128,7 +128,7 @@ public class ProblemParser {
                 CycList theSet =  (CycList) rule.getFormula().third();
                 if (! (theSet.first().toString().equals("TheSet")))
                     throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
-                ArrayList domainValues = new ArrayList(theSet.rest());
+                ArrayList domainValues = new ArrayList((CycList) theSet.rest());
                 constraintProblem.valueDomains.varsDictionary.put(cycVariable, domainValues);
                 if (verbosity > 8)
                     System.out.println("Initializing domain for " + cycVariable +

@@ -119,7 +119,7 @@ public class RuleEvaluator {
     public boolean ask(ConstraintRule rule) throws IOException, CycApiException {
         Object predicate = rule.getPredicate();
         if (predicate.equals(and)) {
-            CycList arguments = rule.getFormula().rest();
+            CycList arguments = (CycList) rule.getFormula().rest();
             for (int i = 0; i < arguments.size(); i++) {
                 Object argument = arguments.get(i);
                 if (! (argument instanceof CycList))
@@ -131,7 +131,7 @@ public class RuleEvaluator {
             return true;
         }
         else if (predicate.equals(or)) {
-            CycList arguments = rule.getFormula().rest();
+            CycList arguments = (CycList) rule.getFormula().rest();
             for (int i = 0; i < arguments.size(); i++) {
                 Object argument = arguments.get(i);
                 if (! (argument instanceof CycList))
@@ -180,7 +180,7 @@ public class RuleEvaluator {
             return argument1Integer == argument2Integer;
         }
         else if (predicate.equals(different)) {
-            CycList arguments = rule.getFormula().rest();
+            CycList arguments = (CycList) rule.getFormula().rest();
             return ! arguments.containsDuplicates();
         }
         else

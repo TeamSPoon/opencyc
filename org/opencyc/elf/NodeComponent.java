@@ -60,15 +60,6 @@ public abstract class NodeComponent extends ELFObject {
   public void setNode(Node node) {
     this.node = node;
   }
-
-  /**
-   * Gets the puttable channel for this node component to which other node
-   * components can send messages.
-   *
-   * @return the puttable channel for this node component to which other node
-   * components can send messages
-   */
-  public abstract Puttable getChannel ();
   
   /**
    * Sends the given message through the given channel to the recipient.

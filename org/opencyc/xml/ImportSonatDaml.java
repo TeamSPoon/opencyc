@@ -61,6 +61,7 @@ public class ImportSonatDaml {
      */
     public ImportSonatDaml()
         throws IOException, UnknownHostException, CycApiException {
+        Log.current.println("Connecting to Cyc server.");
         cycAccess = new CycAccess("MCCARTHY",
                                   4600,
                                   CycConnection.DEFAULT_COMMUNICATION_MODE,
@@ -75,6 +76,7 @@ public class ImportSonatDaml {
      */
     public static void main(String[] args) {
         Log.makeLog();
+        Log.current.println("Import DAML starting");
         ImportSonatDaml importSonatDaml;
         try {
             importSonatDaml = new ImportSonatDaml();
@@ -99,8 +101,8 @@ public class ImportSonatDaml {
                            ontologyNicknames,
                            kbSubsetCollectionName);
         //for (int i = 16; i < 17; i++) {
-        //for (int i = 0; i < documentsToImport.size(); i++) {
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < damlDocInfos.size(); i++) {
+        //for (int i = 0; i < 1; i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
@@ -114,16 +116,26 @@ public class ImportSonatDaml {
      * Initializes the documents to import.
      */
     protected void initializeDocumentsToImport () {
+        damlDocInfos.add(new DamlDocInfo("http://xmlns.com/foaf/0.1/",
+                                         "DamlSonatFoafOntologyMt"));
+        damlDocInfos.add(new DamlDocInfo("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont.daml",
+                                         "DamlSonatDrcDcesOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml",
                                          "DamlSonatDrcVesOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/10/html/airport-ont.daml",
                                          "DamlSonatAirportOntologyMt"));
-        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips.daml",
-                                         "DamlSonatFipsOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips-10-4.daml",
                                          "DamlSonatFips10-4OntologyMt"));
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips.daml",
+                                         "DamlSonatFipsOntologyMt"));
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/02/chiefs/chiefs-ont.daml",
+                                         "DamlSonatChiefsOntologyMt"));
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/02/chiefs/af.daml",
+                                         "DamlSonatChiefsAfOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/12/factbook/factbook-ont.daml",
                                          "DamlSonatCiaFactbookOntologyMt"));
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/12/factbook/internationalOrganizations.daml",
+                                         "DamlSonatCiaFactbookOrganizationOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/agency-ont.daml",
                                          "DamlSonatAgencyOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/CINC-ont.daml",
@@ -168,20 +180,42 @@ public class ImportSonatDaml {
 
         ontologyNicknames.put("http://www.daml.org/2001/03/daml+oil", "daml");
 
+        ontologyNicknames.put("http://xmlns.com/foaf/0.1", "foaf");
+        ontologyNicknames.put("http://xmlns.com/foaf", "foaf");
+        ontologyNicknames.put("http://xmlns.com/wot/0.1", "wot");
+        ontologyNicknames.put("http://xmlns.com/wordnet/1.6", "wn");
+        ontologyNicknames.put("http://www.w3.org/2001/08/rdfweb", "rdfweb");
+        ontologyNicknames.put("http://purl.org/dc/elements/1.1", "dublincore");
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2", "drc-dc");
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2", "ves");
         ontologyNicknames.put("http://orlando.drc.com/daml/Ontology/daml-extension/3.2/daml-ext-ont", "daml-ext");
 
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml", "factbook");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont", "factbook");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook", "factbook");
 
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/internationalOrganizations.daml", "factbkorg");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/internationalOrganizations", "factbkorg");
+
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/chiefs-ont.daml", "chiefs-ont");
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/chiefs-ont", "chiefs-ont");
+
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/af.daml", "chiefs");
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/af", "chiefs");
+
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont.daml", "dces");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont", "dces");
 
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml", "ves");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont", "ves");
 
         ontologyNicknames.put("http://www.daml.org/2001/10/html/airport-ont.daml", "airport");
+        ontologyNicknames.put("http://www.daml.org/2001/10/html/airport-ont", "airport");
 
         ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips-10-4-ont", "fips10-4");
 
         ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips.daml", "fips");
+        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips", "fips");
 
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont.daml", "enp");
         ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont", "enp");

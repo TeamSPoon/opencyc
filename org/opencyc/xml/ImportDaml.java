@@ -106,6 +106,17 @@ public class ImportDaml implements StatementHandler {
     protected String kbSubsetCollectionName;
 
     /**
+     * The KB Subset collection which identifies ontology import
+     * terms in Cyc.
+     */
+    protected CycConstant kbSubsetCollection;
+
+    /**
+     * The #$BookkeepingMt.
+     */
+    protected CycConstant bookkeepingMt;
+
+    /**
      * Constructs a new ImportDaml object.
      *
      * @param cycAccess the CycAccess instance which manages the connection
@@ -134,11 +145,14 @@ public class ImportDaml implements StatementHandler {
             equivalentDamlCycTerms = new HashMap();
             equivalentDamlCycTerms.put("daml:Thing", "Thing");
             equivalentDamlCycTerms.put("daml:Class", "Collection");
+            equivalentDamlCycTerms.put("rdfs:Class", "Collection");
             equivalentDamlCycTerms.put("daml:Ontology", "AbstractInformationStructure");
             equivalentDamlCycTerms.put("daml:DatatypeProperty", "DamlDatatypeProperty");
             equivalentDamlCycTerms.put("daml:ObjectProperty", "DamlObjectProperty");
             equivalentDamlCycTerms.put("rdf:Property", "BinaryPredicate");
         }
+        kbSubsetCollection = cycAccess.getKnownConstantByName(kbSubsetCollectionName);
+        bookkeepingMt = cycAccess.getKnownConstantByName("BookkeepingMt");
     }
 
     /**
@@ -207,9 +221,9 @@ public class ImportDaml implements StatementHandler {
         return;
         }
 
-        DamlTermInfo subjectTermInfo = resource(subject);
-        DamlTermInfo predicateTermInfo = resource(predicate);
-        DamlTermInfo objectTermInfo = resource(object);
+        DamlTermInfo subjectTermInfo = resource(subject, null);
+        DamlTermInfo predicateTermInfo = resource(predicate, null);
+        DamlTermInfo objectTermInfo = resource(object, predicateTermInfo);
 
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
@@ -241,8 +255,8 @@ public class ImportDaml implements StatementHandler {
             Log.current.println();
         }
         else {
-            DamlTermInfo subjectTermInfo = resource(subject);
-            DamlTermInfo predicateTermInfo = resource(predicate);
+            DamlTermInfo subjectTermInfo = resource(subject, null);
+            DamlTermInfo predicateTermInfo = resource(predicate, null);
             DamlTermInfo literalTermInfo = literal(literal);
 
             displayTriple(subjectTermInfo,
@@ -274,24 +288,92 @@ public class ImportDaml implements StatementHandler {
                                   DamlTermInfo predicateTermInfo,
                                   DamlTermInfo objLitTermInfo)
         throws IOException, UnknownHostException, CycApiException {
-        String predicate = predicateTermInfo.toString();
-        if (predicate.equals("rdf:type")) {
+        if (predicateTermInfo.isURI) {
+            predicateTermInfo.coerceToNamespace();
+        }
+        String damlPredicate = predicateTermInfo.toString();
+        if (damlPredicate.equals("rdf:type")) {
             importIsa(subjectTermInfo, objLitTermInfo);
+            return;
         }
-        else if (predicate.equals("daml:versionInfo")) {
+        if (damlPredicate.equals("rdfs:subClassOf")) {
+            importGenls(subjectTermInfo, objLitTermInfo);
+            return;
+        }
+        else if (damlPredicate.equals("daml:versionInfo")) {
             importVersionInfo(subjectTermInfo, objLitTermInfo);
+            return;
         }
-        else if (predicate.equals("daml:imports")) {
+        else if (damlPredicate.equals("daml:imports")) {
             importImports(subjectTermInfo, objLitTermInfo);
+            return;
         }
-        else if (predicate.equals("rdfs:comment")) {
+        else if (damlPredicate.equals("rdfs:comment") ||
+                 damlPredicate.equals("daml:comment")) {
             importComment(subjectTermInfo, objLitTermInfo);
+            return;
         }
-        else if (predicate.equals("rdfs:label")) {
+        else if (damlPredicate.equals("rdfs:label") ||
+                 damlPredicate.equals("daml:label")) {
             importNameString(subjectTermInfo, objLitTermInfo);
+            return;
         }
-        else
-            Log.current.println("\nUnhandled predicate: " + predicate);
+        else if (damlPredicate.equals("daml:samePropertyAs")) {
+            importEqualSymbols(subjectTermInfo, objLitTermInfo);
+            return;
+        }
+        else if (damlPredicate.equals("rdfs:domain")) {
+            importArg1Isa(subjectTermInfo, objLitTermInfo);
+            return;
+        }
+        else if (damlPredicate.equals("rdfs:range")) {
+            importArg2Isa(subjectTermInfo, objLitTermInfo);
+            return;
+        }
+        else if (damlPredicate.equals("rdfs:seeAlso")) {
+            importConceptuallyRelated(subjectTermInfo, objLitTermInfo);
+            return;
+        }
+        else if (damlPredicate.equals("rdfs:isDefinedBy")) {
+            importSubInformation(subjectTermInfo, objLitTermInfo);
+            return;
+        }
+        else if (damlPredicate.equals("rdfs:subPropertyOf") ||
+                 damlPredicate.equals("daml:subPropertyOf")) {
+            importGenlPreds(subjectTermInfo, objLitTermInfo);
+            return;
+        }
+        else if (predicateTermInfo.ontologyNickname.equals("daml") ||
+                 predicateTermInfo.ontologyNickname.equals("rdfs") ||
+                 predicateTermInfo.ontologyNickname.equals("rdf")) {
+            Log.current.println("\n\nUnhandled predicate: " + damlPredicate + "\n");
+            return;
+        }
+        CycFort subject = importTerm(subjectTermInfo);
+        CycFort predicate = cycAccess.getConstantByName(damlPredicate);
+        if (predicate == null) {
+            predicate = importTerm(predicateTermInfo);
+            if (predicate == null) {
+                Log.current.println("\n*** " + damlPredicate + " is an invalid constant ***");
+                return;
+            }
+            cycAccess.assertIsaBinaryPredicate(predicate);
+        }
+        if (objLitTermInfo.isLiteral) {
+            cycAccess.assertGaf(importMt,
+                                predicate,
+                                subject,
+                                (String) objLitTermInfo.literal);
+            return;
+        }
+        CycFort object = cycAccess.getConstantByName(objLitTermInfo.toString());
+        if (object == null)
+            object = importTerm(objLitTermInfo);
+        cycAccess.assertGaf(importMt,
+                            predicate,
+                            subject,
+                            object);
+
     }
 
     /**
@@ -304,13 +386,121 @@ public class ImportDaml implements StatementHandler {
                               DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
+        if (term == null) {
+            Log.current.println("\n*** " + subjectTermInfo.toString() + " is an invalid constant ***");
+            return;
+        }
         String collectionName = objectTermInfo.toString();
-        if (this.equivalentDamlCycTerms.containsKey(collectionName))
+        if (equivalentDamlCycTerms.containsKey(collectionName))
             collectionName = (String) equivalentDamlCycTerms.get(collectionName);
-        CycFort collection = cycAccess.getKnownConstantByName(collectionName);
+        CycFort collection = cycAccess.getConstantByName(collectionName);
+        if (collection == null) {
+            Log.current.println("*** " + collectionName + " is undefined ***\n");
+            collection = importTerm(objectTermInfo);
+            cycAccess.assertIsaCollection(collection);
+        }
         cycAccess.assertIsa(term,
-                            collection,
-                            importMt);
+                            collection);
+    }
+
+    /**
+     * Imports the rdf:subClassOf triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param objectTermInfo the object DamlTermInfo object
+     */
+    protected void importGenls (DamlTermInfo subjectTermInfo,
+                                DamlTermInfo objectTermInfo)
+        throws IOException, UnknownHostException, CycApiException  {
+        CycFort term = importTerm(subjectTermInfo);
+        if (term == null) {
+            Log.current.println("\n*** " + subjectTermInfo.toString() + " is an invalid constant ***");
+            return;
+        }
+        String collectionName = objectTermInfo.toString();
+        if (equivalentDamlCycTerms.containsKey(collectionName))
+            collectionName = (String) equivalentDamlCycTerms.get(collectionName);
+        CycFort collection = cycAccess.getConstantByName(collectionName);
+        if (collection == null) {
+            Log.current.println("\n*** " + collectionName + " is undefined ***");
+            collection = importTerm(objectTermInfo);
+            cycAccess.assertIsaCollection(collection);
+        }
+        cycAccess.assertGenls(term,
+                              collection);
+    }
+
+    /**
+     * Imports the daml:samePropertyAs triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param objectTermInfo the object DamlTermInfo object
+     */
+    protected void importEqualSymbols (DamlTermInfo subjectTermInfo,
+                                    DamlTermInfo objectTermInfo)
+        throws IOException, UnknownHostException, CycApiException  {
+        importTerm(subjectTermInfo);
+        cycAccess.assertEqualSymbols(subjectTermInfo.toString(),
+                                     objectTermInfo.toString());
+    }
+
+    /**
+     * Imports the rdfs:domain triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param objectTermInfo the object DamlTermInfo object
+     */
+    protected void importArg1Isa (DamlTermInfo subjectTermInfo,
+                                  DamlTermInfo objectTermInfo)
+        throws IOException, UnknownHostException, CycApiException  {
+        CycFort term1 = importTerm(subjectTermInfo);
+        CycFort term2 = importTerm(objectTermInfo);
+        cycAccess.assertArgIsa(term1, 1, term2);
+    }
+
+    /**
+     * Imports the rdfs:range triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param objectTermInfo the object DamlTermInfo object
+     */
+    protected void importArg2Isa (DamlTermInfo subjectTermInfo,
+                                  DamlTermInfo objectTermInfo)
+        throws IOException, UnknownHostException, CycApiException  {
+        CycFort term1 = importTerm(subjectTermInfo);
+        CycFort term2 = importTerm(objectTermInfo);
+        cycAccess.assertArgIsa(term1, 2, term2);
+    }
+
+    /**
+     * Imports the rdfs:seeAlso triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param objectTermInfo the object DamlTermInfo object
+     */
+    protected void importConceptuallyRelated (DamlTermInfo subjectTermInfo,
+                                              DamlTermInfo objectTermInfo)
+        throws IOException, UnknownHostException, CycApiException  {
+        CycFort term1 = importTerm(subjectTermInfo);
+        CycFort term2 = importTerm(objectTermInfo);
+        cycAccess.assertConceptuallyRelated(term1,
+                                            term2,
+                                            importMt);
+    }
+
+    /**
+     * Imports the daml:subPropertyOf triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param objectTermInfo the object DamlTermInfo object
+     */
+    protected void importGenlPreds (DamlTermInfo subjectTermInfo,
+                                    DamlTermInfo objectTermInfo)
+        throws IOException, UnknownHostException, CycApiException  {
+        CycFort specPred = importTerm(subjectTermInfo);
+        CycFort genlPred = importTerm(objectTermInfo);
+        cycAccess.assertGenlPreds(specPred,
+                                  genlPred);
     }
 
     /**
@@ -323,9 +513,7 @@ public class ImportDaml implements StatementHandler {
                                       DamlTermInfo literalTermInfo)
         throws IOException, UnknownHostException, CycApiException {
         CycFort term = importTerm(subjectTermInfo);
-        cycAccess.assertNameString(term,
-                                   literalTermInfo.literalValue(),
-                                   importMt);
+        //TODO
     }
 
     /**
@@ -371,6 +559,23 @@ public class ImportDaml implements StatementHandler {
     }
 
     /**
+     * Imports the rdfs:isDefinedBy triple.
+     *
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param literalTermInfo the object DamlTermInfo object
+     */
+    protected void importSubInformation (DamlTermInfo subjectTermInfo,
+                                         DamlTermInfo uriTermInfo)
+        throws IOException, UnknownHostException, CycApiException {
+        CycFort term = importTerm(subjectTermInfo);
+        CycFort resource = importTerm(uriTermInfo);
+        cycAccess.assertGaf(importMt,
+                            cycAccess.getKnownConstantByName("subInformation"),
+                            term,
+                            resource);
+    }
+
+    /**
      * Imports the given term.
      *
      * @param damlTermInfo the given daml term information
@@ -385,13 +590,25 @@ public class ImportDaml implements StatementHandler {
         if (damlTermInfo.isURI) {
             cycFort = new CycNart(cycAccess.getKnownConstantByName("URLFn"),
                                   damlTermInfo.toString());
-            Log.current.println("importing term: " + cycFort.cyclify());
+            //Log.current.println("importing term: " + cycFort.cyclify());
         }
         else {
             String term = damlTermInfo.toString();
-            Log.current.println("importing term: " + term);
-            cycFort = cycAccess.findOrCreate(term);
-            cycAccess.assertIsa(term, kbSubsetCollectionName);
+            //Log.current.println("importing term: " + term);
+            try {
+                cycFort = cycAccess.findOrCreate(term);
+            }
+            catch (CycApiException e) {
+                Log.current.println("Error while importing " + term);
+                Log.current.printStackTrace(e);
+                System.exit(1);
+            }
+            if (cycFort == null)
+                // error
+                return cycFort;
+            cycAccess.assertIsa(cycFort,
+                                kbSubsetCollection,
+                                bookkeepingMt);
         }
         damlTermInfo.cycFort = cycFort;
         previousDamlTermInfo = damlTermInfo;
@@ -421,34 +638,49 @@ public class ImportDaml implements StatementHandler {
      * Returns the DamlTerm info of the given RDF resource.
      *
      * @param aResource the RDF resource
+     * @param predicateTermInfo when processing the RDF triple object,
+     * contains the predicate term info, otherwise is null;
      * @return the DamlTerm info of the given RDF resource
      */
-    protected DamlTermInfo resource(AResource aResource) {
+    protected DamlTermInfo resource(AResource aResource,
+                                    DamlTermInfo predicateTermInfo) {
         DamlTermInfo damlTermInfo = new DamlTermInfo();
+        String localName;
+        String nameSpace;
         Resource resource = translateResource(aResource);
         if (aResource.isAnonymous()) {
             damlTermInfo.isAnonymous = true;
             damlTermInfo.anonymousId = aResource.getAnonymousID();
+            return damlTermInfo;
+        }
+        else if (aResource.getURI().indexOf("?") > -1) {
+            damlTermInfo.isURI = false;
+            int index = aResource.getURI().indexOf("?");
+            localName = aResource.getURI().substring(index + 1);
+            nameSpace = aResource.getURI().substring(0, index);
         }
         else if (! hasUriNamespaceSyntax(aResource.getURI())) {
             damlTermInfo.isURI = true;
             damlTermInfo.uri = resource.toString();
+            if (! damlTermInfo.mustBeUri(predicateTermInfo))
+                damlTermInfo.coerceToNamespace();
+            return damlTermInfo;
         }
         else {
-            String localName = resource.getLocalName();
-            damlTermInfo.localName = localName;
-            String nameSpace = resource.getNameSpace();
-            damlTermInfo.nameSpace = nameSpace;
-            if (localName == null ||
-                nameSpace == null)
-                throw new RuntimeException("Invalid nameSpace " + nameSpace +
-                                           " localName " + localName +
-                                           " for resource " + resource.toString());
-            String ontologyNickname = getOntologyNickname(nameSpace, resource);
-            damlTermInfo.ontologyNickname = ontologyNickname;
-            String constantName = ontologyNickname + ":" + localName;
-            damlTermInfo.constantName = constantName;
+            localName = resource.getLocalName();
+            nameSpace = resource.getNameSpace();
         }
+        if (localName == null ||
+            nameSpace == null)
+            throw new RuntimeException("Invalid nameSpace " + nameSpace +
+                                       " localName " + localName +
+                                       " for resource " + resource.toString());
+        damlTermInfo.localName = localName;
+        damlTermInfo.nameSpace = nameSpace;
+        String ontologyNickname = getOntologyNickname(nameSpace, resource);
+        damlTermInfo.ontologyNickname = ontologyNickname;
+        String constantName = ontologyNickname + ":" + localName;
+        damlTermInfo.constantName = constantName;
         return damlTermInfo;
     }
 
@@ -475,9 +707,9 @@ public class ImportDaml implements StatementHandler {
     protected void processRestrictionSubject(AResource subject,
                                              AResource predicate,
                                              AResource object) {
-        DamlTermInfo subjectTermInfo = resource(subject);
-        DamlTermInfo predicateTermInfo = resource(predicate);
-        DamlTermInfo objectTermInfo = resource(object);
+        DamlTermInfo subjectTermInfo = resource(subject, null);
+        DamlTermInfo predicateTermInfo = resource(predicate, null);
+        DamlTermInfo objectTermInfo = resource(object, null);
 
         /*
         displayTriple(subjectTermInfo,
@@ -496,8 +728,8 @@ public class ImportDaml implements StatementHandler {
     protected void processRestrictionSubject(AResource subject,
                                             AResource predicate,
                                             ALiteral literal) {
-        DamlTermInfo subjectTermInfo = resource(subject);
-        DamlTermInfo predicateTermInfo = resource(predicate);
+        DamlTermInfo subjectTermInfo = resource(subject, null);
+        DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo literalTermInfo = literal(literal);
 
         /*
@@ -517,9 +749,9 @@ public class ImportDaml implements StatementHandler {
     protected void processRestrictionObject(AResource subject,
                                             AResource predicate,
                                             AResource object) {
-        DamlTermInfo subjectTermInfo = resource(subject);
-        DamlTermInfo predicateTermInfo = resource(predicate);
-        DamlTermInfo objectTermInfo = resource(object);
+        DamlTermInfo subjectTermInfo = resource(subject, null);
+        DamlTermInfo predicateTermInfo = resource(predicate, null);
+        DamlTermInfo objectTermInfo = resource(object, null);
 
         /*
         displayTriple(subjectTermInfo,
@@ -540,9 +772,9 @@ public class ImportDaml implements StatementHandler {
         String key = nameSpace.substring(0, len);
         String nickname = (String) ontologyNicknames.get(key);
         if (nickname == null) {
-            boolean ans = hasUriNamespaceSyntax(resource.getURI());
-            throw new RuntimeException("Ontology nickname not found for " + key +
-                                       "\nResource " + resource.toString());
+            Log.current.println("\n*** Ontology nickname not found for " + key +
+                                "\nResource " + resource.toString());
+            nickname = "unknown";
         }
         return nickname;
     }
@@ -576,17 +808,6 @@ public class ImportDaml implements StatementHandler {
         }
         else
             return new ResourceImpl(aResource.getURI());
-    }
-
-    /**
-     * Assert that the given term is an instance of the DamlSonatConstant KB
-     * subset collection.
-     *
-     * @param cycConstantName the name of the Cyc constant
-     */
-    protected void assertIsaDamlSonatConstant (String cycConstantName)
-        throws IOException, CycApiException {
-        cycAccess.assertIsa(cycConstantName, kbSubsetCollectionName, "BookkeepingMt");
     }
 
     /**
@@ -648,6 +869,7 @@ public class ImportDaml implements StatementHandler {
             else
                 return constantName;
         }
+
         /**
          * Returns the literal value of this object.
          *
@@ -658,6 +880,47 @@ public class ImportDaml implements StatementHandler {
                 return literal;
             else
                 throw new RuntimeException(this.toString() + " is not a literal");
+        }
+
+        /**
+         * Coerces a namespace:localname from the URI.
+         * For example, http://xmlns.com/foaf/0.1/Person -->
+         * http://xmlns.com/foaf/0.1#Person
+         */
+        public void coerceToNamespace() {
+            int index = uri.lastIndexOf("/");
+            nameSpace = uri.substring(0, index);
+            localName = uri.substring(index + 1);
+            ontologyNickname = (String) ontologyNicknames.get(nameSpace);
+            if (ontologyNickname == null) {
+                Log.current.println("*** nickname not found for " + nameSpace +
+                                    "\nuri " + uri);
+                ontologyNickname = "unknown";
+            }
+            constantName = ontologyNickname + ":" + localName;
+            isURI = false;
+        }
+
+        /**
+         * Returns true if the uri does not represent an RDF
+         * object.  Heuristic patterns are used.
+         *
+         * @param predicateTermInfo when present indicates that this
+         * is the object of the RDF triple
+         * @return true if the uri does not represent an RDF
+         * object
+         */
+        public boolean mustBeUri(DamlTermInfo predicateTermInfo) {
+            if (predicateTermInfo != null) {
+                if (predicateTermInfo.toString().equals("daml:imports") ||
+                    predicateTermInfo.toString().equals("rdfs:isDefinedBy") ||
+                    predicateTermInfo.toString().equals("rdfs:seeAlso"))
+                    return true;
+            }
+            if (uri.endsWith(".daml") ||
+               (uri.indexOf("daml+oil") > -1))
+                return true;
+            return false;
         }
     }
 

@@ -34,7 +34,7 @@ import  org.opencyc.cycobject.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycConnection {
+public class CycConnection implements CycConnectionInterface {
 
     /**
      * Default host name for the OpenCyc server.
@@ -695,6 +695,21 @@ public class CycConnection {
         }
         in.reset();
         return  result.toString();
+    }
+
+    /**
+     * Returns the trace value.
+     */
+    public int getTrace() {
+        return trace;
+    }
+
+    /**
+     * Sets the trace value.
+     * @param trace the trace value
+     */
+    public void setTrace(int trace) {
+        this.trace = trace;
     }
 
     /**

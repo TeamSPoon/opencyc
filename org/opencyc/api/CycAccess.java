@@ -182,7 +182,7 @@ public class CycAccess {
     /**
      * Reference to <tt>CycConnection</tt> object which manages the api connection to the OpenCyc server.
      */
-    protected CycConnection cycConnection;
+    protected CycConnectionInterface cycConnection;
 
     /**
      * Constructs a new CycAccess object.
@@ -193,6 +193,7 @@ public class CycAccess {
              CycConnection.DEFAULT_COMMUNICATION_MODE,
              CycAccess.DEFAULT_CONNECTION);
     }
+
     /**
      * Constructs a new CycAccess object given a host name, port, communication mode and persistence indicator.
      *
@@ -268,7 +269,7 @@ public class CycAccess {
      *
      * @return the CycConnection object
      */
-    public CycConnection getCycConnection() {
+    public CycConnectionInterface getCycConnection() {
         return cycConnection;
     }
 
@@ -292,11 +293,11 @@ public class CycAccess {
         Object [] response = {null, null};
         if (! persistentConnection) {
             cycConnection = new CycConnection(hostName, port, communicationMode, this);
-            cycConnection.trace = saveTrace;
+            cycConnection.setTrace(saveTrace);
         }
         response = cycConnection.converse(command);
         if (! persistentConnection) {
-            saveTrace = cycConnection.trace;
+            saveTrace = cycConnection.getTrace();
             cycConnection.close();
         }
         return response;

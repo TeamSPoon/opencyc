@@ -1,5 +1,8 @@
 package org.opencyc.chat;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
 
 /**
@@ -30,9 +33,17 @@ import org.opencyc.cycobject.*;
 public class Parser {
 
     /**
-     * Constructs a new Parser object.
+     * the Cyc server connection and API wrapper
      */
-    public Parser() {
+    CycAccess cycAccess;
+
+    /**
+     * Constructs a new Parser object given a CycAccess connection.
+     *
+     * @param cycAccess the Cyc server connection and API wrapper
+     */
+    public Parser(CycAccess cycAccess) {
+        this.cycAccess = cycAccess;
     }
 
     /**
@@ -44,7 +55,8 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    public Object[] parseUserInput (String userInput) {
+    public Object[] parseUserInput (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
         if (userInput.toLowerCase().startsWith("create "))
             return parseCreateCommand(userInput);
@@ -74,8 +86,43 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    protected Object[] parseCreateCommand (String userInput) {
+    protected Object[] parseCreateCommand (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
+        String text = userInput.substring(6);
+        int index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "The constant name is not properly quoted.";
+                return answer;
+            }
+            if (text.charAt(index) == '"') {
+                break;
+            }
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "The constant name is not properly quoted.";
+            return answer;
+        }
+        StringBuffer constantNameBuffer = new StringBuffer();
+        if (index < text.length() - 1)
+            text = text.substring(index + 1);
+        index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "The constant name is not properly quoted.";
+                return answer;
+            }
+            if (text.charAt(index) == '"') {
+                break;
+            }
+            constantNameBuffer.append(text.charAt(index));
+        }
+        String constantName = constantNameBuffer.toString();
+        String script = "(cyc-create \"" + constantName + "\")";
+        CycList createCommand = cycAccess.makeCycList(script);
         return answer;
     }
 
@@ -87,8 +134,42 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    protected Object[] parseRenameCommand (String userInput) {
+    protected Object[] parseRenameCommand (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
+        String text = userInput.substring(6);
+        int index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "I do not recognize the constant to be renamed.";
+                return answer;
+            }
+            if (text.charAt(index) == '#') {
+                break;
+            }
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "I do not recognize the constant to be renamed.";
+            return answer;
+        }
+        StringBuffer constantNameBuffer = new StringBuffer();
+        text = text.substring(index);
+        index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "I do not recognize the new constant name.";
+                return answer;
+            }
+            if (text.charAt(index) == '"') {
+                break;
+            }
+            constantNameBuffer.append(text.charAt(index));
+        }
+        String constantName = constantNameBuffer.toString();
+        String script = "(cyc-create \"" + constantName + "\")";
+        CycList createCommand = cycAccess.makeCycList(script);
         return answer;
     }
 
@@ -100,7 +181,8 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    protected Object[] parseKillCommand (String userInput) {
+    protected Object[] parseKillCommand (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
         return answer;
     }
@@ -113,7 +195,8 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    protected Object[] parseAssertCommand (String userInput) {
+    protected Object[] parseAssertCommand (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
         return answer;
     }
@@ -126,7 +209,8 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    protected Object[] parseUnassertCommand (String userInput) {
+    protected Object[] parseUnassertCommand (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
         return answer;
     }
@@ -139,7 +223,8 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    protected Object[] parseAskCommand (String userInput) {
+    protected Object[] parseAskCommand (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
         return answer;
     }
@@ -152,7 +237,8 @@ public class Parser {
      * the equivalent SubL command and whose second
      * element is the error message
      */
-    protected Object[] parseSummarizeCommand (String userInput) {
+    protected Object[] parseSummarizeCommand (String userInput)
+        throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
         return answer;
     }

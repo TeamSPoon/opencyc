@@ -52,6 +52,7 @@ public class UnitTest extends TestCase {
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testChatterBot"));
+        testSuite.addTest(new UnitTest("testParser"));
         return testSuite;
     }
 
@@ -135,6 +136,40 @@ public class UnitTest extends TestCase {
         interpreter.interpret();
         if (verbosity > 2)
             System.out.print(interpreter.displayStateConfigurationTree());
+    }
+
+    /**
+     * Tests the Parser object.
+     */
+    public void testParser () {
+        System.out.println("\n**** testParser ****");
+        Log.makeLog("unit-test.log");
+
+        try {
+            String localHostName = InetAddress.getLocalHost().getHostName();
+            CycAccess cycAccess;
+            if (localHostName.equals("crapgame.cyc.com")) {
+                cycAccess = new CycAccess("localhost",
+                                          3620,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+                //cycAccess.traceNamesOn();
+            }
+            else if (localHostName.equals("thinker")) {
+                cycAccess = new CycAccess("localhost",
+                                          3600,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+            }
+            else
+                cycAccess = new CycAccess();
+            Parser parser = new Parser(cycAccess);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+        System.out.println("**** testParser ****");
     }
 
 

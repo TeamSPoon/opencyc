@@ -7,8 +7,23 @@ import org.opencyc.elf.Status;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
+import org.opencyc.elf.message.DoTaskMsg;
+import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.message.JobAssignmentStatus;
+import org.opencyc.elf.message.KBObjectRequestMsg;
+import org.opencyc.elf.message.KBObjectResponseMsg;
+import org.opencyc.elf.message.PredictedInputMsg;
+import org.opencyc.elf.message.PredictionRequestMsg;
+import org.opencyc.elf.message.SchedulerStatusMsg;
+import org.opencyc.elf.message.ScheduleJobMsg;
+
 //// External Imports
 import java.util.ArrayList;
+
+import EDU.oswego.cs.dl.util.concurrent.Executor;
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
+import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
  * <P>
@@ -46,6 +61,36 @@ public class JobAssigner extends NodeComponent {
   public JobAssigner() {
   }
 
+  /** 
+   * Creates a new instance of JobAssigner with the given
+   * input channel.
+   *
+   * @param jobAssignerChannel the takable channel from which messages are input
+   * @param executorChannel the puttable channel to which messages are output to the higher
+   * level executor, or null if this is the highest level
+   * @param knowledgeBaseChannel the puttable channel to which messages are output to the
+   * knowledge base
+   * @param predictorChannel the puttable channel to which messages are output to the predictor
+   */
+  public JobAssigner (Takable jobAssignerChannel,
+                      Puttable executorChannel,
+                      Puttable knowledgeBaseChannel,
+                      Puttable predictorChannel) {
+    consumer = new Consumer(jobAssignerChannel,
+                            executorChannel,
+                            knowledgeBaseChannel,
+                            predictorChannel,
+                            this);
+    executor = new ThreadedExecutor();
+    try {
+      executor.execute(consumer);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+
   //// Public Area
 
   /**
@@ -77,6 +122,144 @@ public class JobAssigner extends NodeComponent {
   //// Protected Area
 
   /**
+   * Thread which processes the input message channel.
+   */
+  protected class Consumer implements Runnable {
+    
+    /**
+     * the takable channel from which messages are input
+     */
+    protected final Takable jobAssignerChannel;
+    
+    /**
+     * the puttable channel to which messages are output to the higher
+     * level executor, or null if this is the highest level
+     */
+    protected final Puttable executorChannel;
+    
+    /**
+     * the puttable channel to which messages are output to the
+     * knowledge base
+     */
+    protected final Puttable knowledgeBaseChannel;
+    
+    /**
+     * the puttable channel to which messages are output to the predictor
+     */
+    protected final Puttable predictorChannel;
+    
+    /**
+     * the parent node component
+     */
+    protected NodeComponent nodeComponent;
+          
+    /**
+     * the node's commanded task
+     */
+    protected TaskCommand taskCommand;
+    
+    /**
+     * the task frame for the current task command
+     */
+    protected TaskFrame taskFrame;
+    
+    /**
+     * Creates a new instance of Consumer.
+     *
+     * @param jobAssignerChannel the takable channel from which messages are input
+     * @param executorChannel the puttable channel to which messages are output to the higher
+     * level executor, or null if this is the highest level
+     * @param knowledgeBaseChannel the puttable channel to which messages are output to the
+     * knowledge base
+     * @param predictorChannel the puttable channel to which messages are output to the predictor
+     * @param nodeComponent the parent node component
+     */
+    protected Consumer (Takable jobAssignerChannel,
+                        Puttable executorChannel,
+                        Puttable knowledgeBaseChannel,
+                        Puttable predictorChannel,
+                        NodeComponent nodeComponent) { 
+      this.jobAssignerChannel = jobAssignerChannel;
+      this.executorChannel = executorChannel;
+      this.knowledgeBaseChannel = knowledgeBaseChannel;
+      this.predictorChannel = predictorChannel;
+      this.nodeComponent = nodeComponent;
+    }
+
+    /**
+     * Reads messages from the input queue and processes them.
+     */
+    public void run () {
+      try {
+        while (true) { 
+          dispatchMsg((GenericMsg) jobAssignerChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+      
+    /**
+     * Dispatches the given input channel message by type.
+     *
+     * @param genericMsg the given input channel message
+     */
+    void dispatchMsg (GenericMsg genericMsg) {
+      if (genericMsg instanceof DoTaskMsg)
+        processDoTaskMsg((DoTaskMsg) genericMsg);
+      else if (genericMsg instanceof KBObjectResponseMsg)
+        processKBObjectResponseMsg((KBObjectResponseMsg) genericMsg);
+      else if (genericMsg instanceof PredictedInputMsg)
+        processPredictedInputMsg((PredictedInputMsg) genericMsg);
+      else if (genericMsg instanceof SchedulerStatusMsg)
+        processSchedulerStatusMsg((SchedulerStatusMsg) genericMsg);
+    }
+  
+    /**
+     * Processes the do task message.
+     *
+     * @param doTaskMsg the do task message that contains the commanded task
+     */
+    protected void processDoTaskMsg (DoTaskMsg doTaskMsg) {
+      taskCommand = doTaskMsg.getTaskCommand();
+      //TOTO
+    }
+
+    /**
+     * Processes the knowledge base object response message.
+     *
+     * @param kbObjectResponseMsg the knowledge base object response message
+     */
+    protected void processKBObjectResponseMsg (KBObjectResponseMsg kbObjectResponseMsg) {
+      Object obj = kbObjectResponseMsg.getObj();
+      Object data = kbObjectResponseMsg.getData();
+      //TODO
+    }
+        
+    /**
+     * Processes the predicted input message.
+     *
+     * @param predictedInputMsg the predicted input message
+     */
+    protected void processPredictedInputMsg (PredictedInputMsg predictedInputMsg) {
+      Object obj = predictedInputMsg.getObj();
+      Object data = predictedInputMsg.getData();
+      //TODO
+    }
+        
+    /**
+     * Processes the schedule status message.
+     *
+     * @param schedulerStatusMsg he schedule status message
+     */
+    protected void processSchedulerStatusMsg (SchedulerStatusMsg schedulerStatusMsg) {
+      //TODO
+      Status status = schedulerStatusMsg.getStatus();
+    }
+        
+    //TODO add methods to send the output messages
+  }
+
+  /**
    * Receives the do task message from behavior generation.  This
    * triggers the fetch task message to be sent back to behavior generation.
    */
@@ -89,18 +272,6 @@ public class JobAssigner extends NodeComponent {
     // may trigger jobAssignerStatus(status)
   }
   
-  /**
-   * Receives the receive task frame message from behavior generation.  This triggers
-   * the decompose task frame message.
-   */
-  protected void receiveTaskFrame () {
-    //TODO
-    // received via channel from behavior generation
-    // TaskCommand taskCommand
-    // TaskFrame taskFrame
-    decomposeTaskFrame();
-  }
-
   /**
    * Receives the scheduler status message from a scheduler
    */
@@ -151,19 +322,19 @@ public class JobAssigner extends NodeComponent {
     // TaskCommand taskCommand
   }
   
-  /**
-   * Sends the job assigner status message to behavior generation
-   */
-  protected void JobAssignerStatus () {
-    //TODO
-    // send via channel to behavior generation
-    // Status status
-    // send behaviorGenerationStatus(status) to behaviorGeneration
-  }
-  
-  public void run() {
-  }
   
   //// Private Area
   //// Internal Rep
+  
+  /**
+   * the thread which processes the input channel of messages
+   */
+  Consumer consumer;
+  
+  /**
+   * the executor of the consumer thread
+   */
+  Executor executor;
+  
+  //// main
 }

@@ -5,6 +5,7 @@ import java.io.*;
 import org.apache.oro.util.*;
 import org.opencyc.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.cycobject.databinding.*;
 
 /**
  * Provides the way to create cyc objects and reuse previously cached instances.<br>

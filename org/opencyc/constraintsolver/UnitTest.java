@@ -625,5 +625,4 @@ public class UnitTest extends TestCase {
 
         System.out.println("** testConstraintProblem OK **");
     }
-
 }

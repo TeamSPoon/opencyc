@@ -331,6 +331,7 @@ public class ForwardCheckingSearcher {
             CycVariable variable = (CycVariable) remainingRuleVariables.get(0);
             // one variable left to instantiate
             if (highCardinalityDomains.contains(variable))
+
                 // The one variable left has a high cardinality domain.
                 if (highCardinalityDomains.getPopulatingRule(variable) == null) {
                     // A rule has not yet populated the high cardinality domain.
@@ -690,15 +691,4 @@ public class ForwardCheckingSearcher {
             System.out.println("Constraint degree for " + variable + " is " + degree);
         return degree;
     }
-
-
-
-
-
-
-
-
-
-
-
 }

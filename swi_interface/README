@@ -1,14 +1,22 @@
 This is an interface for interaction with SWI-Prolog:
 Assuming you have downloaded and installed SWI-Prolog >version 5.x from http://www.swi-prolog.org
 
-It supports Queries, Asserts, UnAsserts, SubL, Loading Files and natural language Parsing in Prolog.
+
+It supports Queries, Asserts, UnAsserts, SubL, Loading Files and natural language parsing in SWI-Prolog.
 
 To INSTALL:
 
 
-run install.sh
+run install.sh (This will concatinate certain files together and copy them into $SWI_HOME/library)
 
-This will concatinate certain files together and copy them into $SWI_HOME/library
+[root@titan swi_interface]# ./install.sh
+/opt/opencyc/src/swi_interface
+% library(opencyc) compiled into opencyc 0.04 sec, 148,796 bytes
+%  library(opencyc) compiled into opencyc 0.04 sec, 148,836 bytes
+% library(e2c) compiled into e2c 0.05 sec, 192,492 bytes
+% Updating index for library /usr/lib/pl-5.0.6/library/
+[root@titan swi_interface]#
+
 
 from prolog:
 
@@ -21,9 +29,6 @@ Please visit http://www.swi-prolog.org for details.
 
 For help, use ?- help(Topic). or ?- apropos(Word).
 
-?- [opencyc].
-% opencyc compiled 0.01 sec, 50,980 bytes
-
 Yes
 ?- cycQuery(isa(X,'Dog')).
 Connected to Cyc TCP Server {$stream(236966),$stream(236986)}
@@ -33,7 +38,7 @@ X = ['GenericInstanceFn', 'Dog'] ;
 X = 'Buffy' ;
 
 No
-?- cycAssert(isa('Fido','Dog'),'JamudMt').
+?- cycAssert(isa('Fido','Dog'),'PrologDataMt').
 T
 
 Yes

@@ -1,6 +1,7 @@
 % ===================================================================
 % File 'e2c.pl'
-% Purpose: Attempto Controlled English to CycL conversions from SWI-Prolog
+% Purpose: Attempto Controlled English to CycL conversions from SWI-Prolog  
+% This implementation is an incomplete proxy for CycNL and likely will not work as well
 % Maintainer: Douglas Miles
 % Contact: $Author$@users.sourceforge.net ;
 % Version: 'interface.pl' 1.0.0
@@ -8,12 +9,20 @@
 % Revised At:   $Date$
 
 % ===================================================================
+:-module(e2c,[
+	e2c/1,
+	e2c/2,
+	testE2C/0]).
+
 :- style_check(-singleton).
 :- style_check(-discontiguous).
 :- style_check(-atom).
 :- style_check(-string).
 
-:-ensure_module_loaded(library(opencyc)).
+:-use_module(library(opencyc)).  
+
+
+
 
 % Semantic Interpretation
 /* from Bratko chapter 17 page 455.
@@ -37,19 +46,11 @@ e2c(English,CycLOut):-atom(English),
 
 e2c([Eng|Lish],CycLOut):-atom(Eng),!,
    try_e2c([Eng|Lish],CycL),
-   toCycApiExpression(CycLIn,[],CycLOut)..
+   toCycApiExpression(CycLIn,CycLOut).
    
    
 try_e2c(English,CycL):-sentence(CycL,English,[]),!.
-
 try_e2c(English,CycL):-noun_phrase('?Var','?SomeRelation',CycL,English,[]),!.
-
-gen_meaning(CycLIn,CycLOut):-
-
-
-%clean_out_chat(CycL,CycLO):-sformat(CycLO,'~q',[CycL]).
-
-clean_out_chat(CycL,CycL).
 
 
 % =======================================================
@@ -1723,3 +1724,6 @@ cycPred('#$TTPred-attr-Sikh').
 cycPred('#$genlMt').
 
 */
+
+testE2C:-make,halt.
+

@@ -15,27 +15,19 @@
 % ===================================================================
 % ===================================================================
 % ===================================================================
-sendNote(To,From,Subj,Msg):-
-   format('~q ~q ~q ~q ~n',[To,From,Subj,Msg]).
-      
-                                                                
-% ===================================================================
-
 
 isSlot(Var):-var(Var).
 isSlot('$VAR'(Var)):-number(Var).
 
 
-:-dynamic reading_in_comment/0.
-:-dynamic reading_in_string/0.
-:-dynamic read_in_atom/0.
-:-dynamic prev_char/1.
-
 % ===================================================================
 % CycL Term Reader
 % ===================================================================
-readCycL(CHARS):-readCycL(user_input,CHARS).
+:-dynamic reading_in_comment/0.
+:-dynamic reading_in_string/0.
+:-dynamic read_in_atom/0.
 
+readCycL(CHARS):-readCycL(user_input,CHARS).
 
 readCycL(Stream,[])  :-at_end_of_stream(Stream).     
 readCycL(Stream,Trim)  :-
@@ -47,30 +39,29 @@ readCycL(Stream,Trim)  :-
 readCycLChars_p0(Stream,[]):-at_end_of_stream(Stream),!.
 readCycLChars_p0(Stream,[Char|Chars]):-
         get_code(Stream,C),
-	%put(user_error,C),flush_output(user_error),
-	cyclReadStateChange(C),readCycLChars_p1(C,Char,Stream,Chars),!.
+	cyclReadStateChange(C),
+	readCycLChars_p1(C,Char,Stream,Chars),!.
 	
 readCycLChars_p1(C,Char,Stream,[]):- at_end_of_stream(Stream),!.
 readCycLChars_p1(C,Char,Stream,[]):-isCycLTerminationStateChar(C,Char),!.
-readCycLChars_p1(C,Char,Stream,Chars):-cyclAsciiRemap(C,Char),readCycLChars_p0(Stream,Chars),!.
+readCycLChars_p1(C,Char,Stream,Chars):-cyclAsciiRemap(C,Char),
+      flag(prev_char,_,Char),
+      readCycLChars_p0(Stream,Chars),!.
 
 isCycLTerminationStateChar(10,32):-reading_in_comment,!.
 isCycLTerminationStateChar(13,32):-reading_in_comment,!.
 isCycLTerminationStateChar(41,41):-flag('bracket_depth',X,X),(X<1),!.
 
 cyclReadStateChange(_):- reading_in_comment,!.
-cyclReadStateChange(34):- (retract(reading_in_string) ; assert(reading_in_string)),!.
+cyclReadStateChange(34):-flag(prev_char,Char,Char),   % char 92 is "\" and will escape a quote mark
+      (Char=92 -> true;(retract(reading_in_string) ; assert(reading_in_string))),!.
 cyclReadStateChange(_):- reading_in_string,!.
 cyclReadStateChange(59):- assert(reading_in_comment),!.
 cyclReadStateChange(40):-!,flag('bracket_depth',N,N + 1).
 cyclReadStateChange(41):-!,flag('bracket_depth',N,N - 1).
 cyclReadStateChange(_).
 
-skipCycLChar(Stream):- get_char(Stream,_),!.
-
-cyclAsciiRemap(N,32):-not(number(N)),!.
-cyclAsciiRemap(X,32):-X<32,!.
-cyclAsciiRemap(X,32):-X>128,!.
+cyclAsciiRemap(X,32):- (not(number(X));X>128;X<32),!.
 cyclAsciiRemap(X,X):-!.
 
 
@@ -109,18 +100,16 @@ Vars = [=(CITIZEN,_h2866)|_h3347]
 getSurfaceFromChars([],[end_of_file],_):-!.
 getSurfaceFromChars([41],[end_of_file],_):-!.
 
-getSurfaceFromChars([CH|ARSIn],TERM,VARS):-!, 
-         %getCleanCharsWhitespaceProper(CHARSIn,NoWhiteCHARS),!,  
-         (trim([CH|ARSIn],CHARS)),!,
-              CHARS=[FC|REST],!,
-          (( 
-            (FC=59,TERM=[comment,REST], VARS= _ ) ;   % ";" Comment Char found in Line
-            (CHARS=[],TERM=nil,VARS=_,! 	  )    %String came empty
-            ;
-            (FC=40,getSurfaceFromCharBalanced(CHARS,TERM,VARS) ,! )    %Use vanila CycL parser
-            ;
-            ( TERM=[comment,[FC|REST]],VARS= _,! )     %All above methods of parsing failed.. Convert to comment
-            )).
+getSurfaceFromChars([CH|ARSIn],TERM,VARS):-
+         trim([CH|ARSIn],CHARS),CHARS=[FC|REST],!,
+	 (CHARS=[] -> % String came empty
+	   TERM=nil; 
+            FC=59 ->  % ";" Comment Char found in Line
+	       (atom_codes(Atom,REST),TERM=[file_comment,Atom]) ;   
+	       FC=40 -> %Use vanila CycL parser
+                  getSurfaceFromCharBalanced(CHARS,TERM,VARS);  
+		  %All above methods of parsing failed.. Convert to comment
+		  (atom_codes(Atom,[FC|REST]),TERM=[file_comment,Atom])),!. 
 	    
 getSurfaceFromChars(C,TERM,VARS):-string_to_list(C,List),!,getSurfaceFromChars(List,TERM,VARS),!.
 
@@ -131,16 +120,11 @@ getSurfaceFromCharBalanced(Chars,WFFOut,VARSOut):-
                clean_sexpression(Tokens,WFFClean),!,
                phrase(cycL(WFF),WFFClean),
                collect_temp_vars(VARS),!,
-               ( 
-                     (VARS=[],VARSOut=_,WFFOut=WFF)
-               ;
-                     (
-                     unnumbervars(VARS,LIST),
+               ((VARS=[],VARSOut=_,WFFOut=WFF);
+                    (unnumbervars(VARS,LIST),
                      cyclVarNums(LIST,WFF,WFFOut,VARSOut2) ,
                      list_to_set(VARSOut2,VARSOut1),
-                     open_list(VARSOut1,VARSOut)
-                     ) 
-               ),!.
+                     open_list(VARSOut1,VARSOut))),!.
 
 /*===================================================================
 % clean_sexpression(Tokens,CleanTokens)
@@ -154,18 +138,6 @@ clean_sexpression(['#$'|WFF],WFFClean):-clean_sexpression(WFF,WFFClean).
 clean_sexpression(['#'|WFF],WFFClean):-clean_sexpression(WFF,WFFClean).
 clean_sexpression(['$'|WFF],WFFClean):-clean_sexpression(WFF,WFFClean).
 clean_sexpression([E|WFF],[E|WFFClean]):-clean_sexpression(WFF,WFFClean).
-
-
-%isCharCodelist([]):-!.
-%isCharCodelist([H|T]):-!,integer(H),isCharCodelist(T).
-
-/*===================================================================
-% S-Expression Version of ISO-Prolog chars_to_tem/3
-====================================================================*/
-chars_to_term_s(CHARS,TERM,VARS):-
-             once(chars_to_term(CHARS,PTERM,VARS)),
-             once(pterm_to_sterm(PTERM,TERM)).
-
 
 /*===================================================================
 % Safe Entry Call Into ISO-Prolog tokenize_chars/2
@@ -185,19 +157,17 @@ convert_the_atom(H,H):-!.
 
 
 
-/*===================================================================
-% Removes Leading whitespaces and not ANSI charset
-====================================================================*/
+%===================================================================
+% Removes Leading and Trailing whitespaces and non ANSI charsets.
+%====================================================================
 trim(X,Y):-ltrim(X,R),reverse(R,Rv),ltrim(Rv,RY),reverse(RY,Y).
 
 ltrim([],[]):-!.
-ltrim([32,32,32,32,32,32,32|String],Out) :-!, trim(String,Out),!.
-ltrim([32,32,32,32,32|String],Out) :- !,trim(String,Out),!.
-ltrim([32,32,32|String],Out) :-!, trim(String,Out),!.
-ltrim([32,32|String],Out) :- !,trim(String,Out),!.
-ltrim([32,32],[]) :- !.
-ltrim([P|X],Y):-P<33,trim(X,Y),!.
-ltrim([P|X],Y):-P>128,trim(X,Y),!.
+ltrim([32,32,32,32,32,32,32|String],Out) :-trim(String,Out),!.
+ltrim([32,32,32,32,32|String],Out) :-trim(String,Out),!.
+ltrim([32,32,32|String],Out) :- trim(String,Out),!.
+ltrim([32,32|String],Out) :- trim(String,Out),!.
+ltrim([P|X],Y):- (not(number(P));P<33;P>128),trim(X,Y),!.
 ltrim(T,T).
 
 /*===================================================================
@@ -322,7 +292,7 @@ unnumbervars_nil(X,Y):-!,unnumbervars(X,Y).
 collect_temp_vars(VARS):-!,(setof(=(Name,Number),numbered_var(Name,Number,_),VARS);VARS=[]).
 
 %================================================================
-% ISO-Prolog STRING TOKENIZATION                            
+% STRING TOKENIZATION                            
 %================================================================
 :-assert(show_this_hide(tokenize,2)).
 

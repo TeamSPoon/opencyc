@@ -165,6 +165,10 @@ public class Log {
                 System.err.println("Error creating log file " + logFilePath);
                 System.err.println(e);
             }
+            catch (SecurityException e) {
+                System.out.println("Security policy does not permit a log file.");
+                writeToFile = false;
+            }
         }
     }
 
@@ -176,7 +180,7 @@ public class Log {
             close();
         logFilePath = location;
         if (writeToFile) {
-                printWriter = new PrintWriter( new BufferedWriter(new FileWriter(logFilePath)));
+            printWriter = new PrintWriter(new BufferedWriter(new FileWriter(logFilePath)));
         }
     }
 

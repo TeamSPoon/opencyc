@@ -6807,6 +6807,91 @@ public class CycAccess {
             assertGenls(cycFort, genlsConstraint);
     }
 
+    /**
+     * Returns the list of arg2 terms from gafs having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the list of arg2 terms from gafs having the specified
+     * predicate and arg1 values
+     */
+    public CycList getArg2sForPredArg1 (String predicate,
+                                        String arg1,
+                                        String mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getArg2sForPredArg1(getKnownConstantByName(predicate),
+                                   getKnownConstantByName(arg1),
+                                   getKnownConstantByName(mt));
+    }
+
+    /**
+     * Returns the list of arg2 terms from gafs having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the list of arg2 terms from gafs having the specified
+     * predicate and arg1 values
+     */
+    public CycList getArg2sForPredArg1 (CycFort predicate,
+                                        CycFort arg1,
+                                        CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList query = new CycList();
+        query.add(predicate);
+        query.add(arg1);
+        CycVariable variable = CycObjectFactory.makeCycVariable("?arg2");
+        query.add(variable);
+        return askWithVariable(query, variable, mt);
+    }
+
+    /**
+     * Returns the first arg2 term from gafs having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the first arg2 term from gafs having the specified
+     * predicate and arg1 values or null if none
+     */
+    public Object getArg2ForPredArg1 (String predicate,
+                                      String arg1,
+                                      String mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getArg2ForPredArg1(getKnownConstantByName(predicate),
+                                  getKnownConstantByName(arg1),
+                                  getKnownConstantByName(mt));
+    }
+
+    /**
+     * Returns the first arg2 term from gafs having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the first arg2 term from gafs having the specified
+     * predicate and arg1 values or null if none
+     */
+    public Object getArg2ForPredArg1 (CycFort predicate,
+                                      CycFort arg1,
+                                      CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList query = new CycList();
+        query.add(predicate);
+        query.add(arg1);
+        CycVariable variable = CycObjectFactory.makeCycVariable("?arg2");
+        query.add(variable);
+        CycList answer = askWithVariable(query, variable, mt);
+        if (answer.size() > 0)
+            return answer.get(0);
+        else
+            return null;
+    }
 
 
 

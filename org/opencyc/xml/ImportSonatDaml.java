@@ -63,7 +63,7 @@ public class ImportSonatDaml extends ImportDaml {
                                       true);
         }
         else if (localHostName.equals("thinker")) {
-            cycAccess = new CycAccess("BABYCOMPUTER",
+            cycAccess = new CycAccess("localhost",
                                       3600,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);

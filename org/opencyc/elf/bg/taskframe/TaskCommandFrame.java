@@ -12,13 +12,13 @@ package org.opencyc.elf.bg.taskframe;
  *          Exp $
  * @author reed <p><p><p><p><p>
  */
-public class TaskCommand {
+public class TaskCommandFrame {
   //// Constructors
 
   /**
    * Creates a new instance of TaskCommand
    */
-  public TaskCommand() {
+  public TaskCommandFrame() {
   }
 
   //// Public Area

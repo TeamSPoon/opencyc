@@ -18,6 +18,8 @@ import org.opencyc.elf.bg.planner.Scheduler;
 import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
+import org.opencyc.elf.goal.Goal;
+
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.message.ExecuteScheduleMsg;
 import org.opencyc.elf.message.ExecutorStatusMsg;
@@ -291,23 +293,29 @@ public class Executor extends BufferedNodeComponent {
     public void run() {
       List plannedCommands = executor.schedule.getPlannedCommands();
       getLogger().info("Executing the sequence of commands " + plannedCommands.toString());
+      //TODO handle macro command by expanding macros (recursively) before sequencing
       Command command = null;
       Command nextCommand = null;
       // TODO for now ignore timing
       Iterator commandIterator = plannedCommands.iterator();
       while (true) {
         if (executor.stopSchedule || (! commandIterator.hasNext())) {
-          Status status = new Status();
-          status.setTrue(Status.SCHEDULE_FINISHED);
-          ExecutorStatusMsg executorStatusMsg = new ExecutorStatusMsg(executor, status);
+          reportScheduleFinished();
           return;
         }
+        if (command instanceof Goal &&
+            executor.actuator instanceof DirectActuator) {
+            //TODO wait for goal to occur and continue or timeout and return with
+            // timeout status msg
+          continue;
+        }
+        
+        //TODO handle perceive command
         
         //TODO handle alternative choice command
         //TODO handle conditional command
         //TODO handle iterated command
         //TODO handle learning episode command
-        //TODO handle macro command
         //TODO handle ordering choice command
         //TODO handle subset choice command
         
@@ -317,6 +325,14 @@ public class Executor extends BufferedNodeComponent {
         executor.sendMsgToRecipient(executor.actuatorChannel, doTaskMsg);
       }
     }    
+    
+    /** Reports to the scheduler that the current sequence of commands is finished. */
+    protected void reportScheduleFinished() {
+      Status status = new Status();
+      status.setTrue(Status.SCHEDULE_FINISHED);
+      ExecutorStatusMsg executorStatusMsg = new ExecutorStatusMsg(executor, status);
+    }
+    
   }
     
   //// Private Area

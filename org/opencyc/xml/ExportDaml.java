@@ -264,7 +264,7 @@ public class ExportDaml {
         //createConstantNode("PhysicalDevice");
         if (verbosity > 2)
             Log.current.println("Building DAML model");
-        /*
+
         for (int i = 0; i < damlSelectedClasses.size(); i++) {
             CycConstant cycConstant = (CycConstant) damlSelectedClasses.get(i);
             if (verbosity > 2)
@@ -277,7 +277,7 @@ public class ExportDaml {
                 Log.current.print(cycConstant + "  BinaryPredicate");
             createConstantNode(cycConstant);
         }
-        */
+
         for (int i = 0; i < damlSelectedIndividuals.size(); i++) {
             CycConstant cycConstant = (CycConstant) damlSelectedIndividuals.get(i);
             if (verbosity > 2)
@@ -507,7 +507,7 @@ public class ExportDaml {
         Log.current.println("  Isas :" + isas.cyclify());
         CycConstant isa = bestIsaForIndividual();
         Log.current.println("  best isa: " + isa.cyclify());
-        Element individualNode = document.createElement(isas.get(0).toString());
+        Element individualNode = document.createElement(isa.toString());
         rdf.appendChild(individualNode);
         individualNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");

@@ -3795,8 +3795,8 @@ public class CycAccess {
     }
 
     /**
-     * Asserts the given sentence and also places it on the transcript queue
-     * with default strength and direction.
+     * Asserts the given sentence and bookkeeping info, and then places it on
+     * the transcript queue.
      *
      * @param sentence the given sentence for assertion
      * @param mt the microtheory in which the assertion is placed
@@ -3807,7 +3807,8 @@ public class CycAccess {
     public void assertWithTranscript (CycList sentence, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         String command =
-            "(clet ((*the-cyclist* " + cyclist.cyclify() + "))\n" +
+            "(clet ((*the-cyclist* " + cyclist.cyclify() + ")\n" +
+            "       (*ke-purpose* " + project.cyclify() + "))\n" +
             "  (ke-assert-now\n" +
             "    '" + sentence.cyclify() + "\n" +
             "    " + mt.cyclify() + "))";
@@ -3977,6 +3978,16 @@ public class CycAccess {
             gafApiValue(mt) + "))";
         converseVoid(command);
     }
+
+
+
+
+    // TODO assertGaf does *not* write to the transcript.
+    // figure out a way to encapsulate the choices whether to use
+    // bookkeeping and the transcript.  Maybe just CycAccess booleans.
+
+
+
 
     /**
      * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation

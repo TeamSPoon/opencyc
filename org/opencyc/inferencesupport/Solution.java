@@ -33,15 +33,20 @@ import java.util.*;
 public class Solution {
 
     /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
+    protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
-     * Reference to the parent <tt>ConstraintProblem</tt> object.
+     * The number of solutions requested in the parent object.
      */
-    protected ConstraintProblem constraintProblem;
+    protected Integer nbrSolutionsRequested;
 
     /**
      * Number of solutions found by the search.  Will not be more than the
@@ -60,10 +65,10 @@ public class Solution {
      * Constructs a new <tt>Solution</tt> object given the parent <tt>ConstraintProblem</tt>
      * object.  Initializes the solutions to a single empty solution.
      *
-     * @param constraintProblem the parent constraint problem
+     * @param parent the parent <tt>ConstraintProblem</tt> or <tt>QueryProcessor</tt> object
      */
-    public Solution(ConstraintProblem constraintProblem) {
-        this.constraintProblem = constraintProblem;
+    public Solution(Integer nbrSolutionsRequested) {
+        this.nbrSolutionsRequested = nbrSolutionsRequested;
         solutions = new ArrayList();
         addSolution(new ArrayList());
     }
@@ -161,8 +166,8 @@ public class Solution {
      * were requested and where all solutions were found.
      */
     public void finalizeAllSolutions() {
-        if (this.constraintProblem.nbrSolutionsRequested == null &&
-            this.nbrSolutionsFound > 0)
+        if (nbrSolutionsRequested == null &&
+            nbrSolutionsFound > 0)
             solutions.remove(solutions.size() - 1);
     }
 

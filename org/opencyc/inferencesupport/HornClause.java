@@ -41,15 +41,15 @@ public class HornClause {
     /**
      * The antecedant part of the horn clause, as a list of conjuncts which are logical
      * expressions which all must be true for the consequent part of the horn clause to be
-     * true.  Each antecedant element is represented as a <tt>Rule</tt> object.
+     * true.  Each antecedant element is represented as a <tt>QueryLiteral</tt> object.
      */
     ArrayList antecedantConjuncts;
 
     /**
      * The consequent part of the horn clause, as a single logical expression represented as a
-     * <tt>Rule</tt> object.
+     * <tt>QueryLiteral</tt> object.
      */
-    Rule consequent;
+    QueryLiteral consequent;
 
     /**
      * The set of variables used in either the antecedantConjuncts or the consequent.
@@ -66,14 +66,14 @@ public class HornClause {
      * Constructs a new <tt>HornClause</tt> object from the given antecedant conjuncts
      * and consequent.
      */
-    public HornClause(ArrayList antecedantConjuncts, Rule consequent) {
+    public HornClause(ArrayList antecedantConjuncts, QueryLiteral consequent) {
         this.antecedantConjuncts = antecedantConjuncts;
         this.consequent = consequent;
         gatherVariables();
     }
 
     /**
-     * Constructs a new <tt>HornClause</tt> object from the given implication <tt>Rule</tt>.
+     * Constructs a new <tt>HornClause</tt> object from the given implication <tt>ConstraintRule</tt>.
      *
      * @param rule the given implication <tt>Rule</tt>
      */
@@ -107,12 +107,12 @@ public class HornClause {
         if (antecedantCycList.first().toString().equals("and")) {
             antecedantCycList = antecedantCycList.rest();
             for (int i = 0; i < antecedantCycList.size(); i++)
-                antecedantConjuncts.add(new Rule((CycList) antecedantCycList.get(i)));
+                antecedantConjuncts.add(new QueryLiteral((CycList) antecedantCycList.get(i)));
         }
         else {
-            antecedantConjuncts.add(new Rule(antecedantCycList));
+            antecedantConjuncts.add(new QueryLiteral(antecedantCycList));
         }
-        consequent = new Rule(consequentCycList);
+        consequent = new QueryLiteral(consequentCycList);
         gatherVariables();
     }
 
@@ -130,7 +130,7 @@ public class HornClause {
      *
      * @return the consequent for this horn clause
      */
-    public Rule getConsequent() {
+    public QueryLiteral getConsequent() {
         return consequent;
     }
 
@@ -151,7 +151,7 @@ public class HornClause {
         variables = new ArrayList();
         variables.addAll(consequent.variables);
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
-            Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
+            QueryLiteral antecedantConjunct = (QueryLiteral) antecedantConjuncts.get(i);
             for (int j = 0; j < antecedantConjunct.variables.size(); j++) {
                 CycVariable variable = (CycVariable) antecedantConjunct.variables.get(j);
                 if (! (variables.contains(variable)))
@@ -207,7 +207,7 @@ public class HornClause {
         if (consequent.getVariables().contains(variable))
             consequent.substituteVariable(variable, newObject);
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
-            Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
+            QueryLiteral antecedantConjunct = (QueryLiteral) antecedantConjuncts.get(i);
             if (antecedantConjunct.getVariables().contains(variable)) {
                 antecedantConjunct.substituteVariable(variable, newObject);
                 if (! CycAccess.current().isWellFormedFormula(antecedantConjunct.getFormula())) {
@@ -239,17 +239,17 @@ public class HornClause {
     }
 
     /**
-     * Creates and returns a copy of this <tt>Rule</tt> suitable for mutation.
+     * Creates and returns a copy of this <tt>QueryLiteral</tt> suitable for mutation.
      *
      * @return a clone of this instance
      */
     public Object clone() {
         HornClause cloneHornClause = new HornClause();
         cloneHornClause.variables = (ArrayList) this.variables.clone();
-        cloneHornClause.consequent = (Rule) this.consequent.clone();
+        cloneHornClause.consequent = (QueryLiteral) this.consequent.clone();
         cloneHornClause.antecedantConjuncts = new ArrayList();
         for (int i = 0; i < this.antecedantConjuncts.size(); i++) {
-            Rule antecedantConjunct = (Rule) this.antecedantConjuncts.get(i);
+            QueryLiteral antecedantConjunct = (QueryLiteral) this.antecedantConjuncts.get(i);
             cloneHornClause.antecedantConjuncts.add(antecedantConjunct.clone());
             }
         return cloneHornClause;
@@ -290,13 +290,13 @@ public class HornClause {
         StringBuffer stringBuffer = new StringBuffer("(#$implies");
         if (antecedantConjuncts.size() == 1) {
             stringBuffer.append("\n  ");
-            stringBuffer.append(((Rule) antecedantConjuncts.get(0)).cyclify());
+            stringBuffer.append(((QueryLiteral) antecedantConjuncts.get(0)).cyclify());
         }
         else {
             stringBuffer.append("\n  (#$and");
             for (int i = 0; i < antecedantConjuncts.size(); i++) {
                 stringBuffer.append("\n    ");
-                stringBuffer.append(((Rule) antecedantConjuncts.get(i)).cyclify());
+                stringBuffer.append(((QueryLiteral) antecedantConjuncts.get(i)).cyclify());
             }
             stringBuffer.append(")");
         }
@@ -335,17 +335,17 @@ public class HornClause {
         if (! implies.equals(CycAccess.current().getKnownConstantByName("#$implies")))
             return false;
         CycList consequentCycList = (CycList) cycList.third();
-        if (! Rule.isValidRuleExpression(consequentCycList))
+        if (! QueryLiteral.isValidQueryLiteralExpression(consequentCycList))
             return false;
         CycList antecedantCycList = (CycList) cycList.second();
         if (antecedantCycList.first().equals(CycAccess.current().getKnownConstantByName("#$and"))) {
             antecedantCycList = antecedantCycList.rest();
             for (int i = 0; i < antecedantCycList.size(); i++)
-                if (! Rule.isValidRuleExpression((CycList) antecedantCycList.get(i)))
+                if (! QueryLiteral.isValidQueryLiteralExpression((CycList) antecedantCycList.get(i)))
                     return false;
         }
         else {
-            if (! Rule.isValidRuleExpression(antecedantCycList))
+            if (! QueryLiteral.isValidQueryLiteralExpression(antecedantCycList))
                 return false;
         }
         return true;

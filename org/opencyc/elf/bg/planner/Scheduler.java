@@ -141,6 +141,17 @@ public class Scheduler extends NodeComponent {
     return (Puttable) schedulerChannel;
   }
 
+  /**
+   * Gets the resources required by this scheduler.
+   *
+   * @return the resources required by this scheduler
+   */
+  public ArrayList getResources() {
+    ArrayList resources = new ArrayList();
+    //TODO iterate through the task frame schedule infos
+    return resources;
+  }
+  
   //// Protected Area
   
   /**

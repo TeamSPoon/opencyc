@@ -2326,6 +2326,7 @@ public class CycAccess {
             getKnownConstantByGuid("bd654be7-9c29-11b1-9dad-c379636f7270");
         return this.isa(predicate, irreflexiveBinaryPredicate, mt);
     }
+
     /**
      * Returns <tt>true</tt> iff any ground formula instances exist having the given predicate,
      * and the given term in the given argument position.
@@ -2394,6 +2395,44 @@ public class CycAccess {
         command1.add(CycObjectFactory.t);
         //this.traceOn();
         return converseInt(command);
+    }
+
+    /**
+     * Imports a MUC (Message Understanding Conference) formatted symbolic expression into
+     * cyc via the function which parses the expression and creates assertions for the
+     * contained concepts and relations between them, using a default new microtheory
+     * created by Cyc's import function.
+     *
+     * @param mucExpression the MUC (Message Understanding Conference) formatted symbolic
+     * expression
+     * @return the number of assertions imported from the input MUC expression
+     */
+    public int importMucExpression(CycList mucExpression) throws IOException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("convert-netowl-sexpr-to-cycl-assertions"));
+        command.add(mucExpression.cycListApiValue());
+        //this.traceOn();
+        return this.converseInt(command);
+    }
+
+    /**
+     * Imports a MUC (Message Understanding Conference) formatted symbolic expression into
+     * cyc via the function which parses the expression and creates assertions for the
+     * contained concepts and relations between them.
+     *
+     * @param mucExpression the MUC (Message Understanding Conference) formatted symbolic
+     * expression
+     * @param mtName the name of the microtheory in which the imported assertions will be made
+     * @return the number of assertions imported from the input MUC expression
+     */
+    public int importMucExpression(CycList mucExpression,
+                                   String mtName) throws IOException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("convert-netowl-sexpr-to-cycl-assertions"));
+        command.add(mucExpression.cycListApiValue());
+        command.add(mtName);
+        //this.traceOn();
+        return this.converseInt(command);
     }
 
 }

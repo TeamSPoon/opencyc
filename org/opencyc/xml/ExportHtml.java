@@ -91,6 +91,18 @@ public class ExportHtml {
     public CycFort cycKbSubsetCollection = null;
 
     /**
+     * The #$EELDSharedOntologyConstant guid.
+     */
+    public static final Guid eeldSharedOntologyConstantGuid =
+        CycObjectFactory.makeGuid("c06e4624-9c29-11b1-9dad-c379636f7270");
+
+    /**
+     * The #$EELDSharedOntologyCoreConstant guid.
+     */
+    public static final Guid eeldSharedOntologyCoreConstantGuid =
+        CycObjectFactory.makeGuid("c12e44bd-9c29-11b1-9dad-c379636f7270");
+
+    /**
      * The #$CounterTerrorismConstant guid.
      */
     public static final Guid counterTerrorismConstantGuid =
@@ -190,11 +202,20 @@ public class ExportHtml {
     public static void main(String[] args) {
         ExportHtml exportHtml = new ExportHtml();
         try {
-            exportHtml.cycKbSubsetCollectionGuid = ExportHtml.counterTerrorismConstantGuid;
-            exportHtml.cycKbSubsetFilterGuid = ExportHtml.ikbConstantGuid;
-            exportHtml.exportedVocabularyOutputPath = "counter-terrorism-vocabulary.html";
-            exportHtml.exportedHierarchyOutputPath = "counter-terrorism-hierarchy.html";
-            exportHtml.export(ExportHtml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE);
+            //exportHtml.cycKbSubsetCollectionGuid = counterTerrorismConstantGuid;
+            //exportHtml.exportedVocabularyOutputPath = "counter-terrorism-vocabulary.html";
+            //exportHtml.exportedHierarchyOutputPath = "counter-terrorism-hierarchy.html";
+
+            //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
+            //exportHtml.exportedVocabularyOutputPath = "eeld-shared-vocabulary.html";
+            //exportHtml.exportedHierarchyOutputPath = "eeld-shared-hierarchy.html";
+
+            exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
+            exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
+            exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
+
+            exportHtml.cycKbSubsetFilterGuid = ikbConstantGuid;
+            exportHtml.export(EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -95,6 +95,12 @@ public class ExportDaml {
         CycObjectFactory.makeGuid("bfe31c38-9c29-11b1-9dad-c379636f7270");
 
     /**
+     * The #$EELDSharedOntologyCoreConstant guid.
+     */
+    public static final Guid eeldSharedOntologyCoreConstantGuid =
+        CycObjectFactory.makeGuid("c12e44bd-9c29-11b1-9dad-c379636f7270");
+
+    /**
      * The #$EELDSharedOntologyConstant guid.
      */
     public static final Guid eeldSharedOntologyConstantGuid =
@@ -202,11 +208,21 @@ public class ExportDaml {
              * Export a kb subset collection filtered by the given
              * kb subset collection.
              */
-            exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
+            exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
             exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
-            exportDaml.title = "EELD Shared Ontology";
-            exportDaml.outputPath = "eeld-shared-ontology.daml";
+            exportDaml.title = "EELD Shared Core Ontology";
+            exportDaml.outputPath = "eeld-shared-core-ontology.daml";
             exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
+
+            /**
+             * Export a kb subset collection filtered by the given
+             * kb subset collection.
+             */
+            //exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
+            //exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
+            //exportDaml.title = "EELD Shared Ontology";
+            //exportDaml.outputPath = "eeld-shared-ontology.daml";
+            //exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
 
             /**
              * Export a kb subset below the given term filtered by the given

@@ -2260,6 +2260,29 @@ public class UnitTest extends TestCase {
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(#$Dog #$Plant #$Brazil)"), responseList);
 
+            script =
+                "(defmacro-in-api my-floor-macro (x y) \n" +
+                "  (ret `(floor ,x ,y)))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-floor-macro"), responseObject);
+            script =
+                "(define-in-api my-floor-macro-test (x y) \n" +
+                "    (ret (multiple-value-list (my-floor-macro x y))))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-floor-macro-test"), responseObject);
+            script = "(my-floor-macro-test 5 3)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
+
+            script =
+                "(defmacro-in-api my-floor-macro (a b) \n" +
+                "  (ret `(floor ,x ,y)))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-floor-macro"), responseObject);
+            script = "(my-floor-macro-test 5 3)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
+
 
 
 

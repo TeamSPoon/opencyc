@@ -4,6 +4,8 @@ package org.opencyc.elf.bg;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
 
+import org.opencyc.elf.bg.planner.JobAssigner;
+import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
@@ -58,10 +60,58 @@ public class BehaviorGeneration extends NodeComponent {
     return "BehaviorGeneration for " + node.getName();
   }
   
+
+  /**
+   * Gets the job assigner
+   *
+   * @return the job assigner
+   */
+  public JobAssigner getJobAssigner () {
+    return jobAssigner;
+  }
+
+  /**
+   * Sets the job assigner
+   *
+   * @param jobAssigner the job assigner
+   */
+  public void setJobAssigner (JobAssigner jobAssigner) {
+    this.jobAssigner = jobAssigner;
+  }
+
+  /**
+   * Gets the plan selector
+   *
+   * @return the plan selector
+   */
+  public PlanSelector getPlanSelector () {
+    return planSelector;
+  }
+
+  /**
+   * Sets the plan selector
+   *
+   * @param planSelector the plan selector
+   */
+  public void setPlanSelector (PlanSelector planSelector) {
+    this.planSelector = planSelector;
+  }
+  
   //// Protected Area
     
   //// Private Area
   
   //// Internal Rep
-    
+  
+  /**
+   * the job assigner
+   */
+  protected JobAssigner jobAssigner;
+  
+  /**
+   * the plan selector
+   */
+  protected PlanSelector planSelector;
+  
+  
 }

@@ -62,8 +62,8 @@ public class Interpreter {
     protected StateMachine stateMachine;
 
     /**
-     * The state configuration, which is a tree consisting of a top state
-     * at the root down to individual simple states at the leaves.  States
+     * The (active) state configuration, which is a tree consisting of a top state
+     * at the root down to individual active simple states at the leaves.  States
      * other than the leaf states are composite states, and branches in
      * the state configuration are concurrent composite states.
      */
@@ -91,7 +91,7 @@ public class Interpreter {
      * Constructs a new Interpreter object.
      */
     public Interpreter() {
-        initialization();
+        initialize();
     }
 
     /**
@@ -100,13 +100,13 @@ public class Interpreter {
      */
     public Interpreter(StateMachine stateMachine) {
         this.stateMachine = stateMachine;
-        initialization();
+        initialize();
     }
 
     /**
-     * Performs initialization of this object.
+     * Initializes this object.
      */
-    protected void initialization () {
+    protected void initialize () {
         Log.makeLog("state-machine-interpreter.log");
         expressionEvaluator = new ExpressionEvaluator();
     }
@@ -125,12 +125,53 @@ public class Interpreter {
      * Interprets the state machine.
      */
     public void interpret () {
+        formInitialStateConfiguration();
         while (true) {
             eventDispatcher();
             eventProcessor();
             fireSelectedTransitions();
         }
     }
+
+    /**
+     * Forms the initial (active) state configuration for this
+     * state machine.
+     */
+    protected void formInitialStateConfiguration () {
+        State topState = stateMachine.getTop();
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(topState);
+        activeStates = new HashMap();
+        activeStates.put(topState, root);
+        stateConfiguration = new DefaultTreeModel(root);
+        if (topState instanceof CompositeState) {
+            formCompositeStateConfigurationFrom((CompositeState) topState, root);
+        }
+        else {
+            topState.isActive();
+            topState.setStateInterpreter(new StateInterpreter(this));
+            topState.getStateInterpreter().enterState(topState);
+        }
+    }
+
+    /**
+     * Forms the portion of the (active) state configuration downward from
+     * the given composite state and corresponding state configuration tree
+     * node.
+     *
+     * @param compositeState the given composite state
+     * @param stateConfigurationNode the given state configuration tree node
+     */
+    protected void formCompositeStateConfigurationFrom (CompositeState compositeState,
+                                                        DefaultMutableTreeNode stateConfigurationNode) {
+        Iterator subVertices = compositeState.getSubVertex().iterator();
+        while (subVertices.hasNext()) {
+            StateVertex subVertex = (StateVertex) subVertices.next();
+
+            //TODO
+
+        }
+    }
+
 
     /**
      * Processes dispatched event instances according to the general semantics

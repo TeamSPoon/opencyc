@@ -253,6 +253,7 @@ public class UnitTest extends TestCase {
                                                    exit,
                                                    doActivity,
                                                    isConcurrent);
+        stateMachine.setTop(topState);
         Assert.assertTrue(topState instanceof CompositeState);
         Assert.assertTrue(topState.getNamespace() instanceof Namespace);
         Assert.assertEquals(namespaceName, topState.getNamespace().getName());
@@ -268,6 +269,7 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(isConcurrent, topState.isConcurrent());
         Assert.assertEquals(0, topState.getDeferrableEvent().size());
         Assert.assertTrue(! topState.isRegion());
+        Assert.assertEquals(topState, stateMachine.getTop());
 
 
         name = "TestStateMachine-InitialState";
@@ -470,7 +472,8 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(interpreter.eventQueue.isEmpty());
         Assert.assertNull(interpreter.getCurrentEvent());
         Assert.assertEquals(stateMachine, interpreter.getStateMachine());
-        //interpreter.eventDispatcher();
+        Assert.assertTrue(interpreter.expressionEvaluator instanceof ExpressionEvaluator);
+        interpreter.eventDispatcher();
 
 
         System.out.println("\n**** testSimpleStateMachine ****");

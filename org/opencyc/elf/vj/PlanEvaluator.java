@@ -141,7 +141,7 @@ public class PlanEvaluator extends NodeComponent {
     }
       
     /**
-     * Evaluates the schedule and sends the result to the plan selector. 
+     * Evaluates the schedule from the plan simulator and sends the result to the plan selector. 
      */
     protected void processEvaluateScheduleMsg(EvaluateScheduleMsg evaluateScheduleMsg) {
       controlledResources = evaluateScheduleMsg.getControlledResources();

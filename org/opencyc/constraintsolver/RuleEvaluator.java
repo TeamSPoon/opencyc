@@ -115,7 +115,7 @@ public class RuleEvaluator {
      * @return <tt>true</tt> iff the instantiated constraint rule is proven true,
      * otherwise return <tt>false</tt>
      */
-    public boolean ask(Rule rule) throws IOException {
+    public boolean ask(ConstraintRule rule) throws IOException {
         Object predicate = rule.getPredicate();
         if (predicate.equals(and)) {
             CycList arguments = rule.getFormula().rest();
@@ -124,7 +124,7 @@ public class RuleEvaluator {
                 if (! (argument instanceof CycList))
                     throw new RuntimeException("Invalid #$or argument: " +
                                                 argument);
-                if (! ask(new Rule((CycList) arguments.get(i))))
+                if (! ask(new ConstraintRule((CycList) arguments.get(i))))
                     return false;
             }
             return true;
@@ -136,7 +136,7 @@ public class RuleEvaluator {
                 if (! (argument instanceof CycList))
                     throw new RuntimeException("Invalid #$or argument: " +
                                                 argument);
-                if (ask(new Rule((CycList) arguments.get(i))))
+                if (ask(new ConstraintRule((CycList) arguments.get(i))))
                     return true;
             }
             return false;
@@ -147,7 +147,7 @@ public class RuleEvaluator {
                 expression.size() < 2)
                 throw new RuntimeException("Invalid #$not expression: " +
                                             expression);
-            return ! ask(new Rule(expression));
+            return ! ask(new ConstraintRule(expression));
         }
         else if (predicate.equals(numericallyEqual)) {
             Object argument1 = rule.getFormula().second();

@@ -4,7 +4,7 @@ import java.util.*;
 import org.opencyc.cycobject.*;
 
 /**
- * <tt>Rule</tt> object to model the attributes of constraint variable value population by
+ * <tt>VariablePopulationItem</tt> object to model the attributes of constraint variable value population by
  * candidate rules.<p>
  *
  * @version $Id$
@@ -40,9 +40,9 @@ public class VariablePopulationItem implements Comparable {
     /**
      * The rule which populates this variable.
      */
-    protected Rule rule;
+    protected ConstraintRule rule;
 
-    public VariablePopulationItem(CycVariable cycVariable, Rule rule) {
+    public VariablePopulationItem(CycVariable cycVariable, ConstraintRule rule) {
         this.cycVariable = cycVariable;
         this.rule = rule;
     }

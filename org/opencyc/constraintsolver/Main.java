@@ -99,7 +99,7 @@ public class Main {
         CycList zebraPuzzleCycList = zebraProblem.cycAccess.makeCycList(zebraPuzzleString);
         ArrayList zebraPuzzleRules = null;
         try {
-            zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
+            zebraPuzzleRules = ConstraintRule.simplifyRuleExpression(zebraPuzzleCycList);
         }
         catch (IOException e) {
             e.printStackTrace();

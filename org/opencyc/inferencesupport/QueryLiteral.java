@@ -1,4 +1,4 @@
-package org.opencyc.constraintsolver;
+package org.opencyc.inferencesupport;
 
 import java.util.*;
 import org.opencyc.cycobject.*;
@@ -6,7 +6,7 @@ import org.opencyc.api.*;
 import java.io.IOException;
 
 /**
- * <tt>Rule</tt> object to model the attributes and behavior of a constraint rule.<p>
+ * <tt>QueryLiteral</tt> object to model the attributes and behavior of a query literal.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -29,98 +29,94 @@ import java.io.IOException;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @see UnitTest#testRule
+ * @see UnitTest#testQueryLiteral
  */
-public class Rule  implements Comparable{
+public class QueryLiteral  implements Comparable{
 
     /**
-     * The number of instances matching this constraint rule formula in the KB. Value of -1
+     * The number of instances matching this query literal formula in the KB. Value of -1
      * indicates the variable is not yet set.
      */
     public int nbrFormulaInstances = -1;
 
     /**
-     * The constraint rule formula as an OpenCyc query.
+     * The query literal formula as an OpenCyc query.
      */
     protected CycList formula;
 
     /**
-     * The collection of <tt>CycVariables</tt> used in the rule.  There should
-     * be at least one, because if there are no variables, then the rule is
+     * The collection of <tt>CycVariables</tt> used in the query literal.  There should
+     * be at least one, because if there are no variables, then the query literal is
      * either always true or always false and has no effect on the
-     * constraint problem's solution.
+     * query's solution.
      */
     protected ArrayList variables;
 
     /**
-     * Value which indicates that a given rule subsumes another given rule.
+     * Value which indicates that a given query literal subsumes another given query literal.
      */
     public static final int SUBSUMES = 1;
 
     /**
-     * Value which indicates that a given rule is subsumed by another given rule.
+     * Value which indicates that a given query literal is subsumed by another given query literal.
      */
     public static final int SUBSUMED_BY = 2;
 
     /**
-     * Value which indicates that a given rule neither subsumes another given rule or is
-     * subsumed by another given rule.
+     * Value which indicates that a given rquery literal neither subsumes another given query literal or is
+     * subsumed by another given query literal.
      */
     public static final int NO_SUBSUMPTION = 3;
 
 
     /**
-     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> <tt>String</tt>
+     * Constructs a new <tt>QueryLiteral</tt> object from a <tt>CycList</tt> <tt>String</tt>
      * representation.<p>
      *
-     * @param formulaString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
+     * @param formulaString the query literal's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public Rule (String formulaString) {
+    public QueryLiteral (String formulaString) {
         formula = CycAccess.current().makeCycList(formulaString);
         gatherVariables();
     }
 
     /**
-     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt>.<p>
+     * Constructs a new <tt>QueryLiteral</tt> object from a <tt>CycList</tt>.<p>
      *
-     * <pre>
-     *  String ruleAsString = "(#$isa ?x #$Cathedral)";
-     *  Rule rule1 = new Rule (cycAccess.makeCycList(ruleAsString));
-     * </pre>
-     *
-     * @param formula the rule's formula, which must be a well formed OpenCyc
+    * @param formula the query literal's formula, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public Rule(CycList formula) {
+    public QueryLiteral(CycList formula) {
         this.formula = formula;
         gatherVariables();
     }
 
     /**
-     * Simplifies a rule expression.<p>
-     * (#$and (<rule1> <rule2> ... <ruleN>) becomes <rule1> <rule2> ... <ruleN>
+     * Simplifies a query literal expression.<p>
+     * (#$and (<query literal1> <query literal2> ... <query literalN>)
+     * becomes <query literal1> <query literal2> ... <query literalN>
      *
-     * @param cycList the rule expression that is simplified
-     * @return an <tt>ArrayList</tt> of <tt>Rule</tt> objects.
-     * @see UnitTest#testRule
+     * @param cycList the query literal expression that is simplified
+     * @return an <tt>ArrayList</tt> of <tt>QueryLiteral</tt> objects.
+     * @see UnitTest#testQueryLiteral
      */
-    public static ArrayList simplifyRuleExpression(CycList cycList) throws IOException {
-        ArrayList rules = new ArrayList();
+    public static ArrayList simplifyQueryLiteralExpression(CycList cycList) throws IOException {
+        ArrayList queryLiterals = new ArrayList();
         if (cycList.size() < 2)
-            throw new RuntimeException("Invalid rule: " + cycList);
+            throw new RuntimeException("Invalid query literal: " + cycList);
         Object object = cycList.first();
         if (object instanceof CycConstant &&
             ((CycConstant) object).equals(CycAccess.and))
             for (int i = 1; i < cycList.size(); i++)
-                rules.add(new Rule((CycList) cycList.get(i)));
+                queryLiterals.add(new QueryLiteral((CycList) cycList.get(i)));
         else
-            rules.add(new Rule(cycList));
-        return rules;
+            queryLiterals.add(new QueryLiteral(cycList));
+        return queryLiterals;
     }
 
     /**
-     * Gathers the unique variables from the rule's formula.
+     * Gathers the unique variables from the query literal's formula.
      */
     protected void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
@@ -137,30 +133,30 @@ public class Rule  implements Comparable{
 
 
     /**
-     * Gets the rule's formula.
+     * Gets the query literal's formula.
      *
-     * @return a <tt>CycList</tt> which is the rule's formula.
+     * @return a <tt>CycList</tt> which is the query literal's formula.
      */
     public CycList getFormula() {
         return formula;
     }
 
     /**
-     * Returns the rule's variables.
+     * Returns the query literal's variables.
      *
      * @return the <tt>ArrayList</tt> which lists the unique <tt>CycVariables</tt> that are
-     * used in the rule's formula.
+     * used in the query literal's formula.
      */
     public ArrayList getVariables() {
         return variables;
     }
 
     /**
-     * Returns the rule's arity which is defined to be the number of variables, not
-     * necessarily equalling the arity of the rule's first predicate.
+     * Returns the query literal's arity which is defined to be the number of variables, not
+     * necessarily equalling the arity of the query literal's first predicate.
      *
-     * @return rule's arity which is defined to be the number of variables, not
-     * necessarily equalling the arity of the rule's first predicate
+     * @return query literal's arity which is defined to be the number of variables, not
+     * necessarily equalling the arity of the query literal's first predicate
      */
     public int getArity() {
         return variables.size();
@@ -173,10 +169,10 @@ public class Rule  implements Comparable{
      * @return <tt>boolean</tt> indicating equality of an object with this object.
      */
     public boolean equals(Object object) {
-        if (! (object instanceof Rule))
+        if (! (object instanceof QueryLiteral))
             return false;
-        Rule thatRule = (Rule) object;
-        return this.formula.equals(thatRule.getFormula());
+        QueryLiteral thatQueryLiteral = (QueryLiteral) object;
+        return this.formula.equals(thatQueryLiteral.getFormula());
     }
 
     /**
@@ -189,32 +185,32 @@ public class Rule  implements Comparable{
      * object is less than, equal to, or greater than the specified object
      */
      public int compareTo (Object object) {
-        if (! (object instanceof Rule))
-            throw new ClassCastException("Must be a Rule object");
-        return (new Integer(this.getArity())).compareTo(new Integer(((Rule) object).getArity()));
+        if (! (object instanceof QueryLiteral))
+            throw new ClassCastException("Must be a QueryLiteral object");
+        return (new Integer(this.getArity())).compareTo(new Integer(((QueryLiteral) object).getArity()));
      }
 
     /**
      * Returns a value indicating the subsumption relationship, or lack of subsumption
-     * relationship between this rule and another rule.
+     * relationship between this query literal and another query literal.
      *
-     * @param rule the rule for subsumption determination
-     * @return <tt>Rule.SUBSUMES</tt> if this rule subsumes the given rule,
-     * <tt>Rule.SUBSUMED_BY</tt> if this rule is subsumed by the given rule,
-     * <tt>Rule.NO_SUBSUMPTION</tt> if this rule is neither subsumed by the given rule, nor
-     * subsumes the given rule
+     * @param queryLiteral the query literal for subsumption determination
+     * @return <tt>QueryLiteral.SUBSUMES</tt> if this query literal subsumes the given query literal,
+     * <tt>QueryLiteral.SUBSUMED_BY</tt> if this query literal is subsumed by the given query literal,
+     * <tt>QueryLiteral.NO_SUBSUMPTION</tt> if this query literal is neither subsumed by the given query literal, nor
+     * subsumes the given query literal
      */
-    public int determineSubsumption(Rule rule) throws IOException {
-        if (this.equals(rule))
+    public int determineSubsumption(QueryLiteral queryLiteral) throws IOException {
+        if (this.equals(queryLiteral))
             return SUBSUMES;
-        if (! (this.getPredicate().equals(rule.getPredicate())))
+        if (! (this.getPredicate().equals(queryLiteral.getPredicate())))
             return NO_SUBSUMPTION;
-        if (this.getArity() != rule.getArity())
+        if (this.getArity() != queryLiteral.getArity())
             return NO_SUBSUMPTION;
         int answer = 0;
         for (int i = 0; i < this.getArguments().size(); i++) {
             Object thisArgument = this.getArguments().get(i);
-            Object thatArgument = rule.getArguments().get(i);
+            Object thatArgument = queryLiteral.getArguments().get(i);
             if (thisArgument.equals(thatArgument))
                 continue;
             if (thisArgument instanceof CycVariable) {
@@ -269,52 +265,51 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns whether this rule is subsumed by the given rule.
+     * Returns whether this query literal is subsumed by the given query literal.
      *
-     * @param rule the given rule for subsumption determination.
-     * @return <tt>true</tt> iff this rule is subsumed by the given <tt>Rule</tt> object.
+     * @param queryLiteral the given queryLiteral for subsumption determination.
+     * @return <tt>true</tt> iff this query literal is subsumed by the given <tt>QueryLiteral</tt> object.
      */
-    public boolean isSubsumedBy(Rule rule) throws IOException {
-        if (this.equals(rule))
+    public boolean isSubsumedBy(QueryLiteral queryLiteral) throws IOException {
+        if (this.equals(queryLiteral))
             return true;
         else
-            return this.determineSubsumption(rule) == Rule.SUBSUMED_BY;
+            return this.determineSubsumption(queryLiteral) == QueryLiteral.SUBSUMED_BY;
     }
 
     /**
-     * Returns whether this rule subsumes the given rule.
+     * Returns whether this query literal subsumes the given query literal.
      *
-     * @param rule the given rule for subsumption determination.
-     * @return <tt>true</tt> iff this rule subsumes the given <tt>Rule</tt> object.
+     * @param queryLiteral the given query literal for subsumption determination.
+     * @return <tt>true</tt> iff this query literal subsumes the given <tt>QueryLiteral</tt> object.
      */
-    public boolean subsumes(Rule rule) throws IOException {
-        return this.determineSubsumption(rule) == Rule.SUBSUMES;
+    public boolean subsumes(QueryLiteral queryLiteral) throws IOException {
+        return this.determineSubsumption(queryLiteral) == QueryLiteral.SUBSUMES;
     }
 
-
     /**
-     * Creates and returns a copy of this <tt>Rule</tt>.
+     * Creates and returns a copy of this <tt>QueryLiteral</tt>.
      *
      * @return a clone of this instance
      */
     public Object clone() {
-        return new Rule((CycList) this.formula.clone());
+        return new QueryLiteral((CycList) this.formula.clone());
     }
 
     /**
-     * Returns the predicate of this <tt>Rule</tt> object.
+     * Returns the predicate of this <tt>QueryLiteral</tt> object.
      *
      * @return the predicate <tt>CycConstant</tt> or <tt>CycSymbol</tt>
-     * of this <tt>Rule</tt> object
+     * of this <tt>QueryLiteral</tt> object
      */
     public CycConstant getPredicate() {
         return (CycConstant) formula.first();
     }
 
     /**
-     * Returns the arguments of this <tt>Rule</tt> object.
+     * Returns the arguments of this <tt>QueryLiteral</tt> object.
      *
-     * @return the arguments of this <tt>Rule</tt> object
+     * @return the arguments of this <tt>QueryLiteral</tt> object
      */
     public CycList getArguments() {
         return (CycList) formula.rest();
@@ -336,10 +331,10 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this <tt>Rule</tt> is a #$different constraint rule.
+     * Returns <tt>true</tt> if this <tt>QueryLiteral</tt> is a #$different query literal.
      *
-     * @return <tt>boolean</tt> indicating if this <tt>Rule</tt> is a #$different
-     * constraint rule
+     * @return <tt>boolean</tt> indicating if this <tt>QueryLiteral</tt> is a #$different
+     * query literal
      */
     public boolean isAllDifferent() throws IOException{
         if (this.getArity() < 2)
@@ -351,12 +346,12 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
+     * Returns <tt>true</tt> if this <tt>QueryLiteral</tt> is a simple evaluatable query literal,
      * which can be answered without KB lookup.  Typically an evaluatable constraint
-     * rule is a relational operator applied to a primitive data type.
+     * queryLiteral is a relational operator applied to a primitive data type.
      *
      *
-     * @return <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
+     * @return <tt>true</tt> if this <tt>QueryLiteral</tt> is a simple evaluatable query literal,
      * which can be answered without KB lookup
      */
     public boolean isEvaluatable() throws IOException {
@@ -367,7 +362,7 @@ public class Rule  implements Comparable{
         else if (this.getPredicate().toString().equals("or") ||
                  this.getPredicate().toString().equals("and")) {
             for (int i = 0; i < this.getArguments().size(); i++) {
-                Rule orArgument = new Rule((CycList) this.getArguments().get(i));
+                QueryLiteral orArgument = new QueryLiteral((CycList) this.getArguments().get(i));
                 if (! orArgument.isEvaluatable())
                     return false;
             }
@@ -378,12 +373,12 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments.
+     * Returns <tt>true</tt> if this <tt>QueryLiteral</tt> has simple evaluatable numerical arguments.
      * Numbers and variables return <tt>true</tt> and functional expressions return
      * <tt>true</tt> iff their arguments are simple numerical expressions.
      *
      *
-     * @return <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments
+     * @return <tt>true</tt> if this <tt>QueryLiteral</tt> has simple evaluatable numerical arguments
      */
     public boolean hasEvaluatableNumericalArgs() throws IOException {
         CycList args = this.getFormula().rest();
@@ -420,75 +415,6 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Evaluates the instantiated constraint rule locally without asking OpenCyc.
-     *
-     * @param instantiatedRule the fully instantiated constraint rule whose predicates
-     * can be evaluated locally without asking OpenCyc.
-     * @return the truth value of the fully instantiated constraint rule
-     */
-    public static boolean evaluateConstraintRule(CycList instantiatedRule) throws IOException {
-        CycConstant predicate = (CycConstant) instantiatedRule.first();
-        if (predicate.equals(CycAccess.numericallyEqual)) {
-            int value = numericallyEvaluateExpression(instantiatedRule.second());
-            for (int i = 2; i < instantiatedRule.size(); i++) {
-                if (numericallyEvaluateExpression(instantiatedRule.get(i)) != value)
-                    return false;
-            }
-            return true;
-        }
-        else if (predicate.equals(CycAccess.or)) {
-            CycList args = instantiatedRule.rest();
-            for (int i = 0; i < args.size(); i++) {
-                CycList arg = (CycList) args.get(i);
-                if (evaluateConstraintRule(arg))
-                    return true;
-            }
-            return false;
-        }
-        else if (predicate.equals(CycAccess.and)) {
-            CycList args = instantiatedRule.rest();
-            for (int i = 0; i < args.size(); i++) {
-                CycList arg = (CycList) args.get(i);
-                if (! evaluateConstraintRule(arg))
-                    return false;
-            }
-            return true;
-        }
-        else
-            throw new RuntimeException(instantiatedRule + "Cannot be evaluated");
-    }
-
-    /**
-     * Returns the numerical value of the expression.
-     *
-     * @param expression the expression to be evaluated which can be a <tt>Integer</tt> value,
-     * or a <tt>CycList</tt>
-     * @return the numerical value of the expression
-     */
-    public static int numericallyEvaluateExpression(Object expression) throws IOException {
-        if (expression instanceof Integer)
-            return ((Integer) expression).intValue();
-        else if (expression instanceof CycNart) {
-            CycNart cycNart = (CycNart) expression;
-            CycFort functor = cycNart.getFunctor();
-            Object arg = cycNart.getArguments().get(0);
-            if (functor.equals(CycAccess.plusFn)) {
-                return numericallyEvaluateExpression(arg) + 1;
-            }
-        }
-        else if (expression instanceof CycList) {
-            CycList cycList = (CycList) expression;
-            CycConstant functor = (CycConstant) cycList.first();
-            Object arg = cycList.get(1);
-            if (functor.equals(CycAccess.plusFn)) {
-                return numericallyEvaluateExpression(arg) + 1;
-            }
-        }
-        throw new RuntimeException(expression + "Cannot be evaluated");
-    }
-
-
-    /**
      * Returns <tt>true</tt> iff this is a ground formula having no variables.
      *
      * @return <tt>true</tt> iff this is a ground formula having no variables
@@ -519,40 +445,16 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this is an extensional variable domain populating <tt>Rule</tt>.
-     * An extensional rule is one in which all the values are listed.
+     * Returns a string representation of the <tt>QueryLiteral</tt>.
      *
-     * @return <tt>boolean</tt> indicating if this is an extensional variable domain populating
-     * <tt>Rule</tt>.
-     */
-    public boolean isExtensionalVariableDomainPopulatingRule() throws IOException {
-        if (this.getArity() != 1)
-            // Only unary rules can populate a domain.
-            return false;
-        if (! this.getPredicate().equals(CycAccess.elementOf))
-            return false;
-        if (! (this.getArguments().get(0) instanceof CycVariable))
-            return false;
-        Object arg2 = this.getArguments().get(1);
-        if (! (arg2 instanceof CycList))
-            return false;
-        CycList elementList = (CycList) arg2;
-        if (elementList.size() < 2)
-           return false;
-        return elementList.first().equals(CycAccess.current().getKnownConstantByName("TheSet"));
-    }
-
-    /**
-     * Returns a string representation of the <tt>Rule</tt>.
-     *
-     * @return the rule's formula formated as a <tt>String</tt>.
+     * @return the query literal's formula formated as a <tt>String</tt>.
      */
     public String toString() {
         return formula.toString();
     }
 
     /**
-     * Returns a cyclified string representation of the rule's formula.
+     * Returns a cyclified string representation of the query literal's formula.
      * Embedded constants are prefixed with ""#$".
      *
      * @return a cyclified <tt>String</tt>.
@@ -562,34 +464,19 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns a new <tt>Rule</tt> which is the result of substituting the given
+     * Returns a new <tt>QueryLiteral</tt> which is the result of substituting the given
      * <tt>Object</tt> value for the given <tt>CycVariable</tt>.
      *
      * @param cycVariable the variable for substitution
      * @param value the value which is substituted for each occurrance of the variable
-     * @return a new <tt>Rule</tt> which is the result of substituting the given
+     * @return a new <tt>QueryLiteral</tt> which is the result of substituting the given
      * <tt>Object</tt> value for the given <tt>CycVariable</tt>
      */
-    public Rule instantiate(CycVariable cycVariable, Object value) {
+    public QueryLiteral instantiate(CycVariable cycVariable, Object value) {
         if (! variables.contains(cycVariable))
             throw new RuntimeException("Cannot instantiate " + cycVariable +
-                                       " in rule " + this);
-        CycList newRule = formula.subst(value, cycVariable);
-        return new Rule(newRule);
-    }
-
-    /**
-     * Returns <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
-     * rule.  Specifically, an expression is not a valid constraint rule if its predicate is not a
-     * <tt>CycConstant</tt> object.
-     *
-     * @param cycListRule the representation of a constraint rule to be validated
-     * @return <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
-     * rule
-     */
-    public static boolean isValidRuleExpression(CycList cycListRule) {
-        if (cycListRule.size() < 2)
-            return false;
-        return cycListRule.first() instanceof CycConstant;
+                                       " in query literal " + this);
+        CycList newQueryLiteral = formula.subst(value, cycVariable);
+        return new QueryLiteral(newQueryLiteral);
     }
 }

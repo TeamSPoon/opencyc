@@ -81,7 +81,7 @@ public class ArgumentTypeConstrainer {
      * @param cycVariable the variable used to construct the returned rules
      * @return the argument type constraint rules for the given rule
      */
-    public ArrayList retrieveArgumentTypeConstraintRules(Rule rule) throws IOException {
+    public ArrayList retrieveArgumentTypeConstraintRules(ConstraintRule rule) throws IOException {
         if (verbosity > 3)
             System.out.println("Gathering type constraints for\n" + rule.cyclify());
         return gatherPredicateVariableArgConstaints(rule.formula);
@@ -155,7 +155,7 @@ public class ArgumentTypeConstrainer {
         for (int i = 0; i < isas.size(); i++) {
             CycFort collection = (CycFort) isas.get(i);
             String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
-            Rule rule = new Rule(ruleString);
+            ConstraintRule rule = new ConstraintRule(ruleString);
             result.add(rule);
             if (verbosity > 3)
                 System.out.println("  " + predicate.cyclify() +
@@ -185,7 +185,7 @@ public class ArgumentTypeConstrainer {
         for (int i = 0; i < genls.size(); i++) {
             CycFort collection = (CycFort) genls.get(i);
             String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
-            Rule rule = new Rule(ruleString);
+            ConstraintRule rule = new ConstraintRule(ruleString);
             result.add(rule);
             if (verbosity > 3)
                 System.out.println("  " + predicate.cyclify() +
@@ -212,7 +212,7 @@ public class ArgumentTypeConstrainer {
      * @return <tt>true</tt> iff the given unary constraint rule is consistent with
      * the previously accepted unary constraints on the given variable
      */
-    public boolean isUnaryRuleConsistent(Rule unaryRule, CycVariable cycVariable) throws IOException {
+    public boolean isUnaryRuleConsistent(ConstraintRule unaryRule, CycVariable cycVariable) throws IOException {
         // Find the associated collections for the unary constraint rule under consideration.
         CycFort consideringIsaCollection = null;
         CycFort consideringGenlsCollection = null;
@@ -235,7 +235,7 @@ public class ArgumentTypeConstrainer {
         // given variable.  Return false if any are disjoint.
 
         for (int i = 0; i < constraintProblem.constraintRules.size(); i++) {
-            Rule rule = (Rule) constraintProblem.constraintRules.get(i);
+            ConstraintRule rule = (ConstraintRule) constraintProblem.constraintRules.get(i);
             if ((rule.getArity() == 1) &&
                 (rule.getVariables().contains(cycVariable)))
             if (verbosity > 3)

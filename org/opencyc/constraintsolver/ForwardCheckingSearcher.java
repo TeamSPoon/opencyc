@@ -233,14 +233,14 @@ public class ForwardCheckingSearcher {
         if (verbosity > 8)
             System.out.println("check forward rules applicable to binding " + currentBinding);
         for (int i = 0; i < constraintRules.size(); i++) {
-            Rule rule = (Rule) constraintRules.get(i);
+            ConstraintRule rule = (ConstraintRule) constraintRules.get(i);
             ArrayList ruleVariables = rule.getVariables();
             if (verbosity > 8)
                 System.out.println("check forward rule \n  " + rule.cyclify() +
                                    "  with variables " + ruleVariables);
             if ((rule.getArity() > 1) &&
                 ruleVariables.contains(currentBinding.getCycVariable())) {
-                // Rule applies to the selected variable.
+                // ConstraintRule applies to the selected variable.
                 ArrayList remainingRuleVariables =
                     (ArrayList) CollectionUtils.intersection(remainingVariables,
                                                              ruleVariables);
@@ -277,7 +277,7 @@ public class ForwardCheckingSearcher {
      * @param currentBinding the current variable and bound value
      * @return <tt>true</tt> iff no remaining variable domains are wiped out
      */
-    protected boolean checkForwardRule(Rule rule,
+    protected boolean checkForwardRule(ConstraintRule rule,
                                        ArrayList remainingRuleVariables,
                                        int level,
                                        Binding currentBinding) throws IOException {
@@ -328,7 +328,7 @@ public class ForwardCheckingSearcher {
      * @param currentBinding the current variable and bound value
      * @return <tt>true</tt> iff no remaining variable domains are wiped out
      */
-    protected boolean checkForwardNonEvaluatableRule(Rule rule,
+    protected boolean checkForwardNonEvaluatableRule(ConstraintRule rule,
                                                      int level,
                                                      Binding currentBinding)
         throws IOException {
@@ -387,7 +387,7 @@ public class ForwardCheckingSearcher {
                                                   ArrayList remainingVariables,
                                                   ArrayList bindings,
                                                   Binding currentBinding,
-                                                  Rule currentRule) throws IOException {
+                                                  ConstraintRule currentRule) throws IOException {
         CycVariable selectedVariable = currentBinding.getCycVariable();
         if (remainingVariables.size() == 0) {
             // This is the terminating recursion case, with no more variables left to instantiate.
@@ -427,7 +427,7 @@ public class ForwardCheckingSearcher {
             boolean isHighCardinalityDomain =
                 variableDomainPopulator.isPostponedHighCardinalityDomain(variable);
             if (verbosity > 2) {
-                System.out.println("Rule instantiation reached singleton " + variable);
+                System.out.println("ConstraintRule instantiation reached singleton " + variable);
                 System.out.println("  high cardinality? --> " + isHighCardinalityDomain);
             }
             if (isHighCardinalityDomain &&
@@ -543,7 +543,7 @@ public class ForwardCheckingSearcher {
      * @param currentBinding the current variable and bound value
      * @return <tt>true</tt> iff no remaining variable domains are wiped out
      */
-    protected boolean checkForwardDifferentRule(Rule rule,
+    protected boolean checkForwardDifferentRule(ConstraintRule rule,
                                                 ArrayList remainingRuleVariables,
                                                 int level,
                                                 Binding currentBinding) {
@@ -587,7 +587,7 @@ public class ForwardCheckingSearcher {
         CycVariable selectedVariable = currentBinding.getCycVariable();
         if (remainingRuleVariables.size() == 0) {
             // This is the terminating recursion case, with no more variables left to instantiate.
-            boolean instantiatedRuleResult = Rule.evaluateConstraintRule(instantiatedRule);
+            boolean instantiatedRuleResult = ConstraintRule.evaluateConstraintRule(instantiatedRule);
             if (verbosity > 2) {
                 System.out.println("  bindings " + bindings);
                 System.out.println("  " + instantiatedRule.cyclify() + " --> " +
@@ -684,7 +684,7 @@ public class ForwardCheckingSearcher {
         int degree = 0;
         ArrayList ruleVariables = null;
         for (int i = 0; i < constraintProblem.constraintRules.size(); i++) {
-            Rule rule = (Rule) constraintProblem.constraintRules.get(i);
+            ConstraintRule rule = (ConstraintRule) constraintProblem.constraintRules.get(i);
             ruleVariables = rule.getVariables();
             if (ruleVariables.contains(variable) &&
                 variables.containsAll(ruleVariables)) {
@@ -692,7 +692,7 @@ public class ForwardCheckingSearcher {
                 if (verbosity > 8) {
                     ArrayList candidateVariables = (ArrayList) variables.clone();
                     candidateVariables.remove(variable);
-                    System.out.println("Rule " + rule.cyclify() + "\n  between " +
+                    System.out.println("ConstraintRule " + rule.cyclify() + "\n  between " +
                                        variable + " and candidate variables " +
                                        candidateVariables);
                 }

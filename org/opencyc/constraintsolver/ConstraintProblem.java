@@ -4,9 +4,10 @@ import java.util.*;
 import java.io.IOException;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
+import org.opencyc.inferencesupport.*;
 
 /**
- * <tt>Rule</tt> object to model the attributes and behavior of a constraint problem.<p>
+ * <tt>ConstraintRule</tt> object to model the attributes and behavior of a constraint problem.<p>
  * A <tt>ProblemParser</tt> object is created to parse the input constraint problem
  * representation.<br>
  * A <tt>ValueDomains</tt> object is created to model the variables and their value domains.<br>
@@ -274,20 +275,20 @@ public class ConstraintProblem {
     }
 
    /**
-     * Returns the number of variable domain populating <tt>Rule</tt>
+     * Returns the number of variable domain populating <tt>ConstraintRule</tt>
      * objects derived from the input problem.
      *
-     * @return the number of variable domain populating <tt>Rule</tt> objects.
+     * @return the number of variable domain populating <tt>ConstraintRule</tt> objects.
      */
     public int getNbrDomainPopulationRules() {
         return domainPopulationRules.size();
     }
 
     /**
-     * Returns the number of constraint <tt>Rule</tt> objects derived from
+     * Returns the number of constraint <tt>ConstraintRule</tt> objects derived from
      * the input problem.
      *
-     * @return the number of constraint <tt>Rule</tt> objects.
+     * @return the number of constraint <tt>ConstraintRule</tt> objects.
      */
     public int getNbrConstraintRules() {
         return constraintRules.size();
@@ -310,7 +311,7 @@ public class ConstraintProblem {
         if (domainPopulationRules.size() > 0) {
             System.out.println("Domain Population Rules");
             for (int i = 0; i < domainPopulationRules.size(); i++) {
-                Rule rule = (Rule) domainPopulationRules.get(i);
+                ConstraintRule rule = (ConstraintRule) domainPopulationRules.get(i);
                 if (rule.nbrFormulaInstances == -1)
                     System.out.println("  " + rule.cyclify());
                 else
@@ -324,7 +325,7 @@ public class ConstraintProblem {
         if (constraintRules.size() > 0) {
             System.out.println("Constraint Rules");
             for (int i = 0; i < constraintRules.size(); i++) {
-                Rule rule = (Rule) constraintRules.get(i);
+                ConstraintRule rule = (ConstraintRule) constraintRules.get(i);
                 if (rule.nbrFormulaInstances == -1)
                     System.out.println("  " + rule.cyclify());
                 else

@@ -145,7 +145,7 @@ public class VariableDomainPopulator {
             }
             if (variablePopulationItem.getNbrFormulaInstances() > domainSizeThreshold) {
                 if (verbosity > 3)
-                    System.out.println("  Rule's domain size exceeds the threshold of " + domainSizeThreshold +
+                    System.out.println("  ConstraintRule's domain size exceeds the threshold of " + domainSizeThreshold +
                                        ", domain population postponed");
                 variableDomainPopulators.put(variablePopulationItem.cycVariable, variablePopulationItem);
                 valueDomains.varsDictionary.put(variablePopulationItem.cycVariable, new ArrayList());
@@ -191,15 +191,15 @@ public class VariableDomainPopulator {
     }
 
     /**
-     * Returns <tt>true</tt> iff the given <tt>Rule</tt> was used to populate the domain
+     * Returns <tt>true</tt> iff the given <tt>ConstraintRule</tt> was used to populate the domain
      * of the given high cardinality variable.
      *
      * @param rule the rule under consideration
      * @param cycVariable the variable under consideration
-     * @return <tt>true</tt> iff the given <tt>Rule</tt> was used to populate the domain
+     * @return <tt>true</tt> iff the given <tt>ConstraintRule</tt> was used to populate the domain
      * of the given high cardinality variable
      */
-    public boolean isPopulatingRule(Rule rule, CycVariable cycVariable) {
+    public boolean isPopulatingRule(ConstraintRule rule, CycVariable cycVariable) {
         return rule.equals(getPopulatingRule(cycVariable));
     }
 
@@ -227,12 +227,12 @@ public class VariableDomainPopulator {
     }
 
     /**
-     * Sets the domain-populating <tt>Rule</tt> of the high cardinality variable.
+     * Sets the domain-populating <tt>ConstraintRule</tt> of the high cardinality variable.
      *
      * @param cycVariable the high-cardinality variable under consideration
      * @parma rule the domain-populating rule
      */
-    public void setPopulatingRule(CycVariable cycVariable, Rule rule) {
+    public void setPopulatingRule(CycVariable cycVariable, ConstraintRule rule) {
         VariablePopulationItem variablePopulationItem =
             (VariablePopulationItem) variableDomainPopulators.get(cycVariable);
         variablePopulationItem.rule = rule;
@@ -242,12 +242,12 @@ public class VariableDomainPopulator {
     }
 
     /**
-     * Gets the domain-populating <tt>Rule</tt> of the high cardinality variable.
+     * Gets the domain-populating <tt>ConstraintRule</tt> of the high cardinality variable.
      *
      * @param cycVariable the variable under consideration
-     * @return the domain-populating <tt>Rule</tt> of the high cardinality variable
+     * @return the domain-populating <tt>ConstraintRule</tt> of the high cardinality variable
      */
-    public Rule getPopulatingRule(CycVariable cycVariable) {
+    public ConstraintRule getPopulatingRule(CycVariable cycVariable) {
         VariablePopulationItem variablePopulationItem =
             (VariablePopulationItem) variableDomainPopulators.get(cycVariable);
         return variablePopulationItem.rule;
@@ -260,7 +260,7 @@ public class VariableDomainPopulator {
      * @param cycVariable the variable whose value domain is to be populated by the results of the query
      *
      */
-    protected void populateDomainViaQuery(Rule rule, CycVariable cycVariable) throws IOException {
+    protected void populateDomainViaQuery(ConstraintRule rule, CycVariable cycVariable) throws IOException {
         CycList domainValuesCycList =
             CycAccess.current().askWithVariable (rule.getFormula(),
                                                  cycVariable,
@@ -291,7 +291,7 @@ public class VariableDomainPopulator {
      */
     public void initializeDomain(VariablePopulationItem variablePopulationItem) throws IOException {
         CycVariable cycVariable = variablePopulationItem.cycVariable;
-        Rule rule = variablePopulationItem.rule;
+        ConstraintRule rule = variablePopulationItem.rule;
         if (valueDomains.domains.containsKey(cycVariable))
             throw new RuntimeException("Duplicate domain specifying rule for " +
                                        cycVariable);
@@ -332,7 +332,7 @@ public class VariableDomainPopulator {
     protected void populatePostponedDomain (CycVariable variable) throws IOException {
         VariablePopulationItem variablePopulationItem =
             (VariablePopulationItem) variableDomainPopulators.get(variable);
-        Rule rule = variablePopulationItem.rule;
+        ConstraintRule rule = variablePopulationItem.rule;
         if (verbosity > 2)
             System.out.println("Populating high cardinality variable " + variable +
                                "\n  with rule\n" + rule.cyclify());

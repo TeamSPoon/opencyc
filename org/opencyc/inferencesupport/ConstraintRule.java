@@ -6,7 +6,7 @@ import org.opencyc.api.*;
 import java.io.IOException;
 
 /**
- * <tt>Rule</tt> object to model the attributes and behavior of a constraint rule.<p>
+ * <tt>ConstraintRule</tt> object to model the attributes and behavior of a constraint rule.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -29,9 +29,9 @@ import java.io.IOException;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @see UnitTest#testRule
+ * @see UnitTest#testConstraintRule
  */
-public class Rule  implements Comparable{
+public class ConstraintRule  implements Comparable{
 
     /**
      * The number of instances matching this constraint rule formula in the KB. Value of -1
@@ -70,29 +70,29 @@ public class Rule  implements Comparable{
 
 
     /**
-     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> <tt>String</tt>
+     * Constructs a new <tt>ConstraintRule</tt> object from a <tt>CycList</tt> <tt>String</tt>
      * representation.<p>
      *
      * @param formulaString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public Rule (String formulaString) {
+    public ConstraintRule (String formulaString) {
         formula = CycAccess.current().makeCycList(formulaString);
         gatherVariables();
     }
 
     /**
-     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt>.<p>
+     * Constructs a new <tt>ConstraintRule</tt> object from a <tt>CycList</tt>.<p>
      *
      * <pre>
      *  String ruleAsString = "(#$isa ?x #$Cathedral)";
-     *  Rule rule1 = new Rule (cycAccess.makeCycList(ruleAsString));
+     *  ConstraintRule rule1 = new ConstraintRule (cycAccess.makeCycList(ruleAsString));
      * </pre>
      *
      * @param formula the rule's formula, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public Rule(CycList formula) {
+    public ConstraintRule(CycList formula) {
         this.formula = formula;
         gatherVariables();
     }
@@ -102,10 +102,10 @@ public class Rule  implements Comparable{
      * (#$and (<rule1> <rule2> ... <ruleN>) becomes <rule1> <rule2> ... <ruleN>
      *
      * @param cycList the rule expression that is simplified
-     * @return an <tt>ArrayList</tt> of <tt>Rule</tt> objects.
-     * @see UnitTest#testRule
+     * @return an <tt>ArrayList</tt> of <tt>ConstraintRule</tt> objects.
+     * @see UnitTest#testConstraintRule
      */
-    public static ArrayList simplifyRuleExpression(CycList cycList) throws IOException {
+    public static ArrayList simplifyConstraintRuleExpression(CycList cycList) throws IOException {
         ArrayList rules = new ArrayList();
         if (cycList.size() < 2)
             throw new RuntimeException("Invalid rule: " + cycList);
@@ -113,9 +113,9 @@ public class Rule  implements Comparable{
         if (object instanceof CycConstant &&
             ((CycConstant) object).equals(CycAccess.and))
             for (int i = 1; i < cycList.size(); i++)
-                rules.add(new Rule((CycList) cycList.get(i)));
+                rules.add(new ConstraintRule((CycList) cycList.get(i)));
         else
-            rules.add(new Rule(cycList));
+            rules.add(new ConstraintRule(cycList));
         return rules;
     }
 
@@ -173,10 +173,10 @@ public class Rule  implements Comparable{
      * @return <tt>boolean</tt> indicating equality of an object with this object.
      */
     public boolean equals(Object object) {
-        if (! (object instanceof Rule))
+        if (! (object instanceof ConstraintRule))
             return false;
-        Rule thatRule = (Rule) object;
-        return this.formula.equals(thatRule.getFormula());
+        ConstraintRule thatConstraintRule = (ConstraintRule) object;
+        return this.formula.equals(thatConstraintRule.getFormula());
     }
 
     /**
@@ -189,9 +189,9 @@ public class Rule  implements Comparable{
      * object is less than, equal to, or greater than the specified object
      */
      public int compareTo (Object object) {
-        if (! (object instanceof Rule))
-            throw new ClassCastException("Must be a Rule object");
-        return (new Integer(this.getArity())).compareTo(new Integer(((Rule) object).getArity()));
+        if (! (object instanceof ConstraintRule))
+            throw new ClassCastException("Must be a ConstraintRule object");
+        return (new Integer(this.getArity())).compareTo(new Integer(((ConstraintRule) object).getArity()));
      }
 
     /**
@@ -199,12 +199,12 @@ public class Rule  implements Comparable{
      * relationship between this rule and another rule.
      *
      * @param rule the rule for subsumption determination
-     * @return <tt>Rule.SUBSUMES</tt> if this rule subsumes the given rule,
-     * <tt>Rule.SUBSUMED_BY</tt> if this rule is subsumed by the given rule,
-     * <tt>Rule.NO_SUBSUMPTION</tt> if this rule is neither subsumed by the given rule, nor
+     * @return <tt>ConstraintRule.SUBSUMES</tt> if this rule subsumes the given rule,
+     * <tt>ConstraintRule.SUBSUMED_BY</tt> if this rule is subsumed by the given rule,
+     * <tt>ConstraintRule.NO_SUBSUMPTION</tt> if this rule is neither subsumed by the given rule, nor
      * subsumes the given rule
      */
-    public int determineSubsumption(Rule rule) throws IOException {
+    public int determineSubsumption(ConstraintRule rule) throws IOException {
         if (this.equals(rule))
             return SUBSUMES;
         if (! (this.getPredicate().equals(rule.getPredicate())))
@@ -272,49 +272,49 @@ public class Rule  implements Comparable{
      * Returns whether this rule is subsumed by the given rule.
      *
      * @param rule the given rule for subsumption determination.
-     * @return <tt>true</tt> iff this rule is subsumed by the given <tt>Rule</tt> object.
+     * @return <tt>true</tt> iff this rule is subsumed by the given <tt>ConstraintRule</tt> object.
      */
-    public boolean isSubsumedBy(Rule rule) throws IOException {
+    public boolean isSubsumedBy(ConstraintRule rule) throws IOException {
         if (this.equals(rule))
             return true;
         else
-            return this.determineSubsumption(rule) == Rule.SUBSUMED_BY;
+            return this.determineSubsumption(rule) == ConstraintRule.SUBSUMED_BY;
     }
 
     /**
      * Returns whether this rule subsumes the given rule.
      *
      * @param rule the given rule for subsumption determination.
-     * @return <tt>true</tt> iff this rule subsumes the given <tt>Rule</tt> object.
+     * @return <tt>true</tt> iff this rule subsumes the given <tt>ConstraintRule</tt> object.
      */
-    public boolean subsumes(Rule rule) throws IOException {
-        return this.determineSubsumption(rule) == Rule.SUBSUMES;
+    public boolean subsumes(ConstraintRule rule) throws IOException {
+        return this.determineSubsumption(rule) == ConstraintRule.SUBSUMES;
     }
 
 
     /**
-     * Creates and returns a copy of this <tt>Rule</tt>.
+     * Creates and returns a copy of this <tt>ConstraintRule</tt>.
      *
      * @return a clone of this instance
      */
     public Object clone() {
-        return new Rule((CycList) this.formula.clone());
+        return new ConstraintRule((CycList) this.formula.clone());
     }
 
     /**
-     * Returns the predicate of this <tt>Rule</tt> object.
+     * Returns the predicate of this <tt>ConstraintRule</tt> object.
      *
      * @return the predicate <tt>CycConstant</tt> or <tt>CycSymbol</tt>
-     * of this <tt>Rule</tt> object
+     * of this <tt>ConstraintRule</tt> object
      */
     public CycConstant getPredicate() {
         return (CycConstant) formula.first();
     }
 
     /**
-     * Returns the arguments of this <tt>Rule</tt> object.
+     * Returns the arguments of this <tt>ConstraintRule</tt> object.
      *
-     * @return the arguments of this <tt>Rule</tt> object
+     * @return the arguments of this <tt>ConstraintRule</tt> object
      */
     public CycList getArguments() {
         return (CycList) formula.rest();
@@ -336,9 +336,9 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this <tt>Rule</tt> is a #$different constraint rule.
+     * Returns <tt>true</tt> if this <tt>ConstraintRule</tt> is a #$different constraint rule.
      *
-     * @return <tt>boolean</tt> indicating if this <tt>Rule</tt> is a #$different
+     * @return <tt>boolean</tt> indicating if this <tt>ConstraintRule</tt> is a #$different
      * constraint rule
      */
     public boolean isAllDifferent() throws IOException{
@@ -351,12 +351,12 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
+     * Returns <tt>true</tt> if this <tt>ConstraintRule</tt> is a simple evaluatable constraint rule,
      * which can be answered without KB lookup.  Typically an evaluatable constraint
      * rule is a relational operator applied to a primitive data type.
      *
      *
-     * @return <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
+     * @return <tt>true</tt> if this <tt>ConstraintRule</tt> is a simple evaluatable constraint rule,
      * which can be answered without KB lookup
      */
     public boolean isEvaluatable() throws IOException {
@@ -367,7 +367,7 @@ public class Rule  implements Comparable{
         else if (this.getPredicate().toString().equals("or") ||
                  this.getPredicate().toString().equals("and")) {
             for (int i = 0; i < this.getArguments().size(); i++) {
-                Rule orArgument = new Rule((CycList) this.getArguments().get(i));
+                ConstraintRule orArgument = new ConstraintRule((CycList) this.getArguments().get(i));
                 if (! orArgument.isEvaluatable())
                     return false;
             }
@@ -378,12 +378,12 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments.
+     * Returns <tt>true</tt> if this <tt>ConstraintRule</tt> has simple evaluatable numerical arguments.
      * Numbers and variables return <tt>true</tt> and functional expressions return
      * <tt>true</tt> iff their arguments are simple numerical expressions.
      *
      *
-     * @return <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments
+     * @return <tt>true</tt> if this <tt>ConstraintRule</tt> has simple evaluatable numerical arguments
      */
     public boolean hasEvaluatableNumericalArgs() throws IOException {
         CycList args = this.getFormula().rest();
@@ -422,40 +422,40 @@ public class Rule  implements Comparable{
     /**
      * Evaluates the instantiated constraint rule locally without asking OpenCyc.
      *
-     * @param instantiatedRule the fully instantiated constraint rule whose predicates
+     * @param instantiatedConstraintRule the fully instantiated constraint rule whose predicates
      * can be evaluated locally without asking OpenCyc.
      * @return the truth value of the fully instantiated constraint rule
      */
-    public static boolean evaluateConstraintRule(CycList instantiatedRule) throws IOException {
-        CycConstant predicate = (CycConstant) instantiatedRule.first();
+    public static boolean evaluateConstraintConstraintRule(CycList instantiatedConstraintRule) throws IOException {
+        CycConstant predicate = (CycConstant) instantiatedConstraintRule.first();
         if (predicate.equals(CycAccess.numericallyEqual)) {
-            int value = numericallyEvaluateExpression(instantiatedRule.second());
-            for (int i = 2; i < instantiatedRule.size(); i++) {
-                if (numericallyEvaluateExpression(instantiatedRule.get(i)) != value)
+            int value = numericallyEvaluateExpression(instantiatedConstraintRule.second());
+            for (int i = 2; i < instantiatedConstraintRule.size(); i++) {
+                if (numericallyEvaluateExpression(instantiatedConstraintRule.get(i)) != value)
                     return false;
             }
             return true;
         }
         else if (predicate.equals(CycAccess.or)) {
-            CycList args = instantiatedRule.rest();
+            CycList args = instantiatedConstraintRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
-                if (evaluateConstraintRule(arg))
+                if (evaluateConstraintConstraintRule(arg))
                     return true;
             }
             return false;
         }
         else if (predicate.equals(CycAccess.and)) {
-            CycList args = instantiatedRule.rest();
+            CycList args = instantiatedConstraintRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
-                if (! evaluateConstraintRule(arg))
+                if (! evaluateConstraintConstraintRule(arg))
                     return false;
             }
             return true;
         }
         else
-            throw new RuntimeException(instantiatedRule + "Cannot be evaluated");
+            throw new RuntimeException(instantiatedConstraintRule + "Cannot be evaluated");
     }
 
     /**
@@ -519,13 +519,13 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns <tt>true</tt> if this is an extensional variable domain populating <tt>Rule</tt>.
+     * Returns <tt>true</tt> if this is an extensional variable domain populating <tt>ConstraintRule</tt>.
      * An extensional rule is one in which all the values are listed.
      *
      * @return <tt>boolean</tt> indicating if this is an extensional variable domain populating
-     * <tt>Rule</tt>.
+     * <tt>ConstraintRule</tt>.
      */
-    public boolean isExtensionalVariableDomainPopulatingRule() throws IOException {
+    public boolean isExtensionalVariableDomainPopulatingConstraintRule() throws IOException {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
@@ -543,7 +543,7 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns a string representation of the <tt>Rule</tt>.
+     * Returns a string representation of the <tt>ConstraintRule</tt>.
      *
      * @return the rule's formula formated as a <tt>String</tt>.
      */
@@ -562,20 +562,20 @@ public class Rule  implements Comparable{
     }
 
     /**
-     * Returns a new <tt>Rule</tt> which is the result of substituting the given
+     * Returns a new <tt>ConstraintRule</tt> which is the result of substituting the given
      * <tt>Object</tt> value for the given <tt>CycVariable</tt>.
      *
      * @param cycVariable the variable for substitution
      * @param value the value which is substituted for each occurrance of the variable
-     * @return a new <tt>Rule</tt> which is the result of substituting the given
+     * @return a new <tt>ConstraintRule</tt> which is the result of substituting the given
      * <tt>Object</tt> value for the given <tt>CycVariable</tt>
      */
-    public Rule instantiate(CycVariable cycVariable, Object value) {
+    public ConstraintRule instantiate(CycVariable cycVariable, Object value) {
         if (! variables.contains(cycVariable))
             throw new RuntimeException("Cannot instantiate " + cycVariable +
                                        " in rule " + this);
-        CycList newRule = formula.subst(value, cycVariable);
-        return new Rule(newRule);
+        CycList newConstraintRule = formula.subst(value, cycVariable);
+        return new ConstraintRule(newConstraintRule);
     }
 
     /**
@@ -583,13 +583,13 @@ public class Rule  implements Comparable{
      * rule.  Specifically, an expression is not a valid constraint rule if its predicate is not a
      * <tt>CycConstant</tt> object.
      *
-     * @param cycListRule the representation of a constraint rule to be validated
+     * @param cycListConstraintRule the representation of a constraint rule to be validated
      * @return <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
      * rule
      */
-    public static boolean isValidRuleExpression(CycList cycListRule) {
-        if (cycListRule.size() < 2)
+    public static boolean isValidConstraintRuleExpression(CycList cycListConstraintRule) {
+        if (cycListConstraintRule.size() < 2)
             return false;
-        return cycListRule.first() instanceof CycConstant;
+        return cycListConstraintRule.first() instanceof CycConstant;
     }
 }

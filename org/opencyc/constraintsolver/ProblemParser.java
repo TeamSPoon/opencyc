@@ -96,7 +96,7 @@ public class ProblemParser {
     }
 
     /**
-     * Simplifies the input problem into its constituent <tt>Rule</tt> objects,
+     * Simplifies the input problem into its constituent <tt>ConstraintRule</tt> objects,
      * then divides the input rules into those which populate the variable
      * domains, and those which subsequently constrain the search for
      * one or more solutions.  Obtains additional argument type constraints for the constraint
@@ -107,11 +107,11 @@ public class ProblemParser {
      * otherwise return <tt>true</tt>
      */
     public boolean extractRulesAndDomains() throws IOException {
-        simplifiedRules.addAll(Rule.simplifyRuleExpression(constraintProblem.problem));
+        simplifiedRules.addAll(ConstraintRule.simplifyRuleExpression(constraintProblem.problem));
         // Sort by ascending arity to find likely unsatisfiable facts first.
         Collections.sort(simplifiedRules);
         for (int i = 0; i < simplifiedRules.size(); i++) {
-            Rule rule = (Rule) simplifiedRules.get(i);
+            ConstraintRule rule = (ConstraintRule) simplifiedRules.get(i);
             if ((constraintProblem.backchainer.backchainDepth ==
                  constraintProblem.backchainer.maxBackchainDepth) &&
                 (! isRuleSatisfiable(rule)))
@@ -141,13 +141,13 @@ public class ProblemParser {
      * @param rule the rule to check in the KB
      * @return <tt>true</tt> iff the rule cannot be satisfied
      */
-    protected boolean isRuleSatisfiable(Rule rule) throws IOException {
+    protected boolean isRuleSatisfiable(ConstraintRule rule) throws IOException {
         if (rule.isGround()) {
             if (verbosity > 3)
                 System.out.println("Ground fact with no backchaining possible\n" + rule);
             boolean isTrueFact;
             if (rule.isEvaluatable())
-                isTrueFact = Rule.evaluateConstraintRule(rule.getFormula());
+                isTrueFact = ConstraintRule.evaluateConstraintRule(rule.getFormula());
             else
                 isTrueFact = CycAccess.current().isQueryTrue(rule.getFormula(), constraintProblem.mt);
             if (verbosity > 3)
@@ -186,7 +186,7 @@ public class ProblemParser {
     public void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
         for (int i = 0; i < constraintProblem.simplifiedRules.size(); i++) {
-            Rule rule = (Rule) constraintProblem.simplifiedRules.get(i);
+            ConstraintRule rule = (ConstraintRule) constraintProblem.simplifiedRules.get(i);
             uniqueVariables.addAll(rule.getVariables());
         }
         constraintProblem.variables.addAll(uniqueVariables);

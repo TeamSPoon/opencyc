@@ -98,17 +98,17 @@ public class NodeConsistencyAchiever {
         CycVariable affectedVariable;
         ArrayList inputDomainValues;
         ArrayList outputDomainValues;
-        Rule instantiatedRule;
+        ConstraintRule instantiatedRule;
         boolean instantiatedRuleResult;
         // Select the unary constraint rules.
         for (int i = 0; i < constraintProblem.getNbrConstraintRules(); i++) {
-            Rule rule = (Rule) constraintProblem.constraintRules.get(i);
+            ConstraintRule rule = (ConstraintRule) constraintProblem.constraintRules.get(i);
             if (rule.getArity() == 1)
                 unaryConstraintRules.add(rule);
         }
         // Apply the unary constraint rules.
         for (int i = 0; i < unaryConstraintRules.size(); i++) {
-            Rule rule = (Rule) unaryConstraintRules.get(i);
+            ConstraintRule rule = (ConstraintRule) unaryConstraintRules.get(i);
             if (verbosity > 5) {
                 System.out.println("\nApplying unary constraint rule to acheive node consistency:");
                 System.out.println(rule);
@@ -169,13 +169,13 @@ public class NodeConsistencyAchiever {
         }
         // Gather the applicable #$different rules.
         for (int i = 0; i < constraintProblem.constraintRules.size(); i++) {
-            Rule rule = (Rule) constraintProblem.constraintRules.get(i);
+            ConstraintRule rule = (ConstraintRule) constraintProblem.constraintRules.get(i);
             if (rule.isAllDifferent())
                 allDifferentRules.add(rule);
         }
         // Propagate singleton variables through the #$different rules.
         for (int i = 0; i < allDifferentRules.size(); i++) {
-            Rule rule = (Rule) allDifferentRules.get(i);
+            ConstraintRule rule = (ConstraintRule) allDifferentRules.get(i);
             if (verbosity > 7)
                 System.out.println("\nPropagating through rule " + rule);
             for (int j = 0; j < singletons.size(); j++) {

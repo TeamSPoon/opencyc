@@ -5,8 +5,9 @@ package org.opencyc.elf.bg.planner;
 
 /**
  * <P>
- * Job is the description of one or many actions (activites) required to
- * perform the task and formulate it in terms of the resources to be used.
+ * Schedule contains the timing specification for a plan.  It can be
+ * represented as a time-labeled or event-labeled sequence of actitivies or
+ * events.
  * </p>
  * 
  * @version $Id: BehaviorGeneration.java,v 1.3 2002/11/19 02:42:53 stephenreed
@@ -30,13 +31,13 @@ package org.opencyc.elf.bg.planner;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Job {
+public class Schedule {
   //// Constructors
 
   /**
    * Creates a new instance of Job
    */
-  public Job() {
+  public Schedule() {
   }
 
   //// Public Area
@@ -49,7 +50,7 @@ public class Job {
    * @return true if the given object equals this object
    */
   public boolean equals(Object obj) {
-    if (!(obj instanceof Job)) {
+    if (!(obj instanceof Schedule)) {
       return false;
     }
 

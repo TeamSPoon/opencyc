@@ -231,6 +231,14 @@ public class ConstraintProblem {
             problemParser.initializeDomains();
             nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();
+            if (verbosity > 0) {
+                if (nbrSolutionsRequested == null)
+                    System.out.println("Solving for all solutions");
+                else if (nbrSolutionsRequested.intValue() == 1)
+                    System.out.println("Solving for the first solution");
+                else
+                    System.out.println("Solving for " + nbrSolutionsRequested + " solutions");
+            }
             forwardCheckingSearcher  = new ForwardCheckingSearcher(this);
             forwardCheckingSearcher.search(variables, 1);
         }

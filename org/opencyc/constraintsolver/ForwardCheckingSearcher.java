@@ -325,7 +325,7 @@ public class ForwardCheckingSearcher {
                                                      int level,
                                                      Binding currentBinding) throws IOException {
         // Order the remaining variables by ascending domain size.
-        ArrayList remainingRuleVariables = rule.getVariables();
+        ArrayList remainingRuleVariables = (ArrayList) rule.getVariables().clone();
         remainingRuleVariables.remove(currentBinding.getCycVariable());
         Collections.sort(remainingRuleVariables,
                          new VariablesByAscendingDomainSizeComparator(valueDomains));

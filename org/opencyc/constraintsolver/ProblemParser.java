@@ -126,7 +126,7 @@ public class ProblemParser {
                 int nbrInstances = CycAccess.current().countAllInstances(collection,
                                                                          constraintProblem.mt);
                 if (verbosity > 3) {
-                    System.out.println("intensional variable domain populating rule\n" + rule);
+                    System.out.println("\nIntensional variable domain populating rule\n" + rule);
                     System.out.println("  nbrInstances " + nbrInstances);
                 }
                 if (nbrInstances > constraintProblem.highCardinalityDomains.domainSizeThreshold) {

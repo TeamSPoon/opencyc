@@ -78,7 +78,15 @@ public class ValueDomains {
         orderedVariables = orderedVariables.sort();
         for (int i = 0; i < orderedVariables.size(); i++) {
             CycVariable cycVariable = (CycVariable) orderedVariables.get(i);
-            System.out.println("  " + cycVariable + "\t" + getDomainValues(cycVariable));
+            ArrayList domainValues = getDomainValues(cycVariable);
+            if (constraintProblem.highCardinalityDomains.contains(cycVariable)) {
+                if (domainValues.size() == 0)
+                    System.out.println("  " + cycVariable + "\t... unpopulated high cardinality domain");
+                else
+                    System.out.println("  " + cycVariable + "\t... populated high cardinality domain " + domainValues);
+            }
+            else
+                System.out.println("  " + cycVariable + "\t" + domainValues);
         }
     }
 

@@ -776,6 +776,8 @@ public class UnitTest extends TestCase {
         System.out.println(europeanCathedralsString);
         ConstraintProblem europeanCathedralsProblem = new ConstraintProblem();
         europeanCathedralsProblem.setVerbosity(1);
+        // Request two solutions.
+        // europeanCathedralsProblem.nbrSolutionsRequested = new Integer(2);
         // Request all solutions.
         europeanCathedralsProblem.nbrSolutionsRequested = null;
         try {

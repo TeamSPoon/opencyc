@@ -739,6 +739,15 @@ public class CycConnection implements CycConnectionInterface {
         cfaslOutputStream.trace = trace;
     }
 
+    /**
+     * Returns connection information, suitable for diagnostics.
+     */
+    public String connectionInfo () {
+        return "host " + hostName +
+               ", asciiPort " + asciiPort +
+               ", cfaslPort " + cfaslPort;
+    }
+
 }
 
 

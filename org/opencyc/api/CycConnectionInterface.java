@@ -31,11 +31,6 @@ import  org.opencyc.util.*;
 public interface CycConnectionInterface {
 
     /**
-     * Close the api sockets and streams.
-     */
-    public void close ();
-
-    /**
      * Send a message to Cyc and return the <tt>Boolean</tt> true as the first
      * element of an object array, and the cyc response Symbolic Expression as
      * the second element.  If an error occurs the first element is <tt>Boolean</tt>
@@ -62,6 +57,16 @@ public interface CycConnectionInterface {
      */
     public Object[] converse (Object message, Timer timeout)
         throws IOException, TimeOutException, CycApiException;
+
+    /**
+     * Returns connection information, suitable for diagnostics.
+     */
+    public String connectionInfo ();
+
+    /**
+     * Close the api sockets and streams.
+     */
+    public void close ();
 
     /**
      * Returns the trace value.

@@ -94,7 +94,7 @@ public class UnitTest extends TestCase {
     public void testAsciiCycConnection () {
         System.out.println("**** testAsciiCycConnection ****");
 
-        CycConnection cycConnection = null;
+        CycConnectionInterface cycConnection = null;
         try {
             CycAccess cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                                 CycConnection.DEFAULT_BASE_PORT,
@@ -104,9 +104,7 @@ public class UnitTest extends TestCase {
             //cycConnection.trace = true;
         }
         catch (Exception e) {
-            System.out.println("host " + CycAccess.current().cycConnection.hostName +
-                               ", asciiPort " + CycAccess.current().cycConnection.asciiPort +
-                               ", cfaslPort " + CycAccess.current().cycConnection.cfaslPort);
+            System.out.println(CycAccess.current().cycConnection.connectionInfo());
             Assert.fail(e.toString());
         }
 
@@ -196,7 +194,7 @@ public class UnitTest extends TestCase {
     public void testBinaryCycConnection1 () {
         System.out.println("**** testBinaryCycConnection1 ****");
         CycAccess cycAccess = null;
-        CycConnection cycConnection = null;
+        CycConnectionInterface cycConnection = null;
         try {
             cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                       CycConnection.DEFAULT_BASE_PORT,
@@ -207,9 +205,7 @@ public class UnitTest extends TestCase {
             //cycConnection.trace = true;
         }
         catch (Exception e) {
-            System.out.println("host " + CycAccess.current().cycConnection.hostName +
-                               ", asciiPort " + CycAccess.current().cycConnection.asciiPort +
-                               ", cfaslPort " + CycAccess.current().cycConnection.cfaslPort);
+            System.out.println(CycAccess.current().cycConnection.connectionInfo());
             e.printStackTrace();
             Assert.fail(e.toString());
         }

@@ -345,8 +345,6 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         try {
             cycAccess.traceOn();
             response = cycAccess.getCycConnection().converse(apiRequest);
-            if (! response[0].equals(Boolean.TRUE))
-                throw new CycApiException(response[1].toString());
         }
         catch (Exception e) {
             Log.current.errorPrintln(e.getMessage());
@@ -358,12 +356,15 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         coAbsReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
         coAbsReplyAcl.setSenderAID(coAbsRequestAcl.getReceiverAID());
         coAbsReplyAcl.setReceiverAID(coAbsRequestAcl.getSenderAID());
-        System.out.println("marshalling\n" + response[1]);
+        CycList responseCycList = new CycList();
+        responseCycList.add(response[0]);
+        responseCycList.add(response[1]);
+        System.out.println("marshalling\n" + responseCycList);
         try {
-            coAbsReplyAcl.setContentObject(Marshaller.marshall(response[1]));
+            coAbsReplyAcl.setContentObject(Marshaller.marshall(responseCycList));
         }
         catch (IOException e) {
-            Log.current.errorPrintln("Exception while marshalling " + response[1]);
+            Log.current.errorPrintln("Exception while marshalling " + responseCycList);
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
             return;

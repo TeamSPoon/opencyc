@@ -5,6 +5,7 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.text.*;
+import ViolinStrings.Strings;
 import org.opencyc.cycobject.*;
 import org.opencyc.cycagent.*;
 import org.opencyc.util.*;
@@ -53,14 +54,31 @@ public class UnitTest extends TestCase {
      */
     public static final int REMOTE_CYC_CONNECTION = 2;
 
-    //public static int connectionMode = REMOTE_CYC_CONNECTION;
-    public static int connectionMode = LOCAL_CYC_CONNECTION;
+    /**
+     * Indicates the use of a java web service (SOAP XML) connection to the
+     * Cyc server.
+     */
+    public static final int SOAP_CYC_CONNECTION = 3;
 
+    //public static int connectionMode = REMOTE_CYC_CONNECTION;
+    public static int connectionMode = SOAP_CYC_CONNECTION;
+    //public static int connectionMode = LOCAL_CYC_CONNECTION;
+
+    /**
+     * the endpoint URL string for the Cyc API web service
+     */
+    public static final String endpointURLString = "http://crapgame.cyc.com:8080/axis/CycSOAPService.jws";
+    
+    /**
+     * the endpoint URL for the Cyc API web service
+     */
+    protected static URL endpointURL;
+    
     /**
      * Indicates whether unit tests should be performed only in binary api mode.
      */
-    //public static boolean performOnlyBinaryApiModeTests = false;
-    public static boolean performOnlyBinaryApiModeTests = true;
+    public static boolean performOnlyBinaryApiModeTests = false;
+    //public static boolean performOnlyBinaryApiModeTests = true;
 
     /**
      * Creates a <tt>UnitTest</tt> object with the given name.
@@ -75,6 +93,11 @@ public class UnitTest extends TestCase {
      * @return the test suite
      */
     public static Test suite() {
+        try {
+            endpointURL = new URL(endpointURLString); 
+        }
+        catch (MalformedURLException e) {
+        }
         TestSuite testSuite = new TestSuite();
 
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
@@ -104,18 +127,14 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess12"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess13"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
-
         return testSuite;
     }
 
     /**
-     * Main method in case tracing is prefered over running JUnit.
+     * Main method in case tracing is prefered over running the JUnit GUI.
      */
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
-        if (connectionMode == REMOTE_CYC_CONNECTION &&
-            agentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
-            System.exit(0);
     }
 
     /**
@@ -163,24 +182,39 @@ public class UnitTest extends TestCase {
         }
         System.out.println("\n**** testAsciiCycConnection ****");
         CycConnectionInterface cycConnection = null;
-        try {
-            CycAccess cycAccess = null;
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
-            cycConnection = cycAccess.cycConnection;
-            //cycConnection.trace = true;
-        }
-        catch (ConnectException e) {
-            System.out.println("Could not connect to host " + CycConnection.DEFAULT_HOSTNAME +
-                               " port " + CycConnection.DEFAULT_BASE_PORT);
-            Assert.fail(e.toString());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail(e.toString());
-        }
+        if (connectionMode == LOCAL_CYC_CONNECTION)
+            try {
+                CycAccess cycAccess = null;
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+                cycConnection = cycAccess.cycConnection;
+                //cycConnection.trace = true;
+            }
+            catch (ConnectException e) {
+                System.out.println("Could not connect to host " + CycConnection.DEFAULT_HOSTNAME +
+                                   " port " + CycConnection.DEFAULT_BASE_PORT);
+                Assert.fail(e.toString());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                Assert.fail(e.toString());
+            }
+        else if (connectionMode == SOAP_CYC_CONNECTION)
+            try {
+                CycAccess cycAccess = null;
+                cycAccess = new CycAccess(endpointURL);
+                cycConnection = cycAccess.cycConnection;
+            }
+            catch (ConnectException e) {
+                System.out.println("Could not connect to SOAP endpoint " + endpointURL.toString());
+                Assert.fail(e.toString());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                Assert.fail(e.toString());
+            }
 
         // Test return of atom.
         String command = "(+ 2 3)";
@@ -267,6 +301,8 @@ public class UnitTest extends TestCase {
      * OpenCyc server.
      */
     public void testBinaryCycConnection1 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycConnection1 ****");
         CycAccess cycAccess = null;
         CycConnectionInterface cycConnection = null;
@@ -404,7 +440,7 @@ public class UnitTest extends TestCase {
      * CycAccess is set to null;
      */
     public void testBinaryCycConnection2 () {
-        if (connectionMode == REMOTE_CYC_CONNECTION)
+        if (connectionMode == SOAP_CYC_CONNECTION)
             return;
         System.out.println("\n**** testBinaryCycConnection2 ****");
         CycConnection cycConnection = null;
@@ -518,10 +554,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 1 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.TRANSIENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.TRANSIENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -537,6 +576,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess1 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 1 ****");
         CycAccess cycAccess = null;
         try {
@@ -651,9 +692,9 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(isas instanceof CycList);
         isas = ((CycList) isas).sort();
         try {
-            CycConstant organismClassificationType =
-                cycAccess.getKnownConstantByGuid("bd58dfe4-9c29-11b1-9dad-c379636f7270");
-            Assert.assertTrue(isas.contains(organismClassificationType));
+            CycConstant biologicalSpecies =
+                cycAccess.getKnownConstantByGuid("bd58caeb-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(isas.contains(biologicalSpecies));
         }
         catch (Exception e) {
             CycAccess.current().close();
@@ -673,10 +714,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 2 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             CycAccess.current().close();
@@ -694,6 +738,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess2 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 2 ****");
         CycAccess cycAccess = null;
         try {
@@ -988,8 +1034,23 @@ public class UnitTest extends TestCase {
             CycAccess.current().close();
             Assert.fail(e.toString());
         }
-       Assert.assertNotNull(phrase);
+        Assert.assertNotNull(phrase);
         Assert.assertTrue(phrase.indexOf("doer (") > -1);
+        
+        
+        // denots-of-string
+        try {
+            String denotationString = "Brazil";
+            CycList denotations = cycAccess.getDenotsOfString(denotationString);
+            System.out.println(denotations.cyclify());
+            Assert.assertTrue(denotations.contains(cycAccess.getKnownConstantByGuid("bd588f01-9c29-11b1-9dad-c379636f7270")));
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
+        
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
@@ -1004,10 +1065,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 3 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1024,6 +1088,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess3 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 3 ****");
         CycAccess cycAccess = null;
         try {
@@ -1084,8 +1150,8 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(isas);
         Assert.assertTrue(isas instanceof CycList);
+        Assert.assertTrue(isas.toString().indexOf("IndependentCountry") > 0);
         isas = ((CycList) isas).sort();
-        Assert.assertTrue(isas.toString().indexOf("Entity") > 0);
         Assert.assertTrue(isas.toString().indexOf("IndependentCountry") > 0);
 
         // getGenls.
@@ -1411,10 +1477,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 4 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1431,6 +1500,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess4 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 4 ****");
         CycAccess cycAccess = null;
         try {
@@ -1688,10 +1759,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 5 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1708,6 +1782,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess5 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 5 ****");
         CycAccess cycAccess = null;
         try {
@@ -1761,6 +1837,7 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.toString());
         }
+        
         // assertComment.
         cycConstant = null;
         try {
@@ -1782,11 +1859,10 @@ public class UnitTest extends TestCase {
             CycAccess.current().close();
             Assert.fail(e.toString());
         }
-        Assert.assertNotNull(cycConstant);
+        Assert.assertNotNull(baseKb);
         Assert.assertEquals("BaseKB", baseKb.getName());
         String assertedComment = "A test comment";
         try {
-            //cycAccess.traceOn();
             cycAccess.assertComment(cycConstant, assertedComment, baseKb);
         }
         catch (Exception e) {
@@ -2009,10 +2085,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 6 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -2029,6 +2108,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess6 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 6 ****");
         CycAccess cycAccess = null;
         try {
@@ -2294,11 +2375,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 7 ****");
         CycAccess cycAccess = null;
         try {
-
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -2315,6 +2398,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess7 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 7 ****");
         CycAccess cycAccess = null;
         try {
@@ -2534,7 +2619,7 @@ public class UnitTest extends TestCase {
             cycAccess.converseVoid(script);
             script = "(get-environment)";
             responseString = cycAccess.converseString(script);
-            Assert.assertEquals("\n", responseString);
+            Assert.assertTrue(responseString.equals("\n") || responseString.equals(" "));
             Assert.assertTrue(! cycAccess.converseBoolean("(boundp 'a)"));
             cycAccess.converseVoid("(csetq a nil)");
             Assert.assertTrue(cycAccess.converseBoolean("(boundp 'a)"));
@@ -2635,7 +2720,7 @@ public class UnitTest extends TestCase {
             cycAccess.converseVoid(script);
             script = "(get-environment)";
             responseString = cycAccess.converseString(script);
-            Assert.assertEquals("\n", responseString);
+            Assert.assertTrue(responseString.equals("\n") || responseString.equals(" "));
             script = "(csetq answer nil)";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(CycObjectFactory.nil, responseObject);
@@ -2680,7 +2765,7 @@ public class UnitTest extends TestCase {
 
             script = "(get-trace-log)";
             responseString = cycAccess.converseString(script);
-            Assert.assertEquals("\n", responseString);
+            Assert.assertTrue(responseString.equals("\n") || responseString.equals(" "));
 
             script = "(trace my-copy-tree)";
             responseObject = cycAccess.converseObject(script);
@@ -2721,8 +2806,9 @@ public class UnitTest extends TestCase {
                 "      2: returned NIL \n" +
                 "    1: returned ((2 (3))) \n" +
                 "  0: returned (1 (2 (3))) \n";
-            Assert.assertEquals(expectedTraceLog,
-                                responseString);
+            String expectedTraceLogWithoutNewlines = Strings.change(expectedTraceLog, "\n", " ");
+            Assert.assertTrue(responseString.equals(expectedTraceLog) ||
+                              responseString.equals(expectedTraceLogWithoutNewlines));
 
             script = "(trace floor)";
             responseObject = cycAccess.converseObject(script);
@@ -3543,11 +3629,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 8 ****");
         CycAccess cycAccess = null;
         try {
-
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -3564,6 +3652,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess8 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 8 ****");
         CycAccess cycAccess = null;
         try {
@@ -3677,11 +3767,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 9 ****");
         CycAccess cycAccess = null;
         try {
-
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -3700,6 +3792,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess9 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 9 ****");
         CycAccess cycAccess = null;
         try {
@@ -3863,11 +3957,13 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testAsciiCycAccess 10 ****");
         CycAccess cycAccess = null;
         try {
-
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.ASCII_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == SOAP_CYC_CONNECTION)
+                cycAccess = new CycAccess(endpointURL);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -3886,6 +3982,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess10 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 10 ****");
         CycAccess cycAccess = null;
         try {
@@ -3918,6 +4016,8 @@ public class UnitTest extends TestCase {
         long startMilliseconds = System.currentTimeMillis();
         try {
             // demonstrate quoted strings
+            String identityQuotedString = "(identity \"abc \\\"def\\\" ghi\")";
+            Assert.assertEquals("abc \\\"def\\\" ghi", cycAccess.converseString(identityQuotedString));
             CycList cycList53 = cycAccess.makeCycList("(\"abc\")");
             Assert.assertEquals(1, cycAccess.converseInt("(length '" + cycList53.cycListApiValue() + ")"));
             Assert.assertEquals(3, cycAccess.converseInt("(length (first '" + cycList53.cycListApiValue() + "))"));
@@ -3947,9 +4047,20 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(1, actualLen);
             Assert.assertEquals(9, cycAccess.converseInt("(length (first '" + cycList57.stringApiValue() + "))"));
 
-            script = "(identity '(#$givenNames #$Guest \"\\\"The\\\" Guest\"))";
+            script =         "(identity (quote (#$givenNames #$Guest \"\\\"The\\\" Guest\")))";
+            String script1 = "(IDENTITY (QUOTE (#$givenNames #$Guest \"\"The\" Guest\")))";
+            //CycListParser.verbosity = 3;
+            CycList scriptCycList = cycAccess.makeCycList(script);
+            // Java strings do not escape embedded quote chars
+            Assert.assertEquals(script1, scriptCycList.cyclify());
+            
             CycList answer = cycAccess.converseList(script);
             Object third = answer.third();
+            Assert.assertTrue(third instanceof String);
+            Assert.assertEquals(11, ((String) third).length());
+            
+            answer = cycAccess.converseList(scriptCycList);
+            third = answer.third();
             Assert.assertTrue(third instanceof String);
             Assert.assertEquals(11, ((String) third).length());
 
@@ -3995,6 +4106,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess11 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 11 ****");
         CycObjectFactory.resetCaches();
         CycAccess cycAccess = null;
@@ -4180,6 +4293,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess12 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 12 ****");
         CycAccess cycAccess = null;
         try {
@@ -4285,6 +4400,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
     public void testBinaryCycAccess13 () {
+        if (connectionMode == SOAP_CYC_CONNECTION)
+            return;
         System.out.println("\n**** testBinaryCycAccess 13 ****");
         CycAccess cycAccess = null;
         try {
@@ -4304,7 +4421,6 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         try {
-            cycAccess.traceOn();
             Object answer =
                 cycAccess.converseObject(
                 "(generate-phrase-for-java " +

@@ -269,6 +269,21 @@ public class CycAccess {
     }
 
     /**
+     * Constructs a new CycAccess object to the given CycProxyAgent in the given
+     * agent community.
+     *
+     * @param endpointURL the SOAP XML endpoint URL which indicates the Cyc API web services host
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycAccess (URL endpointURL) throws IOException, CycApiException  {
+        communicationMode = CycConnection.ASCII_MODE;
+        persistentConnection = PERSISTENT_CONNECTION;
+        cycConnection = new SOAPCycConnection(endpointURL, this);
+        commonInitialization();
+    }
+
+    /**
      * Constructs a new CycAccess object given a host name.
      *
      * @param hostName the host name
@@ -5141,9 +5156,9 @@ public class CycAccess {
     }
 
     /**
-     * Returns a new unique <tt>CycConstant</tt> object using the constant start name,
-     * recording bookkeeping information and but without archiving to the Cyc transcript. If the
-     * start name begins with #$ that portion of the start name is ignored.
+     * Returns a new unique <tt>CycConstant</tt> object using the constant start name prefixed
+     * by TMP-, recording bookkeeping information and but without archiving to the Cyc transcript. 
+     * If the start name begins with #$ that portion of the start name is ignored.
      *
      * @param startName the starting name of the constant which will be made unique
      * using a suffix.
@@ -5170,6 +5185,45 @@ public class CycAccess {
             "       (*the-cyclist* " + cyclistName + ")\n" +
             "       (*ke-purpose* " + projectName + "))\n" +
             "  (gentemp-constant \"" + constantName + "\")))";
+        CycConstant cycConstant = (CycConstant) converseObject(command);
+        cycConstant.getName();
+        cycConstant.getGuid();
+        CycObjectFactory.addCycConstantCacheByName(cycConstant);
+        CycObjectFactory.addCycConstantCacheById(cycConstant);
+        return cycConstant;
+    }
+
+    /**
+     * Returns a new unique <tt>CycConstant</tt> object using the constant start name and prefix,
+     * recording bookkeeping information and but without archiving to the Cyc transcript. If the
+     * start name begins with #$ that portion of the start name is ignored.
+     *
+     * @param startName the starting name of the constant which will be made unique
+     * using a suffix.
+     * @param prefix the prefix
+     * @return a new <tt>CycConstant</tt> object using the constant starting name,
+     * recording bookkeeping information and archiving to the Cyc transcript
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycConstant makeUniqueCycConstant(String startName, String prefix)
+        throws UnknownHostException, IOException, CycApiException {
+        String constantName = startName;
+        if (constantName.startsWith("#$"))
+            constantName = constantName.substring(2);
+        String projectName = "nil";
+        if (project != null)
+            projectName = project.stringApiValue();
+        String cyclistName = "nil";
+        if (cyclist != null)
+            cyclistName = cyclist.stringApiValue();
+        String command =
+            withBookkeepingInfo() +
+            "(clet ((*require-case-insensitive-name-uniqueness* nil)\n" +
+            "       (*the-cyclist* " + cyclistName + ")\n" +
+            "       (*ke-purpose* " + projectName + "))\n" +
+            "  (gentemp-constant \"" + constantName + "\" \"" + prefix + "\")))";
         CycConstant cycConstant = (CycConstant) converseObject(command);
         cycConstant.getName();
         cycConstant.getGuid();
@@ -5207,7 +5261,9 @@ public class CycAccess {
     }
 
     /**
-     * Returns a list of bindings for a query with unbound variables.
+     * Returns a list of bindings for a query with unbound variables.  The bindings each consist
+     * of a list in the order of the unbound variables list parameter, in which each bound term
+     * is the binding for the corresponding variable.
      *
      * @param query the query to be asked in the knowledge base
      * @param variables the list of unbound variables in the query for which bindings are sought
@@ -7071,7 +7127,7 @@ public class CycAccess {
     }
 
     /**
-     * Returns the list of arg2 terms from gafs having the specified
+     * Returns the list of arg2 terms from binary gafs having the specified
      * predicate and arg1 values.
      *
      * @param predicate the given predicate
@@ -7090,7 +7146,7 @@ public class CycAccess {
     }
 
     /**
-     * Returns the list of arg2 terms from gafs having the specified
+     * Returns the list of arg2 terms from binary gafs having the specified
      * predicate and arg1 values.
      *
      * @param predicate the given predicate
@@ -7109,7 +7165,7 @@ public class CycAccess {
     }
 
     /**
-     * Returns the list of arg2 terms from gafs having the specified
+     * Returns the list of arg2 terms from binary gafs having the specified
      * predicate and arg1 values.
      *
      * @param predicate the given predicate
@@ -7131,7 +7187,7 @@ public class CycAccess {
     }
 
     /**
-     * Returns the first arg2 term from gafs having the specified
+     * Returns the first arg2 term from binary gafs having the specified
      * predicate and arg1 values.
      *
      * @param predicate the given predicate
@@ -7150,7 +7206,7 @@ public class CycAccess {
     }
 
     /**
-     * Returns the first arg2 term from gafs having the specified
+     * Returns the first arg2 term from binary gafs having the specified
      * predicate and arg1 values.
      *
      * @param predicate the given predicate
@@ -7167,7 +7223,7 @@ public class CycAccess {
     }
 
     /**
-     * Returns the first arg2 term from gafs having the specified
+     * Returns the first arg2 term from binary gafs having the specified
      * predicate and arg1 values.
      *
      * @param predicate the given predicate
@@ -7423,5 +7479,94 @@ public class CycAccess {
         }
     }
 
+    /**
+     * Returns the list of Cyc terms whose denotation matches the given English
+     * string.
+     *
+     * @param denotationString the given English denotation string
+     * @return the list of Cyc terms whose denotation matches the given English
+     * string
+     */
+    public CycList getDenotsOfString (String denotationString)
+            throws IOException, UnknownHostException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("denots-of-string"));
+        command.add(denotationString);
+        return converseList(command);
+    }
+    
+    /**
+     * Returns the list of Cyc terms whose denotation matches the given English
+     * string and which are instances of any of the given collections.
+     *
+     * @param denotationString the given English denotation string
+     * @param collections the given list of collections
+     * @return the list of Cyc terms whose denotation matches the given English
+     * string
+     */
+    public CycList getDenotsOfString (String denotationString, CycList collections)
+            throws IOException, UnknownHostException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("denots-of-string"));
+        command.add(denotationString);
+        CycList terms = converseList(command);
+        CycList result = new CycList();
+        Iterator collectionsIterator = collections.iterator();
+        while (collectionsIterator.hasNext()) {
+            CycFort collection = (CycFort) collectionsIterator.next();
+            Iterator termsIter = terms.iterator();
+            while (termsIter.hasNext()) {
+                CycFort term = (CycFort) termsIter.next();
+                if (this.isa(term, collection))
+                    result.add(term);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the list of Cyc terms whose denotation matches the given English
+     * multi-word string.
+     *
+     * @param denotationString the given English denotation multi-word string
+     * @return the list of Cyc terms whose denotation matches the given English
+     * multi-word string
+     */
+    public CycList getMWSDenotsOfString (CycList multiWordDenotationString)
+            throws IOException, UnknownHostException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("mws-denots-of-string"));
+        command.addQuoted(multiWordDenotationString);
+        return converseList(command);
+    }
+    
+    /**
+     * Returns the list of Cyc terms whose denotation matches the given English
+     * multi-word string and which are instances of any of the given collections.
+     *
+     * @param denotationString the given English denotation string
+     * @param collections the given list of collections
+     * @return the list of Cyc terms whose denotation matches the given English
+     * multi-word string
+     */
+    public CycList getMWSDenotsOfString (CycList multiWordDenotationString, CycList collections)
+            throws IOException, UnknownHostException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("mws-denots-of-string"));
+        command.addQuoted(multiWordDenotationString);
+        CycList terms = converseList(command);
+        CycList result = new CycList();
+        Iterator collectionsIterator = collections.iterator();
+        while (collectionsIterator.hasNext()) {
+            CycFort collection = (CycFort) collectionsIterator.next();
+            Iterator termsIter = terms.iterator();
+            while (termsIter.hasNext()) {
+                CycFort term = (CycFort) termsIter.next();
+                if (this.isa(term, collection))
+                    result.add(term);
+            }
+        }
+        return result;
+    }
 
 }

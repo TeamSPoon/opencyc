@@ -114,6 +114,19 @@ public class CycObjectFactory {
     }
 
     /**
+     * Constructs a CycSymbol from the given xml databinding object.
+     *
+     * @pararm cycSymbolXmlDataBindingImpl the xml databinding object
+     */
+    public static CycSymbol makeCycSymbol (CycSymbolXmlDataBindingImpl cycSymbolXmlDataBindingImpl) {
+        CycSymbol cycSymbol = getCycSymbolCache(cycSymbolXmlDataBindingImpl.getSymbolName());
+        if (cycSymbol != null)
+            return cycSymbol;
+        cycSymbol = new CycSymbol(cycSymbolXmlDataBindingImpl.getSymbolName());
+        return cycSymbol;
+    }
+
+    /**
      * Resets the <tt>CycSymbol</tt> cache.
      */
     public static void resetCycSymbolCache() {
@@ -158,6 +171,25 @@ public class CycObjectFactory {
         cycConstantCacheById = new CacheLRU(500);
         cycConstantCacheByName = new CacheLRU(500);
         cycConstantCacheByGuid = new CacheLRU(500);
+    }
+
+    /**
+     * Constructs a CycConstant from the given xml databinding object.
+     *
+     * @pararm cycConstantXmlDataBindingImpl the xml databinding object
+     */
+    public static CycConstant makeCycConstant (CycConstantXmlDataBindingImpl cycConstantXmlDataBindingImpl) {
+        CycConstant cycConstant =
+            getCycConstantCacheByGuid(cycConstantXmlDataBindingImpl.getGuid());
+        if (cycConstant != null)
+            return cycConstant;
+        cycConstant = new CycConstant(cycConstantXmlDataBindingImpl.getName(),
+                                      cycConstantXmlDataBindingImpl.getGuid(),
+                                      cycConstantXmlDataBindingImpl.getId());
+        addCycConstantCacheByName(cycConstant);
+        addCycConstantCacheByGuid(cycConstant);
+        addCycConstantCacheById(cycConstant);
+        return cycConstant;
     }
 
     /**
@@ -252,6 +284,25 @@ public class CycObjectFactory {
      */
     public static void resetCycNartCache() {
         cycNartCache = new CacheLRU(500);
+    }
+
+    /**
+     * Constructs a CycNart from the given xml databinding object.
+     *
+     * @pararm cycNartXmlDataBindingImpl the xml databinding object
+     */
+    public static CycNart makeCycNart (CycNartXmlDataBindingImpl cycNartXmlDataBindingImpl) {
+        CycNart cycNart = getCycNartCache(cycNartXmlDataBindingImpl.getId());
+        if (cycNart != null)
+            return cycNart;
+        cycNart = new CycNart();
+        cycNart.setId(cycNartXmlDataBindingImpl.getId());
+        if (cycNartXmlDataBindingImpl.getFunctor() instanceof CycConstantXmlDataBindingImpl)
+            cycNart.setFunctor(makeCycConstant((CycConstantXmlDataBindingImpl)cycNartXmlDataBindingImpl.getFunctor()));
+        else
+             cycNart.setFunctor(makeCycNart((CycNartXmlDataBindingImpl) cycNartXmlDataBindingImpl.getFunctor()));
+        cycNart.setArguments(new CycList(cycNartXmlDataBindingImpl.getArgumentList()));
+        return cycNart;
     }
 
     /**
@@ -356,6 +407,21 @@ public class CycObjectFactory {
     }
 
     /**
+     * Constructs a CycVariable from the given xml databinding object.
+     *
+     * @pararm cycVariableXmlDataBindingImpl the xml databinding object
+     */
+    public static CycVariable makeCycVariable (CycVariableXmlDataBindingImpl cycVariableXmlDataBindingImpl) {
+        CycVariable cycVariable = getCycVariableCache(cycVariableXmlDataBindingImpl.getName());
+        if (cycVariable != null)
+            return cycVariable;
+        cycVariable = new CycVariable();
+        cycVariable.id = cycVariableXmlDataBindingImpl.getId();
+        cycVariable.name = cycVariableXmlDataBindingImpl.getName();
+        return cycVariable;
+    }
+
+    /**
      * Resets the <tt>CycVariable</tt> cache.
      */
     public static void resetCycVariableCache() {
@@ -413,6 +479,28 @@ public class CycObjectFactory {
             guidCache.addElement(guidString, guid);
         }
         return guid;
+    }
+
+    /**
+     * Constructs a Guid from the given xml databinding object.
+     *
+     * @pararm GuidXmlDataBindingImpl the xml databinding object
+     */
+    public static Guid makeGuid (GuidXmlDataBindingImpl guidXmlDataBindingImpl) {
+        Guid guid =
+            makeGuid(guidXmlDataBindingImpl.getGuidString());
+        if (guid != null)
+            return guid;
+        guid = new Guid(guidXmlDataBindingImpl.getGuidString());
+        addGuidCache(guid);
+        return guid;
+    }
+
+    /**
+     * Adds the <tt>Guid</tt> to the cache.
+     */
+    public static void addGuidCache(Guid guid) {
+        guidCache.addElement(guid.guidString, guid);
     }
 
     /**

@@ -25,13 +25,15 @@ package org.opencyc.javashell;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.IOException;
+
 public class CycJavaService {
 
     private static CycJavaShell jshell = null;
     private static CycJavaServer jshellserver = null;
 
     /* Creates a non-started Server */
-    public CycJavaService() {
+    public CycJavaService() throws IOException {
 	if( jshell==null ) {
 	    jshell = new CycJavaShell(); 
 	}

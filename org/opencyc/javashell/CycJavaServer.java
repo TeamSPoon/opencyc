@@ -30,30 +30,30 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.lang.Thread;
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycConnection;
 
 
 public class CycJavaServer extends Thread {
     private ServerSocket serverSocket = null;
     private HashMap allShells = new HashMap();
     public CycJavaServer(CycJavaShell jshell, int port) throws IOException {
-	this.jshell = jshell;
-	allShells.add("localhost",jshell);
+	allShells.put("localhost",jshell);
 	serverSocket = new ServerSocket(port);
     }
     public void run() {
 	while( !this.interrupted() ) {
 	    try {
-		Socket clientSock = new CycJavaClient(serverSocket.accept();
-		String clientKey = clientSock.getInetAddress();
-		CycJavaShell clientJshell = allShells.get(clientKey);
+		Socket clientSock = serverSocket.accept();
+		String clientKey = clientSock.getInetAddress().getHostAddress();
+		CycJavaShell clientJshell = (CycJavaShell)allShells.get(clientKey);
 		if(clientJshell==null) {
-		    cycAccess = new CycAccess(client.getInetAddress().getHostAddress(),
-					      CycConnection.DEFAULT_BASE_PORT,CycConnection.DEFAULT_COMMUNICATION_MODE,CycAccess.DEFAULT_CONNECTION);                   
 		    clientJshell = new CycJavaShell();
-		    clientJshell.ensureClientSupportsShell(cycAccess);
+		    clientJshell.ensureClientSupportsShell(new CycAccess(clientKey,
+					      CycConnection.DEFAULT_BASE_PORT,CycConnection.DEFAULT_COMMUNICATION_MODE,CycAccess.DEFAULT_CONNECTION));
 		    allShells.put(clientKey,clientJshell);
 		}
-		CycJavaClient client = CycJavaClient(clientSock,clientJshell);
+		CycJavaClient client = new CycJavaClient(clientSock,clientJshell);
 		client.start();
 	    } catch( Exception e ) {
 		e.printStackTrace();

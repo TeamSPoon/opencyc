@@ -68,7 +68,7 @@ public class CycJavaClient extends Thread {
 	    }
 		Object result = privJshell.invoke(todo);        
 		if(result instanceof CycObject) {
-		    outstream.println("200 "+((CycObject)result).cyclify(());
+		    outstream.println("200 "+((CycObject)result).cyclify());
 		} else if(result instanceof String) {
 		    outstream.println("200 \""+result+"\"");
 		} else {

@@ -10,6 +10,7 @@ import org.opencyc.elf.a.Actuator;
 
 import org.opencyc.elf.bg.planner.Resource;
 
+import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
@@ -280,7 +281,10 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       //TODO handle goals if the task command is not specified
       taskCommand = doTaskMsg.getTaskCommand();
       getLogger().info("Do task: " + taskCommand);
-      TaskFrame taskFrame = TaskFrameLibrary.getInstance().getTaskFrame(taskCommand.getNextActionCommand().getName());
+      Action actionCommand = taskCommand.getActionCommand();
+      String taskFrameName = actionCommand.getName();
+      getLogger().info("task name " + taskFrameName);
+      TaskFrame taskFrame = TaskFrameLibrary.getInstance().getTaskFrame(taskFrameName);
       Iterator scheduleInfoIterator = taskFrame.getScheduleInfos().iterator();
       while (scheduleInfoIterator.hasNext()) {
         TaskFrame.ScheduleInfo scheduleInfo = 

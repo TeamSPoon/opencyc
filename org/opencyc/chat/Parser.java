@@ -118,11 +118,12 @@ public class Parser {
             if (text.charAt(index) == '"') {
                 break;
             }
-            constantNameBuffer.append(text.charAt(index));
+            constantNameBuffer.append(text.charAt(index++));
         }
         String constantName = constantNameBuffer.toString();
         String script = "(cyc-create \"" + constantName + "\")";
         CycList createCommand = cycAccess.makeCycList(script);
+        answer[0] = createCommand;
         return answer;
     }
 
@@ -255,8 +256,8 @@ public class Parser {
         Object[] answer = {null, null};
         answer[0] =
                 "I understand these commands:\n" +
-                "create <constant name>.\n" +
-                "rename <constant> to <new constant name>.\n" +
+                "create \"<constant name>\".\n" +
+                "rename <constant> to \"<new constant name>\".\n" +
                 "kill <fort>.\n" +
                 "assert <sentence> in <mt>.\n" +
                 "assert <sentence>.\n" +

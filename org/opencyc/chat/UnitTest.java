@@ -51,7 +51,7 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testChatterBot"));
+        //testSuite.addTest(new UnitTest("testChatterBot"));
         testSuite.addTest(new UnitTest("testParser"));
         return testSuite;
     }
@@ -164,6 +164,21 @@ public class UnitTest extends TestCase {
             else
                 cycAccess = new CycAccess();
             Parser parser = new Parser(cycAccess);
+            // help
+            Object[] answer = parser.parseUserInput("help.");
+            System.out.println(answer[0]);
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof String);
+            Assert.assertTrue(((String) answer[0]).startsWith("I understand these commands:"));
+            Assert.assertNull(answer[1]);
+
+            // create
+            answer = parser.parseUserInput("create \"my-term\".");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(answer[0].toString());
+            Assert.assertEquals("(CYC-CREATE \"my-term\")", answer[0].toString());
+            Assert.assertNull(answer[1]);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -1,18 +1,19 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
-import org.opencyc.elf.bg.planner.JobAssignment;
+import org.opencyc.elf.a.DirectActuator;
+
+import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
 
 import org.opencyc.elf.bg.taskframe.Action;
-
-import org.opencyc.elf.wm.ActionFactory;
+import org.opencyc.elf.bg.taskframe.Command;
 
 //// External Imports
 import java.util.ArrayList;
 import java.util.List;
 
-/** JobAssignmentFactory populates the job assignment library.  There is a singleton instance.
+/** JobFactory populates the job library.  There is a singleton instance.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -34,40 +35,37 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class JobAssignmentFactory {
+public class JobFactory {
   
   //// Constructors
   
-  /** Creates a new instance of JobAssignmentFactory and stores it in the singleton instance. */
-  public JobAssignmentFactory() {
-    jobAssignmentFactory = this;
+  /** Creates a new instance of JobFactory and stores it in the singleton instance. */
+  public JobFactory() {
+    jobFactory = this;
   }
   
   //// Public Area
   
-  /** Gets the job assignment factory singleton instance.
+  /** Gets the job factory singleton instance.
    *
-   * @return the job assignment factory singleton instance
+   * @return the job factory singleton instance
    */
-  public JobAssignmentFactory getInstance () {
-    return jobAssignmentFactory;
+  public JobFactory getInstance () {
+    return jobFactory;
   }
   
-  /** Poplulates the job assignment library. */
-  public void populateJobAssignmentLibrary () {
+  /** Poplulates the job library. */
+  public void populateJobLibrary () {
     // converse with user
-    JobAssignment jobAssignment = new JobAssignment();
-    jobAssignment.setActionName(Action.CONVERSE_WITH_USER);
+    Command command = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
     List requiredResources = new ArrayList();
     requiredResources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    jobAssignment.setRequiredResources(requiredResources);
-    ActionFactory actionFactory = new ActionFactory();
-    Action action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
-    jobAssignment.setActionForScheduling(action);
-    JobAssignmentLibrary.getInstance().addJobAssignment(Action.CONVERSE_WITH_USER, jobAssignment);
-    
-    //TODO
-    
+    String directActuatorName = "";
+    String directSensorName = "";
+    Job job = new Job(command, requiredResources, directActuatorName, directSensorName);
+    List jobSet = new ArrayList();
+    jobSet.add(job);
+    JobLibrary.getInstance().addJobSet(Action.CONVERSE_WITH_USER, jobSet);
   }
   
   //// Protected Area
@@ -76,8 +74,8 @@ public class JobAssignmentFactory {
   
   //// Internal Rep
   
-  /** the job assignment factory singleton instance */
-  protected static JobAssignmentFactory jobAssignmentFactory;
+  /** the job factory singleton instance */
+  protected static JobFactory jobFactory;
   
   //// Main
   

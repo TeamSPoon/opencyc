@@ -107,7 +107,6 @@ public class ExportHtml {
      * The #$CycLConstant guid.
      */
     public static final Guid cycLConstantGuid = CycObjectFactory.makeGuid("bf3491c4-9c29-11b1-9dad-c379636f7270");
-    protected CycConstant cycLConstant;
     /**
      * The CycKBSubsetCollection whose elements are exported to HTML.
      */
@@ -185,7 +184,23 @@ public class ExportHtml {
     protected HashSet previouslyExpandedTerms;
     protected String hostname = CycConnection.DEFAULT_HOSTNAME;
     protected int port = CycConnection.DEFAULT_BASE_PORT;
-    protected boolean print_guid = true;
+
+    /**
+     * Additional term guids not to appear in the list of direct instances even if
+     * otherwise qualified to appear.
+     */
+    protected ArrayList filterFromDirectInstanceGuids = new ArrayList();
+
+    /**
+     * Additional terms not to appear in the list of direct instances even if
+     * otherwise qualified to appear.
+     */
+    protected ArrayList filterFromDirectInstances = new ArrayList();
+
+    /**
+     * Export the GUID string for each term?
+     */
+    public boolean print_guid = false;
 
     /**
      * Constructs a new ExportHtml object.
@@ -244,6 +259,12 @@ public class ExportHtml {
             //exportHtml.exportedVocabularyOutputPath = "eeld-shared-candidate-vocabulary.html";
             //exportHtml.exportedHierarchyOutputPath = "eeld-shared-candidate-hierarchy.html";
 
+            exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCandidateConstantGuid);
+            exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCoreConstantGuid);
+            exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyConstantGuid);
+            exportHtml.filterFromDirectInstanceGuids.add(cycLConstantGuid);
+            exportHtml.print_guid = false;
+
             exportHtml.cycKbSubsetFilterGuid = ikbConstantGuid;
             exportHtml.export(EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE);
         } catch (Exception e) {
@@ -278,6 +299,19 @@ public class ExportHtml {
             if (verbosity > 2)
                 Log.current.println("All selected " + selectedCycForts.size() + " CycFort terms");
         }
+        if (verbosity > 2)
+            Log.current.println("Ommitting quoted collection terms ");
+        CycList tempList = new CycList();
+        for (int i = 0; i < selectedCycForts.size(); i++) {
+            CycFort cycFort = (CycFort) selectedCycForts.get(i);
+            if (cycAccess.isQuotedCollection(cycFort)) {
+                if (verbosity > 2)
+                    Log.current.println("  ommitting " + cycFort.cyclify());
+            }
+            else
+                tempList.add(cycFort);
+        }
+        selectedCycForts = tempList;
         if (verbosity > 2)
             Log.current.println("Sorting " + selectedCycForts.size() + " CycFort terms");
         Collections.sort(selectedCycForts);
@@ -324,7 +358,10 @@ public class ExportHtml {
             System.err.println("Invalid export comand " + exportCommand);
             System.exit(1);
         }
-        cycLConstant = cycAccess.getKnownConstantByGuid(cycLConstantGuid);
+        for (int i = 0; i < filterFromDirectInstanceGuids.size(); i++) {
+            Guid guid = (Guid) filterFromDirectInstanceGuids.get(i);
+            filterFromDirectInstances.add(cycAccess.getKnownConstantByGuid(guid));
+        }
     }
 
     /**
@@ -359,10 +396,6 @@ public class ExportHtml {
             else if (cycAccess.isIndividual(cycFort)) {
                 if (verbosity > 2)
                     Log.current.print("Individual");
-                if (verbosity > 2) {
-                    String individualType = "  (type unknown)";
-                    Log.current.println(individualType);
-                }
             }
             else {
                 if (verbosity > 2)
@@ -433,7 +466,7 @@ public class ExportHtml {
         htmlBodyElement.appendChild(blockquoteElement);
         createCommentNodes(cycConstant, blockquoteElement);
         if (print_guid)
-            createGuidNode(cycConstant, blockquoteElement);                     //GUID printing turned on/off here
+            createGuidNode(cycConstant, blockquoteElement);
         createIsaNodes(cycConstant, blockquoteElement);
         if (cycAccess.isCollection(cycConstant))
             createCollectionNode(cycConstant, blockquoteElement);
@@ -667,6 +700,8 @@ public class ExportHtml {
      * @param parentElement the parent HTML DOM element
      */
     protected void createIsaNodes (CycFort cycFort, Element parentElement) throws IOException, CycApiException {
+        //if (cycFort.toString().equals("AntiSymmetricBinaryPredicate"))
+        //    verbosity = 9;
         CycList isas = cycAccess.getIsas(cycFort);
         if (verbosity > 3)
             Log.current.println("  starting isas: " + isas.cyclify());
@@ -678,19 +713,31 @@ public class ExportHtml {
         CycList createdIsas = new CycList();
         for (int i = 0; i < isas.size(); i++) {
             CycFort isa = (CycFort)isas.get(i);
-            if (!selectedCycForts.contains(isa)) {
-                isa = this.findSelectedGenls(isa);
+            if (verbosity > 7) {
+                Log.current.println("  considering " + isa.cyclify());
+                Log.current.println("selectedCycForts.contains(isa) " + selectedCycForts.contains(isa));
+                Log.current.println("cycAccess.isQuotedCollection(isa) " + cycAccess.isQuotedCollection(isa));
+            }
+            if (! selectedCycForts.contains(isa)) {
+                isa = findSelectedGenls(isa);
                 if (isa == null)
                     continue;
             }
             if (createdIsas.contains(isa))
                 continue;
-            else
+            else if (cycAccess.isQuotedCollection(isa)) {
+                if (verbosity > 2)
+                    Log.current.println("  omitting quoted direct-instance-of collection " + isa.cyclify());
+            }
+            else {
+                if (verbosity > 7)
+                    Log.current.println("  adding direct instance of " + isa.cyclify());
                 createdIsas.add(isa);
+            }
         }
         createdIsas = specificCollections(createdIsas);
-        // filter out CycLConstant.
-        createdIsas.remove(cycLConstant);
+        // filter out any specified terms.
+        createdIsas.removeAll(this.filterFromDirectInstances);
         for (int i = 0; i < createdIsas.size(); i++) {
             CycFort isa = (CycFort)createdIsas.get(i);
             HTMLAnchorElement isaAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
@@ -766,7 +813,11 @@ public class ExportHtml {
         bElement.appendChild(genlsLabelTextNode);
         for (int i = 0; i < genls.size(); i++) {
             CycFort genl = (CycFort)genls.get(i);
-            if (selectedCycForts.contains(genl)) {
+            if (cycAccess.isQuotedCollection(genl)) {
+                if (verbosity > 2)
+                    Log.current.println("  omitting quoted genl collection " + genl.cyclify());
+            }
+            else if (selectedCycForts.contains(genl)) {
                 HTMLAnchorElement genlAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
                 genlAnchorElement.setHref("#" + genl.cyclify());
                 parentElement.appendChild(genlAnchorElement);
@@ -1024,10 +1075,7 @@ public class ExportHtml {
                 isasGenls.addAllNew(cycAccess.getAllGenls(cycFort));
 
                 if (cycFort instanceof CycNart) {
-                    Log.current.println("  CycNart " + cycFort.cyclify());
-                    cycAccess.traceOnDetailed();
                     CycList allGenls = cycAccess.getAllGenls(cycFort);
-                    Log.current.println("  genls " + allGenls);
                 }
 
                 for (int j = 0; j < isasGenls.size(); j++) {
@@ -1035,7 +1083,10 @@ public class ExportHtml {
                     try {
                         isaGenl = (CycFort) isasGenls.get(j);
                     } catch (ClassCastException e) {
-                        Log.current.println("***** Invalid term: " + isasGenls.get(j));
+                        if (verbosity > 3)
+                        Log.current.println("***** term: " + cycFort +
+                                            " invalid genls " + isasGenls.get(j) +
+                                            " (" + isasGenls.get(j).getClass() + ")");
                         continue;
                     }
                     if ((!upwardClosureSet.contains(isaGenl)) &&

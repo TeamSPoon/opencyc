@@ -1627,7 +1627,37 @@ public class CycAccess {
     }
 
     /**
+     * Returns true if term is a quotedCollection, in any microtheory
+     *
+     * @param cycFort the given CycFort term
+     * @return true if term is a quotedCollection
+     */
+    public boolean isQuotedCollection (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        CycConstant inferencePSC = getKnownConstantByName("InferencePSC");
+        return this.isQuotedCollection(cycFort, inferencePSC);
+    }
+
+    /**
+     * Returns true if term is a quotedCollection is a quotedCollection.
+     *
+     * @param cycFort the given CycFort term
+     * @param mt the microtheory in which the query is made
+     * @return true if term is a quotedCollection
+     */
+    public boolean isQuotedCollection (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList query = new CycList();
+        query.add(getKnownConstantByName("quotedCollection"));
+        query.add(cycFort);
+        return this.isQueryTrue(query, mt);
+    }
+
+    /**
      * Returns true if cycConstant is a PublicConstant.
+     *
+     * @param cycConstant the given constant
+     * @return true if cycConstant is a PublicConstant
      */
     public boolean isPublicConstant (CycConstant cycConstant)
         throws IOException, UnknownHostException, CycApiException {

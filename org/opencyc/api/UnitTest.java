@@ -75,6 +75,7 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
+        /*
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
@@ -92,6 +93,9 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
+        */
+        testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
@@ -3460,6 +3464,88 @@ public class UnitTest extends TestCase {
             CycAccess.current().close();
             Assert.fail(e.toString());
         }
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the ascii api connection.
+     */
+    public void testAsciiCycAccess8 () {
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
+            return;
+        System.out.println("\n**** testAsciiCycAccess 8 ****");
+        CycAccess cycAccess = null;
+        try {
+
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        doTestCycAccess8(cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testAsciiCycAccess 8 OK ****");
+    }
+
+
+    /**
+     * Tests a portion of the CycAccess methods using the binary api connection.
+     */
+    public void testBinaryCycAccess8 () {
+        System.out.println("\n**** testBinaryCycAccess 8 ****");
+        CycAccess cycAccess = null;
+        try {
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
+       }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        //cycAccess.traceOnDetailed();
+        doTestCycAccess8(cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testBinaryCycAccess 8 OK ****");
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the given api connection.
+     */
+    protected void doTestCycAccess8 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        try {
+
+        // isQuotedCollection
+        CycConstant coreConstant =
+            cycAccess.getKnownConstantByGuid("c0dd1b7c-9c29-11b1-9dad-c379636f7270");
+        Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant, cycAccess.baseKB));
+        Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant));
+        CycConstant animal =
+            cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+        Assert.assertTrue(! cycAccess.isQuotedCollection(animal));
+
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+
+
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }

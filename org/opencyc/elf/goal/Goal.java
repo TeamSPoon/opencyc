@@ -5,7 +5,7 @@ import org.opencyc.cycobject.CycAssertion;
 import org.opencyc.cycobject.CycFort;
 
 import org.opencyc.elf.ELFObject;
-import org.opencyc.elf.bg.procedure.Procedure;
+
 import org.opencyc.elf.bg.state.State;
 
 //// External Imports

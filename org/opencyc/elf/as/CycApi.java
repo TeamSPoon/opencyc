@@ -6,6 +6,10 @@ import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.bg.planner.Resource;
 
 import org.opencyc.elf.message.ActuateMsg;
+import org.opencyc.elf.message.ObservedInputMsg;
+import org.opencyc.elf.message.ReleaseMsg;
+
+import org.opencyc.elf.s.Sensation;
 
 import org.opencyc.elf.wm.ResourcePool;
 
@@ -44,18 +48,83 @@ public class CycApi extends DirectActuatorSensor {
   
   //// Constructors
   
-  /** Creates a new instance of CycApi. */
-  public CycApi() {
+  /** Creates a new instance of CycApi given its name and
+   * required resources.
+   *
+   * @param name tthe name of the actuator-sensor
+   * @param resources the resources requried by this actuator-sensor
+   * @param actuatorSensorChannel the takable channel from which messages are input
+   */
+  public CycApi(String name, 
+                List resources,
+                Takable actuatorSensorChannel) {
+    super(name, resources, actuatorSensorChannel);
   }
   
   //// Public Area
   
   //// Protected Area
   
+  /** Thread which processes the input channel of messages. */
+  protected class Consumer implements Runnable {
+    
+    /** the takable channel from which messages are input */
+    protected final Takable actuatorSensorChannel;
+
+    /** the puttable channel to which messages are output */
+    protected final Puttable sensoryPerceptionChannel;
+
+    /** the parent node component */
+    protected NodeComponent sender;
+    
+    /** Creates a new instance of Consumer.
+     *
+     * @param actuatorSensorChannel the takable channel from which messages are input
+     * @param sensoryPerceptionChannel the puttable channel to which messages are output
+     * @param sender the parent node component
+     */
+    protected Consumer (Takable actuatorSensorChannel,
+                        Puttable sensoryPerceptionChannel,
+                        NodeComponent sender) { 
+      this.actuatorSensorChannel = actuatorSensorChannel;
+      this.sensoryPerceptionChannel = sensoryPerceptionChannel; 
+      this.sender = sender;
+    }
+
+    /** Reads messages from the input queue and processes them. */
+    public void run () {
+      try {
+        while (true) { 
+          doAction((ActuateMsg) actuatorSensorChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+
+    /** Outputs the data that is contained in the actuator message to the connected
+     * Cyc server as an API function request.
+     *
+     * @param actuateMsg the given input channel message
+     */
+    protected void doAction (ActuateMsg actuateMsg) {
+      Object obj = actuateMsg.getObj();
+      Object data = actuateMsg.getData();
+      System.out.println(data);
+      System.out.flush();
+      ObservedInputMsg observedInputMsg = 
+        new ObservedInputMsg(sender, new Sensation(Sensation.CYC_API_RESPONSE, obj, data));
+      sendMsgToRecipient(sensoryPerceptionChannel, observedInputMsg);
+    }
+  
+  }
+  
   //// Private Area
   
   //// Internal Rep
   
+  /** the thread which processes the input channel of messages */
+  protected Consumer consumer;
+
   //// Main
   
 }

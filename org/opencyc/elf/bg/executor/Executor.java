@@ -7,6 +7,7 @@ import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
 
 import org.opencyc.elf.a.Actuator;
+import org.opencyc.elf.a.DirectActuator;
 
 import org.opencyc.elf.bg.BehaviorGeneration;
 
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
@@ -178,15 +180,18 @@ public class Executor extends BufferedNodeComponent {
       controlledResources = executeScheduleMsg.getControlledResources();
       if (executor.actuator == null) {
         String directActuatorName = executor.schedule.getDirectActuatorName();
-        if (directActuatorName != null)
+        if (directActuatorName != null) {
           executor.actuator = ActuatorPool.getInstance().getActuator(directActuatorName);
+          executor.actuatorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
+          ((DirectActuator) executor.actuator).initialize((Takable) executor.actuatorChannel);
+        }
         else
           initializeLowerLevelNode();
       }
       if (executor.schedule.getDirectSensorName() != null) {
-        if (directSensor == null)
+        if (executor.directSensor == null)
           obtainDirectSensor();
-        else if (! directSensor.getName().equals(executor.schedule.getDirectSensorName())) {
+        else if (! executor.directSensor.getName().equals(executor.schedule.getDirectSensorName())) {
           //TODO release the current sensor and get the new one, attaching it
           // to sensory perception
         }
@@ -207,7 +212,11 @@ public class Executor extends BufferedNodeComponent {
     
     /** Obtains the required direct sensor and attaches it to this node's sensory perception. */
     protected void obtainDirectSensor() {
-      
+      String directSensorName = executor.schedule.getDirectSensorName();
+      getLogger().info("Obtaining the sensor named " + directSensorName);
+      executor.directSensor = SensorPool.getInstance().getSensor(directSensorName);
+      executor.getNode().getSensoryPerception().addSensor(executor.directSensor);
+      executor.directSensor.initialize((Puttable) executor.getNode().getSensoryPerception().getChannel());      
     }
     
     /** Connects this node to the new lower level node by initializing the lower level job assigner
@@ -237,10 +246,12 @@ public class Executor extends BufferedNodeComponent {
     
     /** Executes the input schedule. */
     public void run() {
+      List plannedCommands = executor.schedule.getPlannedCommands();
+      getLogger().info("Executing the sequence of commands " + plannedCommands.toString());
       Command command = null;
       Command nextCommand = null;
       // TODO for now ignore timing
-      Iterator commandIterator = executor.schedule.getPlannedCommands().iterator();
+      Iterator commandIterator = plannedCommands.iterator();
       while (true) {
         if (executor.stopSchedule) {
           Status status = new Status();
@@ -263,6 +274,9 @@ public class Executor extends BufferedNodeComponent {
   
   /** the takable channel from which messages are input */
   protected Takable executorChannel;
+
+  /** the puttable channel to which messages are output */
+  protected Puttable actuatorChannel;
 
   /** the thread which processes the input channel of messages */
   protected Consumer consumer;

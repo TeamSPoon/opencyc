@@ -1,8 +1,10 @@
 package org.opencyc.elf;
 
+//// Internal Imports
 import org.opencyc.elf.a.Actuator;
 import org.opencyc.elf.s.Sensor;
 
+//// External Imports
 
 /**
  * Provides the lowest level Node container for the Elementary Loop Functioning
@@ -30,18 +32,17 @@ import org.opencyc.elf.s.Sensor;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class LowestLevelNode extends Node {
-  /** the Actuator for this node */
-  protected Actuator actuator;
 
-  /** the Sensor for this node */
-  protected Sensor sensor;
-
+  //// Constructors
+  
   /**
    * Constructs a new LowestLevelNode object.
    */
   public LowestLevelNode() {
   }
 
+  //// Public Area
+  
   /**
    * Gets the Actuator for this node
    * 
@@ -77,4 +78,18 @@ public class LowestLevelNode extends Node {
   public void setSensor(Sensor sensor) {
     this.sensor = sensor;
   }
+  
+  //// Protected Area
+    
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the Actuator for this node */
+  protected Actuator actuator;
+
+  /** the Sensor for this node */
+  protected Sensor sensor;
+  
+  //// Main
 }

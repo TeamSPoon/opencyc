@@ -25,6 +25,7 @@ package org.opencyc.javashell;
  */
 
 import java.lang.reflect.*;
+import java.lang.reflect.Proxy;
 import java.io.*;
 import java.util.*;
 import java.lang.*;
@@ -38,7 +39,7 @@ import org.opencyc.inferencesupport.*;
 import ViolinStrings.Strings;
 
 
-public class CycJavaShell  {
+public class CycJavaShell {
 
     /* once started = true  */
     public  boolean m_isInitialized = false;
@@ -49,12 +50,27 @@ public class CycJavaShell  {
     /* Debug=0 (None), Debug=1 (Minor), Debug=2 (Extreme)  */
     public  int debug=2;
     /* Dictionary of All objects available to Scripting engine  */
-    public  Hashtable allObjects = null;
+    public static Hashtable mapFortToObject  = new Hashtable();
+    public static Hashtable mapObjectToFort = new Hashtable();
+
+    public Hashtable mapStringToConstant = new Hashtable();
+
+    // CycConstant & Class -> CycConstant key of Fields | DataMethod | Method
+    public static Hashtable thisClassTemplates = new Hashtable();
+    // CycConstant || Class -> Class || CycConstant 
+    public Hashtable mapClassToFort = new Hashtable();
+    public Hashtable mapFortToClass = new Hashtable();
 
     public CycAccess cycAccess = null;
 
-    public  CycSymbol CYC_NIL;
-    public  CycSymbol CYC_TRUE;
+    public  CycConstant theoryMtA = null;
+    public  CycSymbol CYC_NIL=null;
+    public  CycSymbol CYC_TRUE=null;
+    public  CycSymbol cycFalse = null;
+    public  CycSymbol cycTrue = null;
+    public  CycSymbol cycVoid = null;
+    public  CycSymbol cycNull = null;
+
     public  CycConstant cycCreateObject = null;
     public  CycConstant cycCreateObjectNamed = null;
     public  CycConstant cycDestroyObject = null;
@@ -62,14 +78,10 @@ public class CycJavaShell  {
     public  CycConstant cycInvokeObject = null;
     public  CycConstant cycSetObjectField = null;
     public  CycConstant cycGetObjectField = null;
-    
 
-    public    CycConstant javaMt = null;
     public    CycConstant cycadministrator = null;
     public    CycConstant opencycproject = null;
     public    CycConstant functionalRelation = null;
-    public    CycConstant cycVoid = null;
-    public    CycConstant cycNull = null;
     public    CycConstant cycHasArrayMember = null;
     public    CycConstant cycHasMethod = null;
     public    CycConstant cycHasSlot = null;
@@ -77,45 +89,60 @@ public class CycJavaShell  {
     public    CycConstant cycHasSlotValue = null;
     public    CycConstant makeCycConstantError = null;
     public    CycConstant cycArrayOfClass = null;
+    public CycConstant cycNameOFClass;
 
-
-    // CycConstant & Class -> CycConstant key of Fields | DataMethod | Method
-    public    HashMap thisClassTemplates = new HashMap();
-
-    // CycConstant || Class -> Class || CycConstant 
-    public    HashMap cycKnowsClass = new HashMap();
-    public    HashMap cycKnowsObjectAsConstant = new HashMap();
-    //public    HashMap cycKnowsMicrotheory = new HashMap();
+    public CycConstant cycJavaObject = null;
+    public CycConstant cycJavaObjectFn = null;
+    public CycFort dataMt;
+    public CycFort vocabMt;
+    public CycFort mappingMt;
+    public CycFort theoryMt;
 
     /* Creates a non-started Server */
     public CycJavaShell() {
-        if( !m_isInitialized )
-            createState();
+	stringClass = (new String()).getClass();
+	try {
+	    stringClassArrayOfOne = (Class[])(Array.newInstance(Class.forName("java.lang.Class"),1));
+	} catch( Exception e ) {
+	    System.out.println("invokeConstructor: " + e);
+	    e.printStackTrace(System.out);
+	}
+	Array.set(stringClassArrayOfOne,0,stringClass);
+	mapFortToObject.put("CycJavaShell",this);                
+	mapFortToObject.put("System",System.class);                
     }
 
-    /* Ensures Scripting Engine is running*/
-    public synchronized  void createState() {
-        if( allObjects!=null ) return;
-        stringClass = (new String()).getClass();
-
-        try {
-            stringClassArrayOfOne = (Class[])(Array.newInstance(Class.forName("java.lang.Class"),1));
-        } catch( Exception e ) {
-            System.out.println("invokeConstructor: " + e);
-            e.printStackTrace(System.out);
-        }
-
-        Array.set(stringClassArrayOfOne,0,stringClass);
-        debug=5;
-        allObjects = new Hashtable();
-        allObjects.put("CycJavaShell",new CycJavaShell());                
-        allObjects.put("System",System.class);                
-        m_isInitialized = true;
-    }
-
-    public void ensureClientSupportsShell(CycAccess cycA) throws UnknownHostException,IOException,CycApiException {
+    public void ensureClientSupportsShell(CycAccess cycA,CycFort dataMtA,CycFort vocabMtA,CycFort mappingMtA,CycFort theoryMtA) throws UnknownHostException,IOException,CycApiException {
 	cycAccess = cycA;
-	if(cycCreateObject==null) {
+	dataMt = dataMtA;
+	vocabMt = vocabMtA;
+	mappingMt = mappingMtA;
+	theoryMt = theoryMtA;
+
+	cycAccess.assertIsa(dataMtA.cyclify(),"#$Microtheory");
+	cycAccess.assertIsa(vocabMt.cyclify(),"#$Microtheory");
+	cycAccess.assertIsa(mappingMtA.cyclify(),"#$Microtheory");
+	cycAccess.assertIsa(theoryMtA.cyclify(),"#$Microtheory");
+	
+	cycAccess.assertIsa(dataMtA.cyclify(),"#$DataMicrotheory");
+	cycAccess.assertIsa(vocabMt.cyclify(),"#$VocabularyMicrotheory");
+	cycAccess.assertIsa(mappingMtA.cyclify(),"#$ParaphraseMicrotheory");
+	cycAccess.assertIsa(theoryMtA.cyclify(),"#$TheoryMicrotheory");
+	cycAccess.assertIsa(theoryMtA.cyclify(),"#$GeneralMicrotheory");
+	
+	cycAccess.assertGenlMt(vocabMtA.cyclify(),"#$ComputerSoftwareVocabularyMt");
+	cycAccess.assertGenlMt(dataMt,theoryMt);
+	cycAccess.assertGenlMt(theoryMt,vocabMtA);
+	cycAccess.assertGenlMt(theoryMt,mappingMtA);
+	cycAccess.assertGenlMt(mappingMtA,vocabMtA);
+	
+	if( cycCreateObject==null ) {
+	    CYC_TRUE = new CycSymbol("T");
+	    CYC_NIL = new CycSymbol("NIL");
+	    cycVoid = CYC_TRUE;	   // cycAccess.makeCycConstant("#$voidValue");
+	    cycNull = CYC_NIL;	  // cycAccess.makeCycConstant("#$nullValue");
+	    cycTrue =  CYC_TRUE;    //cycAccess.makeCycConstant("#$True");
+	    cycFalse =  CYC_NIL;    //cycAccess.makeCycConstant("#$False");
 	    cycCreateObject = cycAccess.makeCycConstant("javaCreate");
 	    cycCreateObjectNamed = cycAccess.makeCycConstant("javaCreateNamed");
 	    cycDestroyObject = cycAccess.makeCycConstant("javaDestroy");
@@ -123,63 +150,1036 @@ public class CycJavaShell  {
 	    cycInvokeObject = cycAccess.makeCycConstant("javaInvoke");
 	    cycSetObjectField = cycAccess.makeCycConstant("javaSetField");
 	    cycGetObjectField = cycAccess.makeCycConstant("javaGetField");
-	    CYC_NIL = new CycSymbol("NIL");
-	    CYC_TRUE = new CycSymbol("T");
-	    cycVoid =  cycAccess.makeCycConstant("#$voidValue");
-	    cycNull =  cycAccess.makeCycConstant("#$nullValue");
+	    cycNameOFClass = cycAccess.makeCycConstant("#$properNameStrings");
 	    cycHasArrayMember =  cycAccess.makeCycConstant("#$javaArrayContains");
 	    cycHasMethod =  cycAccess.makeCycConstant("#$hasMethod");
 	    cycHasSlot =  cycAccess.makeCycConstant("#$relationAllExists");
-	    cycClassInstance =  cycAccess.makeCycConstant("#$ClassInstance");
+	    cycClassInstance =  cycAccess.makeCycConstant("#$ProgramObject");
 	    cycHasSlotValue =  cycAccess.makeCycConstant("#$hasSlotValue");
-	    javaMt =  cycAccess.makeCycConstant("#$JavaMt");
-	    CycFort reifiedMicrotheory =  cycAccess.makeCycConstant("#$ReifiedMicrotheory");
 	    cycArrayOfClass =  cycAccess.makeCycConstant("#$SetOfTypeFn");
 	    makeCycConstantError =  cycAccess.makeCycConstant("#$MakeCycConstantErrorFn");
-	   // assertIsaSafe(javaMt,     cycAccess.microtheory,        cycAccess.baseKB);
-
+	    cycJavaObject = cycAccess.makeCycConstant("javaInstance");
+	    cycJavaObjectFn = cycAccess.makeCycConstant("JavaInstanceFn");
 	}
-    }
-
-
-
-    /* Scripting Engine is running = true*/
-    public synchronized boolean isStarted() {
-        return m_isInitialized;
     }
 
     public  Object invoke(CycList query) throws Exception {
 
-	/*
-        CycFort pred = (CycFort)query.first();
-        if( pred.equals(cycInvokeObject) )
-            return invokeObject(query.second(),query.third(),(CycList)query.fourth());
+	CycFort pred = (CycFort)query.first();
+	if( pred.equals(cycInvokeObject) )
+	    return invokeObject(query.second(),query.third(),(CycList)query.fourth());
 
-        else if( pred.equals(cycCreateObject) )
-            return createObject(query.second());
+	else if( pred.equals(cycCreateObject) )
+	    return createObject(query.second());
 
-        else if( pred.equals(cycCreateObjectNamed) )
-            return createObjectNamed(query.second(),query.third());
+	else if( pred.equals(cycCreateObjectNamed) )
+	    return createObjectNamed(query.second(),query.third());
 
-        else if( pred.equals(cycForgetObject) )
-            return forgetObject((CycFort)query.second());
+	else if( pred.equals(cycForgetObject) )
+	    return forgetObject((CycFort)query.second());
 
-        else if( pred.equals(cycDestroyObject) )
-            return destroyObject((CycFort)query.second());
+	else if( pred.equals(cycDestroyObject) )
+	    return destroyObject((CycFort)query.second());
 
-        else if( pred.equals(cycSetObjectField) )
-            return setObjectField(query.second(),query.third());
+	else if( pred.equals(cycSetObjectField) )
+	    return setObjectField(query.second(),query.third(),query.fourth());
 
-        else if( pred.equals(cycGetObjectField) )
-            return getObjectField(query.second());
-	    */
+	else if( pred.equals(cycGetObjectField) )
+	    return getObjectField(query.second(),query.third());
 
-        return CYC_NIL;
+	return CYC_NIL;
     }
 
     /* OpenCyc Will call these */
 
-   // Moved code because its breaking building from cvs
+
+    public  CycList getObjects(CycAccess cycAccess) {
+	return new CycList(mapFortToObject.keys());
+    }
+
+    public Object createObject(Object classnameObj) throws Exception {
+	return toCycObject(initObject(classnameObj));
+    }           
+
+    public  CycSymbol createObjectNamed(Object classnameObj,Object objref) throws Exception {
+	Object innerInstance = initObject(classnameObj);
+	Object prevobjref = toCycObject(innerInstance);
+	mapFortToObject.remove(prevobjref.toString());
+	mapFortToObject.put(objref,innerInstance);
+	mapObjectToFort.put(innerInstance,objref);
+	return CYC_TRUE;
+    }           
+
+    public  CycSymbol forgetObject(Object cycobj) throws Exception {
+	Object innerInstance = selectObjectForName(cycobj);
+	if( innerInstance==null ) return CYC_TRUE;
+	mapFortToObject.remove(innerInstance);
+	mapFortToObject.remove(cycobj);
+	return CYC_TRUE;
+    }
+
+    public  CycSymbol destroyObject(Object cycobj) throws Exception {
+	Object innerInstance = selectObjectForName(cycobj);
+	if( innerInstance==null ) return CYC_NIL;
+	mapFortToObject.remove(innerInstance);
+	mapFortToObject.remove(cycobj);
+	if( cycobj instanceof CycConstant ) cycAccess.kill((CycConstant)cycobj);
+	return CYC_TRUE;
+    }
+
+    public synchronized CycSymbol setObjectField(Object cycobj, Object fieldref, Object value) throws Exception {
+	Object innerInstance = selectObjectForName(cycobj);
+	Field field = objectField(innerInstance,fieldref);
+	field.set(innerInstance, recastObject(field.getType(),value));
+	return CYC_TRUE;
+    }
+
+    public synchronized  Object getObjectField(Object cycobj, Object fieldref) throws Exception {
+	Object innerInstance = selectObjectForName(cycobj);
+	Field field = objectField(innerInstance,fieldref);
+	return toCycObject(field.get(innerInstance));
+    }
+
+    public  Field objectField(Object innerInstance, Object fieldref) throws Exception {
+	return innerInstance.getClass().getField(fieldref.toString());
+    }
+
+
+    private Method getMethodForObject(Object obj,String methodName,Class[] argClasses) throws Exception {
+	return classFromInstance(obj).getMethod(methodName,argClasses);
+    }
+    private Class classFromInstance(Object obj) throws Exception {
+	if( obj instanceof Class ) return(Class)obj;
+	return obj.getClass();
+    }  
+
+    public synchronized  Object invokeObject(Object cycobj, Object methodName, CycList params) throws Exception {
+	Object innerInstance = selectObjectForName(cycobj);
+	Method[] meth = classFromInstance(innerInstance).getMethods();
+	int len = params.size();
+	for( int i=0;i<meth.length;i++ ) {
+	    if( meth[i].getName().equals(methodName) ) {
+		Class[] pt = meth[i].getParameterTypes();
+		if( pt.length==len ) {
+		    Object[] args = recastVector(len,pt,params);
+		    if( args!=null ) return toCycObject(meth[i].invoke(innerInstance,args));
+		}
+	    }
+	}
+       throw new NoSuchMethodException("Method '"+methodName+"' not found in " + cycobj);
+    }
+
+    /* Find an instance in mapFortToObject based on HashCode */
+    public  Object selectObjectForName(Object name) throws InstantiationException {
+	Object innerInstance = mapFortToObject.get(name);
+	if( debug>1 ) System.out.println("searching for: " + name + " -> " + innerInstance );
+	if( innerInstance!=null ) return innerInstance;
+	if( !(name instanceof CycObject) ) return name;
+	throw new InstantiationException("Object not found in catalog in selectObjectForName: " + name);
+    }
+
+    /* Creates a new Object for a className */
+    public synchronized  Object initObject(Object theInit) throws InstantiationException,ClassNotFoundException,IllegalAccessException,InvocationTargetException {
+	Class newClass = null;
+	if( !( theInit instanceof CycList || theInit instanceof CycNart ) ) {
+	    newClass = findClass(theInit);
+	    return newClass.newInstance();
+	}
+	Object[] theParams = null;
+	CycList theCycParams = null;
+	try {
+	    newClass = findClass(((CycList)theInit).first());
+	    theCycParams = (CycList)((CycList)theInit).second();
+	} catch( Exception e ) {
+	    newClass = findClass(((CycList)theInit).second());
+	    theCycParams = (CycList)((CycList)theInit).third();
+	}
+	Constructor[] call = newClass.getConstructors();
+	for( int i=0;i < call.length;i++ ) {
+	    Class[] proto = call[i].getParameterTypes();
+	    try {
+		theParams = recastVector(proto.length,proto,theCycParams);
+	    } catch ( Exception e ){
+		// Missed
+	    }
+	    if( theParams!=null ) return call[i].newInstance(theParams);
+	}
+	throw new InstantiationException("initObject: " + theInit);
+    }
+
+    public synchronized Class findClass(Object theInit) throws ClassNotFoundException {
+	if( theInit instanceof Class ) return(Class)theInit;
+	Class newClass = (Class)mapClassToFort.get(theInit);
+	if( newClass!=null ) return newClass;
+	try {
+	    newClass = Class.forName("java.lang." + theInit);
+	} catch( ClassNotFoundException e ) {
+	    newClass = Class.forName(theInit.toString());
+	}
+	toCycClass(newClass);
+	return newClass;
+    }
+
+
+    public Object[] recastVector(int len,Class[] pt, CycList params) throws Exception {
+	Object[] arg = new Object[len+1];
+	for( int i=0; i<len; i++ ) {
+	    arg[i] = recastObject(pt[i],params.get(i));
+	}
+	return arg;
+    }
+
+    public Object recastObject(Class oclass, Object o) throws Exception{
+	    Class[] coclass = oclass.getClasses(); 
+	    for( int i=0, l=coclass.length; i<l; i++ ) {
+		if( coclass[i]==CycObject.class ) return o;
+	    }
+	    ////if( oclass==CycObject.class || oclass==Object.class || oclass==CycList.class || oclass==CycFort.class || oclass==CycConstant.class || oclass==CycNart.class) return o;
+	    Object derefed = mapFortToObject.get(o);
+	    if( derefed!=null )	if( oclass.isInstance(derefed) ) return derefed;
+	    if( o!=null ) if( oclass.isInstance(o) ) return o;
+	    if( o instanceof CycObject ) return recastObject(oclass,o.toString());
+
+	    if( oclass.isArray() ) {
+		if( o instanceof ArrayList ) {
+		    Class elementClass = oclass;
+		    int len = ((ArrayList)o).size();
+		    Object[] arg = (Object[])Array.newInstance(elementClass,len);
+		    for( int i=0;i<len; i++ )
+			arg[i] = recastObject(elementClass,((ArrayList)o).get(i));
+		    return arg;
+		} 
+		throw new ClassCastException("trying convert " + o + " ("+o.getClass()+") to "+oclass  );
+	    }
+
+	    //From here we have 'null' or a non CycObject
+
+	    if( oclass.isPrimitive() ) {
+		if( oclass==int.class ) {
+		    if( o==null ) return new Integer(0);
+		    return new Integer(o.toString());
+		}
+		if( oclass==float.class ) {
+		    if( o==null ) return new Float(0);
+		    return new Float(o.toString());
+		}
+		if( oclass==byte.class ) {
+		    if( o==null ) return new Byte((byte)0);
+		    if( o instanceof String ) if( ((String)o).length()==1 ) o=new Byte((byte)(((String)o).charAt(0)));
+		    int r = (o instanceof Number) ? ((Number)o).intValue() :(o instanceof Boolean) ? (((Boolean)o).booleanValue()?1:0) : Integer.parseInt(o.toString());
+		    return new Byte((byte)r);
+		}
+		if( oclass==char.class ) {
+		    if( o==null ) return new Character((char)0);
+		    if( o instanceof String ) if( ((String)o).length()==1 ) o=new Character(((String)o).charAt(0));
+		    int r = (o instanceof Number) ? ((Number)o).intValue() :(o instanceof Boolean) ? (((Boolean)o).booleanValue()?1:0) : Integer.parseInt(o.toString());
+		    return new Character((char)r);
+		}
+		if( oclass==boolean.class ) {
+		    return new Boolean(toBool(o));
+		}
+	    }
+
+
+	    if( oclass==String.class ) {
+		if( o==null ) return "";
+		if( o instanceof String ) return o;
+		else return null;
+	    }
+
+	    if( oclass == Integer.class ) return new java.lang.Integer(o.toString());
+	    if( oclass == Float.class )	return new java.lang.Float(o.toString());
+	    if( oclass == Boolean.class ) return new Boolean(toBool(o));
+	    throw new ClassCastException("trying convert " + o + " ("+o.getClass()+") to "+oclass  );
+    }
+
+    /***********************************************************
+     *  Java To Cyc
+     *
+     **********************************************************/
+    public  Object toCycObject(Object object) {
+	return toCycObject(object, false);
+    }
+
+    public Object toCycObject(Object object, boolean assertobj) {
+
+	if( object==null ) return cycNull;
+	if( object instanceof Void ) return cycVoid;
+	if( object instanceof Boolean )	 if( object.equals(Boolean.TRUE) ) return cycTrue;
+	    else return cycFalse;
+	if( object instanceof Number ) return object;
+	if( object instanceof Float ) return object;
+	if( object instanceof Byte ) return(Integer)object;
+	if( object instanceof Integer )	return object;
+	if( object instanceof Long ) return object;
+	if( object instanceof Double ) return object;
+	if( object instanceof Character ) return object;
+
+	Class jclass = object.getClass();
+	if( !(jclass.isArray()) ) {
+	    if( jclass.isPrimitive() ) {
+
+		System.out.println("\n\n PRIMITIVE!!!!\n\n PRIMITIVE!!!!\n\n PRIMITIVE!!!! " + object);
+		if( jclass == java.lang.Boolean.TYPE ) if( object.equals(Boolean.TRUE) ) return cycTrue;
+		    else return cycFalse;
+		if( jclass == java.lang.Integer.TYPE ) return new Integer(""+object);
+		if( jclass == java.lang.Byte.TYPE ) return new Integer(""+object);
+		if( jclass == java.lang.Void.TYPE ) return cycVoid;
+		if( jclass == java.lang.Long.TYPE ) return new Long(""+object);
+		if( jclass == java.lang.Character.TYPE ) return  new String("`" + object);
+		if( jclass == java.lang.Double.TYPE ) return new Double(""+object);
+		if( jclass == java.lang.Float.TYPE ) return new Float(""+object);
+	    }
+	} else {
+	    // is array
+	   return arrayToCycList((Object[])object,assertobj);
+
+	}
+
+	CycFort cycobject = (CycFort)mapObjectToFort.get(object);
+	if( cycobject!=null ) return cycobject;
+	if( mapFortToObject.containsKey(object.toString()) ) return object;
+	if( object instanceof String ) return object;
+	if( object instanceof CycObject ) return object;
+	if( object instanceof CycLTerm ) return object;
+
+	try {
+	    cycobject = cycAccess.makeCycConstant("Inst-" + jclass.getName() + "-" + object.hashCode());    
+	} catch (Exception e) {
+
+	}
+	mapFortToObject.put(cycobject,object);
+	mapObjectToFort.put(object,cycobject);
+
+	CycFort cycclass = toCycClass(jclass);
+
+	try {
+	    cycAccess.assertIsa((CycFort)cycobject,(CycFort)cycclass,dataMt);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.out);
+	}
+
+	// Only make this constant for object 
+	if( assertobj )	assertObjectData(dataMt, object,cycobject);
+	return cycobject;
+    }
+
+
+    /* Serializes Array into OpenCyc List */
+    public  CycList arrayToCycList(Object[] pMembs, boolean assertobj) {
+	CycList newCycList = new CycList();
+	int len = pMembs.length;
+	for( int nMemb=0 ; nMemb < len; nMemb++ )
+	    newCycList.add(toCycObject(pMembs[nMemb],assertobj));
+	return newCycList;
+    }
+
+
+    /* Serializes Iterator into OpenCyc List */
+    public synchronized  Object iteratorToCycList(Iterator pMembs) {
+	CycList args = new CycList();
+	while ( pMembs.hasNext() )
+	    args.add(toCycObject( pMembs.next()));
+	return args;
+    }
+    
+    /**
+     * Preforms query in mt with parameters
+     *   then unasserts the insanciated gafs derived from the query 
+     *   
+     *  NOTE:  Only if they exist in the same microtheory as the query is in.
+     *   see queryMatch for how these insanciated gafs are produced
+     *
+     */
+
+
+    public ArrayList deleteMatchGaf(CycList query,CycFort mt,int maxBackchains,int maxAnswers, int maxSeconds) {
+	ArrayList al = queryMatch(query,mt,maxBackchains,maxAnswers,maxSeconds);
+	Iterator its = al.iterator();
+	while( its.hasNext() ) {
+	    try {
+		cycAccess.unassertGaf((CycList)its.next(),mt);
+	    } catch( Exception e ) {
+	    }
+	}
+	return al;
+    }
+
+    /**
+     * Preforms query in mt with parameters
+     *   returns the insanciated gafs derived from the query 
+     *  
+     *   a query of (#$isa ?X #$Dog) in #$BiologyMt
+     *     will return a ArrayList with a single CycList formula containing:
+     *     (#$isa (#$GenericInstanceFn #$Dog) #$Dog)
+     *
+     */
+
+    public ArrayList queryMatch(CycList query,CycFort mt,int maxBackchains,int maxAnswers, int maxSeconds) {
+
+	ArrayList match = new CycList();
+	try {
+	    CycList results = queryWithMaximums(query,mt,maxBackchains,maxAnswers,maxSeconds);
+	    Iterator its = results.iterator();
+	    while( its.hasNext() ) {
+		try {
+		    CycList bindingset = (CycList)its.next();
+		    CycList result = replaceVarsWithBindingSet(query,bindingset).getFormula();
+		    System.out.println(result);
+		    match.add(result);
+		} catch( Exception e ) {
+		    e.printStackTrace();
+		}
+	    }
+	} catch( Exception ee ) {
+	    ee.printStackTrace();
+	}
+	return match;
+    }
+
+    public CycList queryWithMaximums(CycList query,CycFort mt,int maxBackchains,int maxAnswers, int maxSeconds) 
+    throws IOException, CycApiException {
+	CycList queryBuffer = new CycList();
+	queryBuffer.add("(clet ((*cache-inference-results* nil) ");
+	queryBuffer.add("       (*compute-inference-results* nil) ");
+	queryBuffer.add("       (*unique-inference-result-bindings* t) ");
+	queryBuffer.add("       (*generate-readable-fi-results* nil)) ");
+	queryBuffer.add("  (without-wff-semantics ");
+	queryBuffer.add("    (cyc-query '" + query.cyclify() + " ");
+	queryBuffer.add("                  " + mt.cyclify() + " ");
+	queryBuffer.add("                  '(:backchain "+maxBackchains+" :number "+maxAnswers+" :time "+ maxSeconds +"))))");
+	return  cycAccess.converseList(queryBuffer.toString());
+    }
+
+    public QueryLiteral replaceVarsWithBindingSet(CycList query, ArrayList bindingset) {
+	QueryLiteral querylit = new QueryLiteral(query);
+	Iterator bindings = bindingset.iterator();
+	while( bindings.hasNext() ) {
+	    CycList binding =  (CycList)bindings.next();
+	    CycVariable variable = (CycVariable)binding.first();
+	    Object value = binding.rest();
+	    querylit.substituteVariable(variable,value);
+	}
+	return querylit;
+    }
+
+
+
+
+
+    /***********************************************************
+     * Java Editing
+     *
+     **********************************************************/
+
+
+    public synchronized String findNamedProperty(Object target, String property) {
+	// Normally more deeper analysis then string concatination (that is why the target object is here)
+	return "set" + toProperCase(property);
+    }
+
+    public synchronized boolean attemptJavaSetMethod(Object target,String property,Object value) {
+	if( value==null ) {
+	    try {
+		target.getClass().getMethod(findNamedProperty(target,property),null).invoke(target,null);
+		return true;
+	    } catch( Exception e ) {
+		return false;
+	    }
+
+	} else {
+
+	    Class[] sc = { value.getClass()};
+	    Object[] sa = { value};
+
+	    try {
+		target.getClass().getMethod(findNamedProperty(target,property),sc).invoke(target,sa);
+		return true;
+	    } catch( Exception e ) {
+		return false;
+	    }
+	}
+    }
+
+    public synchronized Method findJavaMethod(Class oclass, String methodname)
+    throws NoSuchMethodError {
+	Method[] meths = oclass.getMethods();
+	int len = meths.length;
+	for( int i = 0; i < len ; i++ )
+	    if( meths[i].getName().equals(methodname) )	return meths[i];
+
+	throw new NoSuchMethodError(methodname +" for " + oclass.getName());
+    }
+
+    /***********************************************************
+     * Strings
+     *
+     **********************************************************/
+
+    public synchronized  String toProperCase(String property) {
+	return property.substring(0,0).toUpperCase()+property.substring(1).toLowerCase();
+    }
+
+
+
+    public  void assertObjectData(CycFort dataMt, Object object,CycFort cycobject) {
+	System.out.println("assertObjectData " + object );
+
+	if( object instanceof CycList ) {
+	    assertWithTranscriptNoWffCheckJava(((CycList)object).cyclify(), dataMt);
+	    return;
+	}
+
+	Class jclass = object.getClass();
+	if( jclass.isArray() ) {
+	    assertArrayData(dataMt,object, cycobject);
+	    return;
+	}
+
+	if( object instanceof Iterator ) {
+	    assertIteratorData(dataMt,(Iterator)object, cycobject);
+	    return;
+	}
+
+	assertObjectDataFromTemplate(jclass,dataMt,object, cycobject);
+
+    }
+
+    public void  assertObjectDataFromTemplate(Class jclass,CycFort dataMt, Object object,CycFort cycobject) {
+	Hashtable template = (Hashtable)thisClassTemplates.get(jclass);
+	Iterator it = template.keySet().iterator();
+	while( it.hasNext() ) {
+	    Object cycdataaccess = it.next();
+	    if( cycdataaccess instanceof CycConstant ) {
+		assertMemberValue( dataMt, cycobject, object ,(CycConstant)cycdataaccess, template.get(cycdataaccess));
+	    }
+
+	}
+    }
+
+    public  void assertArrayData(CycFort dataMt, Object object,CycFort cycobject) {
+	System.out.println("assertArrayData " + object );
+	CycList assertme = new CycList(cycHasArrayMember);
+	assertme.add(cycobject);
+	assertme.add(null);
+	assertme.add(null);
+	for( int i=0 ; i < ((Object[])object).length; i++ ) {
+	    Object submember = toCycObject(((Object[])object)[i],true);
+	    try {
+		assertme.set(2,new Integer(i));
+		assertme.set(3,submember);
+		assertWithTranscriptNoWffCheckJava(assertme,dataMt);
+	    } catch( Exception e ) {
+		e.printStackTrace(System.err);
+	    }
+	}
+    }
+
+    public  void assertIteratorData(CycFort dataMt, Iterator object,CycFort cycobject) {
+	System.out.println("assertIteratorData " + object );
+	CycList assertme = new CycList(cycHasArrayMember);
+	assertme.add(cycobject);
+	assertme.add(3,new Integer(0));
+	assertme.add(null);
+	while( object.hasNext() ) {
+	    Object submember = toCycObject(object.next(),true);
+	    try {
+		assertme.set(3,submember);
+		assertWithTranscriptNoWffCheckJava(assertme,dataMt);
+	    } catch( Exception e ) {
+		e.printStackTrace(System.err);
+	    }
+	}
+    }
+
+    public  void assertSlotValue(CycFort dataMt,CycFort cycobject, Object slot, Object value, boolean singlevalued) {
+	assertSlotValue(dataMt,cycobject,slot,value,null,singlevalued);
+    }
+
+
+    public  void assertSlotValue(CycFort dataMt,CycFort cycobject, Object slot, Object value, Object type, boolean singlevalued) {
+	CycFort cycslot = null;
+	if( cycobject==null ) {
+	    System.out.println("assertSlotValue(CycFort " + dataMt + ",CycConstant " +cycobject+", Object " +slot+", Object " +value+", boolean " +singlevalued +")");
+	    return;
+	}
+
+	if( slot instanceof CycConstant ) {
+	    cycslot = (CycConstant)slot;
+	} else {
+	    if( slot instanceof String ) {
+		cycslot = makeTypedCycFort(dataMt,"JavaSlot",(String)slot);
+	    }
+	}
+
+	if( singlevalued ) clearSlot(dataMt,cycobject,cycslot);
+
+	if( value == null ) return;
+
+	if( value instanceof Iterator ) {
+	    while( ((Iterator)value).hasNext() )
+		assertSlotValue(dataMt,cycobject, cycslot, ((Iterator)value).next(), type,false);
+	    return;
+	}
+	if( value instanceof Enumeration ) {
+	    while( ((Enumeration)value).hasMoreElements() )
+		assertSlotValue(dataMt,cycobject, cycslot, ((Enumeration)value).nextElement(),type, false);
+	    return;
+	}
+
+	if( value.getClass().isArray() ) {
+	    assertSlotValue(dataMt,cycobject, cycslot, Arrays.asList((Object[])value).iterator(), type, false);
+	    return;
+	}
+	Object cycvalue = toCycObject(value,false);
+
+	try {
+	if( type!=null ) {
+	    if( cycvalue instanceof CycFort ) {
+		cycAccess.assertIsa((CycFort)cycvalue,(CycFort)toCycObject(type),dataMt);
+	    }
+	    if( cycvalue instanceof CycList ) {
+		cycAccess.assertIsa(((CycFort)new CycNart((CycList)cycvalue)),(CycFort)toCycObject(type),dataMt);
+	    }
+	}
+
+	if( cycvalue!=null ) assertGaf(dataMt,cycslot,cycobject,cycvalue);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.out);
+	    System.out.println("assertSlotValue(CycFort " + dataMt + ",CycConstant " +cycobject+", Object " +slot+", Object " +value+", boolean " +singlevalued +")");
+	}
+    }
+
+    public  void assertGaf(CycFort dataMt, CycFort pred, CycFort object, Object value) 
+    throws Exception{
+	CycList assertme = new CycList(pred);	 //"#$hasFieldValue"
+	assertme.add(object);
+	assertme.add(value);
+	assertWithTranscriptNoWffCheckJava(assertme,dataMt);
+    }
+
+    public  void assertMemberValue(CycFort dataMt, CycFort cycobject, Object object, CycConstant cycaccess, Object accessmember) {
+	System.out.println("while {assertObjectData " + cycobject + " " + cycaccess + " " + accessmember + "}" );
+	try {
+	    if( accessmember instanceof DataMethod ) assertDataMethodResult( dataMt, cycobject, object, cycaccess, (DataMethod)accessmember);
+	    //      if ( accessmember instanceof Method ) assertMethodResult( dataMt, cycobject, object, cycaccess, (Method)accessmember);
+	    if( accessmember instanceof Field )	assertFieldValue( dataMt, cycobject, object, cycaccess, (Field)accessmember);
+	} catch( Exception e ) {
+	    e.printStackTrace( System.out);
+	}
+    }
+
+    public  void assertFieldValue(CycFort dataMt, CycFort cycobject, Object object, CycConstant cycaccess, Field accessmember) 
+    throws Exception{
+	CycList assertme = new CycList(cycHasSlotValue);    //"#$hasFieldValue"
+	assertme.add(cycobject);
+	assertme.add(cycaccess);
+	assertme.add(toCycObject(accessmember.get(object)));
+	assertWithTranscriptNoWffCheckJava(assertme,dataMt);
+    }
+
+    public  void assertMethodResult(CycFort dataMt, CycFort cycobject, Object object, CycConstant cycaccess, Method accessmember) 
+    throws Exception{
+	CycList assertme = new CycList(cycHasMethod);	 //"#$hasMethodValue"
+	assertme.add(cycaccess);
+	assertme.add(toCycObject(accessmember.invoke(object,null)));
+	assertWithTranscriptNoWffCheckJava(assertme,dataMt);
+    }
+
+    public  void assertDataMethodResult(CycFort dataMt, CycFort cycobject, Object object, CycConstant cycaccess, DataMethod accessmember) 
+    throws Exception{
+	CycList assertme = new CycList(cycHasSlotValue);    //"#$hasMethodValue"
+	assertme.add(cycobject);
+	assertme.add(cycaccess);
+	assertme.add(toCycObject(accessmember.get(object)));
+	assertWithTranscriptNoWffCheckJava(assertme,dataMt);
+    }
+
+    public synchronized   void clearSlot(CycFort dataMt,CycFort cycobject, Object cycslot) {
+	// Delete all previous
+	CycList query = new CycList(cycslot);
+	query.add(cycobject);
+	CycVariable cv = new CycVariable("Prev");
+	query.add(cv);
+
+	try {
+	    Iterator result =  cycAccess.askWithVariable(query,cv,dataMt).iterator();
+	    while( result.hasNext() ) {
+		query.set(2,result.next());
+		cycAccess.unassertGaf(query,dataMt);
+	    }
+	} catch( Exception e ) {
+	    e.printStackTrace(System.out);
+	}
+
+    }
+
+    public CycList toCycClassList(Class jclass[]) {
+	CycList cdefs = new CycList();
+	    for( int i = 0 ; i < jclass.length ; i ++ )	cdefs.add(toCycClass(jclass[i]));
+	return cdefs;
+    }
+
+    public synchronized CycFort toCycClass(Class jclass) {
+	CycFort cycjclass  = (CycFort)mapClassToFort.get(jclass);
+	if( cycjclass!=null ) return cycjclass;
+	String classname = jclass.getName();
+	if( classname.startsWith("[L") ) classname = classname.substring(2);
+	if( classname.startsWith("[") )	classname = classname.substring(1);
+	if( classname.endsWith(";") ) classname = classname.substring(0,classname.length()-1);
+	//String packagename = jclass.getPackage().getName();
+	String classextension = "Object";
+	if( jclass.isPrimitive() ) {
+	    /*
+	    jboolean z;
+	    jbyte    b;
+	    jchar    c;
+	    jshort   s;
+	    jint     i;
+	    jlong    j;
+	    jfloat   f;
+	    jdouble  d;
+	    jobject  l;
+	    */    
+	    if( jclass.isArray() ) {
+		switch( classname.charAt(0) ) {
+		    case 'Z':
+			classname = "Boolean";
+		    case 'B':
+			classname = "Byte";
+		    case 'C':
+			classname = "Character";
+		    case 'S':
+			classname = "ShortInteger";
+		    case 'I':
+			classname = "Integer";
+		    case 'J':
+			classname = "Long";
+		    case 'F':
+			classname = "Float";
+		    case 'D':
+			classname = "Double";
+		}
+		classextension = "Array";
+	    } else {
+		classextension = "Value";
+	    }
+	} else {
+	    try {
+		if( jclass.isArray() ) return new CycNart((CycFort)(cycArrayOfClass),(Object)toCycClass(Class.forName(classname)));
+	    } catch( Exception e ) {
+		e.printStackTrace();
+	    }
+	    if( classname.startsWith("java")
+		|| classname.startsWith("logicmoo")
+		|| classname.startsWith("org")
+		//    || classname.startsWith("com")
+	      ) {
+		int lp = classname.lastIndexOf(".");
+		if( lp>2 ) classname = classname.substring(lp+1);
+	    }
+	}
+
+	classname = Strings.change(classname,".","_");
+	classname = Strings.change(classname,"$","_");
+
+	String cycclassname = classname + classextension;
+
+	System.out.println("cycclassname =" + cycclassname);
+
+	try {
+	    cycjclass =  cycAccess.makeCycConstant(cycclassname);    
+	    assertGaf(dataMt,cycNameOFClass,cycjclass,jclass.getName());
+	} catch( Exception e ) {
+	    System.out.println("cycAccess.makeCycConstant: " +cycclassname+" "+ e );
+	    e.printStackTrace(System.err);
+	}
+	mapClassToFort.put(jclass,cycjclass);
+	mapFortToClass.put(cycjclass,jclass);
+	// Save Isa
+	try {
+	    cycAccess.assertIsa(cycjclass,cycClassInstance,theoryMtA);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.err);
+	}
+	try {
+	    // Make super classes
+	    Class superjclass = jclass.getSuperclass();
+	    if( superjclass != null ) {
+		CycFort cycsuperjclass = toCycClass(superjclass);
+		cycAccess.assertGenls(cycjclass,cycsuperjclass,theoryMtA);
+	    }
+	} catch( Exception e ) {
+	    e.printStackTrace(System.err);
+	}
+	// Decide if we should make a template
+	String classstring = jclass.toString();
+	if( classstring.startsWith("class java.lang") 
+	    || classstring.startsWith("class java.io")
+	    || classstring.startsWith("class logicmoo.")
+	    || classstring.startsWith("class com.logicmoo")
+	    || jclass.isPrimitive() )
+	    return cycjclass;
+
+	Hashtable template = new Hashtable();
+
+	Method[] methods = jclass.getMethods();
+	for( int i =0; i<methods.length;i++ ) {
+	    Method method = methods[i];
+	    CycFort cycmethodjclass = toCycClass(method.getReturnType());
+	    String methodname = method.getName();
+	    CycFort cycmethod = makeTypedCycFort("JavaMethod",methodname + "_method");
+	    template.put(cycmethod,method);
+	    Class[] params = method.getParameterTypes();
+	    assertIsaJavaMethodOf(cycjclass,jclass,cycmethod,methodname,params,cycmethodjclass,method,template);
+	}
+
+	Field[] fields = jclass.getFields();
+	for( int i =0; i<fields.length;i++ ) {
+	    Field field=fields[i];
+	    CycFort cycfieldjclass = toCycClass(field.getType());
+	    CycFort cycfield = makeTypedCycFort("JavaSlot",field.getName() + "_field");
+	    template.put(cycfield,field);
+	    assertIsaJavaFieldOf(cycjclass,cycfield,cycfieldjclass);
+	}
+
+	thisClassTemplates.put(jclass,template);
+	thisClassTemplates.put(cycjclass,template);
+	return cycjclass;
+    }
+
+    public  void assertIsaJavaFieldOf(CycFort cycjclass,CycFort cycfield,CycFort cycfieldjclass) {
+	try {
+
+	    assertWithTranscriptNoWffCheckJava(
+					      "(#$relationAllExists "  
+					      + " " + cycfield.cyclify()
+					      + " " + cycjclass.cyclify()
+					      + "  " + cycfieldjclass.cyclify() +  " )",(CycFort) theoryMtA);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.err);
+	}
+    }
+
+    public  void assertIsaJavaDataMethodOf(CycFort cycjclass,CycFort cycdatamethod, CycFort cycmethodjclass) {
+	try {
+	    assertWithTranscriptNoWffCheckJava(
+					      "(#$relationAllExists " 
+					      + " " + cycdatamethod.cyclify()
+					      + " " + cycjclass.cyclify()
+					      + "  " + cycmethodjclass.cyclify() +  " )",(CycFort) theoryMtA);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.err);
+	}
+    }
+
+    public  void assertIsaJavaMethodOf(CycFort cycjclass,Class jclass,CycFort cycmethod,String methodname,Class[] params, CycFort cycmethodjclass,Method method,Hashtable template) {
+
+	assertWithTranscriptNoWffCheckJava(
+					  "(#$hasJavaMethod " + cycjclass.cyclify()
+					  + " (#$JavaMethodFn " + cycmethod.cyclify() + " " + toCycClassList(params) + " ) " 
+					  + "  " + cycmethodjclass.cyclify() +  " )",(CycFort) theoryMtA);
+	if( params.length>0 ) return;
+	if( methodname.startsWith("to") ) return;
+
+	if( methodname.startsWith("get") ) {
+	    String dataname = methodname.substring(3);
+	    Method setmethod = null;  
+	    CycFort cycdatamethod = null;
+	    try {
+		setmethod = jclass.getMethod("set"+dataname,(Class[])Array.newInstance(method.getReturnType(),1)); 
+		cycdatamethod = makeTypedCycFort("JavaSlot",dataname+ "_getSet");
+	    } catch( Exception e ) {
+		cycdatamethod = makeTypedCycFort("JavaSlot",dataname+ "_get");
+		setmethod = null;
+	    }
+	    template.put(cycjclass,new DataMethod(dataname,method,setmethod));
+	    assertIsaJavaDataMethodOf(cycjclass,cycdatamethod,cycmethodjclass);
+	    return;
+	}
+
+	if( methodname.startsWith("child") ||  methodname.endsWith("es") ) {
+	    String dataname = methodname;
+	    CycFort cycdatamethod = makeTypedCycFort("JavaSlot",dataname+ "_getAdd");
+	    template.put(cycjclass,new DataMethod(dataname,method,null));
+	    assertIsaJavaDataMethodOf(cycjclass,cycdatamethod,cycmethodjclass);
+	    return;
+	}
+
+	String firstthree = methodname.substring(0,2);
+
+	if( methodname.equalsIgnoreCase("iterator") ) {
+	    String dataname = methodname;
+	    CycFort cycdatamethod = makeTypedCycFort("JavaSlot",dataname+ "_getIterator");
+	    Method setmethod = null;
+	    DataMethod datamethod = new DataMethod(dataname,method,setmethod);
+	    template.put(cycjclass,datamethod);
+	    assertIsaJavaDataMethodOf(cycjclass,cycdatamethod,cycmethodjclass);
+	    return;
+	}
+
+
+	if( firstthree.equalsIgnoreCase("rem")
+	    || firstthree.equalsIgnoreCase("add") 
+	    || firstthree.equalsIgnoreCase("set") 
+	    || firstthree.equalsIgnoreCase("clo") 
+	    || firstthree.equalsIgnoreCase("cle") 
+	    || firstthree.equalsIgnoreCase("ter") 
+	    ||          firstthree.equalsIgnoreCase(         "kil")          
+	    || firstthree.equalsIgnoreCase("cre") 
+	    || firstthree.equalsIgnoreCase("mak") ) return;
+
+
+
+	/*
+	 if ( !(methodname.endsWith("s")) ) return;
+	 String dataname = methodname;
+	 CycConstant cycdatamethod = makeTypedCycFort("Slot",dataname+ "_get");
+	 Method setmethod = null;
+	 DataMethod datamethod = new DataMethod(dataname,method,setmethod);
+	 template.put(cycjclass,datamethod);
+	 assertIsaJavaDataMethodOf(cycjclass,cycdatamethod,cycmethodjclass);
+	 */
+    }
+
+    public CycFort makeTypedCycFort(String ctype,String name) {
+	return makeTypedCycFort(theoryMtA, ctype, name);
+    }
+
+    public CycFort makeTypedCycFort(CycFort dataMt, String type,String name) {
+	CycConstant nameC =  makeCycConstantError;
+	try {
+	    nameC =  cycAccess.makeCycConstant(name);
+	    CycConstant typeC =  cycAccess.makeCycConstant(type);
+	    cycAccess.assertIsa(typeC, cycAccess.collection,dataMt);
+	    cycAccess.assertIsa(nameC,typeC,dataMt);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.err);
+	}
+	return nameC;
+    }
+
+
+    public synchronized  PrintWriter getPrintWriter(Writer w) {
+	if( w==null ) return new PrintWriter(System.out);
+	if( w instanceof PrintWriter ) return(PrintWriter)w;
+	return new PrintWriter(w);
+    }
+
+
+    public final class DataMethod {
+
+	public String dataname = null;
+	public Method getmethod = null;
+	public Method setmethod = null;
+	public DataMethod(String adataname, Method agetmethod, Method asetmethod) {
+	    dataname = adataname;  
+	    getmethod = agetmethod;  
+	    setmethod = asetmethod;  
+	}
+
+	public Object get(Object object) {
+	    try {
+		return getmethod.invoke(object,null);
+	    } catch( Exception e ) {
+		return "" + e;
+	    }
+	}
+	public void set(Object object,Object value) {
+	    try {
+		Object[] param = {value} ;
+		setmethod.invoke(object,param);
+	    } catch( Exception e ) {
+	    }
+	}
+    }
+
+    public void  assertWithTranscriptNoWffCheckJava(CycList sentence, CycFort mt) {
+	try {
+	    cycAccess.assertWithTranscript( sentence,mt);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.err);
+	}
+    }
+    public void  assertWithTranscriptNoWffCheckJava(String sentence, CycFort mt) {
+	try {
+	    cycAccess.assertWithTranscript( toCycList(sentence),mt);
+	} catch( Exception e ) {
+	    e.printStackTrace(System.err);
+	}
+    }
+
+    /**
+     * Cyclifys a sentence a string
+     */
+    public  CycList toCycList(String sentence) {
+	try {
+	    return(((CycList)((new CycListParser(cycAccess)).read(sentence))));
+	} catch( Exception e ) {
+	    return null;
+	}
+
+    }
+    /**
+     * Cyclifys a sentence to a string
+     */
+    public  String toCycListString(String sentence) {
+	try {
+	    return(((CycList)((new CycListParser(cycAccess)).read(sentence))).cyclify());
+	} catch( Exception e ) {
+	    return null;
+	}
+
+    }
+
+    //toCycObject(type)
+    /*
+    
+    
+      CycL
+    
+     
+(#$implies
+  (#$and
+      (#$remoteCycServer ?Server ?Host ?Port)
+      (#$evaluate ?Result (#$EvaluateSubLFn (cyc-api-remote-eval ?SUBL ?Host ?Port))))
+  (#$evaluate ?Result (#$EvaluateRemoteSubLFn ?Server ?SUBL))
+     
+    
+
+     
+    (ExpandSubLFn (?X) (+ 1 ?X))
+    
+       (evaluate ??RESULT 
+     
+    
+    */
+
+    public  String cleanString(String name) {
+	if( name==null ) return "null";
+	String tryName = name;
+	if( name.startsWith("#$") ) tryName = name.substring(2);
+	tryName = Strings.change(tryName,'$','_');
+	tryName = Strings.change(tryName,')','_');
+	tryName = Strings.change(tryName,'(','_');
+	tryName = Strings.change(tryName,' ','_');
+	tryName = Strings.change(tryName,'.','_');
+	return Strings.change(tryName,'@','_');
+    }
+
+    public  boolean toBool(Object o) throws Exception {
+	switch( o.toString().charAt(0) ) {
+	    case 'T' : return true;
+	    case 'N' : return false;
+	    case 'F' : return false;
+	}
+	throw new Exception("toBool " + o);
+    }
+
+    public void warnEvent(Exception e){
+	e.printStackTrace();
+    }
+
 }
 
 

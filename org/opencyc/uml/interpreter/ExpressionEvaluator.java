@@ -69,9 +69,24 @@ public class ExpressionEvaluator {
     protected CycConstant programBlockFn;
 
     /**
+     * #$ProgramConditionFn
+     */
+    protected CycConstant programConditionFn;
+
+    /**
      * #$softwareParameterValue
      */
     protected CycConstant softwareParameterValue;
+
+    /**
+     * #$evaluate
+     */
+    protected CycConstant evaluate;
+
+    /**
+     * ?value
+     */
+    protected CycConstant trueValue;
 
     /**
      * Constructs a new ExpressionEvaluator object.
@@ -88,7 +103,10 @@ public class ExpressionEvaluator {
         this.verbosity = verbosity;
         programAssignmentFn = cycAccess.getKnownConstantByName("ProgramAssignmentFn");
         programBlockFn = cycAccess.getKnownConstantByName("ProgramBlockFn");
+        programConditionFn = cycAccess.getKnownConstantByName("ProgramConditionFn");
         softwareParameterValue = cycAccess.getKnownConstantByName("softwareParameterValue");
+        evaluate = cycAccess.getKnownConstantByName("evaluate");
+        trueValue = cycAccess.getKnownConstantByName("True");
     }
 
     /**
@@ -98,7 +116,7 @@ public class ExpressionEvaluator {
      * @return the result of evaluating the given boolean java expression
      */
     public boolean evaluateBoolean (BooleanExpression booleanExpression)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         Object answer = evaluateCycLExpression((CycList) booleanExpression.getBody());
         if (answer.equals(Boolean.TRUE))
             return true;
@@ -114,7 +132,7 @@ public class ExpressionEvaluator {
      * @param expression the given java expression
      */
     public void evaluate (Expression expression)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         evaluateCycLExpression(expression.getBody());
     }
 
@@ -125,7 +143,7 @@ public class ExpressionEvaluator {
      * @return the value of the evaluated CycL expression
      */
     public Object evaluateCycLExpression (Object cycLExpression)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         if (verbosity > 2)
             Log.current.println("Evaluating CycL expression: " + cycLExpression);
         CycList cycLExpressionList;
@@ -143,22 +161,46 @@ public class ExpressionEvaluator {
         else if (cycLExpressionList.first().equals(programBlockFn)) {
             evaluateProgramBlockFn((CycList) cycLExpressionList.rest());
         }
+        else if (cycLExpressionList.first().equals(programConditionFn)) {
+            evaluateProgramConditionFn((CycList) cycLExpressionList.rest());
+        }
+        else
+            throw new ExpressionEvaluationException("Unhandled expression " + cycLExpression);
         return null;
     }
 
     /**
-     * Evaluates #$ProgramBlockFn which evaluates the given list of expressions
-     * sequentially.
+     * Evaluates #$ProgramBlockFn which evaluates the given boolean expression.
      *
      * @param cycLExpressions the given expressions in this program block to evaluate
      * @return the symbol NIL
      */
     public CycSymbol evaluateProgramBlockFn (CycList cycLExpressions)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         Iterator iter = cycLExpressions.iterator();
         while (iter.hasNext())
             evaluateCycLExpression(iter.next());
         return CycObjectFactory.nil;
+    }
+
+    /**
+     * Evaluates #$ProgramConditionFn which evaluates the given list of expressions
+     * sequentially.
+     *
+     * @param cycLExpressions the given boolean expression
+     * @return the result of evaluating the given boolean expression
+     */
+    public boolean evaluateProgramConditionFn (CycList cycLExpression)
+            throws IOException, CycApiException, ExpressionEvaluationException {
+        boolean answer;
+        CycList query = new CycList();
+        query.add(evaluate);
+        query.add(trueValue);
+        query.add(cycLExpression);
+        answer = cycAccess.isQueryTrue(query, stateMt);
+        if (verbosity > 2)
+            Log.current.println(cycLExpression + " evaluates to " + answer);
+        return answer;
     }
 
     /**
@@ -172,6 +214,8 @@ public class ExpressionEvaluator {
     public CycSymbol evaluateProgramAssignmentFn (CycFort softwareParameter,
                                                   Object valueExpression)
         throws IOException, CycApiException {
+        if (verbosity > 2)
+            Log.current.println("Assigning value " + valueExpression + " to " + softwareParameter.cyclify());
         Object value = evaluateCycLObject(valueExpression);
         if (value instanceof CycList)
             cycAccess.assertGaf(stateMt,
@@ -209,6 +253,7 @@ public class ExpressionEvaluator {
      */
     public Object evaluateCycLObject (Object cycLObject)
             throws IOException, CycApiException {
+        Object value = CycObjectFactory.nil;
         if (cycLObject instanceof Boolean ||
             cycLObject instanceof String ||
             cycLObject instanceof Integer ||
@@ -216,10 +261,16 @@ public class ExpressionEvaluator {
             cycLObject instanceof Character ||
             cycLObject instanceof Float ||
             cycLObject instanceof Double)
-            return cycLObject;
-
+            value = cycLObject;
+        else if (cycLObject instanceof CycFort) {
+            value = cycAccess.getArg2(softwareParameterValue,
+                                      (CycFort) cycLObject,
+                                      stateMt);
+        }
         //TODO handle other kinds of evaluatable objects
-        return CycObjectFactory.nil;
+        if (verbosity > 2)
+            Log.current.println("Value of " + cycLObject + " is " + value);
+        return value;
     }
 
 

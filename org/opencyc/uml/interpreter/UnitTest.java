@@ -162,6 +162,22 @@ public class UnitTest extends TestCase {
 
             expression.setBody(body);
             expressionEvaluator.evaluate(expression);
+            queryText =
+                    "(#$softwareParameterValue \n" +
+                    "  (#$SoftwareParameterFromSyntaxFn #$TestStateMachine-OutputPin2-X) 0)";
+            query = cycAccess.makeCycList(queryText);
+            Assert.assertTrue(cycAccess.isQueryTrue(query, stateMt));
+            Assert.assertEquals(2, cycAccess.getAllAssertionsInMt(stateMt).size());
+
+            cycAccess.traceNamesOn();
+            body =
+                cycAccess.getAssertionArg2("umlBody",
+                                           "TestStateMachine-BooleanExpression1",
+                                           "UMLStateMachineTest01Mt");
+            System.out.println("body: " + ((CycList) body).cyclify());
+
+            expression.setBody(body);
+            expressionEvaluator.evaluate(expression);
         }
         catch (Exception e) {
             e.printStackTrace();

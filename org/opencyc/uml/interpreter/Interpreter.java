@@ -217,7 +217,7 @@ public class Interpreter {
      * Interprets the state machine.
      */
     public void interpret ()
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         formAllStatesConfiguration();
         formInitialStateConfiguration();
         while (! isTerminated) {
@@ -275,7 +275,7 @@ public class Interpreter {
      * state machine.
      */
     protected void formInitialStateConfiguration ()
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         State topState = stateMachine.getTop();
         if (verbosity > 2)
             Log.current.println("Forming initial state configuration from " + topState.toString());
@@ -318,7 +318,7 @@ public class Interpreter {
      * by the current event.
      */
     protected void eventProcessor ()
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         selectedTransitions = new ArrayList();
         Iterator activeStatesIter = activeStates.keySet().iterator();
         while (activeStatesIter.hasNext()) {
@@ -338,7 +338,7 @@ public class Interpreter {
      * @param transitions the given state transition iterator
      */
     protected void selectTransitions (Iterator transitions)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         while (transitions.hasNext()) {
             Transition transition = (Transition) transitions.next();
             if (currentEventEnables(transition)) {
@@ -393,7 +393,7 @@ public class Interpreter {
      * actions to completion.
      */
     protected void fireSelectedTransitions ()
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         Iterator iter = selectedTransitions.iterator();
         while (iter.hasNext()) {
             Transition transition = (Transition) iter.next();
@@ -412,7 +412,7 @@ public class Interpreter {
      * @param transition the given internal transition
      */
     protected void internalTransition (Transition transition)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         State targetState = (State) transition.getTarget();
         if (verbosity > 2)
             Log.current.println("Internal transition " + transition.toString() +
@@ -426,7 +426,7 @@ public class Interpreter {
      * @param transition the given transition
      */
     protected void transitionExit (Transition transition)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         StateVertex source = transition.getSource();
         if (source instanceof State) {
             State sourceState = (State) source;
@@ -446,7 +446,7 @@ public class Interpreter {
      * @param transition the given transition
      */
     protected void transitionEnter (Transition transition)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         StateVertex target = transition.getTarget();
         if (target instanceof State) {
             State targetState = (State) target;

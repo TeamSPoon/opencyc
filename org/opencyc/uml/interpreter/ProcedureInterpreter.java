@@ -79,7 +79,7 @@ public class ProcedureInterpreter {
      * @param procedure the procedure to interpret
      */
     public void interpret (Procedure procedure)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         this.procedure = procedure;
         if (verbosity > 2)
             Log.current.println("Interpreting " + procedure.toString() +

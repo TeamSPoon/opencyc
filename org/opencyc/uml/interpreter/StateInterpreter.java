@@ -101,7 +101,7 @@ public class StateInterpreter extends Thread {
      * @param transition the transistion
      */
     public void interpretTransitionEntry (Transition transition)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         if (verbosity > 2)
             Log.current.println(transition.toString() + " entering " + state.toString());
         performTransitionEffect(transition);
@@ -118,7 +118,7 @@ public class StateInterpreter extends Thread {
      * @param transition the transition
      */
     protected void performEntryActions (Transition transition)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         Object[] statesFromRootToTarget = interpreter.getStatesFromRootTo(state);
         //TODO think more about how to handle complex tranistions whose source is a vertex
         StateVertex sourceStateVertex = (StateVertex)transition.getSource();
@@ -141,7 +141,7 @@ public class StateInterpreter extends Thread {
      * the transition completion event.
      */
     public void performTransitionEffect (Transition transition)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         Procedure procedure = transition.getEffect();
         if (procedure != null) {
             if (verbosity > 2)
@@ -166,7 +166,7 @@ public class StateInterpreter extends Thread {
      * the state machine terminates.
      */
     protected void complete ()
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         if (verbosity > 2)
             Log.current.println("Completing " + state.toString());
         exit();
@@ -182,7 +182,7 @@ public class StateInterpreter extends Thread {
      * @param entryState the given state
      */
     public void enterState (State entryState)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         if (entryState.equals(state))
             enter();
         else {
@@ -199,7 +199,7 @@ public class StateInterpreter extends Thread {
      * Enters this state, performing the entry action and the do-activity.
      */
     public void enter ()
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         if (verbosity > 2)
             Log.current.println("Entering " + state.toString());
         state.setIsActive(true);
@@ -224,7 +224,7 @@ public class StateInterpreter extends Thread {
      * @param transition the transistion
      */
     public void interpretTransitionExit (Transition transition)
-        throws IOException, CycApiException {
+        throws IOException, CycApiException, ExpressionEvaluationException {
         if (! isCompositeState()) {
             exit();
             return;
@@ -247,7 +247,7 @@ public class StateInterpreter extends Thread {
     /**
      * Exits this state.
      */
-    public void exit () throws IOException, CycApiException {
+    public void exit () throws IOException, CycApiException, ExpressionEvaluationException {
         if (verbosity > 2)
             Log.current.println("Exiting " + state.toString());
         DoActivity doActivityThread = state.getDoActivityThread();

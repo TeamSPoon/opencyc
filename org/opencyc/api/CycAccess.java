@@ -7057,6 +7057,54 @@ public class CycAccess {
 
 
     /**
+     * Returns the first arg2 ground or non-term from assertions having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the first arg2 ground or non-term from assertions having the specified
+     * predicate and arg1 values
+     */
+    public Object getAssertionArg2 (String predicate,
+                                    String arg1,
+                                    String mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getAssertionArg2(getKnownConstantByName(predicate),
+                                getKnownConstantByName(arg1),
+                                getKnownConstantByName(mt));
+    }
+
+
+    /**
+     * Returns the first arg2 ground or non-term from assertions having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the first arg2 ground or non-term from assertions having the specified
+     * predicate and arg1 values
+     */
+    public Object getAssertionArg2 (CycFort predicate,
+                                    CycFort arg1,
+                                    CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList assertions = getAllAssertionsInMt(mt);
+        Iterator iter = assertions.iterator();
+        while (iter.hasNext()) {
+            CycAssertion assertion = (CycAssertion) iter.next();
+            CycList formula = assertion.getFormula();
+            if ((formula.size() > 2) &&
+                (formula.first().equals(predicate)) &&
+                (formula.second().equals(arg1)))
+                return formula.third();
+        }
+        return null;
+    }
+
+
+    /**
      * Returns the list of arg1 terms from gafs having the specified
      * predicate and arg2 values.
      *

@@ -146,6 +146,37 @@ public class Node extends ELFObject {
   }
   
   /**
+   * Sends the requested Knowledge Base object.
+   *
+   * @parm obj the requested Knowledge Base object
+   */
+  public void sendKBObject (Object obj) {
+    //TODO
+    //send via channel
+  }
+  
+  /**
+   * Sends the status of the given controlled resources.
+   *
+   * @param controlledResources the given list of controlled resources
+   * @param status the status
+   */
+  public void status (ArrayList controlledResources, Status status) {
+    //TODO
+    //send via channel
+  }
+  
+  /**
+   * Sends the given string to the operator.
+   *
+   * @param output the output string for the operator
+   */
+  public void operatorOutput (String output) {
+    //TODO
+    //send via channel    
+  }
+  
+  /**
    * Returns a string representation of this object.
    * 
    * @return a string representation of this object

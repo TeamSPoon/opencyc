@@ -98,6 +98,8 @@ public class UnitTest extends TestCase {
     Assert.assertTrue(behaviorGenertation.getJobAssigner() instanceof JobAssigner);
     JobAssigner jobAssigner = behaviorGenertation.getJobAssigner();
     Assert.assertEquals(node, jobAssigner.getNode());
+    Assert.assertNotNull(jobAssigner.getChannel());
+    Assert.assertTrue(jobAssigner.getChannel() instanceof Puttable);
 
     Assert.assertNotNull(behaviorGenertation.getPlanSelector());
     Assert.assertTrue(behaviorGenertation.getPlanSelector() instanceof PlanSelector);
@@ -143,6 +145,8 @@ public class UnitTest extends TestCase {
     Assert.assertTrue(node.getSensoryPerception() instanceof SensoryPerception);
     SensoryPerception sensoryPerception = node.getSensoryPerception();
     Assert.assertEquals(node, sensoryPerception.getNode());
+    Assert.assertNotNull(sensoryPerception.getChannel());
+    Assert.assertTrue(sensoryPerception.getChannel() instanceof Puttable);
         
     Assert.assertNotNull(sensoryPerception.getEstimator());
     Assert.assertTrue(sensoryPerception.getEstimator() instanceof Estimator);

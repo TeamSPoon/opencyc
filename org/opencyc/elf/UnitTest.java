@@ -12,6 +12,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.JobAssignmentLibrary;
 import org.opencyc.elf.bg.planner.PlanSelector;
+import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.planner.ResourcePool;
 import org.opencyc.elf.bg.planner.ScheduleLibrary;
 
@@ -246,8 +247,19 @@ public class UnitTest extends TestCase {
    */
   public void testBehaviorEngine () {
     System.out.println("\n*** testBehaviorEngine ***");
-    
     logger.info("Testing behavior engine");
+    BehaviorEngine behaviorEngine = new BehaviorEngine();
+    behaviorEngine.initialize();
+    Assert.assertNotNull(ResourcePool.getInstance());
+    Assert.assertNotNull(ResourcePool.getInstance().getResource(Resource.CONSOLE));
+    Assert.assertEquals("[Resource: console]", ResourcePool.getInstance().getResource(Resource.CONSOLE).toString());
+    Assert.assertNotNull(JobAssignmentLibrary.getInstance());
+    Assert.assertNotNull(JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER));
+    Assert.assertEquals("[JobAssignment for [[Resource: console]] action: converse with user]", 
+                        JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER).toString());
+    Assert.assertNotNull(ScheduleLibrary.getInstance());
+    Assert.assertEquals("[[Schedule [[Action: console prompted input( prompt: null)]]]]", 
+                        ScheduleLibrary.getInstance().getSchedules(Action.CONVERSE_WITH_USER).toString());
     try {
       Thread.sleep(2000);
     }

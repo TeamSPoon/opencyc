@@ -1,9 +1,13 @@
-package org.opencyc.elf.goal;
+package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
+
+import org.opencyc.elf.goal.Goal;
+import org.opencyc.elf.goal.Importance;
+import org.opencyc.elf.goal.PredicateExpression;
 
 //// External Imports
 import java.util.ArrayList;

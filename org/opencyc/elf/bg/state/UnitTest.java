@@ -65,7 +65,8 @@ public class UnitTest extends TestCase {
     StateVariable.initialize();
     
     Situation situation1 = new Situation();
-    StateVariable stateVariable1 = new StateVariable("stateVariable1", 
+    StateVariable stateVariable1 = new StateVariable(String.class,
+                                                     "stateVariable1", 
                                                      "test state variable stateVariable1");
     Assert.assertNull(situation1.getState().getStateValue(stateVariable1));
     situation1.getState().setStateValue(stateVariable1, "abc");
@@ -74,7 +75,8 @@ public class UnitTest extends TestCase {
     Situation situation2 = new Situation(situation1);
     Assert.assertEquals(situation1, situation2);
 
-    StateVariable stateVariable2 = new StateVariable("stateVariable2", 
+    StateVariable stateVariable2 = new StateVariable(String.class,
+                                                     "stateVariable2", 
                                                      "test state variable stateVariable2");
     situation2.getState().setStateValue(stateVariable2, "def");
     Assert.assertTrue(!situation1.equals(situation2));

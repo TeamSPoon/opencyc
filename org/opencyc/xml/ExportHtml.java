@@ -509,7 +509,7 @@ public class ExportHtml {
                 else if (commentConstant == null &&
                          word.endsWith("s")) {
                     commentConstant =
-                        CycAccess.current().getConstantByName(word.substring(0, word.length() - 2));
+                        CycAccess.current().getConstantByName(word.substring(0, word.length() - 1));
                     if (commentConstant != null &&
                         selectedCycForts.contains(commentConstant)) {
                         stringBuffer.append(" ");
@@ -628,7 +628,7 @@ public class ExportHtml {
             return null;
         }
         if (cycAccess.isa(isa, cycAccess.getKnownConstantByName("CycSecureConstant"))) {
-            if (verbosity > 2)
+            if (verbosity > 4)
                 Log.current.println("  ignoring isa for " + isa);
             return null;
         }

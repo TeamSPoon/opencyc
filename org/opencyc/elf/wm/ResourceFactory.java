@@ -7,7 +7,7 @@ import org.opencyc.elf.bg.planner.Resource;
 import java.util.HashMap;
 
 /**
- * <P>ResourceFactory is the factory which creates instances of Resource.  There is
+ * <P>ResourceFactory populates the resource pool.  There is
  * a singleton instance.
  *
  * @version $Id$
@@ -52,13 +52,15 @@ public class ResourceFactory {
   }
   
   /**
-   * Makes the resource instances.
+   * Populates the resource pool.
    */
-  public static void makeResources () {
+  public static void populateResourcePool () {
     ResourcePool resourcePool = ResourcePool.getInstance();
     Resource resource = new Resource();
     resource.setResourceName(Resource.CONSOLE);
     resourcePool.setResource(Resource.CONSOLE, resource);
+    
+    //TODO
   }
   
   //// Protected Area

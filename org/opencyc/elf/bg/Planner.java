@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg;
 
 import org.opencyc.elf.*;
+import org.opencyc.elf.goal.*;
 import org.opencyc.uml.core.*;
 
 /**
@@ -31,6 +32,11 @@ import org.opencyc.uml.core.*;
 public abstract class Planner extends NodeComponent {
 
     /**
+     * the commanded goal for generated behavior to achieve
+     */
+    protected Goal commandedGoal;
+
+    /**
      * the behavior generation instance owning this planner
      */
     protected BehaviorGeneration behaviorGeneration;
@@ -41,14 +47,32 @@ public abstract class Planner extends NodeComponent {
     protected Executor executor;
 
     /**
-     * the plan to execute
+     * the generated plan to execute
      */
-    protected Procedure procedure;
+    protected Procedure procedureToExecute;
 
     /**
      * Constructs a new Planner object.
      */
     public Planner() {
+    }
+
+    /**
+     * Gets the goal for generated behavior to achieve
+     *
+     * @return the goal for generated behavior to achieve
+     */
+    public Goal getCommandedGoal () {
+        return commandedGoal;
+    }
+
+    /**
+     * Sets the goal for generated behavior to achieve
+     *
+     * @param commandedGoal the goal for generated behavior to achieve
+     */
+    public void setCommandedGoal (Goal commandedGoal) {
+        this.commandedGoal = commandedGoal;
     }
 
     /**
@@ -88,20 +112,20 @@ public abstract class Planner extends NodeComponent {
     }
 
     /**
-     * Gets the plan to execute
+     * Gets the generated plan to execute
      *
-     * @return the plan to execute
+     * @return the generated plan to execute
      */
     public Procedure getProcedure () {
-        return procedure;
+        return procedureToExecute;
     }
 
     /**
-     * Sets the plan to execute
+     * Sets the generated plan to execute
      *
-     * @param procedure the plan to execute
+     * @param procedureToExecute the generated plan to execute
      */
-    public void setProcedure (Procedure procedure) {
-        this.procedure = procedure;
+    public void setProcedure (Procedure procedureToExecute) {
+        this.procedureToExecute = procedureToExecute;
     }
 }

@@ -6,7 +6,6 @@ import org.opencyc.elf.sp.*;
 import org.opencyc.elf.vj.*;
 import org.opencyc.elf.wm.*;
 
-
 /**
  * Provides the Node container for the Elementary Loop Functioning (ELF).<br>
  *
@@ -32,7 +31,7 @@ import org.opencyc.elf.wm.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Node extends ELFObject {
+public abstract class Node extends ELFObject {
 
     /**
      * the dictionary of nodes by name

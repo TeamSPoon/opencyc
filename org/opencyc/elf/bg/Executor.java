@@ -33,7 +33,7 @@ public class Executor extends NodeComponent {
     /**
      * the procedure to execute
      */
-    protected Procedure procedure;
+    protected Procedure procedureToExecute;
 
     /**
      * the behavior generation instance which owns this executor
@@ -56,8 +56,8 @@ public class Executor extends NodeComponent {
      *
      * @return the procedure to execute
      */
-    public Procedure getProcedure () {
-        return procedure;
+    public Procedure getProcedureToExecute () {
+        return procedureToExecute;
     }
 
     /**
@@ -65,8 +65,8 @@ public class Executor extends NodeComponent {
      *
      * @param procedure the procedure to execute
      */
-    public void setProcedure (Procedure procedure) {
-        this.procedure = procedure;
+    public void setProcedureToExecute (Procedure procedureToExecute) {
+        this.procedureToExecute = procedureToExecute;
     }
 
     /**

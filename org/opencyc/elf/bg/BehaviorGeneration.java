@@ -82,6 +82,7 @@ public class BehaviorGeneration extends NodeComponent {
     public void setCommandedGoal (Goal commandedGoal) {
         this.commandedGoal = commandedGoal;
     }
+
     /**
      * Gets the parent node's BehaviorGeneration object
      *

@@ -1,6 +1,7 @@
 package org.opencyc.elf.experience;
 
 import java.util.*;
+import java.sql.Timestamp;
 import org.opencyc.elf.*;
 import org.opencyc.elf.goal.*;
 import org.opencyc.uml.statemachine.*;
@@ -34,6 +35,11 @@ import org.opencyc.cycobject.*;
 public class Experience extends ELFObject {
 
     /**
+     * when the experience occurred
+     */
+    protected Timestamp timestamp;
+
+    /**
      * the intial state of the experience
      */
     protected State initialState;
@@ -62,6 +68,24 @@ public class Experience extends ELFObject {
      * Constructs a new experience object.
      */
     public Experience() {
+    }
+
+    /**
+     * Gets when the experience occurred
+     *
+     * @return when the experience occurred
+     */
+    public Timestamp getTimestamp () {
+        return timestamp;
+    }
+
+    /**
+     * Sets when the experience occurred
+     *
+     * @param xxx when the experience occurred
+     */
+    public void setTimestamp (Timestamp timestamp) {
+        this.timestamp = timestamp;
     }
 
 

@@ -286,7 +286,11 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       getLogger().info("task name " + taskFrameName);
       TaskFrame taskFrame = TaskFrameLibrary.getInstance().getTaskFrame(taskFrameName);
       
+      // how to initialize the state?
+      
       // evaluate the schedule predicates to find the first true one
+      
+      
       
       // find agents that can collectively execute the task
       

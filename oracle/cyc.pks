@@ -1,6 +1,9 @@
 CREATE OR REPLACE TYPE cyclist_type
 AS TABLE OF VARCHAR2(4000);
 /
+CREATE OR REPLACE TYPE cyclist_nested_type
+AS TABLE OF cyclist_type;
+/
 ----------------------------------------------------------------
 -- Create the package specification.
 -- Please see the package body and the java stored procedure source for more info.
@@ -80,6 +83,9 @@ FUNCTION askWithVariable(
     variable_in IN VARCHAR2,
     mt_in IN VARCHAR2,
     backchain_in IN NUMBER )
+RETURN cyclist_type;
+
+FUNCTION askWithVariables( query_in IN VARCHAR2, variables_in IN VARCHAR2, mt_in IN VARCHAR2 )
 RETURN cyclist_type;
 
 FUNCTION getBackChainRules( predicate_in IN VARCHAR2 )

@@ -25,6 +25,7 @@ import org.opencyc.util.*;
 import org.opencyc.api.*;
 import oracle.jdbc.*;
 import oracle.sql.*;
+import ViolinStrings.*;
 /**
  * 
  * CycJsprocs.java
@@ -301,16 +302,53 @@ public class CycJsprocs {
      */
     private static oracle.sql.ARRAY cycListToArray ( CycList cyclist )
         throws SQLException {
-// Make internal jdbc connection to db.
+        // Make internal jdbc connection to db.
         OracleDriver ora = new OracleDriver(); 
         Connection conn = ora.defaultConnection();  // internal connection to db.
-// array's, see http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90211/oraarr.htm#1000888
-// obtain a type descriptor
+        // array's, see http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90211/oraarr.htm#1000888
+        // obtain a type descriptor
         ArrayDescriptor desc = ArrayDescriptor.createDescriptor("CYCLIST_TYPE", conn); 
-// create the ARRAY by calling the constructor 
+        // create the ARRAY by calling the constructor 
         oracle.sql.ARRAY arrayanswer = new oracle.sql.ARRAY(desc, conn, cyclist.toArray()); 
         return arrayanswer;
     }
+
+/*****************
+  WORK IN PROGRESS AM TRYING TO MAKE SOMETHING TO RETURN A NESTED ARRAY TO ORACLE ARRAY TYPE
+*********** THIS IS NOT FINISHED *********/
+    /**
+     * Turns a cyclist into an oracle.sql.ARRAY
+     * Must be static because it's called from other static methods.
+     */
+    private static oracle.sql.ARRAY cycListToNestedArray (CycList cyclist_in)
+        throws SQLException {
+        // Make internal jdbc connection to db.
+        OracleDriver ora = new OracleDriver(); 
+        Connection conn = ora.defaultConnection();  // internal connection to db.
+        // array's, see http://download-west.oracle.com/otndoc/oracle9i//901_doc/java.901/a90211/oraarr.htm#1000888
+        // obtain a type descriptor
+        ArrayDescriptor desc = ArrayDescriptor.createDescriptor ("CYCLIST_NESTED_TYPE", conn); 
+        // create a new array from the cyclist.
+        String elems [][] = new String [cyclist_in.size()][2];
+        // Loop through the cyclist.
+        for (int i=0; i<cyclist_in.size(); i++)
+        {
+            CycList sublist = (CycList)cyclist_in.get(i);
+/*****************
+  WORK IN PROGRESS AM TRYING TO MAKE SOMETHING TO RETURN A NESTED ARRAY TO ORACLE ARRAY TYPE
+*********** THIS IS NOT FINISHED *********/
+/// THIS MUST BECOME SOMETHING LIKE A ROW COPY              Array.set( elems[i], sublist.toArray() );
+            String[] subarray = (String[])sublist.toArray();
+            for (int j=0; j<2; j++)
+            {
+                elems[i][j] = subarray[j];
+            }
+        }
+        // create the ARRAY by calling the constructor 
+        oracle.sql.ARRAY arrayanswer = new oracle.sql.ARRAY(desc, conn, elems); 
+        return arrayanswer;
+    }
+
 
     /**
      * Wrapper of Cyc Java API askWithVariable.
@@ -362,6 +400,39 @@ public class CycJsprocs {
             throw new RuntimeException( e.getMessage() );
         }
     }
+
+    /**
+     * Wrapper of Cyc Java API askWithVariables.
+     * 
+     * Asks a question with one variable.
+     *
+     * @param query is e.g. (#$isa ?X #$Employee)
+     * @param vars is an array with all variables of which bindings will be returned
+     * @param mt is e.g. InferencePSC
+     * @return oracle array type with bindings.
+     */
+    public static oracle.sql.ARRAY askWithVariables (String query, String vars, String mt)
+        throws RuntimeException, CycApiException, IOException, SQLException, UnknownHostException {
+        try {
+            String[] varsArray = Strings.split(vars);       // van deze 5 regels een nieuwe functie maken
+            ArrayList cVars = new ArrayList ();                     //
+            for (int i=0; i<varsArray.length; i++)                        //
+            {
+                  cVars.add (CycObjectFactory.makeCycVariable(varsArray[i]));
+            }
+            CycList cquery = cycAccess.makeCycList (query);
+//            CycVariable cvar = new CycVariable (var);
+            CycFort cmt = cycAccess.getKnownConstantByName (mt);
+            CycList answer = cycAccess.askWithVariables (cquery, cVars, cmt);
+
+//            return cycListToNestedArray (answer);
+            return cycListToArray (answer);
+        }
+            catch (Exception e) {
+            throw new RuntimeException( e.getMessage() );
+        }
+    }
+
 
     /**
      *

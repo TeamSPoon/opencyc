@@ -195,6 +195,7 @@ AS LANGUAGE JAVA
 	NAME 'CycJsprocs.askWithVariable( java.lang.String, java.lang.String, java.lang.String )
 		return oracle.sql.ARRAY';
 
+
 /***************************************************************************
  *
  * Extended askWithVariable
@@ -210,6 +211,14 @@ RETURN cyclist_type
 AS LANGUAGE JAVA
 	NAME 'CycJsprocs.askWithVariable( java.lang.String, java.lang.String, java.lang.String, int )
 		return oracle.sql.ARRAY';
+
+FUNCTION askWithVariables( query_in IN VARCHAR2, variables_in IN VARCHAR2, mt_in IN VARCHAR2 )
+RETURN cyclist_type
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.askWithVariables( java.lang.String, java.lang.String, java.lang.String )
+		return oracle.sql.ARRAY';
+
+
 
 /***************************************************************************
  *

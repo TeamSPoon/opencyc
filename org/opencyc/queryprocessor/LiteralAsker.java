@@ -51,7 +51,7 @@ public class LiteralAsker {
      * The default value of the estimated number of instances beyond which the binding values are not
      * all fetched from the KB.
      */
-    public static final int DEFAULT_FORMULA_INSTANCES_THRESHOLD = 50;
+    public static final int DEFAULT_FORMULA_INSTANCES_THRESHOLD = 200;
 
     /**
      * The default value of the estimated number of instances beyond which the binding values are not
@@ -78,7 +78,8 @@ public class LiteralAsker {
         for (int i = 0; i < queryLiterals.size(); i++) {
             QueryLiteral queryLiteral = (QueryLiteral) queryLiterals.get(i);
             BindingSet bindingSet = new BindingSet(queryLiteral, mt);
-            if (bindingSet.getNbrInstances() < formulaInstancesThreshold) {
+            if (bindingSet.getNbrInstances() < formulaInstancesThreshold ||
+                neverPostponeAskingForPredicate(queryLiteral.getPredicate())) {
                 if (verbosity > 3)
                     System.out.println("Asking " + queryLiteral.cyclify());
                 bindingSet.setBindingValues(CycAccess.current().askWithVariables(bindingSet.getQueryLiteral().getFormula(),
@@ -141,26 +142,33 @@ public class LiteralAsker {
                 partiallyInstantiatedFormula.subst(bindingValues.get(i), variables.get(i));
         }
         QueryLiteral partiallyInstantiatedQueryLiteral = new QueryLiteral(partiallyInstantiatedFormula);
-        if (verbosity > 3)
+        if (verbosity > 5)
             System.out.println("  partially instantiated " + partiallyInstantiatedQueryLiteral.cyclify());
         ArrayList bindingLists =
             CycAccess.current().askWithVariables(partiallyInstantiatedFormula,
                                                  partiallyInstantiatedQueryLiteral.getVariables(),
                                                  mt);
-        if (verbosity > 3)
-            System.out.println("\n  --> " + bindingLists);
+        if (verbosity > 5)
+            System.out.println("  --> " + bindingLists);
         CycList result = new CycList();
+        boolean foundValue;
+        Object bindingValue;
         for (int i = 0; i < bindingLists.size(); i++) {
             CycList partiallyInstantiatedBindingValues = (CycList) bindingLists.get(i);
             CycList joinedBindingValueList = new CycList();
             for (int j = 0; j < joinedQueryLiteral.getVariables().size(); j++) {
                 CycVariable queryLiteralVariable = (CycVariable) joinedQueryLiteral.getVariables().get(j);
-                boolean foundValue = false;
+                if (verbosity > 5)
+                    System.out.print("    binding for " + queryLiteralVariable);
+                foundValue = false;
                 for (int k = 0; k < variables.size(); k++) {
                     if (queryLiteralVariable.equals(variables.get(k))) {
                         // found in the input variables
                         foundValue = true;
-                        joinedBindingValueList.add(bindingValues.get(k));
+                        bindingValue = bindingValues.get(k);
+                        joinedBindingValueList.add(bindingValue);
+                        if (verbosity > 5)
+                            System.out.println(" [input] --> " + bindingValue);
                         break;
                     }
                 }
@@ -169,7 +177,10 @@ public class LiteralAsker {
                         if (queryLiteralVariable.equals(partiallyInstantiatedQueryLiteral.getVariables().get(k))) {
                             // found in the asked variables
                             foundValue = true;
-                            joinedBindingValueList.add(partiallyInstantiatedBindingValues.get(k));
+                            bindingValue = partiallyInstantiatedBindingValues.get(k);
+                            joinedBindingValueList.add(bindingValue);
+                            if (verbosity > 5)
+                                System.out.println(" [asked] --> " + bindingValue);
                             break;
                         }
                     }
@@ -181,7 +192,22 @@ public class LiteralAsker {
                 System.out.println("  joined binding list " + joinedBindingValueList);
             result.add(joinedBindingValueList);
         }
-         return bindingLists;
+         return result;
+    }
+
+    /**
+     * Returns <tt>true</tt> iff the predicate in the query literal indicates that the ask should
+     * never be postponed.
+     *
+     * @param predicate the predicate in the query literal
+     * @return <tt>true</tt> iff the predicate in the query literal indicates that the ask should
+     * never be postponed
+     */
+    public boolean neverPostponeAskingForPredicate(CycConstant predicate) throws IOException {
+        if (predicate.equals(CycAccess.current().getKnownConstantByName("#$holdsIn")))
+            return true;
+        else
+            return false;
     }
 
     /**

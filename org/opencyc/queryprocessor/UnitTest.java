@@ -62,7 +62,20 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testQueryParser"));
             //testSuite.addTest(new UnitTest("testLiteralAsker"));
             //testSuite.addTest(new UnitTest("testHashJoiner"));
-            testSuite.addTest(new UnitTest("testQueryProcessor1"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor1"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor3"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor4"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor5"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor6"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor7"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor8"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor9"));
+            testSuite.addTest(new UnitTest("testBackchainer1"));
+            //testSuite.addTest(new UnitTest("testBackchainer2"));
+            //testSuite.addTest(new UnitTest("testBackchainer3"));
+            //testSuite.addTest(new UnitTest("testBackchainer4"));
+            //testSuite.addTest(new UnitTest("testBackchainer5"));
+            //testSuite.addTest(new UnitTest("testBackchainer6"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -207,7 +220,7 @@ public class UnitTest extends TestCase {
         queryLiterals.add(queryLiteral3);
         queryLiterals.add(queryLiteral4);
         LiteralAsker literalAsker = new LiteralAsker();
-        literalAsker.setVerbosity(5);
+        literalAsker.setVerbosity(3);
         ArrayList bindingSets = null;
         try {
             bindingSets = literalAsker.ask(queryLiterals, mt);
@@ -218,7 +231,8 @@ public class UnitTest extends TestCase {
         }
 
         HashJoiner hashJoiner = new HashJoiner();
-        hashJoiner.setVerbosity(4);
+        hashJoiner.literalAsker = literalAsker;
+        hashJoiner.setVerbosity(3);
         BindingSet joinedBindingSets = null;
         try {
             joinedBindingSets = hashJoiner.join(bindingSets);
@@ -253,9 +267,8 @@ public class UnitTest extends TestCase {
             "  (#$isa ?cathedral #$Cathedral) " +
             "  (#$countryOfCity ?country ?city) " +
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
-        System.out.println(europeanCathedralsString);
         QueryProcessor europeanCathedralsQuery = new QueryProcessor();
-        europeanCathedralsQuery.setVerbosity(9);
+        europeanCathedralsQuery.setVerbosity(3);
         // Request two solutions.
         // europeanCathedralsQuery.nbrSolutionsRequested = new Integer(2);
         // Request all solutions.
@@ -274,4 +287,421 @@ public class UnitTest extends TestCase {
 
         System.out.println("** testQueryProcessor1 OK **");
     }
+
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor3() {
+        System.out.println("** testQueryProcessor3 **");
+
+        // European Cathedrals with arg type discovery
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        QueryProcessor whatIsInAustinProblem2 = new QueryProcessor();
+        whatIsInAustinProblem2.setVerbosity(3);
+        // Request one solution.
+        //whatIsInAustinProblem2.nbrSolutionsRequested = new Integer(1);
+        // Request all solutions.
+        whatIsInAustinProblem2.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem2.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsInAustinProblem2.ask(whatIsInAustinString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor3 OK **");
+    }
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor4() {
+        System.out.println("** testQueryProcessor4 **");
+
+        // One variable query.
+        String oneVariableQueryString =
+            "(#$and (#$isa ?WHAT #$CarvedArtwork) (#$provenanceOfArtObject #$CityOfAustinTX ?WHAT))";
+        System.out.println(oneVariableQueryString);
+        QueryProcessor oneVariableQueryProblem = new QueryProcessor();
+        oneVariableQueryProblem.setVerbosity(3);
+        // Request all solutions.
+        oneVariableQueryProblem.nbrSolutionsRequested = null;
+        try {
+            oneVariableQueryProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = oneVariableQueryProblem.ask(oneVariableQueryString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor4 OK **");
+    }
+
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor5() {
+        System.out.println("** testQueryProcessor5 **");
+
+        // One variable query.
+        String oneVariableQueryString =
+            "(#$and (#$groupMembers ?C ?C) (#$objectFoundInLocation ?C #$CityOfAustinTX))";
+        System.out.println(oneVariableQueryString);
+        QueryProcessor oneVariableQueryProblem = new QueryProcessor();
+        oneVariableQueryProblem.setVerbosity(3);
+        // Request all solutions.
+        oneVariableQueryProblem.nbrSolutionsRequested = null;
+        try {
+            oneVariableQueryProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = oneVariableQueryProblem.ask(oneVariableQueryString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor5 OK **");
+    }
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor6() {
+        System.out.println("** testQueryProcessor6 **");
+
+        // query with nart.
+        String nartQueryString =
+            "(#$isa ?STORAGE (#$StoreFn #$CarvedArtwork))";
+        System.out.println(nartQueryString);
+        QueryProcessor nartProblem = new QueryProcessor();
+        nartProblem.setVerbosity(3);
+        // Request all solutions.
+        nartProblem.nbrSolutionsRequested = null;
+        try {
+            nartProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = nartProblem.ask(nartQueryString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor6 OK **");
+    }
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor7() {
+        System.out.println("** testQueryProcessor7 **");
+
+        // NFn.
+        String nFnString =
+            "(#$and (#$physicalParts #$CityOfAustinTX (#$NFn ?COL ?N ?INDEX)) " +
+            "       (#$groupMembers (#$NFn ?COL ?N ?INDEX) ?MEMBER))";
+        System.out.println(nFnString);
+        QueryProcessor nFnProblem = new QueryProcessor();
+        nFnProblem.setVerbosity(3);
+        // Request all solutions.
+        nFnProblem.nbrSolutionsRequested = null;
+        try {
+            nFnProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = nFnProblem.ask(nFnString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor7 OK **");
+    }
+
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor8() {
+        System.out.println("** testQueryProcessor8 **");
+
+        // domain population rules are mostly high cardinality isa rules.
+        String isaDomainString =
+            "(#$and " +
+            "  (#$isa (#$GovernmentFn ?STATE) #$Organization) " +
+            "  (#$physicalExtent (#$GovernmentFn ?STATE) ?PLACE) " +
+            "  (#$physicalParts ?PLACE ?CAP) " +
+            "  (#$isa ?CAP #$ConstructionArtifact))";
+        System.out.println(isaDomainString);
+        QueryProcessor isaDomainProblem = new QueryProcessor();
+        isaDomainProblem.setVerbosity(3);
+        // Request all solutions.
+        isaDomainProblem.nbrSolutionsRequested = null;
+        try {
+            isaDomainProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = isaDomainProblem.ask(isaDomainString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor8 OK **");
+    }
+
+//(and (temporallySubsumes ?TIME ?MT-TIME) (mtTime ?MT ?MT-TIME) (holdsIn ?TIME (on-Physical ?WHAT CityOfAustinTX)))
+    /**
+     * Tests the <tt>QueryProcessor</tt> class.
+     */
+    public void testQueryProcessor9() {
+        System.out.println("** testQueryProcessor9 **");
+
+        // domain population rules are all high cardinality isa rules.
+        String problemString =
+            "(#$and " +
+            "  (#$temporallySubsumes ?TIME ?MT-TIME) " +
+            "  (#$mtTime ?MT ?MT-TIME) " +
+            "  (#$holdsIn ?TIME (#$on-Physical ?WHAT #$CityOfAustinTX)))";
+        System.out.println(problemString);
+        QueryProcessor problem = new QueryProcessor();
+        problem.setVerbosity(3);
+        // Request all solutions.
+        problem.nbrSolutionsRequested = null;
+        try {
+            problem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = problem.ask(problemString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testQueryProcessor9 OK **");
+    }
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer1() {
+        System.out.println("** testBackchainer1 **");
+
+        // what is in Austin?
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+        QueryProcessor whatIsInAustinProblem = new QueryProcessor(cycAccess);
+        whatIsInAustinProblem.setVerbosity(9);
+        // Request one solution.
+        //whatIsInAustinProblem.nbrSolutionsRequested = new Integer(1);
+        // Request all solutions.
+        whatIsInAustinProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            whatIsInAustinProblem.query = CycAccess.current().makeCycList(whatIsInAustinString);
+            whatIsInAustinProblem.queryParser.extractQueryLiterals();
+            whatIsInAustinProblem.backchainer.mt = whatIsInAustinProblem.mt;
+            whatIsInAustinProblem.backchainer.setVariables(whatIsInAustinProblem.getVariables());
+            ArrayList backchainRules =
+                whatIsInAustinProblem.backchainer.getBackchainRules(whatIsInAustinProblem.queryLiterals);
+            Assert.assertNotNull(backchainRules);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testBackchainer1 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer2() {
+        System.out.println("** testBackchainer2 **");
+        // what is in Austin?
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        QueryProcessor whatIsInAustinProblem = new QueryProcessor();
+        whatIsInAustinProblem.setVerbosity(3);
+        whatIsInAustinProblem.setMaxBackchainDepth(1);
+        // Request all solutions.
+        whatIsInAustinProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsInAustinProblem.ask(whatIsInAustinString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer2 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer3() {
+        System.out.println("** testBackchainer3 **");
+        // what is in Austin? to depth 2
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        QueryProcessor whatIsInAustinProblem = new QueryProcessor();
+        //whatIsInAustinProblem.setVerbosity(9);
+        whatIsInAustinProblem.setVerbosity(2);
+        whatIsInAustinProblem.setMaxBackchainDepth(2);
+        // Request all solutions.
+        whatIsInAustinProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsInAustinProblem.ask(whatIsInAustinString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer3 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer4() {
+        System.out.println("** testBackchainer4 **");
+        // what is a CarvedArtwork? to depth 1
+        String whatIsACarvedArtworkString =
+            "(#$isa ?WHAT #$CarvedArtwork)";
+        System.out.println(whatIsACarvedArtworkString);
+        QueryProcessor whatIsACarvedArtworkProblem = new QueryProcessor();
+        whatIsACarvedArtworkProblem.setVerbosity(3);
+        whatIsACarvedArtworkProblem.setSbhlBackchain(true);
+        whatIsACarvedArtworkProblem.setMaxBackchainDepth(1);
+        // Request all solutions.
+        whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsACarvedArtworkProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsACarvedArtworkProblem.ask(whatIsACarvedArtworkString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer4 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer5() {
+        System.out.println("** testBackchainer5 **");
+        String whatIsACarvedArtworkString =
+            "(#$holdsIn ?SIT (#$pathState #$CityOfAustinTX #$PathBlocked))";
+        System.out.println(whatIsACarvedArtworkString);
+        QueryProcessor whatIsACarvedArtworkProblem = new QueryProcessor();
+        whatIsACarvedArtworkProblem.setVerbosity(3);
+        whatIsACarvedArtworkProblem.setSbhlBackchain(true);
+        whatIsACarvedArtworkProblem.setMaxBackchainDepth(1);
+        // Request all solutions.
+        whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsACarvedArtworkProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsACarvedArtworkProblem.ask(whatIsACarvedArtworkString);
+            for (int i = 0; i < solutions.size(); i++)
+                System.out.println(solutions.get(i));
+            //Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("** testBackchainer5 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer6() {
+        System.out.println("** testBackchainer6 **");
+
+        // austinIsaHarbor.
+        String austinIsaHarborString =
+            "(#$and (#$isa ?WHAT #$Ship) " +
+            "       (#$objectFoundInLocation ?WHAT ?L) " +
+            "       (#$isa ?L #$PortCity) " +
+            "       (#$isa #$CityOfAustinTX #$Harbor) " +
+            "       (#$geographicalSubRegions ?L #$CityOfAustinTX))";
+        System.out.println(austinIsaHarborString);
+        QueryProcessor austinIsaHarborProblem = new QueryProcessor();
+        austinIsaHarborProblem.setVerbosity(3);
+        // Request all solutions.
+        austinIsaHarborProblem.nbrSolutionsRequested = null;
+        try {
+            austinIsaHarborProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = austinIsaHarborProblem.ask(austinIsaHarborString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testBackchainer6 OK **");
+    }
+
 }

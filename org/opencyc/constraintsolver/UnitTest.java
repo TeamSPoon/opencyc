@@ -63,23 +63,7 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testRuleEvaluator"));
             //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
             //testSuite.addTest(new UnitTest("testProblemParser"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem1"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem2"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem3"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem4"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem5"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem6"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem7"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem8"));
-            testSuite.addTest(new UnitTest("testConstraintProblem9"));
-            //testSuite.addTest(new UnitTest("testBackchainer1"));
-            //testSuite.addTest(new UnitTest("testBackchainer2"));
-
-            //testSuite.addTest(new UnitTest("testBackchainer3"));
-
-            //testSuite.addTest(new UnitTest("testBackchainer4"));
-            //testSuite.addTest(new UnitTest("testBackchainer5"));
-            //testSuite.addTest(new UnitTest("testBackchainer6"));
+            testSuite.addTest(new UnitTest("testConstraintProblem1"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -103,21 +87,66 @@ public class UnitTest extends TestCase {
         ConstraintProblem constraintProblem = new ConstraintProblem();
         String problemString1 =
             "(#$and " +
-            "  (#$isa ?country #$WesternEuropeanCountry) " +
-            "  (#$isa ?cathedral #$Cathedral) " +
-            "  (#$countryOfCity ?country ?city) " +
-            "  (#$objectFoundInLocation ?cathedral ?city)) ";
+            "  (#$or " +
+            "    (#$numericallyEqual ?norwegian (#$PlusFn ?blue 1)) " +
+            "    (#$numericallyEqual ?blue (#$PlusFn ?norwegian 1))) " +
+            "  (#$numericallyEqual ?japanese ?volkswagen) " +
+            "  (#$numericallyEqual ?mercedes-benz ?orange-juice) " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?ford (#$PlusFn ?horse 1)) " +
+            "    (#$numericallyEqual ?horse (#$PlusFn ?ford 1))) " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?chevrolet (#$PlusFn ?fox 1)) " +
+            "    (#$numericallyEqual ?fox (#$PlusFn ?chevrolet 1))) " +
+            "  (#$numericallyEqual ?norwegian 1) " +
+            "  (#$numericallyEqual ?milk 3) " +
+            "  (#$numericallyEqual ?ford ?yellow) " +
+            "  (#$numericallyEqual ?oldsmobile ?snails) " +
+            "  (#$numericallyEqual ?green (#$PlusFn ?ivory 1)) " +
+            "  (#$numericallyEqual ?ukranian ?eggnog) " +
+            "  (#$numericallyEqual ?cocoa ?green) " +
+            "  (#$numericallyEqual ?spaniard ?dog) " +
+            "  (#$numericallyEqual ?english ?red) " +
+            "  (#$different ?ford ?chevrolet ?oldsmobile ?mercedes-benz ?volkswagen) " +
+            "  (#$different ?orange-juice ?cocoa ?eggnog ?milk ?water) " +
+            "  (#$different ?dog ?snails ?horse ?fox ?zebra) " +
+            "  (#$different ?english ?spaniard ?norwegian ?japanese ?ukranian) " +
+            "  (#$different ?blue ?red ?green ?yellow ?ivory) " +
+            "  (#$elementOf ?blue (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?chevrolet (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?cocoa (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?dog (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?eggnog (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?english (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ford (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?fox (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?green (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?horse (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ivory (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?japanese (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?mercedes-benz (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?milk (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?norwegian (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?oldsmobile (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?orange-juice (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?red (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?snails (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?spaniard (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ukranian (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?volkswagen (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?water (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
         ConstraintRule rule1 = null;
         ConstraintRule rule2 = null;
         ConstraintRule rule3 = null;
         ConstraintRule rule4 = null;
-        ConstraintRule rule5 = null;
-        ConstraintRule rule6 = null;
         try {
             CycList problem1 = CycAccess.current().makeCycList(problemString1);
             constraintProblem.problem = problem1;
             constraintProblem.simplifiedRules = ConstraintRule.simplifyConstraintRuleExpression(problem1);
             ProblemParser problemParser = constraintProblem.problemParser;
+            constraintProblem.setVerbosity(9);
             problemParser.extractRulesAndDomains();
         }
         catch (Exception e) {
@@ -126,23 +155,20 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(constraintProblem.constraintRules);
         Assert.assertNotNull(constraintProblem.domainPopulationRules);
         try {
-            rule1 = new ConstraintRule("(#$isa ?country #$WesternEuropeanCountry)");
-            rule2 = new ConstraintRule("(#$isa ?cathedral #$Cathedral)");
-            rule3 = new ConstraintRule("(#$countryOfCity ?country ?city)");
-            rule4 = new ConstraintRule("(#$objectFoundInLocation ?cathedral ?city)");
-            rule5 = new ConstraintRule("(#$isa ?city #$City)");
-            rule6 = new ConstraintRule("(#$isa ?country #$Country)");
+            rule1 = new ConstraintRule("(#$elementOf ?yellow (#$TheSet 1 2 3 4 5))");
+            rule2 = new ConstraintRule("(#$elementOf ?english (#$TheSet 1 2 3 4 5))");
+            rule3 = new ConstraintRule("(#$different ?ford ?chevrolet ?oldsmobile ?mercedes-benz ?volkswagen)");
+            rule4 = new ConstraintRule("(#$numericallyEqual ?english ?red)");
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         System.out.println("domainPopulationRules\n" + constraintProblem.domainPopulationRules);
-        Assert.assertEquals(3, constraintProblem.domainPopulationRules.size());
+        Assert.assertEquals(25, constraintProblem.domainPopulationRules.size());
         Assert.assertTrue(constraintProblem.domainPopulationRules.contains(rule1));
         Assert.assertTrue(constraintProblem.domainPopulationRules.contains(rule2));
-        Assert.assertTrue(constraintProblem.domainPopulationRules.contains(rule5));
         System.out.println("constraintRules\n" + constraintProblem.constraintRules);
-        Assert.assertEquals(2, constraintProblem.constraintRules.size());
+        Assert.assertEquals(19, constraintProblem.constraintRules.size());
         Assert.assertTrue(constraintProblem.constraintRules.contains(rule3));
         Assert.assertTrue(constraintProblem.constraintRules.contains(rule4));
 
@@ -306,8 +332,15 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        zebraProblem.setVerbosity(1);
-        ArrayList solutions = zebraProblem.solve(zebraPuzzleCycList);
+        zebraProblem.setVerbosity(9);
+        ArrayList solutions = null;
+        try {
+            solutions = zebraProblem.solve(zebraPuzzleCycList);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
         Assert.assertNotNull(solutions);
 
         // test extractRulesAndDomains()
@@ -361,481 +394,6 @@ public class UnitTest extends TestCase {
         System.out.println("** testConstraintProblem1 OK **");
     }
 
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem2() {
-        System.out.println("** testConstraintProblem2 **");
 
-        // European Cathedrals with arg type discovery
-        String europeanCathedralsString2 =
-            "(#$and " +
-            "  (#$isa ?country #$WesternEuropeanCountry) " +
-            "  (#$isa ?cathedral #$Cathedral) " +
-            "  (#$countryOfCity ?country ?city) " +
-            "  (#$objectFoundInLocation ?cathedral ?city)) ";
-        System.out.println(europeanCathedralsString2);
-        ConstraintProblem europeanCathedralsProblem2 = new ConstraintProblem();
-        europeanCathedralsProblem2.setVerbosity(1);
-        // Request one solution.
-        europeanCathedralsProblem2.nbrSolutionsRequested = new Integer(1);
-        // Request all solutions.
-        //europeanCathedralsProblem2.nbrSolutionsRequested = null;
-        try {
-            europeanCathedralsProblem2.mt =
-                CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
-            ArrayList solutions = europeanCathedralsProblem2.solve(CycAccess.current().makeCycList(europeanCathedralsString2));
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        // European Cathedrals
-        String europeanCathedralsString =
-            "(#$and " +
-            "  (#$isa ?country #$WesternEuropeanCountry) " +
-            "  (#$isa ?city #$City) " +
-            "  (#$isa ?cathedral #$Cathedral) " +
-            "  (#$countryOfCity ?country ?city) " +
-            "  (#$objectFoundInLocation ?cathedral ?city)) ";
-        System.out.println(europeanCathedralsString);
-        ConstraintProblem europeanCathedralsProblem = new ConstraintProblem();
-        europeanCathedralsProblem.setVerbosity(1);
-        // Request two solutions.
-        // europeanCathedralsProblem.nbrSolutionsRequested = new Integer(2);
-        // Request all solutions.
-        europeanCathedralsProblem.nbrSolutionsRequested = null;
-        try {
-            europeanCathedralsProblem.mt =
-                CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
-        }
-        catch (IOException e) {
-            Assert.fail(e.getMessage());
-        }
-        ArrayList solutions = europeanCathedralsProblem.solve(CycAccess.current().makeCycList(europeanCathedralsString));
-        Assert.assertNotNull(solutions);
-
-
-        System.out.println("** testConstraintProblem2 OK **");
-    }
-
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem3() {
-        System.out.println("** testConstraintProblem3 **");
-
-        // European Cathedrals with arg type discovery
-        String whatIsInAustinString =
-            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
-        System.out.println(whatIsInAustinString);
-        ConstraintProblem whatIsInAustinProblem2 = new ConstraintProblem();
-        whatIsInAustinProblem2.setVerbosity(8);
-        // Request one solution.
-        //whatIsInAustinProblem2.nbrSolutionsRequested = new Integer(1);
-        // Request all solutions.
-        whatIsInAustinProblem2.nbrSolutionsRequested = null;
-        try {
-            whatIsInAustinProblem2.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = whatIsInAustinProblem2.solve(whatIsInAustinString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testConstraintProblem3 OK **");
-    }
-
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem4() {
-        System.out.println("** testConstraintProblem4 **");
-
-        // One variable query.
-        String oneVariableQueryString =
-            "(#$and (#$isa ?WHAT #$CarvedArtwork) (#$provenanceOfArtObject #$CityOfAustinTX ?WHAT))";
-        System.out.println(oneVariableQueryString);
-        ConstraintProblem oneVariableQueryProblem = new ConstraintProblem();
-        oneVariableQueryProblem.setVerbosity(9);
-        // Request all solutions.
-        oneVariableQueryProblem.nbrSolutionsRequested = null;
-        try {
-            oneVariableQueryProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = oneVariableQueryProblem.solve(oneVariableQueryString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testConstraintProblem4 OK **");
-    }
-
-
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem5() {
-        System.out.println("** testConstraintProblem5 **");
-
-        // One variable query.
-        String oneVariableQueryString =
-            "(#$and (#$groupMembers ?C ?C) (#$objectFoundInLocation ?C #$CityOfAustinTX))";
-        System.out.println(oneVariableQueryString);
-        ConstraintProblem oneVariableQueryProblem = new ConstraintProblem();
-        oneVariableQueryProblem.setVerbosity(9);
-        // Request all solutions.
-        oneVariableQueryProblem.nbrSolutionsRequested = null;
-        try {
-            oneVariableQueryProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = oneVariableQueryProblem.solve(oneVariableQueryString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testConstraintProblem5 OK **");
-    }
-
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem6() {
-        System.out.println("** testConstraintProblem6 **");
-
-        // query with nart.
-        String nartQueryString =
-            "(#$isa ?STORAGE (#$StoreFn #$CarvedArtwork))";
-        System.out.println(nartQueryString);
-        ConstraintProblem nartProblem = new ConstraintProblem();
-        nartProblem.setVerbosity(9);
-        // Request all solutions.
-        nartProblem.nbrSolutionsRequested = null;
-        try {
-            nartProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = nartProblem.solve(nartQueryString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testConstraintProblem6 OK **");
-    }
-
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem7() {
-        System.out.println("** testConstraintProblem7 **");
-
-        // NFn.
-        String nFnString =
-            "(#$and (#$physicalParts #$CityOfAustinTX (#$NFn ?COL ?N ?INDEX)) " +
-            "       (#$groupMembers (#$NFn ?COL ?N ?INDEX) ?MEMBER))";
-        System.out.println(nFnString);
-        ConstraintProblem nFnProblem = new ConstraintProblem();
-        nFnProblem.setVerbosity(9);
-        // Request all solutions.
-        nFnProblem.nbrSolutionsRequested = null;
-        try {
-            nFnProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = nFnProblem.solve(nFnString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testConstraintProblem7 OK **");
-    }
-
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem8() {
-        System.out.println("** testConstraintProblem8 **");
-
-        // domain population rules are mostly high cardinality isa rules.
-        String isaDomainString =
-            "(#$and " +
-            "  (#$isa (#$GovernmentFn ?STATE) #$Organization) " +
-            "  (#$physicalExtent (#$GovernmentFn ?STATE) ?PLACE) " +
-            "  (#$physicalParts ?PLACE ?CAP) " +
-            "  (#$isa ?CAP #$ConstructionArtifact))";
-        System.out.println(isaDomainString);
-        ConstraintProblem isaDomainProblem = new ConstraintProblem();
-        isaDomainProblem.setVerbosity(9);
-        // Request all solutions.
-        isaDomainProblem.nbrSolutionsRequested = null;
-        try {
-            isaDomainProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = isaDomainProblem.solve(isaDomainString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testConstraintProblem8 OK **");
-    }
-
-//(and (temporallySubsumes ?TIME ?MT-TIME) (mtTime ?MT ?MT-TIME) (holdsIn ?TIME (on-Physical ?WHAT CityOfAustinTX)))
-    /**
-     * Tests the <tt>ConstraintProblem</tt> class.
-     */
-    public void testConstraintProblem9() {
-        System.out.println("** testConstraintProblem9 **");
-
-        // domain population rules are all high cardinality isa rules.
-        String problemString =
-            "(#$and " +
-            "  (#$temporallySubsumes ?TIME ?MT-TIME) " +
-            "  (#$mtTime ?MT ?MT-TIME) " +
-            "  (#$holdsIn ?TIME (#$on-Physical ?WHAT #$CityOfAustinTX)))";
-        System.out.println(problemString);
-        ConstraintProblem problem = new ConstraintProblem();
-        problem.setVerbosity(9);
-        // Request all solutions.
-        problem.nbrSolutionsRequested = null;
-        try {
-            problem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = problem.solve(problemString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testConstraintProblem9 OK **");
-    }
-
-
-    /**
-     * Tests the <tt>Backchainer</tt> class.
-     */
-    public void testBackchainer1() {
-        System.out.println("** testBackchainer1 **");
-
-        // what is in Austin?
-        String whatIsInAustinString =
-            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
-        System.out.println(whatIsInAustinString);
-        CycAccess cycAccess = null;
-        try {
-            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      CycConnection.DEFAULT_BASE_PORT,
-                                      CycConnection.ASCII_MODE,
-                                      CycAccess.PERSISTENT_CONNECTION);
-        }
-        catch (Exception e) {
-            Assert.fail(e.toString());
-        }
-        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem(cycAccess);
-        whatIsInAustinProblem.setVerbosity(8);
-        // Request one solution.
-        //whatIsInAustinProblem.nbrSolutionsRequested = new Integer(1);
-        // Request all solutions.
-        whatIsInAustinProblem.nbrSolutionsRequested = null;
-        try {
-            whatIsInAustinProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            whatIsInAustinProblem.problem = CycAccess.current().makeCycList(whatIsInAustinString);
-            whatIsInAustinProblem.problemParser.extractRulesAndDomains();
-            ArrayList backchainRules =
-                whatIsInAustinProblem.backchainer.getBackchainRules(whatIsInAustinProblem.domainPopulationRules);
-            Assert.assertNotNull(backchainRules);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testBackchainer1 OK **");
-    }
-
-    /**
-     * Tests the <tt>Backchainer</tt> class.
-     */
-    public void testBackchainer2() {
-        System.out.println("** testBackchainer2 **");
-        // what is in Austin?
-        String whatIsInAustinString =
-            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
-        System.out.println(whatIsInAustinString);
-        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
-        whatIsInAustinProblem.setVerbosity(3);
-        whatIsInAustinProblem.setMaxBackchainDepth(1);
-        // Request all solutions.
-        whatIsInAustinProblem.nbrSolutionsRequested = null;
-        try {
-            whatIsInAustinProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = whatIsInAustinProblem.solve(whatIsInAustinString);
-            for (int i = 0; i < solutions.size(); i++)
-                System.out.println(solutions.get(i));
-            //Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("** testBackchainer2 OK **");
-    }
-
-    /**
-     * Tests the <tt>Backchainer</tt> class.
-     */
-    public void testBackchainer3() {
-        System.out.println("** testBackchainer3 **");
-        // what is in Austin? to depth 2
-        String whatIsInAustinString =
-            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
-        System.out.println(whatIsInAustinString);
-        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
-        //whatIsInAustinProblem.setVerbosity(9);
-        whatIsInAustinProblem.setVerbosity(2);
-        whatIsInAustinProblem.setMaxBackchainDepth(2);
-        // Request all solutions.
-        whatIsInAustinProblem.nbrSolutionsRequested = null;
-        try {
-            whatIsInAustinProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = whatIsInAustinProblem.solve(whatIsInAustinString);
-            for (int i = 0; i < solutions.size(); i++)
-                System.out.println(solutions.get(i));
-            //Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("** testBackchainer3 OK **");
-    }
-
-    /**
-     * Tests the <tt>Backchainer</tt> class.
-     */
-    public void testBackchainer4() {
-        System.out.println("** testBackchainer4 **");
-        // what is a CarvedArtwork? to depth 1
-        String whatIsACarvedArtworkString =
-            "(#$isa ?WHAT #$CarvedArtwork)";
-        System.out.println(whatIsACarvedArtworkString);
-        ConstraintProblem whatIsACarvedArtworkProblem = new ConstraintProblem();
-        whatIsACarvedArtworkProblem.setVerbosity(9);
-        whatIsACarvedArtworkProblem.setSbhlBackchain(true);
-        whatIsACarvedArtworkProblem.setMaxBackchainDepth(1);
-        // Request all solutions.
-        whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
-        try {
-            whatIsACarvedArtworkProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = whatIsACarvedArtworkProblem.solve(whatIsACarvedArtworkString);
-            for (int i = 0; i < solutions.size(); i++)
-                System.out.println(solutions.get(i));
-            //Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("** testBackchainer4 OK **");
-    }
-
-    /**
-     * Tests the <tt>Backchainer</tt> class.
-     */
-    public void testBackchainer5() {
-        System.out.println("** testBackchainer5 **");
-        String whatIsACarvedArtworkString =
-            "(#$holdsIn ?SIT (#$pathState #$CityOfAustinTX #$PathBlocked))";
-        System.out.println(whatIsACarvedArtworkString);
-        ConstraintProblem whatIsACarvedArtworkProblem = new ConstraintProblem();
-        whatIsACarvedArtworkProblem.setVerbosity(9);
-        whatIsACarvedArtworkProblem.setSbhlBackchain(true);
-        whatIsACarvedArtworkProblem.setMaxBackchainDepth(1);
-        // Request all solutions.
-        whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
-        try {
-            whatIsACarvedArtworkProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = whatIsACarvedArtworkProblem.solve(whatIsACarvedArtworkString);
-            for (int i = 0; i < solutions.size(); i++)
-                System.out.println(solutions.get(i));
-            //Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("** testBackchainer5 OK **");
-    }
-
-    /**
-     * Tests the <tt>Backchainer</tt> class.
-     */
-    public void testBackchainer6() {
-        System.out.println("** testBackchainer6 **");
-
-        // austinIsaHarbor.
-        String austinIsaHarborString =
-            "(#$and (#$isa ?WHAT #$Ship) " +
-            "       (#$objectFoundInLocation ?WHAT ?L) " +
-            "       (#$isa ?L #$PortCity) " +
-            "       (#$isa #$CityOfAustinTX #$Harbor) " +
-            "       (#$geographicalSubRegions ?L #$CityOfAustinTX))";
-        System.out.println(austinIsaHarborString);
-        ConstraintProblem austinIsaHarborProblem = new ConstraintProblem();
-        austinIsaHarborProblem.setMaxBackchainDepth(1);
-        austinIsaHarborProblem.setVerbosity(9);
-        // Request all solutions.
-        austinIsaHarborProblem.nbrSolutionsRequested = null;
-        try {
-            austinIsaHarborProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = austinIsaHarborProblem.solve(austinIsaHarborString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testBackchainer6 OK **");
-    }
 
 }

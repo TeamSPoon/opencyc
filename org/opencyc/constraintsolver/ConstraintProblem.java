@@ -68,11 +68,6 @@ public class ConstraintProblem {
     protected ArgumentTypeConstrainer argumentTypeConstrainer = new ArgumentTypeConstrainer(this);
 
     /**
-     * <tt>Backchainer</tt> for this <tt>ConstraintProblem</tt>.
-     */
-    protected Backchainer backchainer = new Backchainer();
-
-    /**
      * <tt>Solution</tt> for this <tt>ConstraintProblem</tt>.
      */
     protected Solution solution;
@@ -208,6 +203,50 @@ public class ConstraintProblem {
      * Solves a constraint problem and return a list of solutions if one or more
      * was found, otherwise returns <tt>null</tt>.
      *
+     * @param solution a partial solution
+     * @param constraintRules a list of constraint rules to further restrict the partial solution.
+     * @return an <tt>ArrayList</tt> of solutions or <tt>null</tt> if no solutions were
+     * found.  Each solution is an <tt>ArrayList</tt> of variable binding <tt>ArrayList</tt>
+     * objects, each binding having the form of an <tt>ArrayList</tt> where the first
+     * element is the <tt>CycVariable</tt> and the second element is the domain value
+     * <tt>Object</tt>.
+     */
+    public ArrayList solveUsingPartialSolution(Solution solution,
+                                               ArrayList constraintRules) throws IOException {
+        CycList problem = new CycList();
+        problem.add(CycAccess.and);
+        ArrayList partialSolutions = solution.getSolutions();
+        ArrayList partialSolution = null;
+        CycList solutionConstraint = new CycList();
+        problem.add(solutionConstraint);
+        solutionConstraint.add(CycAccess.or);
+        CycList andClause;
+        CycList equalsClause;
+        CycConstant equals = CycAccess.current().getKnownConstantByName("equals");
+        for (int i = 0; i < partialSolutions.size(); i++) {
+            partialSolution = (ArrayList) partialSolution.get(i);
+            andClause = new CycList();
+            solutionConstraint.add(andClause);
+            andClause.add(CycAccess.and);
+            for (int j = 0; j < partialSolution.size(); j++) {
+                Binding binding = (Binding) partialSolution.get(j);
+                CycVariable cycVariable = binding.getCycVariable();
+                Object value = binding.getValue();
+                equalsClause = new CycList();
+                andClause.add(equalsClause);
+                equalsClause.add(equals);
+                equalsClause.add(cycVariable);
+                equalsClause.add(value);
+            }
+        }
+        problem.addAll(constraintRules);
+        return solve(problem);
+    }
+
+    /**
+     * Solves a constraint problem and return a list of solutions if one or more
+     * was found, otherwise returns <tt>null</tt>.
+     *
      * @param problem a constraint problem in the form of an OpenCyc query string
      * @return an <tt>ArrayList</tt> of solutions or <tt>null</tt> if no solutions were
      * found.  Each solution is an <tt>ArrayList</tt> of variable binding <tt>ArrayList</tt>
@@ -235,26 +274,14 @@ public class ConstraintProblem {
         this.problem = problem;
         solution = new Solution(nbrSolutionsRequested, verbosity);
         try {
-            if (! problemParser.extractRulesAndDomains()) {
-                long endMilliseconds = System.currentTimeMillis();
-                if (verbosity > 0) {
-                    System.out.println("No solution because an input constraint cannot be satisfied");
-                    System.out.println((endMilliseconds - startMilliseconds) + " milliseconds");
-                }
-                return new ArrayList();
-            }
+            problemParser.extractRulesAndDomains();
             problemParser.gatherVariables();
             if (variables.size() > 0)
                 nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();
             if (verbosity > 0) {
-                if (nbrSolutionsRequested == null) {
-                    if (backchainer.backchainDepth > 0)
-                        System.out.println("Solving for all solutions at backchain depth " +
-                                           backchainer.backchainDepth);
-                    else
-                        System.out.println("Solving for all solutions");
-                }
+                if (nbrSolutionsRequested == null)
+                    System.out.println("Solving for all solutions");
                 else if (nbrSolutionsRequested.intValue() == 1)
                     System.out.println("Solving for the first solution");
                 else
@@ -358,35 +385,12 @@ public class ConstraintProblem {
         valueDomains.setVerbosity(verbosity);
         variableDomainPopulator.setVerbosity(verbosity);
         argumentTypeConstrainer.setVerbosity(verbosity);
-        backchainer.setVerbosity(verbosity);
         nodeConsistencyAchiever.setVerbosity(verbosity);
         ruleEvaluator.setVerbosity(verbosity);
         if (forwardCheckingSearcher != null)
             forwardCheckingSearcher.setVerbosity(verbosity);
         if (solution != null)
             solution.setVerbosity(verbosity);
-    }
-
-    /**
-     * Sets the maximum depth of backchaining from an input constraint rule. A value of zero indicates
-     * no backchaining.
-     *
-     * @param maxBackchainDepth the maximum depth of backchaining, or zero if no backchaing on the input
-     * constraint rules
-     */
-    public void setMaxBackchainDepth(int maxBackchainDepth) {
-        backchainer.maxBackchainDepth = maxBackchainDepth;
-    }
-
-    /**
-     * Sets whether backchaining is performed on rules with the predicate of #$isa or #$genls.  Large
-     * numbers of rules conclude #$isa or #$genls, which are not usually relevant - so the default is
-     * false.
-     *
-     * @param sbhlBackchain whether backchaining is performed on rules with the predicate of #$isa or #$genls
-     */
-    public void setSbhlBackchain(boolean sbhlBackchain) {
-        backchainer.setSbhlBackchain(sbhlBackchain);
     }
 
     /**

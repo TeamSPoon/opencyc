@@ -62,7 +62,7 @@ public class Backchainer {
     /**
      * The list of variables in this problem or query.
      */
-    ArrayList variables;
+    protected ArrayList variables;
 
     /**
      * The microtheory in which inferences are performed.
@@ -133,17 +133,17 @@ public class Backchainer {
     }
 
     /**
-     * Performs backchaining inference to augment the input constraint domain-populating
-     * constraint rule set.
+     * Performs backchaining inference to find sets of implication rules to conclude
+     * literals in the given list.
      *
-     * @param domainPopulationRules collection of the rules which populate variable domains
-     * @return the augmented input constraint domain-populating constraint rule set
+     * @param literals the list of query literals
+     * @return sets of implication rules to conclude literals in the given list
      */
-    public ArrayList getBackchainRules(ArrayList domainPopulationRules) throws IOException {
+    public ArrayList getBackchainRules(ArrayList literals) throws IOException {
         ArrayList result = new ArrayList();
-        for (int i = 0; i < domainPopulationRules.size(); i++) {
-            Literal domainPopulationRule = (Literal) domainPopulationRules.get(i);
-            result.addAll(getBackchainRules(domainPopulationRule));
+        for (int i = 0; i < literals.size(); i++) {
+            Literal literal = (Literal) literals.get(i);
+            result.addAll(getBackchainRules(literal));
         }
         return result;
     }
@@ -220,7 +220,10 @@ public class Backchainer {
                 System.out.println("backchain inference bypassed for evaluatable predicate " + predicate);
             return result;
         }
-        CycList backchainImplicationRules = CycAccess.current().getBackchainImplicationRules(literal, mt);
+        CycList backchainImplicationRules =
+            CycAccess.current().getBackchainImplicationRules(literal.getPredicate(),
+                                                             literal.getFormula(),
+                                                             mt);
         for (int i = 0; i < backchainImplicationRules.size(); i++) {
             CycList cycListRule = (CycList) backchainImplicationRules.get(i);
             if (HornClause.isValidHornExpression(cycListRule))
@@ -230,7 +233,10 @@ public class Backchainer {
                     System.out.println("dropped ill-formed (backward) rule " + cycListRule.cyclify());
             }
         }
-        CycList forwardChainImplicationRules = CycAccess.current().getForwardChainRules(literal, mt);
+        CycList forwardChainImplicationRules =
+            CycAccess.current().getForwardChainRules(literal.getPredicate(),
+                                                     literal.getFormula(),
+                                                     mt);
         for (int i = 0; i < forwardChainImplicationRules.size(); i++) {
             CycList cycListRule = (CycList) forwardChainImplicationRules.get(i);
             if (HornClause.isValidHornExpression(cycListRule))
@@ -310,6 +316,13 @@ public class Backchainer {
      */
     public static int getCacheSize() {
         return implicationRuleSetCache.size();
+    }
+
+    /**
+     * Sets the variables used in the parent problem.
+     */
+    public void setVariables(ArrayList variables) {
+        this.variables = variables;
     }
 
 }

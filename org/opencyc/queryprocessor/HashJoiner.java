@@ -101,6 +101,9 @@ public class HashJoiner {
                 System.out.println("  best binding set for join \n  " + bestBindingSetForJoin);
             joinedBindingSet = join(joinedBindingSet, bestBindingSetForJoin);
         }
+        if (joinedBindingSet.isBindingPostponed())
+            // Ensure that a single literal query gets asked.
+            literalAsker.ask(joinedBindingSet);
         return joinedBindingSet;
     }
 

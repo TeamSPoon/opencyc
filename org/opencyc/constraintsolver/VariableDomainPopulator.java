@@ -268,22 +268,6 @@ public class VariableDomainPopulator {
                                                  constraintProblem.mt);
         ArrayList domainValues = new ArrayList();
         domainValues.addAll(domainValuesCycList);
-
-        if (constraintProblem.backchainer.maxBackchainDepth >
-            constraintProblem.backchainer.backchainDepth) {
-            if (verbosity > 3)
-                System.out.println("maxBackchainDepth " +
-                                   constraintProblem.backchainer.maxBackchainDepth +
-                                   " > " + constraintProblem.backchainer.backchainDepth +
-                                   "\n  for rule\n" + rule);
-            ArrayList backchainDomainValues =
-                constraintProblem.backchainer.backchain(rule,
-                                                        constraintProblem.variables,
-                                                        constraintProblem.mt);
-            if (verbosity > 3)
-                System.out.println("Adding backchain domain values " + backchainDomainValues +
-                                   "\n  for " + cycVariable);
-        }
         constraintProblem.valueDomains.varsDictionary.put(cycVariable, domainValues);
     }
 

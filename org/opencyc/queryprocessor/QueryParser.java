@@ -46,6 +46,11 @@ public class QueryParser {
     protected ArrayList queryLiterals;
 
     /**
+     * Reference to the parent list of constraint rules.
+     */
+    protected ArrayList constraintRules;
+
+    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
@@ -61,6 +66,8 @@ public class QueryParser {
         this.queryProcessor = queryProcessor;
         queryLiterals = new ArrayList();
         queryProcessor.queryLiterals = this.queryLiterals;
+        constraintRules = new ArrayList();
+        queryProcessor.constraintRules = this.constraintRules;
     }
 
     /**
@@ -74,7 +81,8 @@ public class QueryParser {
     }
 
     /**
-     * Simplifies the input problem into its constituent <tt>QueryLiteral</tt> objects,
+     * Simplifies the input problem into its constituent <tt>QueryLiteral</tt> and
+     * <tt>ConstraintRule</tt> objects,
      * If a ground fact discovered among the query literals is proven false, then immediately
      * return the value false.  If a query literal has no bindings, then immediately return the value false
      *
@@ -82,7 +90,18 @@ public class QueryParser {
      * otherwise return <tt>true</tt>
      */
     public boolean extractQueryLiterals() throws IOException {
-        queryLiterals.addAll(QueryLiteral.simplifyQueryLiteralExpression(queryProcessor.query));
+        ArrayList literals = QueryLiteral.simplifyQueryLiteralExpression(queryProcessor.query);
+        for (int i = 0; i < literals.size(); i++) {
+            Literal literal = (Literal) literals.get(i);
+            if (literal.isEvaluatable()) {
+                ConstraintRule constraintRule = new ConstraintRule(literal.getFormula());
+                constraintRules.add(constraintRule);
+            }
+            else {
+                queryLiterals.add((QueryLiteral) literal);
+            }
+
+        }
         // Sort by ascending arity to find likely unsatisfiable facts first.
         Collections.sort(queryLiterals);
         for (int i = 0; i < queryLiterals.size(); i++) {
@@ -92,8 +111,10 @@ public class QueryParser {
                 (! isQueryLiteralSatisfiable(queryLiteral)))
                 return false;
         }
-        if (verbosity > 1)
+        if (verbosity > 1) {
             queryProcessor.displayQueryLiterals();
+            queryProcessor.displayConstraintRules();
+        }
         return true;
     }
 

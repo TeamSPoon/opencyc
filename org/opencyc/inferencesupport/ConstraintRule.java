@@ -160,7 +160,15 @@ public class ConstraintRule extends Literal implements Comparable{
         throw new RuntimeException(expression + "Cannot be evaluated");
     }
 
-
+    /**
+     * Returns <tt>true</tt> if this is a variable domain populating <tt>Rule</tt>.
+     *
+     * @return <tt>boolean</tt> indicating if this is a variable domain populating
+     * <tt>Rule</tt>.
+     */
+    public boolean isVariableDomainPopulatingRule() throws IOException {
+        return isExtensionalVariableDomainPopulatingConstraintRule();
+    }
 
     /**
      * Returns <tt>true</tt> if this is an extensional variable domain populating <tt>ConstraintRule</tt>.

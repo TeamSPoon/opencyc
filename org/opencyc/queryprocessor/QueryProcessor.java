@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 import org.opencyc.inferencesupport.*;
+import org.opencyc.constraintsolver.*;
 
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a query processor.<p>
@@ -78,6 +79,12 @@ public class QueryProcessor {
      * Collection of the query literals.
      */
     protected ArrayList queryLiterals;
+
+    /**
+     * Collection of the constraint rules which are evaluatable query literals that
+     * cannot be asked in the KB until their variables have populated domains.
+     */
+    protected ArrayList constraintRules;
 
     /**
      * <tt>ProblemParser</tt> object for this <tt>QueryProcessor</tt>.
@@ -210,17 +217,36 @@ public class QueryProcessor {
             ArrayList bindingSets = literalAsker.ask(queryLiterals, mt);
             BindingSet joinedBindingSets = hashJoiner.join(bindingSets);
             solution.addBindingSet(joinedBindingSets);
+            if (constraintRules.size() > 0) {
+                ConstraintProblem constraintProblem = new ConstraintProblem(cycAccess);
+                constraintProblem.setVerbosity(verbosity);
+                constraintProblem.nbrSolutionsRequested = nbrSolutionsRequested;
+                ArrayList constraintSolutions =
+                    constraintProblem.solveUsingPartialSolution(solution, constraintRules);
+                solution.setSolutions(constraintSolutions);
+            }
         }
         catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error accessing OpenCyc " + e.getMessage());
             System.exit(1);
         }
-        long endMilliseconds = System.currentTimeMillis();
-        if (verbosity > 0)
-            System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+        long duration = System.currentTimeMillis() - startMilliseconds;
+        if (verbosity > 0) {
+            solution.displaySolutions();
+            System.out.println("  " + duration + " milliseconds");
+        }
 
         return solution.getSolutions();
+    }
+
+    /**
+     * Returns the variables used in the query.
+     *
+     * @return the variables used in the query
+     */
+    public ArrayList getVariables() {
+        return variables;
     }
 
     /**
@@ -264,13 +290,18 @@ public class QueryProcessor {
     }
 
     /**
-     * Displays the literals and their binding set.
+     * Displays the constraint rules.
      */
-    public void displayLiteralsAndBindings() {
-        System.out.println("Query Literals and Bindings");
-        for (int i = 0; i < queryLiterals.size(); i++) {
-            System.out.println(queryLiterals.get(i));
+    public void displayConstraintRules() {
+        System.out.println("Constraint Rules");
+        if (constraintRules.size() > 0) {
+            for (int i = 0; i < constraintRules.size(); i++) {
+                ConstraintRule constraintRule = (ConstraintRule) constraintRules.get(i);
+                System.out.println("  " + constraintRule.cyclify());
+            }
         }
+        else
+            System.out.println("No constraint rules");
     }
 
     /**

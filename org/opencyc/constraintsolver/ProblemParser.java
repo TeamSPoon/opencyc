@@ -107,15 +107,14 @@ public class ProblemParser {
      * @return <tt>false</tt> if no further backchaining is possible and a rule cannot be satisfied,
      * otherwise return <tt>true</tt>
      */
+     /*
     public boolean extractRulesAndDomains() throws IOException {
         simplifiedRules.addAll(ConstraintRule.simplifyConstraintRuleExpression(constraintProblem.problem));
         // Sort by ascending arity to find likely unsatisfiable facts first.
         Collections.sort(simplifiedRules);
         for (int i = 0; i < simplifiedRules.size(); i++) {
             ConstraintRule rule = (ConstraintRule) simplifiedRules.get(i);
-            if ((constraintProblem.backchainer.backchainDepth ==
-                 constraintProblem.backchainer.maxBackchainDepth) &&
-                (! isRuleSatisfiable(rule)))
+            if (! isRuleSatisfiable(rule))
                 return false;
             if (rule.isExtensionalVariableDomainPopulatingConstraintRule())
                 // Extensional rules that explicitly define the value domain will rank best.
@@ -135,6 +134,27 @@ public class ProblemParser {
             constraintProblem.displayConstraintRules();
         return true;
     }
+    */
+
+    /**
+     * Simplifies the input problem into its constituent <tt>Rule</tt> objects,
+     * then divides the input rules into those which populate the variable
+     * domains, and those which subsequently constrain the search for
+     * one or more solutions.
+     */
+    protected void extractRulesAndDomains() throws IOException {
+        constraintProblem.simplifiedRules =
+            ConstraintRule.simplifyConstraintRuleExpression(constraintProblem.problem);
+        for (int i = 0; i < constraintProblem.simplifiedRules.size(); i++) {
+            ConstraintRule rule = (ConstraintRule) constraintProblem.simplifiedRules.get(i);
+            if (rule.isVariableDomainPopulatingRule())
+                constraintProblem.domainPopulationRules.add(rule);
+            else
+                constraintProblem.constraintRules.add(rule);
+        }
+        if (verbosity > 1)
+            constraintProblem.displayConstraintRules();
+    }
 
     /**
      * Returns <tt>true</tt> iff the rule cannot be satisfied.
@@ -142,6 +162,7 @@ public class ProblemParser {
      * @param rule the rule to check in the KB
      * @return <tt>true</tt> iff the rule cannot be satisfied
      */
+    /*
     protected boolean isRuleSatisfiable(ConstraintRule rule) throws IOException {
         if (rule.isGround()) {
             if (verbosity > 3)
@@ -180,6 +201,7 @@ public class ProblemParser {
         }
         return true;
     }
+    */
 
     /**
      * Gathers the unique variables used in this constraint problem.

@@ -160,6 +160,15 @@ public class Solution {
     }
 
     /**
+     * Sets solutions to the given list of solutions.
+     *
+     * @param solutions the list of solutions
+     */
+    public void setSolutions(ArrayList solutions) {
+        this.solutions = solutions;
+    }
+
+    /**
      * Records the current solution state by copying the current solution into a new
      * partial solution without including the given binding, which is already part of
      * a prior solution.

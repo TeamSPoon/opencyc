@@ -5,17 +5,25 @@ import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
 
+import org.opencyc.elf.wm.ActuatorClassFactory;
+import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ExperienceLibrary;
+import org.opencyc.elf.wm.GoalFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
-import org.opencyc.elf.wm.ScheduleLibrary;
+import org.opencyc.elf.wm.KnowledgeBase;
+import org.opencyc.elf.wm.PredicateClassFactory;
+import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
+import org.opencyc.elf.wm.ScheduleLibrary;
+import org.opencyc.elf.wm.TaskFrameLibrary;
 
 //// External Imports
 import java.util.logging.Logger;
 
 /**
  * BehaviorEngine provides the main method for the behavior engine that
- * consists of a hierarchy of Elementary Loop Functioning (ELF) nodes.
+ * consists of a hierarchy of Elementary Loop Functioning (ELF) nodes.  There is a singleton
+ * instance of behavior engine.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -41,7 +49,7 @@ public class BehaviorEngine {
   
   //// Constructors
   
-  /** Creates a new instance of BehaviorEngine */
+  /** Creates a new instance of BehaviorEngine and stores it in the singleton instance. */
   public BehaviorEngine() {
   }
   
@@ -53,10 +61,17 @@ public class BehaviorEngine {
   public void initialize () {
     logger = Logger.getLogger("org.opencyc.elf");
     logger.info("Initializing BehaviorEngine");
+    new ActuatorClassFactory();
+    new PredicateClassFactory();
+    new KnowledgeBase();
+    new ActionFactory();
+    new GoalFactory();
+    new ResourceFactory();
     (new ResourcePool()).getInstance().initialize();
+    StateVariable.initialize();
     (new JobAssignmentLibrary()).getInstance().initialize();
     (new ScheduleLibrary()).getInstance().initialize();
-    StateVariable.initialize();
+    new TaskFrameLibrary();
     new NotNull();
     new ExperienceLibrary();
     
@@ -74,6 +89,11 @@ public class BehaviorEngine {
    */
   protected static Logger logger;
   
+  /**
+   * the behavior engine singleton instance
+   */
+  protected static BehaviorEngine behaviorEngine;
+  
   //// Main
   
   /**
@@ -81,7 +101,7 @@ public class BehaviorEngine {
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {
-    BehaviorEngine behaviorEngine = new BehaviorEngine();
+    new BehaviorEngine();
     behaviorEngine.initialize();
     //TODO
     

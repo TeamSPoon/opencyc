@@ -1,6 +1,6 @@
 package org.opencyc.cycobject;
 
-import org.apache.oro.util.*;
+import org.opencyc.api.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc GUID (Globally Unique
@@ -37,7 +37,7 @@ public class Guid {
     /**
      * Constructs a new <tt>Guid</tt> object.
      */
-    public Guid(String guidString) {
+    public Guid (String guidString) {
         this.guidString = guidString;
     }
 
@@ -64,5 +64,16 @@ public class Guid {
         return guidString;
     }
 
+    /**
+     * Returns the GuidXmlDataBindingImpl object which contains this Guid.  The
+     * xml databinding object can be subsequently serialized into xml.
+     *
+     * @return the GuidXmlDataBindingImpl object which contains this Guid
+     */
+    public GuidXmlDataBindingImpl toGuidXmlDataBindingImpl () {
+        GuidXmlDataBindingImpl guidXmlDataBindingImpl = new GuidXmlDataBindingImpl();
+        guidXmlDataBindingImpl.setGuidString(guidString);
+        return guidXmlDataBindingImpl;
+    }
 
 }

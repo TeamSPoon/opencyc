@@ -121,4 +121,17 @@ public class CycVariable implements Comparable {
         return this.name.compareTo(((CycVariable) object).name);
      }
 
+    /**
+     * Returns the CycVariableXmlDataBindingImpl object which contains this CycVariable.  The
+     * xml databinding object can be subsequently serialized into xml.
+     *
+     * @return the CycVariableXmlDataBindingImpl object which contains this CycVariable
+     */
+    public CycVariableXmlDataBindingImpl toCycVariableXmlDataBindingImpl () {
+        CycVariableXmlDataBindingImpl cycVariableXmlDataBindingImpl = new CycVariableXmlDataBindingImpl();
+        cycVariableXmlDataBindingImpl.setId(id);
+        cycVariableXmlDataBindingImpl.setName(name);
+        return cycVariableXmlDataBindingImpl;
+    }
+
 }

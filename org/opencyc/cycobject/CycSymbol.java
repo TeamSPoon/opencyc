@@ -108,4 +108,15 @@ public class CycSymbol implements Comparable {
         return true;
     }
 
+    /**
+     * Returns the CycSymbolXmlDataBindingImpl object which contains this CycSymbol.  The
+     * xml databinding object can be subsequently serialized into xml.
+     *
+     * @return the CycSymbolXmlDataBindingImpl object which contains this CycSymbol
+     */
+    public CycSymbolXmlDataBindingImpl toCycSymbolXmlDataBindingImpl () {
+        CycSymbolXmlDataBindingImpl cycSymbolXmlDataBindingImpl = new CycSymbolXmlDataBindingImpl();
+        cycSymbolXmlDataBindingImpl.setSymbolName(symbolName);
+        return cycSymbolXmlDataBindingImpl;
+    }
 }

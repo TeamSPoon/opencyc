@@ -86,25 +86,6 @@ public class CycConstant extends CycFort implements Comparable {
     }
 
     /**
-     * Constructs a CycConstant from the given xml databinding object.
-     *
-     * @pararm cycConstantXmlDataBinding the xml databinding object
-     */
-    public CycConstant makeCycConstant (CycConstantXmlDataBinding cycConstantXmlDataBinding) {
-        CycConstant cycConstant =
-            CycObjectFactory.getCycConstantCacheByGuid(cycConstantXmlDataBinding.getGuid());
-        if (cycConstant != null)
-            return cycConstant;
-        cycConstant = new CycConstant(cycConstantXmlDataBinding.getName(),
-                                      cycConstantXmlDataBinding.getGuid(),
-                                      cycConstantXmlDataBinding.getId());
-        CycObjectFactory.addCycConstantCacheByName(cycConstant);
-        CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
-        CycObjectFactory.addCycConstantCacheById(cycConstant);
-        return cycConstant;
-    }
-
-    /**
      * Gets the id.
      *
      * @return the id
@@ -311,16 +292,16 @@ public class CycConstant extends CycFort implements Comparable {
     }
 
     /**
-     * Returns the CycConstantXmlDataBinding object which contains this CycConstant.  The
+     * Returns the CycConstantXmlDataBindingImpl object which contains this CycConstant.  The
      * xml databinding object can be subsequently serialized into xml.
      *
-     * @return the CycConstantXmlDataBinding object which contains this CycConstant
+     * @return the CycConstantXmlDataBindingImpl object which contains this CycConstant
      */
-    public CycConstantXmlDataBinding toCycConstantXmlDataBinding () {
-        CycConstantXmlDataBinding cycConstantXmlDataBinding = new CycConstantXmlDataBinding();
-        cycConstantXmlDataBinding.setId(this.getId());
-        cycConstantXmlDataBinding.setName(name);
-        cycConstantXmlDataBinding.setGuid(guid);
-        return cycConstantXmlDataBinding;
+    public CycConstantXmlDataBindingImpl toCycConstantXmlDataBindingImpl () {
+        CycConstantXmlDataBindingImpl cycConstantXmlDataBindingImpl = new CycConstantXmlDataBindingImpl();
+        cycConstantXmlDataBindingImpl.setId(this.getId());
+        cycConstantXmlDataBindingImpl.setName(name);
+        cycConstantXmlDataBindingImpl.setGuid(guid);
+        return cycConstantXmlDataBindingImpl;
     }
 }

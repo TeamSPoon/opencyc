@@ -1,7 +1,10 @@
 package org.opencyc.cycobject;
 
 import junit.framework.*;
+import java.io.*;
 import java.util.*;
+import fipaos.util.*;
+import org.jdom.*;
 import org.opencyc.api.*;
 
 /**
@@ -85,6 +88,33 @@ public class UnitTest extends TestCase {
         Guid guid3 = CycObjectFactory.makeGuid(guidString);
         Assert.assertEquals(guid, guid3);
         Assert.assertEquals(1, CycObjectFactory.getGuidCacheSize());
+
+        GuidXmlDataBindingImpl guidXmlDataBindingImpl = guid.toGuidXmlDataBindingImpl();
+        Guid guid4 = CycObjectFactory.makeGuid(guidXmlDataBindingImpl);
+        Assert.assertTrue(guid.equals(guid4));
+        String guidXml = null;
+        try {
+            guidXml = XMLDataBinding.marshall(guidXmlDataBindingImpl);
+        }
+        catch (IOException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("guidXml\n" + guidXml);
+        Object object = null;
+        try {
+            object = XMLDataBinding.unmarshall(guidXml);
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+        Assert.assertTrue(object instanceof GuidXmlDataBindingImpl);
+        GuidXmlDataBindingImpl guidXmlDataBindingImpl2 = (GuidXmlDataBindingImpl) object;
+        Guid guid5 = CycObjectFactory.makeGuid(guidXmlDataBindingImpl2);
+        Assert.assertTrue(guid.equals(guid5));
         System.out.println("** testGuid OK **");
     }
 

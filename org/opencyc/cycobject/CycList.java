@@ -91,38 +91,38 @@ public class CycList extends ArrayList {
     /**
      * Constructs a CycList from the given xml databinding object.
      *
-     * @pararm cycListXmlDataBinding the xml databinding object
+     * @pararm cycListXmlDataBindingImpl the xml databinding object
      */
-    public CycList (CycListXmlDataBinding cycListXmlDataBinding) {
-        for (int i = 0; i < cycListXmlDataBinding.getElementList(); i++) {
-            Object element = cycListXmlDataBinding.elementList.get(i);
-            if (element instanceof CycConstantXmlDataBinding)
-                this.add(new CycConstant((CycConstantXmlDataBinding) element));
-            else if (element instanceof CycNartXmlDataBinding)
-                this.add(new CycNart((CycNartXmlDataBinding) element));
-            else if (element instanceof CycSymbolXmlDataBinding)
-                this.add(new CycSymbol((CycSymbolXmlDataBinding) element));
-            else if (element instanceof CycVariableXmlDataBinding)
-                this.add(new CycVariable((CycVariableXmlDataBinding) element));
-            else if (element instanceof GuidXmlDataBinding)
-                this.add(new CycVariable((GuidXmlDataBinding) element));
+    public CycList (CycListXmlDataBindingImpl cycListXmlDataBindingImpl) {
+        for (int i = 0; i < cycListXmlDataBindingImpl.getElementList().size(); i++) {
+            Object element = cycListXmlDataBindingImpl.getElementList().get(i);
+            if (element instanceof CycConstantXmlDataBindingImpl)
+                this.add(CycObjectFactory.makeCycConstant((CycConstantXmlDataBindingImpl) element));
+            else if (element instanceof CycNartXmlDataBindingImpl)
+                this.add(CycObjectFactory.makeCycNart((CycNartXmlDataBindingImpl) element));
+            else if (element instanceof CycSymbolXmlDataBindingImpl)
+                this.add(CycObjectFactory.makeCycSymbol((CycSymbolXmlDataBindingImpl) element));
+            else if (element instanceof CycVariableXmlDataBindingImpl)
+                this.add(CycObjectFactory.makeCycConstant((CycConstantXmlDataBindingImpl) element));
+            else if (element instanceof GuidXmlDataBindingImpl)
+                this.add(CycObjectFactory.makeGuid((GuidXmlDataBindingImpl) element));
             else
                 this.add(element);
         }
-        this.addAll(cycListXmlDataBinding.elementList);
-        this.isProperList = cycListXmlDataBinding.getIsProperListIndicator();
-        if (element instanceof CycConstantXmlDataBinding)
-            this.dottedElement = new CycConstant((CycConstantXmlDataBinding) element);
-        else if (element instanceof CycNartXmlDataBinding)
-            this.dottedElement = new CycNart((CycNartXmlDataBinding) element);
-        else if (element instanceof CycSymbolXmlDataBinding)
-            this.dottedElement = new CycSymbol((CycSymbolXmlDataBinding) element);
-        else if (element instanceof CycVariableXmlDataBinding)
-            this.dottedElement = new CycVariable((CycVariableXmlDataBinding) element);
-        else if (element instanceof GuidXmlDataBinding)
-            this.dottedElement = new CycVariable((GuidXmlDataBinding) element);
+        this.addAll(cycListXmlDataBindingImpl.getElementList());
+        this.isProperList = cycListXmlDataBindingImpl.getIsProperListIndicator();
+        if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycConstantXmlDataBindingImpl)
+            this.dottedElement = CycObjectFactory.makeCycConstant((CycConstantXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycNartXmlDataBindingImpl)
+            this.dottedElement = CycObjectFactory.makeCycNart((CycNartXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycSymbolXmlDataBindingImpl)
+            this.dottedElement = CycObjectFactory.makeCycSymbol((CycSymbolXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof CycVariableXmlDataBindingImpl)
+            this.dottedElement = CycObjectFactory.makeCycVariable((CycVariableXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
+        else if (cycListXmlDataBindingImpl.getDottedElement() instanceof GuidXmlDataBindingImpl)
+            this.dottedElement = CycObjectFactory.makeGuid((GuidXmlDataBindingImpl) cycListXmlDataBindingImpl.getDottedElement());
         else
-            this.dottedElement = element;
+            this.dottedElement = cycListXmlDataBindingImpl.getDottedElement();
     }
 
     /**
@@ -667,22 +667,49 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Returns the CycListXmlDataBinding object which contains this CycList.  The
+     * Returns the CycListXmlDataBindingImpl object which contains this CycList.  The
      * xml databinding object can be subsequently serialized into xml.
      *
-     * @return the CycListXmlDataBinding object which contains this CycList
+     * @return the CycListXmlDataBindingImpl object which contains this CycList
      */
-    public CycListXmlDataBinding toCycListXmlDataBinding () {
-        CycListXmlDataBinding cycListXmlDataBinding = new CycListXmlDataBinding();
+    public CycListXmlDataBindingImpl toCycListXmlDataBindingImpl () {
+        CycListXmlDataBindingImpl cycListXmlDataBindingImpl = new CycListXmlDataBindingImpl();
         ArrayList elementList = new ArrayList();
         for (int i = 0; i < this.size(); i++) {
             Object element = this.get(i);
             if (element instanceof CycConstant)
-
+                elementList.add(((CycConstant) element).toCycConstantXmlDataBindingImpl());
+            else if (element instanceof CycNart)
+                elementList.add(((CycNart) element).toCycNartXmlDataBindingImpl());
+            else if (element instanceof CycSymbol)
+                elementList.add(((CycSymbol) element).toCycSymbolXmlDataBindingImpl());
+            else if (element instanceof CycVariable)
+                elementList.add(((CycVariable) element).toCycVariableXmlDataBindingImpl());
+            else if (element instanceof Guid)
+                elementList.add(((Guid) element).toGuidXmlDataBindingImpl());
+            else if (element instanceof CycList)
+                elementList.add(((CycList) element).toCycListXmlDataBindingImpl());
+            else
+                elementList.add(element);
         }
-        cycListXmlDataBinding.setElementList(new ArrayList(this));
-        cycListXmlDataBinding.setIsProperListIndicator(this.isProperList);
-        cycListXmlDataBinding.setDottedElement(this.dottedElement);
-        return cycListXmlDataBinding;
+        cycListXmlDataBindingImpl.setElementList(elementList);
+        cycListXmlDataBindingImpl.setIsProperListIndicator(this.isProperList);
+        if (dottedElement == null)
+            cycListXmlDataBindingImpl.setDottedElement(null);
+        else if (dottedElement instanceof CycConstant)
+            cycListXmlDataBindingImpl.setDottedElement(((CycConstant) dottedElement).toCycConstantXmlDataBindingImpl());
+        else if (dottedElement instanceof CycNart)
+            cycListXmlDataBindingImpl.setDottedElement(((CycNart) dottedElement).toCycNartXmlDataBindingImpl());
+        else if (dottedElement instanceof CycSymbol)
+            cycListXmlDataBindingImpl.setDottedElement(((CycSymbol) dottedElement).toCycSymbolXmlDataBindingImpl());
+        else if (dottedElement instanceof CycVariable)
+            cycListXmlDataBindingImpl.setDottedElement(((CycVariable) dottedElement).toCycVariableXmlDataBindingImpl());
+        else if (dottedElement instanceof Guid)
+            cycListXmlDataBindingImpl.setDottedElement(((Guid) dottedElement).toGuidXmlDataBindingImpl());
+        else if (dottedElement instanceof CycList)
+            cycListXmlDataBindingImpl.setDottedElement(((CycList) dottedElement).toCycListXmlDataBindingImpl());
+        else
+            cycListXmlDataBindingImpl.setDottedElement(dottedElement);
+        return cycListXmlDataBindingImpl;
     }
 }

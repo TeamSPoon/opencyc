@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.expression.Expression;
+
 import org.opencyc.elf.wm.state.State;
 import org.opencyc.elf.wm.state.StateVariable;
 
@@ -34,12 +36,12 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class PredicateExpression {
+public class PredicateExpression implements Expression {
   
   //// Constructors
   
   /** Creates a new instance of PredicateExpression. */ 
- public PredicateExpression() {
+  public PredicateExpression() {
   }
   
   /**  Creates a new instance of a unary PredicateExpression given the
@@ -100,7 +102,7 @@ public class PredicateExpression {
    *
    * @return the result of evaluating the predicate and arguments within the given state
    */
-  public Boolean evaluate(State state) {
+  public Object evaluate(State state) {
     return predicate.evaluate(arguments, state);
   }
   
@@ -146,14 +148,14 @@ public class PredicateExpression {
  
   //// Protected Area
   
+  //// Private Area
+  
+  //// Internal Rep
+  
   /** the predicate */
   protected Predicate predicate;
 
   /** the argument list */
   protected List arguments;
-  
-  //// Private Area
-  
-  //// Internal Rep
   
 }

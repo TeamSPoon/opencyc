@@ -52,7 +52,7 @@ public class CycAccess {
 
     private boolean trace = false;
     private String hostName = CycConnection.DEFAULT_HOSTNAME;
-    private int port = CycConnection.DEFAULT_PORT;
+    private int port = CycConnection.DEFAULT_BASE_PORT;
     private static final Integer OK_RESPONSE_CODE = new Integer(200);
     private CycConnection cycConnection;
 
@@ -455,6 +455,9 @@ public class CycAccess {
      * Gets a CycConstant by using its GUID.
      */
     public CycConstant getConstantByGuid (Guid guid)  throws IOException, UnknownHostException {
+        CycConstant answer = CycConstant.getCache(guid);
+        if (answer != null)
+            return answer;
         Object [] response = {new Integer(0), ""};
         String command = "(find-constant-by-guid (string-to-guid \"" + guid + "\"))";
         response = converse(command);
@@ -472,9 +475,6 @@ public class CycAccess {
      */
     public CycConstant getConstantByName (String constantName)
         throws IOException, UnknownHostException {
-        CycConstant answer = CycConstant.getCache(constantName);
-        if (answer != null)
-            return answer;
         Object [] response = {new Integer(0), ""};
         String command;
         if (constantName.startsWith("#$"))
@@ -485,13 +485,44 @@ public class CycAccess {
         responseCode = (Integer) response[0];
         if (responseCode.equals(OK_RESPONSE_CODE)) {
             String guid = ((String) response[1]).substring(3, 39);
-            answer = CycConstant.makeCycConstant(guid, constantName);
-            return answer;
+            return CycConstant.makeCycConstant(guid, constantName);
         }
         else if (((String) response[1]).indexOf("is not an existing constant") > -1)
             return null;
         else
             throw new IOException(response[1].toString());
+    }
+
+    /**
+     * Gets a CycConstant by using its ID.
+     */
+    public CycConstant getConstantById (int id)  throws IOException, UnknownHostException {
+        Object [] response = {new Integer(0), ""};
+        String command = "(find-constant-by-id " + id + ")";
+        response = converse(command);
+        responseCode = (Integer) response[0];
+        if (responseCode.equals(OK_RESPONSE_CODE)) {
+            String constantName = (String) response[1];
+            return getConstantByName(constantName);
+        }
+        else
+            throw new IOException(response[1].toString());
+    }
+
+    /**
+     * Gets a CycAssertion by using its id.
+     */
+    public CycAssertion getAssertionById (Integer id)  throws IOException, UnknownHostException {
+        CycAssertion answer = CycAssertion.getCache(id);
+        if (answer != null) {
+            if (answer.getFormula() != null)
+                return answer;
+        }
+        else
+            answer = new CycAssertion(id);
+        String command = "(assertion-formula (find-assertion-by-id " + id + "))";
+        answer.setFormula(converseList(command));
+        return answer;
     }
 
     /**
@@ -1123,7 +1154,7 @@ public class CycAccess {
      */
     public synchronized void kill (CycConstant cycConstant)   throws IOException, UnknownHostException {
         converseBoolean("(cyc-kill " + cycConstant.cycName() + ")");
-        CycConstant.removeCache(cycConstant);
+        CycConstant.removeCache(cycConstant.guid);
     }
 
     public synchronized void kill (CycConstant[] cycConstants)   throws IOException, UnknownHostException {
@@ -1409,11 +1440,9 @@ public class CycAccess {
      */
     public CycConstant makeCycConstant(String name)
         throws UnknownHostException, IOException {
-        CycConstant cycConstant = CycConstant.getCache(name);
+        CycConstant cycConstant = this.getConstantByName(name);
         if (cycConstant == null) {
-            cycConstant = this.getConstantByName(name);
-            if (cycConstant == null)
-                cycConstant = this.createNewPermanent(name);
+            cycConstant = this.createNewPermanent(name);
             CycConstant.addCache(cycConstant);
         }
         return cycConstant;

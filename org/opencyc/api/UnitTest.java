@@ -193,6 +193,23 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("#$Dog", cycConstant.cycName());
         Assert.assertEquals("Dog", cycConstant.name);
 
+        // getConstantById
+        cycConstant = null;
+        try {
+            cycConstant = cycAccess.getConstantById(23200);
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(cycConstant);
+        Assert.assertEquals("#$Dog", cycConstant.cycName());
+        Assert.assertEquals("Dog", cycConstant.name);
+        Assert.assertEquals(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"),
+                            cycConstant.guid);
+
         // getComment.
         String comment = null;
         try {

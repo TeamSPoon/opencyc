@@ -6,7 +6,8 @@ import org.opencyc.util.*;
 import org.opencyc.cycobject.*;
 
 /**
- * Provides a connection to the OpenCyc server.<p>
+ * Provides a binary connection and an ascii connection to the OpenCyc server.  The ascii connection is
+ * legacy and its use is deprecated.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -31,58 +32,166 @@ import org.opencyc.cycobject.*;
  */
 public class CycConnection {
 
-    public BufferedReader in;
-    public BufferedWriter out;
-
-    private CycAccess cycAccess;
-    private Socket apiSocket;
-    private String hostName;
-    private int port;
-    private static final Timer notimeout = new Timer();
-
+    /**
+     * Default host name for the OpenCyc server.
+     */
     public static final String DEFAULT_HOSTNAME = "localhost";
-    public static final int DEFAULT_PORT = 3601;
-    public boolean trace = false;
-    private boolean isSymbolicExpression = false;
 
     /**
-     * Constructs a new CycConnection object.
+     * Default base tcp port for the OpenCyc server.
      */
+    public static final int DEFAULT_BASE_PORT = 3600;
 
+    /**
+     * HTTP port offset for the OpenCyc server.
+     */
+    public static final int HTTP_PORT_OFFSET = 0;
+
+    /**
+     * ASCII port offset for the OpenCyc server.
+     */
+    public static final int ASCII_PORT_OFFSET = 1;
+
+    /**
+     * CFASL (binary) port offset for the OpenCyc server.
+     */
+    public static final int CFASL_PORT_OFFSET = 14;
+
+    /**
+     * Parameter that, when true, causes a trace of the messages to and from the server.
+     */
+    public boolean trace = false;
+
+    /**
+     * The ascii interface input stream.
+     */
+    protected BufferedReader in;
+
+    /**
+     * The ascii interface output stream.
+     */
+    protected BufferedWriter out;
+
+    /**
+     * The binary interface input stream</tt>.
+     */
+    protected CfaslInputStream cfaslInputStream;
+
+    /**
+     * The binary interface output stream</tt>.
+     */
+    protected CfaslOutputStream cfaslOutputStream;
+
+    /**
+     * The name of the computer hosting the OpenCyc server.
+     */
+    protected String hostName;
+
+    /**
+     * The tcp port from which the asciiPort and cfaslPorts are derived.
+     */
+    protected int basePort;
+
+    /**
+     * The tcp port assigned to the the ascii connection to the OpenCyc server.
+     */
+    protected int asciiPort;
+
+    /**
+     * The tcp port assigned to the the binary connection to the OpenCyc server.
+     */
+    protected int cfaslPort;
+
+    /**
+     * The tcp socket assigned to the the ascii connection to the OpenCyc server.
+     */
+    protected Socket asciiSocket;
+
+    /**
+     * The tcp socket assigned to the the binary connection to the OpenCyc server.
+     */
+    protected Socket cfaslSocket;
+
+    /**
+     * The timer which optionally monitors the duration of requests to the OpenCyc server.
+     */
+    protected static final Timer notimeout = new Timer();
+
+    /**
+     * Indicates if the response from the OpenCyc server is a symbolic expression (enclosed in
+     * parentheses).
+     */
+    protected boolean isSymbolicExpression = false;
+
+    /**
+     * A reference to the parent CycAccess object for dereferencing constants in ascii symbolic expressions.
+     */
+    protected CycAccess cycAccess;
+
+    /**
+     * Constructs a new CycConnection object using the default host name and base port number.
+     */
     public CycConnection() throws IOException, UnknownHostException {
-        this(DEFAULT_HOSTNAME, DEFAULT_PORT);
+        this(DEFAULT_HOSTNAME, DEFAULT_BASE_PORT);
     }
+
+    /**
+     * Constructs a new CycConnection object using a given host name and the default base port number.
+     *
+     * @param host the name of the computer hosting the OpenCyc server.
+     */
     public CycConnection(String host)
         throws IOException, UnknownHostException {
-        this(host, DEFAULT_PORT);
+        this(host, DEFAULT_BASE_PORT);
     }
-    public CycConnection(int port)
+
+    /**
+     * Constructs a new CycConnection object using the default host name and a given base port number.
+     *
+     * @param basePort the base tcp port on which the OpenCyc server is listening for connections.
+     */
+    public CycConnection(int basePort)
         throws IOException, UnknownHostException {
-        this(DEFAULT_HOSTNAME, port);
+        this(DEFAULT_HOSTNAME, basePort);
     }
-    public CycConnection(String hostName, int port)
+
+    /**
+     * Constructs a new CycConnection object using a given host name and a given base port number.
+     *
+     * @param host the name of the computer hosting the OpenCyc server.
+     * @param basePort the base tcp port on which the OpenCyc server is listening for connections.
+     */
+    public CycConnection(String hostName, int basePort)
         throws IOException, UnknownHostException {
         this.hostName = hostName;
-        this.port = port;
-        initializeApiConnection();
-        System.out.println("Connection " + apiSocket);
+        this.basePort = basePort;
+        asciiPort = basePort + ASCII_PORT_OFFSET;
+        cfaslPort = basePort + CFASL_PORT_OFFSET;
+        initializeApiConnections();
+        System.out.println("Connection " + asciiSocket);
+        System.out.println("Connection " + cfaslSocket);
     }
 
     /**
-     * Initialize a cyc api socket.
+     * Initializes the OpenCyc ascii socket and the OpenCyc binary socket connections.
      */
-    private void initializeApiConnection() throws IOException, UnknownHostException {
-        apiSocket = new Socket(hostName, DEFAULT_PORT);
-        in = new BufferedReader(new InputStreamReader(apiSocket.getInputStream()));
-        out = new BufferedWriter(new OutputStreamWriter(apiSocket.getOutputStream()));
+    private void initializeApiConnections() throws IOException, UnknownHostException {
+        asciiSocket = new Socket(hostName, asciiPort);
+        in = new BufferedReader(new InputStreamReader(asciiSocket.getInputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(asciiSocket.getOutputStream()));
+        cfaslSocket = new Socket(hostName, cfaslPort);
+        cfaslInputStream = new CfaslInputStream(cfaslSocket.getInputStream(), this);
+        cfaslOutputStream = new CfaslOutputStream(cfaslSocket.getOutputStream(), this);
     }
 
     /**
-     * Close the cyc api socket.
+     * Close the cyc api sockets.
      */
     public void close () throws IOException {
-        if (apiSocket != null)
-            apiSocket.close();
+        if (asciiSocket != null)
+            asciiSocket.close();
+        if (cfaslSocket != null)
+            cfaslSocket.close();
     }
 
     /**

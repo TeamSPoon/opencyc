@@ -60,8 +60,8 @@ public class UnitTest extends TestCase {
         //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
         //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -3143,6 +3143,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(new Integer(99), responseObject);
 
             // ignore-errors, cunwind-protect
+            //cycAccess.traceOn();
             script =
                 "(clet (result) \n" +
                 "  (ignore-errors \n" +
@@ -3415,6 +3416,7 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(cycAccess.converseBoolean(script));
 
             // constant name with embedded slash
+            //cycAccess.traceOn();
             script =
               "(rtp-parse-exp-w/vpp \"Symptoms of EEE begin 4-10 days after infection\" \n" +
                 "(fort-for-string \"STemplate\") \n" +

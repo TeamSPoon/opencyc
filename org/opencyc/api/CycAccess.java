@@ -502,7 +502,7 @@ public class CycAccess {
         String command = "(boolean (find-constant \"" + constantName + "\"))";
         boolean constantExists = converseBoolean(command);
         if (constantExists) {
-            command = "(constant-id (find-constant \"" + constantName + "\"))";
+            command = "(constant-internal-id (find-constant \"" + constantName + "\"))";
             return new Integer(converseInt(command));
         }
         else
@@ -551,7 +551,7 @@ public class CycAccess {
         command1.add(CycObjectFactory.makeCycSymbol("constant-guid"));
         CycList command2 = new CycList();
         command1.add(command2);
-        command2.add(CycObjectFactory.makeCycSymbol("find-constant-by-id"));
+        command2.add(CycObjectFactory.makeCycSymbol("find-constant-by-internal-id"));
         command2.add(id);
         return CycObjectFactory.makeGuid(converseString(command));
     }
@@ -568,7 +568,7 @@ public class CycAccess {
         command.add(CycObjectFactory.makeCycSymbol("boolean"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-id"));
+        command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-internal-id"));
         command1.add(id);
         boolean constantExists = converseBoolean(command);
         if (! constantExists)
@@ -595,7 +595,7 @@ public class CycAccess {
         command.add(CycObjectFactory.makeCycSymbol("constant-name"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-id"));
+        command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-internal-id"));
         command1.add(id);
         return converseString(command);
     }

@@ -2,6 +2,11 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.a.Actuator;
+import org.opencyc.elf.a.ConsoleOutput;
+
+import org.opencyc.elf.bg.planner.Resource;
+
+import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
 
@@ -56,7 +61,9 @@ public class ActuatorFactory {
    * Populates the actuator pool.
    */
   public void populateActuatorPool() {
-    //TODO
+    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, 
+                                                    ResourcePool.getInstance().getResource(Resource.CONSOLE));
+    
   }
   
   //// Protected Area

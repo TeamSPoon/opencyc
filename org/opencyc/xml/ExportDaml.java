@@ -95,6 +95,12 @@ public class ExportDaml {
         CycObjectFactory.makeGuid("bfe31c38-9c29-11b1-9dad-c379636f7270");
 
     /**
+     * The #$EELDSharedOntologyConstant guid.
+     */
+    public static final Guid eeldSharedOntologyConstantGuid =
+        CycObjectFactory.makeGuid("c06e4624-9c29-11b1-9dad-c379636f7270");
+
+    /**
      * The #$IKBConstant guid.
      */
     public static final Guid ikbConstantGuid =
@@ -137,6 +143,11 @@ public class ExportDaml {
      * The DAML export path and file name.
      */
     public String outputPath = "export.daml";
+
+    /**
+     * The DAML comment that titles the output file.
+     */
+    public String title = "EELD Shared Ontology";
 
     private static final String rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String rdfsNamespace = "http://www.w3.org/2000/01/rdf-schema#";
@@ -187,11 +198,25 @@ public class ExportDaml {
     public static void main (String[] args) {
         ExportDaml exportDaml = new ExportDaml();
         try {
-            Guid transportationDeviceGuid =
-                CycObjectFactory.makeGuid("bd58d540-9c29-11b1-9dad-c379636f7270");
-            exportDaml.rootTermGuid = transportationDeviceGuid;
-            exportDaml.cycKbSubsetFilterGuid = ExportDaml.counterTerrorismConstantGuid;
-            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM);
+            /**
+             * Export a kb subset collection filtered by the given
+             * kb subset collection.
+             */
+            exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
+            exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
+            exportDaml.title = "EELD Shared Ontology";
+            exportDaml.outputPath = "eeld-shared-ontology.daml";
+            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
+
+            /**
+             * Export a kb subset below the given term filtered by the given
+             * kb subset collection.
+             */
+            //Guid transportationDeviceGuid =
+            //    CycObjectFactory.makeGuid("bd58d540-9c29-11b1-9dad-c379636f7270");
+            //exportDaml.rootTermGuid = transportationDeviceGuid;
+            //exportDaml.cycKbSubsetFilterGuid = counterTerrorismConstantGuid;
+            //exportDaml.export(ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -380,7 +405,7 @@ public class ExportDaml {
         damlVersionInfo.appendChild(document.createTextNode("$Id$"));
         damlOntology.appendChild(damlVersionInfo);
         rdfsComment = document.createElementNS(rdfsNamespace, "rdfs:comment");
-        rdfsComment.appendChild(document.createTextNode("The Cyc Upper Ontology"));
+        rdfsComment.appendChild(document.createTextNode(title));
         damlOntology.appendChild(rdfsComment);
     }
 

@@ -1412,7 +1412,7 @@ public class CycAccess {
     public boolean predicateRelates (CycConstant binaryPredicate,
                                      CycFort arg1,
                                      CycFort arg2,
-                                     CycFort mt)
+                                     ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         Object [] response = {null, null};
         String command = "(pred-u-v-holds " +
@@ -1577,7 +1577,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public String getComment (CycFort cycFort, CycFort mt)
+    public String getComment (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String script =
             "(clet ((comment-string \n" +
@@ -1612,7 +1612,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getIsas (CycFort cycFort, CycFort mt)
+    public CycList getIsas (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(isa " + cycFort.stringApiValue() +
                               " " + mt.stringApiValue() + ")");
@@ -1642,7 +1642,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getGenls (CycFort cycFort, CycFort mt)
+    public CycList getGenls (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(genls " + cycFort.stringApiValue() +
                               " " + mt.stringApiValue() + ")");
@@ -1672,7 +1672,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getMinGenls (CycFort cycFort, CycFort mt)
+    public CycList getMinGenls (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(min-genls " + cycFort.stringApiValue() +
                               " " + mt.stringApiValue() + ")");
@@ -1702,7 +1702,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getSpecs (CycFort cycFort, CycFort mt)
+    public CycList getSpecs (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(specs " + cycFort.stringApiValue() +
                               " " + mt.stringApiValue() + ")");
@@ -1732,7 +1732,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getMaxSpecs (CycFort cycFort, CycFort mt)
+    public CycList getMaxSpecs (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(max-specs " + cycFort.stringApiValue() +
                               " " + mt.stringApiValue() + ")");
@@ -1762,7 +1762,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getGenlSiblings (CycFort cycFort, CycFort mt)
+    public CycList getGenlSiblings (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(genl-siblings " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -1792,7 +1792,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getSiblings (CycFort cycFort, CycFort mt)
+    public CycList getSiblings (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return getSpecSiblings(cycFort, mt);
     }
@@ -1821,7 +1821,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getSpecSiblings (CycFort cycFort, CycFort mt)
+    public CycList getSpecSiblings (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(spec-siblings " + cycFort.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
@@ -1852,7 +1852,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllGenls (CycFort cycFort, CycFort mt)
+    public CycList getAllGenls (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-genls " + cycFort.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
@@ -1881,7 +1881,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllSpecs (CycFort cycFort, CycFort mt)
+    public CycList getAllSpecs (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-specs " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -1911,7 +1911,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public HashSet getAllSpecsHashSet (CycFort cycFort, CycFort mt)
+    public HashSet getAllSpecsHashSet (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return new HashSet(getAllSpecs(cycFort, mt));
     }
@@ -1946,7 +1946,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllGenlsWrt (CycFort spec, CycFort genl, CycFort mt)
+    public CycList getAllGenlsWrt (CycFort spec, CycFort genl, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-genls-wrt " + spec.stringApiValue() + " " + genl.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -1982,7 +1982,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllDependentSpecs (CycFort cycFort, CycFort mt)
+    public CycList getAllDependentSpecs (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-dependent-specs " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2016,7 +2016,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getSampleLeafSpecs (CycFort cycFort, int numberOfSamples, CycFort mt)
+    public CycList getSampleLeafSpecs (CycFort cycFort, int numberOfSamples, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(sample-leaf-specs " + cycFort.stringApiValue() + " " + numberOfSamples +
                             " " + mt.stringApiValue() + ")");
@@ -2063,7 +2063,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isSpecOf (CycFort spec, CycFort genl, CycFort mt)
+    public boolean isSpecOf (CycFort spec, CycFort genl, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return isGenlOf(genl, spec, mt);
     }
@@ -2121,7 +2121,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isGenlOf (CycFort genl, CycFort spec, CycFort mt)
+    public boolean isGenlOf (CycFort genl, CycFort spec, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(genl? " + spec.stringApiValue() +
                                " " + genl.stringApiValue() +
@@ -2139,7 +2139,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isGenlPredOf (CycFort genlPred, CycFort specPred, CycFort mt)
+    public boolean isGenlPredOf (CycFort genlPred, CycFort specPred, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(genl-predicate? " + specPred.stringApiValue() +
                                " " + genlPred.stringApiValue() +
@@ -2174,7 +2174,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isGenlInverseOf (CycFort genlPred, CycFort specPred, CycFort mt)
+    public boolean isGenlInverseOf (CycFort genlPred, CycFort specPred, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(genl-inverse? " + specPred.stringApiValue() +
                                " " + genlPred.stringApiValue() +
@@ -2246,7 +2246,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean areTacitCoextensional (CycFort collection1, CycFort collection2, CycFort mt)
+    public boolean areTacitCoextensional (CycFort collection1, CycFort collection2, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(tacit-coextensional? " + collection1.stringApiValue() +
                                " " + collection2.stringApiValue() +
@@ -2289,7 +2289,7 @@ public class CycAccess {
      */
     public boolean areAssertedCoextensional (CycFort collection1,
                                              CycFort collection2,
-                                             CycFort mt)
+                                             ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycConstant coExtensional = this.getKnownConstantByGuid("bd59083a-9c29-11b1-9dad-c379636f7270");
         if (predicateRelates(coExtensional, collection1, collection2, mt))
@@ -2329,7 +2329,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean areIntersecting (CycFort collection1, CycFort collection2, CycFort mt)
+    public boolean areIntersecting (CycFort collection1, CycFort collection2, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(collections-intersect? " + collection1.stringApiValue() + " " +
                                collection2.stringApiValue() +
@@ -2365,7 +2365,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean areHierarchical (CycFort collection1, CycFort collection2, CycFort mt)
+    public boolean areHierarchical (CycFort collection1, CycFort collection2, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(hierarchical-collections? " + collection1.stringApiValue() +
                                collection2.stringApiValue() +
@@ -2406,7 +2406,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getWhyGenl (CycFort spec, CycFort genl, CycFort mt)
+    public CycList getWhyGenl (CycFort spec, CycFort genl, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(why-genl? " + spec.stringApiValue() + " " + genl.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2459,7 +2459,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public ArrayList getWhyGenlParaphrase (CycFort spec, CycFort genl, CycFort mt)
+    public ArrayList getWhyGenlParaphrase (CycFort spec, CycFort genl, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList listAnswer =
             converseList("(why-genl? " +
@@ -2510,7 +2510,7 @@ public class CycAccess {
      */
     public CycList getWhyCollectionsIntersect (CycFort collection1,
                                                CycFort collection2,
-                                               CycFort mt)
+                                               ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(why-collections-intersect? " +
                             collection1.stringApiValue() + " " + collection2.stringApiValue() +
@@ -2565,7 +2565,7 @@ public class CycAccess {
      */
     public ArrayList getWhyCollectionsIntersectParaphrase (CycFort collection1,
                                                            CycFort collection2,
-                                                           CycFort mt)
+                                                           ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList listAnswer = converseList("(with-all-mts (why-collections-intersect? " +
                                           collection1.stringApiValue() + " " +
@@ -2609,7 +2609,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getCollectionLeaves (CycFort cycFort, CycFort mt)
+    public CycList getCollectionLeaves (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(collection-leaves " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2636,7 +2636,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getLocalDisjointWith (CycFort cycFort, CycFort mt)
+    public CycList getLocalDisjointWith (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(local-disjoint-with " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2668,7 +2668,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean areDisjoint (CycFort collection1, CycFort collection2, CycFort mt)
+    public boolean areDisjoint (CycFort collection1, CycFort collection2, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(with-all-mts (disjoint-with? " + collection1.stringApiValue() +
                                " " + collection2.stringApiValue() +
@@ -2699,7 +2699,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getMinIsas (CycFort cycFort, CycFort mt)
+    public CycList getMinIsas (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(min-isa " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2729,7 +2729,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getInstances (CycFort cycFort, CycFort mt)
+    public CycList getInstances (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(instances " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2760,7 +2760,7 @@ public class CycAccess {
      * @return the list of the instance siblings of a CycFort, for all collections of which
      * it is an instance
      */
-    public CycList getInstanceSiblings (CycFort cycFort, CycFort mt)
+    public CycList getInstanceSiblings (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(instance-siblings " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2790,7 +2790,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllIsa (CycFort cycFort, CycFort mt)
+    public CycList getAllIsa (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-isa " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -2826,7 +2826,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      * given collection
     */
-    public CycList getAllInstances (CycFort cycFort, CycFort mt)
+    public CycList getAllInstances (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-instances " + cycFort.stringApiValue()
                             + " " + mt.stringApiValue()+ ")");
@@ -2845,7 +2845,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
     */
-    public HashSet getAllInstancesHashSet (CycFort cycFort, CycFort mt)
+    public HashSet getAllInstancesHashSet (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return new HashSet(getAllInstances(cycFort, mt));
     }
@@ -2910,7 +2910,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isa (CycFort term, CycFort collection, CycFort mt)
+    public boolean isa (CycFort term, CycFort collection, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList command = new CycList();
         command.add(CycObjectFactory.makeCycSymbol("isa?"));
@@ -2952,7 +2952,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getWhyIsa (CycFort spec, CycFort genl, CycFort mt)
+    public CycList getWhyIsa (CycFort spec, CycFort genl, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(why-isa? " + spec.stringApiValue() + " " + genl.stringApiValue() +
                             " " + mt.stringApiValue()+ ")");
@@ -3002,7 +3002,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public ArrayList getWhyIsaParaphrase (CycFort spec, CycFort genl, CycFort mt)
+    public ArrayList getWhyIsaParaphrase (CycFort spec, CycFort genl, ELMT mt)
         throws IOException, CycApiException {
         String command = "(why-isa? " + spec.stringApiValue() + " " + genl.stringApiValue() +
                          " " + mt.stringApiValue()+ ")";
@@ -3042,7 +3042,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getGenlPreds (CycConstant predicate, CycFort mt)
+    public CycList getGenlPreds (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(genl-predicates " + predicate.stringApiValue() +
                             " " + mt.stringApiValue()+ ")");
@@ -3072,7 +3072,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllGenlPreds (CycConstant predicate, CycFort mt)
+    public CycList getAllGenlPreds (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-genl-predicates " + predicate.stringApiValue() +
                             " " + mt.stringApiValue()+ ")");
@@ -3106,7 +3106,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllSpecPreds (CycFort cycFort, CycFort mt)
+    public CycList getAllSpecPreds (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-spec-predicates " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -3139,7 +3139,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public HashSet getAllSpecPredsHashSet (CycFort cycFort, CycFort mt)
+    public HashSet getAllSpecPredsHashSet (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return new HashSet(getAllSpecPreds(cycFort, mt));
     }
@@ -3172,7 +3172,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllSpecInverses (CycFort cycFort, CycFort mt)
+    public CycList getAllSpecInverses (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-spec-inverses " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -3205,7 +3205,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getAllSpecMts (CycFort mt)
+    public CycList getAllSpecMts (ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-spec-mts " + mt.stringApiValue() + ")");
     }
@@ -3221,7 +3221,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public HashSet getAllSpecInversesHashSet (CycFort cycFort, CycFort mt)
+    public HashSet getAllSpecInversesHashSet (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return new HashSet(getAllSpecInverses(cycFort, mt));
     }
@@ -3237,7 +3237,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public HashSet getAllSpecMtsHashSet (CycFort mt)
+    public HashSet getAllSpecMtsHashSet (ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return new HashSet(getAllSpecMts(mt));
     }
@@ -3266,7 +3266,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArg1Isas (CycConstant predicate, CycFort mt)
+    public CycList getArg1Isas (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(arg1-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
@@ -3295,7 +3295,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArg2Isas (CycConstant predicate, CycFort mt)
+    public CycList getArg2Isas (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(arg2-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
@@ -3324,7 +3324,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArg3Isas (CycConstant predicate, CycFort mt)
+    public CycList getArg3Isas (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(arg3-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
@@ -3353,7 +3353,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArg4Isas (CycConstant predicate, CycFort mt)
+    public CycList getArg4Isas (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(arg4-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
@@ -3390,7 +3390,7 @@ public class CycAccess {
      */
     public CycList getArgNIsas (CycConstant predicate,
                                 int argPosition,
-                                CycFort mt)
+                                ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String command =
             "(remove-duplicates \n" +
@@ -3440,7 +3440,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getInterArgIsa1_2s (CycConstant predicate, CycFort mt)
+    public CycList getInterArgIsa1_2s (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String command =
             "(remove-duplicates \n" +
@@ -3490,7 +3490,7 @@ public class CycAccess {
      */
     public CycList getInterArgIsa1_2_forArg2 (CycConstant predicate,
                                               CycFort arg1,
-                                              CycFort mt)
+                                              ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList result = new CycList();
         ListIterator constraintPairs = getInterArgIsa1_2s(predicate, mt).listIterator();
@@ -3526,7 +3526,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getResultIsas (CycConstant function, CycFort mt)
+    public CycList getResultIsas (CycConstant function, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(result-isa " + function.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -3561,7 +3561,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArgNGenls (CycConstant predicate, int argPosition, CycFort mt)
+    public CycList getArgNGenls (CycConstant predicate, int argPosition, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(argn-genl " + predicate.stringApiValue() +
                             " " + argPosition +
@@ -3592,7 +3592,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArg1Formats (CycConstant predicate, CycFort mt)
+    public CycList getArg1Formats (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(arg1-format " + predicate.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -3622,7 +3622,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getArg2Formats (CycConstant predicate, CycFort mt)
+    public CycList getArg2Formats (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(arg2-format " + predicate.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -3652,7 +3652,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getDisjointWiths (CycFort cycFort, CycFort mt)
+    public CycList getDisjointWiths (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(local-disjoint-with " + cycFort.stringApiValue() +
                             " " + mt.stringApiValue() + ")");
@@ -3692,7 +3692,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getCoExtensionals (CycFort cycFort, CycFort mt)
+    public CycList getCoExtensionals (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList answer = null;
         try {
@@ -3905,7 +3905,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isQuotedCollection (CycFort cycFort, CycFort mt)
+    public boolean isQuotedCollection (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList query = new CycList();
         query.add(getKnownConstantByName("quotedCollection"));
@@ -4116,7 +4116,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertWithTranscript (CycList sentence, CycFort mt)
+    public void assertWithTranscript (CycList sentence, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertWithTranscript(sentence.cyclify(), mt);
     }
@@ -4131,7 +4131,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertWithTranscript (String sentence, CycFort mt)
+    public void assertWithTranscript (String sentence, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String projectName = "nil";
         if (project != null)
@@ -4158,7 +4158,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertWithTranscriptAndBookkeeping (CycList sentence, CycFort mt)
+    public void assertWithTranscriptAndBookkeeping (CycList sentence, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertWithTranscriptAndBookkeeping(sentence.cyclify(), mt);
     }
@@ -4173,7 +4173,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertWithTranscriptAndBookkeeping (String sentence, CycFort mt)
+    public void assertWithTranscriptAndBookkeeping (String sentence, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String projectName = "nil";
         if (project != null)
@@ -4202,7 +4202,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertWithBookkeepingAndWithoutTranscript (CycList sentence, CycFort mt)
+    public void assertWithBookkeepingAndWithoutTranscript (CycList sentence, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertWithBookkeepingAndWithoutTranscript (sentence.cyclify(), mt);
     }
@@ -4217,7 +4217,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertWithBookkeepingAndWithoutTranscript (String sentence, CycFort mt)
+    public void assertWithBookkeepingAndWithoutTranscript (String sentence, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String projectName = "nil";
         if (project != null)
@@ -4250,7 +4250,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void unassertWithBookkeepingAndWithoutTranscript (CycList sentence, CycFort mt)
+    public void unassertWithBookkeepingAndWithoutTranscript (CycList sentence, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String command = withBookkeepingInfo() +
             "(cyc-unassert '" +
@@ -4338,7 +4338,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertGaf (CycFort mt,
+    public void assertGaf (ELMT mt,
                            CycFort predicate,
                            CycFort arg1,
                            CycFort arg2)
@@ -4363,7 +4363,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertGaf (CycFort mt,
+    public void assertGaf (ELMT mt,
                            CycFort predicate,
                            CycFort arg1,
                            String arg2)
@@ -4388,7 +4388,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertGaf (CycFort mt,
+    public void assertGaf (ELMT mt,
                            CycConstant predicate,
                            CycFort arg1,
                            CycList arg2)
@@ -4413,7 +4413,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertGaf (CycFort mt,
+    public void assertGaf (ELMT mt,
                            CycConstant predicate,
                            CycFort arg1,
                            int arg2)
@@ -4434,7 +4434,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertGaf (CycFort mt,
+    public void assertGaf (ELMT mt,
                            CycFort predicate,
                            CycFort arg1,
                            Integer arg2)
@@ -4459,7 +4459,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertGaf (CycFort mt,
+    public void assertGaf (ELMT mt,
                            CycFort predicate,
                            CycFort arg1,
                            Double arg2)
@@ -4486,7 +4486,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public void assertGaf (CycFort mt,
+    public void assertGaf (ELMT mt,
                            CycConstant predicate,
                            CycFort arg1,
                            CycFort arg2,
@@ -4513,7 +4513,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public void assertGaf (CycList gaf,
-                           CycFort mt)
+                           ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertWithTranscriptAndBookkeeping(gaf, mt);
     }
@@ -4528,7 +4528,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public void unassertGaf (CycList gaf,
-                            CycFort mt)
+                            ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         String command = withBookkeepingInfo() +
             "(ke-unassert-now '" +
@@ -4592,7 +4592,7 @@ public class CycAccess {
      */
     public void assertComment (CycFort cycFort,
                                String comment,
-                               CycFort mt)
+                               ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(mt, CycAccess.comment, cycFort, comment);
     }
@@ -4610,7 +4610,7 @@ public class CycAccess {
      */
     public void assertNameString (CycFort cycFort,
                                   String nameString,
-                                  CycFort mt)
+                                  ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(mt,
                   this.getKnownConstantByGuid("c0fdf7e8-9c29-11b1-9dad-c379636f7270"),
@@ -4801,7 +4801,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public void assertIsaCollection (CycFort cycFort,
-                                     CycFort mt)
+                                     ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(mt, isa, cycFort, collection);
     }
@@ -4879,7 +4879,7 @@ public class CycAccess {
      */
     public void assertGenls (CycFort specCollection,
                              CycFort genlsCollection,
-                             CycFort mt)
+                             ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(mt, genls, specCollection, genlsCollection);
     }
@@ -4941,7 +4941,7 @@ public class CycAccess {
      */
     public void assertConceptuallyRelated (CycFort term1,
                                            CycFort term2,
-                                           CycFort mt)
+                                           ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycConstant conceptuallyRelated =
             getKnownConstantByGuid("bd58803e-9c29-11b1-9dad-c379636f7270");
@@ -5046,7 +5046,7 @@ public class CycAccess {
      */
     public void assertIsa (CycFort cycFort,
                            CycFort aCollection,
-                           CycFort mt)
+                           ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertGaf(mt, isa, cycFort, aCollection);
     }
@@ -5095,7 +5095,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public void assertIsaBinaryPredicate (CycFort cycFort,
-                                          CycFort mt)
+                                          ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         assertIsa(cycFort, binaryPredicate, mt);
     }
@@ -5245,7 +5245,7 @@ public class CycAccess {
      */
     public CycList askWithVariable (CycList query,
                                     CycVariable variable,
-                                    CycFort mt)
+                                    ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         StringBuffer queryBuffer = new StringBuffer();
         queryBuffer.append("(clet ((*cache-inference-results* nil) ");
@@ -5275,7 +5275,7 @@ public class CycAccess {
      */
     public CycList askWithVariables (CycList query,
                                      ArrayList variables,
-                                     CycFort mt)
+                                     ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         StringBuffer queryBuffer = new StringBuffer();
         queryBuffer.append("(clet ((*cache-inference-results* nil) ");
@@ -5301,7 +5301,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public boolean isQueryTrue (CycList query,
-                                CycFort mt)
+                                ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList command = new CycList();
         command.add(CycObjectFactory.makeCycSymbol("cyc-query"));
@@ -5325,7 +5325,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public boolean isQueryTrue_Cached (CycList query,
-                                          CycFort mt)
+                                          ELMT mt)
         throws IOException, CycApiException {
         boolean answer;
         Boolean isQueryTrue = (Boolean) askCache.getElement(query);
@@ -5347,7 +5347,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public int countAllInstances(CycFort collection, CycFort mt) throws IOException, CycApiException {
+    public int countAllInstances(CycFort collection, ELMT mt) throws IOException, CycApiException {
         return this.converseInt("(count-all-instances " +
                                 collection.stringApiValue() + " " +
                                 mt.stringApiValue() + ")");
@@ -5364,7 +5364,7 @@ public class CycAccess {
      * @throws CycApiException if the api request results in a cyc server error
      */
     public int countAllInstances_Cached(CycFort collection,
-                                        CycFort mt)
+                                        ELMT mt)
         throws IOException, CycApiException {
         int answer;
         Integer countAllInstances = (Integer) countAllInstancesCache.getElement(collection);
@@ -5388,7 +5388,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getBackchainImplicationRules (CycConstant predicate, CycList formula, CycFort mt)
+    public CycList getBackchainImplicationRules (CycConstant predicate, CycList formula, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         StringBuffer command = new StringBuffer();
         CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
@@ -5431,7 +5431,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getForwardChainRules (CycConstant predicate, CycList formula, CycFort mt)
+    public CycList getForwardChainRules (CycConstant predicate, CycList formula, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         StringBuffer command = new StringBuffer();
         CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
@@ -5472,7 +5472,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getBackchainRules (CycConstant predicate, CycFort mt)
+    public CycList getBackchainRules (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         StringBuffer command = new StringBuffer();
         CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
@@ -5514,7 +5514,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getForwardChainRules (CycConstant predicate, CycFort mt)
+    public CycList getForwardChainRules (CycConstant predicate, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         StringBuffer command = new StringBuffer();
         CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
@@ -5610,7 +5610,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isBackchainRequired(CycConstant predicate, CycFort mt)
+    public boolean isBackchainRequired(CycConstant predicate, ELMT mt)
         throws IOException, CycApiException {
         CycConstant backchainRequired =
             getKnownConstantByGuid("beaa3d29-9c29-11b1-9dad-c379636f7270");
@@ -5629,7 +5629,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isBackchainEncouraged(CycConstant predicate, CycFort mt)
+    public boolean isBackchainEncouraged(CycConstant predicate, ELMT mt)
         throws IOException, CycApiException {
         CycConstant backchainEncouraged =
             getKnownConstantByGuid("c09d1cea-9c29-11b1-9dad-c379636f7270");
@@ -5648,7 +5648,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isBackchainDiscouraged(CycConstant predicate, CycFort mt)
+    public boolean isBackchainDiscouraged(CycConstant predicate, ELMT mt)
         throws IOException, CycApiException {
         CycConstant backchainDiscouraged =
             getKnownConstantByGuid("bfcbce14-9c29-11b1-9dad-c379636f7270");
@@ -5667,7 +5667,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isBackchainForbidden(CycConstant predicate, CycFort mt)
+    public boolean isBackchainForbidden(CycConstant predicate, ELMT mt)
         throws IOException, CycApiException {
         CycConstant backchainForbidden =
             getKnownConstantByGuid("bfa4e9d2-9c29-11b1-9dad-c379636f7270");
@@ -5688,7 +5688,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isIrreflexivePredicate(CycConstant predicate, CycFort mt)
+    public boolean isIrreflexivePredicate(CycConstant predicate, ELMT mt)
         throws IOException, CycApiException {
         CycConstant irreflexiveBinaryPredicate =
             getKnownConstantByGuid("bd654be7-9c29-11b1-9dad-c379636f7270");
@@ -5711,7 +5711,7 @@ public class CycAccess {
     public boolean hasSomePredicateUsingTerm(CycConstant predicate,
                                              CycFort term,
                                              Integer argumentPosition,
-                                             CycFort mt) throws IOException, CycApiException {
+                                             ELMT mt) throws IOException, CycApiException {
         CycList command = new CycList();
         CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
         CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
@@ -5744,7 +5744,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public int countUsingBestIndex(CycList formula, CycFort mt) throws IOException, CycApiException {
+    public int countUsingBestIndex(CycList formula, ELMT mt) throws IOException, CycApiException {
         CycList command = new CycList();
         CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
         CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
@@ -5943,7 +5943,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isFormulaWellFormed (CycList formula, CycFort mt)
+    public boolean isFormulaWellFormed (CycList formula, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(el-formula-ok? '" + formula.stringApiValue() +
                                " " + mt.stringApiValue() + ")");
@@ -6757,7 +6757,7 @@ public class CycAccess {
      */
     public CycList getGafs (CycFort cycFort,
                             CycList predicates,
-                            CycFort mt)
+                            ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList result = new CycList();
         for (int i = 0; i < predicates.size(); i++) {
@@ -6783,7 +6783,7 @@ public class CycAccess {
      */
     public CycList getGafs (CycFort cycFort,
                             CycFort predicate,
-                            CycFort mt)
+                            ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList gafs = new CycList();
         String command =
@@ -6877,7 +6877,7 @@ public class CycAccess {
                                                 CycFort predicate,
                                                 int indexArg,
                                                 CycList gatherArgs,
-                                                CycFort mt)
+                                                ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList tuples = new CycList();
         CycList command = new CycList();
@@ -6965,7 +6965,7 @@ public class CycAccess {
     public void assertSynonymousExternalConcept (CycFort cycTerm,
                                                  CycFort informationSource,
                                                  String externalConcept,
-                                                 CycFort mt)
+                                                 ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList gaf = new CycList();
         // #$synonymousExternalConcept
@@ -7000,7 +7000,7 @@ public class CycAccess {
      * @param mt the assertion microtheory
      */
     public CycList getSynonymousExternalConcepts (CycFort informationSource,
-                                                  CycFort mt)
+                                                  ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList variables = new CycList();
         CycVariable cycTermVar = CycObjectFactory.makeCycVariable("?cyc-term");
@@ -7033,7 +7033,7 @@ public class CycAccess {
         gaf.add(getKnownConstantByGuid("bd588078-9c29-11b1-9dad-c379636f7270"));
         gaf.add(getKnownConstantByGuid("bd6757b8-9c29-11b1-9dad-c379636f7270"));
         gaf.add(phrase);
-        CycFort mt = getKnownConstantByGuid("bda16220-9c29-11b1-9dad-c379636f7270");
+        ELMT mt = getKnownConstantByGuid("bda16220-9c29-11b1-9dad-c379636f7270");
         assertGaf(gaf, mt);
     }
 
@@ -7054,7 +7054,7 @@ public class CycAccess {
         gaf.add(getKnownConstantByGuid("bd588078-9c29-11b1-9dad-c379636f7270"));
         gaf.add(getKnownConstantByGuid("bd5a6853-9c29-11b1-9dad-c379636f7270"));
         gaf.add(phrase);
-        CycFort mt = getKnownConstantByGuid("bda16220-9c29-11b1-9dad-c379636f7270");
+        ELMT mt = getKnownConstantByGuid("bda16220-9c29-11b1-9dad-c379636f7270");
         assertGaf(gaf, mt);
     }
 
@@ -7068,7 +7068,7 @@ public class CycAccess {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public CycList getNameStrings (CycFort cycFort, CycFort mt)
+    public CycList getNameStrings (CycFort cycFort, ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         // (#$nameString <cycFort> ?name-string)
         CycList query = new CycList();
@@ -7157,7 +7157,7 @@ public class CycAccess {
      */
     public CycList getArg2s (String predicate,
                              CycFort arg1,
-                             CycFort mt)
+                             ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return getArg2s(getKnownConstantByName(predicate),
                         arg1,
@@ -7176,7 +7176,7 @@ public class CycAccess {
      */
     public CycList getArg2s (CycFort predicate,
                              CycFort arg1,
-                             CycFort mt)
+                             ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList query = new CycList();
         query.add(predicate);
@@ -7217,7 +7217,7 @@ public class CycAccess {
      */
     public Object getArg2 (String predicate,
                            CycFort arg1,
-                           CycFort mt)
+                           ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         return getArg2(getKnownConstantByName(predicate), arg1, mt);
     }
@@ -7234,7 +7234,7 @@ public class CycAccess {
      */
     public Object getArg2 (CycFort predicate,
                            CycFort arg1,
-                           CycFort mt)
+                           ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList query = new CycList();
         query.add(predicate);
@@ -7281,7 +7281,7 @@ public class CycAccess {
      */
     public Object getAssertionArg2 (CycFort predicate,
                                     CycFort arg1,
-                                    CycFort mt)
+                                    ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList assertions = getAllAssertionsInMt(mt);
         Iterator iter = assertions.iterator();
@@ -7329,7 +7329,7 @@ public class CycAccess {
      */
     public Object getArg1 (CycFort predicate,
                            CycFort arg2,
-                           CycFort mt)
+                           ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList answer = getArg1s(predicate, arg2, mt);
         if (answer.size() > 0)
@@ -7369,7 +7369,7 @@ public class CycAccess {
      */
     public CycList getArg1s (CycFort predicate,
                              CycFort arg2,
-                             CycFort mt)
+                             ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList query = new CycList();
         query.add(predicate);
@@ -7398,7 +7398,7 @@ public class CycAccess {
      * @param mt the given microtheory
      * @return  the list of assertions contained in the given mt
      */
-    public CycList getAllAssertionsInMt (CycFort mt)
+    public CycList getAllAssertionsInMt (ELMT mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList command = new CycList();
         command.add(CycObjectFactory.makeCycSymbol("gather-mt-index"));
@@ -7412,7 +7412,7 @@ public class CycAccess {
      *
      * @param mt the microtheory from which to delete all its assertions
      */
-    public void unassertMtContentsWithTranscript (CycFort mt)
+    public void unassertMtContentsWithTranscript (ELMT mt)
             throws IOException, UnknownHostException, CycApiException {
         CycList assertions = getAllAssertionsInMt(mt);
         Iterator iter = assertions.iterator();
@@ -7432,7 +7432,7 @@ public class CycAccess {
      *
      * @param mt the microtheory from which to delete all its assertions
      */
-    public void unassertMtContentsWithoutTranscript (CycFort mt)
+    public void unassertMtContentsWithoutTranscript (ELMT mt)
             throws IOException, UnknownHostException, CycApiException {
         CycList assertions = getAllAssertionsInMt(mt);
         Iterator iter = assertions.iterator();
@@ -7456,7 +7456,7 @@ public class CycAccess {
      */
     public void unassertMatchingAssertionsWithoutTranscript (CycFort predicate,
                                                              Object arg1,
-                                                             CycFort mt)
+                                                             ELMT mt)
             throws IOException, UnknownHostException, CycApiException {
         CycList assertions = getAllAssertionsInMt(mt);
         Iterator iter = assertions.iterator();

@@ -31,7 +31,7 @@ import org.opencyc.api.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycNart extends CycFort implements Comparable {
+public class CycNart extends CycFort implements Comparable, ELMT {
 
     /**
      * XML serialization tags.
@@ -330,22 +330,18 @@ public class CycNart extends CycFort implements Comparable {
         while (iterator.hasNext()) {
             Object object = iterator.next();
             String cyclifiedObject = null;
-            if(object instanceof CycObject) {
-               cyclifiedObject = ((CycObject) object).cyclify();
-            } else if (object instanceof CycList) {
+            if (object instanceof DefaultCycObject) {
+               cyclifiedObject = ((DefaultCycObject) object).cyclify();
+            } 
+            else if (object instanceof CycList) {
                cyclifiedObject = ((CycList) object).cyclify();
-            } else if (object instanceof String) {
+            } 
+            else if (object instanceof String) {
                cyclifiedObject = "\"" + object + "\"";
-            } else {
+            } 
+            else {
                 cyclifiedObject = object.toString();
             }
-            /*
-            if (object instanceof CycConstant)
-                cyclifiedObject = ((CycConstant) object).cyclify();
-            else if (object instanceof CycNart)
-                cyclifiedObject = ((CycNart) object).cyclify();
-            else
-                cyclifiedObject = object.toString();*/
             result .append(" ");
             result.append(cyclifiedObject);
         }

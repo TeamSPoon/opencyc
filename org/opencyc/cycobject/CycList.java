@@ -35,7 +35,7 @@ import  ViolinStrings.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycList extends ArrayList {
+public class CycList extends ArrayList implements CycObject, ELMT {
     /**
      * XML serialization tags.
      */
@@ -226,7 +226,7 @@ public class CycList extends ArrayList {
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
-    public boolean isFormulaWellFormed (CycFort mt) throws IOException, UnknownHostException,
+    public boolean isFormulaWellFormed (ELMT mt) throws IOException, UnknownHostException,
             CycApiException {
         return  CycAccess.current().isFormulaWellFormed(this, mt);
     }
@@ -636,8 +636,8 @@ public class CycList extends ArrayList {
             Object object = this.get(i);
             if (object == null)
                 throw  new RuntimeException("Invalid null element after " + result);
-            if (object instanceof CycObject)
-                cyclifiedObject = ((CycObject)object).cyclify();
+            if (object instanceof DefaultCycObject)
+                cyclifiedObject = ((DefaultCycObject)object).cyclify();
             else if (object instanceof CycConstant)
                 cyclifiedObject = ((CycConstant)object).cyclify();
             else if (object instanceof CycNart)
@@ -686,12 +686,8 @@ public class CycList extends ArrayList {
             Object object = this.get(i);
             if (object == null)
                 throw  new RuntimeException("Invalid null element after " + result);
-            if (object instanceof CycObject)
-                cyclifiedObject = ((CycObject)object).cyclify();
-            else if (object instanceof CycConstant)
-                cyclifiedObject = ((CycConstant)object).cyclify();
-            else if (object instanceof CycNart)
-                cyclifiedObject = ((CycNart)object).cyclify();
+            if (object instanceof DefaultCycObject)
+                cyclifiedObject = ((DefaultCycObject)object).cyclify();
             else if (object instanceof CycVariable)
                 cyclifiedObject = ((CycVariable)object).cyclify();
             else if (object instanceof String)

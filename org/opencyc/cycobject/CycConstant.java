@@ -30,7 +30,7 @@ import org.opencyc.api.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycConstant extends CycFort implements Comparable {
+public class CycConstant extends CycFort implements Comparable, ELMT {
 
     /**
      * Field for storing the name of the XML tag for CycConstant objects

@@ -35,7 +35,7 @@ public class StateMachine extends ModelElement {
      * variables that distinguish the state, and the operations which
      * can be performed upon state transitions.
      */
-    protected Object context;
+    protected Classifier context;
 
     /**
      * the top state of this state machine
@@ -63,7 +63,7 @@ public class StateMachine extends ModelElement {
      *
      * @return the context of this state machine
      */
-    public Object getContext () {
+    public Classifier getContext () {
         return context;
     }
 
@@ -72,7 +72,7 @@ public class StateMachine extends ModelElement {
      *
      * @param context the context of this state machine
      */
-    public void setContext (Object context) {
+    public void setContext (Classifier context) {
         this.context = context;
     }
 

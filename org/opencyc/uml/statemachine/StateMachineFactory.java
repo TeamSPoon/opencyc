@@ -5,6 +5,7 @@ import org.opencyc.cycobject.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.action.*;
+import org.opencyc.uml.datatypes.Multiplicity;
 
 /**
  * StateVertex from the UML State_Machines package.
@@ -51,28 +52,84 @@ public class StateMachineFactory {
 
     /**
      * Makes a new state machine object.  All further objects defined for this state
-     * machine will linked to the given namespace.
+     * machine will linked to the given namespace.  The name of the state machine is
+     * also required to be the name of the context classifier
      *
      * @param namespaceName the state machine namespace name
      * @param name the identifier for the state machine within its containing
      * namespace
      * @param commentString the comment for this state machine
-     * @param context the context Classifier of this state machine, which contains the
-     * variables that distinguish the state, and the operations which
-     * can be performed during state transitions.
+     * @param contextGeneralizations the list of Classifer generalizations for the
+     * given context classifier
      * @return the new state machine object
      */
     public StateMachine makeStateMachine(String namespaceName,
                                          String name,
-                                         String commentString,
-                                         Object context) {
+                                         String commentString) {
         stateMachine = new StateMachine();
         namespace = new Namespace(namespaceName);
         setNamespaceNameComment(stateMachine,
                                 name,
                                 commentString);
-        stateMachine.setContext(context);
         return stateMachine;
+    }
+
+    /**
+     * Associates the given Classifier shell with the state machine.
+     *
+     * @param name the name of the context Classifier
+     * @param commentString the comment for the given context Classifier
+     */
+    public void associateClassifierToStateMachine (String name,
+                                                   String commentString) {
+        org.opencyc.uml.core.Class context = new org.opencyc.uml.core.Class();
+        setNamespaceNameComment(context,
+                                name,
+                                commentString);
+        context.setIsAbstract(false);
+        stateMachine.setContext(context);
+    }
+
+    /**
+     * Adds a direct super classifer to the context Classifier.
+     *
+     * @param generalizableElement the direct super Classifier
+     */
+    public void addGeneralizationToClassifier (Classifier generalizableElement) {
+        stateMachine.getContext().addGeneralization(generalizableElement);
+    }
+
+    /**
+     * Adds a state variable to the context Classifier.
+     *
+     * @param name the name of the state variable
+     * @param commentString the comment for this state machine
+     * @param targetScope indicates whether this is a class or instance attribute
+     * @param type the type of the state variable
+     * @param changeability indicates whether the attribute may be changed
+     * @param multiplicity the multiplicity of the attribute
+     * @param ordering the ordering of the attribute
+     * @param initialValue the initial value expression
+     */
+    public void addStateVariableToClassifier (String name,
+                                              String commentString,
+                                              int targetScope,
+                                              Object type,
+                                              int changeability,
+                                              Multiplicity multiplicity,
+                                              int ordering,
+                                              Expression initialValue) {
+        Attribute attribute = new Attribute();
+        setNamespaceNameComment(attribute,
+                                name,
+                                commentString);
+        attribute.setType(type);
+        attribute.setChangeability(changeability);
+        attribute.setMultiplicity(multiplicity);
+        attribute.setOrdering(ordering);
+        attribute.setInitialValue(initialValue);
+        attribute.setTargetScope(targetScope);
+        stateMachine.getContext().addFeature(attribute);
     }
 
     /**
@@ -117,7 +174,7 @@ public class StateMachineFactory {
     public InputPin addInputPinToProcedure(String name,
                                            String commentString,
                                            Procedure procedure,
-                                           Class type) {
+                                           java.lang.Class type) {
         InputPin inputPin = new InputPin();
         setNamespaceNameComment(inputPin,
                                 name,
@@ -141,7 +198,7 @@ public class StateMachineFactory {
     public OutputPin addOutputPinToProcedure(String name,
                                              String commentString,
                                              Procedure procedure,
-                                             Class type) {
+                                             java.lang.Class type) {
         OutputPin outputPin = new OutputPin();
         setNamespaceNameComment(outputPin,
                                 name,
@@ -297,7 +354,7 @@ public class StateMachineFactory {
     public Parameter addParameterToEvent(String name,
                                          String commentString,
                                          Event event,
-                                         Class type) {
+                                         java.lang.Class type) {
         Parameter parameter = new Parameter();
         setNamespaceNameComment(parameter,
                                 name,

@@ -43,7 +43,7 @@ public abstract class Feature extends ModelElement {
     /**
      * the Classifier declaring this feature
      */
-    protected Class owner;
+    protected Classifier owner;
 
     /**
      * Constructs a new Feature object.
@@ -74,7 +74,7 @@ public abstract class Feature extends ModelElement {
      *
      * @return the Classifier declaring this feature
      */
-    public Class getOwner () {
+    public Classifier getOwner () {
         return owner;
     }
 
@@ -83,7 +83,7 @@ public abstract class Feature extends ModelElement {
      *
      * @param owner the Classifier declaring this feature
      */
-    public void setOwner (Class owner) {
+    public void setOwner (Classifier owner) {
         this.owner = owner;
     }
 }

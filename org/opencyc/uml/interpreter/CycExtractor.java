@@ -212,6 +212,7 @@ public class CycExtractor {
             Log.current.println(stateMachineTerm.cyclify() + " is defined in " +
                                 stateMachineDefinitionMtTerm.cyclify());
         stateMachine = extractStateMachine();
+        extractContextClassifier();
         extractProcedures();
         extractStates();
         extractTransitions();
@@ -233,12 +234,30 @@ public class CycExtractor {
                                       stateMachineDefinitionMtTerm.cyclify());
         String namespaceName = namespaceTerm.toString();
         String commentString = cycAccess.getComment(stateMachineTerm);
-        Object context = stateMachineDefinitionMtTerm;
         return stateMachineFactory.makeStateMachine(namespaceName,
-                                                    stateMachineName,
-                                                    commentString,
-                                                    context);
+                                                 stateMachineName,
+                                                 commentString);
     }
+
+    /**
+     * Extracts the context classifier from Cyc, which has the same name and
+     * comment as the state machine.
+     */
+    protected void extractContextClassifier ()
+        throws IOException, CycApiException, ClassNotFoundException {
+        String commentString = cycAccess.getComment(stateMachineTerm);
+        stateMachineFactory.associateClassifierToStateMachine(stateMachineName,
+                                                              commentString);
+        CycConstant classifier =
+                (CycConstant) cycAccess.getArg2("umlContext",
+                                                stateMachineTerm,
+                                                stateMachineDefinitionMtTerm);
+        // get the state variables and make them into attributes
+
+    }
+
+
+
 
     /**
      * Extracts the procedures for the state machine from Cyc.
@@ -313,7 +332,7 @@ public class CycExtractor {
                     throw new CycApiException("Expected umlType not found for \n  " +
                                               argumentTerm.cyclify() + " in " +
                                               procedureDefinitionMt.cyclify());
-                Class type = translateType(typeTerm);
+                java.lang.Class type = translateType(typeTerm);
                 stateMachineFactory.addInputPinToProcedure(name,
                                                            commentString,
                                                            procedure,
@@ -344,7 +363,7 @@ public class CycExtractor {
                     throw new CycApiException("Expected umlType not found for \n  " +
                                               resultTerm.cyclify() + " in " +
                                               procedureDefinitionMt.cyclify());
-                Class type = translateType(typeTerm);
+                java.lang.Class type = translateType(typeTerm);
                 stateMachineFactory.addOutputPinToProcedure(name,
                                                             commentString,
                                                             procedure,
@@ -359,24 +378,24 @@ public class CycExtractor {
      * @param typeTerm the given type term
      * @return the java class denoted by the given Cyc type term
      */
-    protected Class translateType (CycConstant typeTerm)
+    protected java.lang.Class translateType (CycConstant typeTerm)
         throws IOException, CycApiException, ClassNotFoundException {
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLPrimitiveBoolean")))
-            return Class.forName("org.opencyc.uml.statemachine.PrimitiveBoolean");
+            return java.lang.Class.forName("org.opencyc.uml.statemachine.PrimitiveBoolean");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLPrimitiveChar")))
-            return Class.forName("org.opencyc.uml.statemachine.PrimitiveChar");
+            return java.lang.Class.forName("org.opencyc.uml.statemachine.PrimitiveChar");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLPrimitiveDouble")))
-            return Class.forName("org.opencyc.uml.statemachine.PrimitiveDouble");
+            return java.lang.Class.forName("org.opencyc.uml.statemachine.PrimitiveDouble");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLPrimitiveFloat")))
-            return Class.forName("org.opencyc.uml.statemachine.PrimitiveFloat");
+            return java.lang.Class.forName("org.opencyc.uml.statemachine.PrimitiveFloat");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLPrimitiveInt")))
-            return Class.forName("org.opencyc.uml.statemachine.PrimitiveInt");
+            return java.lang.Class.forName("org.opencyc.uml.statemachine.PrimitiveInt");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLPrimitiveLong")))
-            return Class.forName("org.opencyc.uml.statemachine.PrimitiveLong");
+            return java.lang.Class.forName("org.opencyc.uml.statemachine.PrimitiveLong");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLString")))
-            return Class.forName("java.lang.String");
+            return java.lang.Class.forName("java.lang.String");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLCycLExpression")))
-            return Class.forName("org.opencyc.cycobject.CycList");
+            return java.lang.Class.forName("org.opencyc.cycobject.CycList");
         //TODO add other types as required
         throw new RuntimeException("Unhandled typeTerm " + typeTerm.cyclify());
     }
@@ -706,6 +725,12 @@ public class CycExtractor {
                 Iterator inputBindingTuplesIter = inputBindingTuples.iterator();
                 while (inputBindingTuplesIter.hasNext()) {
                     CycList inputBindingTuple = (CycList) inputBindingTuplesIter.next();
+
+                    //todo call StateMachineFactory
+
+                    //todo add stateVariables attribute to StateMachine
+
+                    //todo what about umlBody - minimize Interpreter calls to Cyc.
 
                 }
 

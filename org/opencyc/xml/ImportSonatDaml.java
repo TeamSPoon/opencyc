@@ -1032,9 +1032,9 @@ public class ImportSonatDaml {
             // arg2Isa
             null,
             // arg1Genl
-            "Event",
-            // arg2Genl
             "PartiallyTangible",
+            // arg2Genl
+            "Event",
             // resultIsa
             "Collection");
 

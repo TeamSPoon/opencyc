@@ -199,6 +199,15 @@ public class Log {
     }
 
     /**
+     * Writes the object's string representation to the log.
+     *
+     * @param object the object whose string representation is to be logged.
+     */
+    public void print(Object object) {
+        print(object.toString());
+    }
+
+    /**
      * Writes the String message to the log.
      *
      * @param message the String message to be logged.
@@ -215,7 +224,18 @@ public class Log {
     }
 
     /**
-     * Writes the String message to the log.
+     * Writes the object's string representation to the log, followed by
+     * a newline.
+     *
+     * @param object the object whose string representation is to be logged.
+     */
+    public void println(Object object) {
+        this.println(object.toString());
+    }
+
+    /**
+     * Writes the object's string representation to the log, followed by
+     * a newline.
      *
      * @param message the String message to be logged.
      */

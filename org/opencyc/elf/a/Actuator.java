@@ -32,16 +32,16 @@ import java.util.ArrayList;
 public interface Actuator {
   
   /** 
-   * Gets the name of the actuator.
+   * Gets the name of the actuator or virtual actuator (job assigner)
    *
-   * @return the name of the actuator
+   * @return the name of the actuator or virtual actuator (job assigner).
    */
   public String getName();
   
   /**
-   * Gets the resources required by this actuator.
+   * Gets the resources required by this actuator or virtual actuator (job assigner).
    *
-   * @return the resources required by this actuator
+   * @return the resources required by this actuator or virtual actuator (job assigner)
    */
   public ArrayList getResources();
   

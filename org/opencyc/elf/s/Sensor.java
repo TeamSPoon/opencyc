@@ -32,16 +32,16 @@ import java.util.ArrayList;
 public interface Sensor {
   
   /** 
-   * Gets the name of the sensor.
+   * Gets the name of the sensor or virtual sensor (sensory perception).
    *
-   * @return the name of the sensor
+   * @return the name of the sensor or virtual sensor (sensory perception)
    */
   public String getName();
 
   /**
-   * Gets the resources required by this sensor.
+   * Gets the resources required by this sensor or virtual sensor (sensory perception).
    *
-   * @return the resources required by this sensor
+   * @return the resources required by this sensor or virtual sensor (sensory perception)
    */
   public ArrayList getResources();
   

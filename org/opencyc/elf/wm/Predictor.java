@@ -3,17 +3,7 @@ package org.opencyc.elf.wm;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
-import org.opencyc.elf.message.GenericMsg;
-import org.opencyc.elf.message.PerceivedSensoryInputMsg;
-import org.opencyc.elf.message.PredictedInputMsg;
-import org.opencyc.elf.message.PredictionRequestMsg;
-
 //// External Imports
-
-import EDU.oswego.cs.dl.util.concurrent.Executor;
-import EDU.oswego.cs.dl.util.concurrent.Puttable;
-import EDU.oswego.cs.dl.util.concurrent.Takable;
-import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
  * Provides the predictor for the ELF WorldModel.<br>
@@ -45,126 +35,15 @@ public class Predictor extends NodeComponent {
   public Predictor() {
   }
   
-  /** 
-   * Creates a new instance of Predictor with the given
-   * input and output channels.
-   *
-   * @param predictorChannel the takable channel from which messages are input
-   */
-  public Predictor (Takable predictorChannel,
-                    Puttable planEvaluatorChannel) {
-    consumer = new Consumer(predictorChannel,
-                            this);
-    executor = new ThreadedExecutor();
-    try {
-      executor.execute(consumer);
-    }
-    catch (InterruptedException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-  }
   
   //// Public Area
   
   //// Protected Area
-  
-  /**
-   * Thread which processes the input message channel.
-   */
-  protected class Consumer implements Runnable {
     
-    /**
-     * the takable channel from which messages are input
-     */
-    protected final Takable predictorChannel;
-    
-    /**
-     * the parent node component
-     */
-    protected NodeComponent nodeComponent;
-          
-    /**
-     * Creates a new instance of Consumer.
-     *
-     * @param predictorChannel the takable channel from which messages are input
-     * @param nodeComponent the parent node component
-     */
-    protected Consumer (Takable predictorChannel,
-                        NodeComponent nodeComponent) { 
-      this.predictorChannel = predictorChannel;
-      this.nodeComponent = nodeComponent;
-    }
-
-    /**
-     * Reads messages from the input queue and processes them.
-     */
-    public void run () {
-      try {
-        while (true) { 
-          dispatchMsg((GenericMsg) predictorChannel.take()); 
-        }
-      }
-      catch (InterruptedException ex) {}
-    }
-      
-    /**
-     * Dispatches the given input channel message by type.
-     *
-     * @param genericMsg the given input channel message
-     */
-    void dispatchMsg (GenericMsg genericMsg) {
-      if (genericMsg instanceof PredictionRequestMsg)
-        respondToPredictionRequestMsg((PredictionRequestMsg) genericMsg);
-      else if (genericMsg instanceof PerceivedSensoryInputMsg)
-        processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
-    }
-  
-    /**
-     * Responds to the prediction request message.
-     *
-     * @param predictionRequestMsg the prediction request message
-     */
-    protected void respondToPredictionRequestMsg(PredictionRequestMsg predictionRequestMsg) {
-      Object obj = predictionRequestMsg.getObj();
-      //TODO
-      Object data = null;
-      
-      PredictedInputMsg predictedInputMsg = new PredictedInputMsg();
-      predictedInputMsg.setSender(nodeComponent);
-      predictedInputMsg.setInReplyToMsg(predictionRequestMsg);
-      predictedInputMsg.setObj(obj);
-      predictedInputMsg.setData(data);
-      sendMsgToRecipient(predictedInputMsg.getReplyToChannel(), predictedInputMsg);
-    }
-    
-    /**
-     * Processes the perceived sensory input message.
-     *
-     * @param perceivedSensoryInputMsg the perceived sensory input message
-     */
-    protected void processPerceivedSensoryInputMsg(PerceivedSensoryInputMsg perceivedSensoryInputMsg) {
-      Object obj = perceivedSensoryInputMsg.getObj();
-      Object data = perceivedSensoryInputMsg.getData();
-      //TODO
-    }
-    
-  }
-  
   //// Private Area
   
   //// Internal Rep
-  
-  /**
-   * the thread which processes the input channel of messages
-   */
-  Consumer consumer;
-  
-  /**
-   * the executor of the consumer thread
-   */
-  Executor executor;
-  
+    
   //// Main
 
 }

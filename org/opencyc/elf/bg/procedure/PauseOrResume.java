@@ -7,7 +7,7 @@ package org.opencyc.elf.bg.procedure;
 import java.util.ArrayList;
 
 /**
- * <P>PauseOrResume is designed to...
+ * <P>PauseOrResume contains the pause-or-resume procedure.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.

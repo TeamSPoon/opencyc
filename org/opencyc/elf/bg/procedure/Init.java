@@ -7,7 +7,7 @@ package org.opencyc.elf.bg.procedure;
 import java.util.ArrayList;
 
 /**
- * <P>Init is designed to...
+ * <P>Init contains the Init procedure.
  *
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.

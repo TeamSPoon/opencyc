@@ -14,7 +14,7 @@ package org.opencyc.elf.bg.procedure;
 import java.util.ArrayList;
 
 /**
- * <P>EmergencyStop is designed to...
+ * <P>EmergencyStop contains the emergency stop procedure.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.

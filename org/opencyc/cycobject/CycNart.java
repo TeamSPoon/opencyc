@@ -119,6 +119,24 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
+     * Returns the functor of the <tt>CycNart</tt>.
+     *
+     * @return the functor of the <tt>CycNart</tt>
+     */
+    public CycFort getFunctor() {
+        return functor;
+    }
+
+    /**
+     * Returns the arguments of the <tt>CycNart</tt>.
+     *
+     * @return the arguments of the <tt>CycNart</tt>
+     */
+    public List getArguments() {
+        return arguments;
+    }
+
+    /**
      * Prints the XML representation of the <ttt>CycNart</tt> to an <tt>XMLPrintWriter</tt>
      * It is supposed to look like this:<p>
      * <pre>

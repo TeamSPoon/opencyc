@@ -152,6 +152,43 @@ public class UnitTest extends TestCase {
         Rule rule7 = new Rule("(#$different ?x ?y)");
         Assert.assertTrue(rule7.isAllDifferent());
 
+        // isEvaluatable
+        Rule rule8 = new Rule("(#$isa ?x #$Cathedral)");
+        Assert.assertTrue(! rule8.isEvaluatable());
+        Rule rule9 = new Rule("(#$numericallyEqual ?x 1)");
+        Assert.assertTrue(rule9.isEvaluatable());
+        Rule rule10 = new Rule("(#$and (#$isa ?x #$Cathedral) (#$numericallyEqual ?x 2))");
+        Assert.assertTrue(! rule10.isEvaluatable());
+        Rule rule11 = new Rule("(#$and (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))");
+        Assert.assertTrue(rule11.isEvaluatable());
+        Rule rule12 = new Rule("(#$or (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))");
+        Assert.assertTrue(rule11.isEvaluatable());
+
+
+        // evaluateConstraintRule
+        CycList cycList13 = new CycList("(#$numericallyEqual 0 0)");
+        Assert.assertTrue(Rule.evaluateConstraintRule(cycList13));
+        CycList cycList14 = new CycList("(#$numericallyEqual 1 0)");
+        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList14));
+        CycList cycList15 = new CycList("(#$numericallyEqual 0 1)");
+        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList15));
+        CycList cycList16 = new CycList("(#$numericallyEqual (#$PlusFn 0) 1)");
+        Assert.assertTrue(Rule.evaluateConstraintRule(cycList16));
+        CycList cycList17 = new CycList("(#$numericallyEqual (#$PlusFn 3) 1)");
+        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList17));
+        CycList cycList18 = new CycList("(#$or (#$numericallyEqual (#$PlusFn 3) 1) " +
+                                        "      (#$numericallyEqual 4 (#$PlusFn 3)))");
+        Assert.assertTrue(Rule.evaluateConstraintRule(cycList18));
+        CycList cycList19 = new CycList("(#$or (#$numericallyEqual (#$PlusFn 3) 1) " +
+                                        "      (#$numericallyEqual 4 (#$PlusFn 7)))");
+        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList19));
+        CycList cycList20 = new CycList("(#$and (#$numericallyEqual (#$PlusFn 3) 4) " +
+                                        "       (#$numericallyEqual 4 (#$PlusFn 3)))");
+        Assert.assertTrue(Rule.evaluateConstraintRule(cycList20));
+        CycList cycList21 = new CycList("(#$and (#$numericallyEqual (#$PlusFn 3) 1) " +
+                                        "       (#$numericallyEqual 4 (#$PlusFn 7)))");
+        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList21));
+
         //Zebra Puzzle rules
         String zebraPuzzleString =
             "(#$and " +
@@ -350,6 +387,7 @@ public class UnitTest extends TestCase {
         ArrayList zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
 
         ConstraintProblem zebraProblem = new ConstraintProblem();
+        zebraProblem.setVerbosity(1);
         ArrayList solutions = zebraProblem.solve(zebraPuzzleCycList);
         Assert.assertNotNull(solutions);
 
@@ -387,7 +425,7 @@ public class UnitTest extends TestCase {
         Assert.assertTrue((zebraProblem.valueDomains.domains.get(blue)) instanceof HashMap);
         HashMap domainValueMarks = (HashMap) zebraProblem.valueDomains.domains.get(blue);
         Assert.assertTrue(domainValueMarks.containsKey(new Long(1)));
-        Assert.assertNull(domainValueMarks.get(new Long(1)));
+        Assert.assertNotNull(domainValueMarks.get(new Long(1)));
 
         // test HighCardinalityDomains
         Assert.assertTrue(zebraProblem.highCardinalityDomains.highCardinalityDomains.size() == 0);

@@ -120,6 +120,18 @@ public class ValueDomains {
     }
 
     /**
+     * Adds an <tt>Object</tt> value to the domain for a variable.
+     *
+     * @param cycVariable the variable
+     * @param value the <tt>Object</tt> value which is added to the domain for the variable
+     */
+    protected void addDomainValue(CycVariable cycVariable, Object value) {
+        ArrayList domainValues = this.getDomainValues(cycVariable);
+        domainValues.add(value);
+        setDomainValues(cycVariable, domainValues);
+    }
+
+    /**
      * Returns <tt>true</tt> if the variable has value in its domain.
      *
      * @param cycVariable the variable under consideration
@@ -195,7 +207,7 @@ public class ValueDomains {
                 break;
             Object keyValue = values.next();
             Object level = domainValueMarks.get(keyValue);
-            if (level != null)
+            if (level == null)
                 unmarkedDomainValues.add(keyValue);
         }
         return unmarkedDomainValues;
@@ -273,7 +285,11 @@ public class ValueDomains {
                                             Object value,
                                             Integer level) {
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
-        return (domainValueMarks.get(value)).equals(level);
+        Object mark = domainValueMarks.get(value);
+        if (mark == null)
+            return false;
+        else
+            return mark.equals(level);
     }
 
     /**

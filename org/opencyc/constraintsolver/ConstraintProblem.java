@@ -60,14 +60,24 @@ public class ConstraintProblem {
     protected RuleEvaluator ruleEvaluator = new RuleEvaluator(this);
 
     /**
-     * <tt>ForwardCheckingSearcher</tt> for this <tt>ConstraintProblem</tt>.
+     * <tt>ArgumentTypeConstrainer</tt> for this <tt>ConstraintProblem</tt>.
      */
-    protected ForwardCheckingSearcher forwardCheckingSearcher = new ForwardCheckingSearcher(this);
+    protected ArgumentTypeConstrainer argumentTypeConstrainer = new ArgumentTypeConstrainer(this);
+
+    /**
+     * <tt>Backchainer</tt> for this <tt>ConstraintProblem</tt>.
+     */
+    protected Backchainer backchainer = new Backchainer(this);
 
     /**
      * <tt>Solution</tt> for this <tt>ConstraintProblem</tt>.
      */
     protected Solution solution = new Solution(this);
+
+    /**
+     * <tt>ForwardCheckingSearcher</tt> for this <tt>ConstraintProblem</tt>.
+     */
+    protected ForwardCheckingSearcher forwardCheckingSearcher;
 
     /**
      * The OpenCyc microtheory in which the constraint rules should be asked.
@@ -90,7 +100,7 @@ public class ConstraintProblem {
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 9;
+    protected int verbosity = 8;
 
     /**
      * The input problem <tt>CycList</tt>.
@@ -116,6 +126,11 @@ public class ConstraintProblem {
      * solution(s).
      */
     protected ArrayList constraintRules = new ArrayList();
+
+    /**
+     * Collection of additional argument type constraint rules.
+     */
+    ArrayList argumentTypeConstraintRules = new ArrayList();
 
     /**
      * Collection of the constraint variables as <tt>CycVariable</tt> objects.
@@ -155,9 +170,12 @@ public class ConstraintProblem {
         problemParser.setVerbosity(verbosity);
         valueDomains.setVerbosity(verbosity);
         highCardinalityDomains.setVerbosity(verbosity);
+        argumentTypeConstrainer.setVerbosity(verbosity);
+        backchainer.setVerbosity(verbosity);
         nodeConsistencyAchiever.setVerbosity(verbosity);
         ruleEvaluator.setVerbosity(verbosity);
-        forwardCheckingSearcher.setVerbosity(verbosity);
+        if (forwardCheckingSearcher != null)
+            forwardCheckingSearcher.setVerbosity(verbosity);
         solution.setVerbosity(verbosity);
     }
     /**
@@ -172,14 +190,18 @@ public class ConstraintProblem {
      * <tt>Object</tt>.
      */
     public ArrayList solve(CycList problem) {
+        long startMilliseconds = System.currentTimeMillis();
         this.problem = problem;
         problemParser.extractRulesAndDomains();
         problemParser.gatherVariables();
         problemParser.initializeDomains();
         nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
         valueDomains.initializeDomainValueMarking();
-        //TODO enable when coding for search is done
-        //forwardCheckingSearcher.search(variables, 1);
+        forwardCheckingSearcher  = new ForwardCheckingSearcher(this);
+        forwardCheckingSearcher.search(variables, 1);
+        long endMilliseconds = System.currentTimeMillis();
+        if (verbosity > 0)
+            System.out.println((endMilliseconds - startMilliseconds) + " milliseconds");
 
         return solution.solutions;
     }

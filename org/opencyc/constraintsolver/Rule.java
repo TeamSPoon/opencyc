@@ -45,6 +45,14 @@ public class Rule {
     protected ArrayList variables;
 
     /**
+     * The depth of backchaining when this rule was introduced.  For rules that originate
+     * from the input constraint problem, this value is 0.  When this value equals the
+     * maximum depth of backchain limit, then this rule cannot be the subject of a further
+     * backchain inference step.
+     */
+    protected int backchainDepth = 0;
+
+    /**
      * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> <tt>String</tt>
      * representation.<p>
      *
@@ -71,6 +79,26 @@ public class Rule {
         this.rule = rule;
         gatherVariables();
     }
+
+    /**
+     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> at the given
+     * backchain depth.<p>
+     *
+     * <pre>
+     *  String ruleAsString = "(#$isa ?x #$Cathedral)";
+     *  Rule rule1 = new Rule (new CycList(ruleAsString), 2);
+     * </pre>
+     *
+     * @param rule the rule's formula, which must be a well formed OpenCyc
+     * query represented by a <tt>CycList</tt>.
+     * @param backchainDepth the depth of backchaining when this rule is introduced
+     */
+    protected Rule(CycList rule, int backchainDepth) {
+        this.rule = rule;
+        this.backchainDepth = backchainDepth;
+        gatherVariables();
+    }
+
     /**
      * Simplifies a rule expression.<p>
      * (#$and (<rule1> <rule2> ... <ruleN>) becomes <rule1> <rule2> ... <ruleN>
@@ -119,7 +147,7 @@ public class Rule {
     }
 
     /**
-     * Gets the rule's variables.
+     * Returns the rule's variables.
      *
      * @return the <tt>ArrayList</tt> which lists the unique <tt>CycVariables</tt> that are
      * used in the rule's formula.
@@ -129,14 +157,23 @@ public class Rule {
     }
 
     /**
-     * Gets the rule's arity, which is the number of variables
-     * in this <tt>Rule</tt>.
+     * Returns the rule's arity which is defined to be the number of variables, not
+     * necessarily equalling the arity of the rule's first predicate.
      *
-     * @return an <tt>int</tt> which is the number of <tt>CycVariables</tt>
-     * in the rule's formula.
+     * @return rule's arity which is defined to be the number of variables, not
+     * necessarily equalling the arity of the rule's first predicate
      */
     protected int getArity() {
         return variables.size();
+    }
+
+    /**
+     * Returns the backchain depth when this rule was introduced.
+     *
+     * @return the backchain depth when this rule was introduced
+     */
+    protected int getBackchainDepth() {
+        return this.backchainDepth;
     }
 
     /**
@@ -158,8 +195,17 @@ public class Rule {
      * @return the predicate <tt>CycConstant</tt> or <tt>CycSymbol</tt>
      * of this <tt>Rule</tt> object
      */
-    protected Object getPredicate() {
+    protected CycConstant getPredicate() {
         return (CycConstant) rule.first();
+    }
+
+    /**
+     * Returns the arguments of this <tt>Rule</tt> object.
+     *
+     * @return the arguments of this <tt>Rule</tt> object
+     */
+    protected CycList getArguments() {
+        return (CycList) rule.rest();
     }
 
     /**
@@ -188,6 +234,144 @@ public class Rule {
         else
             return false;
     }
+
+    /**
+     * Returns <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
+     * which can be answered without KB lookup.  Typically an evaluatable constraint
+     * rule is a relational operator applied to a primitive data type.
+     *
+     *
+     * @return <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
+     * which can be answered without KB lookup
+     */
+    protected boolean isEvaluatable() {
+        if (this.getArguments().size() < 2)
+            return false;
+        if (this.getPredicate().toString().equals("numericallyEqual"))
+            return hasEvaluatableNumericalArgs();
+        else if (this.getPredicate().toString().equals("or") ||
+                 this.getPredicate().toString().equals("and")) {
+            for (int i = 0; i < this.getArguments().size(); i++) {
+                Rule orArgument = new Rule((CycList) this.getArguments().get(i));
+                if (! orArgument.isEvaluatable())
+                    return false;
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+
+    /**
+     * Returns <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments.
+     * Numbers and variables return <tt>true</tt> and functional expressions return
+     * <tt>true</tt> iff their arguments are simple numerical expressions.
+     *
+     *
+     * @return <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments
+     */
+    protected boolean hasEvaluatableNumericalArgs() {
+        CycList args = this.getRule().rest();
+        for (int i = 0; i < args.size(); i++) {
+            Object arg = args.get(i);
+            if (arg instanceof CycVariable)
+                continue;
+            else if (arg instanceof Long)
+                continue;
+            else if (arg instanceof CycNart) {
+                CycNart cycNart = (CycNart) arg;
+                if (cycNart.getFunctor().toString().equals("PlusFn")) {
+                    Object plusFnArg = cycNart.getArguments().get(0);
+                    if (plusFnArg instanceof CycVariable)
+                        continue;
+                    if (plusFnArg instanceof Long)
+                        continue;
+                }
+            }
+            else if (arg instanceof CycList) {
+                CycList cycList = (CycList) arg;
+                if (cycList.first().toString().equals("PlusFn")) {
+                    Object plusFnArg = cycList.second();
+                    if (plusFnArg instanceof CycVariable)
+                        continue;
+                    if (plusFnArg instanceof Long)
+                        continue;
+                }
+            }
+            else
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Evaluates the instantiated constraint rule locally without asking OpenCyc.
+     *
+     * @param instantiatedRule the fully instantiated constraint rule whose predicates
+     * can be evaluated locally without asking OpenCyc.
+     * @return the truth value of the fully instantiated constraint rule
+     */
+    protected static boolean evaluateConstraintRule(CycList instantiatedRule) {
+        CycConstant predicate = (CycConstant) instantiatedRule.first();
+        if (predicate.toString().equals("numericallyEqual")) {
+            long value = numericallyEvaluateExpression(instantiatedRule.second());
+            for (int i = 2; i < instantiatedRule.size(); i++) {
+                if (numericallyEvaluateExpression(instantiatedRule.get(i)) != value)
+                    return false;
+            }
+            return true;
+        }
+        else if (predicate.toString().equals("or")) {
+            CycList args = instantiatedRule.rest();
+            for (int i = 0; i < args.size(); i++) {
+                CycList arg = (CycList) args.get(i);
+                if (evaluateConstraintRule(arg))
+                    return true;
+            }
+            return false;
+        }
+        else if (predicate.toString().equals("and")) {
+            CycList args = instantiatedRule.rest();
+            for (int i = 0; i < args.size(); i++) {
+                CycList arg = (CycList) args.get(i);
+                if (! evaluateConstraintRule(arg))
+                    return false;
+            }
+            return true;
+        }
+        else
+            throw new RuntimeException(instantiatedRule + "Cannot be evaluated");
+    }
+
+    /**
+     * Returns the numerical value of the expression.
+     *
+     * @param expression the expression to be evaluated which can be a <tt>Long</tt> value,
+     * or a <tt>CycList</tt>
+     * @return the numerical value of the expression
+     */
+    protected static long numericallyEvaluateExpression(Object expression) {
+        if (expression instanceof Long)
+            return ((Long) expression).longValue();
+        else if (expression instanceof CycNart) {
+            CycNart cycNart = (CycNart) expression;
+            CycFort functor = cycNart.getFunctor();
+            Object arg = cycNart.getArguments().get(0);
+            if (functor.toString().equals("PlusFn")) {
+                return numericallyEvaluateExpression(arg) + 1;
+            }
+        }
+        else if (expression instanceof CycList) {
+            CycList cycList = (CycList) expression;
+            CycConstant functor = (CycConstant) cycList.first();
+            Object arg = cycList.get(1);
+            if (functor.toString().equals("PlusFn")) {
+                return numericallyEvaluateExpression(arg) + 1;
+            }
+        }
+        throw new RuntimeException(expression + "Cannot be evaluated");
+    }
+
 
     /**
      * Returns <tt>true</tt> if this is an intensional variable domain populating <tt>Rule</tt>.

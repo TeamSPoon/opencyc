@@ -136,7 +136,7 @@ public class NodeConsistencyAchiever {
                                    " to " + outputDomainValues);
         }
         achieveAllDifferentConsistencyWrtSingletons();
-        if (verbosity > 0) {
+        if (verbosity > 1) {
             System.out.println("\nAfter node consistency and all-different rule propagation.");
             constraintProblem.valueDomains.displayVariablesAndDomains();
         }
@@ -187,8 +187,4 @@ public class NodeConsistencyAchiever {
             }
         }
     }
-
-
-
-
 }

@@ -152,7 +152,7 @@ public class HighCardinalityDomains {
      * @param cycVariable the high-cardinality variable under consideration
      * @parma rule the domain-populating rule
      */
-    protected void setPopulatingRul(CycVariable cycVariable, Rule rule) {
+    protected void setPopulatingRule(CycVariable cycVariable, Rule rule) {
         if (! contains(cycVariable))
             this.initialize(cycVariable);
         Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);

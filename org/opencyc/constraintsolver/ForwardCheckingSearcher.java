@@ -38,7 +38,7 @@ public class ForwardCheckingSearcher {
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = 8;
+    protected int verbosity = 0;
 
     /**
      * Reference to the parent <tt>ConstraintProblem</tt> object.
@@ -63,6 +63,21 @@ public class ForwardCheckingSearcher {
     protected ValueDomains valueDomains;
 
     /**
+     * Reference to the <tt>HighCardinalityDomains</tt> object for the parent <tt>ConstraintProblem</tt>
+     * object.
+     */
+    protected HighCardinalityDomains highCardinalityDomains;
+
+    /**
+     * When instantiating a rule having one variable left to instantiate for subsequent
+     * asking the KB, this parameter sets the threshold beyond which a variable is used in the ask
+     *  -- returning what bindings are known (or proven) in the KB.
+     * Under this threshold, the rule is fully instantiated for the of each variable binding in
+     * the unmarked value domain and the KB ask is performed on each of these.
+     */
+    protected static final int ASK_ALL_OR_INDIV_THRESHOLD = 10;
+
+    /**
      * Constructs a new <tt>FowardCheckingSearcher</tt> object.
      *
      * @param constraintProblem the parent constraint problem
@@ -73,6 +88,8 @@ public class ForwardCheckingSearcher {
         constraintRules = constraintProblem.constraintRules;
         solution = constraintProblem.solution;
         valueDomains = constraintProblem.valueDomains;
+        highCardinalityDomains = constraintProblem.highCardinalityDomains;
+        verbosity = constraintProblem.verbosity;
     }
 
     /**
@@ -150,9 +167,12 @@ public class ForwardCheckingSearcher {
                     // Requested solution(s) found in the subtree.
                     return true;
                 // Otherwise backtrack, selecting next unmarked domain value.
-                if (verbosity > 2)
-                    System.out.println("  backtracking from " + currentBinding);
                 solution.removeBindingFromCurrentSolution(currentBinding);
+                if (verbosity > 2) {
+                    System.out.println("  backtracking from " + currentBinding);
+                    System.out.println("  trial solution " +
+                                       solution.getCurrentSolution());
+                }
                 restore(remainingVariables, level);
             }
         }
@@ -207,20 +227,24 @@ public class ForwardCheckingSearcher {
             Rule rule = (Rule) constraintRules.get(i);
             ArrayList ruleVariables = rule.getVariables();
             if ((rule.getArity() > 1) &&
-                // Does rule apply?
-                ruleVariables.contains(currentBinding.getCycVariable()) &&
-                // Can it rule out any remaining variable values?
-                OcCollectionUtils.hasIntersection(remainingVariables, ruleVariables)) {
+                ruleVariables.contains(currentBinding.getCycVariable())) {
+                // Rule applies to the selected variable.
+                ArrayList remainingRuleVariables =
+                    (ArrayList) CollectionUtils.intersection(remainingVariables,
+                                                             ruleVariables);
+                if (remainingRuleVariables.size() > 0) {
+                    // It can rule out remaining variable values.
 
-                if (verbosity > 4)
-                    System.out.println("Applicable rule \n" + rule +
-                                       "  for " + currentBinding.getCycVariable());
-                if (! checkForwardRule(rule,
-                                       remainingVariables,
-                                       level,
-                                       currentBinding))
-                    // found a forward rule which wipes out a domain
-                    return false;
+                    if (verbosity > 4)
+                        System.out.println("Applicable rule \n  " + rule +
+                                           "  for " + currentBinding.getCycVariable());
+                    if (! checkForwardRule(rule,
+                                           remainingRuleVariables,
+                                           level,
+                                           currentBinding))
+                        // found a forward rule which wipes out a domain
+                        return false;
+                }
             }
         }
     return true;
@@ -229,16 +253,394 @@ public class ForwardCheckingSearcher {
     /**
      * Performs forward checking of the given rule to restrict the domains of remaining
      * variables.  Returns <tt>true</tt> iff no remaining variable domains are wiped out.
+     * Delegates forward checking to specific methods for all-different constraint,
+     * evaluatable constraint, non-evaluatable constraint.  Non-evaluatable constraints
+     * are asked in the knowledge base rather than evaluated in the constraint solver
+     * object.
      *
-     * @param remainingVariables the <tt>ArrayList</tt> of variables for which no domain
+     * @param rule the constraint rule
+     * @param remainingRuleVariables the <tt>ArrayList</tt> of rule variables for which no domain
      * values have yet been bound
+     * @param level the current level of solution search depth
      * @param currentBinding the current variable and bound value
      * @return <tt>true</tt> iff no remaining variable domains are wiped out
      */
     protected boolean checkForwardRule(Rule rule,
-                                       ArrayList remainingVariables,
+                                       ArrayList remainingRuleVariables,
                                        int level,
                                        Binding currentBinding) {
+        CycList instantiatedRule = rule.getRule().subst(currentBinding.getValue(),
+                                                        currentBinding.getCycVariable());
+        if (verbosity > 2) {
+            System.out.println("Forward checking constraint\n  " + instantiatedRule);
+        }
+        if (rule.isAllDifferent()) {
+            if (verbosity > 2)
+                System.out.println("all-different rule\n  " + rule.getRule() +
+                                   "  for binding " + currentBinding);
+            return checkForwardDifferentRule(rule,
+                                             remainingRuleVariables,
+                                             level,
+                                             currentBinding);
+        }
+        else if (rule.isEvaluatable()) {
+            if (verbosity > 2)
+                System.out.println("Evaluatable rule\n  " + rule.getRule() +
+                                   "  for binding " + currentBinding);
+            ArrayList bindings = new ArrayList();
+            bindings.add(currentBinding);
+            return checkForwardInstantiatedRule(instantiatedRule,
+                                                remainingRuleVariables,
+                                                bindings,
+                                                level,
+                                                currentBinding);
+        }
+        else {
+            if (verbosity > 2)
+                System.out.println("Non-evaluatable rule " + rule.getRule() +
+                                   "\n  for binding " + currentBinding);
+            return checkForwardNonEvaluatableRule(rule,
+                                                  level,
+                                                  currentBinding);
+        }
+    }
+
+    /**
+     * Performs forward checking of the given non-evaluatable rule to restrict the
+     * domains of remaining variables.  Returns <tt>true</tt> iff no remaining variable
+     * domains are wiped out. Non-evaluatable constraints are asked in the knowledge base
+     * rather than evaluated in the constraint solver object.
+     *
+     * @param rule the constraint rule
+     * @param level the current level of solution search depth
+     * @param currentBinding the current variable and bound value
+     * @return <tt>true</tt> iff no remaining variable domains are wiped out
+     */
+    protected boolean checkForwardNonEvaluatableRule(Rule rule,
+                                                     int level,
+                                                     Binding currentBinding) {
+        // Order the remaining variables by ascending domain size.
+        ArrayList remainingRuleVariables = rule.getVariables();
+        remainingRuleVariables.remove(currentBinding.getCycVariable());
+        Collections.sort(remainingRuleVariables,
+                         new VariablesByAscendingDomainSizeComparator(valueDomains));
+        CycList instantiatedRule = rule.getRule().subst(currentBinding.getValue(),
+                                                        currentBinding.getCycVariable());
+        // For variables with high domain cardinality, use the first applicable
+        // rule to obtain the initial domain.
+        if (remainingRuleVariables.size() == 1) {
+            CycVariable variable = (CycVariable) remainingRuleVariables.get(0);
+            // one variable left to instantiate
+            if (highCardinalityDomains.contains(variable))
+                // The one variable left has a high cardinality domain.
+                if (highCardinalityDomains.getPopulatingRule(variable) == null) {
+                    // A rule has not yet populated the high cardinality domain.
+                    if (verbosity > 2)
+                        System.out.println("Using " + instantiatedRule +
+                                           "\nto populate the domain of " + variable);
+                    highCardinalityDomains.setPopulatingRule(variable, rule);
+                }
+        }
+        ArrayList bindingList = new ArrayList();
+        bindingList.add(currentBinding);
+        markPermittedRemainingBindings(instantiatedRule,
+                                       remainingRuleVariables,
+                                       bindingList,
+                                       currentBinding,
+                                       rule);
+        for (int i = 0; i < remainingRuleVariables.size(); i++) {
+            CycVariable remainingRuleVariable = (CycVariable) remainingRuleVariables.get(i);
+            valueDomains.complementDomainValues(remainingRuleVariable,
+                                                new Integer(level),
+                                                currentBinding);
+            if (valueDomains.isDomainWipedOut(remainingRuleVariable))
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Recurses to instantiate the constraint rule in the constraint problem KB microtheory with
+     * all remaining variables as bindings, marking the domain values as permitted with
+     * <tt>Boolean</tt> <tt>true</tt>.
+     *
+     * @param instantiatedRule the constraint rule
+     * @param remainingVariables the variables left to instantiate in the constraint rule
+     * @param bindings the instantiated values for variables already instantiated in the
+     * constraint rule
+     */
+    protected void markPermittedRemainingBindings(CycList instantiatedRule,
+                                                  ArrayList remainingVariables,
+                                                  ArrayList bindings,
+                                                  Binding currentBinding,
+                                                  Rule currentRule) {
+        CycVariable selectedVariable = currentBinding.getCycVariable();
+        if (remainingVariables.size() == 0) {
+            // This is the terminating recursion case, with no more variables left to instantiate.
+            boolean instantiatedRuleResult = constraintRuleAsk(instantiatedRule);
+            if (verbosity > 2) {
+                System.out.println("Bindings " + bindings);
+                System.out.println(instantiatedRule + " --> " + instantiatedRuleResult);
+            }
+            if (instantiatedRuleResult) {
+                CycVariable variable;
+                Object value;
+                for (int i = 0; i < bindings.size(); i++) {
+                    Binding binding = (Binding) bindings.get(i);
+                    variable = binding.getCycVariable();
+                    if (! variable.equals(selectedVariable)) {
+                        value = binding.getValue();
+                    if ((! highCardinalityDomains.contains(variable)) ||
+                        // initial population of high cardinality domain
+                        highCardinalityDomains.isPopulatingRule(currentRule, variable) ||
+                        // Other rules cannot extend a high cardinality domain.
+                        valueDomains.domainHasValue(variable, value))
+                        if (verbosity > 2)
+                            System.out.println("  " + binding + " is permitted by " +
+                                               currentBinding);
+                        valueDomains.markDomain(variable, value, Boolean.TRUE);
+                    }
+                }
+            }
+            return;
+        }
+        else if (remainingVariables.size() == 1) {
+            // One variable left, handle the special cases where individual value
+            // instantiation is not efficient.
+            CycVariable variable = (CycVariable) remainingVariables.get(0);
+            boolean isHighCardinalityDomain =
+                highCardinalityDomains.contains(variable);
+            if (verbosity > 2) {
+                System.out.println("Rule instantiation reached singleton " + variable);
+                System.out.println("  high cardinality? --> " + isHighCardinalityDomain);
+            }
+            if (isHighCardinalityDomain &&
+                highCardinalityDomains.isPopulatingRule(currentRule, variable)) {
+                // Special case where the rule is used to populate the values of an
+                // otherwise high cardinality domain.  Thus the constraint reasoner
+                // searches some subset of the potential domain values, where the
+                // subset is expected to have much smaller cardinality.
+                if (verbosity > 2)
+                    System.out.println("  high cardinality variable " + variable);
+                ArrayList permittedValues = askWithVariable(instantiatedRule, variable);
+                for (int i = 0; i < permittedValues.size(); i++) {
+                    Object value = permittedValues.get(i);
+                    Binding binding = new Binding(variable, value);
+                    if (valueDomains.domainHasValue(variable, value)) {
+                        if (verbosity > 2)
+                            System.out.println("  " + binding + " is permitted by " +
+                                               currentBinding);
+                        valueDomains.markDomain(variable, value, Boolean.TRUE);
+                    }
+                    else {
+                        // initial population of high cardinality domain
+                        if (verbosity > 2)
+                            System.out.println("  " + binding + " is new and permitted by " +
+                                               currentBinding);
+                        valueDomains.addDomainValue(variable, value);
+                        valueDomains.markDomain(variable, value, Boolean.TRUE);
+                    }
+                }
+            }
+            else if (valueDomains.getUnmarkedDomainSize(variable) > ASK_ALL_OR_INDIV_THRESHOLD) {
+                // Special case it is more efficient to ask for all the bindings and mark
+                // them rather than to ask for them individually.
+                if (verbosity > 2)
+                    System.out.println("Variable exceeds ask-all threshold " + variable);
+                ArrayList domainValues = this.askWithVariable(instantiatedRule, variable);
+                for (int i = 0; i < domainValues.size(); i++) {
+                    Object value = domainValues.get(i);
+                    if (valueDomains.domainHasValue(variable, value)) {
+                        if (verbosity > 2)
+                            System.out.println("  " + (new Binding(variable, value)) +
+                                               " is permitted by " + currentBinding);
+                        valueDomains.markDomain(variable, value, Boolean.TRUE);
+                    }
+
+                }
+            }
+            return;
+        }
+        else {
+            // Recurse to instantiate the remaining variables.
+            CycVariable variable = (CycVariable) remainingVariables.get(0);
+            ArrayList domainValues = valueDomains.getUnmarkedDomainValues(variable);
+            int limit = valueDomains.getUnmarkedDomainSize(variable);
+            if (verbosity > 4) {
+                System.out.println("variable " + variable);
+                System.out.println("  domain " + domainValues);
+                System.out.println("  limit  " + limit);
+            }
+            Object value;
+            CycList newInstantiatedRule;
+            ArrayList newBindings = new ArrayList();
+            for (int i = 0; i < limit; i++) {
+                value = domainValues.get(i);
+                Binding newCurrentBinding = new Binding(variable, value);
+                newBindings.addAll(bindings);
+                newBindings.add(new Binding(variable, value));
+                newInstantiatedRule = instantiatedRule.subst(value, variable);
+                if (verbosity > 4)
+                    System.out.println("  instantiated rule " + newInstantiatedRule);
+                ArrayList newRemainingVariables = (ArrayList) remainingVariables.clone();
+                newRemainingVariables.remove(0);
+                this.markPermittedRemainingBindings(newInstantiatedRule,
+                                                    newRemainingVariables,
+                                                    newBindings,
+                                                    newCurrentBinding,
+                                                    currentRule);
+            }
+        }
+    }
+
+    /**
+     * Returns a list of bindings for single unbound variable left in the rule.
+     *
+     * @param instantiatedRule the rule in <tt>CycList</tt> form which has a single
+     * unbound variable
+     * @param variable the variable for which bindings are sought
+     * @return a <tt>ArrayList</tt> of bindings for single unbound variable left in the rule
+     */
+    protected ArrayList askWithVariable(CycList instantiatedRule, CycVariable variable) {
+        ArrayList result = new ArrayList();
+
+        System.out.println("******** askWithVariable Not implemented**********");
+
+        //TODO use CycAccess
+
+        return result;
+    }
+
+    /**
+     * Returns <tt>true</tt> iff the instantiated (fully bound) rule is proven true in
+     * the constraint problem KB microtheory.
+     *
+     * @param instantiatedRule the fully bound constraint rule
+     * @return <tt>true</tt> iff the instantiated (fully bound) rule is proven true in
+     * the constraint problem KB microtheory
+     */
+    protected boolean constraintRuleAsk(CycList instantiatedRule) {
+        constraintProblem.nbrAsks++;
+        //TODO add cache of results
+        //TODO call removal ask
+        System.out.println("******** constraintRuleAsk Not implemented**********");
+        return true;
+    }
+
+
+    /**
+     * Applies the all-different constraint rule to the remaining domains and returns <tt>true</tt>
+     * iff no domains are wiped out.
+     *
+     * @param rule the all-different constraint rule
+     * @param remainingRuleVariables the variables left to instantiate in the constraint rule
+     * @param level the current level of solution search depth
+     * @param currentBinding the current variable and bound value
+     * @return <tt>true</tt> iff no remaining variable domains are wiped out
+     */
+    protected boolean checkForwardDifferentRule(Rule rule,
+                                                ArrayList remainingRuleVariables,
+                                                int level,
+                                                Binding currentBinding) {
+        Object value = currentBinding.getValue();
+        ArrayList differentVariables = (ArrayList) remainingRuleVariables.clone();
+        differentVariables.remove(currentBinding.getCycVariable());
+        for (int i = 0; i < differentVariables.size(); i++) {
+            CycVariable differentVariable = (CycVariable) differentVariables.get(i);
+            if (valueDomains.getUnmarkedDomainValues(differentVariable).contains(value) &&
+                ! valueDomains.isDomainMarked(differentVariable, value)) {
+                if (verbosity > 6)
+                    System.out.println("  " + (new Binding(differentVariable, value)) +
+                                       " is ruled out by " + currentBinding);
+                valueDomains.markDomain(differentVariable, value, new Integer(level));
+                if (valueDomains.isDomainWipedOut(differentVariable)) {
+                    if (verbosity > 6)
+                        System.out.println("  domain wiped out for " + differentVariable);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Recurses to instantiate the rule in the constraint problem microtheory with all
+     * remaining variables as bindings. Returns <tt>true</tt> iff no domains are wiped out.
+     *
+     * @param rule the instantiated constraint rule
+     * @param remainingRuleVariables the variables left to instantiate in the constraint rule
+     * @param bindings the list of bindings instantiated so far
+     * @param level the current level of solution search depth
+     * @param currentBinding the current variable and bound value
+     * @return <tt>true</tt> iff no remaining variable domains are wiped out
+     */
+    protected boolean checkForwardInstantiatedRule(CycList instantiatedRule,
+                                                   ArrayList remainingRuleVariables,
+                                                   ArrayList bindings,
+                                                   int level,
+                                                   Binding currentBinding) {
+        CycVariable selectedVariable = currentBinding.getCycVariable();
+        if (remainingRuleVariables.size() == 0) {
+            // This is the terminating recursion case, with no more variables left to instantiate.
+            boolean instantiatedRuleResult = Rule.evaluateConstraintRule(instantiatedRule);
+            if (verbosity > 2) {
+                System.out.println("  bindings " + bindings);
+                System.out.println("  " + instantiatedRule + " --> " + instantiatedRuleResult);
+            }
+            if (! instantiatedRuleResult) {
+                CycVariable variable;
+                Object value;
+                for (int i = 0; i < bindings.size(); i++) {
+                    Binding binding = (Binding) bindings.get(i);
+                    variable = binding.getCycVariable();
+                    if (! variable.equals(selectedVariable)) {
+                        value = binding.getValue();
+                        if (verbosity > 6)
+                            System.out.println("  " + binding + " is ruled out by " +
+                                               currentBinding);
+                        valueDomains.markDomain(variable, value, new Integer(level));
+                        if (valueDomains.isDomainWipedOut(variable)) {
+                            if (verbosity > 6)
+                                System.out.println("  domain wiped out for " + variable);
+                            return false;
+                            }
+                        }
+                }
+            }
+            return true;
+        }
+        else {
+            // Recurse to instantiate the remaining variables.
+            CycVariable variable = (CycVariable) remainingRuleVariables.get(0);
+            ArrayList domainValues = valueDomains.getUnmarkedDomainValues(variable);
+            int limit = valueDomains.getUnmarkedDomainSize(variable);
+            if (verbosity > 4) {
+                System.out.println("variable " + variable);
+                System.out.println("  domain " + domainValues);
+                System.out.println("  limit  " + limit);
+            }
+            Object value;
+            CycList newInstantiatedRule;
+            for (int i = 0; i < limit; i++) {
+                value = domainValues.get(i);
+                Binding newCurrentBinding = new Binding(variable, value);
+                ArrayList newBindings = new ArrayList();
+                newBindings.addAll(bindings);
+                newBindings.add(new Binding(variable, value));
+                newInstantiatedRule = instantiatedRule.subst(value, variable);
+                if (verbosity > 4)
+                    System.out.println("  instantiated rule\n  " + newInstantiatedRule);
+                ArrayList newRemainingRuleVariables = (ArrayList) remainingRuleVariables.clone();
+                newRemainingRuleVariables.remove(0);
+                if (! checkForwardInstantiatedRule(newInstantiatedRule,
+                                                   newRemainingRuleVariables,
+                                                   newBindings,
+                                                   level,
+                                                   currentBinding)) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 

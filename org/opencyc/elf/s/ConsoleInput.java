@@ -49,6 +49,7 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    * Constructs a new ConsoleInput object given its name.
    *
    * @param name the sensor name
+   * @param sensedObject the object for which data is sensed
    */
   public ConsoleInput (String name, Resource sensedObject) {
     this.name = name;

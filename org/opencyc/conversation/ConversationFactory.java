@@ -95,6 +95,7 @@ public class ConversationFactory {
      */
     protected void makeAllConversations () {
         makeChat();
+        makeDisambiguateTerm();
         makeTermQuery();
     }
 
@@ -187,6 +188,93 @@ public class ConversationFactory {
     }
 
     /**
+     * Makes a "disambiguate-term" Conversation.
+     * Initial state is start. <br>
+     * 1. If we are in the start state and get a start performative,
+     * transition to the disambiguate-term state and perform the
+     * disambiguate-parse-term action. <br>
+     * 2. If we are in the disambiguate-term state and get a term-match performative,
+     * transition to the done state and perform the
+     * disambiguate-term-done action. <br>
+     * 3. If we are in the disambiguate-term state and get a term-choice performative,
+     * transition to the term-choice state and perform the
+     * disambiguate-term-choice action. <br>
+     * 4. If we are in the term-choice state and get a term-chosen performative,
+     * transition to the done state and perform the
+     * disambiguate-term-done action. <br>
+     */
+    public Conversation makeDisambiguateTerm () {
+        Conversation disambiguateTerm = (Conversation) conversationCache.get("disambiguate-term");
+        if (disambiguateTerm != null)
+            return disambiguateTerm;
+        disambiguateTerm = new Conversation("disambiguate-term");
+
+        State startState = new State("start");
+        disambiguateTerm.addState(startState);
+        disambiguateTerm.setInitialState(startState);
+        State disambiguateTermState = new State("disambiguate-term");
+        disambiguateTerm.addState(disambiguateTermState);
+        State termChoiceState = new State("term-choice");
+        disambiguateTerm.addState(termChoiceState);
+        State doneState = new State("done");
+        disambiguateTerm.addState(doneState);
+
+        Action disambiguateParseTermAction =
+            actionFactory.makeAction("do-disambiguate-parse-term");
+        Action disambiguateTermDoneAction =
+            actionFactory.makeAction("do-disambiguate-term-done");
+        Action disambiguateTermChoiceAction =
+            actionFactory.makeAction("do-disambiguate-term-choice");
+
+        Performative startPerformative = new Performative("start");
+        Performative termMatchPerformative = new Performative("term-match");
+        Performative termChoicePerformative = new Performative("term-choice");
+        Performative termChosenPerformative = new Performative("term-chosen");
+
+        /**
+         * 1. If we are in the start state and get a start performative,
+         * transition to the disambiguate-term state and perform the
+         * disambiguate-parse-term action. <br>
+         */
+        Arc arc1 = new Arc(startState,
+                           startPerformative,
+                           disambiguateTermState,
+                           disambiguateParseTermAction);
+
+        /**
+         * 2. If we are in the disambiguate-term state and get a term-match performative,
+         * transition to the done state and perform the
+         * disambiguate-term-done action.
+         */
+        Arc arc2 = new Arc(disambiguateTermState,
+                           termMatchPerformative,
+                           doneState,
+                           disambiguateTermDoneAction);
+
+        /**
+         * 3. If we are in the disambiguate-term state and get a term-choice performative,
+         * transition to the term-choice state and perform the
+         * disambiguate-term-choice action.
+         */
+        Arc arc3 = new Arc(disambiguateTermState,
+                           termChoicePerformative,
+                           termChoiceState,
+                           disambiguateTermChoiceAction);
+        /**
+         * 4. If we are in the term-choice state and get a term-chosen performative,
+         * transition to the done state and perform the
+         * disambiguate-term-done action.
+         */
+        Arc arc4 = new Arc(termChoiceState,
+                           termChosenPerformative,
+                           doneState,
+                           disambiguateTermDoneAction);
+
+        conversationCache.put(disambiguateTerm.name, disambiguateTerm);
+        return disambiguateTerm;
+    }
+
+    /**
      * Makes a "term-query" Conversation.
      * Initial state is retrieve-fact. <br>
      * 1. If we are in the retrieve-fact state and get a term-query performative, transition to the
@@ -202,11 +290,8 @@ public class ConversationFactory {
             return termQuery;
         termQuery = new Conversation("term-query");
 
-        State disambiguateTermsState = new State("disambiguate-terms");
-        termQuery.setInitialState(disambiguateTermsState);
-        termQuery.addState(disambiguateTermsState);
-
         State retrieveFactState = new State("retrieve-fact");
+        termQuery.setInitialState(retrieveFactState);
         termQuery.addState(retrieveFactState);
 
         State promptForMoreState = new State("prompt-for-more");
@@ -215,23 +300,14 @@ public class ConversationFactory {
         State doneState = new State("done");
         termQuery.addState(doneState);
 
-        Action disambiguateTermsAction =
-            actionFactory.makeAction("disambiguateTerms");
         Action replyWithFirstFactAction =
-            actionFactory.makeAction("reply-with-first-fact");
+            actionFactory.makeAction("do-reply-with-first-fact");
         Action replyWithNextFactAction =
-            actionFactory.makeAction("reply-with-next-fact");
+            actionFactory.makeAction("do-reply-with-next-fact");
 
         Performative termQueryPerformative = new Performative("term-query");
-        Performative disambiguateTermsPerformative = new Performative("disambiguateTerms");
         Performative morePerformative = new Performative("more");
         Performative donePerformative = new Performative("done");
-        /**
-         * 1. If we are in the disambiguate-terms state and get a , transition
-         * to the prompt-for-more state and perform the reply-with-first-fact action.
-         */
-
-
 
         /**
          * 1. If we are in the retrieve-fact state and get a term-query performative, transition

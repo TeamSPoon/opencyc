@@ -59,6 +59,11 @@ public class Performer {
     protected Interpreter interpreter;
 
     /**
+     * reference to the parent ConversationFactory object
+     */
+    protected ConversationFactory conversationFactory;
+
+    /**
      * The context for RKF-related inferences involving all and only english lexical mts.
      */
     protected CycConstant rkfEnglishLexicalMicrotheoryPsc;
@@ -78,6 +83,7 @@ public class Performer {
     public Performer(Interpreter interpreter) {
         Log.makeLog();
         this.interpreter = interpreter;
+        this.conversationFactory = interpreter.chatterBot.conversationFactory;
     }
 
     /**
@@ -93,6 +99,15 @@ public class Performer {
         }
         else if (action.getName().equals("do-finalization")) {
             doFinalization();
+        }
+        else if (action.getName().equals("do-disambiguate-parse-term")) {
+            doDisambiguateParseTermAction(currentState, action);
+        }
+        else if (action.getName().equals("do-disambiguate-term-choice")) {
+            doDisambiguateTermChoiceAction(currentState, action);
+        }
+        else if (action.getName().equals("do-disambiguate-term-done")) {
+            doDisambiguateTermDoneAction(currentState);
         }
         else if (action.getName().equals("do-term-query")) {
             doTermQuery(currentState, action);
@@ -128,7 +143,34 @@ public class Performer {
     }
 
     /**
-     * Performs the do-term-query action.
+     * Performs the do-disambiguate-parse-term action.
+     *
+     * @param currentState the current conversation state
+     * @param action the action object.
+     */
+    protected void doDisambiguateParseTermAction (State currentState, Action action) {
+    }
+
+    /**
+     * Performs the do-disambiguate-term-choice action.
+     *
+     * @param currentState the current conversation state
+     * @param action the action object.
+     */
+    protected void doDisambiguateTermChoiceAction (State currentState, Action action) {
+    }
+
+    /**
+     * Performs the do-disambiguate-term-done action
+     *
+     * @param currentState the current conversation state
+     */
+    protected void doDisambiguateTermDoneAction (State currentState) {
+    }
+
+    /**
+     * Performs the do-term-query action.  First performs a disambiguate-term
+     * conversation to obtain the correct term for the query.
      *
      * @param currentState the current conversation state
      * @param action the action object.
@@ -140,8 +182,35 @@ public class Performer {
         ArrayList queryWords =
             parseResults.getTextBinding(CycObjectFactory.makeCycVariable("?term"));
         interpreter.setStateAttribute("query words", queryWords);
-        CycList parsedTerms = parseTermsString(queryWords);
-        interpreter.setStateAttribute("parsed terms", parsedTerms);
+
+        Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
+        Object [] attributeValuePair = {"disambiguation words", queryWords};
+        ArrayList arguments = new ArrayList();
+        arguments.add(attributeValuePair);
+        setupSubConversation(disambiguateTerm, arguments);
+        interpreter.setNextPerformative(disambiguateTerm.getDefaultPerformative());
+    }
+
+    /**
+     * Sets up the given sub conversation and the input arguments as
+     * a list of attribute/value pairs.
+     *
+     * @param conversation the new conversation
+     * @param arguments a list of Object arrays of length two, the first array element is the
+     * attribute and the second array element is its value
+     */
+    protected void setupSubConversation (Conversation conversation, ArrayList arguments) {
+        ConversationStateInfo conversationStateInfo =
+            new ConversationStateInfo(conversation,
+                                      (HashMap) interpreter.stateAttributes.clone());
+        interpreter.pushConversationStateInfo(conversationStateInfo);
+        interpreter.currentState = conversation.getInitialState();
+        for (int i = 0; i < arguments.size(); i++) {
+            Object [] attributeValuePair = (Object []) arguments.get(i);
+            String attribute = (String) attributeValuePair[0];
+            Object value = attributeValuePair[1];
+            interpreter.setStateAttribute(attribute, value);
+        }
     }
 
     /**

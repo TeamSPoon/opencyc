@@ -43,6 +43,11 @@ public class Conversation {
     protected State initialState;
 
     /**
+     * default performative for the initial state
+     */
+    protected Performative defaultPerformative;
+
+    /**
      * dictionary of conversation states, stateName --> State
      */
     protected HashMap conversationFsmStates = new HashMap();
@@ -57,7 +62,7 @@ public class Conversation {
     }
 
     /**
-     * Returns the conversation name
+     * Returns the conversation name.
      *
      * @return the conversation name
      */
@@ -81,6 +86,26 @@ public class Conversation {
      */
     public State getInitialState() {
         return initialState;
+    }
+
+    /**
+     * Sets the default performative.
+     *
+     * @param defaultPerformative the default performative for the initial state, for those
+     * cases in which the performative is computed, rather than input directly from the user
+     */
+    public void setDefaultPerformative (Performative defaultPerformative) {
+        this.defaultPerformative = defaultPerformative;
+    }
+
+    /**
+     * Returns the default performative.
+     *
+     * @return the default performative for the initial state, for those
+     * cases in which the performative is computed, rather than input directly from the user
+     */
+    public Performative getDefaultPerformative () {
+        return defaultPerformative;
     }
 
     /**

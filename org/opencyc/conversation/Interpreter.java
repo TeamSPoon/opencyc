@@ -59,7 +59,10 @@ public class Interpreter {
     protected HashMap conversationStacks;
 
     /**
-     * reference to the current conversation stack
+     * Reference to the current conversation stack, which is a stack of
+     * ConversationInfo elements.  Each of these elements contains
+     * the conversation and its state attributes.
+     *
      */
     protected StackWithPointer conversationStack;
 
@@ -77,6 +80,11 @@ public class Interpreter {
      * Dictionary of state attribute and object values.
      */
     protected HashMap stateAttributes = new HashMap();
+
+    /**
+     * Next computed Performative, or null if none.
+     */
+    protected Performative nextPerformative;
 
     /**
      * Makes Template objects for the TemplateParser.
@@ -114,8 +122,7 @@ public class Interpreter {
                        String chatUserNickname,
                        String chatUserUniqueId,
                        String conversationStackId,
-                       Conversation conversation
-                       ) {
+                       Conversation conversation) {
         Log.makeLog();
         this.chatterBot = chatterBot;
         chatUserModel = chatterBot.getChatUserModel(chatUserUniqueId);
@@ -133,11 +140,15 @@ public class Interpreter {
     public void receiveChatMessage (String chatMessage)
         throws CycApiException, IOException, UnknownHostException {
         ParseResults parseResults = templateParser.parse(chatMessage);
+        setStateAttribute("parse results", parseResults);
         Performative performative = parseResults.getPerformative();
-        Arc arc = lookupArc(performative);
-        transitionState(arc);
-        this.setStateAttribute("parse results", parseResults);
-        performer.performArc(currentState, arc.getAction());
+        nextPerformative = performative;
+        while (nextPerformative != null) {
+            Arc arc = lookupArc(performative);
+            nextPerformative = null;
+            transitionState(arc);
+            performer.performArc(currentState, arc.getAction());
+        }
     }
 
     /**
@@ -195,7 +206,9 @@ public class Interpreter {
         performer = new Performer(this);
         conversationStack = new StackWithPointer();
         this.conversation = conversation;
-        conversationStack.push(conversation);
+        ConversationStateInfo conversationStateInfo =
+            new ConversationStateInfo(conversation, stateAttributes);
+        pushConversationStateInfo(conversationStateInfo);
         conversationStacks = new HashMap();
         conversationStacks.put(conversationStackId, conversationStack);
         currentState = conversation.getInitialState();
@@ -221,6 +234,15 @@ public class Interpreter {
     }
 
     /**
+     * Sets the value of the computed next performative.
+     *
+     * @param nextAction the computed next performative
+     */
+    public void setNextPerformative (Performative nextPerformative) {
+        this.nextPerformative = nextPerformative;
+    }
+
+    /**
      * Returns the value for the given state attribute.
      *
      * @param attribute the key object
@@ -229,4 +251,29 @@ public class Interpreter {
     public Object getStateAttribute (Object attribute) {
         return stateAttributes.get(attribute);
     }
+
+    /**
+     * Pushes the given conversation state onto the current
+     * conversation stack.
+     *
+     * @param conversationStateInfo the new conversation and its state
+     */
+    public void pushConversationStateInfo (ConversationStateInfo conversationStateInfo) {
+        if (conversationStack.size() > 0)
+            ((ConversationStateInfo) conversationStack.peek()).currentState = currentState;
+        conversationStack.push(conversationStateInfo);
+    }
+
+    /**
+     * Pops the conversation state stack and restores the previous
+     * conversation state.
+     */
+    public void popConversationStateInfo () {
+        ConversationStateInfo conversationStateInfo =
+            (ConversationStateInfo) conversationStack.pop();
+        this.conversation = conversationStateInfo.conversation;
+        this.currentState = conversationStateInfo.currentState;
+        this.stateAttributes = conversationStateInfo.stateAttributes;
+    }
+
 }

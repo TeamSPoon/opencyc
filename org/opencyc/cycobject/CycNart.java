@@ -131,6 +131,24 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
+     * Returns the given object if it is a <tt>CycNart</tt>, otherwise the object is expected to be
+     * a <tt>CycList</tt> and a <tt>CycNart</tt> object is returned using the given
+     * CycList representation.
+     *
+     * @param object the object to be coerced into a CycNart
+     * @return the given object if it is a <tt>CycNart</tt>, otherwise the object is expected to be
+     * a <tt>CycList</tt> and a <tt>CycNart</tt> object is returned using the given
+     * CycList representation
+     */
+    public static CycNart coerceToCycNart(Object object) {
+        if (object instanceof CycNart)
+            return (CycNart) object;
+        if (! (object instanceof CycList))
+            throw new RuntimeException("Cannot coerce to CycNart " + object);
+        return new CycNart((CycList) object);
+    }
+
+    /**
      * Returns the functor of the <tt>CycNart</tt>.
      *
      * @return the functor of the <tt>CycNart</tt>
@@ -329,13 +347,12 @@ public class CycNart extends CycFort implements Comparable {
      * @return equals <tt>boolean</tt> value indicating equality or non-equality.
      */
     public boolean equals(Object object) {
-    if (object instanceof CycNart &&
-        this.metaGuid().equals(((CycNart)object).metaGuid()) &&
-        this.metaName().equals(((CycNart)object).metaName())) {
-        return true;
-    }
-    else
+    if (! (object instanceof CycNart))
         return false;
+    CycNart thatNart = (CycNart) object;
+    if (! this.functor.equals(thatNart.functor))
+        return false;
+    return this.arguments.equals(thatNart.arguments);
     }
 
     /**

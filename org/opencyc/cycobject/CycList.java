@@ -181,8 +181,7 @@ public class CycList extends ArrayList {
             Object object = this.get(i);
             if (object instanceof String ||
                 object instanceof Integer ||
-                object instanceof Long ||
-                //object instanceof GUID ||
+                object instanceof Guid ||
                 object instanceof Float ||
                 object instanceof CycConstant ||
                 object instanceof CycNart)

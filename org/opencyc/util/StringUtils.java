@@ -51,4 +51,34 @@ public class StringUtils {
         }
         return true;
     }
+
+    /**
+     * Returns true iff the given object is a string delimited by double quotes.
+     *
+     * @param object the object to be tested
+     * @return <tt>true</tt> iff the given object is a string delimited by double quotes
+     */
+    public static boolean isDelimitedString (Object object) {
+        if (! (object instanceof String))
+            return false;
+        String string = (String) object;
+        if (string.length() < 2)
+            return false;
+        if (! string.startsWith("\""))
+            return false;
+        return string.endsWith("\"");
+    }
+
+    /**
+     * Removes delimiter characters from the given string.
+     *
+     * @param string the string which has delimiters to be removed
+     * @return a input string without its delimiters
+     */
+    public static String removeDelimiters(String string) {
+        int length = string.length();
+        if (length < 3)
+            throw new RuntimeException("Cannot remove delimters from " + string);
+        return string.substring(1, length - 1);
+    }
 }

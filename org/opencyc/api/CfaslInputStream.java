@@ -208,7 +208,7 @@ public class CfaslInputStream extends BufferedInputStream {
                     o = readSymbol();
                     break;
                 case CFASL_NIL:
-                    o = null;
+                    o = CycSymbol.nil;
                     break;
                 case CFASL_LIST:
                     o = readCycList();
@@ -277,12 +277,8 @@ public class CfaslInputStream extends BufferedInputStream {
                     throw  new RuntimeException("Unknown cfasl opcode: " + cfaslOpcode);
             }
         }
-        if (cycConnection.trace) {
-            if (o == null)
-                System.out.println("readObject = nil/null");
-            else
-                System.out.println("readObject = " + o + " (" + o.getClass() + ")");
-            }
+        if (cycConnection.trace)
+            System.out.println("readObject = " + o + " (" + o.getClass() + ")");
         return  o;
     }
 

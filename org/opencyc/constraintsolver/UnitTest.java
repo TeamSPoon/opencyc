@@ -737,7 +737,7 @@ public class UnitTest extends TestCase {
 
         // getSolutions
         Assert.assertTrue(solution.getSolutions().size() == 1);
-        Binding binding1 = new Binding(CycVariable.makeCycVariable("?x"), new Long(1));
+        Binding binding1 = new Binding(CycVariable.makeCycVariable("?x"), new Integer(1));
 
         // addBindingToCurrentSolution
         solution.addBindingToCurrentSolution(binding1);
@@ -749,8 +749,8 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(solution.getCurrentSolution().size() == 0);
 
         // addBindingToCurrentSolution
-        Binding binding2 = new Binding(CycVariable.makeCycVariable("?y"), new Long(2));
-        Binding binding3 = new Binding(CycVariable.makeCycVariable("?z"), new Long(3));
+        Binding binding2 = new Binding(CycVariable.makeCycVariable("?y"), new Integer(2));
+        Binding binding3 = new Binding(CycVariable.makeCycVariable("?z"), new Integer(3));
         solution.addBindingToCurrentSolution(binding2);
         solution.addBindingToCurrentSolution(binding3);
         Assert.assertTrue(solution.getCurrentSolution().size() == 2);
@@ -875,15 +875,15 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(zebraProblem.valueDomains.varsDictionary.get(blue) instanceof ArrayList);
         ArrayList domainValues = (ArrayList) zebraProblem.valueDomains.varsDictionary.get(blue);
         Assert.assertEquals(5, domainValues.size());
-        Assert.assertTrue(domainValues.contains(new Long(1)));
-        Assert.assertTrue(domainValues.contains(new Long(2)));
-        Assert.assertTrue(domainValues.contains(new Long(3)));
-        Assert.assertTrue(domainValues.contains(new Long(4)));
-        Assert.assertTrue(domainValues.contains(new Long(5)));
+        Assert.assertTrue(domainValues.contains(new Integer(1)));
+        Assert.assertTrue(domainValues.contains(new Integer(2)));
+        Assert.assertTrue(domainValues.contains(new Integer(3)));
+        Assert.assertTrue(domainValues.contains(new Integer(4)));
+        Assert.assertTrue(domainValues.contains(new Integer(5)));
 
         // test ValueDomains.domainHasValue(CycVariable cycVariable, Object value)
-        Assert.assertTrue(zebraProblem.valueDomains.domainHasValue(blue, new Long(1)));
-        Assert.assertTrue(! (zebraProblem.valueDomains.domainHasValue(blue, new Long(6))));
+        Assert.assertTrue(zebraProblem.valueDomains.domainHasValue(blue, new Integer(1)));
+        Assert.assertTrue(! (zebraProblem.valueDomains.domainHasValue(blue, new Integer(6))));
 
         // test ValueDomains.getDomainValues(CycVariable cycVariable)
         ArrayList domainValues2 = zebraProblem.valueDomains.getDomainValues(blue);
@@ -893,8 +893,8 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(zebraProblem.valueDomains.domains.get(blue));
         Assert.assertTrue((zebraProblem.valueDomains.domains.get(blue)) instanceof HashMap);
         HashMap domainValueMarks = (HashMap) zebraProblem.valueDomains.domains.get(blue);
-        Assert.assertTrue(domainValueMarks.containsKey(new Long(1)));
-        Assert.assertNotNull(domainValueMarks.get(new Long(1)));
+        Assert.assertTrue(domainValueMarks.containsKey(new Integer(1)));
+        Assert.assertNotNull(domainValueMarks.get(new Integer(1)));
 
         // test HighCardinalityDomains
         Assert.assertTrue(zebraProblem.highCardinalityDomains.highCardinalityDomains.size() == 0);

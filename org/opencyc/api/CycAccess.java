@@ -266,39 +266,15 @@ public class CycAccess {
     public Object converseObject(Object command)  throws IOException, UnknownHostException {
         Object [] response = {null, null};
         response = converse(command);
-        if (response[0].equals(Boolean.TRUE)) {
-            if (cycConnection.communicationMode == CycConnection.BINARY_MODE) {
-                // The binary api correctly determines object types.
-                if (response[1] == null)
-                    // Do not coerce empty lists to the symbol nil, instead return a list of size zero.
-                    return new CycList();
-                else
-                    return response[1];
-            }
-            else {
-                // The ascii api returns strings which need further parsing because in this method the
-                // expected return object type is unknown.
-                String string = (String) response[1];
-                if (StringUtils.isNumeric(string))
-                    response[1] = new Long(string);
-                else if (CycSymbol.isValidSymbolName(string))
-                    response[1] = CycSymbol.makeCycSymbol(string);
-                else if (string.startsWith("#$"))
-                    response[1] = getConstantByName(string);
-                else if ((string.length() > 2) &&
-                         (string.charAt(0) == '"') &&
-                         (string.charAt(string.length() - 1) == '"'))
-                    // Strip off the delimiting quotes and return a java string object.
-                    response[1] = string.substring(1, string.length() - 1);
-                return response[1];
-            }
-        }
+        if (response[0].equals(Boolean.TRUE))
+            return response[1];
         else
             throw new IOException(response[1].toString());
     }
 
     /**
-     * Converses with Cyc to perform an API command whose result is returned as a list.
+     * Converses with Cyc to perform an API command whose result is returned as a list.  The symbol
+     * nil is returned as the empty list.
      *
      * @param command the command string or CycList
      * @return the result of processing the API command
@@ -306,13 +282,11 @@ public class CycAccess {
     public CycList converseList(Object command)  throws IOException, UnknownHostException {
         Object [] response = {null, null};
         response = converse(command);
-        if (response[0].equals(Boolean.TRUE)) {
-            if (response[1] == null)
-                // Do not coerce empty lists to the symbol nil, instead return a list of size zero.
+        if (response[0].equals(Boolean.TRUE))
+            if (response[1].equals(CycSymbol.nil))
                 return new CycList();
             else
                 return (CycList) response[1];
-        }
         else
             throw new IOException(response[1].toString());
     }
@@ -346,10 +320,7 @@ public class CycAccess {
         Object [] response = {null, null};
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
-            if (response[1] == null)
-                // Do not conflate null with the symbol NIL.
-                return false;
-            else if (response[1].toString().equals("T"))
+            if (response[1].toString().equals("T"))
                 return true;
             else
                 return false;
@@ -680,6 +651,9 @@ public class CycAccess {
             else if (element instanceof CycConstant)
                 // Replace element with the completed constant, which might be previously cached.
                 cycList.set(i, completeCycConstant((CycConstant) element));
+            else if (element instanceof CycNart)
+                // Replace element with the completed constant, which might be previously cached.
+                cycList.set(i, completeCycNart((CycNart) element));
             else if (element instanceof CycVariable)
                 // Replace element with the completed variable, which might be previously cached.
                 cycList.set(i, completeCycVariable((CycVariable) element));

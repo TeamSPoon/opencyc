@@ -279,15 +279,15 @@ public class CycListParser  {
      */
     private void scanNumber(StreamTokenizer st) {
         Double d;
-        Long i;
+        Integer i;
         Object n = null;
 
         //System.out.println(st.nval );
-        // Try representing the scanned number as both java double and long.
-        d = new Double ( st.nval );
-        i = new Long( d.intValue() );
+        // Try representing the scanned number as both java double and integer.
+        d = new Double (st.nval);
+        i = new Integer(d.intValue());
 
-        // Choose long if no loss of accuracy.
+        // Choose integer if no loss of accuracy.
         if ( i.doubleValue() == d.doubleValue() )
             n = i;
         else

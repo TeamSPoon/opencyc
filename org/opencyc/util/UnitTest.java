@@ -89,6 +89,29 @@ public class UnitTest extends TestCase {
     }
 
     /**
+     * Tests the StringUtils.removeDelimiters method.
+     */
+    public void testRemoveDelimiters() {
+        System.out.println("** testRemoveDelimiters **");
+        Assert.assertEquals("abc", StringUtils.removeDelimiters("\"abc\""));
+        System.out.println("** testRemoveDelimiters OK**");
+    }
+
+    /**
+     * Tests the StringUtils.isDelimitedString method.
+     */
+    public void testIsDelimitedString() {
+        System.out.println("** testIsDelimitedString **");
+        Assert.assertTrue(StringUtils.isDelimitedString("\"abc\""));
+        Assert.assertTrue(StringUtils.isDelimitedString("\"\""));
+        Assert.assertTrue(! StringUtils.isDelimitedString("\""));
+        Assert.assertTrue(! StringUtils.isDelimitedString(new Integer(1)));
+        Assert.assertTrue(! StringUtils.isDelimitedString("abc\""));
+        Assert.assertTrue(! StringUtils.isDelimitedString("\"abc"));
+        System.out.println("** testIsDelimitedString OK **");
+    }
+
+    /**
      * Tests the StringUtils.isNumeric method.
      */
     public void testIsNumeric() {
@@ -119,3 +142,4 @@ public class UnitTest extends TestCase {
         System.out.println("** testIsNumeric OK **");
     }
 }
+

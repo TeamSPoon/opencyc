@@ -246,7 +246,7 @@ public class UnitTest extends TestCase {
                             new Integer(174));
         CycList nartCycList2 = new CycList();
         nartCycList2.add(plusFn);
-        nartCycList2.add(new Long(100));
+        nartCycList2.add(new Integer(100));
         narts.add(new CycNart(nartCycList2));
         CycList nartCycList3 = new CycList();
         nartCycList3.add(fruitFn2);
@@ -255,6 +255,14 @@ public class UnitTest extends TestCase {
         Collections.sort(narts);
         Assert.assertEquals("[(FruitFn AppleTree), (GovernmentFn Brazil), (PlusFn 100)]",
                             narts.toString());
+
+        // coerceToCycNart
+        CycNart cycNart4 = new CycNart(fruitFn2, appleTree2);
+        Assert.assertEquals(cycNart4, CycNart.coerceToCycNart(cycNart4));
+        CycList cycList4 = new CycList();
+        cycList4.add(fruitFn2);
+        cycList4.add(appleTree2);
+        Assert.assertEquals(cycNart2, CycNart.coerceToCycNart(cycList4));
 
         System.out.println("** testCycNart OK **");
     }
@@ -381,6 +389,7 @@ public class UnitTest extends TestCase {
             cycAccess = new CycAccess();
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
 
@@ -510,7 +519,7 @@ public class UnitTest extends TestCase {
             CycList cycList34 = cycAccess.makeCycList("(1 2 3 4 5 6 7 8 9 10)");
             CycList permutedCycList = cycList34.randomPermutation();
             Assert.assertEquals(10, permutedCycList.size());
-            Assert.assertTrue(permutedCycList.contains(new Long(2)));
+            Assert.assertTrue(permutedCycList.contains(new Integer(2)));
             Assert.assertTrue(! permutedCycList.containsDuplicates());
         }
         catch (Exception e) {
@@ -520,15 +529,15 @@ public class UnitTest extends TestCase {
         // doesElementPrecedeOthers
         try {
             CycList cycList35 = cycAccess.makeCycList("(1 2 3 4 5 6 7 8 9 10)");
-            Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Long(1),
+            Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Integer(1),
                                                                  cycAccess.makeCycList("(8 7 6)")));
-            Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Long(9),
+            Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Integer(9),
                                                                  cycAccess.makeCycList("(10)")));
-            Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Long(10),
+            Assert.assertTrue(cycList35.doesElementPrecedeOthers(new Integer(10),
                                                                  cycAccess.makeCycList("(18 17 16)")));
-            Assert.assertTrue(! cycList35.doesElementPrecedeOthers(new Long(12),
+            Assert.assertTrue(! cycList35.doesElementPrecedeOthers(new Integer(12),
                                                                  cycAccess.makeCycList("(1 2 10)")));
-            Assert.assertTrue(! cycList35.doesElementPrecedeOthers(new Long(9),
+            Assert.assertTrue(! cycList35.doesElementPrecedeOthers(new Integer(9),
                                                                  cycAccess.makeCycList("(8 7 6)")));
         }
         catch (Exception e) {
@@ -581,7 +590,7 @@ public class UnitTest extends TestCase {
 
         // last
         CycList cycList46 = cycAccess.makeCycList("(8 7 6)");
-        Assert.assertEquals(new Long(6), cycList46.last());
+        Assert.assertEquals(new Integer(6), cycList46.last());
 
         try {
             cycAccess.close();
@@ -615,11 +624,11 @@ public class UnitTest extends TestCase {
             CycList cycList2 = cycAccess.makeCycList("(1 \"a\" :foo #$Brazil)");
             Enumeration e2 = cycList2.cycListVisitor();
             Assert.assertTrue(e2.hasMoreElements());
-            Long long1 = new Long(1);
+            Integer integer1 = new Integer(1);
             Object nextObject = e2.nextElement();
-            Assert.assertTrue(nextObject instanceof Long);
-            Assert.assertTrue(((Long) nextObject).longValue() == long1.longValue());
-            Assert.assertTrue(((Long) nextObject).longValue() == 1);
+            Assert.assertTrue(nextObject instanceof Integer);
+            Assert.assertTrue(((Integer) nextObject).intValue() == integer1.intValue());
+            Assert.assertTrue(((Integer) nextObject).intValue() == 1);
             Assert.assertTrue(e2.hasMoreElements());
             Assert.assertEquals("a", e2.nextElement());
             Assert.assertTrue(e2.hasMoreElements());

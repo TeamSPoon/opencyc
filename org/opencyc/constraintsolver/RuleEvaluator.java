@@ -151,32 +151,32 @@ public class RuleEvaluator {
         }
         else if (predicate.equals(numericallyEqual)) {
             Object argument1 = rule.getRule().second();
-            long argument1Long = 0;
+            int argument1Integer = 0;
             if (argument1 instanceof CycList) {
                 if (((CycList) argument1).first().equals(plusFn) &&
-                    ((CycList) argument1).second() instanceof Long)
-                    argument1Long = 1 + ((Long) ((CycList) argument1).second()).longValue();
+                    ((CycList) argument1).second() instanceof Integer)
+                    argument1Integer = 1 + ((Integer) ((CycList) argument1).second()).intValue();
             }
-            else if (argument1 instanceof Long)
-                argument1Long = ((Long) argument1).longValue();
+            else if (argument1 instanceof Integer)
+                argument1Integer = ((Integer) argument1).intValue();
             else
                 // Ask OpenCyc.
                 return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
                                                               constraintProblem.mt);
             Object argument2 = rule.getRule().third();
-            long argument2Long = 0;
+            int argument2Integer = 0;
             if (argument2 instanceof CycList) {
                 if (((CycList) argument2).first().equals(plusFn) &&
-                    ((CycList) argument2).second() instanceof Long)
-                    argument2Long = 1 + ((Long) ((CycList) argument2).second()).longValue();
+                    ((CycList) argument2).second() instanceof Integer)
+                    argument2Integer = 1 + ((Integer) ((CycList) argument2).second()).intValue();
             }
-            else if (argument2 instanceof Long)
-                argument2Long = ((Long) argument2).longValue();
+            else if (argument2 instanceof Integer)
+                argument2Integer = ((Integer) argument2).intValue();
             else
                 // Ask OpenCyc.
                 return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
                                                               constraintProblem.mt);
-            return argument1Long == argument2Long;
+            return argument1Integer == argument2Integer;
         }
         else if (predicate.equals(different)) {
             CycList arguments = rule.getRule().rest();

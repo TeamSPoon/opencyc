@@ -402,19 +402,49 @@ public class CycConnection {
     synchronized protected Object[] converseAscii (String message, Timer timeout) throws IOException,
             TimeOutException {
         isSymbolicExpression = false;
-        Object[] response = converseUsingStrings(message, timeout);
+        Object[] response = converseUsingAsciiStrings(message, timeout);
         if (response[0].equals(Boolean.TRUE)) {
             String answer = ((String)response[1]).trim();
-            if (isSymbolicExpression)
-                // Recurse if list contains CycConstant objects.
+            if (StringUtils.isDelimitedString(answer)) {
+                response[1] = StringUtils.removeDelimiters(answer);
+                // Return the string.
+                return response;
+            }
+            if (isSymbolicExpression) {
+                // Recurse to complete contained CycConstant, CycNart objects.
                 response[1] = CycAccess.current().makeCycList(answer);
-            else if (answer.equals("NIL"))
-                response[1] = new CycList();
-            else
-                // Treat a non-string object as a string.
-                response[1] = answer;
+                // Return the CycList object.
+                return response;
+            }
+            if (answer.equals("NIL")) {
+                response[1] = CycSymbol.nil;
+                // Return the symbol nil.
+                return response;
+            }
+            if (answer.startsWith("#$")) {
+                response[1] = CycAccess.current().makeCycConstant(answer);
+                // Return the constant.
+                return response;
+            }
+            if (answer.startsWith("?")) {
+                response[1] = CycVariable.makeCycVariable(answer);
+                // Return the variable.
+                return response;
+            }
+            if (StringUtils.isNumeric(answer)) {
+                response[1] = new Integer(answer);
+                // Return the number.
+                return response;
+            }
+            if (CycSymbol.isValidSymbolName(answer)) {
+                response[1] = CycSymbol.makeCycSymbol(answer);
+                // Return the symbol.
+                return response;
+            }
+            throw new RuntimeException("Ascii api response not understood " + answer);
         }
-        return  response;
+        else
+            return response;
     }
 
     /**
@@ -422,7 +452,7 @@ public class CycConnection {
      * element of a object array, and the Cyc response string as the second
      * element.
      */
-    protected Object[] converseUsingStrings (String message, Timer timeout) throws IOException, TimeOutException {
+    protected Object[] converseUsingAsciiStrings (String message, Timer timeout) throws IOException, TimeOutException {
         if (trace)
             System.out.println(message + " --> cyc");
         out.write(message);
@@ -431,7 +461,7 @@ public class CycConnection {
         out.flush();
         if (trace)
             System.out.print("cyc --> ");
-        Object[] answer = readCycResponse(timeout);
+        Object[] answer = readAsciiCycResponse(timeout);
         if (trace)
             System.out.println();
         return  answer;
@@ -440,7 +470,7 @@ public class CycConnection {
     /**
      * Read the cyc response.
      */
-    private Object[] readCycResponse (Timer timeout) throws IOException, TimeOutException {
+    private Object[] readAsciiCycResponse (Timer timeout) throws IOException, TimeOutException {
         Object[] answer =  {
             null, null
         };
@@ -468,7 +498,7 @@ public class CycConnection {
             answer[1] = readSymbolicExpression();
         }
         else if (ch == '"')
-            answer[1] = readString();
+            answer[1] = readQuotedString();
         else
             answer[1] = readAtom();
         // Read the terminating newline.
@@ -479,7 +509,9 @@ public class CycConnection {
     }
 
     /**
-     * Read a symbolic expression.
+     * Reads a complete symbolic expression as an ascii string.
+     *
+     * @return a complete symbolic expression as an ascii string
      */
     private String readSymbolicExpression () throws IOException {
         int parenLevel = 0;
@@ -499,21 +531,23 @@ public class CycConnection {
                     isQuotedString = false;
                 else
                     isQuotedString = true;
-            if (!isQuotedString) {
+            if (! isQuotedString) {
                 if (ch == '(')
                     parenLevel++;
                 if (ch == ')')
                     parenLevel--;
             }
-            result.append((char)ch);
+            result.append((char) ch);
         }
         return  result.toString();
     }
 
     /**
-     * Read a quoted string.
+     * Reads a quoted string
+     *
+     * @return the quoted string read
      */
-    private String readString () throws IOException {
+    private String readQuotedString () throws IOException {
         StringBuffer result = new StringBuffer();
         int ch = in.read();
         if (trace)
@@ -529,7 +563,9 @@ public class CycConnection {
     }
 
     /**
-     * Read an atom.
+     * Reads an atom.
+     *
+     * @return the atom read as an ascii string
      */
     private String readAtom () throws IOException {
         StringBuffer result = new StringBuffer();

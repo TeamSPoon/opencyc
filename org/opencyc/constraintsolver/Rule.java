@@ -417,7 +417,7 @@ public class Rule {
             Object arg = args.get(i);
             if (arg instanceof CycVariable)
                 continue;
-            else if (arg instanceof Long)
+            else if (arg instanceof Integer)
                 continue;
             else if (arg instanceof CycNart) {
                 CycNart cycNart = (CycNart) arg;
@@ -425,7 +425,7 @@ public class Rule {
                     Object plusFnArg = cycNart.getArguments().get(0);
                     if (plusFnArg instanceof CycVariable)
                         continue;
-                    if (plusFnArg instanceof Long)
+                    if (plusFnArg instanceof Integer)
                         continue;
                 }
             }
@@ -435,7 +435,7 @@ public class Rule {
                     Object plusFnArg = cycList.second();
                     if (plusFnArg instanceof CycVariable)
                         continue;
-                    if (plusFnArg instanceof Long)
+                    if (plusFnArg instanceof Integer)
                         continue;
                 }
             }
@@ -455,7 +455,7 @@ public class Rule {
     public static boolean evaluateConstraintRule(CycList instantiatedRule) throws IOException {
         CycConstant predicate = (CycConstant) instantiatedRule.first();
         if (predicate.equals(CycAccess.numericallyEqual)) {
-            long value = numericallyEvaluateExpression(instantiatedRule.second());
+            int value = numericallyEvaluateExpression(instantiatedRule.second());
             for (int i = 2; i < instantiatedRule.size(); i++) {
                 if (numericallyEvaluateExpression(instantiatedRule.get(i)) != value)
                     return false;
@@ -487,13 +487,13 @@ public class Rule {
     /**
      * Returns the numerical value of the expression.
      *
-     * @param expression the expression to be evaluated which can be a <tt>Long</tt> value,
+     * @param expression the expression to be evaluated which can be a <tt>Integer</tt> value,
      * or a <tt>CycList</tt>
      * @return the numerical value of the expression
      */
-    public static long numericallyEvaluateExpression(Object expression) throws IOException {
-        if (expression instanceof Long)
-            return ((Long) expression).longValue();
+    public static int numericallyEvaluateExpression(Object expression) throws IOException {
+        if (expression instanceof Integer)
+            return ((Integer) expression).intValue();
         else if (expression instanceof CycNart) {
             CycNart cycNart = (CycNart) expression;
             CycFort functor = cycNart.getFunctor();

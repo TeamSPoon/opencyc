@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 
@@ -52,5 +53,10 @@ public class AssignCommand implements Command {
   
   /** the name of this conditional command */
   protected String name;
+ 
+  /** the state variable that receives the assigned value */
+  protected StateVariable assignee;
   
+  /** the literal or evaluatable expression that is assigned */
+  protected Object assignedObject;
 }

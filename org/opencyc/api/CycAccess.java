@@ -303,8 +303,19 @@ public class CycAccess {
      * Closes the CycConnection object.
      */
     public void close() {
-        if (cycConnection != null)
+        if (cycConnection != null) {
+            if (cycConnection instanceof RemoteCycConnection)
+                try {
+                    this.converseVoid("(end-cyc-access)");
+                }
+                catch (UnknownHostException e) {
+                }
+                catch (IOException e) {
+                }
+                catch (CycApiException e) {
+                }
             cycConnection.close();
+        }
         cycAccessInstances.remove(Thread.currentThread());
     }
 

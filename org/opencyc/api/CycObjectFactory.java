@@ -496,7 +496,7 @@ public class CycObjectFactory {
         else if (elementName.equals("list"))
             return unmarshallCycList(element, document);
         else if (elementName.equals("string"))
-            return element.getTextTrim();
+            return element.getText();
         else if (elementName.equals("integer"))
             return new Integer(element.getTextTrim());
         else if (elementName.equals("double"))

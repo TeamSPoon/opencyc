@@ -95,20 +95,21 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
     protected int count;
 
     /**
-     * The CycAccess object which manages the interface to the Cyc api.
-     */
-    protected CycAccess cycAccess;
-
-    /**
      * The conversation state.
      */
     protected String conversationState = "initial";
 
     /**
      * Cached AgentRep objects which reduce lookup overhead.
-     * agentName --> agentRep
+     * agentName --> AgentRep instance
      */
     protected static Hashtable agentRepCache = new Hashtable();
+
+    /**
+     * Cached CycAccess objects which preserve Cyc session state.
+     * agentName --> CycAccess instance
+     */
+    protected static Hashtable cycAccessCache = new Hashtable();
 
     /**
      * Constructs a new CoAbsCycProxy object.
@@ -325,8 +326,15 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         conversationState = "api request";
         ACL coAbsRequestAcl = null;
         CycList apiRequest = null;
+        String senderName = apiRequestMessage.getSenderAgentRep().getName();
+        CycAccess cycAccess = (CycAccess) cycAccessCache.get(senderName);
         try {
-            cycAccess = new CycAccess();
+            if (cycAccess == null) {
+                cycAccess = new CycAccess();
+                cycAccessCache.put(senderName, cycAccess);
+                if (verbosity > 1)
+                    Log.current.print("created cyc access for " + senderName);
+            }
             coAbsRequestAcl = new ACL(apiRequestMessage.getRawText());
             String contentXml = (String) coAbsRequestAcl.getContentObject();
             apiRequest = (CycList) CycObjectFactory.unmarshall(contentXml);
@@ -337,9 +345,30 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
             return;
         }
 
+        if (apiRequest.first().equals(CycObjectFactory.makeCycSymbol("cyc-kill"))) {
+            CycObjectFactory.removeCaches((CycConstant) apiRequest.second());
+            if (verbosity > 2)
+                System.out.println("killed cached version of " + (CycConstant) apiRequest.second());
+        }
+
+        try {
+            if (apiRequest.equals(cycAccess.makeCycList("(end-cyc-access)"))) {
+                if (verbosity > 1)
+                    Log.current.print("ending cyc access for " + senderName);
+                    cycAccess.close();
+                cycAccessCache.remove(senderName);
+                conversationState = "api ready";
+                return;
+                }
+            }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+        }
+
         Object [] response = {null, null};
         try {
-            cycAccess.traceOn();
+            //cycAccess.traceOnDetailed();
             response = cycAccess.getCycConnection().converse(apiRequest);
         }
         catch (Exception e) {
@@ -381,13 +410,6 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         AgentRep requestingAgentRep = apiRequestMessage.getSenderAgentRep();
         requestingAgentRep.addMessage(replyMessage);
 
-        try {
-            cycAccess.close();
-        }
-        catch (Exception e) {
-            Log.current.errorPrintln(e.getMessage());
-            Log.current.printStackTrace(e);
-        }
         conversationState = "api ready";
     }
 

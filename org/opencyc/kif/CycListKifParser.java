@@ -393,6 +393,10 @@ public class CycListKifParser {
 		Object w = null;
 		if ( st.sval.startsWith("#$") )
 			w = cycAccess.makeCycConstant(st.sval);
+		else if ( st.sval.startsWith(":") )
+			w = new CycSymbol(st.sval);
+		else if ( st.sval.startsWith("!") )
+			w = CycObjectFactory.makeCycSymbol(st.sval.substring(1));
 		else if ( st.sval.startsWith("?") )
 			w = CycObjectFactory.makeCycVariable(st.sval);
 		else if ( st.sval.equals("#") ) {

@@ -44,13 +44,33 @@ public class ForwardCheckingSearcher {
     protected ConstraintProblem constraintProblem;
 
     /**
+     * Reference to the <tt>Solution</tt> for the parent <tt>ConstraintProblem</tt> object.
+     */
+    protected Solution solution;
+
+    /**
+     * Reference to the <tt>ValueDomains</tt> object for the parent <tt>ConstraintProblem</tt>
+     * object.
+     */
+    protected ValueDomains valueDomains;
+
+    /**
      * Constructs a new <tt>FowardCheckingSearcher</tt> object.
      *
      * @param constraintProblem the parent constraint problem
      */
     public ForwardCheckingSearcher(ConstraintProblem constraintProblem) {
+        // Set direct references to collaborating objects.
         this.constraintProblem = constraintProblem;
+        solution = constraintProblem.solution;
+        valueDomains = constraintProblem.valueDomains;
     }
+
+    /**
+     * Number of search steps performed during the search for solution(s).
+     */
+    protected int nbrSteps = 0;
+
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -68,11 +88,11 @@ public class ForwardCheckingSearcher {
      *
      * @param variables is the <tt>ArrayList</tt> of remaining variables to solve
      * @param level is the current depth of the search
-     * @return <tt>true</tt> if a solution is found in this subtree.
+     * @return <tt>true</tt> when done with the search
      */
     protected boolean search(ArrayList variables, int level) {
         CycVariable selectedVariable = selectVariable(variables);
-        ArrayList remainingDomain = constraintProblem.valueDomains.getUnmarkedDomainValues(selectedVariable);
+        ArrayList remainingDomain = valueDomains.getUnmarkedDomainValues(selectedVariable);
         ArrayList remainingVariables = (ArrayList) variables.clone();
         remainingVariables.remove(selectedVariable);
         if (verbosity > 2) {
@@ -85,10 +105,49 @@ public class ForwardCheckingSearcher {
         // backtracking when required.
         for (int i = 0; i < remainingDomain.size(); i++) {
             Object selectedValue = remainingDomain.get(i);
-            //Solution object
-
+            Binding currentBinding = new Binding(selectedVariable,
+                                                 selectedValue);
+            solution.addBindingToCurrentSolution(currentBinding);
+            nbrSteps++;
+            if (verbosity > 2)
+                System.out.println("  trial solution " +
+                                   solution.getCurrentSolution());
+            if (variables.size() == 1) {
+                // Trivial case where the last variable is under consideration.
+                solution.nbrSolutionsFound++;
+                if (verbosity > 0) {
+                    if (solution.nbrSolutionsFound == 1)
+                        System.out.println("\nFound a solution\n");
+                    else
+                        System.out.println("\nFound solution " +
+                                           solution.nbrSolutionsFound + "\n");
+                    solution.displaySolution(solution.getCurrentSolution());
+                    System.out.println();
+                }
+                // The last variable is solved, have all the solutions requested been found?
+                if (constraintProblem.nbrSolutionsRequested != null)
+                    if (constraintProblem.nbrSolutionsRequested.intValue() == solution.nbrSolutionsFound)
+                        // Done and stop the search.
+                        return true;
+                // More solutions are needed, record this solution.
+                solution.recordNewSolution(currentBinding);
+            }
+            else {
+                // Try to achieve partial arc-consistency in the subtree.
+                if (checkForwardRules(remainingVariables,
+                                      level,
+                                      currentBinding) &&
+                    search(remainingVariables, level + 1))
+                    // Requested solution(s) found in the subtree.
+                    return true;
+                // Otherwise backtrack, selecting next unmarked domain value.
+                if (verbosity > 2)
+                    System.out.println("  backtracking from " + currentBinding);
+                solution.removeBindingFromCurrentSolution(currentBinding);
+                restore(remainingVariables, level);
+            }
         }
-        // No solution down this branch.
+        // Done with this branch of the search tree, and keep searching.
         return false;
     }
 
@@ -107,7 +166,7 @@ public class ForwardCheckingSearcher {
         Integer degree = null;
         for (int i = 0; i < variables.size(); i++) {
             CycVariable variable = (CycVariable) variables.get(i);
-            remainingDomainSize = new Integer(constraintProblem.valueDomains.getUnmarkedDomainSize(variable));
+            remainingDomainSize = new Integer(valueDomains.getUnmarkedDomainSize(variable));
             degree = new Integer(constraintDegree(variable, variables));
             annotatedVariables.add(new VariableSelectionAttributes(variable,
                                                                    remainingDomainSize,
@@ -121,6 +180,43 @@ public class ForwardCheckingSearcher {
             }
         }
         return ((VariableSelectionAttributes) annotatedVariables.get(0)).cycVariable;
+    }
+
+    /**
+     * Performs forward checking of applicable rules to restrict the domains of remaining
+     * variables.  Returns <tt>true</tt> iff no remaining variable domains are wiped out.
+     *
+     * @param remainingVariables the <tt>ArrayList</tt> of variables for which no domain
+     * values have yet been bound
+     * @param currentBinding the current variable and bound value
+     * @return <tt>true</tt> iff no remaining variable domains are wiped out
+     */
+    protected boolean checkForwardRules(ArrayList remainingVariables,
+                                        int level,
+                                        Binding currentBinding) {
+
+
+    return true;
+    }
+
+    /**
+     * Restores the eliminated value choices for constraint variables due to a backtrack in
+     * the search.
+     */
+    protected void restore(ArrayList remainingVariables, int level) {
+        Integer intLevel = new Integer(level);
+        for (int i = 0; i < remainingVariables.size(); i++) {
+            CycVariable cycVariable = (CycVariable) remainingVariables.get(i);
+            ArrayList domainValues = valueDomains.getDomainValues(cycVariable);
+            for (int j = 0; j < domainValues.size(); j++) {
+                Object value = domainValues.get(j);
+                if (valueDomains.isDomainMarkedAtLevel(cycVariable, value, intLevel)) {
+                    if (verbosity > 2)
+                        System.out.println("  restoring " + (new Binding(cycVariable, value)));
+                    valueDomains.unmarkDomain(cycVariable, value);
+                }
+            }
+        }
     }
 
     /**

@@ -183,8 +183,8 @@ public class ValueDomains {
     }
 
     /**
-     * Returns the <tt>ArrayList</tt> of unmarked (eligible for the solution) domain values
-     * for the given variable.
+     * Returns the <tt>ArrayList</tt> of unmarked (eligible for the solution) domain
+     * values for the given variable.
      */
     protected ArrayList getUnmarkedDomainValues(CycVariable cycVariable) {
         ArrayList unmarkedDomainValues = new ArrayList();

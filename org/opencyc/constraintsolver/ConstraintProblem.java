@@ -128,12 +128,6 @@ public class ConstraintProblem {
     protected int nbrAsks = 0;
 
     /**
-     * Number of search steps performed during the search for solution(s).
-     */
-    protected int nbrSteps = 0;
-
-
-    /**
      * Constructs a new <tt>ConstraintProblem</tt> object.
      */
     public ConstraintProblem() {
@@ -184,7 +178,8 @@ public class ConstraintProblem {
         problemParser.initializeDomains();
         nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
         valueDomains.initializeDomainValueMarking();
-        forwardCheckingSearcher.search(variables, 1);
+        //TODO enable when coding for search is done
+        //forwardCheckingSearcher.search(variables, 1);
 
         return solution.solutions;
     }

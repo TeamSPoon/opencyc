@@ -552,16 +552,23 @@ public class CfaslOutputStream extends BufferedOutputStream {
     public void writeObject (Object o) throws IOException {
         if (trace == API_TRACE_DETAILED) {
             try {
-                // If object o understands the safeToString method, then use it.
-                Method safeToString = o.getClass().getMethod("safeToString", null);
-                System.out.println("writeObject = " + safeToString.invoke(o, null) +
-                                   " (" + o.getClass() + ")");
+                if (o == null)
+                    System.out.println("writeObject = null");
+                else {
+                    // If object o understands the safeToString method, then use it.
+                    Method safeToString = o.getClass().getMethod("safeToString", null);
+                    System.out.println("writeObject = " + safeToString.invoke(o, null) +
+                                       " (" + o.getClass() + ")");
+                }
             }
             catch (Exception e) {
                 System.out.println("writeObject = " + o + " (" + o.getClass() + ")");
             }
         }
-        if (o instanceof Guid)
+        if (o == null)
+            // Substitute NIL symbol for java null
+            writeSymbol(CycObjectFactory.nil);
+        else if (o instanceof Guid)
             writeGuid((Guid) o);
         else if (o instanceof CycSymbol)
             writeSymbol((CycSymbol) o);

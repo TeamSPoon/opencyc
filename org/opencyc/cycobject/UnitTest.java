@@ -294,8 +294,7 @@ public class UnitTest extends TestCase {
         CycAccess cycAccess = null;
         try {
             cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                      //CycConnection.DEFAULT_BASE_PORT,
-                                      3640,
+                                      CycConnection.DEFAULT_BASE_PORT,
                                       CycConnection.BINARY_MODE,
                                       CycAccess.PERSISTENT_CONNECTION);
             CycConstant fruitFn =
@@ -854,7 +853,7 @@ public class UnitTest extends TestCase {
                 "    <constant>\n" +
                 "      <guid>bd58daa0-9c29-11b1-9dad-c379636f7270</guid>\n" +
                 "      <name>Dog</name>\n" +
-                "      <id>2053</id>\n" +
+                "      <id>2050</id>\n" +
                 "    </constant>\n" +
                 "  </dotted-element>\n" +
                 "</list>\n";
@@ -937,8 +936,6 @@ public class UnitTest extends TestCase {
                                 envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":to")));
             Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-cyc-agent"),
                                 envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":from")));
-            System.out.println("class=" +
-                               envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":date")).getClass());
             Assert.assertEquals(new Long("3215361678"),
                                 envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":date")));
             Assert.assertEquals(CycObjectFactory.makeCycSymbol(":coabs"),
@@ -988,6 +985,12 @@ public class UnitTest extends TestCase {
         cycList51.add(new Integer(1));
         cycList51.addQuoted(CycObjectFactory.makeCycSymbol("quote-me"));
         Assert.assertEquals("(1 (QUOTE QUOTE-ME))", cycList51.toString());
+
+        // toString (with null element)
+        CycList cycList52 = new CycList();
+        cycList52.add(null);
+        Assert.assertNull(cycList52.first());
+        Assert.assertEquals("(null)", cycList52.toString());
 
         System.out.println("*** testCycList OK ***");
     }

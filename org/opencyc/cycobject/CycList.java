@@ -510,7 +510,9 @@ public class CycList extends ArrayList {
             if (i > 0)
                 result.append(" ");
             Object element = this.get(i);
-            if (element instanceof String)
+            if (element == null)
+                result.append("null");
+            else if (element instanceof String)
                 result.append("\"" + element + "\"");
             else if (safe) {
                 try {

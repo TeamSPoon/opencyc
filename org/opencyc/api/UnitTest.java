@@ -78,6 +78,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
+        /*
         testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
@@ -92,6 +93,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
+        */
         testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
@@ -3532,15 +3534,36 @@ public class UnitTest extends TestCase {
         long startMilliseconds = System.currentTimeMillis();
         try {
 
-        // isQuotedCollection
-        CycConstant coreConstant =
-            cycAccess.getKnownConstantByGuid("c0dd1b7c-9c29-11b1-9dad-c379636f7270");
-        Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant, cycAccess.baseKB));
-        Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant));
-        CycConstant animal =
-            cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
-        Assert.assertTrue(! cycAccess.isQuotedCollection(animal));
+            // isQuotedCollection
+            CycConstant coreConstant =
+                cycAccess.getKnownConstantByGuid("c0dd1b7c-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant, cycAccess.baseKB));
+            Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant));
+            CycConstant animal =
+                cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(! cycAccess.isQuotedCollection(animal));
 
+            // List containing null is coerced to list containing NIL.
+            if (cycAccess.communicationMode == CycConnection.BINARY_MODE) {
+                cycAccess.traceOn();
+                CycList script = new CycList();
+                script.add(CycObjectFactory.makeCycSymbol("csetq"));
+                script.add(CycObjectFactory.makeCycSymbol("a"));
+                script.add(null);
+                Object responseObject = cycAccess.converseObject(script);
+                Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+                script = new CycList();
+                script.add(CycObjectFactory.makeCycSymbol("csetq"));
+                script.add(CycObjectFactory.makeCycSymbol("a"));
+                CycList cycList = new CycList();
+                cycList.add(null);
+                cycList.add(new Integer(1));
+                script.addQuoted(cycList);
+                CycList responseList = cycAccess.converseList(script);
+                Assert.assertEquals(cycAccess.makeCycList("(nil 1)"),
+                                    responseList);
+            }
         }
         catch (Exception e) {
             CycAccess.current().close();

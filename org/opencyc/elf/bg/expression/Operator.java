@@ -73,7 +73,7 @@ public abstract class Operator {
    * @param arg2Num the second numeric argument
    * @return the converted numeric objects in an array
    */
-  public Number[] convertNumericArguments(Number arg1Num, Number arg2Num) {
+  public static Number[] convertNumericArguments(Number arg1Num, Number arg2Num) {
     Number[] result = {arg1Num, arg2Num};
     if (! arg1Num.getClass().equals(arg2Num.getClass())) {
       if (arg1Num instanceof Integer) {
@@ -100,8 +100,6 @@ public abstract class Operator {
     return result;
   }
   
-  //// Protected Area
-  
   /** Dereferences the given argument within the given state if the argument is a state 
    * variable or operator expression.
    *
@@ -110,7 +108,7 @@ public abstract class Operator {
    * @return the value of the state variable when the given argument is a state variable,
    * otherwise return the argument
    */
-  protected Object evaluateArgument (Object argument, State state) {
+  public static Object evaluateArgument (Object argument, State state) {
     if (argument instanceof StateVariable) {
       return state.getStateValue((StateVariable) argument);
     }
@@ -119,7 +117,8 @@ public abstract class Operator {
     else
       return argument;
   }
-  
+  //// Protected Area
+    
   //// Private Area
   
   //// Internal Rep

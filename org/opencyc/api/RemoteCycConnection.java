@@ -86,7 +86,9 @@ public class RemoteCycConnection implements CycConnectionInterface {
     /**
      * the interface for interacting with an agent community such as CoABS or FIPA-OS
      */
-    AgentCommunityAdapter agentCommunityAdapter;
+    protected AgentCommunityAdapter agentCommunityAdapter;
+
+    protected static final long thirtyMinutesDuration = 30 * 60 * 1000;
 
     /**
      * Constructs a new RemoteCycConnection object to the given CycProxyAgent in the given
@@ -160,7 +162,7 @@ public class RemoteCycConnection implements CycConnectionInterface {
         acl.setReplyWith(agentCommunityAdapter.nextMessageId());
 
         try {
-            ACL replyAcl = agentCommunityAdapter.converseMessage(acl, this.agentCommunityAdapter.WAIT_FOREVER);
+            ACL replyAcl = agentCommunityAdapter.converseMessage(acl, thirtyMinutesDuration);
         }
         catch (TimeLimitExceededException e) {
             Log.current.errorPrintln(e.getMessage());

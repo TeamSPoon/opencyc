@@ -733,7 +733,8 @@ public class CycList extends ArrayList {
         xmlWriter.setIndent(-indentLength, true);
         if (startingIndent != xmlWriter.getIndentLength())
             throw new RuntimeException("Starting indent " + startingIndent +
-                                       " is not equal to ending indent " + xmlWriter.getIndentLength());
+                                       " is not equal to ending indent " + xmlWriter.getIndentLength() +
+                                       " for object " + object);
     }
 
 }

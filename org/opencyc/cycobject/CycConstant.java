@@ -185,15 +185,20 @@ public class CycConstant extends CycFort implements Comparable {
     public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
         throws IOException {
         xmlWriter.printXMLStartTag(constantXMLTag, indent, relative, true);
-        if (guid != null)
-            guid.toXML(xmlWriter, indentLength, true);
+        int subIndent = indentLength;
+        if (guid != null) {
+            guid.toXML(xmlWriter, subIndent, true);
+            subIndent = 0;
+        }
         if (name != null) {
-            xmlWriter.printXMLStartTag(nameXMLTag, 0, true, false);
+            xmlWriter.printXMLStartTag(nameXMLTag, subIndent, true, false);
             xmlWriter.print(this.getName());
             xmlWriter.printXMLEndTag(nameXMLTag);
+            if (subIndent == indentLength)
+                subIndent = 0;
         }
         if (super.getId() != null) {
-            xmlWriter.printXMLStartTag(idXMLTag, 0, true, false);
+            xmlWriter.printXMLStartTag(idXMLTag, subIndent, true, false);
             xmlWriter.print(this.getId().toString());
             xmlWriter.printXMLEndTag(idXMLTag);
         }

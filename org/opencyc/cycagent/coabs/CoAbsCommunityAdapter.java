@@ -6,7 +6,7 @@ import java.util.*;
 import javax.naming.TimeLimitExceededException;
 import net.jini.core.entry.Entry;
 import net.jini.lookup.ServiceIDListener;
-import net.jini.core.lookup.ServiceID;
+import net.jini.core.lookup.*;
 import fipaos.ont.fipa.*;
 import fipaos.parser.ParserException;
 import com.globalinfotek.coabsgrid.*;
@@ -79,12 +79,20 @@ public class CoAbsCommunityAdapter
     protected String conversationState = "initial";
 
     /**
+     * Cached AgentRep objects which reduce lookup overhead.
+     * agentName --> agentRep
+     */
+    protected static Hashtable agentRepCache = new Hashtable();
+
+    /**
      * Constructs a new CoAbsCommunityAdapter for the given CoAbs agent name.
      *
      * @param agentName the name of my agent in the CoAbs community.
      */
     public CoAbsCommunityAdapter(String agentName) throws IOException {
         this.agentName = agentName;
+        if (Log.current == null)
+            Log.makeLog();
         register();
     }
 
@@ -96,8 +104,8 @@ public class CoAbsCommunityAdapter
             Log.current.println("Starting CoAbsCommunityAdapter for " + agentName);
         regHelper = new AgentRegistrationHelper(agentName);
         regHelper.addMessageListener(this);
-        Entry[] entries = {new AMSAgentDescription(agentName)};
-        regHelper.addAdvertisedCapabilities(entries);
+        //Entry[] entries = {new AMSAgentDescription(agentName)};
+        //regHelper.addAdvertisedCapabilities(entries);
         ShutdownHandler.addHook(this);
         conversationState = "register";
         if (verbosity > 2)
@@ -123,28 +131,30 @@ public class CoAbsCommunityAdapter
         }
         String registrationMessageId = nextMessageId();
         try {
-            // The agent version of registerAgent(), used below, sends a message
-            // confirming that registration has been initiated.
-            regHelper.registerAgent ("message" + ++msgSerialNumber);
+            regHelper.registerAgent (registrationMessageId);
         }
         catch (IOException e) {
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
             }
-        org.opencyc.util.Timer timer = new org.opencyc.util.Timer(10000);
+        long tenSecondsDuration = 10000;
+        org.opencyc.util.Timer timer = new org.opencyc.util.Timer(tenSecondsDuration);
         waitingReplyThreads.put(registrationMessageId, Thread.currentThread());
         while (true)
             try {
                 Thread.sleep(500);
-                if (timer.isTimedOut())
+                if (timer.isTimedOut()) {
+                    Log.current.errorPrintln("Time limit exceeded while awaiting CoABS registration");
                     throw new IOException("Time limit exceeded while awaiting CoABS registration");
+                }
             }
             catch (InterruptedException e) {
-                if (verbosity > 2)
-                    Log.current.println(agentName + " registered with CoABS grid");
-                waitingReplyThreads.remove(registrationMessageId);
-                replyMessages.remove(registrationMessageId);
+                break;
             }
+        if (verbosity > 2)
+            Log.current.println(agentName + " registered with CoABS grid");
+        waitingReplyThreads.remove(registrationMessageId);
+        replyMessages.remove(registrationMessageId);
     }
 
     /**
@@ -226,14 +236,15 @@ public class CoAbsCommunityAdapter
      *
      * @param acl the Agent Communication Language message to be sent
      */
-    public void sendMessage (ACL acl) {
-        Message requestMessage = new BasicMessage(agentName,
+    public void sendMessage (ACL acl) throws IOException {
+        Message requestMessage = new BasicMessage(acl.getReceiverAID().getName(),
                                                   "fipa-xml",
                                                   acl.toString());
         if (verbosity > 2)
             Log.current.println("\nSending " + requestMessage.toString() +
                                 "\n  receiver: " + requestMessage.getReceiver());
-        forward(requestMessage, acl.getReplyWith());
+        AgentRep receivingAgentRep = this.lookupAgentRep(acl.getReceiverAID().getName());
+        receivingAgentRep.addMessage(requestMessage);
     }
 
     /**
@@ -259,7 +270,7 @@ public class CoAbsCommunityAdapter
      */
     public ACL converseMessage (ACL acl, long timeoutMilliseconds)
         throws TimeLimitExceededException, IOException {
-        Message requestMessage = new BasicMessage(agentName,
+        Message requestMessage = new BasicMessage(acl.getReceiverAID().getName(),
                                                   "fipa-xml",
                                                   acl.toString());
         if (verbosity > 2)
@@ -267,14 +278,16 @@ public class CoAbsCommunityAdapter
                                 "\n  receiver: " + requestMessage.getReceiver());
         String replyWith = acl.getReplyWith();
         waitingReplyThreads.put(replyWith, Thread.currentThread());
-        forward(requestMessage, replyWith);
+        AgentRep receivingAgentRep = this.lookupAgentRep(acl.getReceiverAID().getName());
+        receivingAgentRep.addMessage(requestMessage);
         org.opencyc.util.Timer timer = new org.opencyc.util.Timer(timeoutMilliseconds);
         waitingReplyThreads.put(replyWith, Thread.currentThread());
         while (true)
             try {
                 Thread.sleep(500);
                 if (timer.isTimedOut())
-                    throw new IOException("Time limit exceeded while awaiting reply message to " + replyWith);
+                    throw new IOException("Time limit exceeded - " + timer.getElapsedSeconds() +
+                                          " seconds, while awaiting reply message to " + replyWith);
             }
             catch (InterruptedException e) {
                 ACL replyAcl = (ACL) replyMessages.get(replyWith);
@@ -349,6 +362,42 @@ public class CoAbsCommunityAdapter
         regHelper.addServiceIDListener(sidl);
     }
 
+    /**
+     * Returns the AgentRep object for the given agent name.
+     *
+     * @param agentName the agent name
+     * @return the AgentRep object for the given agent name
+     */
+    protected AgentRep lookupAgentRep(String agentName) throws IOException {
+        AgentRep agentRep = (AgentRep) agentRepCache.get(agentName);
+        if (agentRep != null)
+            return agentRep;
+        // create a Directory to use for lookups
+        Directory directory = new Directory();
+        System.out.println("*** Looking up everything:");
+        ServiceItem[] items = directory.lookup((net.jini.core.lookup.ServiceTemplate) null);
+        for (int i = 0; i < items.length; i++) {
+            System.out.println();
+            System.out.println("Match " + (i + 1));
+            System.out.println("---------");
+            ServiceItem si = items[i];
+            Object service =  si.service;
+            System.out.println("Service (" + service.getClass() + ") = " + service);
+            if (service instanceof AgentRep) {
+                agentRep = (AgentRep) service;
+                System.out.println("Agent name " + agentRep.getName());
+                if (agentName.equals(agentRep.getName())) {
+                    agentRepCache.put(agentName, agentRep);
+                    if (verbosity > 2)
+                        Log.current.print("cached AgentRep for " + agentName);
+                    return agentRep;
+                }
+            }
+        }
+        throw new IOException("Agent not found " + agentName);
+    }
+
+
     // FIPA ACC
 
     /**
@@ -356,7 +405,7 @@ public class CoAbsCommunityAdapter
      *
      * @param message the CoABS message
      */
-    public void forward(Message message, String messageId) {
+    public void xforward(Message message, String messageId) {
         try {
             regHelper.getDirectory().forward(message,
                                              regHelper.getAgentRep(),

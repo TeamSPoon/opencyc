@@ -337,7 +337,8 @@ public class CycConnection implements CycConnectionInterface {
      * false and the second element is the error message string.
      *
      * @param message the api command
-     * @return an array of two objects, the first is an Integer response code, and the second is the
+     * @return an array of two objects, the first is an response status object
+     * either a Boolean (binary mode) or Integer (ascii mode), and the second is the
      * response object or error string.
      */
     public synchronized Object[] converse (Object message) throws IOException, CycApiException {
@@ -354,7 +355,8 @@ public class CycConnection implements CycConnectionInterface {
      *
      * @param message the api command which must be a String or a CycList
      * @param timeout a <tt>Timer</tt> object giving the time limit for the api call
-     * @return an array of two objects, the first is an Integer response code, and the second is the
+     * @return an array of two objects, the first is an response status object
+     * either a Boolean (binary mode) or Integer (ascii mode), and the second is the
      * response object or error string.
      */
     public synchronized Object[] converse (Object message, Timer timeout)

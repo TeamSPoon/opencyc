@@ -49,14 +49,14 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testGuid"));
+        testSuite.addTest(new UnitTest("testCoAbsCommunityAdapter"));
         return testSuite;
     }
 
     /**
      * Tests <tt>CoAbsCommunityAdapter</tt> object behavior.
      */
-    public void testGuid() {
+    public void testCoAbsCommunityAdapter() {
         System.out.println("\n** testCoAbsCommunityAdapter **");
         try {
             String aclText =

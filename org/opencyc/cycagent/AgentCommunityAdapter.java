@@ -42,7 +42,7 @@ public interface AgentCommunityAdapter {
      *
      * @param acl the Agent Communication Language message to be sent
      */
-    public void sendMessage (ACL acl);
+    public void sendMessage (ACL acl) throws IOException;
 
     /**
      * Notifies my agent that an Agent Communication Language message has been received.
@@ -50,8 +50,6 @@ public interface AgentCommunityAdapter {
      * @param acl the Agent Communication Language message which has been received for my agent
      */
     public void messageReceived (ACL acl);
-
-    public static final long WAIT_FOREVER = Long.MAX_VALUE;
 
     /**
      * Sends an Agent Communication Language message and returns the reply.

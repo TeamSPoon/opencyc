@@ -823,7 +823,7 @@ public class UnitTest extends TestCase {
                 "    <constant>\n" +
                 "      <guid>bd58daa0-9c29-11b1-9dad-c379636f7270</guid>\n" +
                 "      <name>Dog</name>\n" +
-                "      <id>2055</id>\n" +
+                "      <id>2054</id>\n" +
                 "    </constant>\n" +
                 "  </dotted-element>\n" +
                 "</list>\n";
@@ -836,13 +836,16 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycList47, (CycList) object);
 
             CycList cycList48 =
-                cycAccess.makeCycList("(#$BiologicalTaxon " +
+                cycAccess.makeCycList("(T (#$BiologicalTaxon " +
                                       "#$BiologicalSpecies " +
                                       "#$OrganismClassificationType " +
                                       "#$PublicConstant " +
-                                      "#$DomesticatedAnimalType)");
+                                      "#$DomesticatedAnimalType))");
             cycListXMLString = Marshaller.marshall(cycList48);
-            System.out.println(cycListXMLString);
+            //System.out.println(cycListXMLString);
+            object = CycObjectFactory.unmarshall(cycListXMLString);
+            Assert.assertTrue(object instanceof CycList);
+            Assert.assertEquals(cycList48, (CycList) object);
         }
         catch (Exception e) {
             e.printStackTrace();

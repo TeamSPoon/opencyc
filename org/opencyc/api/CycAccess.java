@@ -205,6 +205,8 @@ public class CycAccess {
     public CycAccess (String myAgentName,
                       String cycProxyAgentName,
                       int agentCommunity) throws IOException, CycApiException  {
+        communicationMode = CycConnection.BINARY_MODE;
+        persistentConnection = PERSISTENT_CONNECTION;
         cycConnection = new RemoteCycConnection(myAgentName, cycProxyAgentName, agentCommunity);
         commonInitialization();
     }

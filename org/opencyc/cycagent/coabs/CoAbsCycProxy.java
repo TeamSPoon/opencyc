@@ -137,8 +137,8 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
             Log.current.println("Starting CoAbsCycProxy " + agentName);
         regHelper = new AgentRegistrationHelper(agentName);
         regHelper.addMessageListener(this);
-        Entry[] entries = {new AMSAgentDescription(agentName)};
-        regHelper.addAdvertisedCapabilities(entries);
+        //Entry[] entries = {new AMSAgentDescription(agentName)};
+        //regHelper.addAdvertisedCapabilities(entries);
         count = 1;
         conversationState = "register";
         register();
@@ -357,9 +357,14 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         coAbsReplyAcl.setSenderAID(coAbsRequestAcl.getReceiverAID());
         coAbsReplyAcl.setReceiverAID(coAbsRequestAcl.getSenderAID());
         CycList responseCycList = new CycList();
-        responseCycList.add(response[0]);
+        if (response[0].equals(Boolean.TRUE))
+            responseCycList.add(CycObjectFactory.t);
+        else if (response[0].equals(Boolean.FALSE))
+            responseCycList.add(CycObjectFactory.nil);
+        else
+            new RuntimeException("response[0] not Boolean " + response[0]);
         responseCycList.add(response[1]);
-        System.out.println("marshalling\n" + responseCycList);
+        System.out.println("marshalling\n" + responseCycList.cyclify());
         try {
             coAbsReplyAcl.setContentObject(Marshaller.marshall(responseCycList));
         }

@@ -67,7 +67,7 @@ public class RelevantObjectsCommand implements Command {
    */
   public void execute(State state) {
     List possiblyRelevantObjectsList;
-    //TODO machine learning, for no possibilities are relevant
+    //TODO machine learning - for now, no possibilities are relevant
     List relevantObjectsList = new ArrayList();
     state.setStateValue(relevantObjects, relevantObjectsList);
   }  

@@ -1,15 +1,15 @@
 package org.opencyc.elf.bg.state;
 
+//// Internal Imports
+
+//// External Imports
 import java.util.*;
 
 import junit.framework.*;
 
-
 /**
  * Provides a suite of JUnit test cases for the org.opencyc.elf.bg.state
  * package.
- * 
- * <p></p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -33,14 +33,8 @@ import junit.framework.*;
  */
 public class UnitTest extends TestCase {
   
-  /**
-   * Main method in case tracing is prefered over running JUnit.
-   * @param args command line arguments (unused)
-   */
-  public static void main(String[] args) {
-    junit.textui.TestRunner.run(suite());
-  }
-
+  //// Constructors
+  
   /**
    * Construct a new UnitTest object.
    * 
@@ -49,6 +43,8 @@ public class UnitTest extends TestCase {
   public UnitTest(String name) {
     super(name);
   }
+  
+  //// Public Area
 
   /**
    * Runs the unit tests
@@ -108,5 +104,21 @@ public class UnitTest extends TestCase {
     Assert.assertTrue(situation1.getState().isStateVariable(stateVariable1));
 
     System.out.println("*** testSituation OK ***");
+  }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
+  
+  /**
+   * Main method in case tracing is prefered over running JUnit.
+   * @param args command line arguments (unused)
+   */
+  public static void main(String[] args) {
+    junit.textui.TestRunner.run(suite());
   }
 }

@@ -464,6 +464,15 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(source.getOutgoing().contains(transition3));
         Assert.assertTrue(target.getIncoming().contains(transition3));
 
+        Interpreter interpreter = new Interpreter(stateMachine);
+        Assert.assertNotNull(interpreter);
+        Assert.assertTrue(interpreter instanceof Interpreter);
+        Assert.assertTrue(interpreter.eventQueue.isEmpty());
+        Assert.assertNull(interpreter.getCurrentEvent());
+        Assert.assertEquals(stateMachine, interpreter.getStateMachine());
+        //interpreter.eventDispatcher();
+
+
         System.out.println("\n**** testSimpleStateMachine ****");
     }
 

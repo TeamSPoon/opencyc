@@ -18,9 +18,11 @@ import org.opencyc.elf.bg.planner.Scheduler;
 import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
+import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.message.ExecuteScheduleMsg;
 import org.opencyc.elf.message.ExecutorStatusMsg;
 import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.message.ReleaseMsg;
 
 import org.opencyc.elf.s.DirectSensor;
 
@@ -178,27 +180,8 @@ public class Executor extends BufferedNodeComponent {
       executor.schedule = executeScheduleMsg.getSchedule();
       getLogger().info("Executing " + executor.schedule);
       controlledResources = executeScheduleMsg.getControlledResources();
-      if (executor.actuator == null) {
-        String directActuatorName = executor.schedule.getDirectActuatorName();
-        if (directActuatorName != null) {
-          executor.actuator = ActuatorPool.getInstance().getActuator(directActuatorName);
-          executor.actuatorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
-          ((DirectActuator) executor.actuator).initialize((Takable) executor.actuatorChannel);
-        }
-        else
-          initializeLowerLevelNode();
-      }
-      if (executor.schedule.getDirectSensorName() != null) {
-        if (executor.directSensor == null)
-          obtainDirectSensor();
-        else if (! executor.directSensor.getName().equals(executor.schedule.getDirectSensorName())) {
-          //TODO release the current sensor and get the new one, attaching it
-          // to sensory perception
-        }
-      }
-      else if (directSensor != null) {
-        //TODO release the previous sensor
-      }
+      setupRequiredActuator();
+      setupRequiredSensor();
       scheduleSequencer = new ScheduleSequencer();
       scheduleSequencerExecutor = new ThreadedExecutor();
       try {
@@ -208,6 +191,65 @@ public class Executor extends BufferedNodeComponent {
         e.printStackTrace();
         System.exit(1);
       }
+    }
+    
+    /** Handles the direct sensor if one is required by the schedule, otherwise handles
+     * the initialization of a lower level node.
+     */
+    protected void setupRequiredActuator() {
+      String directActuatorName = executor.schedule.getDirectActuatorName();
+      if (directActuatorName == null)
+          initializeLowerLevelNode();
+      else {
+        if (executor.actuator == null)
+          obtainDirectActuator();
+        else if (executor.actuator instanceof DirectActuator &&
+                 (! ((DirectActuator) executor.actuator).getName().equals(directActuatorName))) {
+          releaseDirectActuator();
+          obtainDirectActuator();
+        }
+      }
+    }
+    
+    /** Releases the previous direct actuator. */
+    protected void releaseDirectActuator() {
+      ReleaseMsg releaseMsg = new ReleaseMsg(executor);
+      executor.sendMsgToRecipient(executor.actuator.getChannel(), releaseMsg);
+      executor.actuator = null;
+    }
+    
+    /** Obtains the required direct actutor and attaches it to this executor. */
+    protected void obtainDirectActuator() {
+      String directActuatorName = executor.schedule.getDirectActuatorName();
+      getLogger().info("Obtaining the actuator named " + directActuatorName);
+      executor.actuator = ActuatorPool.getInstance().getActuator(directActuatorName);
+      executor.actuatorChannel = executor.actuator.getChannel();
+      executor.actuatorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
+      ((DirectActuator) executor.actuator).initialize();
+    }
+    
+    /** Handles the direct sensor if one is required by the schedule, including releasing
+     * an existing sensor if it is no longer required.
+     */
+    protected void setupRequiredSensor() {
+      String directSensorName = executor.schedule.getDirectSensorName();
+      if (directSensorName != null) {
+        if (executor.directSensor == null)
+          obtainDirectSensor();
+        else if (! executor.directSensor.getName().equals(directSensorName)) {
+          releaseDirectSensor();
+          obtainDirectSensor();
+        }
+      }
+      else if (directSensor != null)
+        releaseDirectSensor();
+    }
+    
+    /** Releases the previous sensor from this node's sensory perception. */
+    protected void releaseDirectSensor() {
+      ReleaseMsg releaseMsg = new ReleaseMsg(executor);
+      executor.sendMsgToRecipient(executor.directSensor.getChannel(), releaseMsg);
+      executor.getNode().getSensoryPerception().removeSensor(executor.directSensor);
     }
     
     /** Obtains the required direct sensor and attaches it to this node's sensory perception. */
@@ -230,6 +272,7 @@ public class Executor extends BufferedNodeComponent {
       JobAssigner lowerLevelJobAssigner = lowerLevelNode.getBehaviorGeneration().getJobAssigner();
       lowerLevelJobAssigner.initialize(executor.getChannel());
       executor.actuator = lowerLevelJobAssigner;
+      executor.actuatorChannel = executor.actuator.getChannel();
       SensoryPerception lowerLevelSensoryPerception = lowerLevelNode.getSensoryPerception();
       executor.getNode().getSensoryPerception().addSensor(lowerLevelSensoryPerception);
       lowerLevelSensoryPerception.initialize(executor.getNode().getSensoryPerception().getChannel());
@@ -253,17 +296,25 @@ public class Executor extends BufferedNodeComponent {
       // TODO for now ignore timing
       Iterator commandIterator = plannedCommands.iterator();
       while (true) {
-        if (executor.stopSchedule) {
+        if (executor.stopSchedule || (! commandIterator.hasNext())) {
           Status status = new Status();
           status.setTrue(Status.SCHEDULE_FINISHED);
           ExecutorStatusMsg executorStatusMsg = new ExecutorStatusMsg(executor, status);
           return;
         }
+        
+        //TODO handle alternative choice command
+        //TODO handle conditional command
+        //TODO handle iterated command
+        //TODO handle learning episode command
+        //TODO handle macro command
+        //TODO handle ordering choice command
+        //TODO handle subset choice command
+        
         command = (Command) commandIterator.next();
         TaskCommand taskCommand = new TaskCommand(command, nextCommand);
-        
-        
-        // send task command to the actuator
+        DoTaskMsg doTaskMsg = new DoTaskMsg(executor, taskCommand);
+        executor.sendMsgToRecipient(executor.actuatorChannel, doTaskMsg);
       }
     }    
   }

@@ -1,9 +1,9 @@
 package org.opencyc.javashell;
 /**
- * This class implements a CycJavaClient.
+ * Description TODO
  *
  * @version $Id$
- * @author Stephen L. Reed
+ * @author Douglas R. Miles
  *
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>

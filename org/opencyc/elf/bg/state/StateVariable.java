@@ -36,16 +36,27 @@ public class StateVariable extends ELFObject {
   /** 
    * Creates a new instance of StateVariable given its name.
    *
+   * @param type the state variable type
    * @param name the state variable name
    * @param comment the comment
    */
-  public StateVariable(String name, String comment) {
+  public StateVariable(Class type, String name, String comment) {
+    this.type = type;
     this.name = name;
     this.comment = comment;
   }
   
   //// Public Area
   
+  /**
+   * Gets the state variable type
+   *
+   * @return the state variable type
+   */
+  public Class getType () {
+    return type;
+  }
+
   /**
    * Gets the state variable name
    *
@@ -88,16 +99,23 @@ public class StateVariable extends ELFObject {
     return this.name.equals(that.name);
   }
   
+  
   /** 
-   * the prompt 
+   * the console input state variable
    */
-  public static StateVariable PROMPT;
+  public static StateVariable CONSOLE_INPUT;
+  
+  /** 
+   * the console prompt state variable
+   */
+  public static StateVariable CONSOLE_PROMPT;
   
   /**
    * Initializes the state variables.
    */
   public static void initialize () {
-    PROMPT = new StateVariable("prompt", "the prompt");
+    CONSOLE_INPUT = new StateVariable(String.class, "consoleInput", "the console input string");
+    CONSOLE_PROMPT = new StateVariable(String.class, "consolePrompt", "the console prompt string");
   }
   
   //// Protected Area
@@ -105,6 +123,11 @@ public class StateVariable extends ELFObject {
   //// Private Area
   
   //// Internal Rep
+  
+  /**
+   * the state variable type
+   */
+  protected Class type;
   
   /**
    * the state variable name

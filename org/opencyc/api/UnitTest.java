@@ -70,9 +70,12 @@ public class UnitTest extends TestCase {
 
     public void testCycConnection () {
         System.out.println("**** testCycConnection ****");
+
+
         CycConnection cycConnection = null;
         try {
-            cycConnection = new CycConnection(new CycAccess());
+            CycAccess cycAccess = new CycAccess();
+            cycConnection = new CycConnection();
             //cycConnection.trace = true;
         }
         catch (UnknownHostException e) {
@@ -1286,7 +1289,30 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
+        // askWithVariable
+        try {
+            CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)");
+            CycVariable variable = CycVariable.makeCycVariable("?WHAT");
+            mt = CycAccess.current().getConstantByName("EverythingPSC");
+            CycList response = CycAccess.current().askWithVariable(query, variable, mt);
+            Assert.assertNotNull(response);
+            Assert.assertTrue(response.contains(CycAccess.current().getConstantByName("#$UniversityOfTexasAtAustin")));
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
 
+        // isQueryTrue
+        try {
+            CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfAustinTX)");
+            mt = CycAccess.current().getConstantByName("EverythingPSC");
+            Assert.assertTrue(CycAccess.current().isQueryTrue(query, mt));
+            query = CycAccess.current().makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfHoustonTX)");
+            Assert.assertTrue(! CycAccess.current().isQueryTrue(query, mt));
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
 
         //--------- last.
         try {

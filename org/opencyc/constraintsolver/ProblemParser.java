@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import org.opencyc.cycobject.*;
 import java.util.*;
+import java.io.IOException;
 
 /**
  * <tt>ProblemParser</tt> object to model the attributes and behavior of
@@ -73,7 +74,7 @@ public class ProblemParser {
      * domains, and those which subsequently constrain the search for
      * one or more solutions.
      */
-    public void extractRulesAndDomains() {
+    public void extractRulesAndDomains() throws IOException {
         constraintProblem.simplifiedRules = Rule.simplifyRuleExpression(constraintProblem.problem);
         for (int i = 0; i < constraintProblem.simplifiedRules.size(); i++) {
             Rule rule = (Rule) constraintProblem.simplifiedRules.get(i);
@@ -102,7 +103,7 @@ public class ProblemParser {
     /**
      * Initializes the value domains for each variable.
      */
-    public void initializeDomains() {
+    public void initializeDomains() throws IOException {
         for (int i = 0; i < constraintProblem.domainPopulationRules.size(); i++) {
             Rule rule = (Rule) constraintProblem.domainPopulationRules.get(i);
             //TODO handle high cardinality domains.

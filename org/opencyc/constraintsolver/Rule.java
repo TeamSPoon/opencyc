@@ -3,6 +3,7 @@ package org.opencyc.constraintsolver;
 import java.util.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
+import java.io.IOException;
 
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a constraint rule.<p>
@@ -59,10 +60,9 @@ public class Rule {
      *
      * @param ruleString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
-     * @param cycAccess the OpenCyc api connection
      */
-    public Rule (String ruleString, CycAccess cycAccess) {
-        rule = cycAccess.makeCycList(ruleString);
+    public Rule (String ruleString) {
+        rule = CycAccess.current().makeCycList(ruleString);
         gatherVariables();
     }
 
@@ -109,12 +109,13 @@ public class Rule {
      * @return an <tt>ArrayList</tt> of <tt>Rule</tt> objects.
      * @see UnitTest#testRule
      */
-    public static ArrayList simplifyRuleExpression(CycList cycList) {
+    public static ArrayList simplifyRuleExpression(CycList cycList) throws IOException {
         ArrayList rules = new ArrayList();
         if (cycList.size() < 2)
             throw new RuntimeException("Invalid rule: " + cycList);
-        //TODO - use static value from CycConstant class.
-        if (cycList.first().toString().equals("and"))
+        Object object = cycList.first();
+        if (object instanceof CycConstant &&
+            ((CycConstant) object).equals(CycAccess.current().getConstantByName("and")))
             for (int i = 1; i < cycList.size(); i++)
                 rules.add(new Rule((CycList) cycList.get(i)));
         else
@@ -240,7 +241,7 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this is a variable domain populating
      * <tt>Rule</tt>.
      */
-    public boolean isVariableDomainPopulatingRule() {
+    public boolean isVariableDomainPopulatingRule() throws IOException {
         return isIntensionalVariableDomainPopulatingRule() ||
                isExtensionalVariableDomainPopulatingRule();
     }
@@ -251,11 +252,10 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this <tt>Rule</tt> is a #$different
      * constraint rule
      */
-    public boolean isAllDifferent() {
+    public boolean isAllDifferent() throws IOException{
         if (this.getArity() < 2)
             return false;
-        //TODO make right
-        if (this.getPredicate().toString().equals("different"))
+        if (this.getPredicate().equals(CycAccess.current().getConstantByName("different")))
             return true;
         else
             return false;
@@ -270,10 +270,10 @@ public class Rule {
      * @return <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
      * which can be answered without KB lookup
      */
-    public boolean isEvaluatable() {
+    public boolean isEvaluatable() throws IOException {
         if (this.getArguments().size() < 2)
             return false;
-        if (this.getPredicate().toString().equals("numericallyEqual"))
+        if (this.getPredicate().equals(CycAccess.current().getConstantByName("numericallyEqual")))
             return hasEvaluatableNumericalArgs();
         else if (this.getPredicate().toString().equals("or") ||
                  this.getPredicate().toString().equals("and")) {
@@ -296,7 +296,7 @@ public class Rule {
      *
      * @return <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments
      */
-    public boolean hasEvaluatableNumericalArgs() {
+    public boolean hasEvaluatableNumericalArgs() throws IOException {
         CycList args = this.getRule().rest();
         for (int i = 0; i < args.size(); i++) {
             Object arg = args.get(i);
@@ -306,7 +306,7 @@ public class Rule {
                 continue;
             else if (arg instanceof CycNart) {
                 CycNart cycNart = (CycNart) arg;
-                if (cycNart.getFunctor().toString().equals("PlusFn")) {
+                if (cycNart.getFunctor().equals(CycAccess.current().getConstantByName("PlusFn"))) {
                     Object plusFnArg = cycNart.getArguments().get(0);
                     if (plusFnArg instanceof CycVariable)
                         continue;
@@ -316,7 +316,7 @@ public class Rule {
             }
             else if (arg instanceof CycList) {
                 CycList cycList = (CycList) arg;
-                if (cycList.first().toString().equals("PlusFn")) {
+                if (cycList.first().equals(CycAccess.current().getConstantByName("PlusFn"))) {
                     Object plusFnArg = cycList.second();
                     if (plusFnArg instanceof CycVariable)
                         continue;
@@ -337,9 +337,9 @@ public class Rule {
      * can be evaluated locally without asking OpenCyc.
      * @return the truth value of the fully instantiated constraint rule
      */
-    public static boolean evaluateConstraintRule(CycList instantiatedRule) {
+    public static boolean evaluateConstraintRule(CycList instantiatedRule) throws IOException {
         CycConstant predicate = (CycConstant) instantiatedRule.first();
-        if (predicate.toString().equals("numericallyEqual")) {
+        if (predicate.equals(CycAccess.current().getConstantByName("numericallyEqual"))) {
             long value = numericallyEvaluateExpression(instantiatedRule.second());
             for (int i = 2; i < instantiatedRule.size(); i++) {
                 if (numericallyEvaluateExpression(instantiatedRule.get(i)) != value)
@@ -347,7 +347,7 @@ public class Rule {
             }
             return true;
         }
-        else if (predicate.toString().equals("or")) {
+        else if (predicate.equals(CycAccess.current().getConstantByName("or"))) {
             CycList args = instantiatedRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
@@ -356,7 +356,7 @@ public class Rule {
             }
             return false;
         }
-        else if (predicate.toString().equals("and")) {
+        else if (predicate.equals(CycAccess.current().getConstantByName("and"))) {
             CycList args = instantiatedRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
@@ -376,14 +376,14 @@ public class Rule {
      * or a <tt>CycList</tt>
      * @return the numerical value of the expression
      */
-    public static long numericallyEvaluateExpression(Object expression) {
+    public static long numericallyEvaluateExpression(Object expression) throws IOException {
         if (expression instanceof Long)
             return ((Long) expression).longValue();
         else if (expression instanceof CycNart) {
             CycNart cycNart = (CycNart) expression;
             CycFort functor = cycNart.getFunctor();
             Object arg = cycNart.getArguments().get(0);
-            if (functor.toString().equals("PlusFn")) {
+            if (functor.equals(CycAccess.current().getConstantByName("PlusFn"))) {
                 return numericallyEvaluateExpression(arg) + 1;
             }
         }
@@ -391,7 +391,7 @@ public class Rule {
             CycList cycList = (CycList) expression;
             CycConstant functor = (CycConstant) cycList.first();
             Object arg = cycList.get(1);
-            if (functor.toString().equals("PlusFn")) {
+            if (functor.equals(CycAccess.current().getConstantByName("PlusFn"))) {
                 return numericallyEvaluateExpression(arg) + 1;
             }
         }
@@ -406,12 +406,11 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this is an intensional variable domain populating
      * <tt>Rule</tt>.
      */
-    public boolean isIntensionalVariableDomainPopulatingRule() {
+    public boolean isIntensionalVariableDomainPopulatingRule() throws IOException {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
-        //TODO make right
-        if (this.getPredicate().toString().equals("isa"))
+        if (this.getPredicate().equals(CycAccess.current().getConstantByName("isa")))
             return true;
         else
             return false;
@@ -424,13 +423,11 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this is an extensional variable domain populating
      * <tt>Rule</tt>.
      */
-    public boolean isExtensionalVariableDomainPopulatingRule() {
+    public boolean isExtensionalVariableDomainPopulatingRule() throws IOException {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
-        //TODO put elementOf in the right place
-        //if (this.predicate().equals(CycConstant.elementOf))
-        if (this.getPredicate().toString().equals("elementOf"))
+        if (this.getPredicate().equals(CycAccess.current().getConstantByName("elementOf")))
             return true;
         else
             return false;

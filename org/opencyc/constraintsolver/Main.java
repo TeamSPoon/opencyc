@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import org.opencyc.cycobject.*;
 import java.util.*;
+import java.io.IOException;
 
 /**
  * Main program for a finite domain constraint solver optimized to work with the
@@ -97,7 +98,15 @@ public class Main {
             "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
         ConstraintProblem zebraProblem = new ConstraintProblem();
         CycList zebraPuzzleCycList = zebraProblem.cycAccess.makeCycList(zebraPuzzleString);
-        ArrayList zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
+        ArrayList zebraPuzzleRules = null;
+        try {
+            zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error accessing OpenCyc " + e.getMessage());
+            System.exit(1);
+        }
         zebraProblem.setVerbosity(1);
         zebraProblem.solve(zebraPuzzleCycList);
     }

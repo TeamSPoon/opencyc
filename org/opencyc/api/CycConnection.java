@@ -49,22 +49,21 @@ public class CycConnection {
      * Constructs a new CycConnection object.
      */
 
-    public CycConnection(CycAccess cycAccess) throws IOException, UnknownHostException {
-        this(DEFAULT_HOSTNAME, DEFAULT_PORT, cycAccess);
+    public CycConnection() throws IOException, UnknownHostException {
+        this(DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
-    public CycConnection(String host, CycAccess cycAccess)
+    public CycConnection(String host)
         throws IOException, UnknownHostException {
-        this(host, DEFAULT_PORT, cycAccess);
+        this(host, DEFAULT_PORT);
     }
-    public CycConnection(int port, CycAccess cycAccess)
+    public CycConnection(int port)
         throws IOException, UnknownHostException {
-        this(DEFAULT_HOSTNAME, port, cycAccess);
+        this(DEFAULT_HOSTNAME, port);
     }
-    public CycConnection(String hostName, int port, CycAccess cycAccess)
+    public CycConnection(String hostName, int port)
         throws IOException, UnknownHostException {
         this.hostName = hostName;
         this.port = port;
-        this.cycAccess = cycAccess;
         initializeApiConnection();
         System.out.println("Connection " + apiSocket);
     }
@@ -102,7 +101,7 @@ public class CycConnection {
             String answer = ((String) response[1]).trim();
             if (isSymbolicExpression)
                 // Recurse if list contains CycConstant objects.
-                response[1] = cycAccess.makeCycList(answer);
+                response[1] = CycAccess.current().makeCycList(answer);
             else if (answer.equals("NIL"))
                 response[1] = new CycList();
             else

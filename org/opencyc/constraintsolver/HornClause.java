@@ -75,10 +75,9 @@ public class HornClause {
      * Constructs a new <tt>HornClause</tt> object from the given cyclified string representation.
      *
      * @param hornClauseString the cyclified string representation of the horn clause
-     * @param cycAccess the OpenCyc api connection
      */
-    public HornClause(String hornClauseString, CycAccess cycAccess) {
-        CycList hornClause = cycAccess.makeCycList(hornClauseString);
+    public HornClause(String hornClauseString) {
+        CycList hornClause = CycAccess.current().makeCycList(hornClauseString);
         if (hornClause.size() != 3)
             throw new RuntimeException("HornClause list is not length 3 " + hornClauseString);
         CycConstant implies = (CycConstant) hornClause.first();

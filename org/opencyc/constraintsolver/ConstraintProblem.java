@@ -1,6 +1,7 @@
 package org.opencyc.constraintsolver;
 
 import java.util.*;
+import java.io.IOException;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 
@@ -194,6 +195,22 @@ public class ConstraintProblem {
             forwardCheckingSearcher.setVerbosity(verbosity);
         solution.setVerbosity(verbosity);
     }
+
+    /**
+     * Solves a constraint problem and return a list of solutions if one or more
+     * was found, otherwise returns <tt>null</tt>.
+     *
+     * @param problem a constraint problem in the form of an OpenCyc query string
+     * @return an <tt>ArrayList</tt> of solutions or <tt>null</tt> if no solutions were
+     * found.  Each solution is an <tt>ArrayList</tt> of variable binding <tt>ArrayList</tt>
+     * objects, each binding having the form of an <tt>ArrayList</tt> where the first
+     * element is the <tt>CycVariable</tt> and the second element is the domain value
+     * <tt>Object</tt>.
+     */
+    public ArrayList solve(String problemString) {
+        return solve(cycAccess.makeCycList(problemString));
+    }
+
     /**
      * Solves a constraint problem and return a list of solutions if one or more
      * was found, otherwise returns <tt>null</tt>.
@@ -208,13 +225,20 @@ public class ConstraintProblem {
     public ArrayList solve(CycList problem) {
         long startMilliseconds = System.currentTimeMillis();
         this.problem = problem;
-        problemParser.extractRulesAndDomains();
-        problemParser.gatherVariables();
-        problemParser.initializeDomains();
-        nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
-        valueDomains.initializeDomainValueMarking();
-        forwardCheckingSearcher  = new ForwardCheckingSearcher(this);
-        forwardCheckingSearcher.search(variables, 1);
+        try {
+            problemParser.extractRulesAndDomains();
+            problemParser.gatherVariables();
+            problemParser.initializeDomains();
+            nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
+            valueDomains.initializeDomainValueMarking();
+            forwardCheckingSearcher  = new ForwardCheckingSearcher(this);
+            forwardCheckingSearcher.search(variables, 1);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error accessing OpenCyc " + e.getMessage());
+            System.exit(1);
+        }
         long endMilliseconds = System.currentTimeMillis();
         if (verbosity > 0)
             System.out.println((endMilliseconds - startMilliseconds) + " milliseconds");

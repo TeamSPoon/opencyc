@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import org.opencyc.cycobject.*;
 import java.util.*;
+import java.io.IOException;
 
 /**
  * The <tt>NodeConsistencyAchiever</tt> object achieves node consistency
@@ -93,7 +94,7 @@ public class NodeConsistencyAchiever {
      * Apply the unary constraint rules to restrict domain values and subsequently
      * propagate the effects through any #$different constraint rules.
      */
-    public void applyUnaryRulesAndPropagate() {
+    public void applyUnaryRulesAndPropagate() throws IOException {
         CycVariable affectedVariable;
         ArrayList inputDomainValues;
         ArrayList outputDomainValues;
@@ -147,7 +148,7 @@ public class NodeConsistencyAchiever {
      * the affects of single-valued variables through all #$different
      * constraint rules.
      */
-    protected void achieveAllDifferentConsistencyWrtSingletons() {
+    protected void achieveAllDifferentConsistencyWrtSingletons() throws IOException {
         ArrayList differentVariables;
         Object singletonValue;
         // Gather the singleton variables.

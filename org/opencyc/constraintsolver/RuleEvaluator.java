@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import org.opencyc.cycobject.*;
 import java.util.*;
+import java.io.IOException;
 import org.opencyc.api.*;
 
 /**
@@ -114,7 +115,7 @@ public class RuleEvaluator {
      * @return <tt>true</tt> iff the instantiated constraint rule is proven true,
      * otherwise return <tt>false</tt>
      */
-    public boolean ask(Rule rule) {
+    public boolean ask(Rule rule) throws IOException {
         Object predicate = rule.getPredicate();
         if (predicate.equals(and)) {
             CycList arguments = rule.getRule().rest();
@@ -149,7 +150,6 @@ public class RuleEvaluator {
             return ! ask(new Rule(expression));
         }
         else if (predicate.equals(numericallyEqual)) {
-            //TODO if args are not numeric, ask OpenCyc.
             Object argument1 = rule.getRule().second();
             long argument1Long = 0;
             if (argument1 instanceof CycList) {
@@ -160,8 +160,8 @@ public class RuleEvaluator {
             else if (argument1 instanceof Long)
                 argument1Long = ((Long) argument1).longValue();
             else
-                throw new RuntimeException("Invalid #$numericallyEqual argument1: " +
-                                            argument1);
+                // Ask OpenCyc.
+                return constraintProblem.forwardCheckingSearcher.constraintRuleAsk(rule.getRule());
             Object argument2 = rule.getRule().third();
             long argument2Long = 0;
             if (argument2 instanceof CycList) {
@@ -172,8 +172,8 @@ public class RuleEvaluator {
             else if (argument2 instanceof Long)
                 argument2Long = ((Long) argument2).longValue();
             else
-                throw new RuntimeException("Invalid #$numericallyEqual argument2: " +
-                                            argument2);
+                // Ask OpenCyc.
+                return constraintProblem.forwardCheckingSearcher.constraintRuleAsk(rule.getRule());
             return argument1Long == argument2Long;
         }
         else if (predicate.equals(different)) {
@@ -181,9 +181,8 @@ public class RuleEvaluator {
             return ! arguments.containsDuplicates();
         }
         else
-            //TODO ask OpenCyc
-            throw new RuntimeException("Cannot locally evaluate " + rule.cyclify());
-
+            // Ask OpenCyc.
+            return constraintProblem.forwardCheckingSearcher.constraintRuleAsk(rule.getRule());
     }
 
     /**

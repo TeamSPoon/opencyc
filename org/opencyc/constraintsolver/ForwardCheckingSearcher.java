@@ -3,7 +3,9 @@ package org.opencyc.constraintsolver;
 import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
 import org.apache.commons.collections.*;
+import org.apache.oro.util.*;
 import java.util.*;
+import java.io.IOException;
 
 /**
  * The <tt>ForwardCheckingSearcher</tt> object to perform forward checking search for one or
@@ -83,6 +85,10 @@ public class ForwardCheckingSearcher {
     protected int nbrSteps = 0;
 
     /**
+     * Least Recently Used Cache of ask results.
+     */
+    protected Cache askCache = new CacheLRU(500);
+    /**
      * Constructs a new <tt>FowardCheckingSearcher</tt> object.
      *
      * @param constraintProblem the parent constraint problem
@@ -115,7 +121,7 @@ public class ForwardCheckingSearcher {
      * @param level is the current depth of the search
      * @return <tt>true</tt> when done with the search
      */
-    public boolean search(ArrayList variables, int level) {
+    public boolean search(ArrayList variables, int level) throws IOException {
         CycVariable selectedVariable = selectVariable(variables);
         ArrayList remainingDomain = valueDomains.getUnmarkedDomainValues(selectedVariable);
         ArrayList remainingVariables = (ArrayList) variables.clone();
@@ -221,7 +227,7 @@ public class ForwardCheckingSearcher {
      */
     protected boolean checkForwardRules(ArrayList remainingVariables,
                                         int level,
-                                        Binding currentBinding) {
+                                        Binding currentBinding) throws IOException {
         for (int i = 0; i < constraintRules.size(); i++) {
             Rule rule = (Rule) constraintRules.get(i);
             ArrayList ruleVariables = rule.getVariables();
@@ -267,7 +273,7 @@ public class ForwardCheckingSearcher {
     protected boolean checkForwardRule(Rule rule,
                                        ArrayList remainingRuleVariables,
                                        int level,
-                                       Binding currentBinding) {
+                                       Binding currentBinding) throws IOException {
         CycList instantiatedRule = rule.getRule().subst(currentBinding.getValue(),
                                                         currentBinding.getCycVariable());
         if (verbosity > 2) {
@@ -317,7 +323,7 @@ public class ForwardCheckingSearcher {
      */
     protected boolean checkForwardNonEvaluatableRule(Rule rule,
                                                      int level,
-                                                     Binding currentBinding) {
+                                                     Binding currentBinding) throws IOException {
         // Order the remaining variables by ascending domain size.
         ArrayList remainingRuleVariables = rule.getVariables();
         remainingRuleVariables.remove(currentBinding.getCycVariable());
@@ -373,7 +379,7 @@ public class ForwardCheckingSearcher {
                                                   ArrayList remainingVariables,
                                                   ArrayList bindings,
                                                   Binding currentBinding,
-                                                  Rule currentRule) {
+                                                  Rule currentRule) throws IOException {
         CycVariable selectedVariable = currentBinding.getCycVariable();
         if (remainingVariables.size() == 0) {
             // This is the terminating recursion case, with no more variables left to instantiate.
@@ -501,13 +507,12 @@ public class ForwardCheckingSearcher {
      * @param variable the variable for which bindings are sought
      * @return a <tt>ArrayList</tt> of bindings for single unbound variable left in the rule
      */
-    protected ArrayList askWithVariable(CycList instantiatedRule, CycVariable variable) {
+    protected ArrayList askWithVariable(CycList instantiatedRule, CycVariable variable)
+        throws IOException {
         ArrayList result = new ArrayList();
-
-        System.out.println("******** askWithVariable Not implemented**********");
-
-        //TODO use CycAccess
-
+        result.addAll(constraintProblem.cycAccess.askWithVariable(instantiatedRule,
+                                                                  variable,
+                                                                  constraintProblem.mt));
         return result;
     }
 
@@ -519,14 +524,22 @@ public class ForwardCheckingSearcher {
      * @return <tt>true</tt> iff the instantiated (fully bound) rule is proven true in
      * the constraint problem KB microtheory
      */
-    protected boolean constraintRuleAsk(CycList instantiatedRule) {
+    protected boolean constraintRuleAsk(CycList instantiatedRule) throws IOException {
+        boolean answer;
+        Boolean isQueryTrue = (Boolean) askCache.getElement(instantiatedRule);
+        if (isQueryTrue != null) {
+            answer = isQueryTrue.booleanValue();
+            if (verbosity > 3)
+                System.out.println("Cached answer to \n" + instantiatedRule + " --> " + answer);
+            return answer;
+        }
         constraintProblem.nbrAsks++;
-        //TODO add cache of results
-        //TODO call removal ask
-        System.out.println("******** constraintRuleAsk Not implemented**********");
-        return true;
+        answer = constraintProblem.cycAccess.isQueryTrue(instantiatedRule, constraintProblem.mt);
+        askCache.addElement(instantiatedRule, new Boolean(answer));
+        if (verbosity > 3)
+            System.out.println("Answer to \n" + instantiatedRule + " --> " + answer);
+        return answer;
     }
-
 
     /**
      * Applies the all-different constraint rule to the remaining domains and returns <tt>true</tt>
@@ -578,7 +591,7 @@ public class ForwardCheckingSearcher {
                                                    ArrayList remainingRuleVariables,
                                                    ArrayList bindings,
                                                    int level,
-                                                   Binding currentBinding) {
+                                                   Binding currentBinding) throws IOException {
         CycVariable selectedVariable = currentBinding.getCycVariable();
         if (remainingRuleVariables.size() == 0) {
             // This is the terminating recursion case, with no more variables left to instantiate.

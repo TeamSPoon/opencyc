@@ -33,6 +33,12 @@ import org.opencyc.util.*;
  */
 public class CycAccess {
 
+    /**
+     * Dictionary of CycAccess instances, indexed by thread so that the application does not
+     * have to keep passing around a CycAccess object reference.
+     */
+    static HashMap cycAccessInstances = new HashMap();
+
     public boolean persistentConnection = true;
     private boolean trace = false;
     public Integer responseCode = null;
@@ -57,8 +63,9 @@ public class CycAccess {
      * Constructs a new CycAccess object.
      */
     public CycAccess() throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         if (persistentConnection)
-            cycConnection = new CycConnection(this);
+            cycConnection = new CycConnection();
         initializeConstants();
     }
 
@@ -68,9 +75,10 @@ public class CycAccess {
      * @param hostName the host name
      */
     public CycAccess(String hostName) throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         this.hostName = hostName;
         if (persistentConnection)
-            cycConnection = new CycConnection(hostName, this);
+            cycConnection = new CycConnection(hostName);
         initializeConstants();
     }
 
@@ -80,9 +88,10 @@ public class CycAccess {
      * @param port the TCP socket port number
      */
     public CycAccess(int port) throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         this.port = port;
         if (persistentConnection)
-            cycConnection = new CycConnection(port, this);
+            cycConnection = new CycConnection(port);
         initializeConstants();
     }
 
@@ -93,10 +102,11 @@ public class CycAccess {
      * @param port the TCP socket port number
      */
     public CycAccess(String hostName, int port) throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         this.hostName = hostName;
         this.port = port;
         if (persistentConnection)
-            cycConnection = new CycConnection(port, this);
+            cycConnection = new CycConnection(port);
         initializeConstants();
     }
 
@@ -107,9 +117,10 @@ public class CycAccess {
      * the OpenCyc server
      */
     public CycAccess(boolean persistentConnection) throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(this);
+            cycConnection = new CycConnection();
         initializeConstants();
     }
 
@@ -121,10 +132,11 @@ public class CycAccess {
      * the OpenCyc server
      */
     public CycAccess(String hostName, boolean persistentConnection) throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         this.hostName = hostName;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(hostName, this);
+            cycConnection = new CycConnection(hostName);
         initializeConstants();
     }
 
@@ -137,10 +149,11 @@ public class CycAccess {
      */
     public CycAccess(int port, boolean persistentConnection)
         throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         this.port = port;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(port, this);
+            cycConnection = new CycConnection(port);
         initializeConstants();
     }
 
@@ -154,13 +167,27 @@ public class CycAccess {
      */
     public CycAccess(String hostName, int port, boolean persistentConnection)
         throws IOException, UnknownHostException {
+        cycAccessInstances.put(Thread.currentThread(), this);
         this.hostName = hostName;
         this.port = port;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(port, this);
+            cycConnection = new CycConnection(port);
         initializeConstants();
     }
+
+    /**
+     * Returns the <tt>CycAccess</tt> object for this thread.
+     *
+     * @return the <tt>CycAccess</tt> object for this thread
+     */
+    public static CycAccess current() {
+        CycAccess cycAccess = (CycAccess) cycAccessInstances.get(Thread.currentThread());
+        if (cycAccess == null)
+            throw new RuntimeException("No CycAccess object for this thread");
+        return cycAccess;
+    }
+
 
     /**
      * Turns on the diagnostic trace of socket messages.
@@ -191,6 +218,7 @@ public class CycAccess {
     public void close() throws IOException {
         if (cycConnection != null)
             cycConnection.close();
+        cycAccessInstances.remove(Thread.currentThread());
     }
 
     /**
@@ -202,7 +230,7 @@ public class CycAccess {
     private Object [] converse(String command)  throws IOException, UnknownHostException {
         Object [] response = {new Integer(0), ""};
         if (! persistentConnection)
-            cycConnection = new CycConnection(hostName, port, this);
+            cycConnection = new CycConnection(hostName, port);
         response = cycConnection.converse(command);
         if (! persistentConnection)
             cycConnection.close();
@@ -1198,6 +1226,43 @@ public class CycAccess {
             CycConstant.addCache(cycConstant);
         }
         return cycConstant;
+    }
+
+    /**
+     * Returns a list of bindings for a query with a single unbound variable.
+     *
+     * @param query the query to be asked in the knowledge base
+     * @param variable the single unbound variable in the query for which bindings are sought
+     * @param mt the microtheory in which the query is asked
+     * @return a list of bindings for the query
+     */
+    public CycList askWithVariable (CycList query,
+                                    CycVariable variable,
+                                    CycConstant mt)  throws IOException, UnknownHostException {
+        StringBuffer queryBuffer = new StringBuffer();
+        queryBuffer.append("(clet ((*cache-inference-results* nil) ");
+        queryBuffer.append("       (*compute-inference-results* nil) ");
+        queryBuffer.append("       (*unique-inference-result-bindings* t) ");
+        queryBuffer.append("       (*generate-readable-fi-results* nil)) ");
+        queryBuffer.append("  (without-wff-semantics ");
+        queryBuffer.append("    (ask-template '" + variable.cyclify() + " ");
+        queryBuffer.append("                  '" + query.cyclify() + " ");
+        queryBuffer.append("                  " + mt.cyclify() + " ");
+        queryBuffer.append("                  0 nil nil nil)))");
+        return converseList(queryBuffer.toString());
+    }
+
+    /**
+     * Returns <tt>true</tt> iff the query is true in the knowledge base.
+     *
+     * @param query the query to be asked in the knowledge base
+     * @param mt the microtheory in which the query is asked
+     * @return <tt>true</tt> iff the query is true in the knowledge base
+     */
+    public boolean isQueryTrue (CycList query,
+                                CycConstant mt)  throws IOException, UnknownHostException {
+        CycList response = converseList("(removal-ask '" + query.cyclify() + " " + mt.cyclify() + ")");
+        return response.size() > 0;
     }
 
 

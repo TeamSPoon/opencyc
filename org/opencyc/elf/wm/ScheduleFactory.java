@@ -2,17 +2,11 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.a.DirectActuator;
-
 import org.opencyc.elf.bg.planner.Schedule;
-
-import org.opencyc.elf.bg.predicate.PredicateExpression;
+import org.opencyc.elf.bg.predicate.*;
 import org.opencyc.elf.bg.predicate.True;
-
-import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.Command;
-
+import org.opencyc.elf.bg.taskframe.*;
 import org.opencyc.elf.goal.Goal;
-
 import org.opencyc.elf.s.DirectSensor;
 
 //// External Imports
@@ -69,8 +63,11 @@ public class ScheduleFactory {
     // converse with user
     PredicateExpression predicateExpression = new PredicateExpression(new True()); 
     List plannedCommands = new ArrayList();
-    plannedCommands.add(ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT));
-    plannedCommands.add(GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT));
+    // perform ConsolePromptedInput using ">"
+    Action action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
+    // achieve GetUserInput using 
+    plannedCommands.add(action);
+    plannedCommands.add(GoalLibrary.getInstance().getGoal(Goal.PERCEIVE_SENSATION));
     List plannedTimeMilliseconds = new ArrayList();
     plannedTimeMilliseconds.add(new Integer(100));
     plannedTimeMilliseconds.add(new Integer(300000));

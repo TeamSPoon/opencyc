@@ -7,14 +7,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/** MacroCommand is a type of command having a list of commands that replace the macro
- * command when sequenced by the executor.
+/**
+ * ParallelCommand is a command in which its subcommands may be executed in parallel.
  *
- * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
- * <BR>This software is the proprietary information of Cycorp, Inc.
- * <P>Use is subject to license terms.
+ * @version $Id$
+ * @author  reed
  *
- * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
@@ -32,35 +30,43 @@ import java.util.List;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * @version $Id$
  */
-public class MacroCommand implements Command {
+public class ParallelCommand implements Command {
   
   //// Constructors
   
-  /** Creates a new instance of MacroCommand.
+  /** Creates a new instance of ParallelCommand.
    * 
-   * @param name the name of this macro command
-   * @param expansionCommands the expansion commands which replace this macro command during sequencing
+   * @param name the name of this parallel command
+   * @param parallelCommands the subcommands that can be executed in parallel 
    * by the executor
    */
-  public MacroCommand(String name, List expansionCommands) {
+  public ParallelCommand(String name, List parallelCommands) {
     this.name = name;
-    this.expansionCommands = expansionCommands;
+    this.parallelCommands = parallelCommands;
   }
   
   //// Public Area
   
-  /** Returns a string representation of this object.
+  /**
+   * Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
-  public String toString () {
+  public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[MacroCommand with expansion ");
-    stringBuffer.append(expansionCommands.toString());
+    stringBuffer.append("[ParallelCommand with ");
+    stringBuffer.append(parallelCommands.toString());
     stringBuffer.append("]");
     return stringBuffer.toString();
+  }
+  
+  /** Gets the name of the command
+   *
+   * @return name the name of the command
+   */
+  public String getName() {
+    return name;
   }
   
   /** Creates and returns a copy of this object. 
@@ -68,41 +74,23 @@ public class MacroCommand implements Command {
    * @return a copy of this object
    */
   public Object clone() {
-    List clonedExpansionCommands = new ArrayList(expansionCommands.size());
-    Iterator iter = expansionCommands.iterator();
+    List clonedParallelCommands = new ArrayList(parallelCommands.size());
+    Iterator iter = parallelCommands.iterator();
     while (iter.hasNext())
-      clonedExpansionCommands.add(((Command) iter.next()).clone());
-    return new MacroCommand(name, clonedExpansionCommands);
+      clonedParallelCommands.add(((Command) iter.next()).clone());
+    return new ParallelCommand(name, clonedParallelCommands);
   }
   
-  /** Gets the name of this macro command
-   *
-   * @return the name of this macro command
-   */
-  public String getName () {
-    return name;
-  }
-
-  /** Gets the expansion commands which replace this macro command during sequencing by the executor.
-   *
-   * @return the expansion commands which replace this macro command during sequencing by the executor
-   */
-  public List getExpansionCommands () {
-    return expansionCommands;
-  }
-
   //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
   
-  /** the name of this macro command */
+  /** the name of this parallel command */
   protected String name;
   
-  /** the expansion commands which replace this macro command during sequencing by the executor */
-  protected List expansionCommands;
-  
-  //// Main
+  /** the parallel commands */
+  protected List parallelCommands;
   
 }

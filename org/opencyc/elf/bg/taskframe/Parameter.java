@@ -1,14 +1,15 @@
-package org.opencyc.elf.wm;
+package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
-import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 
-/** EntityFrame is describes an entity with a list of stateVariable/values.
- * 
+/**
+ * Parameter contains the name and type of formal parameters for actions and goals.
+ *
  * @version $Id$
- * @author Stephen L. Reed  
+ * @author  reed
+ *
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
@@ -27,48 +28,71 @@ import org.opencyc.elf.wm.state.State;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class EntityFrame {
+public class Parameter {
   
   //// Constructors
   
-  /** Creates a new instance of EntityFrame. */
-  public EntityFrame() {
-    state = new State();
-  }
-
-  /** Creates a new instance of EntityFrame given an existing entityFrame.
-   * 
-   * @param entityFrame the given entityFrame
+  /** Creates a new instance of Parameter given the name and type.
+   *
+   * @param name the parameter name
+   * @param type the parameter type
    */
-  public EntityFrame(EntityFrame entityFrame) {
-    state = (State) entityFrame.state.clone();
+  public Parameter(String name, Class type) {
+    this.name = name;
+    this.type = type;
   }
-
+  
   //// Public Area
-
-  /** Returns a string representation of this object.
-   * 
-   * @return string representation of this object
+  
+  /**
+   * Returns a string representation of this object.
+   *
+   * @return a string representation of this object
    */
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[EntityFrame:\n");
-    stringBuffer.append(state.toString());
-    stringBuffer.append("]");
-
+    stringBuffer.append("[Parameter ");
+    stringBuffer.append(name);
+    stringBuffer.append(" (");
+    stringBuffer.append(type.toString());
+    stringBuffer.append(")]");
     return stringBuffer.toString();
   }
-
-  /** Return the entityFrame state.
-   * 
-   * @return the entityFrame state
+  
+  /**
+   * Gets the parameter name.
+   *
+   * @return the parameter name
    */
-  public State getState() {
-    return state;
+  public String getName () {
+    return name;
   }
 
-  /** the entity state */
-  protected State state;
+  /**
+   * Gets the parameter type.
+   *
+   * @return the parameter type
+   */
+  public Class getType () {
+    return type;
+  }
 
-  //// Main
+  /** the name of the prompt input parameter */
+  public static final String PROMPT = "?PROMPT"; 
+  
+  /** the name of the user input parameter */
+  public static final String USER_INPUT = "?USER-INPUT"; 
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the parameter name */
+  protected final String name;
+  
+  /** the parameter type */
+  protected final Class type;
+
 }

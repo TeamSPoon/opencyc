@@ -4,13 +4,15 @@ package org.opencyc.elf.wm;
 import org.opencyc.elf.bg.predicate.NotNull;
 import org.opencyc.elf.bg.predicate.Predicate;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
-
+import org.opencyc.elf.bg.taskframe.Parameter;
 import org.opencyc.elf.goal.Goal;
+import org.opencyc.elf.goal.GoalTime;
 import org.opencyc.elf.goal.Importance;
-
 import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
+import java.util.ArrayList;
+import java.util.List;
 
 /** GoalFactory is designed to create goals.  There is a singleton instance of goal factory.
  *
@@ -59,20 +61,24 @@ public class GoalFactory {
   
   /** Populates the goal library. */
   public void populateGoalLibrary() {
-    // get input from user
-    Goal goal = new Goal();
-    goal.setName(Goal.GET_USER_INPUT);
-    goal.setPredicateExpression(new PredicateExpression((Predicate)NotNull.getInstance(),
-                                                        StateVariable.USER_INPUT));
-    goal.setImportance(new Importance(Importance.NEUTRAL));
-    GoalLibrary.getInstance().setGoal(goal.getName(), goal);
-    // get console prompted input
-    goal = new Goal();
-    goal.setName(Goal.GET_CONSOLE_PROMPTED_INPUT);
-    goal.setPredicateExpression(new PredicateExpression((Predicate)NotNull.getInstance(),
-                                                        StateVariable.CONSOLE_INPUT));
-    goal.setImportance(new Importance(Importance.NEUTRAL));
-    GoalLibrary.getInstance().setGoal(goal.getName(), goal);
+    // perceived sensation
+    String name = Goal.PERCEIVE_SENSATION;
+    Parameter parameter = new Parameter(Parameter.USER_INPUT,  String.class);
+    PredicateExpression predicateExpression = 
+      new PredicateExpression((Predicate)NotNull.getInstance(),
+                              parameter);
+    List failurePredicateExpressions = new ArrayList();
+    Importance importance = new Importance(Importance.NEUTRAL);
+    GoalTime goalTime = new GoalTime(GoalTime.TEN_MINUTES, 0);
+    List inputParameters = new ArrayList();
+    inputParameters.add(parameter);
+    Goal goal = new Goal(name, 
+                         predicateExpression,
+                         failurePredicateExpressions,
+                         importance,
+                         goalTime,
+                         inputParameters);
+    GoalLibrary.getInstance().setGoal(name,goal); 
   }
   
   //// Protected Area

@@ -42,6 +42,10 @@ public class AssignCommand implements Command {
     this.name = name;
   }
   
+  /** Returns the name of this assign command.
+   *
+   * @return the name of this assign command
+   */
   public String getName() {
     return name;
   }
@@ -51,7 +55,7 @@ public class AssignCommand implements Command {
     return new AssignCommand(name);
   }
   
-  /** the name of this conditional command */
+  /** the name of this assign command */
   protected String name;
  
   /** the state variable that receives the assigned value */

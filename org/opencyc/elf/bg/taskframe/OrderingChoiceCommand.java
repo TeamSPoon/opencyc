@@ -77,9 +77,9 @@ public class OrderingChoiceCommand extends ChoiceCommand implements Command {
     return new OrderingChoiceCommand(name, clonedUnorderedCommands, relevantStateVariables);
   }
   
-  /** Gets the name of this conditional command
+  /** Gets the name of this ordering choice command
    *
-   * @return the name of this conditional command
+   * @return the name of this ordering choice command
    */
   public String getName () {
     return name;

@@ -1,11 +1,10 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycFort;
 import org.opencyc.elf.NodeComponent;
-
 import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
-
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
@@ -121,7 +120,7 @@ public class WorldModel extends NodeComponent {
    *
    * @return the entity of attention
    */
-  public EntityFrame getEntityOfAttention () {
+  public CycFort getEntityOfAttention () {
     return entityOfAttention;
   }
 
@@ -129,7 +128,7 @@ public class WorldModel extends NodeComponent {
    *
    * @param entityOfAttention the entity of attention
    */
-  public void setEntityOfAttention (EntityFrame entityOfAttention) {
+  public void setEntityOfAttention (CycFort entityOfAttention) {
     this.entityOfAttention = entityOfAttention;
   }
 
@@ -152,7 +151,7 @@ public class WorldModel extends NodeComponent {
   protected Predictor predictor;
   
   /** the entity of attention */
-  protected EntityFrame entityOfAttention;
+  protected CycFort entityOfAttention;
   
   //// Main
 }

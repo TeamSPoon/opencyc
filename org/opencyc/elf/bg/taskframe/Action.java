@@ -2,11 +2,10 @@ package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
 import org.opencyc.elf.BehaviorEngineException;
-
 import org.opencyc.elf.wm.state.State;
+import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
-import java.util.Iterator;
 import java.util.List;
 
 /** Action describes the action to be performed and may include a set of modifiers such as
@@ -40,8 +39,17 @@ public class Action implements Command {
   
   //// Constructors
   
-  /** Creates a new instance of Action. */
-  public Action() {
+  /** Creates a new instance of Action. 
+   *
+   * @param name the name of the action
+   * @param inputParameters the input formal parameters for this action
+   * @param outputParameters the output formal parameters for this action which are 
+   * customized by the schedule factory
+   */
+  public Action(String name, List inputParameters, List outputParameters) {
+    this.name = name;
+    this.inputParameters = inputParameters;
+    this.outputParameters = outputParameters;
   }
   
   //// Public Area
@@ -52,28 +60,45 @@ public class Action implements Command {
    */
   public String toString () {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[Action: ");
+    stringBuffer.append("[Action ");
     stringBuffer.append(name);
-    stringBuffer.append("(");
-    for (int i = 0; i < getParameterNames().size(); i++) {
-      String parameterName = (String) getParameterNames().get(i);
-      stringBuffer.append(" ");
-      stringBuffer.append(parameterName);
-      stringBuffer.append(": ");
-      if (getParameterValues() != null) {
-        Object parameterValue = getParameterValues().get(i);
-        if (parameterValue instanceof String) {
-          stringBuffer.append('"');
-          stringBuffer.append(parameterValue.toString());
-          stringBuffer.append('"');
+    if (inputParameters.size() > 0) {
+      stringBuffer.append(" input (");
+      for (int i = 0; i < inputParameters.size(); i++) {
+        Parameter parameter = (Parameter) inputParameters.get(i);
+        stringBuffer.append(" ");
+        stringBuffer.append(parameter.getName());
+        stringBuffer.append("(");
+        stringBuffer.append(parameter.getType().toString());
+        stringBuffer.append("): ");
+        if (inputParameters != null) {
+          Object parameterValue = inputParameters.get(i);
+          if (parameterValue instanceof String) {
+            stringBuffer.append('"');
+            stringBuffer.append(parameterValue.toString());
+            stringBuffer.append('"');
+          }
+          else
+            stringBuffer.append(parameterValue.toString());
         }
         else
-          stringBuffer.append(parameterValue.toString());
+          stringBuffer.append("null");
       }
-      else
-        stringBuffer.append("null");
+      stringBuffer.append(") ");
     }
-    stringBuffer.append(")]");
+    if (outputParameters.size() > 0) {
+      stringBuffer.append(" input (");
+      for (int i = 0; i < outputParameters.size(); i++) {
+        Parameter parameter = (Parameter) outputParameters.get(i);
+        stringBuffer.append(" ");
+        stringBuffer.append(parameter.getName());
+        stringBuffer.append("(");
+        stringBuffer.append(outputStateVariables.get(i).toString());
+        stringBuffer.append("): ");
+      }
+      stringBuffer.append(") ");
+    }
+    stringBuffer.append("]");
     return stringBuffer.toString();
   }
   
@@ -83,12 +108,7 @@ public class Action implements Command {
    * @return a partially instantiated copy of this object
    */
   public Object clone () {
-    Action action = new Action();
-    action.setName(name);
-    action.setParameterNames(parameterNames);
-    action.setParameterTypes(parameterTypes);
-    action.setOutputType(outputType);
-    return action;
+    return new Action(name, inputParameters, outputParameters);
   }
   
   /** Gets the name of the action
@@ -99,146 +119,101 @@ public class Action implements Command {
     return name;
   }
 
-  /** Gets the parameter names for this action.
+  /** Gets the input parameter values for this action which are customized by the schedule factory.
    *
-   * @return the parameter names for this action
+   * @return tthe input parameter values for this action which are customized by the schedule factory
    */
-  public List getParameterNames () {
-    return parameterNames;
-  }
-   
-  /** Gets the parameter types for this action.
-   *
-   * @return the parameter types for this action
-   */
-  public List getParameterTypes () {
-    return parameterTypes;
+  public List getInputParameters () {
+    return inputParameters;
   }
     
-  /** Gets the parameter values for this action.
+  /** Gets the output parameter values for this action which are customized by the schedule factory.
    *
-   * @return the parameter values for this action
+   * @return tthe output parameter values for this action which are customized by the schedule factory
    */
-  public List getParameterValues () {
-    return parameterValues;
+  public List getOutputParameters () {
+    return outputParameters;
   }
-  
-  /** Sets the parameter values for this action.
+    
+  /** Sets the input parameter values for this action.
    *
-   * @param parameterValues the parameter values for this action
+   * @param inputParameterValues the input parameter values for this action
    */
-  public void setParameterValues (List parameterValues) {
-    if (parameterValues.size() != getParameterTypes().size())
-      throw new BehaviorEngineException("Number of parameter values (" + parameterValues.size() +
-                                        ") does not match the number of parameter types (" +
-                                        getParameterTypes().size() + ")");
-    for (int i = 0; i < parameterValues.size(); i++) {
-      Object parameterValue = parameterValues.get(i);
-      Class parameterType = (Class) getParameterTypes().get(i);
+  public void setInputParameterValues (List inputParameterValues) {
+    if (inputParameterValues.size() != inputParameters.size())
+      throw new BehaviorEngineException("Number of parameter values (" + inputParameterValues.size() +
+                                        ") does not match the number of input parameters (" +
+                                        inputParameters.size() + ")");
+    for (int i = 0; i < inputParameterValues.size(); i++) {
+      Object parameterValue = inputParameterValues.get(i);
+      Parameter parameter = (Parameter) inputParameters.get(i);
+      Class parameterType = parameter.getType();
       if (! (parameterType.isInstance(parameterValue))) {
         throw new BehaviorEngineException("parameter values (" + parameterValue +
                                           ") is not an instance of parameter type (" +
                                           parameterType + ")");
       }
     }
-    this.parameterValues = parameterValues;
+    this.inputParameterValues = inputParameterValues;
   }
-  
-  /** Gets the output type for this action.
+       
+  /** Sets the output state variables for this action.
    *
-   * @return the output type for this action
+   * @param inputParameterValues the input parameter values for this action
    */
-  public Class getOutputType () {
-    return outputType;
-   }
-  
-  /** Gets the output value for this (completed) action.
-   *
-   * @return the parameter values for this (completed) action
-   */
-  public Object getOutputValue () {
-    return outputValue;
+  public void setOutputStateVariables (List outputStateVariables) {
+    if (outputStateVariables.size() != outputParameters.size())
+      throw new BehaviorEngineException("Number of output state variables (" + outputStateVariables.size() +
+                                        ") does not match the number of input parameters (" +
+                                        outputParameters.size() + ")");
+    for (int i = 0; i < outputStateVariables.size(); i++) {
+      StateVariable stateVariable = (StateVariable) outputStateVariables.get(i);
+      Parameter parameter = (Parameter) outputParameters.get(i);
+      Class parameterType = parameter.getType();
+      if (! (parameterType.isInstance(stateVariable.getType()))) {
+        throw new BehaviorEngineException("state variable (" + stateVariable +
+                                          ") is not an instance of output parameter type (" +
+                                          parameterType + ")");
+      }
+    }
+    this.outputStateVariables = outputStateVariables;
   }
-    
-  
-  //// Protected Area
-  
-  /** Sets the name of the action
-   *
-   * @param name the name of the action
-   */
-  public void setName (String name) {
-    this.name = name;
-  }  
-  
-  /** Sets the parameter names for this action.
-   *
-   * @param parameterNames the parameter names for this action
-   */
-  public void setParameterNames (List parameterNames) {
-    this.parameterNames = parameterNames;
-  }
-   
-  /** Sets the parameter types for this action.
-   *
-   * @param parameterTypes the parameter types for this action
-   */
-  public void setParameterTypes (List parameterTypes) {
-    this.parameterTypes = parameterTypes;
-  }
-   
-  /** Sets the output type for this action.
-   *
-   * @param outputType the output type for this action
-   */
-  public void setOutputType (Class outputType) {
-    this.outputType = outputType;
-  }
-  
-  /** Sets the output value for this action.
-   *
-   * @param outputValue the output valuefor this action
-   */
-  public void setOutputValue (Object outputValue) {
-    this.outputValue = outputValue;
-  }
-   
+     
   /** the abort action name */
-  public static final String ABORT = "abort";
+  public static final String ABORT = "Abort";
   
   /** the console prompted input action name */
-  public static final String CONSOLE_PROMPTED_INPUT = "console prompted input";
+  public static final String CONSOLE_PROMPTED_INPUT = "ConsolePromptedInput";
   
   /** the converse with user action name */
-  public static final String CONVERSE_WITH_USER = "converse with user";
+  public static final String CONVERSE_WITH_USER = "ConverseWithUser";
   
   /** the emergency stop action name */
-  public static final String EMERGENCY_STOP = "emergency stop";
+  public static final String EMERGENCY_STOP = "EmergencyStop";
   
   /** the init action name */
-  public static final String INIT = "init";
+  public static final String INITIALIZE = "Initialize";
+  
+  //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
     
   /** the name of the action */
-  protected String name;
+  protected final String name;
   
-  /** the parameter names for this action */
-  protected List parameterNames;
+  /** the input formal parameters for this action */
+  protected final List inputParameters;
   
-  /** the parameter types for this action */
-  protected List parameterTypes;
+  /** the input parameter values for this action which are customized by the schedule factory */
+  protected List inputParameterValues;
   
-  /** the parameter values for this action */
-  protected List parameterValues;
+  /** the output formal parameters for this action which are customized by the schedule factory */
+  protected final List outputParameters;
   
-  /** the output type for this action */
-  protected Class outputType;
-  
-  /** the output value for this (completed) action */
-  protected Object outputValue;
+  /** the output state variables for this action which are customized by the schedule factory */
+  protected List outputStateVariables;
   
   //// Main
   

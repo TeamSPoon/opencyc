@@ -1,6 +1,8 @@
 package org.opencyc.elf.wm.state;
 
 //// Internal Imports
+import org.opencyc.elf.Node;
+import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.StateVariableFactory;
 import org.opencyc.elf.wm.StateVariableLibrary;
 
@@ -11,9 +13,7 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
-
 
 /** Provides a suite of JUnit test cases for the org.opencyc.elf.bg.state
  * package.
@@ -58,51 +58,51 @@ public class UnitTest extends TestCase {
    */
   public static Test suite() {
     TestSuite testSuite = new TestSuite();
-    testSuite.addTest(new UnitTest("testSituation"));
+    testSuite.addTest(new UnitTest("testState"));
 
     return testSuite;
   }
 
-  /** Tests Situation object behavior. */
-  public void testSituation() {
-    System.out.println("\n*** testSituation ***");
+  /** Tests State object behavior. */
+  public void testState() {
+    System.out.println("\n*** testState ***");
+    new NodeFactory();
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
     
-    Situation situation1 = new Situation();
     StateVariable stateVariable1 = new StateVariable(String.class,
                                                      "stateVariable1", 
                                                      "test state variable stateVariable1");
-    Assert.assertNull(situation1.getState().getStateValue(stateVariable1));
-    situation1.getState().setStateValue(stateVariable1, "abc");
-    Assert.assertEquals("abc", situation1.getState().getStateValue(stateVariable1));
-
-    Situation situation2 = new Situation(situation1);
-    Assert.assertEquals(situation1, situation2);
-
-    StateVariable stateVariable2 = new StateVariable(String.class,
+    State state = new State(null);
+    Assert.assertTrue(! state.isStateVariable(stateVariable1));
+    state.setStateValue(stateVariable1, "abc");
+    Assert.assertTrue(state.isStateVariable(stateVariable1));
+    Assert.assertEquals("abc", state.getStateValue(stateVariable1));
+    Node node = NodeFactory.getInstance().makeNodeShell();
+    Node parentNode = NodeFactory.getInstance().makeNodeShell();
+    node.setParentNode(parentNode);
+    State parentState = new State(parentNode);
+    parentNode.getWorldModel().setState(parentState);
+    state = new State(node);
+    node.getWorldModel().setState(state);
+    parentState.setStateValue(stateVariable1, "def");
+    Assert.assertEquals("def", state.getStateValue(stateVariable1));
+    Assert.assertEquals("def", parentState.getStateValue(stateVariable1));
+    StateVariable stateVariable2 = new StateVariable(Integer.class,
                                                      "stateVariable2", 
                                                      "test state variable stateVariable2");
-    situation2.getState().setStateValue(stateVariable2, "def");
-    Assert.assertTrue(!situation1.equals(situation2));
-    System.out.println(situation2.toString());
-
-    int iteratorCount = 0;
-    Object iterator1 = situation1.getState().stateVariables();
-    Assert.assertTrue(iterator1 instanceof Iterator);
-
-    Iterator iterator2 = situation1.getState().stateVariables();
-
-    while (iterator2.hasNext()) {
-      Object stateVariable = iterator2.next();
-      iteratorCount++;
-      Assert.assertEquals(stateVariable1, stateVariable);
-    }
-
-    Assert.assertEquals(1, iteratorCount);
-    Assert.assertTrue(situation1.getState().isStateVariable(stateVariable1));
-
-    System.out.println("*** testSituation OK ***");
+    Assert.assertTrue(! parentState.isStateVariable(stateVariable2));
+    Assert.assertTrue(! state.isStateVariable(stateVariable2));
+    parentState.setStateValue(stateVariable2, new Integer(-1));
+    Assert.assertTrue(parentState.isStateVariable(stateVariable2));
+    Assert.assertTrue(state.isStateVariable(stateVariable2));
+    Assert.assertEquals(new Integer(-1), state.getStateValue(stateVariable2));
+    Assert.assertEquals(new Integer(-1), parentState.getStateValue(stateVariable2));
+    state.setStateValue(stateVariable2, new Integer(99));
+    Assert.assertEquals(new Integer(99), state.getStateValue(stateVariable2));
+    Assert.assertEquals(new Integer(-1), parentState.getStateValue(stateVariable2));
+    
+    System.out.println("*** testState OK ***");
   }
   
   //// Protected Area

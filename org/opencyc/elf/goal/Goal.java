@@ -1,15 +1,18 @@
 package org.opencyc.elf.goal;
 
 //// Internal Imports
+import org.opencyc.elf.BehaviorEngineException;
 import org.opencyc.elf.bg.predicate.Predicate;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
-
 import org.opencyc.elf.bg.taskframe.Command;
+import org.opencyc.elf.bg.taskframe.Parameter;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-/** Provides the Goal container for the Elementary Loop Functioning (ELF).
+/** Provides the Goal container for the behavior engine.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -36,8 +39,29 @@ public class Goal implements Command {
   //// Constructors
   
   /** Constructs a new Goal object.
+   *
+   * @param name the goal name
+   * @param predicateExpression the predicate expression which when true, indicates that the goal
+   * is achieved
+   * @param failurePredicateExpressions the list of predicate expressions which if true, indicate 
+   * goal failure
+   * @param importance the goal importance
+   * @param goalTime the goal time constraint plus modifiers such as tolerance
+   * @param inputParameters the input parameter values for this goal which are customized by the 
+   * schedule factory
    */
-  public Goal() {
+  public Goal(String name,
+              PredicateExpression predicateExpression,
+              List failurePredicateExpressions,
+              Importance importance,
+              GoalTime goalTime,
+              List inputParameters) {
+    this.name = name;
+    this.predicateExpression = predicateExpression;
+    this.failurePredicateExpressions = failurePredicateExpressions;
+    this.importance = importance;
+    this.goalTime = goalTime;
+    this.inputParameters = inputParameters;
   }
 
   //// Public Area
@@ -46,16 +70,14 @@ public class Goal implements Command {
    * and goal importance can be modified by the receiver.
    */
   public Object clone() {
-    Goal goal = new Goal();
-    goal.setGoalTime((GoalTime) goalTime.clone());
-    goal.setImportance((Importance) importance.clone());
-    goal.setName(name);
-    goal.setPredicateExpression(predicateExpression);
-    goal.setfailurePredicateExpressions(failurePredicateExpressions);
-    return goal;
+    return new Goal(name,
+                    predicateExpression,
+                    failurePredicateExpressions,
+                    (Importance) importance.clone(),
+                    (GoalTime) goalTime.clone(),
+                    inputParameters);
   }
   
-
   /** Gets the goal name
    *
    * @return the goal name
@@ -64,20 +86,40 @@ public class Goal implements Command {
     return name;
   }
 
-  /** Sets the goal name
-   *
-   * @param name the goal name
-   */
-  public void setName (String name) {
-    this.name = name;
-  }
-
   /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
   public String toString() {
-    return predicateExpression.toString();
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[Goal: ");
+    stringBuffer.append(name);
+    stringBuffer.append(" ");
+    stringBuffer.append(predicateExpression.toString());
+    stringBuffer.append(" ");
+    stringBuffer.append("(");
+    for (int i = 0; i < inputParameters.size(); i++) {
+      Parameter inputParameter = (Parameter) inputParameters.get(i);
+      stringBuffer.append(" ");
+      stringBuffer.append(inputParameter.getName());
+      stringBuffer.append(": ");
+      if (inputParameterValues != null) {
+        Object parameterValue = inputParameterValues.get(i);
+        if (parameterValue == null)
+          stringBuffer.append("null");
+        else if (parameterValue instanceof String) {
+          stringBuffer.append('"');
+          stringBuffer.append(parameterValue.toString());
+          stringBuffer.append('"');
+        }
+        else
+          stringBuffer.append(parameterValue.toString());
+      }
+      else
+        stringBuffer.append("null");
+    }
+    stringBuffer.append(")]");
+    return stringBuffer.toString();
   }
   
   /** Gets the predicate expression which when true, indicates that the goal
@@ -90,31 +132,12 @@ public class Goal implements Command {
     return predicateExpression;
   }
 
-  /** Sets the predicate expression which when true, indicates that the goal
-   * is achieved
-   *
-   * @param predicateExpression the predicate expression which when true, indicates that 
-   * the goal is achieved
-   */
-  public void setPredicateExpression (PredicateExpression predicateExpression) {
-    this.predicateExpression = predicateExpression;
-  }
-
   /** Gets the list of predicate expressions which if true, indicate goal failure
    *
    * @return the list of predicate expressions which if true, indicate goal failure
    */
-  public ArrayList getfailurePredicateExpressions () {
+  public List getfailurePredicateExpressions () {
     return failurePredicateExpressions;
-  }
-
-  /** Sets the list of predicate expressions which if true, indicate goal failure
-   *
-   * @param failurePredicateExpressions the list of predicate expressions which if true, 
-   * indicate goal failure
-   */
-  public void setfailurePredicateExpressions (ArrayList failurePredicateExpressions) {
-    this.failurePredicateExpressions = failurePredicateExpressions;
   }
 
   /** Gets the goal importance
@@ -125,14 +148,6 @@ public class Goal implements Command {
     return importance;
   }
 
-  /** Sets the goal importance
-   * 
-   * @param importance the goal importance
-   */
-  public void setImportance(Importance importance) {
-    this.importance = importance;
-  }
-  
   /** Gets the goal time constraint plus modifiers such as tolerance.
    *
    * @return the goal time constraint plus modifiers such as tolerance
@@ -141,19 +156,45 @@ public class Goal implements Command {
     return goalTime;
   }
 
-  /** Sets the goal time constraint plus modifiers such as tolerance.
+  /** Gets the input formal parameters for this goal.
    *
-   * @param goalTime the goal time constraint plus modifiers such as tolerance
+   * @return the input formal parameters for this goal
    */
-  public void setGoalTime (GoalTime goalTime) {
-    this.goalTime = goalTime;
+  public List getInputParameters () {
+    return inputParameters;
   }
-
-  /** goal name for get user input */
-  public static final String GET_USER_INPUT = "get user input"; 
+   
+  /** Gets the input parameter values for this goal which are customized by the schedule factory.
+   *
+   * @return the input parameter values for this goal which are customized by the schedule factory
+   */
+  public List getInputParameterValues () {
+    return inputParameterValues;
+  }
+    
+  /** Sets the parameter values for this goal.
+   *
+   * @param inputParameterValues the input parameter values for this goal
+   */
+  public void setParameterValues (List inputParameterValues) {
+    if (inputParameterValues.size() != inputParameters.size())
+      throw new BehaviorEngineException("Number of input parameter values (" + inputParameterValues.size() +
+                                        ") does not match the number of input parameters (" +
+                                        inputParameters.size() + ")");
+    for (int i = 0; i < inputParameterValues.size(); i++) {
+      Object inputParameterValue = inputParameterValues.get(i);
+      Class inputParameterType = ((Parameter) inputParameters.get(i)).getType();
+      if (! (inputParameterType.isInstance(inputParameterValue))) {
+        throw new BehaviorEngineException("parameter value (" + inputParameterValue +
+                                          ") is not an instance of parameter type (" +
+                                          inputParameterType + ")");
+      }
+    }
+    this.inputParameterValues = inputParameterValues;
+  }
   
   /** goal name for console prompted input */
-  public static final String GET_CONSOLE_PROMPTED_INPUT = "get console prompted input";   
+  public static final String PERCEIVE_SENSATION = "PerceiveSensation";   
   
   //// Protected Area
   
@@ -164,21 +205,27 @@ public class Goal implements Command {
   /**
    * the goal name
    */
-  protected String name;
+  protected final String name;
   
   /** the predicate expression which when true, indicates that the goal
    * is achieved
    */
-  protected PredicateExpression predicateExpression;
+  protected final PredicateExpression predicateExpression;
 
   /**  the list of predicate expressions which if true, indicate goal failure */
-  protected ArrayList failurePredicateExpressions = new ArrayList();
+  protected final List failurePredicateExpressions;
 
   /** the goal importance */
-  protected Importance importance;
+  protected final Importance importance;
 
   /** the goal time constraint plus modifiers such as tolerance */
-  protected GoalTime goalTime;
+  protected final GoalTime goalTime;
+  
+  /** the input formal parameters for this goal */
+  protected final List inputParameters;
+  
+  /** the input parameter values for this goal which are customized by the schedule factory */
+  protected List inputParameterValues;
   
   //// Main
 }

@@ -31,7 +31,7 @@ package org.opencyc.elf.bg.taskframe;
  * @version $Id$
  */
 
-public interface Command {
+public interface Command extends Cloneable {
   
   /** Gets the name of the command
    *

@@ -2,7 +2,7 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.bg.taskframe.Action;
-
+import org.opencyc.elf.bg.taskframe.Parameter;
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
@@ -57,46 +57,42 @@ public class ActionFactory {
   /** Populates the action library. */
   public void populateActionLibrary () {
     // abort
-    Action action = new Action();
-    action.setName(Action.ABORT);
-    action.setParameterNames(new ArrayList());
-    action.setParameterTypes(new ArrayList());
+    String name = Action.ABORT;
+    List inputParameters = new ArrayList();
+    List outputParameters = new ArrayList();
+    Action action = new Action(name, inputParameters, outputParameters);
     ActionLibrary.getInstance().setAction(action.getName(), action);
     
     // console prompted input
-    action = new Action();
-    action.setName(Action.CONSOLE_PROMPTED_INPUT);
-    List parameterNames = new ArrayList();
-    parameterNames.add("prompt");
-    action.setParameterNames(parameterNames);
-    List parameterTypes = new ArrayList();
-    parameterTypes.add(String.class);
-    action.setParameterTypes(parameterTypes);
+    name = Action.CONSOLE_PROMPTED_INPUT;
+    inputParameters = new ArrayList();
+    Parameter parameter = new Parameter(Parameter.PROMPT, String.class);
+    inputParameters.add(parameter);
+    outputParameters = new ArrayList();
+    action = new Action(name, inputParameters, outputParameters);
     ActionLibrary.getInstance().setAction(action.getName(), action);
     
     // converse with user
-    action = new Action();
-    action.setName(Action.CONVERSE_WITH_USER);
-    parameterNames = new ArrayList();
-    parameterNames.add("prompt");
-    action.setParameterNames(parameterNames);
-    parameterTypes = new ArrayList();
-    parameterTypes.add(String.class);
-    action.setParameterTypes(parameterTypes);
+    name = Action.CONVERSE_WITH_USER;
+    inputParameters = new ArrayList();
+    outputParameters = new ArrayList();
+    parameter = new Parameter(Parameter.USER_INPUT, String.class);
+    outputParameters.add(parameter);
+    action = new Action(name, inputParameters, outputParameters);
     ActionLibrary.getInstance().setAction(action.getName(), action);
     
     // emergency stop
-    action = new Action();
-    action.setName(Action.EMERGENCY_STOP);
-    action.setParameterNames(new ArrayList());
-    action.setParameterTypes(new ArrayList());
+    name = Action.EMERGENCY_STOP;
+    inputParameters = new ArrayList();
+    outputParameters = new ArrayList();
+    action = new Action(name, inputParameters, outputParameters);
     ActionLibrary.getInstance().setAction(action.getName(), action);
     
-    // init
-    action = new Action();
-    action.setName(Action.INIT);
-    action.setParameterNames(new ArrayList());
-    action.setParameterTypes(new ArrayList());
+    // initialize
+    name = Action.INITIALIZE;
+    inputParameters = new ArrayList();
+    outputParameters = new ArrayList();
+    action = new Action(name, inputParameters, outputParameters);
     ActionLibrary.getInstance().setAction(action.getName(), action);
   }
     

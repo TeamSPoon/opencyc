@@ -30,10 +30,6 @@ public class GoalTime {
   
   //// Constructors
   
-  /** Creates a new instance of GoalTime. */
-  public GoalTime() {
-  }
-  
   /** Creates a new instance of GoalTime given the goal achievment time and tolerance.
    *
    * @param goalTimeMilliseconds the goal achievement time in milliseconds
@@ -59,28 +55,12 @@ public class GoalTime {
     return goalTimeMilliseconds;
   }
 
-  /** Sets the goal achievement time in milliseconds
-   *
-   * @param goalTimeMilliseconds the goal achievement time in milliseconds
-   */
-  public void setGoalTimeMilliseconds (long goalTimeMilliseconds) {
-    this.goalTimeMilliseconds = goalTimeMilliseconds;
-  }
-
   /** Gets the goal achievement tolerance in milliseconds
    *
    * @return the goal achievement tolerance in milliseconds
    */
   public long getGoalToleranceMilliseconds () {
     return goalToleranceMilliseconds;
-  }
-
-  /** Sets the goal achievement tolerance in milliseconds
-   *
-   * @param goalToleranceMilliseconds the goal achievement tolerance in milliseconds
-   */
-  public void setGoalToleranceMilliseconds (long goalToleranceMilliseconds) {
-    this.goalToleranceMilliseconds = goalToleranceMilliseconds;
   }
 
   /** Returns a string representation of this object.
@@ -97,6 +77,9 @@ public class GoalTime {
     return stringBuffer.toString();
   }
   
+  /** ten minutes measured in milliseconds */
+  public static final long TEN_MINUTES = 10 * 3600;
+  
   //// Protected Area
   
   //// Private Area
@@ -104,10 +87,10 @@ public class GoalTime {
   //// Internal Rep
   
   /** the goal achievement time in milliseconds */
-  protected long goalTimeMilliseconds;  
+  protected final long goalTimeMilliseconds;  
   
   /** the goal achievement tolerance in milliseconds */
-  protected long goalToleranceMilliseconds = 0;
+  protected final long goalToleranceMilliseconds;
     
   //// Main
   

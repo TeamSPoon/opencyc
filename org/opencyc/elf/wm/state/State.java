@@ -2,12 +2,15 @@ package org.opencyc.elf.wm.state;
 
 //// Internal Imports
 import org.opencyc.cycobject.CycList;
+import org.opencyc.elf.Node;
+import org.opencyc.elf.NodeComponent;
 
 //// External Imports
 import java.util.Hashtable;
 import java.util.Iterator;
 
-/** State provides the container for the list of stateVariable/values.
+/** State provides the container for the list of stateVariable/values, and states form 
+ * a binding stack within the node hierarchy.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -29,12 +32,13 @@ import java.util.Iterator;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class State {
+public class State extends NodeComponent {
   
   //// Constructors
   
   /** Constructs a new instance of this object. */
-  public State() {
+  public State(Node node) {
+    this.node = node;
     stateVariableDictionary = new Hashtable();
   }
 
@@ -99,45 +103,18 @@ public class State {
     return stringBuffer.toString();
   }
 
-  /** Returns a clone of this state.
-   * 
-   * @return a clone of this state
-   */
-  public Object clone() {
-    State state = new State();
-
-    Iterator iter = stateVariables();
-
-    while (iter.hasNext()) {
-      StateVariable stateVariable = (StateVariable) iter.next();
-      Object value = null;
-      try {
-        value = ((State) getStateValue(stateVariable)).clone();
-      }
-      //TOTO replace with CloneNotSupportedException
-       catch (Exception e) {
-        value = getStateValue(stateVariable);
-      }
-      state.setStateValue(stateVariable, value);
-    }
-    return state;
-  }
-
-  /** Returns an iterator over the state variables.
-   * 
-   * @return an iterator over the state variables
-   */
-  public Iterator stateVariables() {
-    return new StateIterator(this);
-  }
-
   /** Returns true if the given object is a state variable of this state.
    * 
    * @param obj the given object
    * @return true if the given object is a state variable of this state
    */
   public boolean isStateVariable(Object obj) {
-    return stateVariableDictionary.containsKey(obj);
+    if (stateVariableDictionary.containsKey(obj))
+      return true;
+    if (node == null || node.getParentNode() == null)
+      return false;
+    else
+      return node.getParentNode().getWorldModel().getState().isStateVariable(obj);
   }
 
   /** Sets the given state state variable to the given value.
@@ -159,7 +136,12 @@ public class State {
    * @return the stateVariable for the given stateVariable
    */
   public Object getStateValue(Object stateVariable) {
-    return stateVariableDictionary.get(stateVariable);
+    if (stateVariableDictionary.containsKey(stateVariable))
+      return stateVariableDictionary.get(stateVariable);
+    if (node == null || node.getParentNode() == null)
+      return null;
+    else
+      return node.getParentNode().getWorldModel().getState().getStateValue(stateVariable);
   }
 
   //// Protected Area

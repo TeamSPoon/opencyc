@@ -3,26 +3,19 @@ package org.opencyc.elf.wm;
 //// Internal Imports
 import org.opencyc.elf.a.Actuator;
 import org.opencyc.elf.a.DirectActuator;
-
 import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
-
 import org.opencyc.elf.bg.predicate.NotNull;
-
 import org.opencyc.elf.bg.taskframe.Action;
-
 import org.opencyc.elf.goal.Goal;
-
 import org.opencyc.elf.s.DirectSensor;
 import org.opencyc.elf.s.Sensor;
-
 import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
-
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -73,7 +66,6 @@ public class UnitTest extends TestCase {
   public static Test suite() {
     logger = Logger.getLogger("org.opencyc.elf");
     TestSuite testSuite = new TestSuite();
-    testSuite.addTest(new UnitTest("testEntityFrame"));
     testSuite.addTest(new UnitTest("testStateVariableLibrary"));
     testSuite.addTest(new UnitTest("testActionLibrary"));
     testSuite.addTest(new UnitTest("testGoalLibrary"));
@@ -84,40 +76,6 @@ public class UnitTest extends TestCase {
     return testSuite;
   }
 
-  /** Tests EntityFrame object behavior. */
-  public void testEntityFrame() {
-    System.out.println("\n*** testEntityFrame ***");
-    EntityFrame entityFrame1 = new EntityFrame();
-    StateVariable stateVariable1 = new StateVariable(String.class, 
-                                                     "stateVariable1", 
-                                                     "test state variable stateVariable1");
-    Object attribute1 = new Object();
-    Assert.assertNull(entityFrame1.getState().getStateValue(stateVariable1));
-    entityFrame1.getState().setStateValue(stateVariable1, "abc");
-    Assert.assertEquals("abc", entityFrame1.getState().getStateValue(stateVariable1));
-
-    EntityFrame entityFrame2 = new EntityFrame(entityFrame1);
-    Assert.assertNotSame(entityFrame1, entityFrame2);
-    StateVariable stateVariable2 = new StateVariable(String.class, 
-                                                     "stateVariable2", 
-                                                     "test state variable stateVariable2");
-    entityFrame2.getState().setStateValue(stateVariable2, "def");
-    Assert.assertTrue(!entityFrame1.equals(entityFrame2));
-    System.out.println(entityFrame2.toString());
-    int iteratorCount = 0;
-    Object iterator1 = entityFrame1.getState().stateVariables();
-    Assert.assertTrue(iterator1 instanceof Iterator);
-    Iterator iterator2 = entityFrame1.getState().stateVariables();
-    while (iterator2.hasNext()) {
-      Object stateVariable = iterator2.next();
-      iteratorCount++;
-      Assert.assertEquals(stateVariable1, stateVariable);
-    }
-    Assert.assertEquals(1, iteratorCount);
-    Assert.assertTrue(entityFrame1.getState().isStateVariable(stateVariable1));
-    System.out.println("*** testEntityFrame OK ***");
-  }
-  
   /** Tests state variable library and state variable factory behavior. */
   public void testStateVariableLibrary() {
     System.out.println("\n*** testStateVariableLibrary ***");
@@ -147,7 +105,7 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT));
     Assert.assertNotNull(ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER));
     Assert.assertNotNull(ActionLibrary.getInstance().getAction(Action.EMERGENCY_STOP));
-    Assert.assertNotNull(ActionLibrary.getInstance().getAction(Action.INIT));
+    Assert.assertNotNull(ActionLibrary.getInstance().getAction(Action.INITIALIZE));
     Assert.assertEquals("[Action: console prompted input( prompt: null)]", 
                         ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT).toString());
     System.out.println("*** testActionLibrary OK ***");
@@ -164,12 +122,12 @@ public class UnitTest extends TestCase {
     new GoalLibrary();
     (new GoalFactory()).getInstance().populateGoalLibrary();
     Assert.assertNotNull(GoalLibrary.getInstance());
-    Assert.assertNotNull(GoalLibrary.getInstance().getGoal(Goal.GET_CONSOLE_PROMPTED_INPUT));
+    Assert.assertNotNull(GoalLibrary.getInstance().getGoal(Goal.PERCEIVE_SENSATION));
     Assert.assertEquals("(not-null \"consoleInput\")", 
-                        GoalLibrary.getInstance().getGoal(Goal.GET_CONSOLE_PROMPTED_INPUT).toString());
-    Assert.assertNotNull(GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT));
+                        GoalLibrary.getInstance().getGoal(Goal.PERCEIVE_SENSATION).toString());
+    Assert.assertNotNull(GoalLibrary.getInstance().getGoal(Goal.PERCEIVE_SENSATION));
     Assert.assertEquals("(not-null \"userInput\")", 
-                        GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT).toString());
+                        GoalLibrary.getInstance().getGoal(Goal.PERCEIVE_SENSATION).toString());
     System.out.println("*** testGoalLibrary OK ***");
   }
   

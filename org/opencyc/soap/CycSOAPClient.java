@@ -34,8 +34,24 @@ import org.opencyc.util.Log;
  */
 public class CycSOAPClient {
 
+    /**
+     * Required jars
+     *
+     * common-collections.jar
+     * jug.jar
+     * jajarta-oro-2.0.3.jar
+     * axis.jar
+     * jaxrpc.jar
+     * commons-discovery.jar
+     * commons-logging.jar
+     * ViolinStrings.jar
+     */
 
-
+   /**
+    * the web service URL
+    */
+   public String endpointURL = "http://localhost:8080/axis/CycSOAPService.jws";
+    
     /**
      * Construct a new CycSOAPClient object.
      */
@@ -52,7 +68,8 @@ public class CycSOAPClient {
         CycSOAPClient cycSOAPClient = new CycSOAPClient();
         try {
             cycSOAPClient.helloWorld();
-            cycSOAPClient.remoteSubLInteractor();
+            for (int i = 0; i < 10; i++)
+                Log.current.println(cycSOAPClient.remoteSubLInteractor("(isa #$TransportationDevice)"));
         }
         catch( Exception e ) {
             Log.current.errorPrintln(e.getMessage());
@@ -63,15 +80,14 @@ public class CycSOAPClient {
     /**
      * Provides a simple test of the SOAP service without Cyc access.
      */
-    protected void helloWorld ()
+    public void helloWorld ()
         throws ServiceException, MalformedURLException, RemoteException {
-        String endpointURL = "http://localhost:9080/axis/CycSOAPService.jws";
         String methodName = "getHelloWorldMessage";
         Service service = new Service();
         Call call = (Call) service.createCall();
         call.setTargetEndpointAddress(new java.net.URL(endpointURL));
         call.setOperationName(methodName);
-        call.addParameter("name",
+        call.addParameter("echo",
                           XMLType.XSD_STRING,
                           ParameterMode.IN);
         call.setReturnType(XMLType.XSD_STRING);
@@ -80,22 +96,50 @@ public class CycSOAPClient {
     }
 
     /**
-     * Provides a remote SubL Interactor.
+     * Provides a SubL interactor client.
+     *
+     * @param subLRequest the given SubL request which will be submitted to the
+     * Cyc server for evaluation
+     * @return the result of evaluating the given SubL request
      */
-    protected void remoteSubLInteractor ()
+    public String remoteSubLInteractor (String subLRequest)
         throws ServiceException, MalformedURLException, RemoteException {
-        String endpointURL = "http://localhost:8080/axis/CycSOAPService.jws";
         String methodName = "subLInteractor";
         Service service = new Service();
         Call call = (Call) service.createCall();
         call.setTargetEndpointAddress(new java.net.URL(endpointURL));
         call.setOperationName(methodName);
-        call.addParameter("name",
+        call.addParameter("subLRequest",
                           XMLType.XSD_STRING,
                           ParameterMode.IN);
         call.setReturnType(XMLType.XSD_STRING);
-        String result = (String) call.invoke(new Object[] {"(isa #$TransportationDevice)"});
-        Log.current.println(result);
+        return (String) call.invoke(new Object[] {subLRequest});
+    }
+    
+    /**
+     * Categorizes the given entity within the Cyc KB.
+     *
+     * @param entity the given entity to categorize
+     * @param entityKind the given general entity kind as determined from information
+     * extraction
+     * @return an XML structure consisting of the mathched entity paraphrase and Cyc category, 
+     * and if unmatched return an empty string
+     */
+    public String categorizeEntity  (String entityString, String generalEntityKindString)
+        throws ServiceException, MalformedURLException, RemoteException {
+        String methodName = "categorizeEntity";
+        Service service = new Service();
+        Call call = (Call) service.createCall();
+        call.setTargetEndpointAddress(new java.net.URL(endpointURL));
+        call.setOperationName(methodName);
+        call.addParameter("entityString",
+                          XMLType.XSD_STRING,
+                          ParameterMode.IN);
+        call.addParameter("generalEntityKindString",
+                          XMLType.XSD_STRING,
+                          ParameterMode.IN);
+        call.setReturnType(XMLType.XSD_STRING);
+        return (String) call.invoke(new Object[] {entityString, generalEntityKindString});
     }
 }
 

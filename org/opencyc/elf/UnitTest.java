@@ -4,8 +4,13 @@ package org.opencyc.elf;
 import org.opencyc.elf.a.Actuator;
 
 import org.opencyc.elf.bg.BehaviorGeneration;
+
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
+
+import org.opencyc.elf.message.DoTaskMsg;
 
 import org.opencyc.elf.s.Sensor;
 
@@ -79,7 +84,7 @@ public class UnitTest extends TestCase {
   public static Test suite() {
     TestSuite testSuite = new TestSuite();
     testSuite.addTest(new UnitTest("testELFFactory"));
-
+    testSuite.addTest(new UnitTest("testBehaviorGeneration"));
     return testSuite;
   }
 
@@ -177,6 +182,26 @@ public class UnitTest extends TestCase {
     
     
     System.out.println("*** testELFFactory OK ***");
+  }
+
+  /**
+   * Tests BehaviorGeneration object behavior.
+   */
+  public void testBehaviorGeneration() {
+    try {
+      Thread.sleep(4000);
+    }
+    catch (InterruptedException e) {
+    }
+    System.out.println("\n*** testBehaviorGeneration ***");
+    
+    logger.info("Testing behavior generation");
+    ELFFactory elfFactory = new ELFFactory();
+    Node node = elfFactory.makeNodeShell("test-node");
+    
+    
+    
+    System.out.println("*** testBehaviorGeneration OK ***");
   }
 
   //// Protected Area

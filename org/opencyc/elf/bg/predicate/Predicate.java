@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.elf.bg.expression.Operator;
+
 import org.opencyc.elf.wm.state.State;
 import org.opencyc.elf.wm.state.StateVariable;
 
@@ -31,14 +33,14 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class Predicate {
+public abstract class Predicate extends Operator {
   
   //// Constructors
 
   /** Constructs a new Predicate object.
    */
   public Predicate() {
-    predicate = this;
+    super();
   }
   
   //// Public Area
@@ -48,7 +50,7 @@ public abstract class Predicate {
    * @return the singleton instance of predicate
    */
   public static Predicate getInstance () {
-    return predicate;
+    return (Predicate) operator;
   }
   
   /** Evaluates the given arguments within the given state and returns the result.  The semantics
@@ -59,38 +61,11 @@ public abstract class Predicate {
    */
   public abstract Boolean evaluate (List arguments, State state);
   
-  /** Returns a string representation of this predicate given
-   * the arguments.
-   *
-   * @param arguments the given arguments to evaluate
-   * @return a string representation of this object
-   */
-  public abstract String toString(List arguments);
-  
   //// Protected Area
-  
-  /** Dereferences the given argument within the given state if the argument is a state 
-   * variable.
-   *
-   * @param argument the given argument
-   * @param state the given state
-   * @return the value of the state variable when the given argument is a state variable,
-   * otherwise return the argument
-   */
-  protected Object evaluateArgument (Object argument, State state) {
-    if (argument instanceof StateVariable) {
-      return state.getStateValue((StateVariable) argument);
-    }
-    else
-      return argument;
-  }
   
   //// Private Area
   
   //// Internal Rep
 
-  /** the singleton instance of predicate */
-  protected static Predicate predicate;
-  
   //// Main
 }

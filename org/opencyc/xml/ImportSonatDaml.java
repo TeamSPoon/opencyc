@@ -577,6 +577,278 @@ public class ImportSonatDaml {
                       "http://www.daml.org/2001/03/daml+oil#disjointWith",
                       "disjointWith");
 
+        // SONAT Mappings
+        assertMapping("soci:Religion",
+                      "http://www.daml.org/experiment/ontology/social-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/social-elements-ont.daml#Religion",
+                      "Religion");
+
+        assertMapping("soci:EthnicGroups",
+                      "http://www.daml.org/experiment/ontology/social-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/social-elements-ont.daml#EthnicGroups",
+                      "PersonTypeByEthnicity");
+
+        assertMapping("soci:Population",
+                      "http://www.daml.org/experiment/ontology/social-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/social-elements-ont.daml#Population",
+                      "(#$PopulationOfTypeFn #$Person)");
+
+        assertMapping("poli:GovernmentType",
+                      "http://www.daml.org/experiment/ontology/political-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/political-elements-ont.daml#GovernmentType",
+                      "SystemOfGovernment");
+
+        assertMapping("poli:PoliticalParty",
+                      "http://www.daml.org/experiment/ontology/political-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/political-elements-ont.daml#PoliticalParty",
+                      "PoliticalParty");
+
+        assertMapping("poli:PressureGroup",
+                      "http://www.daml.org/experiment/ontology/political-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/political-elements-ont.daml#PressureGroup",
+                      "PoliticalInterestGroup");
+
+        assertMapping("econ:Industry",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml#Industry",
+                      "Industry-Localized");
+
+        assertMapping("econ:Agriculture",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml#Agriculture",
+                      "AgriculturalEconomicSector");
+
+        assertMapping("econ:Services",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml#Services",
+                      "ServiceEconomicSector");
+
+        assertMapping("econ:NaturalResource",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/economic-elements-ont.daml#NaturalResource",
+                      "NaturalResource");
+
+        assertMapping("infr:EducationAndScience",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#EducationAndScience",
+                      "(#$CollectionUnionFn \n" +
+                      "  (#$InfrastructureFn (#$ForFn #$EducationalOrganization)) \n" +
+                      "  (#$InfrastructureFn (#$ForFn #$AcademicOrganization)) \n" +
+                      "  (#$InfrastructureFn (#$ForFn #$Science)))");
+
+        assertMapping("infr:Airport",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Airport",
+                      "(#$InfrastructureFn (#$ForFn #$Airport-Physical))");
+
+        assertMapping("infr:Bridge",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Bridge",
+                      "(#$InfrastructureFn (#$ForFn Bridge");
+
+        assertMapping("infr:Railroad",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Railroad",
+                      "(#$InfrastructureFn (#$ForFn #$Railway))");
+
+        assertMapping("infr:Highway",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Highway",
+                      "(#$InfrastructureFn (#$ForFn #$Highway))");
+
+        assertMapping("infr:Port",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Port",
+                      "(#$InfrastructureFn (#$ForFn #$PortFacility))");
+
+        assertMapping("infr:OilRefinery",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#OilRefinery",
+                      "(#$InfrastructureFn (#$ForFn #$OilRefinery))");
+
+        assertMapping("infr:PowerGrid",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#PowerGrid",
+                      "(#$InfrastructureFn (#$ForFn #$ElectricalPowerGrid");
+
+        assertMapping("infr:College",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.dam",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#College",
+                      "(#$InfrastructureFn (#$ForFn #$College))");
+
+        assertMapping("infr:GradeSchool",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#GradeSchool",
+                      "(#$InfrastructureFn (#$ForFn #$ElementarySchoolInstitution))");
+
+        assertMapping("infr:HighSchool",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#HighSchool",
+                      "(#$InfrastructureFn (#$ForFn #$HighSchoolInstitution))");
+
+        assertMapping("infr:JuniorCollege",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#JuniorCollege",
+                      "(#$InfrastructureFn (#$ForFn #$College-2Year))");
+
+        assertMapping("infr:Kindergarden",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Kindergarden",
+                      "(#$InfrastructureFn (#$ForFn #$KindergartenInstitution))");
+
+        assertMapping("infr:School",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#School",
+                      "(#$InfrastructureFn (#$ForFn #$AcademicOrganization))");
+
+        assertMapping("infr:SecondarySchool",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#SecondarySchool",
+                      "(#$InfrastructureFn (#$ForFn #$HighSchoolInstitution))");
+
+        assertMapping("infr:AstronomicalStation",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#AstronomicalStation",
+                      "(#$InfrastructureFn (#$ForFn #$AstronomicalObservatory))");
+
+        assertMapping("infr:AtomicCenter",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#AtomicCenter",
+                      "(#$InfrastructureFn (#$ForFn #$NuclearWeaponResearchFacility))");
+
+        assertMapping("infr:BoatYard",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#BoatYard",
+                      "(#$InfrastructureFn (#$ForFn #$Shipyard))");
+
+        assertMapping("infr:Camp",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Camp",
+                      "(#$InfrastructureFn (#$ForFn #$Campsite))");
+
+        assertMapping("infr:Capital",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Capital",
+                      "(#$InfrastructureFn (#$ForFn #$CapitalCityOfRegion))");
+
+        assertMapping("infr:City",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#City",
+                      "(#$InfrastructureFn (#$ForFn #$City))");
+
+        assertMapping("infr:Clinic",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Clinic",
+                      "(#$InfrastructureFn (#$ForFn #$MedicalClinic))");
+
+        assertMapping("infr:Dam",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Dam",
+                      "(#$InfrastructureFn (#$ForFn #$Dam))");
+
+        assertMapping("infr:Dike",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Dike",
+                      "(#$InfrastructureFn (#$ForFn #$Dike))");
+
+        assertMapping("infr:Distribution",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Distribution",
+                      "(#$InfrastructureFn (#$ForFn #$ProductDistributionOrganization))");
+
+        assertMapping("infr:Dock",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Dock",
+                      "(#$InfrastructureFn (#$ForFn #$Dock))");
+
+
+        assertMapping("infr:Electricity",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Electricity",
+                      "(#$InfrastructureFn (#$ForFn #$ElectricalPowerGeneration");
+
+        assertMapping("infr:Ferry",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Ferry",
+                      "(#$InfrastructureFn (#$ForFn #$Ferry))");
+
+        assertMapping("infr:Fuel",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
+                      "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Fuel",
+                      "(#$InfrastructureFn (#$ForFn #$FossilFuel))");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+        assertMapping("",
+                      "",
+                      "",
+                      "");
+
+
+
         // Get the above mappings plus any previously defined in the KB.
         getMappings();
     }

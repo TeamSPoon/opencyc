@@ -1,8 +1,13 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.elf.bg.planner.Schedule;
+
+import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.TaskFrame;
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * TaskFrameFactory populates the task frame library.  There is a singleton instance.
@@ -51,18 +56,22 @@ public class TaskFrameFactory {
    * Poplulates the task frame library.
    */
   public void populateTaskFrameLibrary () {
-    //TODO
-    /*
+    // converse with user
+    TaskFrame taskFrame = new TaskFrame();
+    Action action = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
+    taskFrame.setTaskName(action.getName());
+    taskFrame.setTaskAction(action);
     Schedule schedule = new Schedule();
-    ActionFactory actionFactory = new ActionFactory();
-    
-    // convserse with user --> console prompted input
     ArrayList plannedActions = new ArrayList();
-    plannedActions.add(actionFactory.makeConsolePromptedInput());
+    action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
     schedule.setPlannedActions(plannedActions);
-    ArrayList plannedGoals = new ArrayList();
-    addSchedule(Action.CONVERSE_WITH_USER, schedule);
-    */
+    ArrayList resources = new ArrayList();
+    ArrayList actuators = new ArrayList();
+    taskFrame.addScheduleInfo(schedule, resources, actuators);
+    
+    
+    //TODO actuator pool, sensor pool?
+    //taskFrame.setTaskGoal(taskGoal);    
   }
   
   //// Protected Area

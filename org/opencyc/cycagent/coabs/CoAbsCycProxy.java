@@ -339,7 +339,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
 
         Object [] response = {null, null};
         try {
-            //cycAccess.traceOn();
+            cycAccess.traceOn();
             response = cycAccess.getCycConnection().converse(apiRequest);
         }
         catch (Exception e) {

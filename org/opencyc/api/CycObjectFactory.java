@@ -501,6 +501,8 @@ public class CycObjectFactory {
             return new Integer(element.getTextTrim());
         else if (elementName.equals("double"))
             return new Double(element.getTextTrim());
+        else if (elementName.equals("byte-vector"))
+            return unmarshallByteArray(element, document);
         else
             throw new IOException("Invalid element name " + elementName);
     }
@@ -637,7 +639,7 @@ public class CycObjectFactory {
      *
      * @param cycListElement the element representing the CycList
      * @param document the XML document containing the element
-     * @return the CycNart
+     * @return the CycList
      */
     protected static CycList unmarshallCycList(Element cycListElement, Document document)
         throws IOException {
@@ -651,6 +653,28 @@ public class CycObjectFactory {
                 cycList.add(unmarshallElement(element, document));
         }
         return cycList;
+    }
+
+    /**
+     * Unmarshalls a ByteArray from the given element in an XML Document object.
+     *
+     * @param byteArrayElement the element representing the CycList
+     * @param document the XML document containing the element
+     * @return the ByteArray
+     */
+    protected static ByteArray unmarshallByteArray(Element byteArrayElement, Document document)
+        throws IOException {
+        List elements = byteArrayElement.getChildren();
+        ArrayList arrayList = new ArrayList();
+        for (int i = 0; i < elements.size(); i++) {
+            Element element = (Element) elements.get(i);
+            if (element.getName().equals("byte"))
+                arrayList.add(new Byte(element.getTextTrim()));
+        }
+        byte[] bytes = new byte[arrayList.size()];
+        for (int i = 0; i < arrayList.size(); i++)
+            bytes[i] = ((Byte) arrayList.get(i)).byteValue();
+        return new ByteArray(bytes);
     }
 
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import javax.naming.TimeLimitExceededException;
 import fipaos.ont.fipa.*;
 import org.opencyc.cycagent.*;
+import org.opencyc.util.Timer;
 
 /**
  * Provides the interface for interacting with the FIPA-OS agent community.<p>
@@ -77,14 +78,14 @@ public class FipaOsCommunityAdapter implements AgentCommunityAdapter {
      * Sends an Agent Communication Language message and returns the reply.
      *
      * @param acl the Agent Communication Language message to be sent
-     * @param timeoutMilliseconds the maximum wait time for a reply message, after which an
-     * excecption is thrown.
+     * @param timer a Timer object contolling the maximum wait time for a reply message,
+     * after which an excecption is thrown.
      * @return the Agent Communication Language reply message which has been received for my agent
      *
      * @thows TimeLimitExceededException when the time limit is exceeded before a reply message
      * is received.
      */
-    public ACL converseMessage (ACL acl, long timeoutMilliseconds)
+    public ACL converseMessage (ACL acl, Timer timer)
         throws TimeLimitExceededException, IOException {
         return acl;
     }
@@ -96,6 +97,12 @@ public class FipaOsCommunityAdapter implements AgentCommunityAdapter {
      */
     public String nextMessageId () {
         return "message" + ++msgSerialNumber;
+    }
+
+    /**
+     * De-register this agent.
+     */
+    public void deregister() {
     }
 
     /**

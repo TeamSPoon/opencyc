@@ -720,6 +720,8 @@ public class CycList extends ArrayList {
         }
         else if (object instanceof CycFort)
              ((CycFort) object).toXML(xmlWriter, indentLength, true);
+        else if (object instanceof ByteArray)
+             ((ByteArray) object).toXML(xmlWriter, indentLength, true);
         else if (object instanceof CycVariable)
              ((CycVariable) object).toXML(xmlWriter, indentLength, true);
         else if (object instanceof CycSymbol)

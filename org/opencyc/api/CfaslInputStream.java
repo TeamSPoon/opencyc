@@ -4,8 +4,6 @@ import  java.io.*;
 import  java.math.BigInteger;
 import  java.util.HashMap;
 import  org.opencyc.cycobject.*;
-import  org.opencyc.util.ByteArray;
-
 
 /**
  * A CFASL translating input stream.  All Java-native types which have logical

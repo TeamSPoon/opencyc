@@ -124,6 +124,24 @@ public class RemoteCycConnection implements CycConnectionInterface {
      * response object or error string.
      */
     public Object[] converse (Object message) throws IOException, CycApiException {
+        return converse(message, new Timer());
+    }
+
+    /**
+     * Send a message to Cyc and return the response code as the first
+     * element of an object array, and the cyc response Symbolic Expression as
+     * the second element, spending no less time than the specified timer allows
+     * but throwing a <code>TimeOutException</code> at the first opportunity
+     * where that time limit is exceeded.
+     * If an error occurs the second element is the error message string.
+     *
+     * @param message the api command which must be a String or a CycList
+     * @param timeout a <tt>Timer</tt> object giving the time limit for the api call
+     * @return an array of two objects, the first is an Integer response code, and the second is the
+     * response object or error string.
+     */
+    public Object[] converse (Object message, Timer timer)
+        throws IOException, TimeOutException, CycApiException {
         if (trace > API_TRACE_NONE) {
             if (message instanceof String)
                 System.out.println(message + " --> cyc");
@@ -164,7 +182,7 @@ public class RemoteCycConnection implements CycConnectionInterface {
 
         ACL replyAcl = null;
         try {
-            replyAcl = agentCommunityAdapter.converseMessage(acl, thirtyMinutesDuration);
+            replyAcl = agentCommunityAdapter.converseMessage(acl, timer);
         }
         catch (TimeLimitExceededException e) {
             Log.current.errorPrintln(e.getMessage());
@@ -199,29 +217,10 @@ public class RemoteCycConnection implements CycConnectionInterface {
     }
 
     /**
-     * Send a message to Cyc and return the response code as the first
-     * element of an object array, and the cyc response Symbolic Expression as
-     * the second element, spending no less time than the specified timer allows
-     * but throwing a <code>TimeOutException</code> at the first opportunity
-     * where that time limit is exceeded.
-     * If an error occurs the second element is the error message string.
-     *
-     * @param message the api command which must be a String or a CycList
-     * @param timeout a <tt>Timer</tt> object giving the time limit for the api call
-     * @return an array of two objects, the first is an Integer response code, and the second is the
-     * response object or error string.
-     */
-    public Object[] converse (Object message, Timer timeout)
-        throws IOException, TimeOutException, CycApiException {
-        Object [] response = {null, null};
-        throw new RuntimeException("not yet implemented");
-        //return response;
-    }
-
-    /**
      * Close the api sockets and streams.
      */
     public void close () {
+        agentCommunityAdapter.deregister();
     }
 
     /**

@@ -1,5 +1,9 @@
 package  org.opencyc.api;
 
+import  java.io.*;
+import  java.math.BigInteger;
+import  java.util.*;
+import  org.opencyc.cycobject.*;
 
 /**
  * A CFASL translating buffered output stream.  All Java-native types which have logical
@@ -32,11 +36,6 @@ package  org.opencyc.api;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import  java.io.*;
-import  java.math.BigInteger;
-import  java.util.*;
-import  org.opencyc.cycobject.*;
-import  org.opencyc.util.ByteArray;
 
 public class CfaslOutputStream extends BufferedOutputStream {
     /**

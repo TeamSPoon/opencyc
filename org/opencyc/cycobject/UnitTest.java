@@ -53,6 +53,7 @@ public class UnitTest extends TestCase {
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testGuid"));
+        testSuite.addTest(new UnitTest("testByteArray"));
         testSuite.addTest(new UnitTest("testCycSymbol"));
         testSuite.addTest(new UnitTest("testCycVariable"));
         testSuite.addTest(new UnitTest("testCycConstant"));
@@ -994,6 +995,30 @@ public class UnitTest extends TestCase {
         ByteArray byteArray3 = new ByteArray(bytes3);
         Assert.assertTrue(! byteArray1.equals(byteArray3));
         Assert.assertEquals("[ByteArray len:6 0,1,2,3,4,-128]", byteArray1.toString());
+
+        // toXML, toXMLString, unmarshall
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        try {
+            byteArray1.toXML(xmlStringWriter, 0, false);
+            String expectedXmString =
+                "<byte-vector>\n" +
+                "  <length>6</length>\n" +
+                "  <byte>0</byte>\n" +
+                "  <byte>1</byte>\n" +
+                "  <byte>2</byte>\n" +
+                "  <byte>3</byte>\n" +
+                "  <byte>4</byte>\n" +
+                "  <byte>-128</byte>\n" +
+                "</byte-vector>\n";
+
+            Assert.assertEquals(expectedXmString, xmlStringWriter.toString());
+            Assert.assertEquals(expectedXmString, byteArray1.toXMLString());
+            Assert.assertEquals(byteArray1, CycObjectFactory.unmarshall(byteArray1.toXMLString()));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
         System.out.println("** testByteArray OK**");
     }
 }

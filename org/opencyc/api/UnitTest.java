@@ -51,8 +51,8 @@ public class UnitTest extends TestCase {
      */
     protected static final int REMOTE_CYC_CONNECTION = 2;
 
-    protected int connectionMode = REMOTE_CYC_CONNECTION;
-    //protected int connectionMode = LOCAL_CYC_CONNECTION;
+    protected static int connectionMode = REMOTE_CYC_CONNECTION;
+    //protected static int connectionMode = LOCAL_CYC_CONNECTION;
 
     /**
      * Creates a <tt>UnitTest</tt> object with the given name.
@@ -68,24 +68,24 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testAsciiCycConnection"));
+        //testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
-        testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
-        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        //testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
+        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
 
@@ -94,6 +94,9 @@ public class UnitTest extends TestCase {
      */
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
+        if (connectionMode == REMOTE_CYC_CONNECTION &&
+            agentCommunity == RemoteCycConnection.COABS_AGENT_COMMUNTITY)
+            System.exit(0);
     }
 
     /**

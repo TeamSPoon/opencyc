@@ -262,14 +262,14 @@ public class CoAbsCommunityAdapter
      * Sends an Agent Communication Language message and returns the reply.
      *
      * @param acl the Agent Communication Language message to be sent
-     * @param timeoutMilliseconds the maximum wait time for a reply message, after which an
-     * excecption is thrown.
+     * @param timer the Timer object controlling the maximum wait time for a reply message,
+     * after which an excecption is thrown.
      * @return the Agent Communication Language reply message which has been received for my agent
      *
      * @thows TimeLimitExceededException when the time limit is exceeded before a reply message
      * is received.
      */
-    public ACL converseMessage (ACL acl, long timeoutMilliseconds)
+    public ACL converseMessage (ACL acl, org.opencyc.util.Timer timer)
         throws TimeLimitExceededException, IOException {
         Message requestMessage = new BasicMessage(acl.getReceiverAID().getName(),
                                                   "fipa-xml",
@@ -282,7 +282,6 @@ public class CoAbsCommunityAdapter
         waitingReplyThreads.put(replyWith, Thread.currentThread());
         AgentRep receivingAgentRep = this.lookupAgentRep(acl.getReceiverAID().getName());
         receivingAgentRep.addMessage(requestMessage);
-        org.opencyc.util.Timer timer = new org.opencyc.util.Timer(timeoutMilliseconds);
         waitingReplyThreads.put(replyWith, Thread.currentThread());
         while (true)
             try {
@@ -418,10 +417,15 @@ public class CoAbsCommunityAdapter
      * Deregisters this agent when the application is terminated.
      */
     public void cleanup() {
-        if (regHelper.isRegistered()) {
+        if (! regHelper.isTerminated()) {
+            if (regHelper.isRegistered()) {
+                if (verbosity > 1)
+                    Log.current.println("de-registering" + regHelper.getAgentRep().getName());
+                deregister();
+            }
             if (verbosity > 1)
-                Log.current.println("de-registering" + regHelper.getAgentRep().getName());
-            deregister();
+                Log.current.println("terminating");
+            regHelper.terminate();
         }
     }
 
@@ -446,6 +450,8 @@ public class CoAbsCommunityAdapter
      * Terminate this agent.
      */
     public void terminate() {
-        deregister();
+        if (regHelper.isRegistered())
+            deregister();
+        regHelper.terminate();
     }
 }

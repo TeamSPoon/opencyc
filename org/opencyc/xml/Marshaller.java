@@ -55,6 +55,8 @@ public class Marshaller {
             return "<integer>" + ((Integer) object).toString() + "</integer>\n";
         else if (object instanceof Double)
             return "<double>" + ((Double) object).toString() + "</double>\n";
+        else if (object instanceof ByteArray)
+            return ((ByteArray) object).toXMLString();
         else
             throw new IOException("Invalid object for marshalling " + object);
     }

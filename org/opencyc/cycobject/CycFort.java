@@ -27,7 +27,7 @@ import org.opencyc.xml.XMLWriter;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class CycFort implements Serializable {
+public abstract class CycFort implements Serializable, Comparable {
 
 
     /**
@@ -95,5 +95,34 @@ public abstract class CycFort implements Serializable {
      * constant names
      */
     public abstract String safeToString ();
+
+    /**
+     * Compares this object with the specified object for order.
+     * Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param object the reference object with which to compare.
+     * @return a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object
+     */
+     public int compareTo (Object object) {
+        if (this instanceof CycConstant) {
+            if (object instanceof CycConstant)
+                return this.toString().compareTo(object.toString());
+            else if (object instanceof CycNart)
+                return this.toString().compareTo(object.toString().substring(1));
+            else
+                throw new ClassCastException("Must be a CycFort object");
+        }
+        else {
+            if (object instanceof CycNart)
+                return this.toString().compareTo(object.toString());
+            else if (object instanceof CycConstant)
+                return this.toString().substring(1).compareTo(object.toString());
+            else
+                throw new ClassCastException("Must be a CycFort object");
+        }
+     }
+
 }
 

@@ -424,8 +424,16 @@ public class CycNart extends CycFort implements Comparable {
         return result.append(")").toString();
     }
 
+    /**
+     * Return a hash value for this object.
+     *
+     * @return a hash value for this object
+     */
     public int hashCode() {
-        return this.getId().hashCode();
+        if (super.getId() != null)
+            return this.getId().hashCode();
+        else
+            return functor.hashCode();
     }
 
     /**
@@ -446,21 +454,6 @@ public class CycNart extends CycFort implements Comparable {
             return false;
         return this.arguments.equals(thatNart.arguments);
     }
-
-    /**
-     * Compares this object with the specified object for order.
-     * Returns a negative integer, zero, or a positive integer as this
-     * object is less than, equal to, or greater than the specified object.
-     *
-     * @param object the reference object with which to compare.
-     * @return a negative integer, zero, or a positive integer as this
-     * object is less than, equal to, or greater than the specified object
-     */
-     public int compareTo (Object object) {
-        if (! (object instanceof CycNart))
-            throw new ClassCastException("Must be a CycNart object");
-        return this.toString().compareTo(object.toString());
-     }
 
 
 }

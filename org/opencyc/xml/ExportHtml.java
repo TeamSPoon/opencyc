@@ -149,15 +149,20 @@ public class ExportHtml {
      */
     protected CycAccess cycAccess;
 
-    private Element htmlBodyElement;
-    private Guid guid;
-    private String name;
-    private ArrayList selectedConstants = new ArrayList();
-    private CycConstant cycConstant;
-    private String comment;
-    private CycList isas;
-    private CycList genls;
-    private CycList genlPreds;
+    /**
+     * the HTML body element
+     */
+    protected Element htmlBodyElement;
+
+    /**
+     * the selected terms
+     */
+    protected CycList selectedCycForts;
+
+    /**
+     * Indicates the presence of a comment for the current term.
+     */
+    protected boolean hasComment = false;
 
     /**
      * Constructs a new ExportHtml object.
@@ -173,12 +178,11 @@ public class ExportHtml {
     public static void main(String[] args) {
         ExportHtml exportHtml = new ExportHtml();
         try {
-            Guid transportationDeviceGuid =
-                CycObjectFactory.makeGuid("bd58d540-9c29-11b1-9dad-c379636f7270");
-            exportHtml.rootTermGuid = transportationDeviceGuid;
-            exportHtml.cycKbSubsetFilterGuid = ExportHtml.counterTerrorismConstantGuid;
-            exportHtml.export(ExportHtml.EXPORT_KB_SUBSET_BELOW_TERM);
-        } catch (Exception e) {
+            exportHtml.cycKbSubsetCollectionGuid = ExportHtml.counterTerrorismConstantGuid;
+            exportHtml.cycKbSubsetFilterGuid = ExportHtml.ikbConstantGuid;
+            exportHtml.export(ExportHtml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE);
+        }
+        catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -192,8 +196,6 @@ public class ExportHtml {
         setup();
         if (verbosity > 2)
             System.out.println("Getting terms from Cyc");
-        CycList selectedConstants = new CycList();
-        CycList selectedCycForts = null;
         if ((exportCommand == ExportHtml.EXPORT_KB_SUBSET) ||
             (exportCommand == ExportHtml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
             selectedCycForts = cycAccess.getAllInstances(cycKbSubsetCollection);
@@ -213,42 +215,33 @@ public class ExportHtml {
             if (verbosity > 2)
                 System.out.println("All selected " + selectedCycForts.size() + " CycFort terms");
         }
-        for (int i = 0; i < selectedCycForts.size(); i++) {
-            CycFort selectedCycFort = (CycFort)selectedCycForts.get(i);
-            if (selectedCycFort instanceof CycConstant)
-                selectedConstants.add(selectedCycFort);
-        }
         if (verbosity > 2)
-            System.out.println("Sorting " + selectedConstants.size() + " CycConstant terms");
-        Collections.sort(selectedConstants);
-        //createConstantNode("PhysicalDevice");
+            System.out.println("Sorting " + selectedCycForts.size() + " CycFort terms");
+
+        Collections.sort(selectedCycForts);
+
         if (verbosity > 2)
             System.out.println("Building HTML model");
-        //for (int i = 0; i < selectedConstants.size(); i++) {
-        for (int i = 0; i < 60; i++) {
-            CycConstant cycConstant = (CycConstant) selectedConstants.get(i);
+
+        for (int i = 0; i < selectedCycForts.size(); i++) {
+        //for (int i = 0; i < 20; i++) {
+
+            CycFort cycFort = (CycFort) selectedCycForts.get(i);
             if (verbosity > 2)
-                System.out.print(cycConstant + "  ");
-            if (cycAccess.isCollection(cycConstant)) {
+                System.out.print(cycFort + "  ");
+            if (cycAccess.isCollection(cycFort)) {
                 if (verbosity > 2)
                     System.out.println("Collection");
             }
-            else if (cycAccess.isPredicate(cycConstant)) {
+            else if (cycAccess.isPredicate(cycFort)) {
                 if (verbosity > 2)
                     System.out.println("Predicate");
             }
-            else if (cycAccess.isIndividual(cycConstant)) {
+            else if (cycAccess.isIndividual(cycFort)) {
                 if (verbosity > 2)
                     System.out.print("Individual");
-                populateIsas(cycConstant);
                 if (verbosity > 2) {
                     String individualType = "  (type unknown)";
-                    if (isas != null)
-                        for (int j = 0; j < isas.size(); j++)
-                            if (!isas.get(j).equals(cycKbSubsetCollection)) {
-                                individualType = (" (a " + isas.get(j) + ")");
-                                break;
-                            }
                     System.out.println(individualType);
                 }
             }
@@ -257,7 +250,10 @@ public class ExportHtml {
                     System.out.println("other");
                 continue;
             }
-            createConstantNode(cycConstant);
+            if (cycFort instanceof CycConstant)
+                createCycConstantNode((CycConstant) cycFort);
+            else
+                createCycNartNode((CycNart) cycFort);
         }
         serialize();
     }
@@ -299,8 +295,6 @@ public class ExportHtml {
         Node htmlNode = htmlDocument.getChildNodes().item(0);
         htmlBodyElement = htmlDocument.createElement("body");
         htmlNode.appendChild(htmlBodyElement);
-
-
     }
 
     /**
@@ -320,63 +314,69 @@ public class ExportHtml {
     }
 
     /**
-     * Populates the comment for a Cyc term.
-     *
-     * @parameter cycConstant the Cyc term for which the comment is obtained.
+     * Creates a HTML node for a single Cyc Nart.
+     * @parameter cycNart the CycNart from which the HTML node is created
      */
-    protected void populateComment (CycConstant cycConstant) throws UnknownHostException, IOException,
-            CycApiException {
-        comment = cycAccess.getComment(cycConstant);
-    }
-
-    /**
-     * Populates the isas for a Cyc term.
-     *
-     * @parameter cycConstant the Cyc term for which the isas are obtained.
-     */
-    protected void populateIsas (CycConstant cycConstant) throws UnknownHostException, IOException,
-            CycApiException {
-        isas = cycAccess.getIsas(cycConstant);
-        isas = filterSelectedConstants(isas);
-    }
-
-    /**
-     * Populates the genls for a Cyc term.
-     *
-     * @parameter cycConstant the Cyc term for which the genls are obtained.
-     */
-    protected void populateGenls (CycConstant cycConstant) throws UnknownHostException, IOException,
-            CycApiException {
-        genls = cycAccess.getGenls(cycConstant);
-        genls = filterSelectedConstants(genls);
-    }
-
-    /**
-     * Populates the genlPreds for a Cyc predicate.
-     *
-     * @parameter cycConstant the Cyc predicate for which the genlPreds are obtained.
-     */
-    protected void populateGenlPreds (CycConstant cycConstant) throws UnknownHostException, IOException,
-            CycApiException {
-        genlPreds = cycAccess.getGenlPreds(cycConstant);
-        genlPreds = filterSelectedConstants(genlPreds);
+    protected void createCycNartNode (CycNart cycNart)
+        throws UnknownHostException, IOException, CycApiException {
+        horizontalRule();
+        HTMLFontElement htmlFontElement =
+            new HTMLFontElementImpl((HTMLDocumentImpl) htmlDocument, "font");
+        htmlFontElement.setSize("+1");
+        htmlBodyElement.appendChild(htmlFontElement);
+        HTMLAnchorElement htmlAnchorElement =
+            new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+        htmlAnchorElement.setName(cycNart.cyclify());
+        htmlFontElement.appendChild(htmlAnchorElement);
+        String generatedPhrase = cycAccess.getSingularGeneratedPhrase(cycNart);
+        if (generatedPhrase.endsWith("(unclassified term)"))
+            generatedPhrase = generatedPhrase.substring(0, generatedPhrase.length() - 20);
+        Node nartTextNode =
+            htmlDocument.createTextNode(cycNart.cyclify() + "  (" + generatedPhrase + ")");
+        htmlAnchorElement.appendChild(nartTextNode);
+        Element blockquoteElement = htmlDocument.createElement("blockquote");
+        htmlBodyElement.appendChild(blockquoteElement);
+        createIsaNodes(cycNart, blockquoteElement);
+        createGenlNodes(cycNart, blockquoteElement);
     }
 
     /**
      * Creates a HTML node for a single Cyc Constant.
      * @parameter cycConstant the CycConstant from which the HTML node is created
      */
-    protected void createConstantNode (CycConstant cycConstant) throws UnknownHostException, IOException,
-            CycApiException {
-        guid = cycConstant.getGuid();
-        populateComment(cycConstant);
-        //populateIsas(cycConstant);
+    protected void createCycConstantNode (CycConstant cycConstant)
+        throws UnknownHostException, IOException, CycApiException {
+        horizontalRule();
+        HTMLFontElement htmlFontElement =
+            new HTMLFontElementImpl((HTMLDocumentImpl) htmlDocument, "font");
+        htmlFontElement.setSize("+1");
+        htmlBodyElement.appendChild(htmlFontElement);
+        HTMLAnchorElement htmlAnchorElement =
+            new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+        htmlAnchorElement.setName(cycConstant.cyclify());
+        htmlFontElement.appendChild(htmlAnchorElement);
+        String generatedPhrase;
         if (cycAccess.isCollection(cycConstant))
-            createCollectionNode(cycConstant);
+            generatedPhrase = cycAccess.getPluralGeneratedPhrase(cycConstant);
+        else
+            generatedPhrase = cycAccess.getSingularGeneratedPhrase(cycConstant);
+        if (generatedPhrase.endsWith("(unclassified term)"))
+            generatedPhrase = generatedPhrase.substring(0, generatedPhrase.length() - 20);
+        Node collectionTextNode =
+            htmlDocument.createTextNode(cycConstant.cyclify() + "  (" + generatedPhrase + ")");
+        htmlAnchorElement.appendChild(collectionTextNode);
+        Element blockquoteElement = htmlDocument.createElement("blockquote");
+        htmlBodyElement.appendChild(blockquoteElement);
+        createCommentNodes(cycConstant, blockquoteElement);
+        createGuidNode(cycConstant, blockquoteElement);
+        createIsaNodes(cycConstant, blockquoteElement);
+
+        if (cycAccess.isCollection(cycConstant))
+            createCollectionNode(cycConstant, blockquoteElement);
         else if (cycAccess.isPredicate(cycConstant))
-            createPredicateNode(cycConstant);
+            createPredicateNode(cycConstant, blockquoteElement);
         else if (cycAccess.isIndividual(cycConstant))
-            createIndividualNode(cycConstant);
+            createIndividualNode(cycConstant, blockquoteElement);
         else {
             if (verbosity > 0)
                 System.out.println("Unhandled constant: " + cycConstant.toString());
@@ -393,10 +393,12 @@ public class ExportHtml {
 
     /**
      * Creates a line break in the HTML document.
+     *
+     * @param parentElement the parent HTML DOM element
      */
-    protected void lineBreak () {
+    protected void lineBreak (Element parentElement) {
         Element breakElement = htmlDocument.createElement("br");
-        htmlBodyElement.appendChild(breakElement);
+        parentElement.appendChild(breakElement);
     }
 
     /**
@@ -410,8 +412,18 @@ public class ExportHtml {
     /**
      * Creates HTML nodes for comment text containing CycConstants which are to be
      * represented as hyperlinks.
+     *
+     * @param cycConstant the CycConstant for which isa links are to be created
+     * @param parentElement the parent HTML DOM element
      */
-    protected void createCommentNodes () throws IOException, CycApiException {
+    protected void createCommentNodes (CycConstant cycConstant, Element parentElement)
+        throws IOException, CycApiException {
+        String comment = cycAccess.getComment(cycConstant);
+        if (comment.equals("")) {
+            hasComment = false;
+            return;
+        }
+        hasComment = true;
         StringTokenizer st = new StringTokenizer(comment);
         StringBuffer stringBuffer = new StringBuffer();
         CycConstant commentConstant;
@@ -423,13 +435,14 @@ public class ExportHtml {
             if (word.startsWith("#$")) {
                 commentConstant = CycAccess.current().getConstantByName(word);
                 if (commentConstant != null &&
-                    selectedConstants.contains(commentConstant)) {
+                    selectedCycForts.contains(commentConstant)) {
+                    stringBuffer.append(" ");
                     commentTextNode = htmlDocument.createTextNode(stringBuffer.toString());
-                    htmlDocument.appendChild(commentTextNode);
+                    parentElement.appendChild(commentTextNode);
                     stringBuffer = new StringBuffer();
                     htmlAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
                     htmlAnchorElement.setHref("#" + commentConstant.cyclify());
-                    htmlDocument.appendChild(htmlAnchorElement);
+                    parentElement.appendChild(htmlAnchorElement);
                     linkTextNode = htmlDocument.createTextNode(word);
                     htmlAnchorElement.appendChild(linkTextNode);
                 }
@@ -438,13 +451,14 @@ public class ExportHtml {
                     commentConstant =
                         CycAccess.current().getConstantByName(word.substring(0, word.length() - 2));
                     if (commentConstant != null &&
-                        selectedConstants.contains(commentConstant)) {
+                        selectedCycForts.contains(commentConstant)) {
+                        stringBuffer.append(" ");
                         commentTextNode = htmlDocument.createTextNode(stringBuffer.toString());
-                        htmlDocument.appendChild(commentTextNode);
+                        parentElement.appendChild(commentTextNode);
                         stringBuffer = new StringBuffer();
                         htmlAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
                         htmlAnchorElement.setHref("#" + commentConstant.cyclify());
-                        htmlDocument.appendChild(htmlAnchorElement);
+                        parentElement.appendChild(htmlAnchorElement);
                         linkTextNode = htmlDocument.createTextNode(word);
                         htmlAnchorElement.appendChild(linkTextNode);
                     }
@@ -461,7 +475,116 @@ public class ExportHtml {
         }
         if (stringBuffer.length() > 0) {
             commentTextNode = htmlDocument.createTextNode(stringBuffer.toString());
-            htmlDocument.appendChild(commentTextNode);
+            parentElement.appendChild(commentTextNode);
+        }
+    }
+
+    /**
+     * Creates HTML node for guid.
+     *
+     * @param cycConstant the CycConstant for which isa links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createGuidNode (CycConstant cycConstant, Element parentElement)
+        throws IOException, CycApiException {
+        Guid guid = cycConstant.getGuid();
+        if (hasComment)
+            lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node guidLabelTextNode = htmlDocument.createTextNode("guid: ");
+        bElement.appendChild(guidLabelTextNode);
+        Node guidTextNode = htmlDocument.createTextNode(guid.toString());
+        parentElement.appendChild(guidTextNode);
+    }
+
+    /**
+     * Creates HTML nodes for isa links.
+     *
+     * @param cycConstant the CycConstant for which isa links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createIsaNodes (CycFort cycFort, Element parentElement)
+        throws IOException, CycApiException {
+        CycList isas = filterSelectedConstants(cycAccess.getIsas(cycFort));
+        System.out.println("isas " + isas);
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node isasLabelTextNode = htmlDocument.createTextNode("direct instance of: ");
+        bElement.appendChild(isasLabelTextNode);
+        for (int i = 0; i < isas.size(); i++) {
+            CycFort isa = (CycFort) isas.get(i);
+            if (selectedCycForts.contains(isa)) {
+                HTMLAnchorElement isaAnchorElement =
+                    new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+                isaAnchorElement.setHref("#" + isa.cyclify());
+                parentElement.appendChild(isaAnchorElement);
+                Node isaTextNode = htmlDocument.createTextNode(isa.cyclify());
+                isaAnchorElement.appendChild(isaTextNode);
+                Node spacesTextNode = htmlDocument.createTextNode("  ");
+                parentElement.appendChild(spacesTextNode);
+            }
+        }
+    }
+
+    /**
+     * Creates HTML nodes for genl links.
+     *
+     * @param cycConstant the CycConstant for which genl links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createGenlNodes (CycFort cycFort, Element parentElement)
+        throws IOException, CycApiException {
+        CycList genls = filterSelectedConstants(cycAccess.getGenls(cycFort));
+        System.out.println("genls " + genls);
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node genlsLabelTextNode = htmlDocument.createTextNode("direct subset of: ");
+        bElement.appendChild(genlsLabelTextNode);
+        for (int i = 0; i < genls.size(); i++) {
+            CycFort genl = (CycFort) genls.get(i);
+            if (selectedCycForts.contains(genl)) {
+                HTMLAnchorElement genlAnchorElement =
+                    new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+                genlAnchorElement.setHref("#" + genl.cyclify());
+                parentElement.appendChild(genlAnchorElement);
+                Node genlTextNode = htmlDocument.createTextNode(genl.cyclify());
+                genlAnchorElement.appendChild(genlTextNode);
+                Node spacesTextNode = htmlDocument.createTextNode("  ");
+                parentElement.appendChild(spacesTextNode);
+            }
+        }
+    }
+
+    /**
+     * Creates HTML nodes for genlPreds links.
+     *
+     * @param cycConstant the CycConstant for which genlPreds links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createGenlPredsNodes (CycConstant cycConstant, Element parentElement)
+        throws IOException, CycApiException {
+        CycList genlPreds = filterSelectedConstants(cycAccess.getGenlPreds(cycConstant));
+        System.out.println("genlPreds " + genlPreds);
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node genlsPredsLabelTextNode = htmlDocument.createTextNode("direct specialization of: ");
+        bElement.appendChild(genlsPredsLabelTextNode);
+        for (int i = 0; i < genlPreds.size(); i++) {
+            CycConstant genlPred = (CycConstant) genlPreds.get(i);
+            if (selectedCycForts.contains(genlPred)) {
+                HTMLAnchorElement genlPredAnchorElement =
+                    new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+                genlPredAnchorElement.setHref("#" + genlPred.cyclify());
+                parentElement.appendChild(genlPredAnchorElement);
+                Node genlPredTextNode = htmlDocument.createTextNode(genlPred.cyclify());
+                genlPredAnchorElement.appendChild(genlPredTextNode);
+                Node spacesTextNode = htmlDocument.createTextNode("  ");
+                parentElement.appendChild(spacesTextNode);
+            }
         }
     }
 
@@ -469,175 +592,38 @@ public class ExportHtml {
      * Creates an HTML individual node for a single Cyc individual.
      *
      * @parameter cycConstant the Cyc individual from which the HTML individual node is created
+     * @param parentElement the parent HTML DOM element
      */
-    protected void createIndividualNode (CycConstant cycConstant) throws UnknownHostException, IOException,
-            CycApiException {
-        if (isas == null || isas.size() == 0)
-            return;
-        horizontalRule();
-        Element boldElement = htmlDocument.createElement("bold");
-        htmlBodyElement.appendChild(boldElement);
-        Node individualTextNode = htmlDocument.createTextNode(cycConstant.cyclify());
-        boldElement.appendChild(individualTextNode);
-        /*
-        Element individualNode = document.createElement(isas.get(0).toString());
-        rdf.appendChild(individualNode);
-        individualNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
-        Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
-        String label = cycAccess.getSingularGeneratedPhrase(cycConstant);
-        if (verbosity > 2)
-            System.out.println("  " + label);
-        labelNode.appendChild(document.createTextNode(label));
-        individualNode.appendChild(labelNode);
-        Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
-        commentNode.appendChild(document.createTextNode(comment));
-        individualNode.appendChild(commentNode);
-        Element guidNode = document.createElement("guid");
-        guidNode.appendChild(document.createTextNode(guid.toString()));
-        individualNode.appendChild(guidNode);
-        */
+    protected void createIndividualNode (CycConstant cycConstant, Element parentElement)
+        throws UnknownHostException, IOException, CycApiException {
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node individualLabelTextNode = htmlDocument.createTextNode("Individual");
+        bElement.appendChild(individualLabelTextNode);
     }
 
     /**
      * Creates an HTML node for a single Cyc collection.
+     *
      * @parameter cycConstant the Cyc collection from which the HTML node is created
+     * @param parentElement the parent HTML DOM element
      */
-    protected void createCollectionNode (CycConstant cycConstant) throws UnknownHostException, IOException,
+    protected void createCollectionNode (CycConstant cycConstant, Element parentElement)
+        throws UnknownHostException, IOException,
             CycApiException {
-        horizontalRule();
-        HTMLFontElement htmlFontElement = new HTMLFontElementImpl((HTMLDocumentImpl) htmlDocument, "font");
-        htmlFontElement.setSize("+1");
-        htmlBodyElement.appendChild(htmlFontElement);
-        HTMLAnchorElement collectionAnchorElement =
-            new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
-        collectionAnchorElement.setName(cycConstant.cyclify());
-        htmlFontElement.appendChild(collectionAnchorElement);
-        Node collectionTextNode = htmlDocument.createTextNode(cycConstant.cyclify());
-        collectionAnchorElement.appendChild(collectionTextNode);
-        lineBreak();
-        this.createCommentNodes();
-        /*
-        populateGenls(cycConstant);
-        populateDisjointWiths(cycConstant);
-        populateCoExtensionals(cycConstant);
-        Element classNode = document.createElementNS(damlNamespace, "daml:Class");
-        rdf.appendChild(classNode);
-        classNode.setAttributeNS(rdfNamespace, "rdf:ID", cycConstant.toString());
-        Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
-        String label = null;
-        label = cycAccess.getPluralGeneratedPhrase(cycConstant);
-        if (verbosity > 2)
-            System.out.println("  " + label);
-        labelNode.appendChild(document.createTextNode(label));
-        classNode.appendChild(labelNode);
-        Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
-        commentNode.appendChild(document.createTextNode(comment));
-        classNode.appendChild(commentNode);
-        Element guidNode = document.createElement("guid");
-        guidNode.appendChild(document.createTextNode(guid.toString()));
-        classNode.appendChild(guidNode);
-        Element sameClassAsNode;
-        if (cycConstant.equals(cycAccess.thing)) {
-            sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
-            sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlThing);
-            classNode.appendChild(sameClassAsNode);
-        }
-        else if (cycConstant.equals(cycAccess.binaryPredicate)) {
-            sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
-            sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlProperty);
-            classNode.appendChild(sameClassAsNode);
-        }
-        else if (cycConstant.equals(cycAccess.getKnownConstantByName("TransitiveBinaryPredicate"))) {
-            sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
-            sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlTransitiveProperty);
-            classNode.appendChild(sameClassAsNode);
-        }
-        else if (cycConstant.equals(cycAccess.collection)) {
-            sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
-            sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlClass);
-            classNode.appendChild(sameClassAsNode);
-        }
-        if (isas != null)
-            for (int i = 0; i < isas.size(); i++) {
-                Element typeNode = document.createElementNS(rdfNamespace, "rdf:type");
-                typeNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)isas.get(i)));
-                classNode.appendChild(typeNode);
-            }
-        if (genls != null)
-            for (int i = 0; i < genls.size(); i++) {
-                Element subClassNode = document.createElementNS(rdfsNamespace, "rdfs:subClassOf");
-                subClassNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)genls.get(i)));
-                classNode.appendChild(subClassNode);
-            }
-        if (disjointWiths != null)
-            for (int i = 0; i < disjointWiths.size(); i++) {
-                Element disjointWithNode = document.createElementNS(damlNamespace, "daml:disjointWith");
-                disjointWithNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)disjointWiths.get(i)));
-                classNode.appendChild(disjointWithNode);
-            }
-        if (coExtensionals != null)
-            for (int i = 0; i < coExtensionals.size(); i++) {
-                sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
-                sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)coExtensionals.get(i)));
-                classNode.appendChild(sameClassAsNode);
-            }
-        */
+        createGenlNodes(cycConstant, parentElement);
     }
 
     /**
      * Creates an HTML node for a single Cyc predicate.
      *
      * @parameter cycConstant the Cyc predicate from which the HTML node is created
+     * @param parentElement the parent HTML DOM element
      */
-    protected void createPredicateNode (CycConstant cycConstant)
+    protected void createPredicateNode (CycConstant cycConstant, Element parentElement)
         throws UnknownHostException, IOException, CycApiException {
-        /*
-        populateGenlPreds(cycConstant);
-        populateArg1Isa(cycConstant);
-        populateArg2Isa(cycConstant);
-        populateArg1Format(cycConstant);
-        populateArg2Format(cycConstant);
-        Element propertyNode;
-        if ((arg1Format != null) && arg1Format.equals("SingleEntry"))
-            propertyNode = document.createElementNS(damlNamespace, "daml:UnambiguousProperty");
-        else if ((arg2Format != null) && arg2Format.equals("SingleEntry"))
-            propertyNode = document.createElementNS(damlNamespace, "daml:UniqueProperty");
-        else
-            propertyNode = document.createElementNS(damlNamespace, "daml:Property");
-        rdf.appendChild(propertyNode);
-        propertyNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
-        Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
-        String label = null;
-        label = cycAccess.getGeneratedPhrase(cycConstant);
-        if (verbosity > 2)
-            System.out.println("  " + label);
-        labelNode.appendChild(document.createTextNode(label));
-        propertyNode.appendChild(labelNode);
-        Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
-        commentNode.appendChild(document.createTextNode(comment));
-        propertyNode.appendChild(commentNode);
-        Element guidNode = document.createElement("guid");
-        guidNode.appendChild(document.createTextNode(guid.toString()));
-        propertyNode.appendChild(guidNode);
-        if (genlPreds != null)
-            for (int i = 0; i < genlPreds.size(); i++) {
-                Element subPropertyOfNode = document.createElementNS(damlNamespace, "daml:subPropertyOf");
-                subPropertyOfNode.setAttributeNS(rdfNamespace, "rdf:resource", "#" + genlPreds.get(i).toString());
-                propertyNode.appendChild(subPropertyOfNode);
-            }
-        if (arg1Isa != null) {
-            Element domainNode = document.createElementNS(damlNamespace, "daml:domain");
-            domainNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm(arg1Isa));
-            propertyNode.appendChild(domainNode);
-        }
-        if (arg2Isa != null) {
-            Element rangeNode = document.createElementNS(damlNamespace, "daml:range");
-            rangeNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm(arg2Isa));
-            propertyNode.appendChild(rangeNode);
-        }
-        */
+        createGenlPredsNodes(cycConstant, parentElement);
     }
-
 
     /**
      * Removes unselected terms from the given list.
@@ -651,10 +637,10 @@ public class ExportHtml {
         CycList result = new CycList();
         for (int i = 0; i < constants.size(); i++) {
             Object object = constants.get(i);
-            if (selectedConstants.contains(object))
+            if (selectedCycForts.contains(object))
                 result.add(object);
-            else if (verbosity > 4)
-                System.out.println(" dropping " + cycConstant);
+            else if (verbosity > 2)
+                System.out.println(" dropping " + object);
         }
         return  result;
     }

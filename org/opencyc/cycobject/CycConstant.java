@@ -211,7 +211,10 @@ public class CycConstant extends CycFort implements Comparable {
      * @return the hash code for the <tt>CycConstant</tt>
      */
     public int hashCode() {
-        return this.getId().hashCode();
+        if (super.getId() != null)
+            return this.getId().hashCode();
+        else
+            return name.hashCode();
     }
 
     /**
@@ -238,21 +241,6 @@ public class CycConstant extends CycFort implements Comparable {
             return name.equals(((CycConstant) object).getName());
         throw new RuntimeException("Invalid constant for comparision - missing both id and name");
     }
-
-    /**
-     * Compares this object with the specified object for order.
-     * Returns a negative integer, zero, or a positive integer as this
-     * object is less than, equal to, or greater than the specified object.
-     *
-     * @param object the reference object with which to compare.
-     * @return a negative integer, zero, or a positive integer as this
-     * object is less than, equal to, or greater than the specified object
-     */
-     public int compareTo (Object object) {
-        if (! (object instanceof CycConstant))
-            throw new ClassCastException("Must be a CycConstant object");
-        return this.getName().compareTo(((CycConstant) object).getName());
-     }
 
     /**
      * Returns a String representation of the <tt>CycConstant</tt>.

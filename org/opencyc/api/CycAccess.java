@@ -1520,11 +1520,17 @@ public class CycAccess {
     }
 
     /**
-     * Returns true if cycConstant is a Predicate.
+     * Returns true if cycFort is a Predicate.
+     *
+     * @param cycFort the term for determination as a predicate
+     * @return true if cycFort is a Predicate
      */
-    public boolean isPredicate (CycConstant cycConstant)
+    public boolean isPredicate (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(isa-in-any-mt? " + cycConstant.stringApiValue() + " #$Predicate)");
+        if (cycFort instanceof CycNart)
+            return false;
+        else
+            return converseBoolean("(isa-in-any-mt? " + cycFort.stringApiValue() + " #$Predicate)");
     }
 
     /**

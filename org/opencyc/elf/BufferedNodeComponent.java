@@ -4,11 +4,7 @@ package org.opencyc.elf;
 //// Internal Imports
 import org.opencyc.elf.bg.procedure.Procedure;
 
-import org.opencyc.elf.message.GenericMsg;
-
 //// External Imports
-import java.util.ArrayList;
-
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
@@ -37,7 +33,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class BufferedNodeComponent extends ELFObject {
+public abstract class BufferedNodeComponent extends NodeComponent {
   //// Constructors
 
 
@@ -61,6 +57,15 @@ public abstract class BufferedNodeComponent extends ELFObject {
     this.node = node;
   }
 
+  /**
+   * Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   */
+  public abstract Puttable getChannel ();
+  
   //// Protected Area
     
   //// Private Area

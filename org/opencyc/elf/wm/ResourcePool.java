@@ -35,7 +35,7 @@ public class ResourcePool {
   
   //// Constructors
   
-  /** Creates a new instance of ResourcePool */
+  /** Creates a new instance of ResourcePool and stores it in the singleton instance. */
   public ResourcePool() {
     resourcePool = this;
   }

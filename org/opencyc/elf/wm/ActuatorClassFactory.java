@@ -32,8 +32,9 @@ public class ActuatorClassFactory {
   
   //// Constructors
   
-  /** Creates a new instance of ActuatorClassFactory. */
+  /** Creates a new instance of ActuatorClassFactory and stores it in the singleton instance. */
   public ActuatorClassFactory() {
+    actuatorClassFactory = this;
   }
   
   //// Public Area

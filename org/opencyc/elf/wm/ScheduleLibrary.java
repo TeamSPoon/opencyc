@@ -39,7 +39,7 @@ public class ScheduleLibrary {
   
   //// Constructors
   
-  /** Creates a new instance of ScheduleLibrary. */
+  /** Creates a new instance of ScheduleLibrary and stores it in the singleton instance. */
   public ScheduleLibrary() {
     scheduleLibrary = this;
   }

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 /**
  * ActionFactory creates named instances of Action for subsequent elaboration
- * by behavior generation sub components.
+ * by behavior generation sub components.  There is a singleton instance.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -41,11 +41,21 @@ public class ActionFactory {
   
   //// Constructors
   
-  /** Creates a new instance of ActionFactory */
+  /** Creates a new instance of ActionFactory and stores it in the singleton instance. */
   public ActionFactory() {
+    actionFactory = this;
   }
   
   //// Public Area
+  
+  /**
+   * Gets the action factory singleton instance.
+   *
+   * @return the action factory singleton instance
+   */
+  public ActionFactory getInstance() {
+    return actionFactory;
+  }
   
   /**
    * Makes a new abort action having no arguments and having no return value.
@@ -117,6 +127,9 @@ public class ActionFactory {
   //// Private Area
   
   //// Internal Rep
+  
+  /** the action factory singleton instance */
+  protected static ActionFactory actionFactory;
   
   //// Main
 

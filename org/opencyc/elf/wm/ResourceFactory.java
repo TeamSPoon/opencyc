@@ -35,11 +35,21 @@ public class ResourceFactory {
   
   //// Constructors
   
-  /** Creates a new instance of ResourceFactory */
+  /** Creates a new instance of ResourceFactory and stores it in the singleton instance. */
   public ResourceFactory() {
+    resourceFactory = this;
   }
   
   //// Public Area
+  
+  /**
+   * Gets the resource factory singleton instance.
+   *
+   * @return the resource factory singleton instance
+   */
+  public ResourceFactory getInstance() {
+    return resourceFactory;
+  }
   
   /**
    * Makes the resource instances.
@@ -56,6 +66,9 @@ public class ResourceFactory {
   //// Private Area
   
   //// Internal Rep
+  
+  /** the resource factory singleton instance */
+  protected static ResourceFactory resourceFactory;
   
   //// Main
   

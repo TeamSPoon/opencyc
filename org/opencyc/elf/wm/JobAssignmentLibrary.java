@@ -40,7 +40,7 @@ public class JobAssignmentLibrary {
   
   //// Constructors
   
-  /** Creates a new instance of JobLibrary. */
+  /** Creates a new instance of JobLibrary and stores it in the singleton instance. */
   public JobAssignmentLibrary() {
     jobAssignmentLibrary = this;
   }

@@ -43,7 +43,7 @@ public class GoalFactory {
   
   //// Constructors
   
-  /** Creates a new instance of GoalFactory. */
+  /** Creates a new instance of GoalFactory and stores it in the singleton instance. */
   public GoalFactory() {
     goalFactory = this;
   }

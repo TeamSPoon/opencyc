@@ -10,7 +10,8 @@ import org.opencyc.elf.bg.planner.Schedule;
 import java.util.Hashtable;
 
 /**
- * Knowledge Base contains the known entities and their attributes.
+ * Knowledge Base contains the known entities and their attributes.  There is a singleton 
+ * instance of the knowledge base.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -36,12 +37,22 @@ public class KnowledgeBase extends NodeComponent {
   
   //// Constructors
   
-  /** Creates a new instance of KnowledgeBase. */
+  /** Creates a new instance of KnowledgeBase and stores it in the singleton instance. */
   public KnowledgeBase() {
+    knowledgeBase = this;
   }
     
   //// Public Area
     
+  /**
+   * Gets the knowledge base singleton instance.
+   *
+   * @return the knowledge base singleton instance
+   */
+  public KnowledgeBase getInstance() {
+    return knowledgeBase;
+  }
+  
   /**
    * Returns a string representation of this object.
    * 
@@ -82,6 +93,9 @@ public class KnowledgeBase extends NodeComponent {
    * the knowledge base cache associating obj --> data
    */
   protected Hashtable kbCache = new Hashtable();
+  
+  /** the knowledge base singleton instance */
+  protected static KnowledgeBase knowledgeBase;
       
   //// Main
   

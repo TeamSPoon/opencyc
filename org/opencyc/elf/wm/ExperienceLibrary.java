@@ -36,7 +36,7 @@ public class ExperienceLibrary {
   
   //// Constructors
   
-  /** Creates a new instance of ExperienceLibrary. */
+  /** Creates a new instance of ExperienceLibrary and stores it in the singleton instance. */
   public ExperienceLibrary() {
     experienceLibrary = this;
   }

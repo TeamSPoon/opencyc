@@ -32,8 +32,9 @@ public class PredicateClassFactory {
   
   //// Constructors
   
-  /** Creates a new instance of PredicateClassFactory. */
+  /** Creates a new instance of PredicateClassFactory and stores it in the singleton instance. */
   public PredicateClassFactory() {
+    predicateClassFactory = this;
   }
   
   //// Public Area

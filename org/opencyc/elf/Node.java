@@ -52,128 +52,6 @@ public class Node extends ELFObject {
   //// Public Area
   
   /**
-   * Sends the do task message to behavior generation.
-   */
-  public void doTask () {
-    //TODO
-    //send via channel to behavior generation
-    // TaskCommand taskCommand
-    // send doTask(taskCommand) to behaviorGeneration
-  }
-  
-  /**
-   * Receives the sensory perception data message from the next lower level node.
-   */
-  public void receiveSensoryPerceptionData () {
-    //TODO
-    //receive via channelfrom the next lower level node
-    // Object obj
-    // Object data
-  }
-  
-  /**
-   * Receives subnode status message from ?
-   */
-  public void receiveSubNodeStatus () {
-    //TODO
-    //receive via channel from ?
-    // Status status
-  }
-    
-  /**
-   * Receives the request knowledge base object message from ?
-   */
-  public void receiveRequestKBObject () {
-    //TODO
-    //receive via channel from ?
-    // Object obj
-  }
-
-  /**
-   * Receives the knowledge base object message from ?
-   */
-  public void receiveKBObject () {
-    //TODO
-    //receive via channel from ?
-    // Object obj
-  }
-  
-  /**
-   * Receives operator input message from ?.
-   */
-  public void operatorInput() {
-    //TODO
-    //receive via channel
-    // String input
-  }
-  
-  /**
-   * Sends the sensory perception data message to the next highest level node, on
-   * behalf of sensory perception.
-   */
-  public void sendSensoryPerceptionData () {
-    //TODO
-    //received via channel from sensory perception
-    //send via channel to the node at the next highest level
-    // Object obj
-    // Object data
-    // send receiveSensoryPerceptionData(obj, data) to (the next highest level) node
-  }
-  
-  /**
-   * Sends the do subtask message to the appropriate subnode.  The message was received 
-   * from behavior generation and originated from an executor.
-   */
-  public void doSubTask () {
-    //TODO
-    //receive via channel from behavior generation
-    //send via channel to the appropriate sub node
-    // ArrayList controlledResources
-    // TaskCommand
-    //
-  }
-  
-  /**
-   * Forwards the request knowledge base object message from ? to ?
-   */
-  public void forwardRequestKBObject () {
-    //TODO
-    // receive via channel from ?
-    // send via channel to ?
-    // Object obj
-  }
-  
-  /**
-   * Sends the knowledge base object message to ?
-   */
-  public void sendKBObject () {
-    //TODO
-    //send via channel to ?
-    // Object obj
-  }
-  
-  /**
-   * Sends the status message to ?.  This message originates from the job
-   * assigner and is forwarded to the node by behavior generation.
-   */
-  public void status () {
-    //TODO
-    //received via channel from behavior generation
-    //send via channel to ?
-    // ArrayList controlledResources
-    // Status status
-  }
-  
-  /**
-   * Sends operator output message to ?
-   */
-  public void operatorOutput () {
-    //TODO
-    //send via channel to ?  
-    // String output
-  }
-  
-  /**
    * Returns a string representation of this object.
    * 
    * @return a string representation of this object
@@ -370,6 +248,132 @@ public class Node extends ELFObject {
   
   //// Protected Area
   
+  /**
+   * Sends the do task message to behavior generation.
+   */
+  protected void doTask () {
+    //TODO
+    //send via channel to behavior generation
+    // TaskCommand taskCommand
+    // send doTask(taskCommand) to behaviorGeneration
+  }
+  
+  /**
+   * Receives the sensory perception data message from the next lower level node.
+   */
+  protected void receiveSensoryPerceptionData () {
+    //TODO
+    //receive via channelfrom the next lower level node
+    // Object obj
+    // Object data
+  }
+  
+  /**
+   * Receives subnode status message from ?
+   */
+  protected void receiveSubNodeStatus () {
+    //TODO
+    //receive via channel from ?
+    // Status status
+  }
+    
+  /**
+   * Receives the request knowledge base object message from ?
+   */
+  public void receiveRequestKBObject () {
+    //TODO
+    //receive via channel from ?
+    // Object obj
+  }
+
+  /**
+   * Receives the knowledge base object message from ?
+   */
+  protected void receiveKBObject () {
+    //TODO
+    //receive via channel from ?
+    // Object obj
+  }
+  
+  /**
+   * Receives operator input message from ?.
+   */
+  protected void operatorInput() {
+    //TODO
+    //receive via channel
+    // String input
+  }
+  
+  /**
+   * Sends the sensory perception data message to the next highest level node, on
+   * behalf of sensory perception.
+   */
+  protected void sendSensoryPerceptionData () {
+    //TODO
+    //received via channel from sensory perception
+    //send via channel to the node at the next highest level
+    // Object obj
+    // Object data
+    // send receiveSensoryPerceptionData(obj, data) to (the next highest level) node
+  }
+  
+  /**
+   * Sends the do subtask message to the appropriate subnode.  The message was received 
+   * from behavior generation and originated from an executor.
+   */
+  protected void doSubTask () {
+    //TODO
+    //receive via channel from behavior generation
+    //send via channel to the appropriate sub node
+    // ArrayList controlledResources
+    // TaskCommand
+    //
+  }
+  
+  /**
+   * Forwards the request knowledge base object message from ? to ?
+   */
+  protected void forwardRequestKBObject () {
+    //TODO
+    // receive via channel from ?
+    // send via channel to ?
+    // Object obj
+  }
+  
+  /**
+   * Sends the knowledge base object message to ?
+   */
+  protected void sendKBObject () {
+    //TODO
+    //send via channel to ?
+    // Object obj
+  }
+  
+  /**
+   * Sends the status message to ?.  This message originates from the job
+   * assigner and is forwarded to the node by behavior generation.
+   */
+  protected void status () {
+    //TODO
+    //received via channel from behavior generation
+    //send via channel to ?
+    // ArrayList controlledResources
+    // Status status
+  }
+  
+  /**
+   * Sends operator output message to ?
+   */
+  protected void operatorOutput () {
+    //TODO
+    //send via channel to ?  
+    // String output
+  }
+  
+  //// Private Area
+
+  //// Internal Rep
+  
   /** the dictionary of nodes by name name --> Node */
   protected static HashMap nodes = new HashMap();
 
@@ -403,6 +407,4 @@ public class Node extends ELFObject {
   /** the list of sibling nodes at this ELF resolution level */
   protected ArrayList siblingNodes;
   
-  //// Private Area
-  //// Internal Rep
 }

@@ -51,6 +51,7 @@ public class ScheduleFactory {
   
   /** Creates a new instance of ScheduleFactory. */
   public ScheduleFactory() {
+    scheduleFactory = this;
   }
   
   //// Public Area

@@ -37,7 +37,7 @@ import org.opencyc.elf.bg.state.State;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Procedure {
+public class Procedure extends Statement {
   
   //// Constructors
 
@@ -163,28 +163,60 @@ public class Procedure {
   public void setOutputType (Class outputType) {
     this.outputType = outputType;
   }
-  
+
+  /**
+   * Gets the procedure body
+   *
+   * @return body the procedure body
+   */
+  public ArrayList geBody () {
+    return body;
+  }
+
+  /**
+   * Sets the procedure body
+   *
+   * @param body the procedure body
+   */
+  public void setBody (ArrayList body) {
+    this.body = body;
+  }  
   //// Protected Area
 
   //// Private Area
   
   //// Internal Rep
   
-  /** the procedure name */
+  /** 
+   * the procedure name 
+   */
   protected String name;
 
-  /** the procedure namespace */
+  /** 
+   * the procedure namespace 
+   */
   protected String namespace;
 
-  /** the parameter names each of which is a String */
+  /** 
+   * the parameter names each of which is a String 
+   */
   protected ArrayList parameterNames;
 
-  /** the parameter types each of which is a Class */
+  /** 
+   * the parameter types each of which is a Class 
+   */
   protected ArrayList parameterTypes;
 
-  /** the output type */
+  /** 
+   * the output type 
+   */
   protected Class outputType;
 
+  /**
+   * the procedure body consisting of a list of statements
+   */
+  protected ArrayList body;
+  
   //// Main
   
 

@@ -122,6 +122,79 @@ public class SensoryPerception extends NodeComponent {
     this.childrenSensoryPerception = childrenSensoryPerception;
   }
   
+
+  /**
+   * Gets the estimator node component
+   *
+   * @return the estimator node component
+   */
+  public Estimator getEstimator () {
+    return estimator;
+  }
+
+  /**
+   * Sets the estimator node component
+   *
+   * @param estimator the estimator node component
+   */
+  public void setEstimator (Estimator estimator) {
+    this.estimator = estimator;
+  }
+
+  /**
+   * Gets the feature extractor node component
+   *
+   * @return the feature extractor node component
+   */
+  public FeatureExtractor getFeatureExtractor () {
+    return featureExtractor;
+  }
+
+  /**
+   * Sets the feature extractor node component
+   *
+   * @param featureExtractor the feature extractor node component
+   */
+  public void setFeatureExtractor (FeatureExtractor featureExtractor) {
+    this.featureExtractor = featureExtractor;
+  }
+
+  /**
+   * Gets the hypothesis evaluator node component
+   *
+   * @return the hypothesis evaluator node component
+   */
+  public HypothesisEvaluator getHypothesisEvaluator () {
+    return hypothesisEvaluator;
+  }
+
+  /**
+   * Sets the hypothesis evaluator node component
+   *
+   * @param hypothesisEvaluator the hypothesis evaluator node component
+   */
+  public void setHypothesisEvaluator (HypothesisEvaluator hypothesisEvaluator) {
+    this.hypothesisEvaluator = hypothesisEvaluator;
+  }
+
+  /**
+   * Gets the hypothesis former node component
+   *
+   * @return the hypothesis former node component
+   */
+  public HypothesisFormer getHypothesisFormer () {
+    return hypothesisFormer;
+  }
+
+  /**
+   * Sets the hypothesis former node component
+   *
+   * @param xxx the hypothesis former node component
+   */
+  public void setHypothesisFormer (HypothesisFormer hypothesisFormer) {
+    this.hypothesisFormer = hypothesisFormer;
+  }
+
   //// Protected Area
     
   /**
@@ -226,24 +299,44 @@ public class SensoryPerception extends NodeComponent {
   //// Internal Rep
   
   /**
+   * the estimator node component
+   */
+  protected Estimator estimator;
+  
+  /**
+   * the feature extractor node component
+   */
+  protected FeatureExtractor featureExtractor;
+  
+  /**
+   * the hypothesis evaluator node component
+   */
+  protected HypothesisEvaluator hypothesisEvaluator;
+  
+  /**
+   * the hypothesis former node component
+   */
+  protected HypothesisFormer hypothesisFormer;
+  
+  /**
    * the parent sensory perception node component
    */
-  SensoryPerception parentSensoryPerception;
+  protected SensoryPerception parentSensoryPerception;
   
   /**
    * the children sensory perception node compontents
    */
-  ArrayList childrenSensoryPerception;
+  protected ArrayList childrenSensoryPerception;
   
   /**
    * the thread which processes the input channel of messages
    */
-  Consumer consumer;
+  protected Consumer consumer;
   
   /**
    * the executor of the observed input consumer thread
    */
-  Executor executor;
+  protected Executor executor;
   
   //// Main
   

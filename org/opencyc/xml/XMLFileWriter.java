@@ -78,6 +78,14 @@ public class XMLFileWriter extends XMLWriter {
     public void flush () throws java.io.IOException {
         writer.flush();
     }
+
+  /**
+   * Closes the <code>FileWriter</code> in the field @see #writer.
+   */
+  public void close() throws java.io.IOException {
+    writer.close();
+  }
+
 }
 
 

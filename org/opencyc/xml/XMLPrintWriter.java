@@ -77,6 +77,13 @@ public class XMLPrintWriter extends XMLWriter {
     public void flush () {
         writer.flush();
     }
+
+  /**
+   * Closes the <code>PrintWriter</code> in the field @see #writer.
+   */
+  public void close () {
+    writer.close();
+  }
 }
 
 

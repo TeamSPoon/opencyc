@@ -131,15 +131,31 @@ public abstract class XMLWriter {
     public void resetIndent () {
         this.indentString = this.baseIndentString;
     }
+  /**
+   * Returns the length of the current value of @see #indentString.
+   */
+  public int getIndentLength() {
+    return this.indentString.length();
+  }
 
-    /**
-     * Prints @see #string to this <code>XMLWriter</code>.
-     *
-     * @param string the string to be printed.
-     * @exception java.io.IOException if the <code>XMLWriter</code> cannot
-     * print to the file specified.
-     */
-    public abstract void print (String string) throws java.io.IOException;
+  /**
+   * Flushes the <code>XMLWriter</code>.
+   */
+  public abstract void flush () throws java.io.IOException;
+
+  /**
+   * Closes the <code>XMLWriter</code>.
+   */
+  public abstract void close () throws java.io.IOException;
+
+  /**
+   * Prints @see #string to this <code>XMLWriter</code>.
+   *
+   * @param string the string to be printed.
+   * @exception java.io.IOException if the <code>XMLWriter</code> cannot
+   * print to the file specified.
+   */
+  public abstract void print (String string) throws java.io.IOException;
 
     /**
      * Prints @see #string to this <code>XMLWriter</code> after performing all the appropriate

@@ -56,7 +56,8 @@ public class UnitTest extends TestCase {
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
         //testSuite.addTest(new UnitTest("testJavaInterpreter"));
-        testSuite.addTest(new UnitTest("testExpressionEvaluation"));
+        //testSuite.addTest(new UnitTest("testExpressionEvaluation"));
+        testSuite.addTest(new UnitTest("testProcedureInterpretation"));
         //testSuite.addTest(new UnitTest("testSimpleStateMachine"));
         //testSuite.addTest(new UnitTest("testCycExtractor"));
         return testSuite;
@@ -178,46 +179,6 @@ public class UnitTest extends TestCase {
             cycAccess.unassertMtContentsWithoutTranscript(stateMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
 
-
-            //TODO test #$umlProcedureInputBinding
-
-
-            Object body =
-                cycAccess.getArg2("umlBody",
-                                  "TestStateMachine-InitializeNumberToZeroProcedure",
-                                  "UMLStateMachineTest01Mt");
-            System.out.println("body: " + ((CycList) body).cyclify());
-
-            expression.setBody(body);
-            expressionEvaluator.evaluate(expression);
-            queryText =
-                "(#$softwareParameterValue \n" +
-                "  (#$SoftwareParameterFromSyntaxFn #$TestStateMachine-OutputPin2-X) 0)";
-            query = cycAccess.makeCycList(queryText);
-            Assert.assertTrue(cycAccess.isQueryTrue(query, stateMt));
-            Assert.assertEquals(2, cycAccess.getAllAssertionsInMt(stateMt).size());
-
-            Expression testExpression = new Expression();
-            Object testBody =
-                cycAccess.getArg2("umlBody",
-                                  "TestStateMachine-BooleanExpression1",
-                                  "UMLStateMachineTest01Mt");
-            System.out.println("body: " + ((CycList) testBody).cyclify());
-            testExpression.setBody(testBody);
-            Assert.assertTrue(!
-                expressionEvaluator.evaluateProgramConditionFn(
-                    (CycList) ((CycList) testExpression.getBody()).second()));
-
-            Expression incrementExpression = new Expression();
-            Object incrementBody =
-                cycAccess.getArg2("umlBody",
-                                  "TestStateMachine-IncrementProcedure",
-                                  "UMLStateMachineTest01Mt");
-            System.out.println("body: " + ((CycList) testBody).cyclify());
-            incrementExpression.setBody(incrementBody);
-            cycAccess.traceNamesOn();
-            expressionEvaluator.evaluate(incrementExpression);
-
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -225,6 +186,66 @@ public class UnitTest extends TestCase {
         }
 
         System.out.println("\n**** testExpressionEvaluation ****");
+    }
+
+    /**
+     * Tests procedure interpretation.
+     */
+    public void testProcedureInterpretation () {
+        System.out.println("\n**** testProcedureInterpretation ****");
+
+        try {
+            String localHostName = InetAddress.getLocalHost().getHostName();
+            CycAccess cycAccess;
+            if (localHostName.equals("crapgame.cyc.com")) {
+                cycAccess = new CycAccess("localhost",
+                                          3620,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+                //cycAccess.traceNamesOn();
+                cycAccess.setKePurpose("DAMLProject");
+            }
+            else if (localHostName.equals("thinker")) {
+                cycAccess = new CycAccess("localhost",
+                                          3600,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          true);
+                cycAccess.setKePurpose("OpenCyc");
+            }
+            else {
+                cycAccess = new CycAccess();
+                cycAccess.setKePurpose("OpenCyc");
+            }
+            cycAccess.setCyclist(cycAccess.getKnownConstantByName("Cyc"));
+            CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01-ContextMt");
+
+            cycAccess.unassertMtContentsWithoutTranscript(stateMt);
+            Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
+
+            ProcedureInterpreter procedureInterpreter =
+                new ProcedureInterpreter(cycAccess,
+                                        stateMt,
+                                        ExpressionEvaluator.DEFAULT_VERBOSITY);
+            Procedure initializeProcedure = new Procedure();
+            initializeProcedure.setName("TestStateMachine-InitializeNumberToZeroProcedure");
+            Object procedureBody =
+                cycAccess.getArg2("umlBody",
+                                  "TestStateMachine-IncrementProcedure",
+                                  "UMLStateMachineTest01Mt");
+            initializeProcedure.setBody(procedureBody);
+            Transition transition1 = new Transition();
+            transition1.setName("TestStateMachine-Transition1");
+            transition1.setEffect(initializeProcedure);
+            procedureInterpreter.interpretTransitionProcedure(transition1);
+
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+
+        System.out.println("\n**** testProcedureInterpretation ****");
     }
 
     /**

@@ -81,9 +81,9 @@ public class ProcedureInterpreter {
     protected CycFort procedureTerm;
 
     /**
-     * #$procedureEvaluationContext
+     * #$umlProcedureEvaluationContext
      */
-    protected CycConstant procedureEvaluationContext;
+    protected CycConstant umlProcedureEvaluationContext;
 
     /**
      * #$umlProcedureBinding-CalledByStateEntry
@@ -146,7 +146,7 @@ public class ProcedureInterpreter {
         this.stateMt = stateMt;
         this.verbosity = verbosity;
         expressionEvaluator = new ExpressionEvaluator(cycAccess, stateMt, verbosity);
-        procedureEvaluationContext = cycAccess.getKnownConstantByName("procedureEvaluationContext");
+        umlProcedureEvaluationContext = cycAccess.getKnownConstantByName("umlProcedureEvaluationContext");
         umlProcedureBinding_CalledByStateEntry = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateEntry");
         umlProcedureBinding_CalledByStateDoActivity = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateDoActivity");
         umlProcedureBinding_CalledByStateExit = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateExit");
@@ -185,7 +185,6 @@ public class ProcedureInterpreter {
         query2.add(cycVariable);
         query2.add(cycAccess.getKnownConstantByName(procedure.toString()));
         query.add(query2);
-
         CycList queryResult =
             cycAccess.askWithVariable(query, cycVariable, stateMt);
         procedureBinding = (CycFort) queryResult.first();
@@ -254,7 +253,7 @@ public class ProcedureInterpreter {
         throws IOException, CycApiException, ExpressionEvaluationException {
         // clear interpretation context
         CycFort evaluationContext =
-            (CycFort) cycAccess.getArg2(procedureEvaluationContext,
+            (CycFort) cycAccess.getArg2(umlProcedureEvaluationContext,
                                         procedureTerm,
                                         stateMt);
         cycAccess.unassertMtContentsWithoutTranscript(evaluationContext);

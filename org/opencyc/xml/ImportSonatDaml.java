@@ -126,7 +126,7 @@ public class ImportSonatDaml {
                            ontologyNicknames,
                            kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
-        //for (int i = 31; i < damlDocInfos.size(); i++) {
+        //for (int i = 29; i < damlDocInfos.size(); i++) {
         for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
@@ -383,18 +383,27 @@ public class ImportSonatDaml {
         if (cycAccess.isOpenCyc()) {
             cycAccess.setCyclist("CycAdministrator");
             cycAccess.setKePurpose("OpenCycProject");
-            // DamlSonatConstant
-            String term = "DamlSonatConstant";
-            String comment = "The KB subset collection of DAML SONAT terms.";
-            cycAccess.findOrCreate(term);
-            cycAccess.assertComment(term, comment, "BaseKB");
-            cycAccess.assertIsa(term, "VariableOrderCollection");
-            cycAccess.assertGenls(term, "CycLConstant");
-
         }
         else {
             cycAccess.setCyclist("SteveReed");
             cycAccess.setKePurpose("DAMLProject");
+        }
+        // DamlConstant
+        String term = "DamlConstant";
+        String comment = "The KB subset collection of DAML terms.";
+        cycAccess.findOrCreate(term);
+        cycAccess.assertComment(term, comment, "BaseKB");
+        cycAccess.assertIsa(term, "VariableOrderCollection");
+        cycAccess.assertGenls(term, "CycLConstant");
+
+        if (cycAccess.isOpenCyc()) {
+            // DamlSonatConstant
+            term = "DamlSonatConstant";
+            comment = "The KB subset collection of DAML SONAT terms.";
+            cycAccess.findOrCreate(term);
+            cycAccess.assertComment(term, comment, "BaseKB");
+            cycAccess.assertIsa(term, "VariableOrderCollection");
+            cycAccess.assertGenls(term, "DamlConstant");
         }
 
         // #$DamlDatatypeProperty
@@ -434,7 +443,7 @@ public class ImportSonatDaml {
                                         "Agent Markup Language) concept with its source" +
                                         "URL document.",
                                         // arg1Isa
-                                        "Thing",
+                                        "DamlConstant",
                                         // arg2Isa
                                         "UniformResourceLocator",
                                         // arg1Format
@@ -457,7 +466,7 @@ public class ImportSonatDaml {
                                         "Agent Markup Language) concept with its source" +
                                         "Uniform Resource Identifier.",
                                         // arg1Isa
-                                        "Thing",
+                                        "DamlConstant",
                                         // arg2Isa
                                         "UniformResourceLocator",
                                         // arg1Format

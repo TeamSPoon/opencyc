@@ -79,6 +79,10 @@ public abstract class Statement {
   
   //// Internal Rep
 
+  //TODO think through procedure bodies, consisting of statements, versus Actions.
+  //Where do the values and names go?
+  
+  
   /**
    * the operator which is an instance of Procedure or SpecialForm
    */

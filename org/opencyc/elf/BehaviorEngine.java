@@ -5,6 +5,7 @@ import org.opencyc.elf.bg.state.StateVariable;
 
 import org.opencyc.elf.wm.ActuatorClassFactory;
 import org.opencyc.elf.wm.ActionFactory;
+import org.opencyc.elf.wm.ELFFactory;
 import org.opencyc.elf.wm.ExperienceLibrary;
 import org.opencyc.elf.wm.GoalFactory;
 import org.opencyc.elf.wm.JobAssignmentFactory;
@@ -73,6 +74,7 @@ public class BehaviorEngine {
     new TaskFrameLibrary();
     (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
     new ExperienceLibrary();
+    new ELFFactory();
     
     //TODO
   }

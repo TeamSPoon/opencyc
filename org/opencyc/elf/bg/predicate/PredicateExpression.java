@@ -43,6 +43,17 @@ public class PredicateExpression {
   
   /** 
    * Creates a new instance of a unary PredicateExpression given the
+   * predicate and no arguments.
+   *
+   * @param predicate the unary predicate
+   */
+  public PredicateExpression(Predicate predicate) {
+    this.predicate = predicate;
+    arguments = new ArrayList();
+  }
+  
+  /** 
+   * Creates a new instance of a unary PredicateExpression given the
    * predicate and single argument.
    *
    * @param predicate the unary predicate

@@ -268,9 +268,10 @@ public class Node {
     return logger;
   }
   
+  /** the converse with user node name */
+  public static final String CONVERSE_WITH_USER = "converse with user";
+  
   //// Protected Area
-  
-  
   
   //// Private Area
 
@@ -311,8 +312,6 @@ public class Node {
   /** the list of sibling nodes at this ELF resolution level */
   protected ArrayList siblingNodes;
   
-  /**
-   * the logger
-   */
+  /** the logger */
   protected Logger logger;
 }

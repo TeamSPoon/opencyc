@@ -3,7 +3,12 @@ package org.opencyc.elf.bg.planner;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
+import org.opencyc.elf.vj.Result;
+
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * <P>PlanSelector selects the best plan from alternatives.
@@ -40,6 +45,18 @@ public class PlanSelector extends NodeComponent {
   //// Public Area
   
   //// Protected Area
+  
+  /**
+   * Receives the schedule evaluation from ?.
+   */
+  protected void receiveScheduleEvaluation () {
+    //TODO
+    // receive via channel from ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // Result result
+  }
   
   //// Private Area
   

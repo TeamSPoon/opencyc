@@ -89,6 +89,9 @@ public class DirectSensor extends NodeComponent  implements Sensor {
     return sensationCapabilities;
   }
   
+  /** the console input sensor name */
+  public static final String CONSOLE_INPUT = "console input";
+
   //// Protected Area
   
   //// Private Area

@@ -48,6 +48,4 @@ public interface Sensor {
    */
   public List getSensationCapabilities ();
   
-  /** the console input sensor name */
-  public static final String CONSOLE_INPUT = "console input";
 }

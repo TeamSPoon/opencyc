@@ -92,6 +92,9 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
     return resources;
   }
   
+  /** the console output actuator name */
+  public static final String CONSOLE_OUTPUT = "console output";
+  
   //// Protected Area
   
   //// Private Area

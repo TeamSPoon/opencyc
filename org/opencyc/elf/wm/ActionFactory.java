@@ -37,7 +37,6 @@ import java.util.List;
  */
 public class ActionFactory {
   
-  
   //// Constructors
   
   /** Creates a new instance of ActionFactory and stores it in the singleton instance. */

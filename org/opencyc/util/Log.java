@@ -85,7 +85,7 @@ public class Log {
         if (current != null) {
             return;
         }
-        String logProperty = System.getProperty("com.cyc.rkf.log", "default");
+        String logProperty = System.getProperty("org.opencyc.util.log", "default");
         if (logProperty.equalsIgnoreCase("default") || logProperty.equalsIgnoreCase("all")) {
             current = new Log("agent.log", true, true, true, false);
             return;
@@ -102,7 +102,7 @@ public class Log {
             current = new Log("agent.log", true, true, false, false);
             return;
         }
-        System.err.println("Invalid value for property com.cyc.rkf.log " + logProperty + " substituting default");
+        System.err.println("Invalid value for property org.opencyc.util.log " + logProperty + " substituting default");
         current = new Log("agent.log", true, true, true, false);
     }
 

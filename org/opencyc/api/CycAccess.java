@@ -3786,7 +3786,7 @@ public class CycAccess {
      */
     public CycConstant findOrCreate (String constantName)
         throws IOException, UnknownHostException, CycApiException {
-        return createNewPermanent(constantName);
+        return makeCycConstant(constantName);
     }
 
     /**
@@ -4603,9 +4603,17 @@ public class CycAccess {
         throws UnknownHostException, IOException, CycApiException {
         CycConstant cycConstant = this.getConstantByName(name);
         if (cycConstant == null) {
-            cycConstant = this.createNewPermanent(name);
-            if (cycConstant == null)
+            String command =
+                withBookkeepingInfo() +
+                "(clet ((*require-case-insensitive-name-uniqueness* nil)) \n" +
+                "  (cyc-create \"" + name + "\" nil)))";
+            Object object = converseObject(command);
+            if (object instanceof CycConstant)
+                cycConstant = (CycConstant) object;
+            else
                 throw new CycApiException("Cannot create new constant for " + name);
+            cycConstant.getName();
+            cycConstant.getGuid();
             CycObjectFactory.addCycConstantCacheByName(cycConstant);
             CycObjectFactory.addCycConstantCacheById(cycConstant);
         }
@@ -5699,7 +5707,27 @@ public class CycAccess {
      */
     public boolean isOpenCyc ()
         throws IOException, UnknownHostException, CycApiException {
-        return converseBoolean("(cnot (find-constant \"SteveReed\"))");
+        return converseBoolean("(cyc-opencyc-feature)");
+    }
+
+    /**
+     * Returns a constant whose name differs from the given name only by case.
+     * Used because Cyc by default requires constant names to be unique by case.
+     *
+     * @param name the name used to lookup an existing constant
+     * @return a constant whose name differs from the given name only by case,
+     * otherwise null if none exists
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycConstant constantNameCaseCollision (String name)
+        throws IOException, UnknownHostException, CycApiException {
+        Object object = converseObject("(constant-name-case-collision \"" + name + "\")");
+        if (object instanceof CycConstant)
+            return (CycConstant) object;
+        else
+            return null;
     }
 
 }

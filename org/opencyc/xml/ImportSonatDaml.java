@@ -62,13 +62,12 @@ public class ImportSonatDaml {
     public ImportSonatDaml()
         throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Connecting to Cyc server.");
-        cycAccess = new CycAccess();
-        /*
+        //cycAccess = new CycAccess();
         cycAccess = new CycAccess("MCCARTHY",
                                   4600,
                                   CycConnection.DEFAULT_COMMUNICATION_MODE,
                                   true);
-                                  */
+
         initializeDamlVocabulary();
     }
 

@@ -356,10 +356,6 @@ public class ImportDaml implements StatementHandler {
         CycFort predicate = cycAccess.getConstantByName(damlPredicate);
         if (predicate == null) {
             predicate = importTerm(predicateTermInfo);
-            if (predicate == null) {
-                Log.current.println("\n*** " + damlPredicate + " is an invalid constant ***");
-                return;
-            }
             cycAccess.assertIsaBinaryPredicate(predicate);
         }
         if (objLitTermInfo.isLiteral) {
@@ -389,10 +385,6 @@ public class ImportDaml implements StatementHandler {
                               DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
-        if (term == null) {
-            Log.current.println("\n*** " + subjectTermInfo.toString() + " is an invalid constant ***");
-            return;
-        }
         String collectionName = objectTermInfo.toString();
         if (equivalentDamlCycTerms.containsKey(collectionName))
             collectionName = (String) equivalentDamlCycTerms.get(collectionName);
@@ -583,9 +575,10 @@ public class ImportDaml implements StatementHandler {
     }
 
     /**
-     * Imports the given term.
+     * Imports the given DAML term and returns the Cyc term.
      *
      * @param damlTermInfo the given daml term information
+     * @return the Cyc term resulting from the import of the given DAML term
      */
     protected CycFort importTerm (DamlTermInfo damlTermInfo)
         throws IOException, UnknownHostException, CycApiException {

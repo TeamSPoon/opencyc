@@ -57,14 +57,6 @@ public class Action {
   }
 
   /**
-   * Sets the name of the action
-   *
-   * @param name the name of the action
-   */
-  public void setName (String name) {
-    this.name = name;
-  }  
-  /**
    * Gets the action state, including the parameters and action modifiers
    *
    * @return the action state, including the parameters and action modifiers
@@ -132,7 +124,7 @@ public class Action {
    }
   
   /**
-   * Gets the utput value for this (completed) action.
+   * Gets the output value for this (completed) action.
    *
    * @return the parameter values for this (completed) action
    */
@@ -140,6 +132,45 @@ public class Action {
     return state.getStateValue(State.OUTPUT_VALUE);
   }
     
+  
+  //// Protected Area
+  
+  /**
+   * Sets the name of the action
+   *
+   * @param name the name of the action
+   */
+  public void setName (String name) {
+    this.name = name;
+  }  
+  
+  /**
+   * Sets the parameter names for this action.
+   *
+   * @param parameterNames the parameter names for this action
+   */
+  public void setParameterNames (ArrayList parameterNames) {
+    state.setStateValue(State.PARAMETER_NAMES, parameterNames);
+  }
+   
+  /**
+   * Sets the parameter types for this action.
+   *
+   * @param parameterTypes the parameter types for this action
+   */
+  public void setParameterTypes (ArrayList parameterTypes) {
+    state.setStateValue(State.PARAMETER_TYPES, parameterTypes);
+  }
+   
+  /**
+   * Sets the output type for this action.
+   *
+   * @param outputType the output type for this action
+   */
+  public void setOutpuType (Class outputType) {
+    state.setStateValue(State.OUTPUT_TYPE, outputType);
+  }
+   
   /**
    * Sets the action state.
    *
@@ -148,9 +179,7 @@ public class Action {
   public void setState (State state) {
     this.state = state;
   }
-  
-  //// Protected Area
-  
+
   //// Private Area
   
   //// Internal Rep

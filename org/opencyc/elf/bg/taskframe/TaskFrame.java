@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import org.doomdark.uuid.UUID;
 
 /**
- * <P>
  * TaskFrame specifies the materials, tools, and procedures to accomplish a task.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  

@@ -3,14 +3,18 @@ package org.opencyc.elf.bg.planner;
 //// Internal Imports
 import org.opencyc.elf.bg.taskframe.Action;
 
+import org.opencyc.elf.goal.Goal;
+
 //// External Imports
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/** Schedule contains the timing specification for a plan.  It can be
- * represented as a time-labeled or event-labeled sequence of actitivies or
- * events.
+/** Schedule contains the timing specification for a plan.  It can be represented 
+ * as a time-labeled or event-labeled sequence of actitivies or events.  
+ * The job assigner assigns a task or goal to the scheduler by passing partially 
+ * instantiated schedule.  The scheduler determines a schedule of planned actions or
+ * planned goals that accomplish the assigned action or achieve the assigned goal. 
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -57,33 +61,65 @@ public class Schedule {
     this.name = name;
   }
 
-  /** Gets the list of planned actions
+  /** Gets the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
    *
-   * @return the list of planned actions
+   * @return the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
+   */
+  public Action getAssignedJobAction () {
+    return assignedJobAction;
+  }
+
+  /** Sets the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
+   *
+   * @param assignedJobAction the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
+   */
+  public void setAssignedJobAction (Action assignedJobAction) {
+    this.assignedJobAction = assignedJobAction;
+  }
+
+  /** Gets the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
+   *
+   * @return the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
+   */
+  public Goal getAssignedJobGoal () {
+    return assignedJobGoal;
+  }
+
+  /** Sets the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
+   *
+   * @param assignedJobGoal the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
+   */
+  public void setAssignedJobGoal (Goal assignedJobGoal) {
+    this.assignedJobGoal = assignedJobGoal;
+  }
+
+  /** Gets the list of planned actions that accomplish the assigned action or achieve the assigned goal
+   *
+   * @return the list of planned actions that accomplish the assigned action or achieve the assigned goal
    */
   public List getPlannedActions () {
     return plannedActions;
   }
 
-  /** Sets the list of planned actions
+  /** Sets tthe list of planned actions that accomplish the assigned action or achieve the assigned goal
    *
-   * @param plannedActions the list of planned actions
+   * @param plannedActions the list of planned actions that accomplish the assigned action or achieve the assigned goal
    */
   public void setPlannedActions (List plannedActions) {
     this.plannedActions = plannedActions;
   }
 
-  /** Gets the list of planned goals
+  /** Gets the list of planned goals that accomplish the assigned action or achieve the assigned goal
    *
-   * @return the list of planned goals
+   * @return the list of planned goals that accomplish the assigned action or achieve the assigned goal
    */
   public List getPlannedGoals () {
     return plannedGoals;
   }
 
-  /** Sets the list of planned goals
+  /** Sets the list of planned goals that accomplish the assigned action or achieve the assigned goal
    *
-   * @param plannedGoals the list of planned goals
+   * @param plannedGoals the list of planned goals that accomplish the assigned action or achieve the assigned goal
    */
   public void setPlannedGoals (List plannedGoals) {
     this.plannedGoals = plannedGoals;
@@ -110,9 +146,9 @@ public class Schedule {
     this.plannedGoalTimeMilliseconds = plannedGoalTimeMilliseconds;
   }
 
-  /** Gets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+  /** Gets the name of the direct actuator that achieves or accomplishes the schedule
    *
-   * @return the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+   * @return the name of the direct actuator that achieves or accomplishes the schedule
    */
   public String getDirectActuatorName () {
     return directActuatorName;
@@ -126,9 +162,9 @@ public class Schedule {
     this.directActuatorName = directActuatorName;
   }
 
-  /** Gets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+  /** Gets the name of the direct sensor that senses the achievements or accomplishments of the schedule
    *
-   * @return the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+   * @return the name of the direct sensor that senses the achievements or accomplishments of the schedule
    */
   public String getDirectSensorName () {
     return directSensorName;
@@ -181,14 +217,19 @@ public class Schedule {
   // the schedule name or description
   protected String name = "";
   
-  /** the list of planned actions */
+  /** the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task */
+  protected Action assignedJobAction;
+  
+  /** the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task */
+  protected Goal assignedJobGoal;
+  
+  /** the list of planned actions that accomplish the assigned action or achieve the assigned goal */
   protected List plannedActions = new ArrayList();
   
-  /** the list of planned goals */
+  /** the list of planned goals that accomplish the assigned action or achieve the assigned goal */
   protected List plannedGoals = new ArrayList();
   
-  /**
-   * the list of planned goal times, each of which is the planned duration of time in milliseconds to
+  /** the list of planned goal times, each of which is the planned duration of time in milliseconds to
    * elapse from the time the plan commences exectution until the planned goal is achieved
    */
   protected List plannedGoalTimeMilliseconds = new ArrayList();

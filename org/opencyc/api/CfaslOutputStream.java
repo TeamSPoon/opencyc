@@ -3,6 +3,7 @@ package  org.opencyc.api;
 import  java.io.*;
 import  java.math.BigInteger;
 import  java.util.*;
+import  java.lang.reflect.*;
 import  org.opencyc.cycobject.*;
 
 /**
@@ -388,8 +389,14 @@ public class CfaslOutputStream extends BufferedOutputStream {
             writeDottedList((CycList)list);
             return;
         }
-        if (trace == API_TRACE_DETAILED)
-            System.out.println("writeList = " + list + "\n  of size " + list.size());
+        if (trace == API_TRACE_DETAILED) {
+            if (list instanceof CycList)
+                System.out.println("writeList = " + ((CycList) list).safeToString() +
+                                   "\n  of size " + list.size());
+            else
+                System.out.println("writeList = " + list +
+                                   "\n  of size " + list.size());
+        }
         write(CFASL_LIST);
         writeInt(list.size());
         for (int i = 0; i < list.size(); i++) {
@@ -404,15 +411,25 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeDottedList (CycList dottedList) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeDottedList = " + dottedList + "\n  proper elements size " + dottedList.size());
+            System.out.println("writeDottedList = " + dottedList.safeToString() +
+                               "\n  proper elements size " + dottedList.size());
         write(CFASL_DOTTED);
         writeInt(dottedList.size());
         for (int i = 0; i < dottedList.size(); i++) {
             writeObject(dottedList.get(i));
         }
-        if (trace == API_TRACE_DETAILED)
-            System.out.println("writeDottedList.cdr = " + dottedList.getDottedElement());
-        writeObject(dottedList.getDottedElement());
+        Object dottedElement = dottedList.getDottedElement();
+        if (trace == API_TRACE_DETAILED) {
+            try {
+                // If object dottedElement understands the safeToString method, then use it.
+                Method safeToString = dottedElement.getClass().getMethod("safeToString", null);
+                System.out.println("writeDottedList.cdr = " + safeToString.invoke(dottedElement, null));
+            }
+            catch (Exception e) {
+                System.out.println("writeDottedList.cdr = " + dottedElement);
+            }
+        }
+        writeObject(dottedElement);
     }
 
     /**
@@ -484,7 +501,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeVariable (CycVariable cycVariable) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeVariable = " + cycVariable);
+            System.out.println("writeVariable = " + cycVariable.safeToString());
         //write(CFASL_VARIABLE);
         write(CFASL_SYMBOL);
         writeString(cycVariable.toString().toUpperCase());
@@ -497,7 +514,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeConstant (CycConstant cycConstant) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeConstant = " + cycConstant);
+            System.out.println("writeConstant = " + cycConstant.safeToString());
         write(CFASL_CONSTANT);
         writeInt(cycConstant.getId().intValue());
     }
@@ -509,7 +526,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeNart (CycNart cycNart) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeNart = " + cycNart);
+            System.out.println("writeNart = " + cycNart.safeToString());
         write(CFASL_NART);
         writeInt(cycNart.getId().intValue());
     }
@@ -521,7 +538,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
      */
     public void writeAssertion (CycAssertion cycAssertion) throws IOException {
         if (trace == API_TRACE_DETAILED)
-            System.out.println("writeAssertion = " + cycAssertion);
+            System.out.println("writeAssertion = " + cycAssertion.safeToString());
         write(CFASL_ASSERTION);
         writeInt(cycAssertion.getId().intValue());
     }
@@ -533,48 +550,57 @@ public class CfaslOutputStream extends BufferedOutputStream {
      * @throws RuntimeException if the Object cannot be translated.
      */
     public void writeObject (Object o) throws IOException {
-        if (trace == API_TRACE_DETAILED)
-            System.out.println("writeObject = " + o + " (" + o.getClass() + ")");
+        if (trace == API_TRACE_DETAILED) {
+            try {
+                // If object o understands the safeToString method, then use it.
+                Method safeToString = o.getClass().getMethod("safeToString", null);
+                System.out.println("writeObject = " + safeToString.invoke(o, null) +
+                                   " (" + o.getClass() + ")");
+            }
+            catch (Exception e) {
+                System.out.println("writeObject = " + o + " (" + o.getClass() + ")");
+            }
+        }
         if (o instanceof Guid)
-            writeGuid((Guid)o);
+            writeGuid((Guid) o);
         else if (o instanceof CycSymbol)
-            writeSymbol((CycSymbol)o);
+            writeSymbol((CycSymbol) o);
         else if (o instanceof CycVariable)
-            writeVariable((CycVariable)o);
+            writeVariable((CycVariable) o);
         else if (o instanceof CycConstant)
-            writeConstant((CycConstant)o);
+            writeConstant((CycConstant) o);
         else if (o instanceof CycNart)
-            writeNart((CycNart)o);
+            writeNart((CycNart) o);
         else if (o instanceof CycAssertion)
-            writeAssertion((CycAssertion)o);
+            writeAssertion((CycAssertion) o);
         else if (o instanceof List)
             writeList((List)o);
         else if (o instanceof Boolean)
-            writeBoolean(((Boolean)o).booleanValue());
+            writeBoolean(((Boolean) o).booleanValue());
         else if (o instanceof Character)
-            writeChar(((Character)o).charValue());
+            writeChar(((Character) o).charValue());
         else if (o instanceof String)
-            writeString((String)o);
+            writeString((String) o);
         else if (o instanceof Double)
-            writeDouble(((Double)o).doubleValue());
+            writeDouble(((Double) o).doubleValue());
         else if (o instanceof Float)
-            writeDouble(((Float)o).doubleValue());
+            writeDouble(((Float) o).doubleValue());
         else if (o instanceof Long)
-            writeInt(((Long)o).longValue());
+            writeInt(((Long) o).longValue());
         else if (o instanceof Integer)
-            writeInt(((Integer)o).longValue());
+            writeInt(((Integer) o).longValue());
         else if (o instanceof Short)
-            writeInt(((Short)o).longValue());
+            writeInt(((Short) o).longValue());
         else if (o instanceof Byte)
-            writeInt(((Byte)o).longValue());
+            writeInt(((Byte) o).longValue());
         else if (o instanceof BigInteger)
-            writeBigInteger((BigInteger)o);
+            writeBigInteger((BigInteger) o);
         else if (o instanceof Object[])
-            writeList((Object[])o);
+            writeList((Object[]) o);
         else if (o instanceof ByteArray)
-            writeByteArray(((ByteArray)o).byteArrayValue());
+            writeByteArray(((ByteArray) o).byteArrayValue());
         else if (o instanceof byte[])
-            writeByteArray((byte[])o);
+            writeByteArray((byte[]) o);
         else
             throw  new RuntimeException("No cfasl opcode for " + o);
     }

@@ -255,9 +255,11 @@ public class CycNart extends CycFort implements Comparable {
             xmlWriter.print(this.getId().toString());
             xmlWriter.printXMLEndTag(idXMLTag);
         }
-        xmlWriter.printXMLStartTag(functorXMLtag, 0, true, true);
-        this.getFunctor().toXML(xmlWriter, indentLength, true);
-        xmlWriter.printXMLEndTag(functorXMLtag, -indentLength, true);
+        if (functor != null) {
+            xmlWriter.printXMLStartTag(functorXMLtag, 0, true, true);
+            this.getFunctor().toXML(xmlWriter, indentLength, true);
+            xmlWriter.printXMLEndTag(functorXMLtag, -indentLength, true);
+        }
         ListIterator iterator = this.getArguments().listIterator();
         Object arg;
         while (iterator.hasNext()) {
@@ -311,6 +313,33 @@ public class CycNart extends CycFort implements Comparable {
                 cyclifiedObject = object.toString();
             result .append(" ");
             result.append(cyclifiedObject);
+        }
+        return result.append(")").toString();
+    }
+
+    /**
+     * Returns a string representation without causing additional api calls to determine
+     * constant names.
+     *
+     * @return a string representation without causing additional api calls to determine
+     * constant names
+     */
+    public String safeToString () {
+        StringBuffer result = new StringBuffer("(");
+        if (functor != null)
+            result.append(this.getFunctor().safeToString());
+        else
+            result.append("<uncomplete functor>");
+        ListIterator iterator = this.getArguments().listIterator();
+        while (iterator.hasNext()) {
+            Object object = iterator.next();
+            String safeObject = null;
+            if (object instanceof CycFort)
+                safeObject = ((CycFort) object).safeToString();
+            else
+                safeObject = object.toString();
+            result .append(" ");
+            result.append(safeObject);
         }
         return result.append(")").toString();
     }

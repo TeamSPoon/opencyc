@@ -3,6 +3,7 @@ package  org.opencyc.api;
 import  java.io.*;
 import  java.math.BigInteger;
 import  java.util.HashMap;
+import  java.lang.reflect.*;
 import  org.opencyc.cycobject.*;
 
 /**
@@ -306,8 +307,17 @@ public class CfaslInputStream extends BufferedInputStream {
                     throw  new RuntimeException("Unknown cfasl opcode: " + cfaslOpcode);
             }
         }
-        if (trace == API_TRACE_DETAILED)
-            System.out.println("readObject = " + o + " (" + o.getClass() + ")");
+        if (trace == API_TRACE_DETAILED) {
+            try {
+                // If object o understands the safeToString method, then use it.
+                Method safeToString = o.getClass().getMethod("safeToString", null);
+                System.out.println("readObject = " + safeToString.invoke(o, null) +
+                                   " (" + o.getClass() + ")");
+            }
+            catch (Exception e) {
+                System.out.println("readObject = " + o + " (" + o.getClass() + ")");
+            }
+        }
         return  o;
     }
 
@@ -501,7 +511,10 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return the <tt>Guid</tt> read
      */
     public Guid readGuid () throws IOException {
-        return  CycObjectFactory.makeGuid((String)readObject());
+        Guid guid = CycObjectFactory.makeGuid((String)readObject());
+        if (trace == API_TRACE_DETAILED)
+            System.out.println("readGuid: " + guid);
+        return guid;
     }
 
   /**
@@ -535,7 +548,7 @@ public class CfaslInputStream extends BufferedInputStream {
             cycList.add(readObject());
         }
         if (trace == API_TRACE_DETAILED)
-            System.out.println("readCycList.readObject: " + cycList);
+            System.out.println("readCycList.readObject: " + cycList.safeToString());
         return  cycList;
     }
 
@@ -574,6 +587,8 @@ public class CfaslInputStream extends BufferedInputStream {
     public CycConstant readConstant () throws IOException {
         CycConstant cycConstant = new CycConstant();
         cycConstant.setId(new Integer(readInt()));
+        if (trace == API_TRACE_DETAILED)
+            System.out.println("readConstant: " + cycConstant.safeToString());
         return  cycConstant;
     }
 
@@ -585,6 +600,8 @@ public class CfaslInputStream extends BufferedInputStream {
     public CycVariable readVariable () throws IOException {
         CycVariable cycVariable = new CycVariable();
         cycVariable.id = new Integer(readInt());
+        if (trace == API_TRACE_DETAILED)
+            System.out.println("readVariable: " + cycVariable.safeToString());
         return  cycVariable;
     }
 
@@ -596,6 +613,8 @@ public class CfaslInputStream extends BufferedInputStream {
     public CycNart readNart () throws IOException {
         CycNart cycNart = new CycNart();
         cycNart.setId(new Integer(readInt()));
+        if (trace == API_TRACE_DETAILED)
+            System.out.println("readNart: " + cycNart.safeToString());
         return  cycNart;
     }
 
@@ -605,8 +624,12 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return an incomplete <tt>CycAssertion</tt> having the input id
      */
     public CycAssertion readAssertion () throws IOException {
-        return  new CycAssertion(new Integer(readInt()));
+        CycAssertion cycAssertion = new CycAssertion(new Integer(readInt()));
+        if (trace == API_TRACE_DETAILED)
+            System.out.println("readAssertion: " + cycAssertion.safeToString());
+        return cycAssertion;
     }
+
 }
 
 

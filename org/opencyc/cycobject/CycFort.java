@@ -31,7 +31,7 @@ public abstract class CycFort implements Serializable {
 
 
     /**
-     * Field for storing the name of the XML tag for CycConstant objects
+     * The name of the XML tag for id objects
      */
     public static final String idXMLTag = "id";
 
@@ -87,5 +87,13 @@ public abstract class CycFort implements Serializable {
         return id;
     }
 
+    /**
+     * Returns a string representation without causing additional api calls to determine
+     * constant names.
+     *
+     * @return a string representation without causing additional api calls to determine
+     * constant names
+     */
+    public abstract String safeToString ();
 }
 

@@ -2,6 +2,7 @@ package org.opencyc.cycobject;
 
 import java.util.*;
 import java.io.*;
+import java.lang.reflect.*;
 import org.opencyc.util.*;
 import org.opencyc.xml.*;
 import org.opencyc.api.*;
@@ -483,6 +484,27 @@ public class CycList extends ArrayList {
      * <tt>List</tt>.
      */
     public String toString() {
+        return toStringHelper(false);
+    }
+
+    /**
+     * Returns a <tt>String</tt> representation of this
+     * <tt>List</tt> without causing  additional api calls to complete the name field of constants.
+     */
+    public String safeToString() {
+        return toStringHelper(true);
+    }
+
+    /**
+     * Returns a <tt>String</tt> representation of this
+     * <tt>CycList</tt>.  When the parameter is true, the representation is created without causing
+     * additional api calls to complete the name field of constants.
+     *
+     * @param safe when true, the representation is created without causing
+     * additional api calls to complete the name field of constants
+     * @return a <tt>String</tt> representation of this <tt>CycList</tt>
+     */
+    protected String toStringHelper(boolean safe) {
         StringBuffer result = new StringBuffer("(");
         for (int i = 0; i < this.size(); i++) {
             if (i > 0)
@@ -490,6 +512,16 @@ public class CycList extends ArrayList {
             Object element = this.get(i);
             if (element instanceof String)
                 result.append("\"" + element + "\"");
+            else if (safe) {
+                try {
+                    // If element understands the safeToString method, then use it.
+                    Method safeToString = element.getClass().getMethod("safeToString", null);
+                    result.append(safeToString.invoke(element, null));
+                }
+                catch (Exception e) {
+                    result.append(element.toString());
+                }
+            }
             else
                 result.append(element.toString());
         }
@@ -625,6 +657,24 @@ public class CycList extends ArrayList {
     }
 
     /**
+     * Returns true if the proper list tree contains the given object anywhere in the tree.
+     *
+     * @param object the object to be found in the tree.
+     * @return true if the proper list tree contains the given object anywhere in the tree
+     */
+    public boolean treeContains (Object object) {
+        if (this.contains(object))
+            return true;
+        for (int i = 0; i < this.size(); i++) {
+            Object element = this.get(i);
+            if ((element instanceof CycList) &&
+                (((CycList) element).treeContains(object)))
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns <tt>true</tt> if the element is a member of this <tt>CycList</tt> and
      * no element in <tt>CycList</tt> otherElements precede it.
      *
@@ -730,6 +780,8 @@ public class CycList extends ArrayList {
              ((Guid) object).toXML(xmlWriter, indentLength, true);
         else if (object instanceof CycList)
              ((CycList) object).toXML(xmlWriter, indentLength, true);
+        else if (object instanceof CycAssertion)
+             ((CycAssertion) object).toXML(xmlWriter, indentLength, true);
         else
             throw new RuntimeException("Invalid CycList object " + object);
         xmlWriter.setIndent(-indentLength, true);

@@ -54,6 +54,7 @@ public class UnitTest extends TestCase {
         TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testGuid"));
         testSuite.addTest(new UnitTest("testByteArray"));
+        testSuite.addTest(new UnitTest("testCycAssertion"));
         testSuite.addTest(new UnitTest("testCycSymbol"));
         testSuite.addTest(new UnitTest("testCycVariable"));
         testSuite.addTest(new UnitTest("testCycConstant"));
@@ -67,16 +68,16 @@ public class UnitTest extends TestCase {
      * Tests the test harness itself.
      */
     public void testTestHarness() {
-        System.out.println("** testTestHarness **");
+        System.out.println("\n*** testTestHarness ***");
         Assert.assertTrue(true);
-        System.out.println("** testTestHarness OK **");
+        System.out.println("*** testTestHarness OK ***");
     }
 
     /**
      * Tests <tt>Guid</tt> object behavior.
      */
     public void testGuid() {
-        System.out.println("\n** testGuid **");
+        System.out.println("\n*** testGuid ***");
         CycObjectFactory.resetGuidCache();
         Assert.assertEquals(0, CycObjectFactory.getGuidCacheSize());
         String guidString = "bd58c19d-9c29-11b1-9dad-c379636f7270";
@@ -108,14 +109,14 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testGuid OK **");
+        System.out.println("*** testGuid OK ***");
     }
 
     /**
      * Tests <tt>CycSymbol</tt> object behavior.
      */
     public void testCycSymbol() {
-        System.out.println("\n** testCycSymbol **");
+        System.out.println("\n*** testCycSymbol ***");
         CycObjectFactory.resetCycSymbolCache();
         Assert.assertEquals(4, CycObjectFactory.getCycSymbolCacheSize());
         String symbolName = "WHY-ISA?";
@@ -175,14 +176,14 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testCycSymbol OK **");
+        System.out.println("*** testCycSymbol OK ***");
     }
 
     /**
      * Tests <tt>CycConstant</tt> object behavior.
      */
     public void testCycConstant() {
-        System.out.println("\n** testCycConstant **");
+        System.out.println("\n*** testCycConstant ***");
         CycObjectFactory.resetCycConstantCaches();
         Assert.assertEquals(0, CycObjectFactory.getCycConstantCacheByIdSize());
         Assert.assertEquals(0, CycObjectFactory.getCycConstantCacheByNameSize());
@@ -281,14 +282,14 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testCycConstant OK **");
+        System.out.println("*** testCycConstant OK ***");
     }
 
     /**
      * Tests <tt>CycNart</tt> object behavior.
      */
     public void testCycNart() {
-        System.out.println("\n** testCycNart **");
+        System.out.println("\n*** testCycNart ***");
         CycConstant fruitFn =
             new CycConstant("FruitFn",
                             CycObjectFactory.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f7270"),
@@ -410,14 +411,14 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testCycNart OK **");
+        System.out.println("*** testCycNart OK ***");
     }
 
     /**
      * Tests <tt>CycVariable</tt> object behavior.
      */
     public void testCycVariable() {
-        System.out.println("\n** testCycVariable **");
+        System.out.println("\n*** testCycVariable ***");
         CycVariable cycVariable1 = new CycVariable("?X");
         Assert.assertNotNull(cycVariable1);
         Assert.assertEquals("?X", cycVariable1.toString());
@@ -474,14 +475,14 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testCycVariable OK **");
+        System.out.println("*** testCycVariable OK ***");
     }
 
     /**
      * Tests <tt>CycList</tt> object behavior.
      */
     public void testCycList() {
-        System.out.println("\n** testCycList **");
+        System.out.println("\n*** testCycList ***");
 
 
         // Simple empty list constructor.
@@ -870,6 +871,9 @@ public class UnitTest extends TestCase {
             CycList cycList49 = cycAccess.makeCycList("(QUOTE (A . B))");
             Assert.assertEquals(cycList49, object);
 
+            // treeContains
+            CycList cycList50 = cycAccess.makeCycList("(DEFMACRO-IN-API MY-MACRO (A B C) (RET ` (LIST , A , B , C)))");
+            Assert.assertTrue(cycList50.treeContains(CycObjectFactory.backquote));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -883,14 +887,14 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testCycList OK **");
+        System.out.println("*** testCycList OK ***");
     }
 
     /**
      * Tests <tt>CycListVisitor</tt> object behavior.
      */
     public void testCycListVisitor() {
-        System.out.println("\n** testCycListVisitor **");
+        System.out.println("\n*** testCycListVisitor ***");
 
         CycAccess cycAccess = null;
         try {
@@ -970,13 +974,47 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        System.out.println("** testCycListVisitor OK **");
+        System.out.println("*** testCycListVisitor OK ***");
+    }
+
+    /**
+     * Tests the CycAssertion class.
+     */
+    public void testCycAssertion() {
+        System.out.println("\n*** testCycAssertion ***");
+
+        // toXML, toXMLString, unmarshall
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        try {
+            String xmlString =
+                "<assertion>\n" +
+                "  <id>1000</id>\n" +
+                "</assertion>\n";
+            Object object = CycObjectFactory.unmarshall(xmlString);
+            Assert.assertNotNull(object);
+            Assert.assertTrue(object instanceof CycAssertion);
+            CycAssertion cycAssertion = (CycAssertion) object;
+            cycAssertion.toXML(xmlStringWriter, 0, false);
+            Assert.assertEquals(xmlString, xmlStringWriter.toString());
+            Assert.assertEquals(xmlString, cycAssertion.toXMLString());
+            CycAssertion cycAssertion2 = new CycAssertion(new Integer (1000));
+            Assert.assertEquals(cycAssertion2, cycAssertion);
+            CycList cycList = new CycList();
+            cycList.add(cycAssertion);
+            System.out.println(cycList.toXMLString());
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("*** testCycAssertion OK ***");
     }
     /**
      * Tests the ByteArray class.
      */
     public void testByteArray() {
-        System.out.println("** testByteArray **");
+        System.out.println("\n*** testByteArray ***");
         byte[] bytes = {0, 1, 2, 3, 4, -128};
         ByteArray byteArray1 = new ByteArray(bytes);
         Assert.assertNotNull(byteArray1);
@@ -1019,6 +1057,6 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
-        System.out.println("** testByteArray OK**");
+        System.out.println("*** testByteArray OK ***");
     }
 }

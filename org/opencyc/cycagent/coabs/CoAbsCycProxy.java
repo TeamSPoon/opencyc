@@ -16,26 +16,27 @@ import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 import org.opencyc.util.*;
 import org.opencyc.xml.*;
+import org.opencyc.cycagent.*;
 
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
  *
- *  An agent to test AgentRegistrationHelper and Directory methods.  This class
- *  implements MessageListener so that it will be notified when messages get
- *  added to its message queue.  It implements AgentTestInterface so that it can
- *  be used by AgentTestGUI.  This agent demonstrates the two main ways of
- *  interacting with other agents - using the Directory.forward() method or directly
- *  communicating using AgentRep.addMessage().  When this agent receives a
- *  message that has a sender field containing an AgentRep, it calls the
- *  AgentRep.addMessage() method to acknowledge receipt.  AgentTestGUI has
- *  buttons to test the AgentRegistrationHelper registerAgent(),
- *  deregisterAgent(), and modifyAgent() methods and the Directory forward()
- *  method.  A default receiver and message are displayed for the forward()
- *  button.  You can edit the defaults in the window to send messages to any
- *  agent that is up and registered.  When the register button is pressed, this
- *  agent tries to get its ServiceID from a file.  If the file does not exist,
- *  the agent asks the LUS to generate its ServiceID and the agent writes that
- *  ServiceID to the file for use the next time the agent needs to register.<p>
+ * An agent to test AgentRegistrationHelper and Directory methods.  This class
+ * implements MessageListener so that it will be notified when messages get
+ * added to its message queue.  It implements AgentTestInterface so that it can
+ * be used by AgentTestGUI.  This agent demonstrates the two main ways of
+ * interacting with other agents - using the Directory.forward() method or directly
+ * communicating using AgentRep.addMessage().  When this agent receives a
+ * message that has a sender field containing an AgentRep, it calls the
+ * AgentRep.addMessage() method to acknowledge receipt.  AgentTestGUI has
+ * buttons to test the AgentRegistrationHelper registerAgent(),
+ * deregisterAgent(), and modifyAgent() methods and the Directory forward()
+ * method.  A default receiver and message are displayed for the forward()
+ * button.  You can edit the defaults in the window to send messages to any
+ * agent that is up and registered.  When the register button is pressed, this
+ * agent tries to get its ServiceID from a file.  If the file does not exist,
+ * the agent asks the LUS to generate its ServiceID and the agent writes that
+ * ServiceID to the file for use the next time the agent needs to register.<p>
  *
  * An instance of this class is created for each unique cyc agent which makes
  * itself known to the agent manager.  A cyc image can host one or more cyc
@@ -71,7 +72,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 0;
+    public static final int DEFAULT_VERBOSITY = 3;
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -106,10 +107,10 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
     protected static Hashtable agentRepCache = new Hashtable();
 
     /**
-     * Cached CycAccess objects which preserve Cyc session state.
-     * agentName --> CycAccess instance
+     * Cached CycConnection objects which preserve Cyc session state.
+     * agentName --> CycConnection instance
      */
-    protected static Hashtable cycAccessCache = new Hashtable();
+    protected static Hashtable cycConnectionCache = new Hashtable();
 
     /**
      * Constructs a new CoAbsCycProxy object.
@@ -327,13 +328,14 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         ACL coAbsRequestAcl = null;
         CycList apiRequest = null;
         String senderName = apiRequestMessage.getSenderAgentRep().getName();
-        CycAccess cycAccess = (CycAccess) cycAccessCache.get(senderName);
+        CycConnection cycConnection = (CycConnection) cycConnectionCache.get(senderName);
         try {
-            if (cycAccess == null) {
-                cycAccess = new CycAccess();
-                cycAccessCache.put(senderName, cycAccess);
+            if (cycConnection == null) {
+                cycConnection = new CycConnection();
+                cycConnectionCache.put(senderName, cycConnection);
                 if (verbosity > 1)
-                    Log.current.print("created cyc access for " + senderName);
+                    Log.current.print("created cyc connection to " + cycConnection.connectionInfo() +
+                                      "\nfor " + senderName);
             }
             coAbsRequestAcl = new ACL(apiRequestMessage.getRawText());
             String contentXml = (String) coAbsRequestAcl.getContentObject();
@@ -351,14 +353,14 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
                 System.out.println("killed cached version of " + (CycConstant) apiRequest.second());
         }
 
+        boolean cycConnectionEnded = false;
         try {
-            if (apiRequest.equals(cycAccess.makeCycList("(end-cyc-access)"))) {
-                if (verbosity > 1)
-                    Log.current.print("ending cyc access for " + senderName);
-                    cycAccess.close();
-                cycAccessCache.remove(senderName);
-                conversationState = "api ready";
-                return;
+            if (apiRequest.equals(CycObjectFactory.END_CYC_CONNECTION)) {
+                if (verbosity > 0)
+                    Log.current.print("ending cyc connection for " + senderName);
+                    cycConnection.close();
+                cycConnectionCache.remove(senderName);
+                cycConnectionEnded = true;
                 }
             }
         catch (Exception e) {
@@ -367,16 +369,22 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         }
 
         Object [] response = {null, null};
-        try {
-            //cycAccess.traceOnDetailed();
-            response = cycAccess.getCycConnection().converse(apiRequest);
+        if (cycConnectionEnded) {
+            response[0] = Boolean.TRUE;
+            response[1] = CycObjectFactory.nil;
         }
-        catch (Exception e) {
-            Log.current.errorPrintln(e.getMessage());
-            Log.current.printStackTrace(e);
-            return;
+        else {
+            try {
+                //cycConnection.traceOnDetailed();
+                cycConnection.traceOn();
+                response = cycConnection.converse(apiRequest);
+            }
+            catch (Exception e) {
+                Log.current.errorPrintln(e.getMessage());
+                Log.current.printStackTrace(e);
+                return;
+            }
         }
-
         ACL coAbsReplyAcl = (ACL) coAbsRequestAcl.clone();
         coAbsReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
         coAbsReplyAcl.setSenderAID(coAbsRequestAcl.getReceiverAID());

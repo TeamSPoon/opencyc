@@ -3,6 +3,7 @@ package  org.opencyc.cycobject;
 import  java.io.IOException;
 import  java.util.*;
 import  org.opencyc.api.*;
+import  org.opencyc.xml.*;
 
 
 /**
@@ -36,6 +37,21 @@ import  org.opencyc.api.*;
  */
 public class CycAssertion {
     /**
+     * The name of the XML tag for this object.
+     */
+    public static final String cycAssertionXMLTag = "assertion";
+
+    /**
+     * The default indentation for printing objects to XML
+     */
+    public static int indentLength = 2;
+
+    /**
+     * The name of the XML tag for id objects
+     */
+    public static final String idXMLTag = "id";
+
+    /**
      * Assertion id assigned by the local KB server.  Not globally unique.
      */
     public Integer id;
@@ -63,8 +79,8 @@ public class CycAssertion {
     public boolean equals (Object object) {
         if (!(object instanceof CycAssertion))
             return  false;
-        CycAssertion cycAssertion = (CycAssertion)object;
-        return formula.equals(cycAssertion.id);
+        CycAssertion that  = (CycAssertion) object;
+        return this.id.equals(that.id);
     }
 
     /**
@@ -77,6 +93,19 @@ public class CycAssertion {
             return "assertion-with-id:" + id;
         else
             return formula.cyclify();
+    }
+
+    /**
+     * Returns a string representation without causing additional api calls.
+     *
+     * @return a string representation without causing additional api calls
+     */
+    public String safeToString () {
+        StringBuffer result = new StringBuffer("[CycAssertion ");
+        if (id != null)
+            result.append(" id: " + id);
+        result.append("]");
+        return result.toString();
     }
 
     /**
@@ -134,6 +163,32 @@ public class CycAssertion {
         return id;
     }
 
+    /**
+     * Returns the XML representation of this object.
+     *
+     * @return the XML representation of this object
+     */
+    public String toXMLString () throws IOException {
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        toXML(xmlStringWriter, 0, false);
+        return xmlStringWriter.toString();
+    }
+
+    /**
+     * Prints the XML representation of the CycAssertion to an <code>XMLWriter</code>
+     *
+     * @param xmlWriter an <tt>XMLWriter</tt>
+     * @param indent an int that specifies by how many spaces to indent
+     * @param relative a boolean; if true indentation is relative, otherwise absolute
+     */
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
+        throws IOException {
+        xmlWriter.printXMLStartTag(cycAssertionXMLTag, indent, relative, true);
+        xmlWriter.printXMLStartTag(idXMLTag, 2, true, false);
+        xmlWriter.print(id.toString());
+        xmlWriter.printXMLEndTag(idXMLTag);
+        xmlWriter.printXMLEndTag(cycAssertionXMLTag, -indentLength, true);
+    }
 }
 
 

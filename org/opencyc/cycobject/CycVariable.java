@@ -71,7 +71,23 @@ public class CycVariable implements Comparable {
      */
     public String toString() {
         return cyclify();
-        //return name;
+    }
+
+    /**
+     * Returns a string representation without causing additional api calls to determine
+     * constant names.
+     *
+     * @return a string representation without causing additional api calls to determine
+     * constant names
+     */
+    public String safeToString () {
+        if (name != null)
+            return name;
+        StringBuffer result = new StringBuffer("[CycVariable ");
+        if (id != null)
+            result.append(" id: " + id);
+        result.append("]");
+        return result.toString();
     }
 
     /**

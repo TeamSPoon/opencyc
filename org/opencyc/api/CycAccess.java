@@ -6,6 +6,7 @@ import java.io.*;
 import org.apache.oro.util.*;
 import org.opencyc.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.cycagent.*;
 
 /**
  * Provides wrappers for the OpenCyc API.<p>
@@ -76,7 +77,7 @@ public class CycAccess {
 
     private String hostName;
     private int port;
-    private int communicationMode;
+    protected int communicationMode;
     private static final Integer OK_RESPONSE_CODE = new Integer(200);
 
     /**
@@ -278,7 +279,8 @@ public class CycAccess {
      * Turns on the detailed diagnostic trace of socket messages.
      */
     public void traceOnDetailed() {
-        cycConnection.traceOnDetailed();
+        if (cycConnection != null)
+            cycConnection.traceOnDetailed();
         saveTrace = CycConnection.API_TRACE_DETAILED;
     }
 
@@ -306,7 +308,7 @@ public class CycAccess {
         if (cycConnection != null) {
             if (cycConnection instanceof RemoteCycConnection)
                 try {
-                    this.converseVoid("(end-cyc-access)");
+                    this.converseVoid(CycObjectFactory.END_CYC_CONNECTION);
                 }
                 catch (UnknownHostException e) {
                 }
@@ -317,6 +319,15 @@ public class CycAccess {
             cycConnection.close();
         }
         cycAccessInstances.remove(Thread.currentThread());
+    }
+
+    /**
+     * Returns the communication mode.
+     *
+     * @return the communication mode
+     */
+    public int getCommunicationMode() {
+        return communicationMode;
     }
 
     /**
@@ -2378,6 +2389,5 @@ public class CycAccess {
         //this.traceOn();
         return converseInt(command);
     }
-
 
 }

@@ -50,8 +50,15 @@ public class CycObjectFactory {
     public static CycSymbol t = makeCycSymbol("T");
     public static CycSymbol nil = makeCycSymbol("NIL");
     public static CycSymbol quote = makeCycSymbol("QUOTE");
+    public static CycSymbol backquote = makeCycSymbol("`");
     public static CycSymbol cons = makeCycSymbol("CONS");
     public static CycSymbol dot = makeCycSymbol(".");
+
+    /**
+     * The api command which is intercepted by the CycProxy agent to close the CycAccess object
+     * associated with the connection between this agent and the particular cyc image.
+     */
+    public static final CycList END_CYC_CONNECTION = (new CycList(makeCycSymbol("end-cyc-connection")));
 
     /**
      * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
@@ -503,6 +510,8 @@ public class CycObjectFactory {
             return new Double(element.getTextTrim());
         else if (elementName.equals("byte-vector"))
             return unmarshallByteArray(element, document);
+        else if (elementName.equals("assertion"))
+            return unmarshallCycAssertion(element);
         else
             throw new IOException("Invalid element name " + elementName);
     }
@@ -533,6 +542,21 @@ public class CycObjectFactory {
         if (cycSymbol != null)
             return cycSymbol;
         return makeCycSymbol(symbolName);
+    }
+
+    /**
+     * Unmarshalls a CycAssertion from the given element in an XML Document object.
+     *
+     * @param cycAssertionElement the CycAssertion xml element
+     * @return the CycAssertion object
+     */
+    protected static CycAssertion unmarshallCycAssertion (Element cycAssertionElement) {
+        Integer id = null;
+        Element idElement = cycAssertionElement.getChild("id");
+        if (idElement != null) {
+            id = new Integer(idElement.getTextTrim());
+        }
+        return new CycAssertion(id);
     }
 
     /**
@@ -609,20 +633,19 @@ public class CycObjectFactory {
             id = new Integer(idElement.getTextTrim());
         CycFort functor = null;
         Element functorElement = cycNartElement.getChild("functor");
-        if (functorElement == null)
-            throw new IOException("Missing functor from CycNart " + cycNartElement);
-        Element cycConstantFunctorElement = functorElement.getChild("constant");
-        Element cycNartFunctorElement = functorElement.getChild("nat");
-        if (cycConstantFunctorElement != null) {
-            if (cycNartFunctorElement != null)
-                throw new IOException("Invalid CycNart functor" + functorElement);
-            functor = unmarshallCycConstant(cycConstantFunctorElement, document);
+        if (functorElement != null) {
+            Element cycConstantFunctorElement = functorElement.getChild("constant");
+            Element cycNartFunctorElement = functorElement.getChild("nat");
+            if (cycConstantFunctorElement != null) {
+                if (cycNartFunctorElement != null)
+                    throw new IOException("Invalid CycNart functor" + functorElement);
+                functor = unmarshallCycConstant(cycConstantFunctorElement, document);
+            }
+            else if (cycNartFunctorElement != null)
+                functor = unmarshallCycNart(cycNartFunctorElement, document);
+            else
+                throw new IOException("Missing functor constant/nart from CycNart " + cycNartElement);
         }
-        else if (cycNartFunctorElement != null)
-            functor = unmarshallCycNart(cycNartFunctorElement, document);
-        else
-            throw new IOException("Missing functor constant/nart from CycNart " + cycNartElement);
-
         List argElements = cycNartElement.getChildren("arg");
         CycList arguments = new CycList();
         for (int i = 0; i < argElements.size(); i++) {

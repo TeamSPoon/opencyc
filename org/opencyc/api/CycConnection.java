@@ -176,6 +176,15 @@ public class CycConnection implements CycConnectionInterface {
 
     /**
      * Constructs a new CycConnection object using the default host name, default base port number and
+     * binary communication mode.  When CycAccess is null, diagnostic output is reduced.
+     */
+    public CycConnection ()
+    throws IOException, UnknownHostException, CycApiException {
+        this(DEFAULT_HOSTNAME, DEFAULT_BASE_PORT, DEFAULT_COMMUNICATION_MODE, null);
+    }
+
+    /**
+     * Constructs a new CycConnection object using the default host name, default base port number and
      * binary communication mode.
      */
     public CycConnection (CycAccess cycAccess)
@@ -382,7 +391,7 @@ public class CycConnection implements CycConnectionInterface {
             }
             else
                 throw new CycApiException("Invalid class for message " + message);
-            messageCycList = substituteForBackquote(messageCycList);
+            messageCycList = substituteForBackquote(messageCycList, timeout);
             return  converseBinary(messageCycList, timeout);
         }
     }
@@ -394,27 +403,26 @@ public class CycConnection implements CycConnectionInterface {
      *
      * @param messageCyclist the input expression to be checked for directly containing
      * a backquote symbol.
+     * @param timeout a <tt>Timer</tt> object giving the time limit for the api call
      * @return the expression with a READ-FROM-STRING expression substituted for
      * expressions directly containing a backquote symbol
      */
-    protected CycList substituteForBackquote(CycList messageCycList)
+    protected CycList substituteForBackquote(CycList messageCycList, Timer timeout)
         throws IOException, CycApiException {
-        if (messageCycList.contains(CycObjectFactory.makeCycSymbol("`"))) {
+        if (messageCycList.treeContains(CycObjectFactory.backquote)) {
             CycList substituteCycList = new CycList();
             substituteCycList.add(CycObjectFactory.makeCycSymbol("read-from-string"));
             substituteCycList.add(messageCycList.cyclify());
-            if (cycAccess == null)
-                throw new RuntimeException("CycAccess is required to process commands with backquote");
-            return cycAccess.converseList(substituteCycList);
-        }
-        else {
-            for (int i = 1; i < messageCycList.size(); i++) {
-                Object element = messageCycList.get(i);
-                if (element instanceof CycList)
-                    messageCycList.set(i, substituteForBackquote((CycList) element));
+            Object[] response = converseBinary(substituteCycList, timeout);
+            if ((response[0].equals(Boolean.TRUE)) &&
+                (response[1] instanceof CycList)) {
+                return (CycList) response[1];
             }
-            return messageCycList;
+            throw new CycApiException("Invalid backquote substitution in " + messageCycList +
+                                      "\nstatus" + response[0] + "\nmessage " + response[1]);
+
         }
+        return messageCycList;
     }
 
     /**
@@ -466,8 +474,16 @@ public class CycConnection implements CycConnectionInterface {
             status.equals(CycObjectFactory.nil)) {
             answer[0] = Boolean.FALSE;
             answer[1] = response;
-            if (trace > API_TRACE_NONE)
-                System.out.println("received error = (" + status + ") " + response);
+            if (trace > API_TRACE_NONE) {
+                String responseString = null;
+                if (response instanceof CycList)
+                    responseString = ((CycList) response).safeToString();
+                else if (response instanceof CycFort)
+                    responseString = ((CycFort) response).safeToString();
+                else
+                    responseString = response.toString();
+                System.out.println("received error = (" + status + ") " + responseString);
+            }
             return answer;
         }
         answer[0] = Boolean.TRUE;
@@ -477,8 +493,16 @@ public class CycConnection implements CycConnectionInterface {
             answer[1] = response;
         else
             answer[1] = cycAccess.completeObject(response);
-        if (trace > API_TRACE_NONE)
-            System.out.println("cyc --> (" + answer[0] + ") " + answer[1]);
+        if (trace > API_TRACE_NONE) {
+            String responseString = null;
+            if (response instanceof CycList)
+                responseString = ((CycList) response).safeToString();
+            else if (response instanceof CycFort)
+                responseString = ((CycFort) response).safeToString();
+            else
+                responseString = response.toString();
+            System.out.println("cyc --> (" + answer[0] + ") " + responseString);
+        }
         return  answer;
     }
 
@@ -602,7 +626,13 @@ public class CycConnection implements CycConnectionInterface {
                 break;
             responseCodeDigits.append((char)ch);
         }
-        int responseCode = (new Integer(responseCodeDigits.toString().trim())).intValue();
+        int responseCode = 0;
+        try {
+            responseCode = (new Integer(responseCodeDigits.toString().trim())).intValue();
+        }
+        catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid response code digits " + responseCodeDigits);
+        }
         if (responseCode == 200)
             answer[0] = Boolean.TRUE;
         else
@@ -669,12 +699,17 @@ public class CycConnection implements CycConnectionInterface {
         int ch = in.read();
         if (trace > API_TRACE_NONE)
             System.out.print((char)ch);
+        boolean escapedChar = false;
         while (true) {
             ch = in.read();
             if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
-            if (ch == '"')
+            if ((ch == '"')  && (! escapedChar))
                 return  "\"" + result.toString() + "\"";
+            if (escapedChar)
+                escapedChar = false;
+            else if (ch == '\\')
+                escapedChar = true;
             result.append((char)ch);
         }
     }
@@ -719,8 +754,10 @@ public class CycConnection implements CycConnectionInterface {
      */
     public void traceOn() {
         trace = API_TRACE_MESSAGES;
-        cfaslInputStream.trace = trace;
-        cfaslOutputStream.trace = trace;
+        if (communicationMode == BINARY_MODE) {
+            cfaslInputStream.trace = trace;
+            cfaslOutputStream.trace = trace;
+        }
     }
 
     /**
@@ -728,8 +765,10 @@ public class CycConnection implements CycConnectionInterface {
      */
     public void traceOnDetailed() {
         trace = API_TRACE_DETAILED;
-        cfaslInputStream.trace = trace;
-        cfaslOutputStream.trace = trace;
+        if (communicationMode == BINARY_MODE) {
+            cfaslInputStream.trace = trace;
+            cfaslOutputStream.trace = trace;
+        }
     }
 
     /**
@@ -737,8 +776,10 @@ public class CycConnection implements CycConnectionInterface {
      */
     public void traceOff() {
         trace = API_TRACE_NONE;
-        cfaslInputStream.trace = trace;
-        cfaslOutputStream.trace = trace;
+        if (communicationMode == BINARY_MODE) {
+            cfaslInputStream.trace = trace;
+            cfaslOutputStream.trace = trace;
+        }
     }
 
     /**

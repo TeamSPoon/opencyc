@@ -72,7 +72,7 @@ public class CycConstant extends CycFort implements Comparable {
      * @param id the id that uniquely identifies the constant on a given OpenCyc server
      */
     public CycConstant (String name, Guid guid, Integer id) {
-        if (name.startsWith("#$"))
+        if ((name != null) && (name.startsWith("#$")))
             this.name = name.substring(2);
         else
             this.name = name;
@@ -259,6 +259,25 @@ public class CycConstant extends CycFort implements Comparable {
      */
     public String toString() {
         return getName();
+    }
+
+    /**
+     * Returns a string representation without causing additional api calls to determine
+     * constant names.
+     *
+     * @return a string representation without causing additional api calls to determine
+     * constant names
+     */
+    public String safeToString () {
+        if (name != null)
+            return name;
+        StringBuffer result = new StringBuffer("[CycConstant ");
+        if (super.getId() != null)
+            result.append(" id: " + super.getId());
+        if (guid != null)
+            result.append(" guid: " + guid);
+        result.append("]");
+        return result.toString();
     }
 
     /**

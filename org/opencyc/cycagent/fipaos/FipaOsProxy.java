@@ -12,6 +12,10 @@ import fipaos.parser.acl.ACLMessage;
 import fipaos.platform.ams.AMSRegistrationException;
 import fipaos.platform.df.DFRegistrationException;
 import fipaos.util.DIAGNOSTICS;
+import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
+import org.opencyc.util.*;
+import org.opencyc.xml.*;
 
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>

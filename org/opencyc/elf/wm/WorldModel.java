@@ -49,7 +49,7 @@ public class WorldModel extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "WorldModel for " + node.getName();
+    return "WorldModel for " + node.toString();
   }
   
   /** Gets the state.

@@ -62,7 +62,7 @@ public class BehaviorGeneration extends NodeComponent {
    */
   public String toString() {
     System.out.println("Accessing BehaviorGeneration node: " + node);
-    return "BehaviorGeneration for " + node.getName();
+    return "BehaviorGeneration for " + node.toString();
   }
   
 

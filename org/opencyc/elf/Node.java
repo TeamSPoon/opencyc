@@ -50,79 +50,8 @@ public class Node {
     logger = Logger.getLogger("org.opencyc.elf.Node");
   }
 
-  /** Constructs a new Node object with the given name.
-   *
-   * @param name the given node name
-   */
-  public Node(String name) {
-    this.name = name;
-    logger = Logger.getLogger("org.opencyc.elf.Node");
-  }
-  
   //// Public Area
   
-  /** Returns a string representation of this object.
-   * 
-   * @return a string representation of this object
-   */
-  public String toString() {
-    StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("Node: ");
-    stringBuffer.append(name);
-    stringBuffer.append("  purpose: ");
-    stringBuffer.append(purpose);
-
-    return stringBuffer.toString();
-  }
-
-  /** Gets the dictionary of nodes by name
-   * 
-   * @return the dictionary of nodes by name
-   */
-  public static HashMap getNodes() {
-    return nodes;
-  }
-
-  /** Sets the dictionary of nodes by name
-   * 
-   * @param nodes the dictionary of nodes by name
-   */
-  public static void setNodes(HashMap nodes) {
-    Node.nodes = nodes;
-  }
-
-  /** Gets the unique name of this node
-   * 
-   * @return the unique name of this node
-   */
-  public String getName() {
-    return name;
-  }
-
-  /** Sets the unique name of this node
-   * 
-   * @param name the unique name of this node
-   */
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /** Gets the purpose description
-   * 
-   * @return the purpose description
-   */
-  public String getPurpose() {
-    return purpose;
-  }
-
-  /** Sets the purpose description
-   * 
-   * @param purpose the purpose description
-   */
-  public void setPurpose(String purpose) {
-    this.purpose = purpose;
-  }
-
   /** Gets the World Model for this node
    * 
    * @return the World Model for this node
@@ -261,15 +190,6 @@ public class Node {
 
   //// Internal Rep
   
-  /** the node name */
-  protected String name;
-  
-  /** the dictionary of nodes by name, name --> Node */
-  protected static HashMap nodes = new HashMap();
-
-  /** the purpose description */
-  protected String purpose;
-
   /** the World Model for this node */
   protected WorldModel worldModel;
 

@@ -104,7 +104,7 @@ public class Executor extends BufferedNodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "Executor for " + node.getName();
+    return "Executor for " + node.toString();
   }
   
   /** returns the input channel for this buffered node component. 
@@ -174,6 +174,7 @@ public class Executor extends BufferedNodeComponent {
      */
     protected void processExecutorScheduleMsg(ExecuteScheduleMsg executeScheduleMsg) {
       executor.schedule = executeScheduleMsg.getSchedule();
+      getLogger().info("Executing " + executor.schedule);
       controlledResources = executeScheduleMsg.getControlledResources();
       if (executor.actuator == null) {
         String directActuatorName = executor.schedule.getDirectActuatorName();
@@ -183,9 +184,8 @@ public class Executor extends BufferedNodeComponent {
           initializeLowerLevelNode();
       }
       if (executor.schedule.getDirectSensorName() != null) {
-        if (directSensor == null) {
-          //TODO get the sensor and attach it to sensory perception
-        }
+        if (directSensor == null)
+          obtainDirectSensor();
         else if (! directSensor.getName().equals(executor.schedule.getDirectSensorName())) {
           //TODO release the current sensor and get the new one, attaching it
           // to sensory perception
@@ -205,11 +205,17 @@ public class Executor extends BufferedNodeComponent {
       }
     }
     
+    /** Obtains the required direct sensor and attaches it to this node's sensory perception. */
+    protected void obtainDirectSensor() {
+      
+    }
+    
     /** Connects this node to the new lower level node by initializing the lower level job assigner
      * and sensory perception.
      */
     protected void initializeLowerLevelNode () {
-      Node lowerLevelNode = NodeFactory.getInstance().makeNodeShell(null);
+      getLogger().info("Executing " + executor.schedule);
+      Node lowerLevelNode = NodeFactory.getInstance().makeNodeShell();
       executor.getNode().addChildNode(lowerLevelNode);
       executor.getNode().setParentNode(executor.getNode());
       JobAssigner lowerLevelJobAssigner = lowerLevelNode.getBehaviorGeneration().getJobAssigner();

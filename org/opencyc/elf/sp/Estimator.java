@@ -44,7 +44,7 @@ public class Estimator extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "Estimator for " + node.getName();
+    return "Estimator for " + node.toString();
   }
   
   /** Gets the sensory perception instance which owns this estimator

@@ -42,7 +42,7 @@ public class HypothesisFormer extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "HypothesisFormer for " + node.getName();
+    return "HypothesisFormer for " + node.toString();
   }
   
   /** Gets the sensory perception instance which owns this hypothesis former

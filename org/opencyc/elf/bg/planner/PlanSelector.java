@@ -46,7 +46,7 @@ public class PlanSelector extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "PlanSelector " + node.getName();
+    return "PlanSelector " + node.toString();
   }
 
   //// Protected Area

@@ -135,7 +135,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    * @return the name of the virtual actuator
    */
   public String getName() {
-    return getNode().getName();
+    return getNode().toString();
   }
   
   /** Gets the resources required by this virtual actuator by iterating over the

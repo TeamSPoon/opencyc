@@ -87,7 +87,7 @@ public class UnitTest extends TestCase {
     
     logger.info("Creating NodeFactory");
     NodeFactory nodeFactory = new NodeFactory();
-    Node node = nodeFactory.makeNodeShell("test-node");
+    Node node = nodeFactory.makeNodeShell();
     
     Assert.assertNotNull(node.getLogger());
     Assert.assertTrue(node.getLogger() instanceof Logger);
@@ -201,7 +201,7 @@ public class UnitTest extends TestCase {
     new SensorPool();
     (new SensorFactory()).getInstance().populateSensorPool();
     new NodeFactory();
-    Node node = NodeFactory.getInstance().makeNodeShell("test-node");
+    Node node = NodeFactory.getInstance().makeNodeShell();
     
     ActionFactory actionFactory = new ActionFactory();
     Action converseWithUserAction = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);

@@ -45,7 +45,7 @@ public class PlanEvaluator extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "PlanEvaluator for " + node.getName();
+    return "PlanEvaluator for " + node.toString();
   }
   
   //// Public Area

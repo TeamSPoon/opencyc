@@ -43,7 +43,7 @@ public class EntityEvaluator extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "EntityEvaluator for " + node.getName();
+    return "EntityEvaluator for " + node.toString();
   }
   
   //// Protected Area

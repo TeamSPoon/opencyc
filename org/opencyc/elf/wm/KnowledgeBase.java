@@ -56,7 +56,7 @@ public class KnowledgeBase extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "KnowledgeBase for " + node.getName();
+    return "KnowledgeBase for " + node.toString();
   }
 
   /** Gets the value for the given knowledge base object.

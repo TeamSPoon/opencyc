@@ -103,7 +103,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
    * @return a string representation of this object
    */
   public String toString() {
-    return "SensoryPerception for " + node.getName();
+    return "SensoryPerception for " + node.toString();
   }
 
   /** Adds the given sensor to the list of sensors reporting to this sensory

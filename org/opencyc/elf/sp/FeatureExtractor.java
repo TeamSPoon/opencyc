@@ -44,7 +44,7 @@ public class FeatureExtractor extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "FeatureExtractor for " + node.getName();
+    return "FeatureExtractor for " + node.toString();
   }
     
   /** Gets the sensory perception instance which owns this feature extractor

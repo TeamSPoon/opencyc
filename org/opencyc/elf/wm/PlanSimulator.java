@@ -46,7 +46,7 @@ public class PlanSimulator extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "PlanSimulator for " + node.getName();
+    return "PlanSimulator for " + node.toString();
   }
 
   //// Protected Area

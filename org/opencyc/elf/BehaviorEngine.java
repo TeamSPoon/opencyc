@@ -70,7 +70,7 @@ public class BehaviorEngine {
   /** Executes the behavior engine
    */
   public void execute() {
-    Node node = NodeFactory.getInstance().makeNodeShell("root");
+    Node node = NodeFactory.getInstance().makeNodeShell();
 
     // no node superior to the root node.
     node.getSensoryPerception().initialize((Puttable) null);

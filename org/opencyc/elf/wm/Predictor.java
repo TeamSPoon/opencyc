@@ -41,7 +41,7 @@ public class Predictor extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "Predictor for " + node.getName();
+    return "Predictor for " + node.toString();
   }
   
   //// Protected Area

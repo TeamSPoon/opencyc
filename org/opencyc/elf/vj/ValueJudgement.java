@@ -49,7 +49,7 @@ public class ValueJudgement extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "ValueJudgement for " + node.getName();
+    return "ValueJudgement for " + node.toString();
   }
 
   /** Gets the plan evaluator

@@ -42,7 +42,7 @@ public class HypothesisEvaluator extends NodeComponent {
    * @return a string representation of this object
    */
   public String toString() {
-    return "HypothesisEvaluator for " + node.getName();
+    return "HypothesisEvaluator for " + node.toString();
   }
   
   /** Gets the sensory perception instance which owns this hypothesis evaluator

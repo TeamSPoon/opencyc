@@ -87,11 +87,10 @@ public class NodeFactory {
   
   /** Makes a shell node.
    *
-   * @param name the node name
    * @return a shell node
    */
-  public Node makeNodeShell (String name) {
-    node = new Node(name);
+  public Node makeNodeShell () {
+    node = new Node();
     assembleNode();
     return node;
   }

@@ -7105,6 +7105,47 @@ public class CycAccess {
 
 
     /**
+     * Returns the first arg1 term from gafs having the specified
+     * predicate and arg2 values.
+     *
+     * @param predicate the given predicate
+     * @param arg2 the given arg2 term
+     * @param mt the inference microtheory
+     * @return the first arg1 term from gafs having the specified
+     * predicate and arg2 values
+     */
+    public Object getArg1 (String predicate,
+                           String arg2,
+                           String mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getArg1(getKnownConstantByName(predicate),
+                       getKnownConstantByName(arg2),
+                       getKnownConstantByName(mt));
+    }
+
+
+    /**
+     * Returns the first arg1 term from gafs having the specified
+     * predicate and arg2 values.
+     *
+     * @param predicate the given predicate
+     * @param arg2 the given arg2 term
+     * @param mt the inference microtheory
+     * @return the first arg1 term from gafs having the specified
+     * predicate and arg2 values
+     */
+    public Object getArg1 (CycFort predicate,
+                           CycFort arg2,
+                           CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList answer = getArg1s(predicate, arg2, mt);
+        if (answer.size() > 0)
+            return answer.get(0);
+        else
+            return null;
+    }
+
+    /**
      * Returns the list of arg1 terms from gafs having the specified
      * predicate and arg2 values.
      *

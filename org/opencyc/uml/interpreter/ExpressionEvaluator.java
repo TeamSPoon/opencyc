@@ -110,7 +110,7 @@ public class ExpressionEvaluator {
     }
 
     /**
-     * Evaluates the given boolean java expression in the context of the TreeInterpreter.
+     * Evaluates the given boolean expression in the state context.
      *
      * @param booleanExpression the given boolean java expression
      * @return the result of evaluating the given boolean java expression

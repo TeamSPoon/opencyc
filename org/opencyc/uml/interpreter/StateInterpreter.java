@@ -146,7 +146,7 @@ public class StateInterpreter extends Thread {
         if (procedure != null) {
             if (verbosity > 2)
                 Log.current.println("Evaluating effect " + procedure.toString());
-            procedureInterpreter.interpret(procedure);
+            procedureInterpreter.interpretTransitionProcedure(transition);
         }
         if (state instanceof FinalState) {
             state.getContainer().getStateInterpreter().complete();
@@ -213,7 +213,7 @@ public class StateInterpreter extends Thread {
         }
 
         if (state.getEntry() != null)
-            procedureInterpreter.interpret(state.getEntry());
+            procedureInterpreter.interpretStateEntryProcedure(state);
         if (state.getDoActivity() != null)
             new DoActivity(state);
     }
@@ -254,7 +254,7 @@ public class StateInterpreter extends Thread {
         if (doActivityThread != null)
             doActivityThread.terminate();
         if (state.getExit() != null)
-            procedureInterpreter.interpret(state.getExit());
+            procedureInterpreter.interpretStateExitProcedure(state);
         DefaultMutableTreeNode stateNode =
             (DefaultMutableTreeNode) interpreter.getActiveStates().get(state);
         interpreter.getActiveStates().remove(state);

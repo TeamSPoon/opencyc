@@ -528,7 +528,7 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public CycConstant readConstant () throws IOException {
         CycConstant cycConstant = new CycConstant();
-        cycConstant.id = new Integer(readInt());
+        cycConstant.setId(new Integer(readInt()));
         return  cycConstant;
     }
 
@@ -550,7 +550,7 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public CycNart readNart () throws IOException {
         CycNart cycNart = new CycNart();
-        cycNart.id = new Integer(readInt());
+        cycNart.setId(new Integer(readInt()));
         return  cycNart;
     }
 

@@ -347,6 +347,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the given api connection.
      */
     protected void doTestCycAccess1(CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        CycConstant.resetCaches();
         // getConstantByName.
         CycConstant cycConstant = null;
         try {
@@ -359,7 +361,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(cycConstant);
-        Assert.assertEquals("bd58daa0-9c29-11b1-9dad-c379636f7270", cycConstant.guid.toString());
+        Assert.assertEquals("bd58daa0-9c29-11b1-9dad-c379636f7270", cycConstant.getGuid().toString());
 
         // getConstantByGuid.
         try {
@@ -373,7 +375,7 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(cycConstant);
         Assert.assertEquals("#$Dog", cycConstant.cyclify());
-        Assert.assertEquals("Dog", cycConstant.name);
+        Assert.assertEquals("Dog", cycConstant.getName());
 
         // getConstantById
         cycConstant = null;
@@ -388,9 +390,9 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(cycConstant);
         Assert.assertEquals("#$Dog", cycConstant.cyclify());
-        Assert.assertEquals("Dog", cycConstant.name);
+        Assert.assertEquals("Dog", cycConstant.getName());
         Assert.assertEquals(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"),
-                            cycConstant.guid);
+                            cycConstant.getGuid());
 
         // getComment.
         String comment = null;
@@ -427,7 +429,8 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.toString());
         }
-
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
 
     /**
@@ -492,6 +495,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the given api connection.
      */
     protected void doTestCycAccess2 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        CycConstant.resetCaches();
         // getGenls.
         List genls = null;
         try {
@@ -760,6 +765,8 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(phrase);
         Assert.assertEquals("doer", phrase);
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
 
     /**
@@ -824,6 +831,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the given api connection.
      */
     protected void doTestCycAccess3 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        CycConstant.resetCaches();
         // getParaphrase.
         String phrase = null;
         try {
@@ -1148,6 +1157,8 @@ public class UnitTest extends TestCase {
         }
         Assert.assertTrue(answer);
 
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
 
     /**
@@ -1212,6 +1223,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the given api connection.
      */
     protected void doTestCycAccess4 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        CycConstant.resetCaches();
         // getWhyGenl.
         CycList whyGenl = null;
         try {
@@ -1423,6 +1436,8 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertTrue(answer);
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
 
     /**
@@ -1487,6 +1502,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the given api connection.
      */
     protected void doTestCycAccess5 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        CycConstant.resetCaches();
         // createNewPermanent.
         CycConstant cycConstant = null;
         try {
@@ -1499,7 +1516,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(cycConstant);
-        Assert.assertEquals("CycAccessTestConstant", cycConstant.name);
+        Assert.assertEquals("CycAccessTestConstant", cycConstant.getName());
 
         // kill.
         try {
@@ -1524,7 +1541,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(cycConstant);
-        Assert.assertEquals("CycAccessTestConstant", cycConstant.name);
+        Assert.assertEquals("CycAccessTestConstant", cycConstant.getName());
 
         CycConstant baseKb = null;
         try {
@@ -1537,9 +1554,10 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(cycConstant);
-        Assert.assertEquals("BaseKB", baseKb.name);
+        Assert.assertEquals("BaseKB", baseKb.getName());
         String assertedComment = "A test comment";
         try {
+            //cycAccess.traceOn();
             cycAccess.assertComment(cycConstant, assertedComment, baseKb);
         }
         catch (UnknownHostException e) {
@@ -1743,6 +1761,8 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.toString());
         }
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
 
     /**
@@ -1807,6 +1827,8 @@ public class UnitTest extends TestCase {
      * Tests a portion of the CycAccess methods using the given api connection.
      */
     protected void doTestCycAccess6 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        CycConstant.resetCaches();
         // Test common constants.
         try {
             Assert.assertEquals(cycAccess.getConstantByName("and"), CycAccess.and);
@@ -2022,6 +2044,8 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.toString());
         }
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
 }
 

@@ -59,6 +59,12 @@ public class CycAccess {
     public static final boolean DEFAULT_PERSISTENT_CONNECTION = PERSISTENT_CONNECTION;
 
     /**
+     * Parameter indicating whether the OpenCyc binary api defers the completion of CycConstant attributes
+     * until used for the first time.
+     */
+    public boolean deferObjectCompletion = true;
+
+    /**
      * Parameter indicating whether the OpenCyc api should use one TCP socket for the entire
      * session, or if the socket is created and then closed for each api call.
      */
@@ -431,17 +437,18 @@ public class CycAccess {
         String name = constantName;
         if (constantName.startsWith("#$"))
             name = name.substring(2);
-        CycConstant answer = CycConstant.getCache(name);
+        CycConstant answer = CycConstant.getCacheByName(name);
         if (answer != null)
             return answer;
         answer = new CycConstant();
-        answer.name = name;
+        answer.setName(name);
         Integer id = getConstantId(name);
         if (id == null)
             return null;
-        answer.id = id;
-        answer.guid = getConstantGuid(name);
-        CycConstant.addCache(answer);
+        answer.setId(id);
+        answer.setGuid(getConstantGuid(name));
+        CycConstant.addCacheByName(answer);
+        CycConstant.addCacheById(answer);
         return answer;
     }
 
@@ -452,7 +459,7 @@ public class CycAccess {
      * @return the ID for the given CycConstant, or null if the constant does not exist.
      */
     public Integer getConstantId (CycConstant cycConstant)  throws IOException, UnknownHostException {
-        return getConstantId(cycConstant.name);
+        return getConstantId(cycConstant.getName());
     }
 
     /**
@@ -481,7 +488,7 @@ public class CycAccess {
      */
     public Guid getConstantGuid (CycConstant cycConstant)
         throws IOException, UnknownHostException {
-        return getConstantGuid(cycConstant.name);
+        return getConstantGuid(cycConstant.getName());
     }
 
     /**
@@ -537,10 +544,11 @@ public class CycAccess {
         if (! constantExists)
             return null;
         CycConstant answer = new CycConstant();
-        answer.name = getConstantName(id);
-        answer.id = id;
-        answer.guid = getConstantGuid(id);
-        CycConstant.addCache(answer);
+        answer.setName(getConstantName(id));
+        answer.setId(id);
+        answer.setGuid(getConstantGuid(id));
+        CycConstant.addCacheByName(answer);
+        CycConstant.addCacheById(answer);
         return answer;
     }
 
@@ -624,11 +632,11 @@ public class CycAccess {
      * @return the completed <tt>CycConstant</tt> object, or a reference to the previously cached instance
      */
     public CycConstant completeCycConstant (CycConstant cycConstant) throws IOException, UnknownHostException {
-        cycConstant.name = getConstantName(cycConstant.id);
-        CycConstant cachedConstant = CycConstant.getCache(cycConstant.name);
+        cycConstant.setName(getConstantName(cycConstant.getId()));
+        CycConstant cachedConstant = CycConstant.getCacheByName(cycConstant.getName());
         if (cachedConstant == null) {
-            cycConstant.guid = getConstantGuid(cycConstant.id);
-            CycConstant.addCache(cycConstant);
+            cycConstant.setGuid(getConstantGuid(cycConstant.getId()));
+            CycConstant.addCacheByName(cycConstant);
             return cycConstant;
         }
         else
@@ -696,7 +704,7 @@ public class CycAccess {
      * @param the completed <tt>CycNart</tt> object
      */
     public CycNart completeCycNart (CycNart cycNart) throws IOException, UnknownHostException {
-        return getCycNartById(cycNart.id);
+        return getCycNartById(cycNart.getId());
     }
 
     /**
@@ -721,7 +729,7 @@ public class CycAccess {
         }
         else {
             cycNart = new CycNart();
-            cycNart.id = id;
+            cycNart.setId(id);
         }
         CycList command = new CycList();
         command.add(CycSymbol.makeCycSymbol("nart-el-formula"));
@@ -1354,7 +1362,7 @@ public class CycAccess {
      */
     public synchronized void kill (CycConstant cycConstant)   throws IOException, UnknownHostException {
         converseBoolean("(cyc-kill " + cycConstant.stringApiValue() + ")");
-        CycConstant.removeCache(cycConstant);
+        CycConstant.removeCaches(cycConstant);
     }
 
     public synchronized void kill (CycConstant[] cycConstants)   throws IOException, UnknownHostException {
@@ -1648,7 +1656,8 @@ public class CycAccess {
             cycConstant = this.createNewPermanent(name);
             if (cycConstant == null)
                 throw new RuntimeException("Cannot create new constant for " + name);
-            CycConstant.addCache(cycConstant);
+            CycConstant.addCacheByName(cycConstant);
+            CycConstant.addCacheById(cycConstant);
         }
         return cycConstant;
     }

@@ -50,7 +50,7 @@ public class CycAssertion {
     /**
      * The assertion in the form of a <tt>CycList</tt>.
      */
-    protected CycList formula;
+    private CycList formula;
 
     /**
      * Constructs an incomplete <tt>CycAssertion</tt> object given its local KB id.
@@ -110,6 +110,16 @@ public class CycAssertion {
      * @return the formula for this assertion
      */
     public CycList getFormula () {
+        if (formula == null) {
+            CycAssertion cycAssertion = null;
+            try {
+                cycAssertion = CycAccess.current().completeCycAssertion(this);
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            formula = cycAssertion.formula;
+        }
         return formula;
     }
 

@@ -127,6 +127,15 @@ public class Literal  implements Comparable{
     }
 
     /**
+     * Provides the hash code appropriate for the <tt>Literal</tt>.
+     *
+     * @return the hash code for the <tt>Literal</tt>
+     */
+    public int hashCode() {
+        return this.formula.hashCode();
+    }
+
+    /**
      * Compares this object with the specified object for order.
      * Returns a negative integer, zero, or a positive integer as this
      * object is less than, equal to, or greater than the specified object.

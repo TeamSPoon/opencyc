@@ -401,7 +401,10 @@ public class CycConnection {
             return answer;
         }
         answer[0] = Boolean.TRUE;
-        answer[1] = cycAccess.completeObject(response);
+        if (cycAccess.deferObjectCompletion)
+            answer[1] = response;
+        else
+            answer[1] = cycAccess.completeObject(response);
         if (trace > API_TRACE_NONE)
             System.out.println("cyc --> (" + answer[0] + ") " + answer[1]);
         return  answer;

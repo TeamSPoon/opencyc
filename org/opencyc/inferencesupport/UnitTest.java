@@ -59,6 +59,7 @@ public class UnitTest extends TestCase {
         else {
             testSuite = new TestSuite();
             testSuite.addTest(new UnitTest("testBinding"));
+            testSuite.addTest(new UnitTest("testBindingSet"));
             testSuite.addTest(new UnitTest("testConstraintRule"));
             testSuite.addTest(new UnitTest("testQueryLiteral"));
             testSuite.addTest(new UnitTest("testHornClause"));
@@ -83,6 +84,49 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("?x = \"abc\"", binding1.toString());
 
         System.out.println("** testBinding OK **");
+    }
+
+    /**
+     * Tests the <tt>BindingSet</tt> class.
+     */
+    public void testBindingSet() {
+        System.out.println("** testBindingSet **");
+
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        QueryLiteral queryLiteral1 = null;
+        CycFort mt = null;
+        try {
+            String queryLiteralAsString = "(#$isa ?x #$Cathedral)";
+            queryLiteral1 = new QueryLiteral(cycAccess.makeCycList(queryLiteralAsString));
+            Assert.assertNotNull(queryLiteral1);
+            Assert.assertNotNull(queryLiteral1.getFormula());
+            CycList cycList = queryLiteral1.getFormula();
+            Assert.assertEquals(queryLiteralAsString, cycList.cyclify());
+            Assert.assertEquals(queryLiteralAsString, queryLiteral1.cyclify());
+            mt = CycAccess.baseKB;
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        BindingSet bindingSet1 = new BindingSet(queryLiteral1, mt);
+        BindingSet bindingSet2 = new BindingSet(queryLiteral1, mt);
+        Assert.assertEquals(bindingSet1, bindingSet2);
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testBindingSet OK **");
     }
 
     /**
@@ -526,6 +570,12 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testQueryLiteral OK **");
     }
@@ -788,6 +838,13 @@ public class UnitTest extends TestCase {
         }
         catch (Exception e) {
             e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 

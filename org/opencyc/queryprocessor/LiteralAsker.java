@@ -1,9 +1,10 @@
 package org.opencyc.queryprocessor;
 
-import org.opencyc.cycobject.*;
-import org.opencyc.api.*;
 import java.util.*;
 import java.io.*;
+import org.opencyc.cycobject.*;
+import org.opencyc.inferencesupport.*;
+import org.opencyc.api.*;
 
 /**
  * <tt>LiteralAsker</tt> object to obtain bindings for query literals by asking the
@@ -60,8 +61,19 @@ public class LiteralAsker {
      */
     public ArrayList ask(ArrayList queryLiterals, CycFort mt) throws IOException {
         ArrayList result = new ArrayList();
+        for (int i = 0; i < queryLiterals.size(); i++) {
+            QueryLiteral queryLiteral = (QueryLiteral) queryLiterals.get(i);
+            if (verbosity > 3)
+                System.out.println("Asking " + queryLiteral.cyclify());
+            BindingSet bindingSet = new BindingSet(queryLiteral, mt);
+            bindingSet.setBindingValues(CycAccess.current().askWithVariables(bindingSet.getQueryLiteral().getFormula(),
+                                                                             bindingSet.getVariables(),
+                                                                             bindingSet.getMt()));
+            if (verbosity > 8)
+                bindingSet.displayBindingSet();
+            result.add(bindingSet);
+        }
 
-        //TODO implement asks.
 
         return result;
     }

@@ -35,7 +35,7 @@ public abstract class CycFort implements Serializable {
      * The ID of the <tt>CycFort<tt> object which is an integer unique within an OpenCyc
      * KB but not necessarily unique globally.
      */
-    public Integer id;
+    private Integer id;
 
     /**
      * Returns a cyclified string representation of the OpenCyc FORT.
@@ -64,6 +64,24 @@ public abstract class CycFort implements Serializable {
      * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
      */
     public abstract Object cycListApiValue();
+
+    /**
+     * Sets the id.
+     *
+     * @param id the id value
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the id.
+     *
+     * @return the id
+     */
+    public Integer getId() {
+        return id;
+    }
 
 }
 

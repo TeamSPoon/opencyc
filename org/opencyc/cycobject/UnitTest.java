@@ -143,8 +143,9 @@ public class UnitTest extends TestCase {
      */
     public void testCycConstant() {
         System.out.println("** testCycConstant **");
-        CycConstant.resetCache();
-        Assert.assertEquals(0, CycConstant.getCacheSize());
+        CycConstant.resetCaches();
+        Assert.assertEquals(0, CycConstant.getCacheByIdSize());
+        Assert.assertEquals(0, CycConstant.getCacheByNameSize());
         String guidString = "bd58c19d-9c29-11b1-9dad-c379636f7270";
         String constantName = "#$TameAnimal";
         CycConstant cycConstant1 =
@@ -152,17 +153,19 @@ public class UnitTest extends TestCase {
                             Guid.makeGuid(guidString),
                             new Integer(61101217));
         Assert.assertNotNull(cycConstant1);
-        Assert.assertEquals(1, CycConstant.getCacheSize());
+        Assert.assertEquals(1, CycConstant.getCacheByIdSize());
+        Assert.assertEquals(1, CycConstant.getCacheByNameSize());
         Assert.assertEquals(constantName.substring(2), cycConstant1.toString());
         Assert.assertEquals(constantName, cycConstant1.cyclify());
-        Assert.assertEquals(guidString, cycConstant1.guid.toString());
+        Assert.assertEquals(guidString, cycConstant1.getGuid().toString());
 
         // Attempt to create a duplicate returns the cached existing object.
         CycConstant cycConstant2 =
             new CycConstant(constantName,
                             Guid.makeGuid(guidString),
                             new Integer(61101217));
-        Assert.assertEquals(1, CycConstant.getCacheSize());
+        Assert.assertEquals(1, CycConstant.getCacheByIdSize());
+        Assert.assertEquals(1, CycConstant.getCacheByNameSize());
         Assert.assertEquals(cycConstant1, cycConstant2);
 
         CycConstant cycConstant3 =

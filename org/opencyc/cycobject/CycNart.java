@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import org.apache.oro.util.*;
 import org.opencyc.xml.XMLPrintWriter;
+import org.opencyc.api.*;
 
 /**
  * This class implements the behavior and attributes of a
@@ -51,12 +52,12 @@ public class CycNart extends CycFort implements Comparable {
      * (i.e. cannot be assumed to be a CycConstant) because functors can themselves be
      * CycNarts.
      */
-    protected CycFort functor;
+    private CycFort functor;
 
     /**
      * The list of the arguments of the <ttt>CycNart</tt> object.
      */
-    protected CycList arguments = new CycList();
+    private CycList arguments = new CycList();
 
     /**
      * Least Recently Used Cache of CycNarts, so that a reference to an existing <tt>CycNart</tt>
@@ -154,6 +155,17 @@ public class CycNart extends CycFort implements Comparable {
      * @return the functor of the <tt>CycNart</tt>
      */
     public CycFort getFunctor() {
+        if (functor == null) {
+            CycNart cycNart = null;
+            try {
+                cycNart = CycAccess.current().completeCycNart(this);
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            functor = cycNart.functor;
+            arguments = cycNart.arguments;
+        }
         return functor;
     }
 
@@ -172,6 +184,17 @@ public class CycNart extends CycFort implements Comparable {
      * @return the arguments of the <tt>CycNart</tt>
      */
     public List getArguments() {
+        if (arguments == null) {
+            CycNart cycNart = null;
+            try {
+                cycNart = CycAccess.current().completeCycNart(this);
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            functor = cycNart.functor;
+            arguments = cycNart.arguments;
+        }
         return arguments;
     }
 
@@ -242,7 +265,7 @@ public class CycNart extends CycFort implements Comparable {
      */
     public String toString() {
         if (functor == null)
-            return "nart-with-id:" + id;
+            return "nart-with-id:" + getId();
         StringBuffer result = new StringBuffer("(");
         result.append(this.functor.toString());
         ListIterator iterator = arguments.listIterator();
@@ -309,7 +332,7 @@ public class CycNart extends CycFort implements Comparable {
     public String metaGuid() {
         String functorGuid =
             (this.functor instanceof CycConstant ?
-                ((CycConstant) this.functor).guid.toString() : ((CycNart) this.functor).metaGuid());
+                ((CycConstant) this.functor).getGuid().toString() : ((CycNart) this.functor).metaGuid());
         ListIterator iterator = this.arguments.listIterator();
         StringBuffer result = new StringBuffer("(");
         result.append(functorGuid);
@@ -318,7 +341,7 @@ public class CycNart extends CycFort implements Comparable {
         while (iterator.hasNext()) {
             arg = iterator.next();
             if (arg instanceof CycConstant)
-                argGuid = ((CycConstant)arg).guid.toString();
+                argGuid = ((CycConstant)arg).getGuid().toString();
             else if (arg instanceof CycNart)
                 argGuid = ((CycNart) arg).metaGuid();
             else
@@ -337,7 +360,7 @@ public class CycNart extends CycFort implements Comparable {
     public String metaName() {
         String functorName =
             (this.functor instanceof CycConstant ?
-                ((CycConstant)this.functor).name : ((CycNart)this.functor).metaName());
+                ((CycConstant)this.functor).getName() : ((CycNart)this.functor).metaName());
         ListIterator iterator = this.arguments.listIterator();
         StringBuffer result = new StringBuffer("(");
         result.append(functorName);
@@ -346,7 +369,7 @@ public class CycNart extends CycFort implements Comparable {
         while (iterator.hasNext()) {
             arg = iterator.next();
             if (arg instanceof CycConstant)
-                argName = ((CycConstant)arg).name;
+                argName = ((CycConstant)arg).getName();
             else if (arg instanceof CycNart)
                 argName = ((CycNart)arg).metaName();
             else
@@ -402,7 +425,7 @@ public class CycNart extends CycFort implements Comparable {
      * Adds the <tt>CycNart</tt> to the cache.
      */
     public static void addCache(CycNart cycNart) {
-        cache.addElement(cycNart.id, cycNart);
+        cache.addElement(cycNart.getId(), cycNart);
     }
 
     /**
@@ -416,9 +439,9 @@ public class CycNart extends CycFort implements Comparable {
      * Removes the <tt>CycNart</tt> from the cache if it is contained within.
      */
     public static void removeCache(CycNart cycNart) {
-        Object element = cache.getElement(cycNart.id);
+        Object element = cache.getElement(cycNart.getId());
         if (element != null)
-            cache.addElement(cycNart.id, null);
+            cache.addElement(cycNart.getId(), null);
     }
 
     /**

@@ -61,8 +61,8 @@ public class UnitTest extends TestCase {
             testSuite = new TestSuite();
             //testSuite.addTest(new UnitTest("testQueryParser"));
             //testSuite.addTest(new UnitTest("testLiteralAsker"));
-            //testSuite.addTest(new UnitTest("testHashJoiner"));
-            testSuite.addTest(new UnitTest("testQueryProcessor1"));
+            testSuite.addTest(new UnitTest("testHashJoiner"));
+            //testSuite.addTest(new UnitTest("testQueryProcessor1"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -123,7 +123,52 @@ public class UnitTest extends TestCase {
      */
     public void testLiteralAsker() {
         System.out.println("** testLiteralAsker **");
-
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        QueryLiteral queryLiteral1 = null;
+        QueryLiteral queryLiteral2 = null;
+        QueryLiteral queryLiteral3 = null;
+        QueryLiteral queryLiteral4 = null;
+        CycFort mt = null;
+        try {
+            queryLiteral1 = new QueryLiteral("(#$isa ?country #$WesternEuropeanCountry)");
+            queryLiteral2 = new QueryLiteral("(#$isa ?cathedral #$Cathedral)");
+            queryLiteral3 = new QueryLiteral("(#$countryOfCity ?country ?city)");
+            queryLiteral4 = new QueryLiteral("(#$objectFoundInLocation ?cathedral ?city)");
+            mt = CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        ArrayList queryLiterals = new ArrayList();
+        queryLiterals.add(queryLiteral1);
+        queryLiterals.add(queryLiteral2);
+        queryLiterals.add(queryLiteral3);
+        queryLiterals.add(queryLiteral4);
+        LiteralAsker literalAsker = new LiteralAsker();
+        literalAsker.setVerbosity(0);
+        ArrayList bindingSets = null;
+        try {
+            bindingSets = literalAsker.ask(queryLiterals, mt);
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        for (int i = 0; i < bindingSets.size(); i++) {
+            BindingSet bindingSet = (BindingSet) bindingSets.get(i);
+            //bindingSet.displayBindingSet();
+        }
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
         System.out.println("** testLiteralAsker OK **");
     }
 
@@ -132,6 +177,62 @@ public class UnitTest extends TestCase {
      */
     public void testHashJoiner() {
         System.out.println("** testHashJoiner **");
+
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        QueryLiteral queryLiteral1 = null;
+        QueryLiteral queryLiteral2 = null;
+        QueryLiteral queryLiteral3 = null;
+        QueryLiteral queryLiteral4 = null;
+        CycFort mt = null;
+        try {
+            queryLiteral1 = new QueryLiteral("(#$isa ?country #$WesternEuropeanCountry)");
+            queryLiteral2 = new QueryLiteral("(#$isa ?cathedral #$Cathedral)");
+            queryLiteral3 = new QueryLiteral("(#$countryOfCity ?country ?city)");
+            queryLiteral4 = new QueryLiteral("(#$objectFoundInLocation ?cathedral ?city)");
+            mt = CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        ArrayList queryLiterals = new ArrayList();
+        queryLiterals.add(queryLiteral1);
+        queryLiterals.add(queryLiteral2);
+        queryLiterals.add(queryLiteral3);
+        queryLiterals.add(queryLiteral4);
+        LiteralAsker literalAsker = new LiteralAsker();
+        literalAsker.setVerbosity(9);
+        ArrayList bindingSets = null;
+        try {
+            bindingSets = literalAsker.ask(queryLiterals, mt);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        HashJoiner hashJoiner = new HashJoiner();
+        hashJoiner.setVerbosity(9);
+        BindingSet joinedBindingSets = null;
+        try {
+            joinedBindingSets = hashJoiner.join(bindingSets);
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        Assert.assertNotNull(joinedBindingSets);
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testHashJoiner OK **");
     }
@@ -169,6 +270,4 @@ public class UnitTest extends TestCase {
 
         System.out.println("** testQueryProcessor1 OK **");
     }
-
-
 }

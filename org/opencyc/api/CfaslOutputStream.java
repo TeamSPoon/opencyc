@@ -472,7 +472,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
             System.out.println("writeConstant = " + cycConstant);
         write(CFASL_CONSTANT);
-        writeInt(cycConstant.id.intValue());
+        writeInt(cycConstant.getId().intValue());
     }
 
     /**
@@ -484,7 +484,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
             System.out.println("writeNart = " + cycNart);
         write(CFASL_NART);
-        writeInt(cycNart.id.intValue());
+        writeInt(cycNart.getId().intValue());
     }
 
     /**

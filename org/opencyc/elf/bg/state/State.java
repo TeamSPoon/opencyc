@@ -140,7 +140,10 @@ public class State {
    * @param value the stateVariable's value
    */
   public void setStateValue(StateVariable stateVariable, Object value) {
-    stateVariableDictionary.put(stateVariable, value);
+    if (stateVariable.getType().isInstance(value))
+      stateVariableDictionary.put(stateVariable, value);
+    else
+      throw new IllegalArgumentException(value + " is not an instance of " + stateVariable.getType());
   }
 
   /**

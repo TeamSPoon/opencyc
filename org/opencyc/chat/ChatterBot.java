@@ -57,7 +57,7 @@ public class ChatterBot {
     /**
      * Makes Conversation objects for interpretation.
      */
-    protected ConversationFactory conversationFactory;
+    public ConversationFactory conversationFactory;
 
     /**
      * Dictionary of conversation finite state machine interpreters.

@@ -3963,9 +3963,29 @@ public class CycAccess {
     }
 
     /**
+     * Kills a Cyc constant without issuing a transcript operation.
+     * If CYCCONSTANT is a microtheory, then all the contained assertions are deleted from
+     * the KB, the Cyc Truth Maintenance System (TMS) will automatically delete any derived
+     * assertions whose sole support is the killed term(s).
+     *
+     * @param cycConstant the constant term to be removed from the KB
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public synchronized void killWithoutTranscript (CycConstant cycConstant)
+        throws IOException, UnknownHostException, CycApiException {
+        String command =
+            withBookkeepingInfo() +
+            "(cyc-kill " + cycConstant.stringApiValue() + "))";
+        converseBoolean(command);
+        CycObjectFactory.removeCaches(cycConstant);
+    }
+
+    /**
      * Kills the given Cyc constants.  If CYCCONSTANT is a microtheory, then
      * all the contained assertions are deleted from the KB, the Cyc Truth Maintenance System
-     * (TML) will automatically delete any derived assertions whose sole support is the killed
+     * (TMS) will automatically delete any derived assertions whose sole support is the killed
      * term(s).
      *
      * @param cycConstants the list of constant terms to be removed from the KB
@@ -3982,7 +4002,7 @@ public class CycAccess {
     /**
      * Kills the given Cyc constants.  If CYCCONSTANT is a microtheory, then
      * all the contained assertions are deleted from the KB, the Cyc Truth Maintenance System
-     * (TML) will automatically delete any derived assertions whose sole support is the killed
+     * (TMS) will automatically delete any derived assertions whose sole support is the killed
      * term(s).
      *
      * @param cycConstants the list of constant terms to be removed from the KB
@@ -3999,7 +4019,7 @@ public class CycAccess {
     /**
      * Kills a Cyc NART (Non Atomic Reified Term).  If CYCFORT is a microtheory, then
      * all the contained assertions are deleted from the KB, the Cyc Truth Maintenance System
-     * (TML) will automatically delete any derived assertions whose sole support is the killed
+     * (TMS) will automatically delete any derived assertions whose sole support is the killed
      * term(s).
      *
      * @param cycFort the NART term to be removed from the KB
@@ -4198,6 +4218,26 @@ public class CycAccess {
             "    (cyc-assert\n" +
             "      '" + sentence + "\n" +
             "      " + mt.cyclify() + ")))";
+        converseVoid(command);
+    }
+
+
+    /**
+     * Unasserts the given sentence with bookkeeping and without placing it on
+     * the transcript queue.
+     *
+     * @param sentence the given sentence for unassertion
+     * @param mt the microtheory from which the assertion is removed
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void unassertWithBookkeepingAndWithoutTranscript (CycList sentence, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String command = withBookkeepingInfo() +
+            "(ke-unassert-now '" +
+            sentence.stringApiValue() +
+            mt.stringApiValue() + "))";
         converseVoid(command);
     }
 
@@ -5087,6 +5127,44 @@ public class CycAccess {
             cycConstant = (CycConstant) object;
         else
             throw new CycApiException("Cannot create new constant for " + name);
+        cycConstant.getName();
+        cycConstant.getGuid();
+        CycObjectFactory.addCycConstantCacheByName(cycConstant);
+        CycObjectFactory.addCycConstantCacheById(cycConstant);
+        return cycConstant;
+    }
+
+    /**
+     * Returns a new unique <tt>CycConstant</tt> object using the constant start name,
+     * recording bookkeeping information and but without archiving to the Cyc transcript. If the
+     * start name begins with #$ that portion of the start name is ignored.
+     *
+     * @param startName the starting name of the constant which will be made unique
+     * using a suffix.
+     * @return a new <tt>CycConstant</tt> object using the constant starting name,
+     * recording bookkeeping information and archiving to the Cyc transcript
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycConstant makeUniqueCycConstant(String startName)
+        throws UnknownHostException, IOException, CycApiException {
+        String constantName = startName;
+        if (constantName.startsWith("#$"))
+            constantName = constantName.substring(2);
+        String projectName = "nil";
+        if (project != null)
+            projectName = project.stringApiValue();
+        String cyclistName = "nil";
+        if (cyclist != null)
+            cyclistName = cyclist.stringApiValue();
+        String command =
+            withBookkeepingInfo() +
+            "(clet ((*require-case-insensitive-name-uniqueness* nil)\n" +
+            "       (*the-cyclist* " + cyclistName + ")\n" +
+            "       (*ke-purpose* " + projectName + "))\n" +
+            "  (gentemp-constant \"" + constantName + "\")))";
+        CycConstant cycConstant = (CycConstant) converseObject(command);
         cycConstant.getName();
         cycConstant.getGuid();
         CycObjectFactory.addCycConstantCacheByName(cycConstant);
@@ -6717,6 +6795,40 @@ public class CycAccess {
     }
 
     /**
+     * Returns the list of tuples gathered from assertions in given microtheory
+     * in which the predicate is the given predicate, in which the given term appears in
+     * the indexArg position and in which the list of gatherArgs determines the
+     * assertion arguments returned as each tuple.
+     *
+     * @param term the term in the index argument position
+     * @param predicate the given predicate
+     * @param indexArg the argument position in which the given term appears
+     * @param gatherArgs the list of argument Integer positions which indicate the assertion
+     * arguments to be returned as each tuple
+     * @param mt the relevant inference microtheory
+     * @return the list of tuples gathered from assertions in given microtheory
+     * in which the predicate is the given predicate, in which the given term appears in
+     * the indexArg position and in which the list of gatherArgs determines the
+     * assertion arguments returned as each tuple
+     */
+    public CycList getPredicateValueTuplesInMt (CycFort term,
+                                                CycFort predicate,
+                                                int indexArg,
+                                                CycList gatherArgs,
+                                                CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList tuples = new CycList();
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("pred-value-tuples-in-mt"));
+        command.add(term);
+        command.add(predicate);
+        command.add(new Integer(indexArg));
+        command.addQuoted(gatherArgs);
+        command.add(mt);
+        return converseList(command);
+    }
+
+    /**
      * Assert an argument contraint for the given relation and argument position.
      * The operation will be added to the KB transcript for replication and archive.
      *
@@ -7245,6 +7357,36 @@ public class CycAccess {
         Iterator iter = assertions.iterator();
         while (iter.hasNext()) {
             CycAssertion assertion = (CycAssertion) iter.next();
+            String command =
+                "(cyc-unassert '" +
+                assertion.stringApiValue() +
+                mt.stringApiValue() + "))";
+            converseVoid(command);
+        }
+    }
+
+    /**
+     * Unasserts all assertions from the given mt having the given predicate and arg1,
+     * without a transcript record of the unassert operation.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1
+     * @param mt the microtheory from which to delete the matched assertions
+     */
+    public void unassertMatchingAssertionsWithoutTranscript (CycFort predicate,
+                                                             Object arg1,
+                                                             CycFort mt)
+            throws IOException, UnknownHostException, CycApiException {
+        CycList assertions = getAllAssertionsInMt(mt);
+        Iterator iter = assertions.iterator();
+        while (iter.hasNext()) {
+            CycAssertion assertion = (CycAssertion) iter.next();
+            CycList sentence = assertion.getFormula();
+            if (sentence.size() < 2)
+                continue;
+            if ((! (predicate.equals(sentence.first()))) ||
+                (! (arg1.equals(sentence.second()))))
+                continue;
             String command =
                 "(cyc-unassert '" +
                 assertion.stringApiValue() +

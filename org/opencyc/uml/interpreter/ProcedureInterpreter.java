@@ -71,6 +71,11 @@ public class ProcedureInterpreter {
     protected CycAccess cycAccess;
 
     /**
+     * the state machine definition microtheory
+     */
+    protected CycFort definitionMt;
+
+    /**
      * the expression evaluation state context
      */
     protected CycFort stateMt;
@@ -135,17 +140,20 @@ public class ProcedureInterpreter {
      *
      * @param cycAccess the reference to the parent CycAccess object which provides Cyc api
      * services
+     * @param definitionMt the state machine definition microtheory
      * @param stateMt the expression evaluation state context
      * @param verbosity the output verbosity for this object
      */
     public ProcedureInterpreter(CycAccess cycAccess,
+                                CycFort definitionMt,
                                 CycFort stateMt,
                                 int verbosity)
         throws IOException, CycApiException {
         this.cycAccess = cycAccess;
+        this.definitionMt = definitionMt;
         this.stateMt = stateMt;
         this.verbosity = verbosity;
-        expressionEvaluator = new ExpressionEvaluator(cycAccess, stateMt, verbosity);
+        expressionEvaluator = new ExpressionEvaluator(cycAccess, verbosity);
         umlProcedureEvaluationContext = cycAccess.getKnownConstantByName("umlProcedureEvaluationContext");
         umlProcedureBinding_CalledByStateEntry = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateEntry");
         umlProcedureBinding_CalledByStateDoActivity = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateDoActivity");
@@ -156,6 +164,10 @@ public class ProcedureInterpreter {
         umlProcedureOutputBinding = cycAccess.getKnownConstantByName("umlProcedureOutputBinding");
         softwareParameterValue = cycAccess.getKnownConstantByName("softwareParameterValue");
         softwareParameterFromSyntaxFn = cycAccess.getKnownConstantByName("SoftwareParameterFromSyntaxFn");
+        if (verbosity > 2)
+            Log.current.println("Creating ProcedureInterpreter for " +
+                                "\n  definitionMt: " + definitionMt.cyclify() +
+                                "\n  stateMt: " + stateMt.cyclify());
     }
 
     /**
@@ -171,7 +183,7 @@ public class ProcedureInterpreter {
                                 " at " + transition.toString() +
                                 "\n  " + procedure.getBody());
         // get procedure binding term
-        CycFort procedureTerm = cycAccess.getKnownConstantByName(procedure.getName());
+        procedureTerm = cycAccess.getKnownConstantByName(procedure.getName());
         CycList query = new CycList();
         query.add(CycAccess.and);
         CycList query1 = new CycList();
@@ -251,59 +263,79 @@ public class ProcedureInterpreter {
      */
     protected void interpretProcedure ()
         throws IOException, CycApiException, ExpressionEvaluationException {
+        if (verbosity > 2)
+            Log.current.println("procedureBinding: " + procedureBinding.cyclify());
         // clear interpretation context
         CycFort evaluationContext =
             (CycFort) cycAccess.getArg2(umlProcedureEvaluationContext,
                                         procedureTerm,
-                                        stateMt);
+                                        definitionMt);
+        if (verbosity > 2)
+            Log.current.println("evaluationContext: " + evaluationContext.cyclify());
         cycAccess.unassertMtContentsWithoutTranscript(evaluationContext);
         // bind input values
-        CycList inputBindingGafs =
-            cycAccess.getGafs(umlProcedureInputBinding, stateMt);
-        Iterator iter = inputBindingGafs.iterator();
+        CycList gatherArgs = new CycList();
+        gatherArgs.add(new Integer(2));
+        gatherArgs.add(new Integer(3));
+        CycList inputBindingTuples =
+            cycAccess.getPredicateValueTuplesInMt(procedureBinding,
+                                                  umlProcedureInputBinding,
+                                                  1,
+                                                  gatherArgs,
+                                                  definitionMt);
+        if (verbosity > 2)
+            Log.current.println("Input binding tuples: " + inputBindingTuples.cyclify());
+        Iterator iter = inputBindingTuples.iterator();
         while (iter.hasNext()) {
-            CycList inputBindingGaf = (CycList) iter.next();
-            CycFort thisProcedureBinding = (CycFort) inputBindingGaf.second();
-            if (! procedureBinding.equals(thisProcedureBinding))
-                continue;
-            CycFort inputPin = (CycFort) inputBindingGaf.third();
+            CycList inputBindingTuple = (CycList) iter.next();
+            CycFort inputPin = (CycFort) inputBindingTuple.first();
             CycNart inputPinParameter = new CycNart(softwareParameterFromSyntaxFn, inputPin);
-            CycFort stateVariable = (CycFort) inputBindingGaf.fourth();
+            CycFort stateVariable = (CycFort) inputBindingTuple.second();
             Object value =
                 cycAccess.getArg2(softwareParameterValue,
-                                  inputPinParameter,
+                                  stateVariable,
                                   stateMt);
             CycList softwareParameterValueSentence = new CycList();
             softwareParameterValueSentence.add(softwareParameterValue);
-            softwareParameterValueSentence.add(stateVariable);
+            softwareParameterValueSentence.add(inputPinParameter);
             softwareParameterValueSentence.add(value);
             cycAccess.assertWithBookkeepingAndWithoutTranscript(softwareParameterValueSentence,
                                                                 evaluationContext);
         }
 
         // evaluate the procedure body
-        expressionEvaluator.evaluateCycLExpression((CycList) procedure.getBody());
+        expressionEvaluator.evaluateCycLExpression(procedure.getBody(),
+                                                   evaluationContext);
 
         // bind output values
-        CycList outputBindingGafs =
-            cycAccess.getGafs(umlProcedureOutputBinding, stateMt);
-        iter = outputBindingGafs.iterator();
+        CycList outputBindingTuples =
+            cycAccess.getPredicateValueTuplesInMt(procedureBinding,
+                                                  umlProcedureOutputBinding,
+                                                  1,
+                                                  gatherArgs,
+                                                  definitionMt);
+        if (verbosity > 2)
+            Log.current.println("Output binding tuples: " + outputBindingTuples.cyclify());
+        iter = outputBindingTuples.iterator();
         while (iter.hasNext()) {
-            CycList outputBindingGaf = (CycList) iter.next();
-            CycFort thisProcedureBinding = (CycFort) outputBindingGaf.second();
-            if (! procedureBinding.equals(thisProcedureBinding))
-                continue;
-            CycFort outputPin = (CycFort) outputBindingGaf.third();
-            CycFort stateVariable = (CycFort) outputBindingGaf.fourth();
+            CycList outputBindingTuple = (CycList) iter.next();
+            CycFort outputPin = (CycFort) outputBindingTuple.first();
+            CycFort stateVariable = (CycFort) outputBindingTuple.second();
+            CycNart outputPinParameter = new CycNart(softwareParameterFromSyntaxFn, outputPin);
             Object value =
                 cycAccess.getArg2(softwareParameterValue,
-                                  stateVariable,
+                                  outputPinParameter,
                                   evaluationContext);
             CycList softwareParameterValueSentence = new CycList();
             softwareParameterValueSentence.add(softwareParameterValue);
-            CycNart outputPinParameter = new CycNart(softwareParameterFromSyntaxFn, outputPin);
-            softwareParameterValueSentence.add(outputPinParameter);
+            softwareParameterValueSentence.add(stateVariable);
             softwareParameterValueSentence.add(value);
+            cycAccess.unassertMatchingAssertionsWithoutTranscript(softwareParameterValue,
+                                                                  stateVariable,
+                                                                  stateMt);
+            if (verbosity > 0)
+                Log.current.println("asserting " + softwareParameterValueSentence +
+                                    " in " + stateMt);
             cycAccess.assertWithBookkeepingAndWithoutTranscript(softwareParameterValueSentence,
                                                                 stateMt);
         }

@@ -78,6 +78,7 @@ public class StateInterpreter extends Thread {
         verbosity = interpreter.getVerbosity();
         this.state = state;
         procedureInterpreter = new ProcedureInterpreter(interpreter.getCycAccess(),
+                                                        interpreter.getDefinitionMt(),
                                                         interpreter.getStateMt(),
                                                         verbosity);
     }

@@ -38,10 +38,16 @@ import org.opencyc.util.*;
 public class Interpreter {
 
     /**
+     * The quiet verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int QUIET_VERBOSITY = 0;
+
+    /**
      * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 0;
+    public static final int DEFAULT_VERBOSITY = 3;
 
     /**
      * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
@@ -110,9 +116,19 @@ public class Interpreter {
     protected CycAccess cycAccess;
 
     /**
+     * the state machine definition microtheory
+     */
+    protected CycFort definitionMt;
+
+    /**
      * the expression evaluation state context
      */
     protected CycFort stateMt;
+
+    /**
+     * the global temporary interpreter workspace
+     */
+    protected CycFort temporaryWorkspaceMt;
 
     /**
      * the state machine factory used to create and destroy events
@@ -128,7 +144,6 @@ public class Interpreter {
      * Constructs a new Interpreter object.
      */
     public Interpreter() {
-        initialize();
     }
 
     /**
@@ -137,15 +152,18 @@ public class Interpreter {
      *
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
+     * @param definitionMt the state machine definition microtheory
      * @param stateMt the expression evaluation state context
      */
     public Interpreter(StateMachine stateMachine,
                        CycAccess cycAccess,
+                       CycFort definitionMt,
                        CycFort stateMt)
         throws IOException, CycApiException {
         this(stateMachine,
              cycAccess,
              stateMt,
+             definitionMt,
              Interpreter.DEFAULT_VERBOSITY);
     }
 
@@ -155,17 +173,20 @@ public class Interpreter {
      *
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
+     * @param definitionMt the state machine definition microtheory
      * @param stateMt the expression evaluation state context
      * @param verbosity indicates the verbosity of the interpreter's
      * diagnostic output - 9 = maximum, 0 = quiet
      */
     public Interpreter(StateMachine stateMachine,
                        CycAccess cycAccess,
+                       CycFort definitionMt,
                        CycFort stateMt,
                        int verbosity)
         throws IOException, CycApiException {
         this.stateMachine = stateMachine;
         this.cycAccess = cycAccess;
+        this.definitionMt = definitionMt;
         this.stateMt = stateMt;
         this.verbosity = verbosity;
         initialize();
@@ -179,12 +200,11 @@ public class Interpreter {
     protected void initialize () throws IOException, CycApiException {
         Log.makeLog("state-machine-interpreter.log");
         expressionEvaluator = new ExpressionEvaluator(cycAccess,
-                                                      stateMt,
                                                       verbosity);
         stateMachineFactory = new StateMachineFactory();
         stateMachineFactory.setStateMachine(stateMachine);
         stateMachineFactory.setNamespace(stateMachine.getNamespace());
-
+        cycAccess.unassertMtContentsWithoutTranscript(stateMt);
     }
 
     /**
@@ -347,7 +367,7 @@ public class Interpreter {
                                         " enabled by " + currentEvent.toString());
                 BooleanExpression guardExpression = transition.getGuard().getexpression();
                 if ((guardExpression == null) ||
-                    expressionEvaluator.evaluateBoolean(guardExpression)) {
+                    expressionEvaluator.evaluateBoolean(guardExpression, stateMt)) {
                     if (verbosity > 2)
                         Log.current.println("    selected " + transition.toString());
                     selectedTransitions.add(transition);
@@ -470,6 +490,30 @@ public class Interpreter {
     }
 
     /**
+     * Gets the current value of the given state variable.
+     *
+     * @param stateVariable the given state variable
+     * @return the current value of the given state variable
+     */
+    public Object getStateVariableValue (String stateVariable)
+        throws IOException, CycApiException, ExpressionEvaluationException {
+        return getStateVariableValue(cycAccess.getKnownConstantByName(stateVariable));
+    }
+
+    /**
+     * Gets the current value of the given state variable.
+     *
+     * @param stateVariable the given state variable
+     * @return the current value of the given state variable
+     */
+    public Object getStateVariableValue (CycFort stateVariable)
+        throws IOException, CycApiException, ExpressionEvaluationException {
+        return cycAccess.getArg2(cycAccess.getKnownConstantByName("softwareParameterValue"),
+                                 stateVariable,
+                                 stateMt);
+    }
+
+    /**
      * Gets the state machine
      *
      * @return the state machine
@@ -511,6 +555,24 @@ public class Interpreter {
      *
      * @return the expression evaluation state context
      */
+    public CycFort getDefinitionMt () {
+        return definitionMt;
+    }
+
+    /**
+     * Sets the expression evaluation state context
+     *
+     * @param definitionMt the expression evaluation state context
+     */
+    public void setDefinitionMt (CycFort definitionMt) {
+        this.definitionMt = definitionMt;
+    }
+
+    /**
+     * Gets the expression evaluation state context
+     *
+     * @return the expression evaluation state context
+     */
     public CycFort getStateMt () {
         return stateMt;
     }
@@ -518,7 +580,7 @@ public class Interpreter {
     /**
      * Sets the expression evaluation state context
      *
-     * @param xxxx the expression evaluation state context
+     * @param stateMt the expression evaluation state context
      */
     public void setStateMt (CycFort stateMt) {
         this.stateMt = stateMt;
@@ -693,4 +755,22 @@ public class Interpreter {
     public void setStateConfiguration (DefaultTreeModel stateConfiguration) {
         this.stateConfiguration = stateConfiguration;
     }
+    /**
+     * Gets the global temporary interpreter workspace
+     *
+     * @return the global temporary interpreter workspace
+     */
+    public CycFort getTemporaryWorkspaceMt () {
+        return temporaryWorkspaceMt;
+    }
+
+    /**
+     * Sets the global temporary interpreter workspace
+     *
+     * @param temporaryWorkspaceMt
+     */
+    public void setTemporaryWorkspaceMt (CycFort temporaryWorkspaceMt) {
+        this.temporaryWorkspaceMt = temporaryWorkspaceMt;
+    }
+
 }

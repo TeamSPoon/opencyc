@@ -38,6 +38,12 @@ import org.opencyc.util.*;
 public class CycExtractor {
 
     /**
+     * The quiet verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int QUIET_VERBOSITY = 0;
+
+    /**
      * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
@@ -163,6 +169,20 @@ public class CycExtractor {
      */
     public CycExtractor(CycAccess cycAccess) {
         this.cycAccess = cycAccess;
+        verbosity = DEFAULT_VERBOSITY;
+        stateMachineFactory = new StateMachineFactory();
+    }
+
+    /**
+     * Construct a new CycExtractor object given the CycAccess
+     * server connection.
+     *
+     * @param cycAcess the given CycAccess Cyc KB server connection
+     * @param verbosity the verbosity of this object
+     */
+    public CycExtractor(CycAccess cycAccess, int verbosity) {
+        this.cycAccess = cycAccess;
+        this.verbosity = verbosity;
         stateMachineFactory = new StateMachineFactory();
     }
 

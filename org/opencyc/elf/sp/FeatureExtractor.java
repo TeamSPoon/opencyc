@@ -37,6 +37,12 @@ public class FeatureExtractor extends NodeComponent {
   }
 
   /**
+   * Provides the method to be executed when the thread is started.
+   */  
+  public void run() {
+  }
+  
+  /**
    * Gets the sensory perception instance which owns this feature extractor
    * 
    * @return the sensory perception instance which owns this feature extractor

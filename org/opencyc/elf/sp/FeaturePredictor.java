@@ -37,6 +37,12 @@ public class FeaturePredictor extends NodeComponent {
   }
 
   /**
+   * Provides the method to be executed when the thread is started.
+   */  
+  public void run() {
+  }
+  
+  /**
    * Gets the sensory perception instance which owns this feature predictor
    * 
    * @return the sensory perception instance which owns this feature predictor
@@ -54,4 +60,5 @@ public class FeaturePredictor extends NodeComponent {
   public void setSensoryPerception(SensoryPerception sensoryPerception) {
     this.sensoryPerception = sensoryPerception;
   }
+    
 }

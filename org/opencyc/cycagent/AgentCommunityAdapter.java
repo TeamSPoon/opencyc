@@ -33,6 +33,12 @@ import org.opencyc.util.Timer;
 public interface AgentCommunityAdapter {
 
     /**
+     * The quiet verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int QUIET_VERBOSITY = 0;
+
+    /**
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */

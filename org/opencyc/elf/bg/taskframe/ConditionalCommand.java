@@ -38,9 +38,9 @@ public class ConditionalCommand implements Command {
   
   /** Creates a new instance of ConditionalAction.
    * 
-   * @param name the name of this iterated command
+   * @param name the name of this conditional command
    * @param predicateExpression the conditional predicate expression
-   * @param command the commnad to be accomplished if the predicate expression evaluates true
+   * @param command the command to be accomplished if the predicate expression evaluates true
    */
   public ConditionalCommand(String name, PredicateExpression predicateExpression, Command command) {
     this.name = name;
@@ -85,9 +85,9 @@ public class ConditionalCommand implements Command {
     return name;
   }
 
-  /** Gets the commnad to be accomplished if the predicate expression evaluates true
+  /** Gets the command to be accomplished if the predicate expression evaluates true
    *
-   * @return the commnad to be accomplished if the predicate expression evaluates true
+   * @return the command to be accomplished if the predicate expression evaluates true
    */
   public Command getCommand () {
     return command;
@@ -105,7 +105,7 @@ public class ConditionalCommand implements Command {
   /** the name of this conditional command */
   protected String name;
   
-  /** the commnad to be accomplished if the predicate expression evaluates true */
+  /** the command to be accomplished if the predicate expression evaluates true */
   protected Command command;
   
   //// Main

@@ -31,7 +31,6 @@ import org.opencyc.uml.statemachine.*;
 
 public class StateInterpreter extends Thread {
 
-
     /**
      * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
@@ -83,6 +82,10 @@ public class StateInterpreter extends Thread {
      * @param transition the transistion
      */
     public void interpretTransitionEntry (Transition transition) {
+        state.setIsActive(true);
+        if (state.getEntry() != null)
+            new ActionInterpreter(state.getEntry());
+
     }
 
     /**

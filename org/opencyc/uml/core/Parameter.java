@@ -61,7 +61,6 @@ public class Parameter extends ModelElement {
     public Parameter() {
     }
 
-
     /**
      * Gets the default value for this parameter
      *

@@ -2,6 +2,7 @@ package org.opencyc.uml.statemachine;
 
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
+import org.opencyc.uml.action.*;
 
 /**
  * Provides a factory for creating UML State_Machines objects.
@@ -43,9 +44,14 @@ import org.opencyc.uml.commonbehavior.*;
 public class StateMachineFactory {
 
     /**
+     * the namespace for this state machine and its components
+     */
+    protected Namespace namespace;
+
+    /**
      * the state machine being assembled
      */
-    StateMachine stateMachine;
+    protected StateMachine stateMachine;
 
     /**
      * Constructs a new StateMachineFactory object.
@@ -54,9 +60,10 @@ public class StateMachineFactory {
     }
 
     /**
-     * Makes a new state machine object.
+     * Makes a new state machine object.  All further objects defined for this state
+     * machine will linked to the given namespace.
      *
-     * @param namespace the state machine namespace
+     * @param namespaceName the state machine namespace name
      * @param name the identifier for the state machine within its containing
      * namespace
      * @param commentString the comment for this state machine
@@ -65,17 +72,15 @@ public class StateMachineFactory {
      * can be performed during state transitions.
      * @return the new state machine object
      */
-    public StateMachine makeStateMachine(String namespace,
+    public StateMachine makeStateMachine(String namespaceName,
                                          String name,
                                          String commentString,
                                          Object context) {
         stateMachine = new StateMachine();
-        stateMachine.setNamespace(namespace);
-        stateMachine.setName(name);
-        Comment comment = new Comment();
-        comment.setBody(commentString);
-        comment.setAnnotatedElement(stateMachine);
-        stateMachine.setComment(comment);
+        namespace = new Namespace(namespaceName);
+        setNamespaceNameComment(stateMachine,
+                                name,
+                                commentString);
         stateMachine.setContext(context);
         return stateMachine;
     }
@@ -83,61 +88,203 @@ public class StateMachineFactory {
     /**
      * Makes a new procedure object.
      *
-     *
-     * @param namespace the state vertex namespace
-     * @param name the identifier for the state vertex within its containing
+     * @param name the identifier for the procedure within its containing
      * namespace
-     * @param commentString the comment for this state vertex
+     * @param commentString the comment for this procedure
      * @param language the name of the language in which the body attribute is written
+     * @param body the text of the procedure written in the given language
      * @param isList true when the arguments to the procedure are passed as
      * attributes of a single object, or false when passed separately
      * @param expression the text of the procedure written in the given language
      * @param method a method which is performed by the procedure
      * @return the new procedure object
      */
-    public Procedure makeProcedure (String namespace,
-                                    String name,
+    public Procedure makeProcedure (String name,
                                     String commentString,
                                     String language,
-                                    boolean isList,
-                                    Expression expression,
-                                    Method method) {
+                                    String body,
+                                    boolean isList) {
         Procedure procedure = new Procedure();
-        procedure.setNamespace(namespace);
-        procedure.setName(name);
-        Comment comment = new Comment();
-        comment.setBody(commentString);
-        comment.setAnnotatedElement(procedure);
-        procedure.setComment(comment);
+        setNamespaceNameComment(procedure,
+                                name,
+                                commentString);
         procedure.setLanguage(language);
+        procedure.setBody(body);
         procedure.setIsList(isList);
-        procedure.setExpression(expression);
-        procedure.setMethod(method);
         return procedure;
     }
 
+    /**
+     * Adds an input pin (variable) to the given procedure.
+     *
+     * @param name the name of the input pin (variable)
+     * @param commentString the comment for this input pin
+     * @param procedure the given procedure to which the input pin is to
+     * be added
+     * @param type the Class of the input pin (variable)
+     */
+    public void addInputPinToProcedure(String name,
+                                       String commentString,
+                                       Procedure procedure,
+                                       Class type) {
+        InputPin inputPin = new InputPin();
+        setNamespaceNameComment(inputPin,
+                                name,
+                                commentString);
+        inputPin.setType(type);
+        inputPin.setProcedure(procedure);
+        procedure.getArgument().add(inputPin);
+    }
+
+    /**
+     * Adds an output pin (variable) to the given procedure.
+     *
+     * @param name the name of the output pin (variable)
+     * @param commentString the comment for this output pin
+     * @param procedure the given procedure to which the output pin is to
+     * be added
+     * @param type the Class of the output pin (variable)
+     */
+    public void addOutputPinToProcedure(String name,
+                                        String commentString,
+                                        Procedure procedure,
+                                        Class type) {
+        OutputPin outputPin = new OutputPin();
+        setNamespaceNameComment(outputPin,
+                                name,
+                                commentString);
+        outputPin.setType(type);
+        outputPin.setProcedure(procedure);
+        procedure.getResult().add(inputPin);
+    }
+
+    /**
+     * Makes a new Event object.
+     *
+     * @param name the identifier for the event within its containing
+     * namespace
+     * @param commentString the comment for this event
+     * @return the new event object
+     */
+    public Event makeEvent (String name,
+                            String commentString) {
+        Event event = new Event();
+        setNamespaceNameComment(event,
+                                name,
+                                commentString);
+        return event;
+    }
+
+    /**
+     * Makes a new CallEvent object.
+     *
+     * @param name the identifier for the call event within its containing
+     * namespace
+     * @param commentString the comment for this call event
+     * @param specification the specification of the operation called by this event
+     * @return the new call event object
+     */
+    public CallEvent makeCallEvent (String name,
+                                    String commentString,
+                                    String specification) {
+        CallEvent callEvent = new CallEvent();
+        setNamespaceNameComment(callEvent,
+                                name,
+                                commentString);
+        Operation operation = new Operation();
+        setNamespaceNameComment(operation,
+                                name,
+                                commentString);
+        operation.setSpecification(specification);
+        callEvent.setOperation(operation);
+        return callEvent;
+    }
+
+    /**
+     * Makes a new ChangeEvent object.
+     *
+     * @param name the identifier for the change event within its containing
+     * namespace
+     * @param commentString the comment for this change event
+     * @param language the language of the boolean change expression
+     * @param body the body of the boolean change expression
+     * @return the new change event object
+     */
+    public ChangeEvent makeChangeEvent (String name,
+                                        String commentString,
+                                        String language,
+                                        String body) {
+        ChangeEvent changeEvent = new ChangeEvent();
+        setNamespaceNameComment(changeEvent,
+                                name,
+                                commentString);
+        BooleanExpression changeExpression = new BooleanExpression();
+        setNamespaceNameComment(changeExpression,
+                                name,
+                                commentString);
+        changeExpression.setLanguage(language);
+        changeExpression.setBody(body);
+        changeEvent.setChangeExpression(changeExpression);
+        return changeEvent;
+    }
+
+    /**
+     * Makes a new CompletionEvent object.
+     *
+     * @param name the identifier for the completion event within its containing
+     * namespace
+     * @param commentString the comment for this completion event
+     * @param state the state issuing this completion expression
+     * @return the new completion event object
+     */
+    public CompletionEvent makeCompletionEvent (String name,
+                                                String commentString,
+                                                State state) {
+        CompletionEvent completionEvent = new CompletionEvent();
+        setNamespaceNameComment(completionEvent,
+                                name,
+                                commentString);
+        completionEvent.setState(state);
+        return completionEvent;
+    }
+
+    /**
+     * Adds a parameter to the given event.
+     *
+     * @param name the name of parameter
+     * @param commentString the comment for this parameter
+     * @param event the given event to which the parameter is to
+     * be added
+     * @param type the Class of the parameter
+     */
+    public void addParameterToEvent(String name,
+                                    String commentString,
+                                    Event event,
+                                    Class type) {
+        Parameter parameter = new Parameter();
+        setNamespaceNameComment(parameter,
+                                name,
+                                commentString);
+        parameter.setBehavioralFeature(Event);
+        parameter.setType(type);
+    }
 
     /**
      * Makes a new state vertex object.
      *
-     * @param namespace the state vertex namespace
      * @param name the identifier for the state vertex within its containing
      * namespace
      * @param commentString the comment for this state vertex
      * @param container the container of this state vertex
      * @return the new state vertex object
      */
-    public StateVertex makeStateVertex (String namespace,
-                                        String name,
+    public StateVertex makeStateVertex (String name,
                                         String commentString,
                                         CompositeState container) {
         StateVertex stateVertex = new StateVertex();
-        stateVertex.setNamespace(namespace);
-        stateVertex.setName(name);
-        Comment comment = new Comment();
-        comment.setBody(commentString);
-        comment.setAnnotatedElement(stateVertex);
-        stateVertex.setComment(comment);
+        setNamespaceNameComment(stateVertex,
+                                name,
+                                commentString);
         stateVertex.setContainer(container);
         container.getSubVertex().add(stateVertex);
         return stateVertex;
@@ -147,7 +294,6 @@ public class StateMachineFactory {
      * Makes a new state object.  The top (composite) state must be created
      * first, then parent states should be created before their child states.
      *
-     * @param namespace the state namespace
      * @param name the identifier for the state within its containing
      * namespace
      * @param commentString the comment for this state
@@ -157,20 +303,16 @@ public class StateMachineFactory {
      * @param doActivity the do activity for this state, or null if none
      * @return the new state object
      */
-    public State makeState (String namespace,
-                            String name,
+    public State makeState (String name,
                             String commentString,
                             CompositeState container,
                             Procedure entry,
                             Procedure exit,
                             Procedure doActivity) {
         State state = new State();
-        state.setNamespace(namespace);
-        state.setName(name);
-        Comment comment = new Comment();
-        comment.setBody(commentString);
-        comment.setAnnotatedElement(state);
-        state.setComment(comment);
+        setNamespaceNameComment(state,
+                                name,
+                                commentString);
         state.setContainer(container);
         if (container == null)
             state.setStateMachine(stateMachine);
@@ -185,7 +327,6 @@ public class StateMachineFactory {
     /**
      * Makes a new composite state object.
      *
-     * @param namespace the composite state namespace
      * @param name the identifier for the composite state within its containing
      * namespace
      * @param commentString the comment for this composite state
@@ -196,8 +337,7 @@ public class StateMachineFactory {
      * @param isConcurrent true if concurrent processes, otherwise false
      * @return the new composite state object
      */
-    public State makeCompositeState (String namespace,
-                                     String name,
+    public State makeCompositeState (String name,
                                      String commentString,
                                      CompositeState container,
                                      Procedure entry,
@@ -205,12 +345,9 @@ public class StateMachineFactory {
                                      Procedure doActivity,
                                      boolean isConcurrent) {
         CompositeState compositeState = new CompositeState();
-        compositeState.setNamespace(namespace);
-        compositeState.setName(name);
-        Comment comment = new Comment();
-        comment.setBody(commentString);
-        comment.setAnnotatedElement(compositeState);
-        compositeState.setComment(comment);
+        setNamespaceNameComment(compositeState,
+                                name,
+                                commentString);
         compositeState.setContainer(container);
         compositeState.setIsRegion(false);
         if (container == null)
@@ -226,5 +363,27 @@ public class StateMachineFactory {
         compositeState.setIsConcurrent(isConcurrent);
         return compositeState;
     }
+
+    /**
+     * Sets the namespace, name and comment string for the new
+     * model element.
+     *
+     * @param modelElement the given model element
+     * @param name the identifier for the state machine within its containing
+     * namespace
+     * @param commentString the comment for this state machine
+     */
+    protected void setNamespaceNameComment (ModelElement modelElement,
+                                            String name,
+                                            String commentString) {
+        namespace.addOwnedElement(modelElement);
+        modelElement.setNamespace(namespace);
+        modelElement.setName(name);
+        Comment comment = new Comment();
+        comment.setBody(commentString);
+        comment.setAnnotatedElement(modelElement);
+        modelElement.setComment(comment);
+    }
+
 
 }

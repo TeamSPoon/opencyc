@@ -1,9 +1,9 @@
-package org.opencyc.uml.commonbehavior;
+package org.opencyc.uml.core;
 
-import org.opencyc.uml.core.*;
+import java.util.*;
 
 /**
- * Procedure from the UML Common_Behavior package.
+ * Procedure from the UML Core package.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -46,16 +46,18 @@ public class Procedure extends ModelElement {
     protected boolean isList;
 
     /**
-     * An expression the value of which is calculated by the procedure.  Used to
-     * provide a detailed action model for an expression.
+     * If isList is true: the ordered set of input pins representing
+     * procedure arguments.  If isList is false: one input pin
+     * representing the request object.
      */
-    protected Expression expression;
+    protected ArrayList argument = new ArrayList();
 
     /**
-     * A method which is performed by the procedure.  Used to provide a detailed
-     * action model for a method.
+     * If isList is true: the ordered set of output pins representing
+     * procedure results.  If isList is false: one output pin
+     * representing the reply object.
      */
-    protected Method method;
+    protected ArrayList result = new ArrayList();
 
     /**
      * Constructs a new Procedure object.
@@ -75,7 +77,7 @@ public class Procedure extends ModelElement {
     /**
      * Sets the name of the language in which the body attribute is written.
      *
-     * @param xxxx the name of the language in which the body attribute is written
+     * @param language the name of the language in which the body attribute is written
      */
     public void setLanguage (String language) {
         this.language = language;
@@ -122,38 +124,38 @@ public class Procedure extends ModelElement {
     }
 
     /**
-     * Gets the expression the value of which is calculated by the procedure.
+     * Gets the input pins representing procedure arguments.
      *
-     * @return the expression the value of which is calculated by the procedure
+     * @return the input pins representing procedure arguments
      */
-    public Expression getExpression () {
-        return expression;
+    public ArrayList getArgument () {
+        return argument;
     }
 
     /**
-     * Sets the expression the value of which is calculated by the procedure.
+     * Sets the input pins representing procedure arguments.
      *
-     * @param expression the expression the value of which is calculated by the procedure
+     * @param argument the input pins representing procedure arguments
      */
-    public void setExpression (Expression expression) {
-        this.expression = expression;
+    public void setArgument (ArrayList argument) {
+        this.argument = argument;
     }
 
     /**
-     * Gets the method which is performed by the procedure
+     * Gets the pins representing procedure results.
      *
-     * @return the method which is performed by the procedure
+     * @return the pins representing procedure results
      */
-    public Method getMethod () {
-        return method;
+    public ArrayList getResult () {
+        return result;
     }
 
     /**
-     * Sets the method which is performed by the procedure
+     * Sets the pins representing procedure results.
      *
-     * @param method the method which is performed by the procedure
+     * @param result the pins representing procedure results
      */
-    public void setMethod (Method method) {
-        this.method = method;
+    public void setResult (ArrayList result) {
+        this.result = result;
     }
 }

@@ -71,7 +71,6 @@ public class Operation extends BehavioralFeature {
     public Operation() {
     }
 
-
     /**
      * Gets the kind of concurrency.
      *

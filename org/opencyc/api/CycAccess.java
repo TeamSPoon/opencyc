@@ -1161,10 +1161,27 @@ public class CycAccess {
 
     /**
      * Gets a list of all of the direct and indirect genls for a CycFort collection.
+     *
+     * @param cycFort the collection
+     * @return the list of all of the direct and indirect genls for a CycFort collection
      */
     public CycList getAllGenls (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-genls-in-any-mt " + cycFort.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect genls for a CycFort collection
+     * given a relevant microtheory.
+     *
+     * @param cycFort the collection
+     * @param mt the relevant mt
+     * @return the list of all of the direct and indirect genls for a CycFort collection
+     * given a relevant microtheory
+     */
+    public CycList getAllGenls (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-genls " + cycFort.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
 
     /**
@@ -1820,6 +1837,9 @@ public class CycAccess {
 
     /**
      * Gets a list of the arg1Isas for a CycConstant predicate.
+     *
+     * @param predicate the predicate for which argument 1 contraints are sought.
+     * @return the list of the arg1Isas for a CycConstant predicate
      */
     public CycList getArg1Isas (CycConstant predicate)
         throws IOException, UnknownHostException, CycApiException {
@@ -1827,7 +1847,22 @@ public class CycAccess {
     }
 
     /**
+     * Gets the list of the arg1Isas for a CycConstant predicate given an mt.
+     *
+     * @param predicate the predicate for which argument 1 contraints are sought.
+     * @param mt the relevant microtheory
+     * @return the list of the arg1Isas for a CycConstant predicate given an mt
+     */
+    public CycList getArg1Isas (CycConstant predicate, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(arg1-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
+    }
+
+    /**
      * Gets a list of the arg2Isas for a CycConstant predicate.
+     *
+     * @param predicate the predicate for which argument 2 contraints are sought.
+     * @return the list of the arg1Isas for a CycConstant predicate
      */
     public CycList getArg2Isas (CycConstant predicate)
         throws IOException, UnknownHostException, CycApiException {
@@ -1835,7 +1870,22 @@ public class CycAccess {
     }
 
     /**
+     * Gets the list of the arg2Isas for a CycConstant predicate given an mt.
+     *
+     * @param predicate the predicate for which argument 2 contraints are sought.
+     * @param mt the relevant microtheory
+     * @return the list of the arg2Isas for a CycConstant predicate given an mt
+     */
+    public CycList getArg2Isas (CycConstant predicate, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(arg2-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
+    }
+
+    /**
      * Gets a list of the arg3Isas for a CycConstant predicate.
+     *
+     * @param predicate the predicate for which argument 3 contraints are sought.
+     * @return the list of the arg1Isas for a CycConstant predicate
      */
     public CycList getArg3Isas (CycConstant predicate)
         throws IOException, UnknownHostException, CycApiException {
@@ -1843,7 +1893,22 @@ public class CycAccess {
     }
 
     /**
+     * Gets the list of the arg3Isas for a CycConstant predicate given an mt.
+     *
+     * @param predicate the predicate for which argument 3 contraints are sought.
+     * @param mt the relevant microtheory
+     * @return the list of the arg1Isas for a CycConstant predicate given an mt
+     */
+    public CycList getArg3Isas (CycConstant predicate, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(arg3-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
+    }
+
+    /**
      * Gets a list of the arg4Isas for a CycConstant predicate.
+     *
+     * @param predicate the predicate for which argument 4 contraints are sought.
+     * @return the list of the arg4Isas for a CycConstant predicate
      */
     public CycList getArg4Isas (CycConstant predicate)
         throws IOException, UnknownHostException, CycApiException {
@@ -1851,12 +1916,39 @@ public class CycAccess {
     }
 
     /**
+     * Gets the list of the arg4Isas for a CycConstant predicate given an mt.
+     *
+     * @param predicate the predicate for which argument 4 contraints are sought.
+     * @param mt the relevant microtheory
+     * @return the list of the arg4Isas for a CycConstant predicate given an mt
+     */
+    public CycList getArg4Isas (CycConstant predicate, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(arg4-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
+    }
+
+    /**
      * Gets a list of the argNIsas for a CycConstant predicate.
+     *
+     * @param predicate the predicate for which argument N contraints are sought.
+     * @return the list of the argNIsas for a CycConstant predicate
      */
     public CycList getArgNIsas (CycConstant predicate, int argPosition)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(remove-duplicates (with-all-mts (argn-isa " + predicate.stringApiValue() +
                             " " + argPosition + ")))");
+    }
+
+    /**
+     * Gets the list of the argNIsas for a CycConstant predicate given an mt.
+     *
+     * @param predicate the predicate for which argument 1 contraints are sought.
+     * @param mt the relevant microtheory
+     * @return the list of the arg1Isas for a CycConstant predicate given an mt
+     */
+    public CycList getArgNIsas (CycConstant predicate, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(argn-isa " + predicate.stringApiValue() + " " + mt.stringApiValue() + ")");
     }
 
     /**

@@ -209,6 +209,7 @@ public class ExportDaml {
      */
     public static void main (String[] args) {
         ExportDaml exportDaml = new ExportDaml();
+        exportDaml.verbosity = ExportDaml.DEFAULT_VERBOSITY;
         String choice = "eeld-core";
         if (args.length > 0)
             choice = args[0];
@@ -697,7 +698,7 @@ public class ExportDaml {
                 cycAccess.isa((CycConstant) object, cycKbSubsetFilter))
                     result.add(object);
             else if (verbosity > 4)
-                Log.current.println(" dropping " + cycConstant);
+                Log.current.println(" dropping " + object);
         }
         return  result;
     }
@@ -717,10 +718,36 @@ public class ExportDaml {
             if (isFilteredDamlSelectedConstant(object))
                 result.add(object);
             else if (verbosity > 4)
-                Log.current.println(" dropping " + cycConstant);
+                Log.current.println(" dropping " + object);
         }
         return  result;
     }
+
+    /**
+     * Substitutes more general collection constants for functional collection
+     * terms.
+     *
+     * @parameter cycForts the given list of cycForts which is to be processed
+     * @return the list of collection constant terms resulting from the substitution
+     * of more general cycConstants for cycNarts
+     */
+    protected CycList substituteGenlConstantsForNarts (CycList cycForts)
+    throws UnknownHostException, IOException, CycApiException {
+        CycList result = new CycList();
+        for (int i = 0; i < cycForts.size(); i++) {
+            CycFort cycFort = (CycFort) cycForts.get(i);
+            if (cycFort instanceof CycConstant)
+                result.add(cycFort);
+            else {
+                CycList genls = cycAccess.getGenls(cycFort);
+                if (verbosity > 0)
+                    Log.current.println(" substituting genls " + genls + " for " + cycFort);
+                result.addAllNew(genls);
+            }
+        }
+        return  result;
+    }
+
 
     /**
      * Return True iff the object is a selected constant. (DAML does not now
@@ -739,8 +766,8 @@ public class ExportDaml {
      * @parameter object the object under consideration as an instance of the desired KB
      * subset collection
      */
-    protected boolean isFilteredSelectedConstant (Object object) throws UnknownHostException, IOException,
-            CycApiException {
+    protected boolean isFilteredSelectedConstant (Object object)
+    throws UnknownHostException, IOException, CycApiException {
         if (!(object instanceof CycConstant))
             return  false;
         else
@@ -754,7 +781,9 @@ public class ExportDaml {
      */
     protected void populateIsas (CycConstant cycConstant) throws UnknownHostException, IOException,
             CycApiException {
+
         isas = cycAccess.getIsas(cycConstant);
+        isas = substituteGenlConstantsForNarts(isas);
         isas = filterSelectedConstants(isas);
     }
 
@@ -766,6 +795,7 @@ public class ExportDaml {
     protected void populateGenls (CycConstant cycConstant) throws UnknownHostException, IOException,
             CycApiException {
         genls = cycAccess.getGenls(cycConstant);
+        genls = substituteGenlConstantsForNarts(genls);
         genls = filterSelectedConstants(genls);
     }
 
@@ -788,6 +818,7 @@ public class ExportDaml {
     protected void populateArg1Isa (CycConstant cycConstant) throws UnknownHostException, IOException,
             CycApiException {
         CycList arg1Isas = cycAccess.getArg1Isas(cycConstant);
+        arg1Isas = substituteGenlConstantsForNarts(arg1Isas);
         arg1Isas = filterSelectedConstants(arg1Isas);
         if (arg1Isas.size() > 0)
             arg1Isa = (CycConstant)arg1Isas.first();
@@ -802,6 +833,7 @@ public class ExportDaml {
     protected void populateArg2Isa (CycConstant cycConstant) throws UnknownHostException, IOException,
             CycApiException {
         CycList arg2Isas = cycAccess.getArg2Isas(cycConstant);
+        arg2Isas = substituteGenlConstantsForNarts(arg2Isas);
         arg2Isas = filterSelectedConstants(arg2Isas);
         if (arg2Isas.size() > 0)
             arg2Isa = (CycConstant)arg2Isas.first();
@@ -841,6 +873,7 @@ public class ExportDaml {
     protected void populateDisjointWiths (CycConstant cycConstant) throws UnknownHostException, IOException,
             CycApiException {
         disjointWiths = cycAccess.getDisjointWiths(cycConstant);
+        disjointWiths = substituteGenlConstantsForNarts(disjointWiths);
         disjointWiths = filterSelectedConstants(disjointWiths);
     }
 
@@ -849,7 +882,8 @@ public class ExportDaml {
      *
      * @parameter cycConstant the Cyc collection for which the coExtensionals are obtained.
      */
-    protected void populateCoExtensionals (CycConstant cycConstant) throws UnknownHostException, IOException {
+    protected void populateCoExtensionals (CycConstant cycConstant)
+    throws UnknownHostException, IOException, CycApiException {
         try {
             coExtensionals = cycAccess.getCoExtensionals(cycConstant);
         }
@@ -857,6 +891,7 @@ public class ExportDaml {
             e.printStackTrace();
             return;
         }
+        coExtensionals = substituteGenlConstantsForNarts(coExtensionals);
         coExtensionals = filterSelectedConstants(coExtensionals);
     }
 

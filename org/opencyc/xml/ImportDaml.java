@@ -14,7 +14,9 @@ import org.opencyc.util.*;
 import ViolinStrings.Strings;
 
 /**
- * Imports DAML xml content.<p>
+ * Abstract class to provide common functions for importing DAML xml content.
+ * Subclasses will provide additional behavior tailored for the particular
+ * DAML imports.<p>
  * <p>
  * The Another RDF Parser (ARP) is used to parse the input DAML document.
  * This class implements statement callbacks from ARP. Each triple in the
@@ -43,7 +45,7 @@ import ViolinStrings.Strings;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ImportDaml implements StatementHandler {
+public abstract class ImportDaml implements StatementHandler {
 
     /**
      * The default verbosity of this application.  0 --> quiet ... 9 -> maximum
@@ -61,7 +63,7 @@ public class ImportDaml implements StatementHandler {
      * Sets verbosity of this application.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = DEFAULT_VERBOSITY;
+    public int verbosity = DEFAULT_VERBOSITY;
 
     /**
      * Another RDF Parser instance.
@@ -121,7 +123,7 @@ public class ImportDaml implements StatementHandler {
      * The name of the KB Subset collection which identifies ontology import
      * terms in Cyc.
      */
-    protected String kbSubsetCollectionName;
+    public String kbSubsetCollectionName;
 
     /**
      * The KB Subset collection which identifies ontology import
@@ -595,7 +597,7 @@ public class ImportDaml implements StatementHandler {
         cycAccess.assertSynonymousExternalConcept(subjectTermInfo.toString(),
                                                   "WorldWideWeb-DynamicIndexedInfoSource",
                                                   objectTermInfo.toOriginalString(),
-                                                  "DamlSonatSpindleHeadMt");
+                                                  importMtName);
         Log.current.println("(#$synonymousExternalConcept " +
                             subjectTermInfo.cycFort.cyclify() + " " +
                             "WorldWideWeb-DynamicIndexedInfoSource \"" +
@@ -785,7 +787,9 @@ public class ImportDaml implements StatementHandler {
             cycFort = new CycNart(cycAccess.getKnownConstantByName("URLFn"),
                                   damlTermInfo.toString());
         }
-        else if (damlTermInfo.constantName.startsWith("dmoz:DMOZ-")) {
+        else if (damlTermInfo.constantName != null &&
+                 damlTermInfo.constantName.startsWith("dmoz:DMOZ-")) {
+            //TODO generalize
             cycFort = new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
                                   damlTermInfo.toString());
         }
@@ -1139,14 +1143,134 @@ public class ImportDaml implements StatementHandler {
      * Initializes the Ontology nicknames mapping.
      */
     public void initializeCommonOntologyNicknames () {
+        if (verbosity > 1)
+            Log.current.println("Creating common ontology nicknames");
+        if (ontologyNicknames == null)
+            ontologyNicknames = new HashMap();
         ontologyNicknames.put("http://www.w3.org/1999/02/22-rdf-syntax-ns", "rdf");
         ontologyNicknames.put("http://www.w3.org/2000/01/rdf-schema", "rdfs");
         ontologyNicknames.put("http://www.w3.org/2000/10/XMLSchema", "xsd");
         ontologyNicknames.put("http://www.daml.org/2001/03/daml+oil", "daml");
 
+        ontologyNicknames.put("http://xmlns.com/foaf/0.1", "foaf");
+        ontologyNicknames.put("http://xmlns.com/foaf/0.1/", "foaf");
+        ontologyNicknames.put("http://xmlns.com/foaf", "foaf");
+        ontologyNicknames.put("http://xmlns.com/wot/0.1", "wot");
+        ontologyNicknames.put("http://xmlns.com/wordnet/1.6", "wn");
+        ontologyNicknames.put("http://www.w3.org/2001/08/rdfweb", "rdfweb");
+        ontologyNicknames.put("http://purl.org/dc/elements/1.1", "dublincore");
+        ontologyNicknames.put("http://purl.org/dc/elements/1.0/", "dublincore");
+
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2", "drc-dc");
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2", "ves");
+        ontologyNicknames.put("http://orlando.drc.com/daml/Ontology/daml-extension/3.2/daml-ext-ont", "daml-ext");
+        ontologyNicknames.put("http://www.daml.org/cgi-bin/geonames", "geonames");
+        ontologyNicknames.put("http://www.daml.org/cgi-bin/airport", "airport");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml", "factbook");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont", "factbook");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook", "factbook");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/af.daml", "factbook");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology", "daml-experiment");
+
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/internationalOrganizations.daml", "factbkorg");
+        ontologyNicknames.put("http://www.daml.org/2001/12/factbook/internationalOrganizations", "factbkorg");
+
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/chiefs-ont.daml", "chiefs-ont");
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/chiefs-ont", "chiefs-ont");
+
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/af.daml", "chiefs");
+        ontologyNicknames.put("http://www.daml.org/2002/02/chiefs/af", "chiefs");
+
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont.daml", "dces");
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2/dces-ont", "dces");
+
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont.daml", "ves");
+        ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2/drc-ves-ont", "ves");
+
+        ontologyNicknames.put("http://www.daml.org/2001/10/html/airport-ont.daml", "airport");
+        ontologyNicknames.put("http://www.daml.org/2001/10/html/airport-ont", "airport");
+
+        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips-10-4-ont", "fips10-4");
+
+        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips.daml", "fips");
+        ontologyNicknames.put("http://www.daml.org/2001/09/countries/fips", "fips");
+
+        ontologyNicknames.put("http://www.daml.org/2001/09/countries/iso-3166-ont", "iso3166");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont.daml", "enp");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/elements-ont", "enp");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/objectives-ont.daml", "obj");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/objectives-ont", "obj");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/social-elements-ont.daml", "soci");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/social-elements-ont", "soci");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/political-elements-ont.daml", "poli");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/political-elements-ont", "poli");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/economic-elements-ont.daml", "econ");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/economic-elements-ont", "econ");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml", "infr");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/infrastructure-elements-ont", "infr");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/information-elements-ont.daml", "info");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/information-elements-ont", "info");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont.daml", "mil");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/military-elements-ont", "mil");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/enp-characteristics.daml", "enp-char");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/enp-characteristics", "enp-char");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity-ont.daml", "entity-ont");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity-ont", "entity-ont");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity.daml", "entity");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/entity", "entity");
+
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/ona.xsd", "dt");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/location-ont.daml", "loc");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/location-ont", "loc");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/assessment-ont.daml", "assess");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/assessment-ont", "assess");
+
+        ontologyNicknames.put("http://www.daml.org/2001/02/geofile/geofile-dt.xsd", "geodt");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/CINC-ont.daml", "cinc");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/CINC-ont", "cinc");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/cinc-ont", "cinc");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/agency-ont.daml", "agent");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/agency-ont", "agent");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont.daml", "oper");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/operation-ont", "oper");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/target-ont.daml", "target-ont");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/target-ont", "target-ont");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-ont.daml", "unit-ont");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-ont", "unit-ont");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-status.daml", "unit-status");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit-status", "unit-status");
+
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit.daml", "unit");
+        ontologyNicknames.put("http://www.daml.org/experiment/ontology/unit", "unit");
+
+        ontologyNicknames.put("http://www.daml.org/2002/09/milservices/milservices-ont", "milsvcs-ont");
+
+        ontologyNicknames.put("http://www.daml.org/2002/09/milservices/us", "milsvcs-us");
     }
 
     public void setOntologyNickname (String uri, String nickname) {
+        if (ontologyNicknames == null)
+            ontologyNicknames = new HashMap();
         ontologyNicknames.put(uri, nickname);
     }
 
@@ -1155,6 +1279,8 @@ public class ImportDaml implements StatementHandler {
      */
     public void initializeCommonMappedTerms ()
         throws IOException, UnknownHostException, CycApiException {
+        if (verbosity > 1)
+            Log.current.println("Creating common mapped terms");
         assertMapping("daml:Thing",
                       "http://www.daml.org/2001/03/daml+oil",
                       "http://www.daml.org/2001/03/daml+oil#Thing",
@@ -1395,7 +1521,8 @@ public class ImportDaml implements StatementHandler {
                                   String mappingMt)
         throws IOException, UnknownHostException, CycApiException {
         CycFort cycTerm = cycAccess.findOrCreate(cycTermName);
-        Log.current.println("Mapping " + damlTermName + " to " + cycTerm.cyclify());
+        if (verbosity > 1)
+            Log.current.println("Mapping " + damlTermName + " to " + cycTerm.cyclify());
         cycAccess.assertSynonymousExternalConcept(cycTermName,
                                                   "WorldWideWeb-DynamicIndexedInfoSource",
                                                   damlTermName,
@@ -1509,7 +1636,8 @@ public class ImportDaml implements StatementHandler {
      */
     public void initializeCommonDamlVocabulary ()
         throws IOException, UnknownHostException, CycApiException {
-        Log.current.println("Creating common DAML vocabulary");
+        if (verbosity > 1)
+            Log.current.println("Creating common DAML vocabulary");
         if (cycAccess.isOpenCyc()) {
             cycAccess.setCyclist("CycAdministrator");
             cycAccess.setKePurpose("OpenCycProject");

@@ -1,7 +1,7 @@
 package org.opencyc.xml.gui;
 
 import org.opencyc.util.*;
-
+import org.opencyc.xml.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -38,7 +38,7 @@ import javax.swing.tree.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ImportDamlApp {
+public class ImportDamlApp extends ImportDaml {
 
     protected static final int MIN_MAIN_FRAME_HEIGHT = 300;
     protected static final int MIN_MAIN_FRAME_WIDTH = 300;
@@ -74,7 +74,7 @@ public class ImportDamlApp {
                     mainFrame.setSize(width, height);
                 }
             });
-            ImportDamlPanel importDamlPanel = new ImportDamlPanel();
+            ImportDamlPanel importDamlPanel = new ImportDamlPanel(new ImportDamlApp());
             mainFrame.getContentPane().add(importDamlPanel);
             Image icon = Toolkit.getDefaultToolkit().getImage("images/cyc-logo-16.jpg");
             mainFrame.setIconImage(icon);

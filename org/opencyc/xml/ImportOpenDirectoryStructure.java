@@ -121,11 +121,9 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
-            if(importDaml.actuallyImport) {
-                initializeDamlOntologyMt(importMt);
-            }
-            importDaml.initialize();
-            importDaml.importDaml(damlPath, importMt);
+            initializeDamlOntologyMt(importMt);
+            initialize();
+            importDaml(damlPath, importMt);
         }
     }
 
@@ -694,19 +692,6 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
             "~a is an abbreviated reference for the xml namespace of ~a",
             // genFormatList
             "()");
-    }
-
-    /**
-     * Initializes the DAML ontology mt.
-     */
-    protected void initializeDamlOntologyMt (String mtName)
-        throws IOException, UnknownHostException, CycApiException {
-        Log.current.println("Creating " + mtName);
-        String comment = "A microtheory to contain imported ODP DAML assertions.";
-        ArrayList genlMts = new ArrayList();
-        genlMts.add("BaseKB");
-        String isaMtName = "SourceMicrotheory";
-        cycAccess.createMicrotheory(mtName, comment, isaMtName, genlMts);
     }
 
     /**

@@ -3,6 +3,7 @@ package org.opencyc.xml.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -111,6 +112,10 @@ public class ImportDamlPanel extends JPanel {
      */
     protected CycAccess cycAccess;
 
+    /**
+     * reference to the parent object
+     */
+    protected ImportDamlApp importDamlApp;
 
     private void jbInit() throws Exception {
         Border myBorder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2,4,2,2),BorderFactory.createBevelBorder(BevelBorder.RAISED,Color.white,Color.white,new Color(134, 134, 134),new Color(93, 93, 93)));
@@ -192,8 +197,10 @@ public class ImportDamlPanel extends JPanel {
         importMtInputPanel.add(Box.createHorizontalGlue());
     }
 
-    public ImportDamlPanel() {
-        System.out.println("Constructing ImportDamlPanel");
+    public ImportDamlPanel(ImportDamlApp importDamlApp) {
+        if (importDamlApp.verbosity > 1)
+            Log.current.println("Constructing ImportDamlPanel");
+        this.importDamlApp = importDamlApp;
         panel = this;
         try {
             jbInit();
@@ -234,6 +241,7 @@ public class ImportDamlPanel extends JPanel {
                     JDialog errorMessageDialog = errorMessage.createDialog(panel, "ERROR");
                     errorMessageDialog.show();
                 }
+                importDamlIntoCyc();
                 saveProperties();
                 JOptionPane completionMessage = new JOptionPane("DAML import is completed",
                                                                 JOptionPane.INFORMATION_MESSAGE);
@@ -274,26 +282,45 @@ public class ImportDamlPanel extends JPanel {
      */
     protected void importDamlIntoCyc () {
         try {
-            ImportDaml importDaml = new ImportDaml();
-            importDaml.cycAccess = new CycAccess();
-            importDaml.initializeCommonDamlVocabulary();
-            importDaml.initializeCommonMappedTerms();
-            importDaml.initializeCommonOntologyNicknames();
-            importDaml.setOntologyNickname(damlPath, ontologyNickname);
+            if (importDamlApp.verbosity > 1)
+                Log.current.println("Establishing connection to the Cyc server");
+            String localHostName = InetAddress.getLocalHost().getHostName();
+            Log.current.println("Connecting to Cyc server from " + localHostName);
+            if (localHostName.equals("crapgame.cyc.com")) {
+                importDamlApp.cycAccess =
+                    new CycAccess("localhost",
+                                  3600,
+                                  CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                  true);
+            }
+            else if (localHostName.equals("thinker")) {
+                importDamlApp.cycAccess =
+                    new CycAccess("TURING",
+                                  3600,
+                                  CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                  true);
+            }
+            else {
+                importDamlApp.cycAccess = new CycAccess();
+            }
+            importDamlApp.initializeCommonDamlVocabulary();
+            importDamlApp.initializeCommonMappedTerms();
+            importDamlApp.initializeCommonOntologyNicknames();
+            importDamlApp.setOntologyNickname(damlPath, ontologyNickname);
             if (damlPath.endsWith(".daml"))
-                importDaml.setOntologyNickname(damlPath.substring(0, damlPath.length() - 5),
+                importDamlApp.setOntologyNickname(damlPath.substring(0, damlPath.length() - 5),
                                                ontologyNickname);
-            importDaml.initializeDamlOntologyMt(importMt);
-            importDaml.initialize();
-            importDaml.importDaml(damlPath, importMt);
+            importDamlApp.initializeDamlOntologyMt(importMt);
+            importDamlApp.kbSubsetCollectionName = "DamlConstant";
+            importDamlApp.initialize();
+            importDamlApp.importDaml(damlPath, importMt);
         }
         catch (Exception e) {
-            Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
-            JOptionPane errorMessage = new JOptionPane("Error occurred during DAML import\n" +
-                                                       e.getMessage(),
-                                                       JOptionPane.ERROR_MESSAGE);
-            JDialog errorMessageDialog = errorMessage.createDialog(panel, "ERROR");
+            JOptionPane errorMessagePane = new JOptionPane("Error occurred during DAML import\n" +
+                                                           "",
+                                                           JOptionPane.ERROR_MESSAGE);
+            JDialog errorMessageDialog = errorMessagePane.createDialog(panel, "ERROR");
             errorMessageDialog.show();
             System.exit(1);
         }

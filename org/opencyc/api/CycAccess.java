@@ -1069,13 +1069,16 @@ public class CycAccess {
     }
 
     /**
-     * Gets the comment for a CycConstant.  Embedded quotes are replaced by spaces.
+     * Gets the comment for a CycFort.  Embedded quotes are replaced by spaces.
+     *
+     * @param cycFort the term for which the comment is sought
+     * @return the comment for the given CycFort
      */
-    public String getComment (CycConstant cycConstant)
+    public String getComment (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
         String script =
             "(clet ((comment-string \n" +
-            "         (with-all-mts (comment " + cycConstant.stringApiValue() + ")))) \n" +
+            "         (with-all-mts (comment " + cycFort.stringApiValue() + ")))) \n" +
             "  (fif comment-string \n" +
             "       (string-substitute \" \" \"\\\"\" comment-string) \n" +
             "       \"\"))";
@@ -1083,7 +1086,29 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the isas for a CycFort.
+     * Gets the comment for a CycFort in the relevant mt.
+     * Embedded quotes are replaced by spaces.
+     *
+     * @param cycFort the term for which the comment is sought
+     * @param mt the relevant mt from which the comment is visible
+     * @return the comment for the given CycFort
+     */
+    public String getComment (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String script =
+            "(clet ((comment-string \n" +
+            "         (comment " + cycFort.stringApiValue() + " " + mt.stringApiValue() + "))) \n" +
+            "  (fif comment-string \n" +
+            "       (string-substitute \" \" \"\\\"\" comment-string) \n" +
+            "       \"\"))";
+        return converseString(script);
+    }
+
+    /**
+     * Gets the list of the isas for the given CycFort.
+     *
+     * @param cycFort the term for which its isas are sought
+     * @return the list of the isas for the given CycFort
      */
     public CycList getIsas (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1091,7 +1116,23 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the directly asserted true genls for a CycFort collection.
+     * Gets the list of the isas for the given CycFort.
+     *
+     * @param cycFort the term for which its isas are sought
+     * @param mt the relevant mt
+     * @return the list of the isas for the given CycFort
+     */
+    public CycList getIsas (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(isa " + cycFort.stringApiValue() +
+                              " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of the directly asserted true genls for the given CycFort collection.
+     *
+     * @param cycFort the given term
+     * @return the list of the directly asserted true genls for the given CycFort collection
      */
     public CycList getGenls (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1099,16 +1140,16 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the minimum (most specific) genls for a CycFort collection.
+     * Gets the list of the directly asserted true genls for the given CycFort collection.
      *
-     * @param cycFort the collection
-     * @param mt the microtheory in which to look
-     * @return a list of the minimum (most specific) genls for a CycFort collection
+     * @param cycFort the given term
+     * @param mt the relevant mt
+     * @return the list of the directly asserted true genls for the given CycFort collection
      */
-    public CycList getMinGenls (CycFort cycFort, CycFort mt)
+    public CycList getGenls (CycFort cycFort, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        return converseList("(remove-duplicates (min-genls " + cycFort.stringApiValue() +
-                            " " + mt.stringApiValue() + "))");
+        return converseList("(genls " + cycFort.stringApiValue() +
+                              " " + mt.stringApiValue() + ")");
     }
 
     /**
@@ -1120,7 +1161,23 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the directly asserted true specs for a CycFort collection.
+     * Gets a list of the minimum (most specific) genls for a CycFort collection.
+     *
+     * @param cycFort the collection
+     * @param mt the microtheory in which to look
+     * @return a list of the minimum (most specific) genls for a CycFort collection
+     */
+    public CycList getMinGenls (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(min-genls " + cycFort.stringApiValue() +
+                              " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of the directly asserted true specs for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @return the list of the directly asserted true specs for the given CycFort collection
      */
     public CycList getSpecs (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1128,7 +1185,23 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the least specific specs for a CycFort collection.
+     * Gets the list of the directly asserted true specs for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @param mt the microtheory in which to look
+     * @return the list of the directly asserted true specs for the given CycFort collection
+     */
+    public CycList getSpecs (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(specs " + cycFort.stringApiValue() +
+                              " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of the least specific specs for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @return the list of the least specific specs for the given CycFort collection
      */
     public CycList getMaxSpecs (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1136,7 +1209,23 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the direct genls of the direct specs for a CycFort collection.
+     * Gets the list of the least specific specs for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @param mt the microtheory in which to look
+     * @return the list of the least specific specs for the given CycFort collection
+     */
+    public CycList getMaxSpecs (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(max-specs " + cycFort.stringApiValue() +
+                              " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of the direct genls of the direct specs for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @return the list of the direct genls of the direct specs for the given CycFort collection
      */
     public CycList getGenlSiblings (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1144,7 +1233,23 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the siblings (direct specs of the direct genls) for a CycFort collection.
+     * Gets the list of the direct genls of the direct specs for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @param mt the microtheory in which to look
+     * @return the list of the direct genls of the direct specs for the given CycFort collection
+     */
+    public CycList getGenlSiblings (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(genl-siblings " + cycFort.stringApiValue() +
+                            " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of the siblings (direct specs of the direct genls) for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @return the list of the siblings (direct specs of the direct genls) for the given CycFort collection
      */
     public CycList getSiblings (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1152,7 +1257,22 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of the siblings (direct specs of the direct genls) for a CycFort collection.
+     * Gets the list of the siblings (direct specs of the direct genls) for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @param mt the microtheory in which to look
+     * @return the list of the siblings (direct specs of the direct genls) for the given CycFort collection
+     */
+    public CycList getSiblings (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getSpecSiblings(cycFort, mt);
+    }
+
+    /**
+     * Gets the list of the siblings (direct specs of the direct genls) for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @return the list of the siblings (direct specs of the direct genls) for the given CycFort collection
      */
     public CycList getSpecSiblings (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1160,7 +1280,19 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of all of the direct and indirect genls for a CycFort collection.
+     * Gets the list of the siblings (direct specs of the direct genls) for the given CycFort collection.
+     *
+     * @param cycFort the given collection
+     * @param mt the microtheory in which to look
+     * @return the list of the siblings (direct specs of the direct genls) for the given CycFort collection
+     */
+    public CycList getSpecSiblings (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(spec-siblings " + cycFort.stringApiValue() + " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect genls for the given CycFort collection.
      *
      * @param cycFort the collection
      * @return the list of all of the direct and indirect genls for a CycFort collection
@@ -1232,8 +1364,13 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of all of the direct and indirect genls for a CycFort SPEC which are also specs of
+     * Gets the list of all of the direct and indirect genls for a CycFort SPEC which are also specs of
      * CycFort GENL.
+     *
+     * @param spec the given collection
+     * @param genl the more general collection
+     * @return the list of all of the direct and indirect genls for a CycFort SPEC which are also specs of
+     * CycFort GENL
      */
     public CycList getAllGenlsWrt (CycFort spec, CycFort genl)
         throws IOException, UnknownHostException, CycApiException {
@@ -1241,10 +1378,29 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of all of the dependent specs for a CycFort collection.  Dependent specs are those direct and
+     * Gets the list of all of the direct and indirect genls for a CycFort SPEC which are also specs of
+     * CycFort GENL.
+     *
+     * @param spec the given collection
+     * @param genl the more general collection
+     * @param mt the relevant mt
+     * @return the list of all of the direct and indirect genls for a CycFort SPEC which are also specs of
+     * CycFort GENL
+     */
+    public CycList getAllGenlsWrt (CycFort spec, CycFort genl, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-genls-wrt " + spec.stringApiValue() + " " + genl.stringApiValue() +
+                            " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of all of the dependent specs for a CycFort collection.  Dependent specs are those direct and
      * indirect specs of the collection such that every path connecting the spec to a genl of the collection passes
      * through the collection.  In a typical taxomonmy it is expected that all-dependent-specs gives the same
      * result as all-specs.
+     *
+     * @param cycFort the given collection
+     * @return the list of all of the dependent specs for the given CycFort collection
      */
     public CycList getAllDependentSpecs (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
@@ -1252,8 +1408,28 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list with the specified number of sample specs of a CycFort collection.  Attempts to return
-     * leaves that are maximally differet with regard to their all-genls.
+     * Gets the list of all of the dependent specs for a CycFort collection.  Dependent specs are those direct and
+     * indirect specs of the collection such that every path connecting the spec to a genl of the collection passes
+     * through the collection.  In a typical taxomonmy it is expected that all-dependent-specs gives the same
+     * result as all-specs.
+     *
+     * @param cycFort the given collection
+     * @param mt the relevant mt
+     * @return the list of all of the dependent specs for the given CycFort collection
+     */
+    public CycList getAllDependentSpecs (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-dependent-specs " + cycFort.stringApiValue() +
+                            " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list with the specified number of sample specs of the given CycFort collection.
+     * Attempts to return leaves that are maximally differet with regard to their all-genls.
+     *
+     * @param cycFort the given collection
+     * @param numberOfSamples the maximum number of sample specs returned
+     * @return the list with the specified number of sample specs of the given CycFort collection
      */
     public CycList getSampleLeafSpecs (CycFort cycFort, int numberOfSamples)
         throws IOException, UnknownHostException, CycApiException {
@@ -1261,11 +1437,43 @@ public class CycAccess {
     }
 
     /**
+     * Gets the list with the specified number of sample specs of the given CycFort collection.
+     * Attempts to return leaves that are maximally differet with regard to their all-genls.
+     *
+     * @param cycFort the given collection
+     * @param numberOfSamples the maximum number of sample specs returned
+     * @param mt the relevant mt
+     * @return the list with the specified number of sample specs of the given CycFort collection
+     */
+    public CycList getSampleLeafSpecs (CycFort cycFort, int numberOfSamples, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(sample-leaf-specs " + cycFort.stringApiValue() + " " + numberOfSamples +
+                            " " + mt.stringApiValue() + ")");
+    }
+
+    /**
      * Returns true if CycFort SPEC is a spec of CycFort GENL.
+     *
+     * @param spec the considered spec collection
+     * @param genl the considered genl collection
+     * @return true if CycFort SPEC is a spec of CycFort GENL, otherwise false
      */
     public boolean isSpecOf (CycFort spec, CycFort genl)
         throws IOException, UnknownHostException, CycApiException {
         return isGenlOf(genl, spec);
+    }
+
+    /**
+     * Returns true if CycFort SPEC is a spec of CycFort GENL.
+     *
+     * @param spec the considered spec collection
+     * @param genl the considered genl collection
+     * @param mt the relevant mt
+     * @return true if CycFort SPEC is a spec of CycFort GENL, otherwise false
+     */
+    public boolean isSpecOf (CycFort spec, CycFort genl, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return isGenlOf(genl, spec, mt);
     }
 
     /**
@@ -1393,11 +1601,34 @@ public class CycAccess {
     }
 
     /**
-     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are tacitly coextensional via mutual genls of each other.
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are tacitly coextensional
+     * via mutual genls of each other.
+     *
+     * @param collection1 the first given collection
+     * @param collection2 the second given collection
+     * @return true if CycFort COLLECION1 and CycFort COLLECTION2 are tacitly coextensional
+     * via mutual genls of each other, otherwise false
      */
     public boolean areTacitCoextensional (CycFort collection1, CycFort collection2)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(with-all-mts (tacit-coextensional? " + collection1.stringApiValue() + " " + collection2.stringApiValue() + "))");
+    }
+
+    /**
+     * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are tacitly coextensional
+     * via mutual genls of each other.
+     *
+     * @param collection1 the first given collection
+     * @param collection2 the second given collection
+     * @param mt the relevant mt
+     * @return true if CycFort COLLECION1 and CycFort COLLECTION2 are tacitly coextensional
+     * via mutual genls of each other, otherwise false
+     */
+    public boolean areTacitCoextensional (CycFort collection1, CycFort collection2, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(tacit-coextensional? " + collection1.stringApiValue() +
+                               " " + collection2.stringApiValue() +
+                               " " + mt.stringApiValue() + ")");
     }
 
     /**

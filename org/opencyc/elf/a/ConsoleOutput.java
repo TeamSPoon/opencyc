@@ -48,21 +48,20 @@ public class ConsoleOutput extends DirectActuator {
    *
    * @param name the actuator name
    * @param resources the resources requried by this actuator
+   * @param actuatorChannel the takable channel from which messages are input
    */
   public ConsoleOutput(String name, 
-                       List resources) {
-    super(name, resources);
+                       List resources,
+                       Takable actuatorChannel) {
+    super(name, resources, actuatorChannel);
   }
   
   //// Public Area
   
   /** Initializes this console output actuator with the given input message channel and
    * starts the message consumer.
-   *
-   * @param actuatorChannel the takable channel from which messages are input
    */
-  public void initialize(Takable actuatorChannel) {
-    this.actuatorChannel = actuatorChannel;
+  public void initialize() {
     consumer = new Consumer(actuatorChannel, this);
     executor = new ThreadedExecutor();
     try {

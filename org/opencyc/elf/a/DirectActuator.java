@@ -44,22 +44,21 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
    *
    * @param name the actuator name
    * @param resources the resources requried by this actuator
+   * @param actuatorChannel the takable channel from which messages are input
    */
   public DirectActuator(String name, 
-                       List resources) {
+                        List resources,
+                        Takable actuatorChannel) {
     this.name = name;
     this.resources = resources;
+    this.actuatorChannel = actuatorChannel;
     logger = Logger.getLogger("org.opencyc.elf");
   }
   
   //// Public Area
   
-  /** Initializes this direct actuator with the given input message channel and
-   * starts the message consumer.
-   *
-   * @param actuatorChannel the takable channel from which messages are input
-   */
-  public abstract void initialize(Takable actuatorChannel);
+  /** Initializes this direct actuator and starts the message consumer. */
+  public abstract void initialize();
 
   /** Returns a string representation of this object.
    * 

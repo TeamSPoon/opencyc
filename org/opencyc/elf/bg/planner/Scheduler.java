@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.BufferedNodeComponent;
 import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Result;
@@ -23,7 +24,6 @@ import org.opencyc.elf.s.DirectSensor;
 import org.opencyc.elf.wm.NodeFactory;
 
 //// External Imports
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +56,7 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Scheduler extends NodeComponent {
+public class Scheduler extends BufferedNodeComponent {
   
   //// Constructors
 
@@ -64,7 +64,7 @@ public class Scheduler extends NodeComponent {
    * input and output channels.
    *
    * @param node the containing ELF node
-   * @param schedulerChannel the takable channel from which messages are input
+   * @param schedulerChannel the takable channel from which messages are input from the
    * job assigner
    */
   public Scheduler (Node node,
@@ -75,7 +75,7 @@ public class Scheduler extends NodeComponent {
 
   //// Public Area
 
-  /** Initializes the schedule and begins consuming schedules.
+  /** Initializes this scheduler and begins consuming jobs to schedule.
    *
    * @param jobAssignerChannel the puttable channel to which messages are output to the
    * job assigner
@@ -102,8 +102,12 @@ public class Scheduler extends NodeComponent {
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[Scheduler ");
-    if (schedule != null)
+    if (job != null)
+      stringBuffer.append(job.toString());
+    if (schedule != null) {
+      stringBuffer.append(" schedule: ");
       stringBuffer.append(schedule.toString());
+    }
     stringBuffer.append("]");
     return stringBuffer.toString();
   }
@@ -234,11 +238,8 @@ public class Scheduler extends NodeComponent {
      */
     protected void createExecutor(Schedule schedule) {
       Channel executorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
-      executor = new org.opencyc.elf.bg.executor.Executor();
-      //executor.initialize((Puttable) schedulerChannel);
-      
-      //TODO make exectutor a buffered node component
-      
+      executor = new org.opencyc.elf.bg.executor.Executor(getNode(), executorChannel);
+      executor.initialize((Puttable) schedulerChannel);
       getLogger().info("Created new executor: " + executor + " for schedule: " + schedule);
     }
     

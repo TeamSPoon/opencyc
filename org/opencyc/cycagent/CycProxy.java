@@ -4,20 +4,15 @@ import java.io.*;
 import java.util.*;
 import fipaos.ont.fipa.*;
 import fipaos.ont.fipa.fipaman.*;
-import  fipaos.parser.*;
+import fipaos.parser.*;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
 import org.opencyc.xml.*;
 
 /**
- * Provides a proxy for a cyc agent on the CoABS grid or FIPA-OS agent community.<p>
- *
- * An instance of this class is created for each unique cyc agent which makes
- * itself known to the agent manager.  A cyc image can host one or more cyc
- * agents.  Each message envelope from a cyc agent contains a parameter to
- * indicate which agent agent community processes the messge - either the CoABS
- * grid (Darpa & gov) or the FIPA-OS platform (OpenCyc).
+ * Provides a proxy for a cyc api service on the CoABS grid or FIPA-OS agent community, and also
+ * creates CycAgentProxy objects for each Cyc-hosted agent.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -56,6 +51,12 @@ public class CycProxy extends GenericAgent {
     public CycConnection agentsCycConnection;
 
     /**
+     * Association of Cyc-hosted agent names with their CycAgentProxy objects.
+     * CycAgentName --> CycAgentProxy instance
+     */
+    protected static Hashtable cycAgentProxies = new Hashtable();
+
+    /**
      * Constructs a CycProxy object for the given agent on both agent communities.
      *
      * @param myAgentName name of the local agent
@@ -64,7 +65,6 @@ public class CycProxy extends GenericAgent {
      */
     public CycProxy(String myAgentName, int verbosity) {
         super(myAgentName, verbosity);
-
     }
 
     /**
@@ -100,13 +100,16 @@ public class CycProxy extends GenericAgent {
     }
 
     /**
-     * Handles one inbound asynchronous message from a Cyc-hosted agent.
+     * Handles one inbound asynchronous message from a Cyc-hosted agent.  Creates a
+     * CycAgentProxy object if the Cyc-hosted agent is new.  Forwards the inbound
+     * message to the CycAgentProxy, which in turn forwards it to the agent
+     * community.
      *
      * @param fipaTransportMessage the message from a Cyc-hosted agent
      */
     protected void handleMessageFromCyc(CycList fipaTransportMessage) {
         if (verbosity > 2)
-            Log.current.println("\nreceived message from cyc agent for forwarding\n" + fipaTransportMessage);
+            Log.current.println("\nCycProxy received message from cyc agent for forwarding\n" + fipaTransportMessage);
         if (((CycList) fipaTransportMessage).size() != 3) {
             Log.current.println(fipaTransportMessage + "\nfipaTransportMessage has invalid length of " +
                                 ((CycList) fipaTransportMessage).size());
@@ -125,13 +128,19 @@ public class CycProxy extends GenericAgent {
                                        "\nenvelope is not a CycList");
         }
         CycList envelope = (CycList) ((CycList) fipaTransportMessage).second();
+        String cycAgentName =
+            envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":from")).toString();
+        CycAgentProxy cycAgentProxy = (CycAgentProxy) cycAgentProxies.get(cycAgentName);
+        if (cycAgentProxy != null) {
+            cycAgentProxy.handleMessageFromCyc(fipaTransportMessage);
+            return;
+        }
         CycSymbol agentCommunity =
             (CycSymbol) envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":X-agent-community"));
-        AgentCommunityAdapter agentCommunityAdapter = null;
         if (agentCommunity.equals(CycObjectFactory.makeCycSymbol(":COABS")))
-            agentCommunityAdapter = coAbsCommunityAdapter;
+            cycAgentProxy = new CycAgentProxy(cycAgentName, AgentCommunityAdapter.COABS_AGENT_COMMUNITY, verbosity);
         else if (agentCommunity.equals(CycObjectFactory.makeCycSymbol(":FIPA-OS")))
-            agentCommunityAdapter = coAbsCommunityAdapter;
+            cycAgentProxy = new CycAgentProxy(cycAgentName, AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY, verbosity);
         else {
             if (agentCommunity == null) {
                 Log.current.println("agent community is missing");
@@ -142,76 +151,10 @@ public class CycProxy extends GenericAgent {
                 throw new RuntimeException(agentCommunity + " is neither :COABS nor :FIPA-OS");
             }
         }
-        if (! (((CycList) fipaTransportMessage).third() instanceof CycList)) {
-            Log.current.println(((CycList) fipaTransportMessage).third() +
-                                "\npayload is not a CycList");
-            throw new RuntimeException(((CycList) fipaTransportMessage).third() +
-                                       "\npayload is not a CycList");
-        }
-        CycList payload = (CycList) ((CycList) fipaTransportMessage).third();
-        if (! (payload.second() instanceof CycList)) {
-            Log.current.println(payload.second() + "\naclList is not a CycList");
-            throw new RuntimeException(payload.second() + "\naclList is not a CycList");
-        }
-        CycList aclList = (CycList) payload.second();
-        ACL acl = new ACL();
-        acl.setPerformative(aclList.first().toString());
-        Object senderObj = aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":sender"));
-        if (! (senderObj instanceof CycList)) {
-            Log.current.println(senderObj + "\nsenderObj is not a CycList");
-            throw new RuntimeException(senderObj + "\nsenderObj is not a CycList");
-        }
-        AgentID senderAID = null;
-        try {
-            senderAID = new AgentID(((CycList) senderObj).cyclify());
-        }
-        catch (ParserException e) {
-            Log.current.println(e.getMessage() + "\ncannot parse sender " + senderObj);
-            throw new RuntimeException(e.getMessage() + "\ncannot parse sender " + senderObj);
-        }
-        acl.setSenderAID(senderAID);
-        Object receiverListObj = aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":receiver"));
-        if (! (receiverListObj instanceof CycList)) {
-            Log.current.println(receiverListObj + "\nreceiverObj is not a CycList");
-            throw new RuntimeException(receiverListObj + "\nreceiverObj is not a CycList");
-        }
-        Object receiverObj = ((CycList) receiverListObj).second();
-        AgentID receiverAID = null;
-        try {
-            receiverAID = new AgentID(((CycList) receiverObj).cyclify());
-        }
-        catch (ParserException e) {
-            Log.current.println(e.getMessage() + "\ncannot parse receiver " + receiverObj);
-            throw new RuntimeException(e.getMessage() + "\ncannot parse receiver " + receiverObj);
-        }
-        acl.setReceiverAID(receiverAID);
-        Object contentObj = aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":content"));
-        if (! (contentObj instanceof CycList)) {
-            Log.current.println(contentObj + "\ncontentObj is not a CycList");
-            throw new RuntimeException(contentObj + "\ncontentObj is not a CycList");
-        }
-        String contentXml = null;
-        try {
-            contentXml = "\n" + ((CycList) contentObj).toXMLString();
-        }
-        catch (IOException e) {
-            Log.current.println(e.getMessage() +
-                                "\nCannot convert to XML string " + contentObj);
-            throw new RuntimeException(e.getMessage() +
-                                       "\nCannot convert to XML string " + contentObj);
-        }
-        acl.setContentObject(contentXml, ACL.BYTELENGTH_ENCODING);
-        acl.setLanguage(FIPACONSTANTS.XML);
-        acl.setOntology(AgentCommunityAdapter.CYC_API_ONTOLOGY);
-        acl.setReplyWith(agentCommunityAdapter.nextMessageId());
-
-        try {
-            agentCommunityAdapter.sendMessage(acl);
-        }
-        catch (Exception e) {
-            Log.current.println("Exception when sending\n" + acl + "\n" + e.getMessage());
-        }
-
+        cycAgentProxy.agentsCycConnection = agentsCycConnection;
+        cycAgentProxies.put(cycAgentName, cycAgentProxy);
+        cycAgentProxy.initializeAgentCommunity();
+        cycAgentProxy.handleMessageFromCyc(fipaTransportMessage);
     }
 
     /**
@@ -223,49 +166,7 @@ public class CycProxy extends GenericAgent {
     public void messageReceived (int remoteAgentCommunity, ACL acl) {
         super.messageReceived(remoteAgentCommunity, acl);
         if (! messageConsumed) {
-            if (acl.getOntology().equals(AgentCommunityAdapter.CYC_API_ONTOLOGY))
-                processApiRequest(remoteAgentCommunity, acl);
-            else
-                handleMessageToCyc(remoteAgentCommunity, acl);
-        }
-    }
-
-    /**
-     * Handles a message from a remote agent to a Cyc-hosted agent.
-     *
-     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
-     * @param processApiRequest the echo request Agent Communication Language message
-     */
-    public void handleMessageToCyc(int remoteAgentCommunity, ACL acl) {
-        CycList fipaTransportMessage = new CycList();
-        CycList envelope = new CycList();
-        fipaTransportMessage.add(envelope);
-        envelope.add(CycObjectFactory.makeCycSymbol("envelope"));
-        envelope.add(CycObjectFactory.makeCycSymbol(":to"));
-        envelope.add(acl.getReceiverAID().getName());
-        envelope.add(CycObjectFactory.makeCycSymbol(":from"));
-        envelope.add(acl.getSenderAID().getName());
-        envelope.add(CycObjectFactory.makeCycSymbol(":X-agent-community"));
-        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
-            envelope.add(CycObjectFactory.makeCycSymbol(":COABS"));
-        else
-            envelope.add(CycObjectFactory.makeCycSymbol(":FIPA-OS"));
-        CycList payload = new CycList();
-        fipaTransportMessage.add(payload);
-        payload.add(CycObjectFactory.makeCycSymbol("payload"));
-        try {
-            payload.add(aclToCycList(acl));
-        }
-        catch (Exception e) {
-            Log.current.errorPrintln("Exception while converting to CycList\n" + acl);
-            return;
-        }
-        try {
-            agentsCycConnection.sendBinary(fipaTransportMessage);
-        }
-        catch (Exception e) {
-            Log.current.errorPrintln("Exception while sending message to Cyc\n" + fipaTransportMessage);
-            return;
+            processApiRequest(remoteAgentCommunity, acl);
         }
     }
 

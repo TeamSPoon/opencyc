@@ -275,7 +275,7 @@ public class CoAbsCommunityAdapter
                                                   acl.toString());
         requestMessage.setSender(regHelper.getAgentRep());
         if (verbosity > 2)
-            Log.current.println("\nSending " + requestMessage.toString() +
+            Log.current.println("\nSending\n" + requestMessage.toString() +
                                 "\n  receiver: " + requestMessage.getReceiver());
         AgentRep receivingAgentRep = this.lookupAgentRep(acl.getReceiverAID().getName());
         receivingAgentRep.addMessage(requestMessage);
@@ -346,8 +346,8 @@ public class CoAbsCommunityAdapter
                                     "\n  Sender AgentRep: " + agentRep +
                                     "\n  From: " + fromAgentName);
         }
-        if (agentRep != agentRepCache.get(fromAgentName))
-            agentRepCache.put(fromAgentName, agentRep);
+        if (agentRep != agentRepCache.get(fromAgentName.toUpperCase()))
+            agentRepCache.put(fromAgentName.toUpperCase(), agentRep);
         ACL acl = null;
         String fixedText = null;
         try {
@@ -407,7 +407,7 @@ public class CoAbsCommunityAdapter
     protected AgentRep lookupAgentRep(String agentName) throws IOException {
         if (verbosity > 2)
             Log.current.println("directory lookup for " + agentName);
-        AgentRep agentRep = (AgentRep) agentRepCache.get(agentName);
+        AgentRep agentRep = (AgentRep) agentRepCache.get(agentName.toUpperCase());
         if (agentRep != null)
             return agentRep;
         ServiceTemplate serviceTemplate = new ServiceTemplate(null, null, null);
@@ -433,8 +433,8 @@ public class CoAbsCommunityAdapter
                     agentRep = (AgentRep) service;
                     if (verbosity > 0)
                         Log.current.println("    registered agent " + agentRep.getName());
-                    if (agentName.equals(agentRep.getName())) {
-                        agentRepCache.put(agentName, agentRep);
+                    if (agentName.equalsIgnoreCase(agentRep.getName())) {
+                        agentRepCache.put(agentName.toUpperCase(), agentRep);
                         if (verbosity > 0)
                             Log.current.println("\ncached AgentRep for " + agentName);
                         return agentRep;

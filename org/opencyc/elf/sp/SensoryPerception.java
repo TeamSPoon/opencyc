@@ -242,7 +242,7 @@ public class SensoryPerception extends NodeComponent {
      * component within the world model, to (2) the entity evaluator node component within value
      * judgement, and to (3) the sensory processing node component at the next highest level.
      */
-    protected void senderceivedSensoryInputMsg() {
+    protected void sendPerceivedSensoryInputMsg() {
       //TODO
       Object obj = null;
       Object data = null;

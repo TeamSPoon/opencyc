@@ -38,24 +38,6 @@ public abstract class BufferedNodeComponent extends NodeComponent {
   //// Public Area
   
   /**
-   * Gets the ELF Node that contains this object.
-   * 
-   * @return the ELF Node that contains this object
-   */
-  public Node getNode() {
-    return node;
-  }
-
-  /**
-   * Sets the ELF Node that contains this object.
-   * 
-   * @param node the ELF Node thatcontains this object
-   */
-  public void setNode(Node node) {
-    this.node = node;
-  }
-
-  /**
    * Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
@@ -70,10 +52,5 @@ public abstract class BufferedNodeComponent extends NodeComponent {
   
   //// Internal Rep
   
-  /**
-   * the ELF node that contains this object
-   */
-  protected Node node;
-
   //// Main
 }

@@ -1,7 +1,14 @@
 package org.opencyc.elf.wm;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+import org.opencyc.elf.bg.planner.Schedule;
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+import org.opencyc.elf.bg.taskframe.TaskFrame;
+
+//// External Imports
+import java.util.ArrayList;
 
 /**
  * Provides the World Model for the Elementary Loop Functioning (ELF).<br>
@@ -27,12 +34,17 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class WorldModel extends NodeComponent {
+  
+  //// Constructors
+  
   /**
    * Constructs a new WorldModel object.
    */
   public WorldModel() {
   }
 
+  //// Public Area
+  
   /**
    * Returns a string representation of this object.
    * 
@@ -41,4 +53,128 @@ public class WorldModel extends NodeComponent {
   public String toString() {
     return "WorldModel for " + node.getName();
   }
+  
+  //// Protected Area
+  
+  /**
+   * Receives the fetch task frame message from ?, which contains the task command
+   * identifying the task frame.
+   */
+  protected void receiveFetchTaskFrame () {
+    //TODO
+    // received via channel from ?
+    // TaskCommand taskCommand
+  }
+  
+  /**
+   * Forwards the task frame message ?, which was received from ?.
+   */
+  protected void forwardTaskFrame () {
+    //TODO
+    // send via channel to ?
+    // TaskCommand taskCommand
+    // TaskFrame taskFrame
+  }
+  
+  /**
+   * Receives the request KB object message from ?.
+   */
+  protected void receiveRequestKBObject () {
+    //TODO
+    // received via channel from ?
+    // Object obj
+  }
+  
+  /**
+   * Forwards the request KB object message to ?.
+   */
+  protected void forwardRequestKBObject () {
+    //TODO
+    // send via channel from ?
+    // Object obj
+  }
+
+  /** 
+   * Receives the KB object message from ?.
+   */
+  protected void receiveKBObject () {
+    //TODO
+    // received via channel from ?
+    // Object obj
+  }
+  
+  /**
+   * Forwards the KB object message to ?.
+   */
+  protected void forwardKBObject () {
+    //TODO
+    // send via channel from ?
+    // Object obj
+  }
+  
+  /**
+   * Receives an update KB object message from ?
+   */
+  protected void receiveUpdate () {
+    //TODO
+    // received via channel from ?
+    // Object obj
+    // Object data
+  }
+  
+  /**
+   * Receives a post schedule message from ?
+   */
+  protected void receivePostSchedule () {
+    //TODO
+    // received via channel from ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Forwards the request evaluate schedule message from ? to ?.
+   */
+  protected void forwardRequestEvaluateSchedule () {
+    //TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+
+  /**
+   * Forwards the simulation failure notification message from ? to ?.
+   */
+  protected void forwardSimulationFailureNotification () {
+    //TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Forwards the predicted input message from ? to ?.
+   */
+  protected void forwardPredictedInput () {
+    //TODO
+    // send via channel to ?
+    // Object obj
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
 }

@@ -3,6 +3,7 @@ package  org.opencyc.api;
 import  java.net.*;
 import  java.io.*;
 import  java.util.Hashtable;
+import  java.util.Iterator;
 import  ViolinStrings.*;
 import  org.opencyc.util.*;
 import  org.opencyc.cycobject.*;
@@ -80,7 +81,8 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Parameter that, when true, causes a trace of the messages to and from the server.
      */
-    protected int trace = API_TRACE_NONE;
+    //protected int trace = API_TRACE_NONE;
+    protected int trace = API_TRACE_MESSAGES;
 
     /**
      * Ascii mode connnection to the OpenCyc server.
@@ -932,6 +934,7 @@ public class CycConnection implements CycConnectionInterface {
                 taskProcessorRequest = taskProcessorRequestBuffer.toString();
             }
             waitingReplyThreads.put(id, Thread.currentThread());
+            System.out.println(taskProcessorRequest);
             out.write(taskProcessorRequest);
             if (! taskProcessorRequest.endsWith("\n"))
                 out.newLine();
@@ -944,6 +947,8 @@ public class CycConnection implements CycConnectionInterface {
                     break;
                 }
             }
+            if (taskProcessingEnded)
+                throw new IOException("Socket closed");
             Object[] answer =  {
                 null, null
             };
@@ -996,6 +1001,11 @@ public class CycConnection implements CycConnectionInterface {
             if (timeout != null)
                 timeout.checkForTimeOut();
             int ch = in.read();
+            if (ch == -1) {
+                taskProcessingEnded = true;
+                interruptAllWaitingReplyThreads();
+                throw new IOException("Socket closed");
+            }
             if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
             if (ch == ' ')
@@ -1167,6 +1177,19 @@ public class CycConnection implements CycConnectionInterface {
         return "host " + hostName +
             ", asciiPort " + asciiPort +
             ", cfaslPort " + cfaslPort;
+    }
+
+    /**
+     * Recovers from a socket error by interrupting all the
+     * waiting reply threads.  Each awakened thread will detect
+     * the error condition and throw an IOExecption.
+     */
+    protected void interruptAllWaitingReplyThreads() {
+        Iterator iter = waitingReplyThreads.values().iterator();
+        while(iter.hasNext()) {
+            Thread thread = (Thread) iter.next();
+            thread.interrupt();
+        }
     }
 
     /**

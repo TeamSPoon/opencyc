@@ -74,7 +74,7 @@ public class ExportDaml {
      * The default verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected static final int DEFAULT_VERBOSITY = 9;
+    protected static final int DEFAULT_VERBOSITY = 3;
 
     /**
      * Sets verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
@@ -176,6 +176,10 @@ public class ExportDaml {
     private CycConstant arg2Format;
     private CycList disjointWiths;
     private CycList coExtensionals;
+    private CycList propertyAssertions;
+    private ArrayList damlSelectedClasses = new ArrayList();
+    private ArrayList damlSelectedProperties = new ArrayList();
+    private ArrayList damlSelectedIndividuals = new ArrayList();
 
     /**
      * Constructs a new ExportDaml object given the CycAccess object.
@@ -226,79 +230,61 @@ public class ExportDaml {
         if (verbosity > 2)
             Log.current.println("Sorting " + selectedConstants.size() + " CycConstant terms");
         Collections.sort(selectedConstants);
-        if ((exportCommand == ExportDaml.EXPORT_ENTIRE_KB) ||
-            (exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
-            (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
-            if (verbosity > 2)
-                Log.current.println("Removing non-binary properties");
-            for (int i = 0; i < selectedConstants.size(); i++) {
-                CycConstant cycConstant = (CycConstant)selectedConstants.get(i);
-                if (verbosity > 2) {
-                    if ((verbosity > 5) || (i % 20 == 0))
-                        Log.current.println("... " + cycConstant.cyclify());
-                }
-                if (cycAccess.isCollection(cycConstant))
-                    damlSelectedConstants.add(cycConstant);
-                else if (cycAccess.isUnaryPredicate(cycConstant))
-                    // Do not export (for now) Cyc unary predicates, as they cannot be easily expressed in DAML.
-                    continue;
-                else if (cycAccess.isBinaryPredicate(cycConstant))
-                    damlSelectedConstants.add(cycConstant);
-                else if (cycAccess.isFunction(cycConstant))
-                    // Do not export (for now) Cyc functions, as they cannot be expressed in DAML.
-                    continue;
-                else if (cycAccess.isPredicate(cycConstant))
-                    // Do not export Cyc (for now) arity 3+ predicates, as they cannot be easily expressed in DAML.
-                    continue;
-                else if (cycAccess.isIndividual(cycConstant))
-                    damlSelectedConstants.add(cycConstant);
+        if (verbosity > 2)
+            Log.current.println("Removing non-binary properties and partitioning by type.");
+        for (int i = 0; i < selectedConstants.size(); i++) {
+            CycConstant cycConstant = (CycConstant)selectedConstants.get(i);
+            if (verbosity > 2) {
+                if ((verbosity > 5) && (i % 100 == 0))
+                    Log.current.println("... " + cycConstant.cyclify());
             }
-        }
-        else {
-            // EXPORT_KB_SUBSET_BELOW_TERM
-            damlSelectedConstants = applyCycKbSubsetFilter(selectedConstants);
-            if (verbosity > 2)
-                Log.current.println("Filtered " + damlSelectedConstants.size() + " CycConstant terms");
+            if (cycAccess.isCollection(cycConstant)) {
+                damlSelectedConstants.add(cycConstant);
+                damlSelectedClasses.add(cycConstant);
+            }
+            else if (cycAccess.isUnaryPredicate(cycConstant))
+                // Do not export (for now) Cyc unary predicates, as they cannot be easily expressed in DAML.
+                continue;
+            else if (cycAccess.isBinaryPredicate(cycConstant)) {
+                damlSelectedConstants.add(cycConstant);
+                damlSelectedProperties.add(cycConstant);
+            }
+            else if (cycAccess.isFunction(cycConstant))
+                // Do not export (for now) Cyc functions, as they cannot be expressed in DAML.
+                continue;
+            else if (cycAccess.isPredicate(cycConstant))
+                // Do not export Cyc (for now) arity 3+ predicates, as they cannot be easily expressed in DAML.
+                continue;
+            else if (cycAccess.isIndividual(cycConstant)) {
+                damlSelectedConstants.add(cycConstant);
+                damlSelectedIndividuals.add(cycConstant);
+            }
         }
 
         //createConstantNode("PhysicalDevice");
         if (verbosity > 2)
             Log.current.println("Building DAML model");
-        for (int i = 0; i < damlSelectedConstants.size(); i++) {
-            //for (int i = 0; i < 20; i++) {
-            CycConstant cycConstant = (CycConstant)damlSelectedConstants.get(i);
+        /*
+        for (int i = 0; i < damlSelectedClasses.size(); i++) {
+            CycConstant cycConstant = (CycConstant) damlSelectedClasses.get(i);
             if (verbosity > 2)
-                Log.current.print(cycConstant + "  ");
-            if (cycAccess.isCollection(cycConstant)) {
-                if (verbosity > 2)
-                    Log.current.println("Collection");
-            }
-            else if (cycAccess.isBinaryPredicate(cycConstant)) {
-                if (verbosity > 2)
-                    Log.current.println("BinaryPredicate");
-            }
-            else if (cycAccess.isIndividual(cycConstant)) {
-                if (verbosity > 2)
-                    Log.current.print("Individual");
-                populateIsas(cycConstant);
-                if (verbosity > 2) {
-                    String individualType = "  (type unknown)";
-                    if (isas != null)
-                        for (int j = 0; j < isas.size(); j++)
-                            if (!isas.get(j).equals(cycKbSubsetCollection)) {
-                                individualType = (" (a " + isas.get(j) + ")");
-                                break;
-                            }
-                    Log.current.println(individualType);
-                }
-            }
-            else {
-                if (verbosity > 2)
-                    Log.current.println("other");
-                continue;
-            }
+                Log.current.print(cycConstant + "  Collection");
             createConstantNode(cycConstant);
         }
+        for (int i = 0; i < damlSelectedProperties.size(); i++) {
+            CycConstant cycConstant = (CycConstant) damlSelectedProperties.get(i);
+            if (verbosity > 2)
+                Log.current.print(cycConstant + "  BinaryPredicate");
+            createConstantNode(cycConstant);
+        }
+        */
+        for (int i = 0; i < damlSelectedIndividuals.size(); i++) {
+            CycConstant cycConstant = (CycConstant) damlSelectedIndividuals.get(i);
+            if (verbosity > 2)
+                Log.current.println(cycConstant + "  Individual");
+            createConstantNode(cycConstant);
+        }
+
         if (verbosity > 2)
             Log.current.println("Writing DAML output to " + outputPath);
         OutputFormat outputFormat = new OutputFormat(document, "UTF-8", true);
@@ -390,6 +376,7 @@ public class ExportDaml {
         guid = cycConstant.getGuid();
         populateComment(cycConstant);
         populateIsas(cycConstant);
+        populatePropertyAssertions(cycConstant);
         if (cycAccess.isCollection(cycConstant))
             createClassNode(cycConstant);
         else if (cycAccess.isBinaryPredicate(cycConstant))
@@ -452,27 +439,60 @@ public class ExportDaml {
         if (isas != null)
             for (int i = 0; i < isas.size(); i++) {
                 Element typeNode = document.createElementNS(rdfNamespace, "rdf:type");
-                typeNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)isas.get(i)));
+                typeNode.setAttributeNS(rdfNamespace,
+                                        "rdf:resource",
+                                        translateTerm((CycConstant)isas.get(i)));
                 classNode.appendChild(typeNode);
             }
         if (genls != null)
             for (int i = 0; i < genls.size(); i++) {
                 Element subClassNode = document.createElementNS(rdfsNamespace, "rdfs:subClassOf");
-                subClassNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)genls.get(i)));
+                subClassNode.setAttributeNS(rdfNamespace,
+                                            "rdf:resource",
+                                            translateTerm((CycConstant)genls.get(i)));
                 classNode.appendChild(subClassNode);
             }
         if (disjointWiths != null)
             for (int i = 0; i < disjointWiths.size(); i++) {
                 Element disjointWithNode = document.createElementNS(damlNamespace, "daml:disjointWith");
-                disjointWithNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)disjointWiths.get(i)));
+                disjointWithNode.setAttributeNS(rdfNamespace,
+                                                "rdf:resource",
+                                                translateTerm((CycConstant)disjointWiths.get(i)));
                 classNode.appendChild(disjointWithNode);
             }
         if (coExtensionals != null)
             for (int i = 0; i < coExtensionals.size(); i++) {
                 sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
-                sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)coExtensionals.get(i)));
+                sameClassAsNode.setAttributeNS(rdfNamespace,
+                                               "rdf:resource",
+                                               translateTerm((CycConstant)coExtensionals.get(i)));
                 classNode.appendChild(sameClassAsNode);
             }
+        createPropertyAssertionNodes(classNode);
+    }
+
+
+    /**
+     * Creates a property assertions node for the given Element.
+     *
+     * @param element the given element
+     */
+    protected void createPropertyAssertionNodes (Element node)
+        throws UnknownHostException, IOException, CycApiException {
+        for (int i = 0; i < propertyAssertions.size(); i++) {
+            CycList propertyAssertion = (CycList) propertyAssertions.get(i);
+            CycConstant property = (CycConstant) propertyAssertion.first();
+            Object value = propertyAssertion.third();
+            Element propertyAssertionNode = document.createElement(property.toString());
+            if (value instanceof String ||
+                value instanceof Integer)
+                propertyAssertionNode.appendChild(document.createTextNode(guid.toString()));
+            else
+                propertyAssertionNode.setAttributeNS(rdfNamespace,
+                                           "rdf:resource",
+                                           translateTerm((CycConstant) value));
+            node.appendChild(propertyAssertionNode);
+        }
     }
 
     /**
@@ -480,10 +500,13 @@ public class ExportDaml {
      *
      * @parameter cycConstant the Cyc individual from which the DAML individual node is created
      */
-    protected void createIndividualNode (CycConstant cycConstant) throws UnknownHostException, IOException,
-            CycApiException {
+    protected void createIndividualNode (CycConstant cycConstant)
+        throws UnknownHostException, IOException, CycApiException {
         if (isas == null || isas.size() == 0)
             return;
+        Log.current.println("  Isas :" + isas.cyclify());
+        CycConstant isa = bestIsaForIndividual();
+        Log.current.println("  best isa: " + isa.cyclify());
         Element individualNode = document.createElement(isas.get(0).toString());
         rdf.appendChild(individualNode);
         individualNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
@@ -500,7 +523,54 @@ public class ExportDaml {
         Element guidNode = document.createElement("guid");
         guidNode.appendChild(document.createTextNode(guid.toString()));
         individualNode.appendChild(guidNode);
+        for (int i = 0; i < propertyAssertions.size(); i++) {
+            CycList propertyAssertion = (CycList) propertyAssertions.get(i);
+            if (this.verbosity > 5)
+                Log.current.println("    " + propertyAssertion.cyclify());
+            CycConstant property = (CycConstant) propertyAssertion.first();
+            Object value = propertyAssertion.third();
+            Element propertyAssertionNode = document.createElement(property.toString());
+            if (value instanceof String ||
+                value instanceof Integer)
+                propertyAssertionNode.appendChild(document.createTextNode(guid.toString()));
+            else
+                propertyAssertionNode.setAttributeNS(rdfNamespace,
+                                           "rdf:resource",
+                                           translateTerm((CycConstant) value));
+            individualNode.appendChild(propertyAssertionNode);
+        }
+        createPropertyAssertionNodes(individualNode);
     }
+
+    /**
+     * Returns the best isa for the current Individual term.
+     *
+     * @return the best isa for the current Individual term
+     */
+    protected CycConstant bestIsaForIndividual ()
+        throws UnknownHostException, IOException, CycApiException {
+        CycConstant bestIsa = (CycConstant) isas.get(0);
+        if (isas.size() == 1)
+            return bestIsa;
+        CycList candidateIsas = new CycList();
+        for (int i = 0; i < isas.size(); i++) {
+            CycConstant isa = (CycConstant) isas.get(i);
+            if (! cycAccess.isQuotedCollection(isa))
+                candidateIsas.add(isa);
+        }
+        if (candidateIsas.size() == 0)
+            return bestIsa;
+        else if (candidateIsas.size() == 1)
+            return (CycConstant) candidateIsas.get(0);
+        else {
+            bestIsa = (CycConstant) cycAccess.getMinCol(candidateIsas);
+            if (verbosity > 0)
+                Log.current.println("    candidateIsas: " + candidateIsas +
+                                    " best-isa: " + bestIsa);
+            return bestIsa;
+        }
+    }
+
 
     /**
      * Creates the DAML node that defines the guid property.
@@ -575,6 +645,7 @@ public class ExportDaml {
             rangeNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm(arg2Isa));
             propertyNode.appendChild(rangeNode);
         }
+        createPropertyAssertionNodes(propertyNode);
     }
 
     /**
@@ -662,23 +733,14 @@ public class ExportDaml {
      * of more general cycConstants for cycNarts
      */
     protected CycList substituteGenlConstantsForNarts (CycList cycForts)
-    throws UnknownHostException, IOException {
+    throws UnknownHostException, IOException, CycApiException {
         CycList result = new CycList();
         for (int i = 0; i < cycForts.size(); i++) {
             CycFort cycFort = (CycFort) cycForts.get(i);
             if (cycFort instanceof CycConstant)
                 result.add(cycFort);
             else {
-                try {
-                    cycAccess.traceOn();
-                    CycList genls = cycAccess.getGenls(cycFort);
-                }
-                catch (CycApiException e) {
-                    Log.current.println("Cannot get genls for " + cycFort);
-                    Log.current.printStackTrace(e);
-                }
-                cycAccess.traceOff();
-
+                CycList genls = cycAccess.getGenls(cycFort);
                 if (verbosity > 0)
                     Log.current.println(" substituting genls " + genls + " for " + cycFort);
                 result.addAllNew(genls);
@@ -832,6 +894,33 @@ public class ExportDaml {
         }
         coExtensionals = substituteGenlConstantsForNarts(coExtensionals);
         coExtensionals = filterSelectedConstants(coExtensionals);
+    }
+
+    /**
+     * Populates the non-definitional ground atomic formulas in which the the
+     * predicate is an element of the list of applicable binary predicates and in
+     * which the given term appears as the first argument.
+     *
+     * @parameter cycConstant the term which appears in the first argument position
+     */
+    protected void populatePropertyAssertions (CycConstant cycConstant)
+    throws UnknownHostException, IOException, CycApiException {
+        CycList candidatePropertyAssertions = null;
+        propertyAssertions = new CycList();
+        try {
+            candidatePropertyAssertions =
+                cycAccess.getGafs(cycConstant,
+                                  applicableBinaryPredicates);
+        }
+        catch (CycApiException e) {
+            e.printStackTrace();
+            return;
+        }
+        for (int i = 0; i < candidatePropertyAssertions.size(); i++) {
+            CycList candidatePropertyAssertion = (CycList) candidatePropertyAssertions.get(i);
+            if (isFilteredDamlSelectedConstant(candidatePropertyAssertion.third()))
+                propertyAssertions.add(candidatePropertyAssertion);
+        }
     }
 
     /**

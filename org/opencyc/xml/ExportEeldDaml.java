@@ -84,6 +84,7 @@ public class ExportEeldDaml {
 
             ExportDaml exportDaml = new ExportDaml(cycAccess);
             exportDaml.verbosity = ExportDaml.DEFAULT_VERBOSITY;
+            //exportDaml.verbosity = 9;
 
             String choice = "eeld-core";
             if (args.length > 0)
@@ -114,6 +115,8 @@ public class ExportEeldDaml {
                 kbSubsetCollections.add(cycAccess.getKnownConstantByName("EELDNaturalDataConstant"));
                 CycList applicableBinaryPredicates =
                     cycAccess.getApplicableBinaryPredicates(kbSubsetCollections);
+                applicableBinaryPredicates.remove(cycAccess.isa);
+                applicableBinaryPredicates = applicableBinaryPredicates.sort();
                 Log.current.println("applicableBinaryPredicates: \n" + applicableBinaryPredicates.cyclify());
                 exportDaml.applicableBinaryPredicates = applicableBinaryPredicates;
                 exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);

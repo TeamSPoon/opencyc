@@ -126,7 +126,7 @@ public class ImportSonatDaml {
                                          "DamlSonatDrcVesOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/10/html/airport-ont.daml",
                                          "DamlSonatAirportOntologyMt"));
-        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips-10-4.daml",
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips-10-4",
                                          "DamlSonatFips10-4OntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips.daml",
                                          "DamlSonatFipsOntologyMt"));

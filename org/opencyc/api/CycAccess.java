@@ -476,8 +476,15 @@ public class CycAccess {
         response = converse(command);
         if (response[0].equals(Boolean.TRUE))
             return response[1];
-        else
-            throw new CycApiException(response[1].toString());
+        else {
+            String request;
+            if (command instanceof CycList)
+                request = ((CycList) command).cyclify();
+            else
+                request = (String) command;
+            throw new CycApiException(response[1].toString() +
+                                      "\nrequest: " + request);
+        }
     }
 
     /**
@@ -499,8 +506,15 @@ public class CycAccess {
                 return new CycList();
             else
                 return (CycList) response[1];
-        else
-            throw new CycApiException(response[1].toString());
+        else {
+            String request;
+            if (command instanceof CycList)
+                request = ((CycList) command).cyclify();
+            else
+                request = (String) command;
+            throw new CycApiException(response[1].toString() +
+                                      "\nrequest: " + request);
+        }
     }
 
     /**
@@ -522,8 +536,15 @@ public class CycAccess {
                                            response[1] + "\n in response to command " + command);
             return (String) response[1];
         }
-        else
-            throw new CycApiException(response[1].toString());
+        else {
+            String request;
+            if (command instanceof CycList)
+                request = ((CycList) command).cyclify();
+            else
+                request = (String) command;
+            throw new CycApiException(response[1].toString() +
+                                      "\nrequest: " + request);
+        }
     }
 
     /**
@@ -545,8 +566,15 @@ public class CycAccess {
             else
                 return false;
         }
-        else
-            throw new CycApiException(response[1].toString());
+        else {
+            String request;
+            if (command instanceof CycList)
+                request = ((CycList) command).cyclify();
+            else
+                request = (String) command;
+            throw new CycApiException(response[1].toString() +
+                                      "\nrequest: " + request);
+        }
     }
 
     /**
@@ -565,8 +593,15 @@ public class CycAccess {
         if (response[0].equals(Boolean.TRUE)) {
             return (new Integer(response[1].toString())).intValue();
         }
-        else
-            throw new CycApiException(response[1].toString());
+        else {
+            String request;
+            if (command instanceof CycList)
+                request = ((CycList) command).cyclify();
+            else
+                request = (String) command;
+            throw new CycApiException(response[1].toString() +
+                                      "\nrequest: " + request);
+        }
     }
 
     /**
@@ -581,8 +616,15 @@ public class CycAccess {
         throws IOException, UnknownHostException, CycApiException {
         Object [] response = {null, null};
         response = converse(command);
-        if (response[0].equals(Boolean.FALSE))
-            throw new CycApiException(response[1].toString());
+        if (response[0].equals(Boolean.FALSE)) {
+            String request;
+            if (command instanceof CycList)
+                request = ((CycList) command).cyclify();
+            else
+                request = (String) command;
+            throw new CycApiException(response[1].toString() +
+                                      "\nrequest: " + request);
+        }
     }
 
     /**
@@ -1826,6 +1868,21 @@ public class CycAccess {
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(sample-leaf-specs " + cycFort.stringApiValue() + " " + numberOfSamples +
                             " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Returns the single most specific collection from the given list of collectons.
+     *
+     * @param collections the given collections
+     * @return the single most specific collection from the given list of collectons
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public CycFort getMinCol (CycList collections)
+        throws IOException, UnknownHostException, CycApiException {
+        return (CycFort) converseObject("(with-all-mts (min-col '" +
+                                        collections.stringApiValue() + "))");
     }
 
     /**
@@ -5744,7 +5801,7 @@ public class CycAccess {
         for (int i = 0; i < kbSubsetCollections.size(); i++) {
             CycFort kbSubsetCollection = (CycFort) kbSubsetCollections.get(i);
             String query =
-                "(and \n" +
+                "(#$and \n" +
                 "  (#$isa ?binary-predicate " + kbSubsetCollection.cyclify() + ") \n" +
                 "  (#$isa ?binary-predicate #$BinaryPredicate))";
             result.addAllNew(askWithVariable(makeCycList(query),
@@ -5753,5 +5810,137 @@ public class CycAccess {
         }
         return result;
     }
+
+    /**
+     * Returns the list of gafs in which the predicate is a element of the
+     * given list of predicates and in which the given term appears in the first
+     * argument position.
+     *
+     * @param cycFort the given term
+     * @param predicates the given list of predicates
+     * @param mt the relevant inference microtheory
+     * @return the list of gafs in which the predicate is a element of the
+     * given list of predicates and in which the given term appears in the first
+     * argument position
+     */
+    public CycList getGafs (CycFort cycFort,
+                            CycList predicates,
+                            CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList result = new CycList();
+        for (int i = 0; i < predicates.size(); i++) {
+            result.addAllNew(getGafs(cycFort,
+                                     (CycFort) predicates.get(i),
+                                     mt));
+        }
+        return result;
+    }
+
+
+    /**
+     * Returns the list of gafs in which the predicate is the
+     * given predicate and in which the given term appears in the first
+     * argument position.
+     *
+     * @param cycFort the given term
+     * @param predicate the given predicate
+     * @param mt the relevant inference microtheory
+     * @return the list of gafs in which the predicate is a element of the
+     * given list of predicates and in which the given term appears in the first
+     * argument position
+     */
+    public CycList getGafs (CycFort cycFort,
+                            CycFort predicate,
+                            CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList gafs = new CycList();
+        String command =
+            "(with-mt " + mt.cyclify() + "\n" +
+            "  (pred-values-in-relevant-mts " +
+            cycFort.cyclify() + " " +
+            predicate.cyclify() + "))";
+        CycList values = converseList(command);
+        for (int i = 0; i < values.size(); i++) {
+            CycList gaf = new CycList();
+            gaf.add(predicate);
+            gaf.add(cycFort);
+            gaf.add(values.get(i));
+            gafs.add(gaf);
+        }
+        return gafs;
+    }
+
+    /**
+     * Returns the list of gafs in which the predicate is a element of the
+     * given list of predicates and in which the given term appears in the first
+     * argument position.
+     *
+     * @param cycFort the given term
+     * @param predicates the given list of predicates
+     * @return the list of gafs in which the predicate is a element of the
+     * given list of predicates and in which the given term appears in the first
+     * argument position
+     */
+    public CycList getGafs (CycFort cycFort,
+                            CycList predicates)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList result = new CycList();
+        for (int i = 0; i < predicates.size(); i++) {
+            result.addAllNew(getGafs(cycFort,
+                                     (CycFort) predicates.get(i)));
+        }
+        return result;
+    }
+
+
+    /**
+     * Returns the list of gafs in which the predicate is the
+     * given predicate and in which the given term appears in the first
+     * argument position.
+     *
+     * @param cycFort the given term
+     * @param predicate the given predicate
+     * @return the list of gafs in which the predicate is a element of the
+     * given list of predicates and in which the given term appears in the first
+     * argument position
+     */
+    public CycList getGafs (CycFort cycFort,
+                            CycFort predicate)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList gafs = new CycList();
+        String command =
+            "(with-all-mts \n" +
+            "  (pred-values-in-relevant-mts " +
+            cycFort.cyclify() + " " +
+            predicate.cyclify() + "))";
+        CycList values = converseList(command);
+        for (int i = 0; i < values.size(); i++) {
+            CycList gaf = new CycList();
+            gaf.add(predicate);
+            gaf.add(cycFort);
+            gaf.add(values.get(i));
+            gafs.add(gaf);
+        }
+        return gafs;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

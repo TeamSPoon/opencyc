@@ -28,6 +28,7 @@
 	 cycAssert/1,
 	 cycAssert/2,
 	 cycRetract/1,
+	 is_string/1,
 	 balanceBinding/2,
 	 cycRetract/2,
 	 cycRetractAll/1,
@@ -99,14 +100,16 @@
 :- style_check(-singleton).
 :- style_check(-discontiguous).
 :- style_check(-atom).
-:- style_check(-string).
+%:- style_check(+string).
 
 %:- set_prolog_flag(optimise,true).
 %:- set_prolog_flag(file_name_variables,false).
 %:- set_prolog_flag(agc_margin,0).
 %:- set_prolog_flag(trace_gc,false).
+:- set_prolog_flag(gc,false).
 %:-set_prolog_flag(character_escapes,true).
-%:-set_prolog_flag(double_quotes,codes).
+:-set_prolog_flag(double_quotes,codes).
+%:-set_prolog_flag(double_quotes,string).
 %:-set_prolog_flag(report_error,true).
 %:-set_prolog_flag(verbose,normal).
 :-dynamic(cycConnection/3).
@@ -182,7 +185,7 @@ getCycOption_nearest_thread(Name,Value):-
 getCycOption_nearest_thread(_Name,_Value):-!.
 
 
-
+'WRITEL'(F):-writel(F).
 
 isCycOption(Name):-!,isCycOption(Name,true).
 isCycOption(Name=Value):-!,isCycOption(Name,Value).
@@ -443,7 +446,6 @@ toCycApiExpression(Prolog,Vars,Chars):-var(Prolog),!,toCycVar(Prolog,Vars,Chars)
 toCycApiExpression('$VAR'(VAR),Vars,Chars):-!,sformat(Chars,'?~w',['$VAR'(VAR)]).
 toCycApiExpression(Prolog,Vars,Prolog):-(atom(Prolog);number(Prolog)),!.
 toCycApiExpression(Prolog,Vars,Chars):-is_string(Prolog),!,sformat(Chars,'"~s"',[Prolog]).
-toCycApiExpression(Prolog,Vars,Chars):-string(Prolog),!,sformat(Chars,'"~s"',[Prolog]).
 toCycApiExpression([P|List],Vars,Chars):-
 			toCycApiExpression_l([P|List],Vars,Term),
 			sformat(Chars,'\'(~w)',[Term]).
@@ -526,6 +528,7 @@ toCycVar(VAR,_,VarName):-
       atom_codes(AVAR,[95|CODES]),!,
       catch(sformat(VarName,'?HYP-~s',[CODES]),_,VarName='?HYP-VAR').
 
+is_string(X):-string(X),!.
 is_string([A,B|_]):-integer(A),A>12,A<129,integer(B),B>12,B<129.
 
 
@@ -978,15 +981,15 @@ readCycLChars_p0(Stream,[Char|Chars]):-
 	cyclReadStateChange(C),
 	readCycLChars_p1(C,Char,Stream,Chars),!.
 	
-readCycLChars_p1(C,Char,Stream,[]):- at_end_of_stream(Stream),!.
 readCycLChars_p1(C,Char,Stream,[]):-isCycLTerminationStateChar(C,Char),!.
+readCycLChars_p1(C,Char,Stream,[]):- at_end_of_stream(Stream),!.
 readCycLChars_p1(C,Char,Stream,Chars):-cyclAsciiRemap(C,Char),
       flag(prev_char,_,Char),
       readCycLChars_p0(Stream,Chars),!.
 
 isCycLTerminationStateChar(10,32):-reading_in_comment,!.
 isCycLTerminationStateChar(13,32):-reading_in_comment,!.
-isCycLTerminationStateChar(41,41):-flag('bracket_depth',X,X),(X<1),!.
+isCycLTerminationStateChar(41,41):-not(reading_in_string),flag('bracket_depth',X,X),(X<1),!.
 
 cyclReadStateChange(_):- reading_in_comment,!.
 cyclReadStateChange(34):-flag(prev_char,Char,Char),   % char 92 is "\" and will escape a quote mark
@@ -1215,10 +1218,11 @@ get_token(A,List,Token,Rest)  :-
   type_codes(Type,Lchars,Token),!.
 
 type_codes(num,CODES,Num):-catch(number_codes(Num,CODES),_,fail),!.
-type_codes(_,[34|Lchars],string(S)):-!,
+type_codes(_,[34|Lchars],LcharsNoQuotes):-!,
       reverse(Lchars,[_|Rchars]),
-      reverse(Rchars,LcharsNoQuotes),
-      getCycLTokens(LcharsNoQuotes,S).
+      reverse(Rchars,LcharsNoQuotes).
+      %getCycLTokens(LcharsNoQuotes,S),
+      %string_to_list(O,LcharsNoQuotes).
 type_codes(_,Lchars,Token):-!,atom_codes(Token,Lchars).
 
 get_chars_type(L,S,L1,sep)  :-  separator(L,S,L1),!.
@@ -1596,10 +1600,9 @@ xmlPrologServer(Port):-
 
 attemptServerBind(ServerSocket, Port):-
         catch((tcp_bind(ServerSocket, Port),
-        flush_output,
-        writeSTDERR('% OpenCyc Prolog API server started on port ~w. \n',[Port]),flush_output),
+        writeSTDERR('% OpenCyc Prolog API server started on port ~w. \n',[Port])),
         error(E,_),
-        writeSTDERR('\nnOpenCyc Prolog API server not started becasue: "~w"\n',[Port,E])).
+        writeSTDERR('% OpenCyc Prolog API server not started on port ~w becasue: "~w"\n',[Port,E])).
 
 acceptClientsAtServerSocket(ServerSocket):-
 		tcp_open_socket(ServerSocket, AcceptFd, _),
@@ -1628,13 +1631,13 @@ serviceIO(In,Out):-
 	serviceIOBasedOnChar(Char,In,Out),!.
 
 
+serviceIOBasedOnChar('(',In,Out):-!,  
+         serviceCycApiRequest(In,Out).
+
 serviceIOBasedOnChar('G',In,Out):-!,  
          serviceHttpRequest(In,Out).
 serviceIOBasedOnChar('P',In,Out):-!,
          serviceHttpRequest(In,Out).
-
-serviceIOBasedOnChar('(',In,Out):-!,  
-         serviceCycApiRequest(In,Out).
 
 serviceIOBasedOnChar('<',In,Out):-!,
          serviceSoapRequest(In,Out).  % see cyc_soap.pl
@@ -1644,6 +1647,53 @@ serviceIOBasedOnChar('+',In,Out):-!,
 
 serviceIOBasedOnChar(C,In,Out):-
         serviceNativeRequestAsRDF(C,In,Out).
+
+% ===========================================================
+% PROLOGD for OpenCyc SERVICE
+% ===========================================================
+
+serviceCycApiRequest(In,Out):-
+   thread_self(Session),
+   retractall(isKeepAlive(Session)),
+   asserta(isKeepAlive(Session)),
+   repeat,
+      once((
+	 readCycL(In,Trim), 
+	 getSurfaceFromChars(Trim,[Result],ToplevelVars),
+	    set_output(Out),set_input(In),
+	 balanceBinding(Result,PrologGoal),
+	 format(user_error,'remote API Call "~s" -> ~q~n',[Trim,PrologGoal]),
+	 catch(callCycApi(Out,PrologGoal,ToplevelVars),E,format(Out,'500 "~q"\n',[E])),
+	 flush_output(Out))),
+      	 isCycAPIQuit(PrologGoal),!.
+
+isCycAPIQuit('API-QUIT').
+isCycAPIQuit('api-quit').
+      
+'PRINT'(X):-writel(X).
+
+'TEST':-format('"hi"').
+
+callCycApi(Out,PrologGoal,ToplevelVars):-write(Out,'200 ('),
+	       PrologGoal,!,
+	       writel(varslist(ToplevelVars,ToplevelVars)),write(Out,')\n'),flush_output(Out),!.
+callCycApi(Out,PrologGoal,ToplevelVars):-write(Out,'NIL\n').
+
+'API-QUIT':-'api-quit'.
+'api-quit':-thread_self(Session),retractall(isKeepAlive(Session)).
+
+
+
+
+      
+
+serviceCycApiRequestSubP(Trim):-
+       getSurfaceFromChars(Trim,[Result],ToplevelVars),!,
+       balanceBinding(Result,PrologGoal),!,
+	 (catch(PrologGoal,_,true)),
+       once((writel(varslist(ToplevelVars,ToplevelVars)),write('<br>\n'))),fail.
+
+
 
 
 % ===========================================================
@@ -1669,32 +1719,6 @@ invokePrologCommand(Session,In,Out,PrologGoal,ToplevelVars,Returns):-
         set_output(Out),set_input(In),!,
 	ignore(catch(PrologGoal,_,true)),
         xmlExitTags,!.
-
-% ===========================================================
-% PROLOGD for OpenCyc SERVICE
-% ===========================================================
-
-serviceCycApiRequest(In,Out):-
-       readCycL(In,Trim), 
-       isDebug(format(user_error,'remote API Call "~s"~n',[Trim])),
-       serviceCycApiRequestSubP(In,Trim,Out).
-   
-      
-serviceCycApiRequestSubP(In,Trim,Out):-
-       getSurfaceFromChars(Trim,[Result],ToplevelVars),!,
-       balanceBinding(Result,PrologGoal),
-        thread_self(Session),
-        retractall(isKeepAlive(Session)),
-        xmlClearTags,
-       invokePrologCommand(Session,In,Out,PrologGoal,ToplevelVars,Returns),
-       writel(varslist(ToplevelVars,ToplevelVars)).
-
-serviceCycApiRequestSubP(Trim):-
-       getSurfaceFromChars(Trim,[Result],ToplevelVars),!,
-       balanceBinding(Result,PrologGoal),!,
-	 (catch(PrologGoal,_,true)),
-       once((writel(varslist(ToplevelVars,ToplevelVars)),write('<br>\n'))),fail.
-
 
 
 % ===========================================================

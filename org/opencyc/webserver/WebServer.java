@@ -129,7 +129,6 @@ public class WebServer extends Thread {
         getProperties();
         server = new ServerSocket(port);
         processDirectories();
-        WebServerAdmin.makeWebServerAdmin(this);
     }
 
     /**

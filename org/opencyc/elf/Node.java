@@ -79,7 +79,7 @@ public class Node {
    * 
    * @return the dictionary of nodes by name
    */
-  public HashMap getNodes() {
+  public static HashMap getNodes() {
     return nodes;
   }
 
@@ -87,8 +87,8 @@ public class Node {
    * 
    * @param nodes the dictionary of nodes by name
    */
-  public void setNodes(HashMap nodes) {
-    this.nodes = nodes;
+  public static void setNodes(HashMap nodes) {
+    Node.nodes = nodes;
   }
 
   /** Gets the unique name of this node
@@ -218,6 +218,14 @@ public class Node {
    */
   public void setChildNodes(List childNodes) {
     this.childNodes = childNodes;
+  }
+
+  /** Adds the given node to the Child nodes of this node
+   * 
+   * @param the given node to add as a child of this node
+   */
+  public void addChildNode(Node node) {
+    childNodes.add(node);
   }
 
   /** Gets the list of sibling nodes at this ELF resolution level

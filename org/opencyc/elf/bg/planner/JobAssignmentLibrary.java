@@ -68,6 +68,8 @@ public class JobAssignmentLibrary {
     ActionFactory actionFactory = new ActionFactory();
     Action action = actionFactory.makeConsolePromptedInput();
     jobAssignment.setActionForScheduling(action);
+    jobAssignmentDictionary.put(Action.CONVERSE_WITH_USER, jobAssignment);
+    
   }
  
   /**
@@ -92,8 +94,7 @@ public class JobAssignmentLibrary {
   protected static JobAssignmentLibrary jobAssignmentLibrary;
   
   /**
-   * the dictionary that associates a given action name with the list of schedules that
-   * accomplish it
+   * the dictionary that associates a given action name with the list of schedules that accomplish it
    */
   protected HashMap jobAssignmentDictionary = new HashMap();
   

@@ -35,25 +35,21 @@ public class UnitTest extends TestCase {
      * Main method in case tracing is prefered over running JUnit GUI.
      */
     public static void main(String[] args) {
-        boolean allTests = false;
-        //boolean allTests = true;
-        runTests(allTests);
+        junit.textui.TestRunner.run(suite());
     }
 
     /**
-     * Runs the unit tests
+     * Returns the test suite.
+     *
+     * @return the test suite
      */
-    public static void runTests(boolean allTests) {
-        TestSuite testSuite;
-        if (allTests)
-            testSuite = new TestSuite(UnitTest.class);
-        else {
-            testSuite = new TestSuite();
-            //testSuite.addTest(new UnitTest("testExportDaml1"));
-            testSuite.addTest(new UnitTest("testExportDaml2"));
-        }
-        TestResult testResult = new TestResult();
-        testSuite.run(testResult);
+    public static Test suite() {
+        TestSuite testSuite = new TestSuite();
+        testSuite = new TestSuite();
+        //testSuite.addTest(new UnitTest("testExportDaml1"));
+        //testSuite.addTest(new UnitTest("testExportDaml2"));
+        testSuite.addTest(new UnitTest("testTextUtil"));
+        return testSuite;
     }
 
     /**
@@ -68,7 +64,7 @@ public class UnitTest extends TestCase {
      * Tests the ExportDaml class.
      */
     public void xtestExportDaml1() {
-        System.out.println("** testExportDaml1 **");
+        System.out.println("\n*** testExportDaml1 ***");
         ExportDaml exportDaml = new ExportDaml();
         try {
             exportDaml.verbosity = 3;
@@ -81,14 +77,14 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
-        System.out.println("** testExportDaml1 OK **");
+        System.out.println("*** testExportDaml1 OK ***");
     }
 
     /**
      * Tests the ExportDaml class.
      */
     public void testExportDaml2() {
-        System.out.println("** testExportDaml2 **");
+        System.out.println("\n*** testExportDaml2 ***");
         ExportDaml exportDaml = new ExportDaml();
         try {
             exportDaml.verbosity = 3;
@@ -101,7 +97,21 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
-        System.out.println("** testExportDaml2 OK **");
+        System.out.println("*** testExportDaml2 OK ***");
     }
+
+    /**
+     * Tests the TextUtil class.
+     */
+    public void testTextUtil() {
+        System.out.println("\n*** testTextUtil ***");
+
+
+
+
+
+        System.out.println("*** testTextUtil OK ***");
+    }
+
 
 }

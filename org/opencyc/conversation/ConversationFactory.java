@@ -231,6 +231,8 @@ public class ConversationFactory {
         Performative termChoicePerformative = new Performative("term-choice");
         Performative termChosenPerformative = new Performative("term-chosen");
 
+        disambiguateTerm.setDefaultPerformative(startPerformative);
+
         /**
          * 1. If we are in the start state and get a start performative,
          * transition to the disambiguate-term state and perform the

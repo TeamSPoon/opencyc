@@ -5,6 +5,7 @@ import java.util.*;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.templateparser.*;
+import org.opencyc.util.*;
 
 /**
  * Provides a unit test suite for the <tt>org.opencyc.conversation</tt> package<p>
@@ -233,6 +234,17 @@ public class UnitTest extends TestCase {
         Interpreter interpreter = new Interpreter();
         interpreter.initialize("initial", chat);
         Assert.assertNotNull(interpreter);
+        Assert.assertNotNull(interpreter.conversationStacks);
+        Assert.assertNotNull(interpreter.conversationStacks.get("initial"));
+        Assert.assertTrue(interpreter.conversationStacks.get("initial") instanceof StackWithPointer);
+        StackWithPointer conversationStack =
+            (StackWithPointer) interpreter.conversationStacks.get("initial");
+        Assert.assertEquals(1, conversationStack.size());
+        Assert.assertTrue(conversationStack.peek() instanceof ConversationStateInfo);
+        ConversationStateInfo conversationStateInfo =
+            (ConversationStateInfo) conversationStack.peek();
+        Assert.assertEquals(chat, conversationStateInfo.getConversation());
+        Assert.assertNull(conversationStateInfo.getCurrentState());
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         String chatMessage = "xxxx";
         ParseResults parseResults = interpreter.templateParser.parse(chatMessage);
@@ -255,6 +267,13 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("final", interpreter.currentState.getStateId());
 
         interpreter.initialize("initial", chat);
+        conversationStack =
+            (StackWithPointer) interpreter.conversationStacks.get("initial");
+        Assert.assertEquals(1, conversationStack.size());
+        Assert.assertTrue(conversationStack.peek() instanceof ConversationStateInfo);
+        conversationStateInfo =
+            (ConversationStateInfo) conversationStack.peek();
+        Assert.assertEquals(chat, conversationStateInfo.getConversation());
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         chatMessage = "what do you know about penguins?";
         parseResults = interpreter.templateParser.parse(chatMessage);
@@ -269,6 +288,20 @@ public class UnitTest extends TestCase {
         ArrayList actualTextBinding =
             parseResults.getTextBinding(CycObjectFactory.makeCycVariable("term"));
         Assert.assertEquals(expectedTextBinding, actualTextBinding);
+        Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
+        CycList disambiguationWords = new CycList();
+        disambiguationWords.add("penguins");
+        Object [] attributeValuePair = {"disambiguation words", disambiguationWords};
+        ArrayList arguments = new ArrayList();
+        arguments.add(attributeValuePair);
+        interpreter.setupSubConversation(disambiguateTerm, arguments);
+        Assert.assertEquals("ready", conversationStateInfo.getCurrentState().getStateId());
+        Assert.assertEquals(2, conversationStack.size());
+        Assert.assertTrue(conversationStack.peek() instanceof ConversationStateInfo);
+        conversationStateInfo = (ConversationStateInfo) conversationStack.peek();
+        Assert.assertNull(conversationStateInfo.getCurrentState());
+        Assert.assertEquals(disambiguateTerm, conversationStateInfo.getConversation());
+        Assert.assertEquals(interpreter.nextPerformative, disambiguateTerm.getDefaultPerformative());
 
         System.out.println("**** testInterpreter OK ****");
     }
@@ -281,10 +314,11 @@ public class UnitTest extends TestCase {
 
         Interpreter interpreter = new Interpreter();
         Performer performer = new Performer(interpreter);
+
         CycAccess cycAccess = null;
         try {
             cycAccess = new CycAccess();
-
+            //System.out.println("CycAccess initialized");
             CycList terms = performer.parseTermsString("penguins");
             // #$Penguin
             Assert.assertTrue(terms.contains(cycAccess.getKnownConstantByGuid("bd58a986-9c29-11b1-9dad-c379636f7270")));
@@ -293,7 +327,7 @@ public class UnitTest extends TestCase {
 
             CycList words = new CycList();
             words.add("penguins");
-            terms = performer.parseTermsString(words);
+            terms = performer.parseTerms(words);
             // #$Penguin
             Assert.assertTrue(terms.contains(cycAccess.getKnownConstantByGuid("bd58a986-9c29-11b1-9dad-c379636f7270")));
             // #$PittsburghPenguins

@@ -83,7 +83,13 @@ public class Performer {
     public Performer(Interpreter interpreter) {
         Log.makeLog();
         this.interpreter = interpreter;
-        this.conversationFactory = interpreter.chatterBot.conversationFactory;
+        if (interpreter.chatterBot != null)
+            this.conversationFactory = interpreter.chatterBot.conversationFactory;
+        else {
+            // When unit testing, no ChatterBot is present.
+            conversationFactory = new ConversationFactory();
+            conversationFactory.initialize();
+        }
     }
 
     /**
@@ -148,69 +154,15 @@ public class Performer {
      * @param currentState the current conversation state
      * @param action the action object.
      */
-    protected void doDisambiguateParseTermAction (State currentState, Action action) {
-    }
+    protected void doDisambiguateParseTermAction (State currentState, Action action)
+        throws CycApiException, UnknownHostException, IOException {
+        ArrayList disambiguationWords =
+            (ArrayList) interpreter.getStateAttribute("disambiguation words");
+        CycList terms = parseTerms(disambiguationWords);
 
-    /**
-     * Performs the do-disambiguate-term-choice action.
-     *
-     * @param currentState the current conversation state
-     * @param action the action object.
-     */
-    protected void doDisambiguateTermChoiceAction (State currentState, Action action) {
-    }
+        // compare maximum disambiguation generated phrases
 
-    /**
-     * Performs the do-disambiguate-term-done action
-     *
-     * @param currentState the current conversation state
-     */
-    protected void doDisambiguateTermDoneAction (State currentState) {
-    }
-
-    /**
-     * Performs the do-term-query action.  First performs a disambiguate-term
-     * conversation to obtain the correct term for the query.
-     *
-     * @param currentState the current conversation state
-     * @param action the action object.
-     */
-    protected void doTermQuery (State currentState, Action action)
-        throws CycApiException, IOException, UnknownHostException {
-        ParseResults parseResults =
-            (ParseResults) interpreter.getStateAttribute("parse results");
-        ArrayList queryWords =
-            parseResults.getTextBinding(CycObjectFactory.makeCycVariable("?term"));
-        interpreter.setStateAttribute("query words", queryWords);
-
-        Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
-        Object [] attributeValuePair = {"disambiguation words", queryWords};
-        ArrayList arguments = new ArrayList();
-        arguments.add(attributeValuePair);
-        setupSubConversation(disambiguateTerm, arguments);
-        interpreter.setNextPerformative(disambiguateTerm.getDefaultPerformative());
-    }
-
-    /**
-     * Sets up the given sub conversation and the input arguments as
-     * a list of attribute/value pairs.
-     *
-     * @param conversation the new conversation
-     * @param arguments a list of Object arrays of length two, the first array element is the
-     * attribute and the second array element is its value
-     */
-    protected void setupSubConversation (Conversation conversation, ArrayList arguments) {
-        ConversationStateInfo conversationStateInfo =
-            new ConversationStateInfo(conversation,
-                                      (HashMap) interpreter.stateAttributes.clone());
-        interpreter.pushConversationStateInfo(conversationStateInfo);
-        interpreter.currentState = conversation.getInitialState();
-        for (int i = 0; i < arguments.size(); i++) {
-            Object [] attributeValuePair = (Object []) arguments.get(i);
-            String attribute = (String) attributeValuePair[0];
-            Object value = attributeValuePair[1];
-            interpreter.setStateAttribute(attribute, value);
-        }
+        System.out.println("terms " + terms.cyclify());
     }
 
     /**
@@ -219,7 +171,7 @@ public class Performer {
      * @param words the phrase words
      * @return the terms whose parse covers the given phrase words
      */
-    protected CycList parseTermsString (ArrayList words)
+    protected CycList parseTerms (ArrayList words)
         throws CycApiException, IOException, UnknownHostException {
         StringBuffer stringBuffer = new StringBuffer();
         for (int i = 0; i < words.size(); i++) {
@@ -258,6 +210,45 @@ public class Performer {
                 Log.current.println("Bypassing parse\n" + parseExpression.cyclify());
         }
         return answer;
+    }
+
+    /**
+     * Performs the do-disambiguate-term-choice action.
+     *
+     * @param currentState the current conversation state
+     * @param action the action object.
+     */
+    protected void doDisambiguateTermChoiceAction (State currentState, Action action) {
+    }
+
+    /**
+     * Performs the do-disambiguate-term-done action
+     *
+     * @param currentState the current conversation state
+     */
+    protected void doDisambiguateTermDoneAction (State currentState) {
+    }
+
+    /**
+     * Performs the do-term-query action.  First performs a disambiguate-term
+     * conversation to obtain the correct term for the query.
+     *
+     * @param currentState the current conversation state
+     * @param action the action object.
+     */
+    protected void doTermQuery (State currentState, Action action)
+        throws CycApiException, IOException, UnknownHostException {
+        ParseResults parseResults =
+            (ParseResults) interpreter.getStateAttribute("parse results");
+        ArrayList queryWords =
+            parseResults.getTextBinding(CycObjectFactory.makeCycVariable("?term"));
+        interpreter.setStateAttribute("query words", queryWords);
+        Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
+        Object [] attributeValuePair = {"disambiguation words", queryWords};
+        ArrayList arguments = new ArrayList();
+        arguments.add(attributeValuePair);
+        interpreter.setupSubConversation(disambiguateTerm, arguments);
+        interpreter.setNextPerformative(disambiguateTerm.getDefaultPerformative());
     }
 
     /**

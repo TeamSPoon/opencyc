@@ -144,7 +144,7 @@ public class Interpreter {
         Performative performative = parseResults.getPerformative();
         nextPerformative = performative;
         while (nextPerformative != null) {
-            Arc arc = lookupArc(performative);
+            Arc arc = lookupArc(nextPerformative);
             nextPerformative = null;
             transitionState(arc);
             performer.performArc(currentState, arc.getAction());
@@ -250,6 +250,28 @@ public class Interpreter {
      */
     public Object getStateAttribute (Object attribute) {
         return stateAttributes.get(attribute);
+    }
+
+    /**
+     * Sets up the given sub conversation and the input arguments as
+     * a list of attribute/value pairs.
+     *
+     * @param conversation the new conversation
+     * @param arguments a list of Object arrays of length two, the first array element is the
+     * attribute and the second array element is its value
+     */
+    public void setupSubConversation (Conversation conversation, ArrayList arguments) {
+        ConversationStateInfo conversationStateInfo =
+            new ConversationStateInfo(conversation,
+                                      (HashMap) stateAttributes.clone());
+        pushConversationStateInfo(conversationStateInfo);
+        currentState = conversation.getInitialState();
+        for (int i = 0; i < arguments.size(); i++) {
+            Object [] attributeValuePair = (Object []) arguments.get(i);
+            String attribute = (String) attributeValuePair[0];
+            Object value = attributeValuePair[1];
+            setStateAttribute(attribute, value);
+        }
     }
 
     /**

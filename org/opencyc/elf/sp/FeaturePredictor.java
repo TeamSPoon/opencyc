@@ -1,6 +1,9 @@
 package org.opencyc.elf.sp;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
+
+//// External Imports
 
 /**
  * Provides the FeaturePredictor for ELF SensoryPerception.<br>
@@ -27,21 +30,26 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class FeaturePredictor extends NodeComponent {
-  /** the sensory perception instance which owns this feature predictor */
-  protected SensoryPerception sensoryPerception;
-
+  
+  //// Constructors
+  
   /**
    * Constructs a new FeaturePredictor object.
    */
   public FeaturePredictor() {
   }
 
-  /**
-   * Provides the method to be executed when the thread is started.
-   */  
-  public void run() {
-  }
+  //// Public Area
   
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "ValueJudgement for " + node.getName();
+  }
+    
   /**
    * Gets the sensory perception instance which owns this feature predictor
    * 
@@ -61,4 +69,14 @@ public class FeaturePredictor extends NodeComponent {
     this.sensoryPerception = sensoryPerception;
   }
     
+  //// Protected Area
+    
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the sensory perception instance which owns this feature predictor */
+  protected SensoryPerception sensoryPerception;
+
+  //// Main
 }

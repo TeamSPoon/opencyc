@@ -1,6 +1,9 @@
 package org.opencyc.elf.sp;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
+
+//// External Imports
 
 /**
  * Provides the FeatureExtractor for ELF SensoryPerception.<br>
@@ -27,21 +30,26 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class FeatureExtractor extends NodeComponent {
-  /** the sensory perception instance which owns this feature extractor */
-  protected SensoryPerception sensoryPerception;
 
+  //// Constructors
+  
   /**
    * Constructs a new FeatureExtractor object.
    */
   public FeatureExtractor() {
   }
 
-  /**
-   * Provides the method to be executed when the thread is started.
-   */  
-  public void run() {
-  }
+  //// Public Area
   
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "FeatureExtractor for " + node.getName();
+  }
+    
   /**
    * Gets the sensory perception instance which owns this feature extractor
    * 
@@ -60,4 +68,14 @@ public class FeatureExtractor extends NodeComponent {
   public void setSensoryPerception(SensoryPerception sensoryPerception) {
     this.sensoryPerception = sensoryPerception;
   }
+  //// Protected Area
+    
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the sensory perception instance which owns this feature extractor */
+  protected SensoryPerception sensoryPerception;
+  
+  //// Main
 }

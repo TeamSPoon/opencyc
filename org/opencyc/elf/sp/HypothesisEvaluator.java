@@ -1,6 +1,9 @@
 package org.opencyc.elf.sp;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
+
+//// External Imports
 
 /**
  * Provides the HypothesisEvaluator for ELF SensoryPerception.<br>
@@ -27,19 +30,24 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class HypothesisEvaluator extends NodeComponent {
-  /** the sensory perception instance which owns this hypothesis evaluator */
-  protected SensoryPerception sensoryPerception;
 
+  //// Constructors
+  
   /**
    * Constructs a new HypothesisEvaluator object.
    */
   public HypothesisEvaluator() {
   }
-
+  
+  //// Public Area
+  
   /**
-   * Provides the method to be executed when the thread is started.
-   */  
-  public void run() {
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "HypothesisEvaluator for " + node.getName();
   }
   
   /**
@@ -61,4 +69,14 @@ public class HypothesisEvaluator extends NodeComponent {
   public void setSensoryPerception(SensoryPerception sensoryPerception) {
     this.sensoryPerception = sensoryPerception;
   }
+  //// Protected Area
+    
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the sensory perception instance which owns this hypothesis evaluator */
+  protected SensoryPerception sensoryPerception;
+  
+  //// Main
 }

@@ -1,14 +1,18 @@
 package org.opencyc.elf.experience;
 
-import java.sql.Timestamp;
 
-import java.util.ArrayList;
-
+//// Internal Imports
 import org.opencyc.elf.ELFObject;
+
 import org.opencyc.elf.bg.state.State;
+
 import org.opencyc.elf.goal.Goal;
 import org.opencyc.elf.goal.Value;
 
+//// External Imports
+import java.sql.Timestamp;
+
+import java.util.ArrayList;
 
 /**
  * Provides the Experience container for the Elementary Loop Functioning
@@ -35,28 +39,22 @@ import org.opencyc.elf.goal.Value;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Experience extends ELFObject {
-  /** when the experience occurred */
-  protected Timestamp timestamp;
-
-  /** the intial state of the experience */
-  protected State initialState;
-
-  /** the final state of the experience */
-  protected State finalState;
-
-  /** the goal that was sought from the initial state */
-  protected Goal goal;
-
-  /** the state transitions from the initial state to the final state */
-  protected ArrayList transitions;
-
-  /** the value of the experience */
-  protected Value value;
 
   /**
    * Constructs a new experience object.
    */
   public Experience() {
+  }
+
+  //// Public Area
+
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "Experience for " + finalState.toString();
   }
 
   /**
@@ -166,4 +164,30 @@ public class Experience extends ELFObject {
   public void setValue(Value value) {
     this.value = value;
   }
+  
+  //// Protected Area
+    
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** when the experience occurred */
+  protected Timestamp timestamp;
+
+  /** the intial state of the experience */
+  protected State initialState;
+
+  /** the final state of the experience */
+  protected State finalState;
+
+  /** the goal that was sought from the initial state */
+  protected Goal goal;
+
+  /** the state transitions from the initial state to the final state */
+  protected ArrayList transitions;
+
+  /** the value of the experience */
+  protected Value value;
+  
+  //// Main
 }

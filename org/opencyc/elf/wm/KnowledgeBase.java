@@ -44,6 +44,15 @@ public class KnowledgeBase extends NodeComponent {
   //// Public Area
     
   /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "KnowledgeBase for " + node.getName();
+  }
+
+  /**
    * Gets the value for the given knowledge base object.
    *
    * @param obj the given knowledge base object

@@ -38,6 +38,17 @@ public class EntityEvaluator extends NodeComponent {
   public EntityEvaluator() {
   }
   
+  //// Public Area
+  
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "EntityEvaluator for " + node.getName();
+  }
+  
   //// Protected Area
   
   //// Private Area

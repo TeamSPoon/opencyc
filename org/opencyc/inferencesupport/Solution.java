@@ -75,6 +75,25 @@ public class Solution {
     }
 
     /**
+     * Adds the solutions contained in the given binding set.
+     *
+     * @param bindingSet the binding set whose variable value bindings are to be added to the solution
+     */
+    public void addBindingSet(BindingSet bindingSet) {
+        for (int i = 0; i < bindingSet.size(); i++) {
+            ArrayList solution = new ArrayList();
+            CycList bindingValueList = (CycList) bindingSet.getBindingValues().get(i);
+            for (int j = 0; j < bindingSet.getVariables().size(); j++) {
+                CycVariable cycVariable = (CycVariable) bindingSet.getVariables().get(j);
+                Object value = bindingValueList.get(j);
+                Binding binding = new Binding(cycVariable, value);
+                solution.add(binding);
+            }
+            this.addSolution(solution);
+        }
+    }
+
+    /**
      * Adds the variable / value binding to the current solution.
      *
      * @param binding the variable / value binding to be added

@@ -206,8 +206,9 @@ public class QueryProcessor {
                 else
                     System.out.println("Asking for " + nbrSolutionsRequested + " solutions");
             }
-            literalAsker = new LiteralAsker();
-            literalAsker.ask(queryLiterals, mt);
+            ArrayList bindingSets = literalAsker.ask(queryLiterals, mt);
+            BindingSet joinedBindingSets = hashJoiner.join(bindingSets);
+            solution.addBindingSet(joinedBindingSets);
         }
         catch (IOException e) {
             e.printStackTrace();

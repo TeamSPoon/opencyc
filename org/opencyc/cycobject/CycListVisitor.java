@@ -84,23 +84,27 @@ public class CycListVisitor implements Enumeration {
      */
     protected void getNextElement() {
         nextElement = null;
-        if (iterators.empty())
-            return;
         while (true) {
+            if (iterators.empty())
+                // Reached the end of the whole CycList.
+                return;
             Iterator iterator = (Iterator) iterators.peek();
             if (! iterator.hasNext()) {
                 iterators.pop();
-                return;
+                // Reached the end of an embedded CycList.
+                continue;
             }
             Object element = iterator.next();
             if (element.equals(CycSymbol.nil))
+                // bypass nils.
                 continue;
             if (! (element instanceof CycList)) {
                 nextElement = element;
+                // Found the next non-nil element.
                 return;
             }
+            // Iterate over the embedded CycList.
             iterators.push(((CycList) element).iterator());
-            getNextElement();
         }
     }
 

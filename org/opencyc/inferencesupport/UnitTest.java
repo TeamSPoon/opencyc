@@ -58,14 +58,14 @@ public class UnitTest extends TestCase {
             testSuite = new TestSuite(UnitTest.class);
         else {
             testSuite = new TestSuite();
-            testSuite.addTest(new UnitTest("testBinding"));
-            testSuite.addTest(new UnitTest("testBindingSet"));
-            testSuite.addTest(new UnitTest("testConstraintRule"));
+            //testSuite.addTest(new UnitTest("testBinding"));
+            //testSuite.addTest(new UnitTest("testBindingSet"));
+            //testSuite.addTest(new UnitTest("testConstraintRule"));
             testSuite.addTest(new UnitTest("testQueryLiteral"));
-            testSuite.addTest(new UnitTest("testHornClause"));
-            testSuite.addTest(new UnitTest("testSolution"));
-            testSuite.addTest(new UnitTest("testUnifier"));
-            testSuite.addTest(new UnitTest("testBackchainer"));
+            //testSuite.addTest(new UnitTest("testHornClause"));
+            //testSuite.addTest(new UnitTest("testSolution"));
+            //testSuite.addTest(new UnitTest("testUnifier"));
+            //testSuite.addTest(new UnitTest("testBackchainer"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -569,6 +569,47 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(! (queryLiteral36.isSubsumedBy(queryLiteral31)));
         }
         catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        // conjoin.
+        QueryLiteral queryLiteral41 = null;
+        QueryLiteral queryLiteral42 = null;
+        QueryLiteral queryLiteral44 = null;
+        try {
+            queryLiteral41 = new QueryLiteral("(#$isa ?country #$WesternEuropeanCountry)");
+            queryLiteral42 = new QueryLiteral("(#$isa ?cathedral #$Cathedral)");
+            queryLiteral44 = new QueryLiteral("(#$countryOfCity ?country ?city)");
+       }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            CycList conjoinedFormula = cycAccess.makeCycList("(#$and (#$isa ?country #$WesternEuropeanCountry) " +
+                                                 "(#$isa ?cathedral #$Cathedral))");
+            CycListVisitor cycListVisitor = new CycListVisitor(conjoinedFormula);
+            Assert.assertEquals(CycAccess.and, cycListVisitor.nextElement());
+            Assert.assertEquals(CycAccess.isa, cycListVisitor.nextElement());
+            Assert.assertEquals(CycVariable.makeCycVariable("?country"), cycListVisitor.nextElement());
+
+            QueryLiteral queryLiteral43 = QueryLiteral.conjoin(queryLiteral41, queryLiteral42);
+            Assert.assertNotNull(queryLiteral43);
+            Assert.assertTrue(queryLiteral43 instanceof QueryLiteral);
+            Assert.assertEquals(CycAccess.and, queryLiteral43.getFormula().first());
+            Assert.assertEquals(new QueryLiteral("(#$and (#$isa ?country #$WesternEuropeanCountry) " +
+                                                 "(#$isa ?cathedral #$Cathedral))"),
+                                                 queryLiteral43);
+            Assert.assertEquals(2, queryLiteral43.getVariables().size());
+            QueryLiteral queryLiteral45 = QueryLiteral.conjoin(queryLiteral43, queryLiteral44);
+            Assert.assertEquals(3, queryLiteral45.getVariables().size());
+            Assert.assertEquals(new QueryLiteral("(#$and (#$isa ?country #$WesternEuropeanCountry) " +
+                                                 "(#$isa ?cathedral #$Cathedral) " +
+                                                 "(#$countryOfCity ?country ?city))"),
+                                                 queryLiteral45);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
 

@@ -56,7 +56,7 @@ public class HashJoiner {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    public static final int DEFAULT_VERBOSITY = 4;
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -83,18 +83,16 @@ public class HashJoiner {
         Collections.sort(remainingBindingSets);
         BindingSet joinedBindingSet = (BindingSet) remainingBindingSets.get(0);
         remainingBindingSets.remove(0);
-        if (verbosity > 3)
+        if (verbosity > 4)
             System.out.println("Starting binding set for join is \n" + joinedBindingSet);
         while (remainingBindingSets.size() > 0) {
             // In case there are no variables in common, choose the lowest cardinality binding set candidate.
             int index = 0;
             for (int i = 1; i < remainingBindingSets.size(); i++) {
-        if (verbosity > 3)
-            System.out.println("Starting binding set for join is \n" + joinedBindingSet);
                 BindingSet remainingBindingSet = (BindingSet) remainingBindingSets.get(i);
                 ArrayList joinedBindingSetVariables = joinedBindingSet.getVariables();
                 ArrayList remainingBindingSetVariables = remainingBindingSet.getVariables();
-                if (verbosity > 3)
+                if (verbosity > 4)
                     System.out.println("  candidate binding set \n  " + remainingBindingSet);
                 if (OcCollectionUtils.hasIntersection(joinedBindingSetVariables,
                                                       remainingBindingSetVariables)) {
@@ -104,7 +102,7 @@ public class HashJoiner {
             }
             BindingSet bestBindingSetForJoin = (BindingSet) remainingBindingSets.get(index);
             remainingBindingSets.remove(index);
-            if (verbosity > 3)
+            if (verbosity > 4)
                 System.out.println("  best binding set for join \n  " + bestBindingSetForJoin);
             joinedBindingSet = join(joinedBindingSet, bestBindingSetForJoin);
         }
@@ -121,8 +119,8 @@ public class HashJoiner {
      */
     public BindingSet join(BindingSet bindingSet1, BindingSet bindingSet2)
         throws IOException {
-        if (verbosity > 3)
-            System.out.println("Joining \n  " + bindingSet1 + "\n  " + bindingSet2);
+        if (verbosity > 4)
+            System.out.println("Joining (unordered)\n  " + bindingSet1 + "\n  " + bindingSet2);
         if (bindingSet1.size() < bindingSet2.size())
             return joinBuildProbe(bindingSet1, bindingSet2);
         else
@@ -140,63 +138,130 @@ public class HashJoiner {
         throws IOException {
         this.buildBindingSet = buildBindingSet;
         this.probeBindingSet = probeBindingSet;
-        if (verbosity > 3)
-            System.out.println("Joining \n  build " + buildBindingSet + "\n  probe " + probeBindingSet);
+        if (verbosity > 4)
+            System.out.println("Joining (with build and probe identified)\n  build " + buildBindingSet +
+                                "\n    with variables " + buildBindingSet.getVariables() +
+                                "\n  probe " + probeBindingSet +
+                                "\n    with variables " + probeBindingSet.getVariables());
 
-        CycList joinedFormula = new CycList();
-        joinedFormula.add(CycAccess.and);
-        joinedFormula.add(buildBindingSet.getQueryLiteral().getFormula());
-        joinedFormula.add(probeBindingSet.getQueryLiteral().getFormula());
-        QueryLiteral joinedQueryLiteral = new QueryLiteral(joinedFormula);
-        if (verbosity > 3)
-            System.out.println("  joined query \n  " + joinedFormula.cyclify());
+        QueryLiteral joinedQueryLiteral = QueryLiteral.conjoin(buildBindingSet.getQueryLiteral(),
+                                                               probeBindingSet.getQueryLiteral());
+        if (verbosity > 4)
+            System.out.println("  joined query \n  " + joinedQueryLiteral.cyclify() +
+                               "\n    with variables " + joinedQueryLiteral.getVariables());
 
         BindingSet joinedBindingSet = new BindingSet(joinedQueryLiteral, buildBindingSet.getMt());
-        ArrayList joiningVariables = new ArrayList(CollectionUtils.intersection(buildBindingSet.getVariables(),
-                                                                                probeBindingSet.getVariables()));
-        if (verbosity > 3)
-            System.out.println("  joining variables " + joiningVariables);
+        ArrayList intersectingVariables =
+            new ArrayList(CollectionUtils.intersection(buildBindingSet.getVariables(),
+                          probeBindingSet.getVariables()));
+        if (verbosity > 4)
+            System.out.println("    intersecting variables " + intersectingVariables + "\n");
 
-        int joinedVariablesSize = joiningVariables.size();
-        if (joinedVariablesSize == 0)
+        int intersectingVariablesSize = intersectingVariables.size();
+        if (intersectingVariablesSize == 0)
             throw new RuntimeException("product not yet implemented for \n" + buildBindingSet +
                                        "\n" + probeBindingSet);
         // Build step.
         HashMap hashMap = new HashMap();
         ArrayList buildVariables = buildBindingSet.getVariables();
         int buildVariablesSize = buildVariables.size();
+        if (verbosity > 4) {
+            System.out.println("  Starting build step, with build binding set size " + buildBindingSet.size());
+            for (int j = 0; j < intersectingVariablesSize; j++) {
+                for (int k = 0; k < buildVariablesSize; k++)
+                if (intersectingVariables.get(j).equals(buildVariables.get(k)))
+                    System.out.println("    intersecting variable " + intersectingVariables.get(j) +
+                                       " matches build variable at index " + k);
+            }
+        }
         for (int i = 0; i < buildBindingSet.size(); i++) {
             CycList key = new CycList();
-            CycList bindingValueList = (CycList) buildBindingSet.getBindingValues().get(i);
-            for (int j = 0; j < joinedVariablesSize; j++) {
+            CycList buildBindingValueList = (CycList) buildBindingSet.getBindingValues().get(i);
+            for (int j = 0; j < intersectingVariablesSize; j++) {
                 for (int k = 0; k < buildVariablesSize; k++)
-                if (joiningVariables.get(j).equals(buildVariables.get(k)))
-                    key.add(bindingValueList.get(j));
+                if (intersectingVariables.get(j).equals(buildVariables.get(k)))
+                    key.add(buildBindingValueList.get(k));
             }
-            hashMap.put(key, bindingValueList);
+            if (! hashMap.containsKey(key))
+                hashMap.put(key, new ArrayList(3));
+            ArrayList bucket = (ArrayList) hashMap.get(key);
+            bucket.add(buildBindingValueList);
             if (verbosity > 7)
-                System.out.println("  indexing " + bindingValueList.cyclify() + "\n  key " + key.cyclify());
+                System.out.println("  indexing " + buildBindingValueList.cyclify() +
+                                   "\n  key " + key.cyclify());
         }
         // Probe step.
         ArrayList probeVariables = probeBindingSet.getVariables();
         int probeVariablesSize = probeVariables.size();
+        ArrayList joinedVariables = joinedBindingSet.getVariables();
+        int joinedVariablesSize = joinedVariables.size();
+        if (verbosity > 4) {
+            System.out.println("  Starting probe step, with probe binding set size " + probeBindingSet.size());
+            for (int j = 0; j < intersectingVariablesSize; j++) {
+                for (int k = 0; k < probeVariablesSize; k++)
+                if (intersectingVariables.get(j).equals(probeVariables.get(k)))
+                    System.out.println("    intersecting variable " + intersectingVariables.get(j) +
+                                       " matches probe variable at index " + k);
+            }
+        }
         for (int i = 0; i < probeBindingSet.size(); i++) {
             CycList key = new CycList();
-            CycList bindingValueList = (CycList) probeBindingSet.getBindingValues().get(i);
-            for (int j = 0; j < joinedVariablesSize; j++) {
+            CycList probeBindingValueList = (CycList) probeBindingSet.getBindingValues().get(i);
+            for (int j = 0; j < intersectingVariablesSize; j++) {
                 for (int k = 0; k < probeVariablesSize; k++)
-                if (joiningVariables.get(j).equals(probeVariables.get(k)))
-                    key.add(bindingValueList.get(j));
+                if (intersectingVariables.get(j).equals(probeVariables.get(k)))
+                    key.add(probeBindingValueList.get(k));
             }
-            boolean keyFound = hashMap.containsKey(key);
+            ArrayList bucket = (ArrayList) hashMap.get(key);
+            boolean keyFound = bucket != null;
             if (verbosity > 7)
-                System.out.println("  probing " + bindingValueList.cyclify() + "\n  key " +
+                System.out.println("  probing " + probeBindingValueList.cyclify() + "\n    key " +
                                    key.cyclify() + " --> " + keyFound);
-            else if (verbosity > 3 && keyFound)
-                System.out.println("  probing " + bindingValueList.cyclify() + "\n  key " +
+            else if (verbosity > 4 && keyFound)
+                System.out.println("  probing " + probeBindingValueList.cyclify() + "\n    key " +
                                    key.cyclify() + " --> " + keyFound);
+            if (keyFound) {
+                for (int bucketIndex = 0; bucketIndex < bucket.size(); bucketIndex++) {
+                    // Assemble the joined binding set value list from the build and probe sets.
+                    CycList buildBindingValueList = (CycList) bucket.get(bucketIndex);
+                    CycList joinedBindingValueList = new CycList();
+                    for (int j = 0; j < joinedVariablesSize; j++) {
+                        CycVariable joinedVariable = (CycVariable) joinedVariables.get(j);
+                        boolean foundJoinedBindingValue = false;
+                        for (int k = 0; k < buildVariablesSize; k++) {
+                            if (joinedVariable.equals(buildVariables.get(k))) {
+                                foundJoinedBindingValue = true;
+                                joinedBindingValueList.add(buildBindingValueList.get(k));
+                                break;
+                            }
+                        }
+                        if (! foundJoinedBindingValue) {
+                            for (int k = 0; k < probeVariablesSize; k++) {
+                                if (joinedVariable.equals(probeVariables.get(k))) {
+                                    foundJoinedBindingValue = true;
+                                    joinedBindingValueList.add(probeBindingValueList.get(k));
+                                    break;
+                                }
+                            }
+                        }
+                        if (! foundJoinedBindingValue)
+                            throw new RuntimeException("Expected variable not found in joined binding sets \n" +
+                                                       buildBindingSet + "\n" + probeBindingSet);
+                    }
+                    if (verbosity > 4) {
+                        System.out.println("    build binding value list         " + buildBindingValueList);
+                        System.out.println("    probe binding value list         " + probeBindingValueList);
+                        System.out.println("    adding joined binding value list " + joinedBindingValueList);
+                    }
+                    joinedBindingSet.add(joinedBindingValueList);
+                }
+            }
         }
-
+        if (verbosity > 3) {
+            System.out.println();
+            joinedBindingSet.displayBindingSet();
+            System.out.println();
+        }
         return joinedBindingSet;
     }
 

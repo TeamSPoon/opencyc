@@ -61,8 +61,8 @@ public class UnitTest extends TestCase {
             testSuite = new TestSuite();
             //testSuite.addTest(new UnitTest("testQueryParser"));
             //testSuite.addTest(new UnitTest("testLiteralAsker"));
-            testSuite.addTest(new UnitTest("testHashJoiner"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor1"));
+            //testSuite.addTest(new UnitTest("testHashJoiner"));
+            testSuite.addTest(new UnitTest("testQueryProcessor1"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -198,6 +198,7 @@ public class UnitTest extends TestCase {
             mt = CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
         ArrayList queryLiterals = new ArrayList();
@@ -217,12 +218,13 @@ public class UnitTest extends TestCase {
         }
 
         HashJoiner hashJoiner = new HashJoiner();
-        hashJoiner.setVerbosity(5);
+        hashJoiner.setVerbosity(4);
         BindingSet joinedBindingSets = null;
         try {
             joinedBindingSets = hashJoiner.join(bindingSets);
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
         Assert.assertNotNull(joinedBindingSets);
@@ -253,7 +255,7 @@ public class UnitTest extends TestCase {
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         System.out.println(europeanCathedralsString);
         QueryProcessor europeanCathedralsQuery = new QueryProcessor();
-        europeanCathedralsQuery.setVerbosity(9);
+        europeanCathedralsQuery.setVerbosity(1);
         // Request two solutions.
         // europeanCathedralsQuery.nbrSolutionsRequested = new Integer(2);
         // Request all solutions.

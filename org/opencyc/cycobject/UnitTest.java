@@ -47,7 +47,7 @@ public class UnitTest extends TestCase {
      * Runs the unit tests
      */
     public static void runTests() {
-        TestSuite testSuite = new TestSuite(UnitTest.class);
+        TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testGuid"));
         testSuite.addTest(new UnitTest("testCycSymbol"));
         testSuite.addTest(new UnitTest("testVariable"));
@@ -662,8 +662,23 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(e5.hasMoreElements());
             Assert.assertEquals("e", e5.nextElement());
             Assert.assertTrue(! e5.hasMoreElements());
+
+            CycList cycList6 = cycAccess.makeCycList("(\"a\" (\"b\" \"c\") (\"d\" \"e\"))");
+            Enumeration e6 = cycList6.cycListVisitor();
+            Assert.assertTrue(e6.hasMoreElements());
+            Assert.assertEquals("a", e6.nextElement());
+            Assert.assertTrue(e6.hasMoreElements());
+            Assert.assertEquals("b", e6.nextElement());
+            Assert.assertTrue(e6.hasMoreElements());
+            Assert.assertEquals("c", e6.nextElement());
+            Assert.assertTrue(e6.hasMoreElements());
+            Assert.assertEquals("d", e6.nextElement());
+            Assert.assertTrue(e6.hasMoreElements());
+            Assert.assertEquals("e", e6.nextElement());
+            Assert.assertTrue(! e6.hasMoreElements());
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
 

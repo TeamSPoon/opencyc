@@ -71,16 +71,16 @@ public class Literal  implements Comparable{
      * Gathers the unique variables from the literal's formula.
      */
     protected void gatherVariables() {
-        HashSet uniqueVariables = new HashSet();
+        variables = new ArrayList();
         Enumeration e = formula.cycListVisitor();
         while (true) {
             if (! e.hasMoreElements())
                 break;
             Object element = e.nextElement();
-            if (element instanceof CycVariable)
-                uniqueVariables.add(element);
+            if ((element instanceof CycVariable) &&
+               (! (variables.contains(element))))
+                variables.add(element);
         }
-        variables = new ArrayList(uniqueVariables);
     }
 
     /**
@@ -428,4 +428,5 @@ public class Literal  implements Comparable{
             return false;
         return cycListConstraintRule.first() instanceof CycConstant;
     }
+
 }

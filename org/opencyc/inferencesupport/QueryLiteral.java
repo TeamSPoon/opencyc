@@ -104,4 +104,25 @@ public class QueryLiteral extends Literal implements Comparable{
         CycList newQueryLiteral = formula.subst(value, cycVariable);
         return new QueryLiteral(newQueryLiteral);
     }
+
+    public static QueryLiteral conjoin (QueryLiteral queryLiteral1, QueryLiteral queryLiteral2) {
+        CycList formula1 = queryLiteral1.getFormula();
+        CycList formula2 = queryLiteral2.getFormula();
+        CycList conjoinedFormula;
+        if (formula1.first().equals(CycAccess.and)) {
+            conjoinedFormula = (CycList) formula1.clone();
+            conjoinedFormula.add(formula2);
+        }
+        else if (formula2.first().equals(CycAccess.and)) {
+            conjoinedFormula = (CycList) formula2.clone();
+            conjoinedFormula.add(formula1);
+        }
+        else {
+            conjoinedFormula = new CycList();
+            conjoinedFormula.add(CycAccess.and);
+            conjoinedFormula.add(formula1);
+            conjoinedFormula.add(formula2);
+        }
+        return new QueryLiteral(conjoinedFormula);
+    }
 }

@@ -41,6 +41,13 @@ public class ResourcePool {
   //// Public Area
   
   /**
+   * Initializes the resource pool.
+   */
+  public void initialize () {
+    //TODO
+  }
+  
+  /**
    * Gets the singleton resource pool instance.
    *
    * @return the singleton resource pool instance

@@ -41,22 +41,13 @@ public class ResourceFactory {
   //// Public Area
   
   /**
-   * Gets the resource named by the given name.
-   *
-   * @param name the given resource name
-   * @return the resource named by the given name
-   */
-  public static Resource getResource (String name) {
-    return (Resource) resourceDictionary.get(name);
-  }
-  
-  /**
    * Makes the resource instances.
    */
   public static void makeResources () {
+    ResourcePool resourcePool = ResourcePool.getInstance();
     Resource resource = new Resource();
     resource.setResourceName(Resource.CONSOLE);
-    resourceDictionary.put(Resource.CONSOLE, resource);
+    resourcePool.setResource(Resource.CONSOLE, resource);
   }
   
   /**
@@ -88,10 +79,6 @@ public class ResourceFactory {
   
   //// Internal Rep
   
-  /**
-   * the resource dictionary whose key is the unique resource name and 
-   * whose value is the named resource
-   */
-  protected static HashMap resourceDictionary = new HashMap();
+  //// Main
   
 }

@@ -2,13 +2,14 @@ package org.opencyc.elf.bg;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
+import org.opencyc.elf.Status;
 
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
 
-import org.opencyc.elf.vj.Result;
+import org.opencyc.elf.Result;
 
 //// External Imports
 import org.opencyc.elf.goal.Goal;

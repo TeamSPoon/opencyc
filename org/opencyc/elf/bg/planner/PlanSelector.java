@@ -2,10 +2,10 @@ package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
+import org.opencyc.elf.Result;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
-import org.opencyc.elf.vj.Result;
 
 //// External Imports
 import java.util.ArrayList;

@@ -205,6 +205,7 @@ public class ExportHtml {
     protected HashSet previouslyExpandedTerms;
     protected String hostname = CycConnection.DEFAULT_HOSTNAME;
     protected int port = CycConnection.DEFAULT_BASE_PORT;
+    //protected int port = 3620;
 
     /**
      * Additional term guids not to appear in the list of direct instances even if
@@ -270,6 +271,17 @@ public class ExportHtml {
     public static void main (String[] args) {
         ExportHtml exportHtml = new ExportHtml();
         exportHtml.verbosity = 3;
+        try {
+            exportHtml.cycAccess =
+                new CycAccess(exportHtml.hostname,
+                              exportHtml.port,
+                              CycConnection.DEFAULT_COMMUNICATION_MODE,
+                              CycAccess.DEFAULT_CONNECTION);
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            System.exit(1);
+        }
         exportHtml.produceHierarchyPages = false;
         exportHtml.includeUpwardClosure = true;
         String choice = "eeld";
@@ -387,7 +399,8 @@ public class ExportHtml {
      * Sets up the HTML export process.
      */
     protected void setup () throws UnknownHostException, IOException, CycApiException {
-        cycAccess = new CycAccess(hostname, port, CycConnection.DEFAULT_COMMUNICATION_MODE, CycAccess.DEFAULT_CONNECTION);
+
+
         if (exportCommand == ExportDaml.EXPORT_KB_SUBSET) {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             includeUpwardClosure = false;
@@ -491,7 +504,7 @@ public class ExportHtml {
         htmlAnchorElement.appendChild(collectionTextNode);
         Element italicsGeneratedPhraseElement = italics(htmlAnchorElement);
         Node generatedPhraseNode =
-            htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
+            htmlDocument.createTextNode("   " + generatedPhrase);
         italicsGeneratedPhraseElement.appendChild(generatedPhraseNode);
         Element blockquoteElement = htmlDocument.createElement("blockquote");
         htmlBodyElement.appendChild(blockquoteElement);
@@ -532,7 +545,7 @@ public class ExportHtml {
                 generatedPhrase = generatedPhrase.substring(0, generatedPhrase.length() - 20);
             Element italicsGeneratedPhraseElement = italics(htmlAnchorElement);
             Node generatedPhraseNode =
-                htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
+                htmlDocument.createTextNode("   " + generatedPhrase);
             italicsGeneratedPhraseElement.appendChild(generatedPhraseNode);
         }
         Element blockquoteElement = htmlDocument.createElement("blockquote");
@@ -545,6 +558,8 @@ public class ExportHtml {
             createCollectionNode(cycConstant, blockquoteElement);
         else if (cycAccess.isPredicate(cycConstant))
             createPredicateNode(cycConstant, blockquoteElement);
+        else if (cycAccess.isFunction(cycConstant))
+            createFunctionNode(cycConstant, blockquoteElement);
         else if (cycAccess.isIndividual(cycConstant))
             createIndividualNode(cycConstant, blockquoteElement);
         else {
@@ -896,7 +911,8 @@ public class ExportHtml {
                 Log.current.println("  ignoring genls " + collection);
             return  null;
         }
-        if (collection.equals(cycAccess.getKnownConstantByName("CycSecureConstant"))) {
+        Guid cycSecureFortGuid = new Guid("bf71b522-9c29-11b1-9dad-c379636f7270");
+        if (collection.equals(cycAccess.getKnownConstantByGuid(cycSecureFortGuid))) {
             if (verbosity > 4)
                 Log.current.println("  ignoring genls " + collection);
             return  null;
@@ -982,12 +998,12 @@ public class ExportHtml {
                 parentElement.appendChild(genlAnchorElement);
                 Node genlTextNode = htmlDocument.createTextNode(genl.cyclify());
                 genlAnchorElement.appendChild(genlTextNode);
-                Node spacesTextNode = htmlDocument.createTextNode("&nbsp;&nbsp;");
+                Node spacesTextNode = htmlDocument.createTextNode("  ");
                 parentElement.appendChild(spacesTextNode);
             }
         }
         if ((genls.size() > 0) && produceHierarchyPages) {
-            Node spacesTextNode = htmlDocument.createTextNode("&nbsp;&nbsp;");
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
             parentElement.appendChild(spacesTextNode);
             HTMLAnchorElement hierarchyAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
             hierarchyAnchorElement.setHref("./" + exportedHierarchyOutputPath + "./" + exportedVocabularyOutputPath + "#" + cycFort.cyclify());
@@ -1034,6 +1050,44 @@ public class ExportHtml {
     }
 
     /**
+     * Creates an HTML node for a single Cyc predicate.
+     *
+     * @parameter cycConstant the Cyc predicate from which the HTML node is created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createPredicateNode (CycConstant cycConstant, Element parentElement) throws UnknownHostException, IOException, CycApiException {
+        createGenlPredsNodes(cycConstant, parentElement);
+        int arity = cycAccess.getArity(cycConstant);
+        if (arity > 0)
+            createArg1IsaNodes(cycConstant, parentElement);
+        if (arity > 1)
+            createArg2IsaNodes(cycConstant, parentElement);
+        if (arity > 2)
+            createArg3IsaNodes(cycConstant, parentElement);
+        if (arity > 3)
+            createArg4IsaNodes(cycConstant, parentElement);
+    }
+
+    /**
+     * Creates an HTML node for a single Cyc function.
+     *
+     * @parameter cycConstant the Cyc function from which the HTML node is created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createFunctionNode (CycConstant cycConstant, Element parentElement) throws UnknownHostException, IOException, CycApiException {
+        int arity = cycAccess.getArity(cycConstant);
+        if (arity > 0)
+            createArg1IsaNodes(cycConstant, parentElement);
+        if (arity > 1)
+            createArg2IsaNodes(cycConstant, parentElement);
+        if (arity > 2)
+            createArg3IsaNodes(cycConstant, parentElement);
+        if (arity > 3)
+            createArg4IsaNodes(cycConstant, parentElement);
+        createResultIsaNodes(cycConstant, parentElement);
+    }
+
+    /**
      * Creates HTML nodes for genlPreds links.
      *
      * @param cycConstant the CycConstant for which genlPreds links are to be created
@@ -1073,6 +1127,201 @@ public class ExportHtml {
     }
 
     /**
+     * Creates HTML nodes for arg1Isa links.
+     *
+     * @param cycConstant the CycConstant for which arg1Isa links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createArg1IsaNodes (CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
+        CycList arg1Isas = filterSelectedConstants(cycAccess.getArg1Isas(cycConstant));
+        if (verbosity > 4)
+            Log.current.println("arg1Isas " + arg1Isas);
+        CycList tempList = new CycList();
+        for (int i = 0; i < arg1Isas.size(); i++) {
+            CycConstant arg1Isa = (CycConstant) arg1Isas.get(i);
+            if (selectedCycForts.contains(arg1Isa))
+                tempList.add(arg1Isa);
+        }
+        arg1Isas = tempList;
+        if (verbosity > 4)
+            Log.current.println("after filtering, arg1Isas " + arg1Isas);
+        if (arg1Isas.size() == 0)
+            return;
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node arg1IsasLabelTextNode = htmlDocument.createTextNode("argument one is an instance of: ");
+        bElement.appendChild(arg1IsasLabelTextNode);
+        for (int i = 0; i < arg1Isas.size(); i++) {
+            CycConstant arg1Isa = (CycConstant)arg1Isas.get(i);
+            HTMLAnchorElement arg1IsaAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            arg1IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg1Isa.cyclify());
+            parentElement.appendChild(arg1IsaAnchorElement);
+            Node arg1IsaTextNode = htmlDocument.createTextNode(arg1Isa.cyclify());
+            arg1IsaAnchorElement.appendChild(arg1IsaTextNode);
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
+            parentElement.appendChild(spacesTextNode);
+        }
+    }
+
+    /**
+     * Creates HTML nodes for arg2Isa links.
+     *
+     * @param cycConstant the CycConstant for which arg2Isa links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createArg2IsaNodes (CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
+        CycList arg2Isas = filterSelectedConstants(cycAccess.getArg2Isas(cycConstant));
+        if (verbosity > 4)
+            Log.current.println("arg2Isas " + arg2Isas);
+        CycList tempList = new CycList();
+        for (int i = 0; i < arg2Isas.size(); i++) {
+            CycConstant arg2Isa = (CycConstant) arg2Isas.get(i);
+            if (selectedCycForts.contains(arg2Isa))
+                tempList.add(arg2Isa);
+        }
+        arg2Isas = tempList;
+        if (verbosity > 4)
+            Log.current.println("after filtering, arg2Isas " + arg2Isas);
+        if (arg2Isas.size() == 0)
+            return;
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node arg2IsasLabelTextNode = htmlDocument.createTextNode("argument two is an instance of: ");
+        bElement.appendChild(arg2IsasLabelTextNode);
+        for (int i = 0; i < arg2Isas.size(); i++) {
+            CycConstant arg2Isa = (CycConstant)arg2Isas.get(i);
+            HTMLAnchorElement arg2IsaAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            arg2IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg2Isa.cyclify());
+            parentElement.appendChild(arg2IsaAnchorElement);
+            Node arg2IsaTextNode = htmlDocument.createTextNode(arg2Isa.cyclify());
+            arg2IsaAnchorElement.appendChild(arg2IsaTextNode);
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
+            parentElement.appendChild(spacesTextNode);
+        }
+    }
+
+    /**
+     * Creates HTML nodes for arg3Isa links.
+     *
+     * @param cycConstant the CycConstant for which arg3Isa links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createArg3IsaNodes (CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
+        CycList arg3Isas = filterSelectedConstants(cycAccess.getArg3Isas(cycConstant));
+        if (verbosity > 4)
+            Log.current.println("arg3Isas " + arg3Isas);
+        CycList tempList = new CycList();
+        for (int i = 0; i < arg3Isas.size(); i++) {
+            CycConstant arg3Isa = (CycConstant) arg3Isas.get(i);
+            if (selectedCycForts.contains(arg3Isa))
+                tempList.add(arg3Isa);
+        }
+        arg3Isas = tempList;
+        if (verbosity > 4)
+            Log.current.println("after filtering, arg3Isas " + arg3Isas);
+        if (arg3Isas.size() == 0)
+            return;
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node arg3IsasLabelTextNode = htmlDocument.createTextNode("argument three is an instance of: ");
+        bElement.appendChild(arg3IsasLabelTextNode);
+        for (int i = 0; i < arg3Isas.size(); i++) {
+            CycConstant arg3Isa = (CycConstant)arg3Isas.get(i);
+            HTMLAnchorElement arg3IsaAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            arg3IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg3Isa.cyclify());
+            parentElement.appendChild(arg3IsaAnchorElement);
+            Node arg3IsaTextNode = htmlDocument.createTextNode(arg3Isa.cyclify());
+            arg3IsaAnchorElement.appendChild(arg3IsaTextNode);
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
+            parentElement.appendChild(spacesTextNode);
+        }
+    }
+
+    /**
+     * Creates HTML nodes for arg4Isa links.
+     *
+     * @param cycConstant the CycConstant for which arg4Isa links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createArg4IsaNodes (CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
+        CycList arg4Isas = filterSelectedConstants(cycAccess.getArg4Isas(cycConstant));
+        if (verbosity > 4)
+            Log.current.println("arg4Isas " + arg4Isas);
+        CycList tempList = new CycList();
+        for (int i = 0; i < arg4Isas.size(); i++) {
+            CycConstant arg4Isa = (CycConstant) arg4Isas.get(i);
+            if (selectedCycForts.contains(arg4Isa))
+                tempList.add(arg4Isa);
+        }
+        arg4Isas = tempList;
+        if (verbosity > 4)
+            Log.current.println("after filtering, arg4Isas " + arg4Isas);
+        if (arg4Isas.size() == 0)
+            return;
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node arg4IsasLabelTextNode = htmlDocument.createTextNode("argument four is an instance of: ");
+        bElement.appendChild(arg4IsasLabelTextNode);
+        for (int i = 0; i < arg4Isas.size(); i++) {
+            CycConstant arg4Isa = (CycConstant)arg4Isas.get(i);
+            HTMLAnchorElement arg4IsaAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            arg4IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg4Isa.cyclify());
+            parentElement.appendChild(arg4IsaAnchorElement);
+            Node arg4IsaTextNode = htmlDocument.createTextNode(arg4Isa.cyclify());
+            arg4IsaAnchorElement.appendChild(arg4IsaTextNode);
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
+            parentElement.appendChild(spacesTextNode);
+        }
+    }
+
+    /**
+     * Creates HTML nodes for resultIsa links.
+     *
+     * @param cycConstant the CycConstant for which resultIsa links are to be created
+     * @param parentElement the parent HTML DOM element
+     */
+    protected void createResultIsaNodes (CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
+        CycList resultIsas = filterSelectedConstants(cycAccess.getResultIsas(cycConstant));
+        if (verbosity > 4)
+            Log.current.println("resultIsas " + resultIsas);
+        CycList tempList = new CycList();
+        for (int i = 0; i < resultIsas.size(); i++) {
+            CycConstant resultIsa = (CycConstant) resultIsas.get(i);
+            if (selectedCycForts.contains(resultIsa))
+                tempList.add(resultIsa);
+        }
+        resultIsas = tempList;
+        if (verbosity > 4)
+            Log.current.println("after filtering, resultIsas " + resultIsas);
+        if (resultIsas.size() == 0)
+            return;
+        lineBreak(parentElement);
+        Element bElement = htmlDocument.createElement("b");
+        parentElement.appendChild(bElement);
+        Node resultIsasLabelTextNode = htmlDocument.createTextNode("result is an instance of: ");
+        bElement.appendChild(resultIsasLabelTextNode);
+        for (int i = 0; i < resultIsas.size(); i++) {
+            CycConstant resultIsa = (CycConstant)resultIsas.get(i);
+            HTMLAnchorElement resultIsaAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            resultIsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + resultIsa.cyclify());
+            parentElement.appendChild(resultIsaAnchorElement);
+            Node resultIsaTextNode = htmlDocument.createTextNode(resultIsa.cyclify());
+            resultIsaAnchorElement.appendChild(resultIsaTextNode);
+            Node spacesTextNode = htmlDocument.createTextNode("  ");
+            parentElement.appendChild(spacesTextNode);
+        }
+    }
+
+    /**
      * Creates an HTML individual node for a single Cyc individual.
      *
      * @parameter cycConstant the Cyc individual from which the HTML individual node is created
@@ -1095,16 +1344,6 @@ public class ExportHtml {
      */
     protected void createCollectionNode (CycConstant cycConstant, Element parentElement) throws UnknownHostException, IOException, CycApiException {
         createGenlNodes(cycConstant, parentElement);
-    }
-
-    /**
-     * Creates an HTML node for a single Cyc predicate.
-     *
-     * @parameter cycConstant the Cyc predicate from which the HTML node is created
-     * @param parentElement the parent HTML DOM element
-     */
-    protected void createPredicateNode (CycConstant cycConstant, Element parentElement) throws UnknownHostException, IOException, CycApiException {
-        createGenlPredsNodes(cycConstant, parentElement);
     }
 
     /**
@@ -1315,6 +1554,7 @@ public class ExportHtml {
             Category category = (Category) categories.get(i);
             createCategorizedVocabulary(category.title,
                                         category.queryString,
+                                        category.mt,
                                         category.outputPath);
         }
     }
@@ -1325,13 +1565,15 @@ public class ExportHtml {
      * @param title the title of the categorized vocabulary HTML page
      * @param queryString the query string which finds the terms in the
      * category
+     * @param mt the mt in which the query is asked
      * @param outputPath the name of the output HTML page
      */
     protected void createCategorizedVocabulary (String title,
                                                 String queryString,
+                                                CycConstant mt,
                                                 String outputPath)
         throws UnknownHostException, IOException, CycApiException {
-        CycList categoryTerms = askQueryString(queryString);
+        CycList categoryTerms = askQueryString(queryString, mt);
         if (categoryTerms.size() == 0) {
             if (verbosity > 2)
                 Log.current.println("No terms for query:\n" + queryString + "\n");
@@ -1380,298 +1622,429 @@ public class ExportHtml {
     /**
      * Adds all categories to the HTML export.
      */
-    protected void addAllCategories () {
-        addAllVeridianRef();
+    protected void addAllCategories ()
+        throws CycApiException, IOException , UnknownHostException {
+        addAllHorusRef();
         addAllSyracuseRef();
         addAllSraRef();
-        addAllPublicIsas();
-        addAllRoleIsas();
-        addAllPredicateIsas();
-        addAllFunctionIsas();
-        addAllEventSpecs();
-        addAllOrgSpecs();
-        addAllOcctypeSpecs();
-        addAllPersonSpecs();
-        addAllPlaceIsas();
-        addAllPlaceSpecs();
-        addAllWeaponSpecs();
-        addAllCwTopic();
-        addAllScriptTopic();
-        askEeldCoreOntology();
+        addAllVeridianRef();
+        addAllSchemaMappingTypes();
+        addScriptRepresentationVocabulary();
+        addSemanticConstraintVocabulary();
+        addAllPersonTypes();
+        addAllOrganizationTypes();
+        addAllEventTypes();
+        addAllMaterials();
+        addAllWeaponTypes();
+        addAllRelations();
+        addAllBinaryPredicates();
+        addAllActorSlots();
+        addAllTemporalRelations();
+        addAllPartonomicPredicates();
+        addAllSpecializationsOfAffiliation();
+        addAllSpecializationsOfVestedInterest();
+        addAllDenotingFunctions();
+        addEeldCoreOntology();
+        addPublicSharedOntology();
     }
 
 
     /**
-     * Categorizes all ontology constants directly referenced in the Veridian Mapping.
+     * Categorizes all ontology constants directly referenced in the Horus Ontology.
      */
-    protected void addAllVeridianRef () {
+    protected void addAllHorusRef ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "All release constants referenced in the current Veridian ontology mapping";
-        category.outputPath = "all-veridian-ref.html";
+        category.title = "Constants corresponding to terms in the Horus ontology";
+        category.outputPath = "all-horus-ref.html";
         category.queryString =
-            " (#$thereExists ?SOMETHING\n" +
-            "  (#$and\n" +
-            "    (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "    (#$or\n" +
-            "      (#$synonymousExternalConcept ?TERM #$VeridianOntology ?SOMETHING) \n" +
-            "      (#$overlappingExternalConcept ?TERM #$VeridianOntology ?SOMETHING)\n" +
-            "      (#$synonymousListFields ?TERM #$VeridianOntology ?SOMETHING))))\n";
+            " (#$isa ?TERM #$HorusConstant)\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
      * Categorizes all ontology constants directly referenced in the Syracuse Mapping.
      */
-    protected void addAllSyracuseRef () {
+    protected void addAllSyracuseRef ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "All release constants referenced in the current Syracuse ontology mapping";
+        category.title = "Constants corresponding to terms in the Syracuse ontology";
         category.outputPath = "all-syracuse-ref.html";
         category.queryString =
-            " (#$thereExists ?SOMETHING\n" +
-            "  (#$and\n" +
-            "    (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "    (#$or\n" +
-            "      (#$synonymousExternalConcept ?TERM #$SyracuseOntology ?SOMETHING)\n" +
-            "      (#$overlappingExternalConcept ?TERM #$SyracuseOntology ?SOMETHING))))\n";
+            "(#$thereExists ?STRING\n" +
+            " (#$or\n" +
+            "  (#$synonymousExternalConcept ?TERM #$SyracuseOntology ?STRING)\n" +
+            "  (#$overlappingExternalConcept ?TERM #$SyracuseOntology ?STRING)))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
      * Categorizes all constants directly reference in the SRA NetOwl Mapping.
      */
-    protected void addAllSraRef () {
+    protected void addAllSraRef ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "All release constants referenced in the currant SRA ontology mapping";
+        category.title = "Constants corresponding to terms in the NetOwl template extraction ontology.";
         category.outputPath = "all-sra-ref.html";
         category.queryString =
-            " (#$thereExists ?SOMETHING\n" +
+            "(#$thereExists ?STRING\n" +
+            " (#$or\n" +
+            "  (#$synonymousExternalConcept\n" +
+            "      ?TERM #$SRATemplateExtractionOntology ?STRING)\n" +
+            "  (#$overlappingExternalConcept\n" +
+            "      ?TERM #$SRATemplateExtractionOntology ?STRING)))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
+    /**
+     * Categorizes all ontology constants directly referenced in the Veridian Mapping.
+     */
+    protected void addAllVeridianRef ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Constants corresponding to terms referenced in the Veridian schema specification.";
+        category.outputPath = "all-veridian-ref.html";
+        category.queryString =
+            "(#$thereExists ?PROP\n" +
             "  (#$and\n" +
-            "    (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "    (#$or\n" +
-            "      (#$synonymousExternalConcept \n" +
-            "         ?TERM #$SRATemplateExtractionOntology ?SOMETHING)\n" +
-            "      (#$overlappingExternalConcept\n" +
-            "         ?TERM #$SRATemplateExtractionOntology ?SOMETHING))))\n";
+            "    (#$isa ?TERM #$Collection)\n" +
+            "    (#$unknownSentence\n" +
+            "      (#$isa ?TERM #$SKSIConstant))\n" +
+            "    (#$unknownSentence\n" +
+            "      (#$isa ?TERM #$IndexicalConcept))\n" +
+            "    (#$different ?TERM #$meaningSentenceOfSchema)\n" +
+            "    (#$ist-Asserted #$VeridianMappingMt ?PROP)\n" +
+            "    (#$assertedTermSentences ?TERM ?PROP)))";
+        category.mt = cycAccess.getKnownConstantByName("#$VeridianMappingMt");
     }
 
     /**
-     * Categorizes all Cyc public constants in the shared ontology.
+     * Categorizes all schema mapping types.
      */
-    protected void addAllPublicIsas () {
+    protected void addAllSchemaMappingTypes ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "All Cycorp public release constants in the shared ontology";
-        category.outputPath = "all-public-isas.html";
+        category.title = "Terms used to specify the interpretation of the Veridian schema.";
+        category.outputPath = "all-schema-mapping-types.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$isa ?TERM #$PublicConstant))\n";
+            "(#$isa ?TERM #$SKSIConstant)\n";
+        category.mt = cycAccess.getKnownConstantByName("#$SKSIMt");
     }
 
     /**
-     * Categorizes all Roles.
+     * Categorizes script representation vocabulary.
      */
-    protected void addAllRoleIsas () {
+    protected void addScriptRepresentationVocabulary ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Roles";
-        category.outputPath = "all-role-isas.html";
+        category.title = "Relations used in representing scripts.";
+        category.outputPath = "script-representation-vocabulary.html";
         category.queryString =
-            " (#$and \n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$isa ?TERM #$Role))\n";
+            "(#$isa ?TERM #$SKSIConstant)\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Predicates.
+     * Categorizes semantic constraint vocabulary.
      */
-    protected void addAllPredicateIsas () {
+    protected void addSemanticConstraintVocabulary ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Predicates";
-        category.outputPath = "all-predicate-isas.html";
+        category.title = "Relations used to specify semantic constraints.";
+        category.outputPath = "semantic-constraint-vocabulary.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$isa ?TERM #$Predicate))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$OpenCycDefinitionalPredicate))";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Functions.
+     * Categorizes all person types.
      */
-    protected void addAllFunctionIsas () {
+    protected void addAllPersonTypes ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Functions";
-        category.outputPath = "all-function-isas.html";
+        category.title = "Classes of persons in the ontology release.";
+        category.outputPath = "all-person-types.html";
         category.queryString =
-            " (#$and\n" +
-            "  (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$isa ?TERM #$Function-Denotational))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$genls ?TERM #$Person))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Event Types.
+     * Categorizes all organization types.
      */
-    protected void addAllEventSpecs () {
+    protected void addAllOrganizationTypes ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Event types";
-        category.outputPath = "all-event-specs.html";
+        category.title = "Classes of organizations in the ontology release.";
+        category.outputPath = "all-organization-types.html";
         category.queryString =
-            " (#$and \n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$genls ?TERM #$Event))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$genls ?TERM #$Organization))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Organization Types.
+     * Categorizes all event types.
      */
-    protected void addAllOrgSpecs () {
+    protected void addAllEventTypes ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Organization types";
-        category.outputPath = "all-org-specs.html";
+        category.title = "Types of event.";
+        category.outputPath = "all-event-types.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$genls ?TERM #$Organization))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$genls ?TERM #$Event))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Occupation Types.
+     * Categorizes all 'materials'.
      */
-    protected void addAllOcctypeSpecs () {
+    protected void addAllMaterials ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Occupation types";
-        category.outputPath = "all-occtype-specs.html";
+        category.title = "Types of material.";
+        category.outputPath = "all-materials.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$isa ?TERM #$PersonTypeByOccupation))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$ExistingStuffType))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Kinds of Person.
+     * Categorizes all weapon types.
      */
-    protected void addAllPersonSpecs () {
+    protected void addAllWeaponTypes ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Person types";
-        category.outputPath = "all-person-specs.html";
+        category.title = "Types of weapon.";
+        category.outputPath = "all-weapon-types.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$genls ?TERM #$Person))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$genls ?TERM #$Weapon))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Places (GeographicalRegions).
+     * Categorizes all relations.
      */
-    protected void addAllPlaceIsas () {
+    protected void addAllRelations ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Place types";
-        category.outputPath = "all-place-isas.html";
+        category.title = "All relations in the ontology.";
+        category.outputPath = "all-relations.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$isa ?TERM #$GeographicalRegion))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$Relation))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Location Types.
+     * Categorizes all binary predicates.
      */
-    protected void addAllPlaceSpecs () {
+    protected void addAllBinaryPredicates ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Location types";
-        category.outputPath = "all-place-specs.html";
+        category.title = "all binary predicates.";
+        category.outputPath = "all-binary-predicates.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$genls ?TERM #$Place))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$BinaryPredicate))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all Weapon Types.
+     * Categorizes all actorslots.
      */
-    protected void addAllWeaponSpecs () {
+    protected void addAllActorSlots ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Weapon types";
-        category.outputPath = "all-weapon-specs.html";
+        category.title = "All of the binary role relations obtaining between entities and events in the ontology.";
+        category.outputPath = "all-actor-slots.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$genls ?TERM #$Weapon))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$ActorSlot))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all terms relating to the topic of Conceptual Works.
+     * Categorizes all temporal relations.
      */
-    protected void addAllCwTopic () {
+    protected void addAllTemporalRelations ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Conceptual Works";
-        category.outputPath = "all-cw-topic.html";
+        category.title = "All of the temporal ordering relations in the ontology.";
+        category.outputPath = "all-temporal-relations.html";
         category.queryString =
-            " (#$and\n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)  \n" +
-            "   (#$or    \n" +
-            "     (#$genls ?TERM #$ConceptualWork)\n" +
-            "     (#$thereExists ?ARG-COL\n" +
-            "        (#$thereExists ?N\n" +
-            "          (#$and\n" +
-            "            (#$argIsa ?TERM ?N ?ARG-COL)\n" +
-            "            (#$genls ?ARG-COL #$ConceptualWork))))))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$ComplexTemporalRelation))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
-     * Categorizes all terms relating to the topic of Scripts.
+     * Categorizes all partonomic predicates.
      */
-    protected void addAllScriptTopic () {
+    protected void addAllPartonomicPredicates ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Script related terms";
-        category.outputPath = "all-script-topic.html";
+        category.title = "All of the part-whole relations in the ontology.";
+        category.outputPath = "all-partonomic-predicates.html";
         category.queryString =
-            " (#$and \n" +
-            "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
-            "   (#$or\n" +
-            "	  (#$isa ?TERM #$ScriptRelation)\n" +
-            "	  (#$isa ?TERM #$ScriptedEventType)))\n";
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$PartPredicate))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
+
+    /**
+     * Categorizes all specializations of affiliation.
+     */
+    protected void addAllSpecializationsOfAffiliation ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All of the specializations of the affiliatedWith relation.";
+        category.outputPath = "all-specializations-of-affiliation.html";
+        category.queryString =
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$genlPreds ?TERM #$affiliatedWith))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
+    /**
+     * Categorizes all specializations of vested interest.
+     */
+    protected void addAllSpecializationsOfVestedInterest ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All of the specializations of the vestedInterest relation.";
+        category.outputPath = "all-specializations-of-vested-interest.html";
+        category.queryString =
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$genlPreds ?TERM #$vestedInterest))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
+    /**
+     * Categorizes all denoting functions.
+     */
+    protected void addAllDenotingFunctions ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All denoting functions.";
+        category.outputPath = "all-denoting-functions.html";
+        category.queryString =
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$Function-Denotational))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
 
     /**
      * Categorizes the original EELD 'core' ontology.
      */
-    protected void askEeldCoreOntology () {
+    protected void addEeldCoreOntology ()
+        throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
         category.title = "EELD Core Ontology";
         category.outputPath = "all-core.html";
         category.queryString =
             "(#$isa ?TERM #$EELDSharedOntologyCoreConstant)";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
+    /**
+     * Categorizes all public shared ontology constants.
+     */
+    protected void addPublicSharedOntology ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Public Shared Ontology";
+        category.outputPath = "all-public-shared.html";
+        category.queryString =
+            "(#$and\n" +
+            " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
+            " (#$isa ?TERM #$ProposedOrPublicConstant))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
+    /**
+     * Categorizes the original EELD 'core' ontology.
+     */
+    protected void askEeldCoreOntology ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "EELD Core Ontology";
+        category.outputPath = "all-core.html";
+        category.queryString =
+            "(#$isa ?TERM #$EELDSharedOntologyCoreConstant)";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 
     /**
      * Returns the sorted terms resulting from asking the given query string.
      *
+     * @param queryString the query, as a string
+     * @param mt the mt in which the query is asked
      * @return the sorted terms resulting from asking the given query string
      */
-    protected CycList askQueryString (String queryString)
+    protected CycList askQueryString (String queryString, CycConstant mt)
         throws CycApiException, IOException , UnknownHostException {
         CycList query = cycAccess.makeCycList(queryString);
         CycVariable variable = CycObjectFactory.makeCycVariable("?TERM");
-        CycFort mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
         CycList answer = cycAccess.askWithVariable(query, variable, mt);
         if (verbosity > 2) {
             Log.current.println("query:\n" + queryString);
             Log.current.println("number of terms " + answer.size());
         }
+        // Remove nauts which are returned as CycLists.
+        CycList answerTemp = new CycList();
+        for (int i = 0; i < answer.size(); i++) {
+            Object obj = answer.get(i);
+            if (obj instanceof CycFort)
+                answerTemp.add(obj);
+            else if (verbosity > 2)
+                Log.current.println("Dropping non fort from answer\n" + obj.toString());
+        }
+        answer = answerTemp;
         Collections.sort(answer);
         return answer;
     }
@@ -1685,6 +2058,11 @@ public class ExportHtml {
          * The query string used to make this categorized vocabulary page.
          */
         public String queryString;
+
+        /**
+         * The mt in which the query is asked.
+         */
+        public CycConstant mt;
 
         /**
          * The file name used to output this categorized vocabulary page.

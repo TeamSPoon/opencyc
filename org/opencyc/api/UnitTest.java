@@ -1824,6 +1824,28 @@ public class UnitTest extends TestCase {
         }
         Assert.assertTrue(! answer);
 
+        // isConstantNameAvailable
+
+        answer = true;
+        try {
+            answer = cycAccess.isConstantNameAvailable("agent");
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertTrue(! answer);
+
+        answer = false;
+        try {
+            answer = cycAccess.isConstantNameAvailable("myAgent");
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertTrue(answer);
+
         // createMicrotheory.
         CycConstant mt = null;
         ArrayList genlMts = new ArrayList();
@@ -2348,7 +2370,7 @@ public class UnitTest extends TestCase {
 
             // definition
             script =
-                "(define-in-api my-copy-tree (tree) \n" +
+                "(define my-copy-tree (tree) \n" +
                 "  (ret (fif (atom tree) \n" +
                 "       tree \n" +
                 "       ;; else \n" +
@@ -2369,7 +2391,7 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(responseBoolean);
 
             script =
-                "(define-in-api my-floor (x y) \n" +
+                "(define my-floor (x y) \n" +
                 "  (clet (results) \n" +
                 "    (csetq results (multiple-value-list (floor x y))) \n" +
                 "    (ret results)))";
@@ -2380,7 +2402,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
 
             script =
-                "(defmacro-in-api my-macro (a b c) \n" +
+                "(defmacro my-macro (a b c) \n" +
                 "  (ret `(list ,a ,b ,c)))";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-macro"), responseObject);
@@ -2389,12 +2411,12 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.makeCycList("(#$Dog #$Plant #$Brazil)"), responseList);
 
             script =
-                "(defmacro-in-api my-floor-macro (x y) \n" +
+                "(defmacro my-floor-macro (x y) \n" +
                 "  (ret `(floor ,x ,y)))";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-floor-macro"), responseObject);
             script =
-                "(define-in-api my-floor-macro-test (x y) \n" +
+                "(define my-floor-macro-test (x y) \n" +
                 "    (ret (multiple-value-list (my-floor-macro x y))))";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-floor-macro-test"), responseObject);
@@ -2403,7 +2425,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
 
             script =
-                "(defmacro-in-api my-floor-macro (a b) \n" +
+                "(defmacro my-floor-macro (a b) \n" +
                 "  (ret `(floor ,x ,y)))";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-floor-macro"), responseObject);
@@ -2598,7 +2620,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.makeCycList("(1 2)"), responseList);
 
             script =
-                "(define-in-api my-multiple-value-fn (arg1 arg2) \n" +
+                "(define my-multiple-value-fn (arg1 arg2) \n" +
                 "  (ret (values arg1 arg2 (list arg1 arg2) 0)))";
             responseObject = cycAccess.converseObject(script);
             Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-multiple-value-fn"), responseObject);
@@ -3076,7 +3098,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(CycObjectFactory.makeCycSymbol("c"), responseObject);
 
             script =
-                "(define-in-api my-mapdictionary-fn (key value) \n" +
+                "(define my-mapdictionary-fn (key value) \n" +
                 "  (cpush (list key value) answer) \n" +
                 "  (ret nil))";
             responseObject = cycAccess.converseObject(script);
@@ -3120,7 +3142,7 @@ System.out.println("responseList " + responseList);
                 cycAccess.makeCycList("(#$Brazil #$CityOfBrasiliaBrazil)")));
 
             script =
-                "(define-in-api my-parameterized-mapdictionary-fn (key value args) \n" +
+                "(define my-parameterized-mapdictionary-fn (key value args) \n" +
                 "  (cpush (list key value args) answer) \n" +
                 "  (ret nil))";
             responseObject = cycAccess.converseObject(script);
@@ -3146,7 +3168,7 @@ System.out.println("responseList " + responseList);
 
             // ccatch and throw
             script =
-                "(define-in-api my-super () \n" +
+                "(define my-super () \n" +
                 "  (clet (result) \n" +
                 "    (ccatch :abort \n" +
                 "      result \n" +
@@ -3158,7 +3180,7 @@ System.out.println("responseList " + responseList);
                                 responseObject);
 
             script =
-                "(define-in-api my-sub () \n" +
+                "(define my-sub () \n" +
                 "  (clet ((a 1) (b 2)) \n" +
                 "  (ignore a b) \n" +
                 "  (ret (throw :abort 99))))";

@@ -61,6 +61,11 @@ public class ExportDaml {
     public static final int EXPORT_KB_SUBSET_BELOW_TERM = 3;
 
     /**
+     * Command indicating that the DAML export contains all the terms in the KB.
+     */
+    public static final int EXPORT_ENTIRE_KB = 4;
+
+    /**
      * The command performed by the DAML extract process.
      */
     protected int exportCommand = 0;
@@ -155,18 +160,19 @@ public class ExportDaml {
      */
     public String title = "EELD Shared Ontology";
 
+    private static final String xmlNamespace = "http://www.w3.org/XML/1998/namespace";
     private static final String rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String rdfsNamespace = "http://www.w3.org/2000/01/rdf-schema#";
     private static final String damlNamespace = "http://www.daml.org/2001/03/daml+oil#";
-    private static final String cycDamlNamespace = "http://opencyc.sourceforge.net/daml/cyc#";
+    private static final String cycDamlNamespace = "http://www.cyc.com/2002/04/08/cyc#";
     private static final String damlThing = "http://www.daml.org/2001/03/daml+oil#Thing";
     private static final String damlProperty = "http://www.daml.org/2001/03/daml+oil#Property";
     private static final String damlTransitiveProperty = "http://www.daml.org/2001/03/daml+oil#TransitiveProperty";
     private static final String damlClass = "http://www.daml.org/2001/03/daml+oil#Class";
     private static final String rdfsType = "http://www.w3.org/2000/01/rdf-schema#type";
     private static final String rdfsLiteral = "http://www.w3.org/2000/01/rdf-schema#Literal";
-    private static final String guidComment = "Permanent Global Unique ID for the associated concept "
-            + "-- which enables concept renaming.  " + "Users should not depend upon the DAML ID nor label as fixed for all time.";
+    private static final String guidComment =
+        "Permanent Global Unique ID for the associated concept.";
     private CycAccess cycAccess;
     private Document document = new DocumentImpl();
     private String documentUrl = null;
@@ -209,6 +215,12 @@ public class ExportDaml {
         try {
             Log.current.println("Choosing KB selection: " + choice);
             // These require the Cycorp IKB or full KB to work as setup below.
+            if (choice.equals("all")) {
+                exportDaml.includeUpwardClosure = false;
+                exportDaml.title = "Open Cyc Ontology";
+                exportDaml.outputPath = "open-cyc.daml";
+                exportDaml.export(ExportDaml.EXPORT_ENTIRE_KB);
+            }
             if (choice.equals("eeld-core")) {
                 exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
                 exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
@@ -250,7 +262,9 @@ public class ExportDaml {
             Log.current.println("Getting terms from Cyc");
         CycList selectedConstants = new CycList();
         CycList selectedCycForts = null;
-        if ((exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
+        if (exportCommand == ExportDaml.EXPORT_ENTIRE_KB)
+            selectedCycForts = cycAccess.getAllInstances(cycAccess.thing);
+        else if ((exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
             (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
             selectedCycForts = cycAccess.getAllInstances(cycKbSubsetCollection);
         }
@@ -277,7 +291,8 @@ public class ExportDaml {
         if (verbosity > 2)
             Log.current.println("Sorting " + selectedConstants.size() + " CycConstant terms");
         Collections.sort(selectedConstants);
-        if ((exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
+        if ((exportCommand == ExportDaml.EXPORT_ENTIRE_KB) ||
+            (exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
             (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
             if (verbosity > 2)
                 Log.current.println("Removing non-binary properties");
@@ -368,8 +383,18 @@ public class ExportDaml {
         createRdfNode();
         createDamlOntologyNode();
         createCycGuidNode();
-        cycAccess = new CycAccess();
-        if (exportCommand == ExportDaml.EXPORT_KB_SUBSET) {
+        cycAccess =
+            new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                          3620,
+                          //CycConnection.DEFAULT_BASE_PORT
+                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                          CycAccess.DEFAULT_CONNECTION);
+        if (exportCommand == ExportDaml.EXPORT_ENTIRE_KB) {
+            includeUpwardClosure = false;
+            if (verbosity > 1)
+                Log.current.println("Exporting Entire KB subset");
+        }
+        else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET) {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             includeUpwardClosure = false;
             if (verbosity > 1)
@@ -460,6 +485,7 @@ public class ExportDaml {
         rdf.appendChild(classNode);
         classNode.setAttributeNS(rdfNamespace, "rdf:ID", cycConstant.toString());
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
+        labelNode.setAttributeNS(xmlNamespace, "xml:lang", "en");
         String label = null;
         label = cycAccess.getPluralGeneratedPhrase(cycConstant);
         if (verbosity > 2)
@@ -532,6 +558,7 @@ public class ExportDaml {
         rdf.appendChild(individualNode);
         individualNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
+        labelNode.setAttributeNS(xmlNamespace, "xml:lang", "en");
         String label = cycAccess.getSingularGeneratedPhrase(cycConstant);
         if (verbosity > 2)
             Log.current.println("  " + label);
@@ -553,6 +580,7 @@ public class ExportDaml {
         rdf.appendChild(propertyNode);
         propertyNode.setAttributeNS(rdfsNamespace, "rdf:ID", "guid");
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
+        labelNode.setAttributeNS(xmlNamespace, "xml:lang", "en");
         labelNode.appendChild(document.createTextNode("guid"));
         propertyNode.appendChild(labelNode);
         Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
@@ -588,6 +616,7 @@ public class ExportDaml {
         rdf.appendChild(propertyNode);
         propertyNode.setAttributeNS(rdfsNamespace, "rdf:ID", cycConstant.toString());
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
+        labelNode.setAttributeNS(xmlNamespace, "xml:lang", "en");
         String label = null;
         label = cycAccess.getGeneratedPhrase(cycConstant);
         if (verbosity > 2)

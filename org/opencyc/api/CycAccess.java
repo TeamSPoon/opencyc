@@ -1515,12 +1515,36 @@ public class CycAccess {
     }
 
     /**
+     * Gets a list of the arg3Isas for a CycConstant predicate.
+     */
+    public CycList getArg3Isas (CycConstant predicate)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(remove-duplicates (with-all-mts (arg3-isa " + predicate.stringApiValue() + ")))");
+    }
+
+    /**
+     * Gets a list of the arg4Isas for a CycConstant predicate.
+     */
+    public CycList getArg4Isas (CycConstant predicate)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(remove-duplicates (with-all-mts (arg4-isa " + predicate.stringApiValue() + ")))");
+    }
+
+    /**
      * Gets a list of the argNIsas for a CycConstant predicate.
      */
     public CycList getArgNIsas (CycConstant predicate, int argPosition)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(remove-duplicates (with-all-mts (argn-isa " + predicate.stringApiValue() +
                             " " + argPosition + ")))");
+    }
+
+    /**
+     * Gets a list of the resultIsa for a CycConstant function.
+     */
+    public CycList getResultIsas (CycConstant function)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(remove-duplicates (with-all-mts (result-isa " + function.stringApiValue() + ")))");
     }
 
     /**
@@ -1676,11 +1700,25 @@ public class CycAccess {
     }
 
     /**
-     * Returns true if the candidate name is a valid CycConstant name.
+     * Returns true if the candidate name uses valid CycConstant characters.
+     *
+     * @param candidateName the candidate name
+     * @return true if the candidate name uses valid CycConstant characters
      */
     public boolean isValidConstantName (String candidateName)
         throws IOException, UnknownHostException, CycApiException {
         return converseBoolean("(new-constant-name-spec-p \"" + candidateName + "\")");
+    }
+
+    /**
+     * Returns true if the candidate name is an available CycConstant name, case insensitive.
+     *
+     * @param candidateName the candidate name
+     * @return true if the candidate name uses valid CycConstant characters
+     */
+    public boolean isConstantNameAvailable (String candidateName)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(constant-name-available \"" + candidateName + "\")");
     }
 
     /**

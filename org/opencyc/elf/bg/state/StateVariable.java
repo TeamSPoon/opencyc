@@ -98,24 +98,25 @@ public class StateVariable {
     return this.name.equals(that.name);
   }
   
+  /** 
+   * the user input state variable name
+   */
+  public static String USER_INPUT = "userInput";
   
   /** 
-   * the console input state variable
+   * the user prompt state variable name
    */
-  public static StateVariable CONSOLE_INPUT;
+  public static String USER_PROMPT = "userPrompt";
   
   /** 
-   * the console prompt state variable
+   * the console input state variable name
    */
-  public static StateVariable CONSOLE_PROMPT;
+  public static String CONSOLE_INPUT = "consoleInput";
   
-  /**
-   * Initializes the state variables.
+  /** 
+   * the console prompt state variable name
    */
-  public static void initialize () {
-    CONSOLE_INPUT = new StateVariable(String.class, "consoleInput", "the console input string");
-    CONSOLE_PROMPT = new StateVariable(String.class, "consolePrompt", "the console prompt string");
-  }
+  public static String CONSOLE_PROMPT = "consolePrompt";
   
   //// Protected Area
   

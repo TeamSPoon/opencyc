@@ -52,6 +52,26 @@ public class ChatterBot {
     protected CycAccess cycAccess;
 
     /**
+     * Makes Dialog objects for interpretation.
+     */
+    DialogFactory dialogFactory;
+
+    /**
+     * Interprets the chat dialog.
+     */
+    DialogFsmInterpreter dialogFsmInterpreter;
+
+    /**
+     * Makes Template objects for the TemplateParser.
+     */
+    TemplateFactory templateFactory;
+
+    /**
+     * Parses the users input text.
+     */
+    TemplateParser templateParser;
+
+    /**
      * Creates a new ChatterBot object, given a ChatSender.
      *
      * @param chatSender the object which connects the ChatterBot to the
@@ -67,6 +87,14 @@ public class ChatterBot {
     public void initialize() throws CycApiException, UnknownHostException, IOException {
         chatSender.sendChatMessage("I am initializing");
         cycAccess = new CycAccess();
+        dialogFactory = new DialogFactory();
+        dialogFactory.initialize();
+        dialogFsmInterpreter = new DialogFsmInterpreter(this);
+        Dialog chat = dialogFactory.makeChat();
+        dialogFsmInterpreter.setDialogFsmCurrentNode(chat.getInitialDialogFsmNode());
+        templateFactory = new TemplateFactory();
+        templateParser = new TemplateParser();
+        templateParser.initialize();
         chatSender.sendChatMessage("I am ready to chat");
     }
 

@@ -507,7 +507,8 @@ public class AdminExplorer extends JPanel {
                                 serviceIcon = ((GenericServiceInterface)userObject).getIcon();
                                 // cache service's icon to avoid calling it again.
                                 nodeInfo.setIcon(serviceIcon);
-                            } catch (RemoteException e) {
+                            }
+                            catch (RemoteException e) {
                                 serviceIcon = unreachableServiceIcon;
                                 Log.current.println("Cannot get icon from " + userObject);
                             }

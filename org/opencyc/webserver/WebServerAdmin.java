@@ -75,7 +75,7 @@ public class WebServerAdmin extends GenericService
     public static void makeWebServerAdmin (WebServer webServer) {
         initialize();
         // Name entry for LookupService, set the property on the command line.
-        Name nameAttribute = new Name(System.getProperty("com.cyc.rkf.service.name", "default service"));
+        Name nameAttribute = new Name(System.getProperty("org.opencyc.jini.service.name", "default service"));
         // ServiceInfo entry for LookupService, clients match by name.
         String name = "WebServerAdmin Service";
         String manufacturer = "Cycorp Inc.";

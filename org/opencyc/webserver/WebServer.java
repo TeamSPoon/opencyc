@@ -450,18 +450,18 @@ public class WebServer extends Thread {
      */
     private void getProperties() {
         port = DEFAULT_PORT;
-        String portProperty = System.getProperty("com.cyc.rkf.webserver.port", "");
+        String portProperty = System.getProperty("org.opencyc.webserver.port", "");
         if (! portProperty.equalsIgnoreCase(""))
             port = (new Integer(portProperty)).intValue();
         Log.current.println("Listening on port " + port);
 
         cycPort = DEFAULT_CYC_PORT;
-        String cycPortProperty = System.getProperty("com.cyc.rkf.webserver.cycPort", "");
+        String cycPortProperty = System.getProperty("org.opencyc.webserver.cycPort", "");
         if (! cycPortProperty.equalsIgnoreCase(""))
             cycPort = (new Integer(cycPortProperty)).intValue();
         Log.current.println("Cyc connections directed to port " + cycPort);
 
-        String dirsProperty = System.getProperty("com.cyc.rkf.webserver.dirs", "");
+        String dirsProperty = System.getProperty("org.opencyc.webserver.dirs", "");
         dirs = new ArrayList(3);
         StringTokenizer st = new StringTokenizer(dirsProperty, ";", false);
         while (st.hasMoreTokens()) {
@@ -470,14 +470,16 @@ public class WebServer extends Thread {
         }
 
         trees = false;
-        String treesProperty = System.getProperty("com.cyc.rkf.webserver.trees", "");
+        String treesProperty = System.getProperty("org.opencyc.webserver.trees", "");
         if (! treesProperty.equalsIgnoreCase(""))
             trees = true;
 
         traceRequests = false;
-        String traceRequestsProperty = System.getProperty("com.cyc.rkf.webserver.traceRequests", "");
-        if (! traceRequestsProperty.equalsIgnoreCase(""))
+        String traceRequestsProperty = System.getProperty("org.opencyc.webserver.traceRequests", "");
+        if (! traceRequestsProperty.equalsIgnoreCase("")) {
             traceRequests = true;
+            Log.current.println("tracing requests");
+        }
     }
 
     /**
@@ -587,17 +589,17 @@ public class WebServer extends Thread {
      * The properties are:
      *
      * <pre>
-     * com.cyc.rkf.webserver.port=<HTTP listening port>
+     * org.opencyc.webserver.port=<HTTP listening port>
      * </pre>
      * which defaults to 80.
      *
      * <pre>
-     * com.cyc.rkf.webserver.cycPort=<Cyc connection port>
+     * org.opencyc.webserver.cycPort=<Cyc connection port>
      * </pre>
      * which defaults to 3600.
      *
      * <pre>
-     * com.cyc.rkf.webserver.dirs=<path>;<path> ... ;<path>
+     * org.opencyc.webserver.dirs=<path>;<path> ... ;<path>
      * </pre>
      * with the argument enclosed in quotes if any path contains an
      * embedded space.
@@ -614,19 +616,19 @@ public class WebServer extends Thread {
      * Caching of file contents is performed.
      *
      * <pre>
-     * com.cyc.rkf.log=all
+     * org.opencyc.util.log=all
      * </pre>
      * If the all value is given, then all attempts to download files
      * are output.
      *
      * <pre>
-     * com.cyc.rkf.webserver.traceRequests
+     * org.opencyc.webserver.traceRequests
      * </pre>
      * If this property has any value, then the client HTTP requests are
      * output.<p>
      *
      * <pre>
-     * com.cyc.rkf.webserver.trees
+     * org.opencyc.webserver.trees
      * </pre>
      * This property can be used to serve up individual files stored
      * within jar files in addition to the files that are served up by
@@ -645,8 +647,7 @@ public class WebServer extends Thread {
      */
     public static void main(String[] args) {
         Log.makeLog();
-        System.out.println("Cyc Web Server");
-        System.out.println("copyright 2000 by Cycorp Inc., all rights reserved.");
+        System.out.println("OpenCyc Web Server");
 
         try {
             // Launch thread to accept HTTP connections.

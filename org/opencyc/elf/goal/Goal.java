@@ -4,6 +4,8 @@ package org.opencyc.elf.goal;
 import org.opencyc.elf.bg.predicate.Predicate;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
 
+import org.opencyc.elf.bg.taskframe.Command;
+
 //// External Imports
 import java.util.ArrayList;
 
@@ -29,7 +31,7 @@ import java.util.ArrayList;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Goal {
+public class Goal implements Command {
   
   //// Constructors
   
@@ -40,21 +42,34 @@ public class Goal {
 
   //// Public Area
   
+  /** Creates and returns a copy of this object. The default values for goal time
+   * and goal importance can be modified by the receiver.
+   */
+  public Object clone() {
+    Goal goal = new Goal();
+    goal.setGoalTime((GoalTime) goalTime.clone());
+    goal.setImportance((Importance) importance.clone());
+    goal.setName(name);
+    goal.setPredicateExpression(predicateExpression);
+    goal.setfailurePredicateExpressions(failurePredicateExpressions);
+    return goal;
+  }
+  
 
   /** Gets the goal name
    *
    * @return the goal name
    */
-  public String getGoalName () {
-    return goalName;
+  public String getName () {
+    return name;
   }
 
   /** Sets the goal name
    *
-   * @param goalName the goal name
+   * @param name the goal name
    */
-  public void setGoalName (String goalName) {
-    this.goalName = goalName;
+  public void setName (String name) {
+    this.name = name;
   }
 
   /** Returns a string representation of this object.
@@ -118,6 +133,22 @@ public class Goal {
     this.importance = importance;
   }
   
+  /** Gets the goal time constraint plus modifiers such as tolerance.
+   *
+   * @return the goal time constraint plus modifiers such as tolerance
+   */
+  public GoalTime getGoalTime () {
+    return goalTime;
+  }
+
+  /** Sets the goal time constraint plus modifiers such as tolerance.
+   *
+   * @param goalTime the goal time constraint plus modifiers such as tolerance
+   */
+  public void setGoalTime (GoalTime goalTime) {
+    this.goalTime = goalTime;
+  }
+
   /** goal name for get user input */
   public static final String GET_USER_INPUT = "get user input"; 
   
@@ -133,7 +164,7 @@ public class Goal {
   /**
    * the goal name
    */
-  protected String goalName;
+  protected String name;
   
   /** the predicate expression which when true, indicates that the goal
    * is achieved
@@ -146,5 +177,8 @@ public class Goal {
   /** the goal importance */
   protected Importance importance;
 
+  /** the goal time constraint plus modifiers such as tolerance */
+  protected GoalTime goalTime;
+  
   //// Main
 }

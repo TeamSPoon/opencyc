@@ -1,9 +1,9 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
-import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.Command;
 
-import org.opencyc.elf.goal.Goal;
+import org.opencyc.elf.bg.predicate.PredicateExpression;
 
 //// External Imports
 import java.util.ArrayList;
@@ -11,10 +11,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /** Schedule contains the timing specification for a plan.  It can be represented 
- * as a time-labeled or event-labeled sequence of actitivies or events.  
- * The job assigner assigns a task or goal to the scheduler by passing partially 
- * instantiated schedule.  The scheduler determines a schedule of planned actions or
- * planned goals that accomplish the assigned action or achieve the assigned goal. 
+ * as a time-labeled or event-labeled sequence of actitivies or events.  The scheduler
+ * processes its current job assignment by evaluating alternative schedule sets and choosing
+ * the best set.  Each schedule in the schedule set has an associated predicate expression.
+ * The scheduler passes to the executor the first schedule found that has its expression 
+ * evaluate true.  In the event of replanning, this process is repeated.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -40,79 +41,44 @@ public class Schedule {
   
   //// Constructors
 
-  /** Creates a new instance of Schedule. */
-  public Schedule() {
+  /** Creates a new instance of Schedule given its contents.
+   *
+   * @param predicateExpression the predicate expression
+   * @param plannedCommands the list of planned commands that accomplish the assigned action or achieve the assigned goal
+   * @param plannedTimeMilliseconds the list of planned command times, each of which is the planned duration of time 
+   * in milliseconds to elapse from the time the plan commences exectution until the planned command is acomplished
+   * @param directActuatorName the name of the direct actuator that achieves or accomplishes the schedule
+   * @param directSensorName he name of the direct sensor that senses the achievements or accomplishments of the schedule
+   */
+  public Schedule(PredicateExpression predicateExpression, 
+                  List plannedCommands, 
+                  List plannedTimeMilliseconds, 
+                  String directActuatorName, 
+                  String directSensorName) {
+    this.predicateExpression = predicateExpression;
+    this.plannedCommands = plannedCommands;
+    this.directActuatorName = directActuatorName;
+    this.directSensorName = directSensorName;
   }
 
   //// Public Area
 
-  /** Gets the schedule name or description
+  /** Gets the list of planned commands that accomplish the assigned action or achieve the assigned goal.
    *
-   * @return the schedule name or description
+   * @return the list of planned commands that accomplish the assigned action or achieve the assigned goal
    */
-  public String getName () {
-    return name;
+  public List getPlannedCommands () {
+    return plannedCommands;
   }
 
-  /** Sets the schedule name or description
+  /** Gets the list of planned command times, each of which is the planned duration of time in milliseconds to
+   * elapse from the time the plan commences exectution until the planned command is acomplished.
    *
-   * @param name the schedule name or description
+   * @return the list of planned command times, each of which is the planned duration of time in milliseconds to
+   * elapse from the time the plan commences exectution until the planned command is acomplished
    */
-  public void setName (String name) {
-    this.name = name;
-  }
-
-  /** Gets the list of planned actions that accomplish the assigned action or achieve the assigned goal
-   *
-   * @return the list of planned actions that accomplish the assigned action or achieve the assigned goal
-   */
-  public List getPlannedActions () {
-    return plannedActions;
-  }
-
-  /** Sets tthe list of planned actions that accomplish the assigned action or achieve the assigned goal
-   *
-   * @param plannedActions the list of planned actions that accomplish the assigned action or achieve the assigned goal
-   */
-  public void setPlannedActions (List plannedActions) {
-    this.plannedActions = plannedActions;
-  }
-
-  /** Gets the list of planned goals that accomplish the assigned action or achieve the assigned goal
-   *
-   * @return the list of planned goals that accomplish the assigned action or achieve the assigned goal
-   */
-  public List getPlannedGoals () {
-    return plannedGoals;
-  }
-
-  /** Sets the list of planned goals that accomplish the assigned action or achieve the assigned goal
-   *
-   * @param plannedGoals the list of planned goals that accomplish the assigned action or achieve the assigned goal
-   */
-  public void setPlannedGoals (List plannedGoals) {
-    this.plannedGoals = plannedGoals;
-  }
-
-  /** Gets the list of planned goal times, each of which is the planned duration of time in milliseconds to
-   * elapse from the time the plan commences exectution until the planned goal is achieved
-   *
-   * @return the list of planned goal times, each of which is the planned duration of time in milliseconds to
-   * elapse from the time the plan commences exectution until the planned goal is achieved
-   */
-  public List getPlannedGoalTimeMilliseconds () {
-    return plannedGoalTimeMilliseconds;
-  }
-
-  /** Sets the list of planned goal times, each of which is the planned duration of time in milliseconds to
-   * elapse from the time the plan commences exectution until the planned goal is achieved
-   *
-   * @param plannedGoalTimeMilliseconds the list of planned goal times, each of which is the planned duration 
-   * of time in milliseconds to elapse from the time the plan commences exectution until the planned goal is 
-   * achieved
-   */
-  public void setPlannedGoalTimeMilliseconds (List plannedGoalTimeMilliseconds) {
-    this.plannedGoalTimeMilliseconds = plannedGoalTimeMilliseconds;
+  public List getplannedTimeMilliseconds () {
+    return plannedTimeMilliseconds;
   }
 
   /** Gets the name of the direct actuator that achieves or accomplishes the schedule
@@ -123,28 +89,12 @@ public class Schedule {
     return directActuatorName;
   }
 
-  /** Sets the name of the direct actuator that achieves or accomplishes the schedule
-   *
-   * @param directActuatorName the name of the direct actuator that achieves or accomplishes the schedule
-   */
-  public void setDirectActuatorName (String directActuatorName) {
-    this.directActuatorName = directActuatorName;
-  }
-
   /** Gets the name of the direct sensor that senses the achievements or accomplishments of the schedule
    *
    * @return the name of the direct sensor that senses the achievements or accomplishments of the schedule
    */
   public String getDirectSensorName () {
     return directSensorName;
-  }
-
-  /** Sets the name of the direct sensor that senses the achievements or accomplishments of the schedule
-   *
-   * @param directSensorName the name of the direct sensor that senses the achievements or accomplishments of the schedule
-   */
-  public void setDirectSensorName (String sensorName) {
-    this.directSensorName = directSensorName;
   }
 
   /** Returns a string representation of this object.
@@ -154,7 +104,9 @@ public class Schedule {
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[Schedule ");
-    stringBuffer.append(plannedActions.toString());
+    stringBuffer.append(plannedCommands.toString());
+    stringBuffer.append(" when: ");
+    stringBuffer.append(predicateExpression.toString());
     stringBuffer.append(" direct actuator: ");
     stringBuffer.append(directActuatorName);
     stringBuffer.append(" direct sensor: ");
@@ -168,17 +120,27 @@ public class Schedule {
    * @return a copy of this object
    */
   public Object clone () {
-    Schedule schedule = new Schedule();
-    List clonedPlannedActions = new ArrayList();
-    Iterator iter = plannedActions.iterator();
+    List clonedPlannedCommands = new ArrayList();
+    Iterator iter = plannedCommands.iterator();
     while (iter.hasNext()) {
-      Action action = (Action) iter.next();
-      clonedPlannedActions.add((Action) action.clone());
+      Command command = (Command) iter.next();
+      clonedPlannedCommands.add(command.clone());
     }
-    schedule.setPlannedActions(clonedPlannedActions);
-    schedule.setPlannedGoalTimeMilliseconds(plannedGoalTimeMilliseconds);
-    schedule.setPlannedGoals(plannedGoals);
+    Schedule schedule = new Schedule(predicateExpression, 
+                                     clonedPlannedCommands, 
+                                     plannedTimeMilliseconds, 
+                                     directActuatorName, 
+                                     directSensorName);
+    
     return schedule;
+  }
+  
+  /** Gets  the predicate expression 
+   *
+   * @return  the predicate expression 
+   */
+  public PredicateExpression getPredicateExpression () {
+    return predicateExpression;
   }
   
   //// Protected Area
@@ -187,19 +149,16 @@ public class Schedule {
 
   //// Internal Rep
 
-  // the schedule name or description
-  protected String name = "";
+  /** the predicate expression */
+  protected PredicateExpression predicateExpression;
   
-  /** the list of planned actions that accomplish the assigned action or achieve the assigned goal */
-  protected List plannedActions = new ArrayList();
+  /** the list of planned commands that accomplish the assigned action or achieve the assigned goal */
+  protected List plannedCommands = new ArrayList();
   
-  /** the list of planned goals that accomplish the assigned action or achieve the assigned goal */
-  protected List plannedGoals = new ArrayList();
-  
-  /** the list of planned goal times, each of which is the planned duration of time in milliseconds to
-   * elapse from the time the plan commences exectution until the planned goal is achieved
+  /** the list of planned command times, each of which is the planned duration of time in milliseconds to
+   * elapse from the time the plan commences exectution until the planned command is acomplished
    */
-  protected List plannedGoalTimeMilliseconds = new ArrayList();
+  protected List plannedTimeMilliseconds = new ArrayList();
 
   /** the name of the direct actuator that achieves or accomplishes the schedule */
   protected String directActuatorName = "";

@@ -11,7 +11,6 @@ import org.opencyc.elf.bg.planner.JobAssignment;
 import org.opencyc.elf.bg.planner.Resource;
 
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.TaskFrame;
 
 import org.opencyc.elf.goal.Goal;
 
@@ -79,7 +78,6 @@ public class UnitTest extends TestCase {
     testSuite.addTest(new UnitTest("testGoalLibrary"));
     testSuite.addTest(new UnitTest("testResourcePool"));
     testSuite.addTest(new UnitTest("testJobAssignmentLibrary"));
-    testSuite.addTest(new UnitTest("testTaskFrameLibrary"));
     testSuite.addTest(new UnitTest("testActuatorPool"));
     testSuite.addTest(new UnitTest("testSensorPool"));
     return testSuite;
@@ -215,50 +213,6 @@ public class UnitTest extends TestCase {
     Assert.assertEquals(1, requiredResources.size());
     Assert.assertEquals("[Resource: console]", requiredResources.get(0).toString());
     System.out.println("*** testJobAssignmentLibrary OK ***");
-  }
-  
-  /** Tests task frame library and task frame factory behavior. */
-  public void testTaskFrameLibrary() {
-    System.out.println("\n*** testTaskFrameLibrary ***");
-    new StateVariableLibrary();
-    (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
-    new ActionLibrary();
-    (new ActionFactory()).getInstance().populateActionLibrary();
-    new NotNull();
-    new GoalLibrary();
-    (new GoalFactory()).getInstance().populateGoalLibrary();
-    new ResourcePool();
-    (new ResourceFactory()).getInstance().populateResourcePool();
-    new JobAssignmentLibrary();
-    (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
-    new ActuatorPool();
-    (new ActuatorFactory()).getInstance().populateActuatorPool();
-    new SensorPool();
-    (new SensorFactory()).getInstance().populateSensorPool();
-    new TaskFrameLibrary();
-    (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
-    Assert.assertNotNull(TaskFrameLibrary.getInstance());
-    TaskFrame taskFrame = TaskFrameLibrary.getInstance().getTaskFrame(Action.CONVERSE_WITH_USER);
-    Assert.assertEquals(1, TaskFrameLibrary.getInstance().taskFrameDictionary.entrySet().size());
-    Assert.assertNotNull(taskFrame);
-    Assert.assertEquals("[TaskFrame task: converse with user goal: (not-null userInput)]", 
-                        taskFrame.toString());
-    Assert.assertNotNull(taskFrame.getTaskId());
-    Assert.assertTrue(taskFrame.getTaskId() instanceof UUID);
-    Assert.assertNotNull(taskFrame.getTaskName());
-    Assert.assertEquals("converse with user", taskFrame.getTaskName());
-    Assert.assertNotNull(taskFrame.getTaskAction());
-    Assert.assertEquals("[Action: converse with user( prompt: null)]", taskFrame.getTaskAction().toString());
-    List scheduleAlternatives = taskFrame.getScheduleAlternatives();
-    Assert.assertNotNull(scheduleAlternatives);
-    Assert.assertEquals(1, scheduleAlternatives.size());
-    List conditionalScheduleSets = (List) scheduleAlternatives.get(0);
-    Assert.assertNotNull(conditionalScheduleSets);
-    Assert.assertEquals(1, conditionalScheduleSets.size());
-    ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) conditionalScheduleSets.get(0);
-    Assert.assertEquals("[ConditionalScheduleSet condition: TRUE scheduleSet: [[Schedule [] actuator:  sensor: ]]]",  conditionalScheduleSet.toString());
-    
-    System.out.println("*** testTaskFrameLibrary OK ***");
   }
   
   /** Tests actuator pool and actuator factory behavior. */

@@ -43,12 +43,6 @@ public interface Actuator {
    */
   public List getResources();
   
-  /** Gets the names of actions that this actuator or virtual actuator (job assigner) can accomplish.
-   *
-   * @return the names of actions that this actuator or virtual actuator (job assigner) can accomplish
-   */
-  public List getActionCapabilities();
-  
   /** the console output actuator name */
   public static final String CONSOLE_OUTPUT = "console output";
   

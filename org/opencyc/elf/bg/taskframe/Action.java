@@ -36,7 +36,7 @@ import java.util.List;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @version $Id$
  */
-public class Action {
+public class Action implements Command {
   
   //// Constructors
   
@@ -77,7 +77,8 @@ public class Action {
     return stringBuffer.toString();
   }
   
-  /** Creates and returns a copy of this object.
+  /** Creates and returns a copy of this object. The action parameter values are not
+   * cloned so that the receiver may set them as appropriate for the task.
    *
    * @return a partially instantiated copy of this object
    */
@@ -193,6 +194,7 @@ public class Action {
   public void setOutputType (Class outputType) {
     this.outputType = outputType;
   }
+  
   /** Sets the output value for this action.
    *
    * @param outputValue the output valuefor this action

@@ -65,15 +65,15 @@ public class JobLibrary {
   
   /** Adds a job set that accomplishes the given command name.
    *
-   * @param actionName the given command name
+   * @param commandName the given command name
    * @param jobSet the job set
    */
-  public void addJobSet (String actionName, List jobSet) {
-    List jobs = (List) jobDictionary.get(actionName);
+  public void addJobSet (String commandName, List jobSet) {
+    List jobs = (List) jobDictionary.get(commandName);
     if (jobs == null)
       jobs = new ArrayList();
     jobs.add(jobSet);
-    jobDictionary.put(actionName, jobs);
+    jobDictionary.put(commandName, jobs);
   }
   
   //// Private Area

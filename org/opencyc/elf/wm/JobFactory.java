@@ -9,6 +9,8 @@ import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.Command;
 
+import org.opencyc.elf.s.DirectSensor;
+
 //// External Imports
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +62,8 @@ public class JobFactory {
     Command command = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
     List requiredResources = new ArrayList();
     requiredResources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    String directActuatorName = "";
-    String directSensorName = "";
+    String directActuatorName = DirectActuator.CONSOLE_OUTPUT;
+    String directSensorName = DirectSensor.CONSOLE_INPUT;
     Job job = new Job(command, requiredResources, directActuatorName, directSensorName);
     List jobSet = new ArrayList();
     jobSet.add(job);

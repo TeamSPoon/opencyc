@@ -44,14 +44,11 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
    *
    * @param name the actuator name
    * @param resources the resources requried by this actuator
-   * @param actionCapabilities the actions that this actuator can accomplish
    */
   public DirectActuator(String name, 
-                       List resources, 
-                       List actionCapabilities) {
+                       List resources) {
     this.name = name;
     this.resources = resources;
-    this.actionCapabilities = actionCapabilities;
     logger = Logger.getLogger("org.opencyc.elf");
   }
   
@@ -95,14 +92,6 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
     return resources;
   }
   
-  /** Gets the actions that this actuator can accomplish.
-   *
-   * @return the actions that this actuatorcan accomplish
-   */
-  public List getActionCapabilities() {
-    return actionCapabilities;
-  }
-  
   //// Protected Area
   
   //// Private Area
@@ -111,9 +100,6 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
   
   /** the name of the actuator */
   protected String name;
-  
-  /** the names of actions that this actuator can accomplish */
-  protected List actionCapabilities;
   
   /** the resources requried by this actuator */
   protected List resources;

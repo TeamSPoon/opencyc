@@ -7,7 +7,8 @@ import org.opencyc.elf.goal.GoalTime;
 
 //// External Imports
 
-/** TaskCommand is an instruction to perform a named task.
+/** TaskCommand is an instruction to perform the given command.  The next command is also
+ * provided for consideration and response.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -33,8 +34,14 @@ public class TaskCommand {
   
   //// Constructors
 
-  /** Creates a new instance of TaskCommand */
-  public TaskCommand() {
+  /** Creates a new instance of TaskCommand given the command and next command.
+   * 
+   * @param command the action or goal command plus modifiers
+   * @param nextCommand the planned next action or goal command plus modifiers
+   */
+  public TaskCommand(Command command, Command nextCommand) {
+    this.command = command;
+    this.nextCommand = nextCommand;
   }
 
   //// Public Area
@@ -46,109 +53,28 @@ public class TaskCommand {
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[TaskCommand: ");
-    if (actionCommand != null)
-      stringBuffer.append(actionCommand.toString());
-    if (goalCommand != null)
-      stringBuffer.append(goalCommand.toString());
+    stringBuffer.append(command.toString());
     stringBuffer.append("]");
     return stringBuffer.toString();
   }
 
-  /** Gets the action command plus modifiers
+  /** Gets the action or goal command plus modifiers.
    *
-   * @return the action command plus modifiers
+   * @return the action or goal command plus modifiers
    */
-  public Action getActionCommand () {
-    return actionCommand;
+  public Command getCommand () {
+    return command;
   }
 
-  /** Sets the action command plus modifiers
+
+  /** Gets the planned next action or goal command plus modifiers.
    *
-   * @param actionCommand the action command plus modifiers
+   * @return the planned next action or goal command plus modifiers
    */
-  public void setActionCommand (Action actionCommand) {
-    this.actionCommand = actionCommand;
+  public Command getNextCommand () {
+    return nextCommand;
   }
 
-  /** Gets the goal to be accomplish, or the state to be maintained, plus modifiers
-   *
-   * @return the goal to be accomplish, or the state to be maintained, plus modifiers
-   */
-  public Goal getGoalCommand () {
-    return goalCommand;
-  }
-
-  /** Sets the goal to be accomplish, or the state to be maintained, plus modifiers
-   *
-   * @param goalCommand the goal to be accomplish, or the state to be maintained, plus modifiers
-   */
-  public void setGoalCommand (Goal goalCommand) {
-    this.goalCommand = goalCommand;
-  }
-
-  /** Gets the goal time constraint plus modifiers such as tolerance
-   *
-   * @return the goal time constraint plus modifiers such as tolerance
-   */
-  public GoalTime getgoalTime () {
-    return goalTime;
-  }
-
-  /** Sets the goal time constraint plus modifiers such as tolerance
-   *
-   * @param goalTime the goal time constraint plus modifiers such as tolerance
-   */
-  public void setGoalTime (GoalTime goalTime) {
-    this.goalTime = goalTime;
-  }
-
-  /** Gets the planned next action command plus modifiers
-   *
-   * @return the planned next action command plus modifiers
-   */
-  public Action getNextActionCommand () {
-    return nextActionCommand;
-  }
-
-  /** Sets the planned next action command plus modifiers
-   *
-   * @param nextActionCommand the planned next action command plus modifiers
-   */
-  public void setNextActionCommand (Action nextActionCommand) {
-    this.nextActionCommand = nextActionCommand;
-  }
-
-  /** Gets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
-   *
-   * @return the planned next goal to be accomplish, or the state to be maintained, plus modifiers
-   */
-  public Goal getNextGoalCommand () {
-    return nextGoalCommand;
-  }
-
-  /** Sets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
-   *
-   * @param nextGoalCommand the planned next goal to be accomplish, or the state to be maintained, plus modifiers
-   */
-  public void setNextGoalCommand (Goal nextGoalCommand) {
-    this.nextGoalCommand = nextGoalCommand;
-  }
-
-  /** Gets the planned next goal time constraint plus modifiers such as tolerance
-   *
-   * @return the planned next goal time constraint plus modifiers such as tolerance
-   */
-  public GoalTime getNextGoalTime () {
-    return nextGoalTime;
-  }
-
-  /** Sets the planned next goal time constraint plus modifiers such as tolerance
-   *
-   * @param nextGoalTime the planned next goal time constraint plus modifiers such as tolerance
-   */
-  public void setNextGoalTime (GoalTime nextGoalTime) {
-    this.nextGoalTime = nextGoalTime;
-  }
 
   //// Protected Area
   
@@ -156,22 +82,10 @@ public class TaskCommand {
   
   //// Internal Rep
   
-  /** the action command plus modifiers */
-  protected Action actionCommand;
+  /** the action or goal command plus modifiers */
+  protected Command command;
   
-  /** the goal to be accomplish, or the state to be maintained, plus modifiers */
-  protected Goal goalCommand;
-  
-  /** the goal time constraint plus modifiers such as tolerance */
-  protected GoalTime goalTime;
-  
-  /** the planned next action command plus modifiers */
-  protected Action nextActionCommand;
-  
-  /** the planned next goal to be accomplish, or the state to be maintained, plus modifiers */
-  protected Goal nextGoalCommand;
-  
-  /** the planned next goal time constraint plus modifiers such as tolerance */
-  protected GoalTime nextGoalTime;
-  
+  /** the planned next action or goal command plus modifiers */
+  protected Command nextCommand;
+    
 }

@@ -46,6 +46,11 @@ public class GoalTime {
   
   //// Public Area
   
+  /** Creates and returns a copy of this object. */
+  public Object clone() {
+    return new GoalTime(goalTimeMilliseconds, goalToleranceMilliseconds);
+  }
+  
   /** Gets the goal achievement time in milliseconds
    *
    * @return the goal achievement time in milliseconds

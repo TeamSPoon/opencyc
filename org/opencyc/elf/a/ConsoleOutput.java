@@ -48,12 +48,10 @@ public class ConsoleOutput extends DirectActuator {
    *
    * @param name the actuator name
    * @param resources the resources requried by this actuator
-   * @param actionCapabilities the actions that this actuator can accomplish
    */
   public ConsoleOutput(String name, 
-                       List resources, 
-                       List actionCapabilities) {
-    super(name, resources, actionCapabilities);
+                       List resources) {
+    super(name, resources);
   }
   
   //// Public Area

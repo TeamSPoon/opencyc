@@ -33,4 +33,13 @@ package org.opencyc.elf.bg.taskframe;
 
 public interface Command {
   
+  /** Gets the name of the command
+   *
+   * @return name the name of the command
+   */
+  public String getName ();
+
+  /** Creates and returns a copy of this object. */
+  public Object clone();
+  
 }

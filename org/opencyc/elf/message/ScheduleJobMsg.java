@@ -1,7 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
-import org.opencyc.elf.bg.planner.JobAssignment;
+import org.opencyc.elf.bg.planner.Job;
 
 //// External Imports
 
@@ -45,27 +45,25 @@ public class ScheduleJobMsg extends GenericMsg {
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[ScheduleJobMsg ");
-    stringBuffer.append(jobAssignment.toString());
+    stringBuffer.append(job.toString());
     stringBuffer.append("]");
     return stringBuffer.toString();
   }
 
-  /** Gets the job assignment
-   *
-   * @return the job assignment
+  /** Gets the assigned job
+   * @return the assigned job
    */
-  public JobAssignment getJobAssignment () {
-    return jobAssignment;
+  public Job getJob () {
+    return job;
   }
 
-  /** Sets the job assignment
+  /** Sets the assigned job
    *
-   * @param jobAssignment the job assignment
+   * @param job the assigned job
    */
-  public void setJobAssignment (JobAssignment jobAssignment) {
-    this.jobAssignment = jobAssignment;
+  public void setJob (Job job) {
+    this.job = job;
   }
-
 
   //// Protected Area
   
@@ -73,8 +71,8 @@ public class ScheduleJobMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /** the job assignment */
-  protected JobAssignment jobAssignment;
+  /** the assigned job */
+  protected Job job;
   
   //// Main
     

@@ -8,7 +8,6 @@ import org.opencyc.elf.Status;
 
 import org.opencyc.elf.a.DirectActuator;
 
-import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.message.ExecutorStatusMsg;
@@ -211,14 +210,21 @@ public class Scheduler extends NodeComponent {
      */
     protected void processScheduleJobMsg (ScheduleJobMsg scheduleJobMsg) {
       getLogger().info("Scheduler proccessing " + scheduleJobMsg);
-      schedule = scheduleJobMsg.getSchedule();
-      taskCommand = scheduleJobMsg.getTaskCommand();
+      job = scheduleJobMsg.getJob();
+      
+      // get the schedule sets corresponding to the job
+      
+      // evaluate the schedule sets and choose the best one
+      
+      
+      
+      
+      
+      
       if (executor == null)
         createExecutor(schedule);
       
-      
-      
-      // if the executor exists then pass the schedule actions one a time
+      // send the schedule to the executor
       
     }
                 
@@ -325,10 +331,13 @@ public class Scheduler extends NodeComponent {
   /** the executor for this scheduler */
   protected org.opencyc.elf.bg.executor.Executor executor;
   
-  /** the node's commanded task */
-  protected TaskCommand taskCommand;
-
-  /** the schedule which is planned to accomplish the commanded task */
+  /** the assigned job to schedule */
+  protected Job job;
+  
+  /** the set of conditional schedules that accomplish the assigned job */
+  protected List conditionalSchedules;
+  
+  /** the current schedule sent to the executor for execution */
   protected Schedule schedule;
     
 }

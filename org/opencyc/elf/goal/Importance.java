@@ -35,15 +35,22 @@ public class Importance {
   public Importance() {
   }
 
-  /** Constructs a new Importance object given the importance.
+  /** Constructs a new Importance object given the importance value.
    *
-   * @param importance the importance
+   * @param importanceValue the importance value
    */
-  public Importance(float importance) {
-    setImportance(importance);
+  public Importance(float importanceValue) {
+    setImportanceValue(importanceValue);
   }
 
   //// Public Area
+  
+  /** Creates and returns a copy of this object. */
+  public Object clone() {
+    Importance importance = new Importance();
+    importance.setImportanceValue(importanceValue);
+    return importance;
+  }
   
   /** most important */
   public static final float MOST = 1.0f;
@@ -60,29 +67,29 @@ public class Importance {
   /** least important */
   public static final float LEAST = 0.0f;
   
-  /** Gets the importance
+  /** Gets the importance value
    * 
-   * @return the importance
+   * @return the importance value
    */
-  public float getImportance() {
-    return importance;
+  public float getImportanceValue() {
+    return importanceValue;
   }
 
-  /** Sets the importance
+  /** Sets the importance value.
    * 
-   * @param importance the importance
+   * @param importanceValue the importance value
    * @throws IllegalArgumentException when the importance is not in the range [0.0 ... +1.0]
    */
-  public void setImportance(float importance) {
-    if ((importance < 0.0) || (importance > 1.0))
-      throw new IllegalArgumentException(importance + " is not in the range [0.0 ... +1.0]");
-    this.importance = importance;
+  public void setImportanceValue(float importanceValue) {
+    if ((importanceValue < 0.0) || (importanceValue > 1.0))
+      throw new IllegalArgumentException(importanceValue + " is not in the range [0.0 ... +1.0]");
+    this.importanceValue = importanceValue;
   }
   
   //// Protected Area
   
   /** importances range from 0.0 for least important, to +1 for most important. */
-  protected float importance;
+  protected float importanceValue;
 
   //// Private Area
   

@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import org.opencyc.elf.bg.predicate.NotNull;
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
-import org.opencyc.elf.bg.taskframe.TaskFrame;
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ActionLibrary;
@@ -32,8 +31,6 @@ import org.opencyc.elf.wm.SensorFactory;
 import org.opencyc.elf.wm.SensorPool;
 import org.opencyc.elf.wm.StateVariableFactory;
 import org.opencyc.elf.wm.StateVariableLibrary;
-import org.opencyc.elf.wm.TaskFrameFactory;
-import org.opencyc.elf.wm.TaskFrameLibrary;
 import org.opencyc.elf.wm.state.State;
 import org.opencyc.elf.wm.state.StateVariable;
 
@@ -63,19 +60,12 @@ public class BehaviorEngine {
     (new ActuatorClassFactory()).getInstance().generate();
     (new PredicateClassFactory()).getInstance().generate();
     createSingletonInstances();
-    TaskFrameLibrary.getInstance()
-                .setRootTaskFrame(TaskFrameLibrary.getInstance()
-                                                  .getTaskFrame(
-                                        Action.CONVERSE_WITH_USER));
+    //TODO root command
   }
 
   /** Executes the behavior engine
    */
   public void execute() {
-    TaskFrame rootTaskFrame = TaskFrameLibrary.getInstance().getRootTaskFrame();
-    List taskFrames = new ArrayList();
-    taskFrames.add(rootTaskFrame);
-
     Node node = NodeFactory.getInstance().makeNode(taskFrames);
 
     // no node superior to the root node.

@@ -1,17 +1,17 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
-import org.opencyc.elf.bg.expression.Operator;
+import org.opencyc.cycobject.CycFort;
 import org.opencyc.elf.wm.state.State;
 import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-/** RelevantObjectsCommand is a command that sets a given state variable to the relevant
- * subset of the given set with respect to the given set of relevant state variables.
+/** RelevantObjectsCommand is a command that sets a given state variable to the possibly relevant set of objects 
+ * with respect to the given set of relevant state variables and a relevancy relationship.  See 
+ * RelevantObjectsLearningCommand.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -43,20 +43,19 @@ public class RelevantObjectsCommand implements Command {
   
   /** Creates a new instance of RelevantObjectsCommand.
    *
-   *
    * @param name the name of this relevant objects command 
-   * @param possiblyRelevantObjects the list or (state variable referencing a list) of possibly relevant objects
    * @param relevantStateVariables the list of relevant state variables
    * @param relevantObjects the state variable whose value will be set to the output list of relevant objects
+   * @param relevancyRelationship the relevancy relationship 
    */
   public RelevantObjectsCommand(String name, 
-                                Object possiblyRelevantObjects, 
                                 List relevantStateVariables,
-                                StateVariable relevantObjects) {
+                                StateVariable relevantObjects,
+                                CycFort relevancyRelationship) {
     this.name = name;
-    this.possiblyRelevantObjects = possiblyRelevantObjects;
     this.relevantStateVariables = relevantStateVariables;
     this.relevantObjects = relevantObjects;
+    this.relevancyRelationship = relevancyRelationship;
   }
   
   //// Public Area
@@ -68,16 +67,10 @@ public class RelevantObjectsCommand implements Command {
    */
   public void execute(State state) {
     List possiblyRelevantObjectsList;
-    if (possiblyRelevantObjects instanceof StateVariable) 
-      possiblyRelevantObjectsList = (List) state.getStateValue((StateVariable) possiblyRelevantObjects);
-    else
-      possiblyRelevantObjectsList = (List) possiblyRelevantObjects;
-    //TODO machine learning, for now all possibilities are relevant
-    List relevantObjectsList = new ArrayList(possiblyRelevantObjectsList.size());
-    relevantObjectsList.addAll(possiblyRelevantObjectsList);
+    //TODO machine learning, for no possibilities are relevant
+    List relevantObjectsList = new ArrayList();
     state.setStateValue(relevantObjects, relevantObjectsList);
-  }
-  
+  }  
   
   /** Returns a string representation of this object.
    *
@@ -85,10 +78,10 @@ public class RelevantObjectsCommand implements Command {
    */
   public String toString () {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[RelevantObjectsCommand from among ");
-    stringBuffer.append(possiblyRelevantObjects.toString());
-    stringBuffer.append(" relevant state variables: ");
+    stringBuffer.append("[RelevantObjectsCommand in context ");
     stringBuffer.append(relevantStateVariables.toString());
+    stringBuffer.append(" with respect to ");
+    stringBuffer.append(relevancyRelationship.cyclify());
     stringBuffer.append(" output state variable: ");
     stringBuffer.append(relevantObjects.toString());
     stringBuffer.append("]");
@@ -101,9 +94,9 @@ public class RelevantObjectsCommand implements Command {
    */
   public Object clone() {
     return new RelevantObjectsCommand(name, 
-                                      possiblyRelevantObjects, 
                                       relevantStateVariables, 
-                                      relevantObjects);
+                                      relevantObjects,
+                                      relevancyRelationship);
   }
   
   /** Gets the name of this relevant objects command
@@ -122,20 +115,20 @@ public class RelevantObjectsCommand implements Command {
     return relevantStateVariables;
   }
 
-  /** Gets the list or (state variable referencing a list) of possibly relevant objects.
-   *
-   * @return the list or (state variable referencing a list) of possibly relevant objects
-   */
-  public Object getPossiblyRelevantObjects () {
-    return possiblyRelevantObjects;
-  }
-
   /** Gets the state variable whose value will be set to the output list of relevant objects.
    *
    * @return the state variable whose value will be set to the output list of relevant objects
    */
   public StateVariable getRelevantObjects () {
     return relevantObjects;
+  }
+
+  /** Gets the relevancy relationship
+   *
+   * @return the relevancy relationship
+   */
+  public CycFort getRelevancyRelationship () {
+    return relevancyRelationship;
   }
 
   //// Protected Area
@@ -147,14 +140,14 @@ public class RelevantObjectsCommand implements Command {
   /** the name of this relevant objects command */
   protected String name;
   
-  /** the list or (state variable referencing a list) of possibly relevant objects */
-  protected Object possiblyRelevantObjects;
-  
   /** the list of relevant state variables */
   protected List relevantStateVariables;
   
   /** the state variable whose value will be set to the output list of relevant objects */
   protected StateVariable relevantObjects;
+  
+  /** the relevancy relationship */
+  protected CycFort relevancyRelationship;
   
   //// Main
   

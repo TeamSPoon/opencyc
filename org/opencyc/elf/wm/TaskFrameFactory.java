@@ -1,10 +1,21 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.elf.a.Actuator;
+import org.opencyc.elf.a.ConsoleOutput;
+
+import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
+
+import org.opencyc.elf.bg.planner.Resource;
+
+import org.opencyc.elf.s.ConsoleInput;
+import org.opencyc.elf.s.Sensor;
+
+import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
 import java.util.ArrayList;
@@ -65,13 +76,14 @@ public class TaskFrameFactory {
     ArrayList plannedActions = new ArrayList();
     action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
     schedule.setPlannedActions(plannedActions);
+    Resource resource = ResourcePool.getInstance().getResource(Resource.CONSOLE);
     ArrayList resources = new ArrayList();
-    ArrayList actuators = new ArrayList();
-    taskFrame.addScheduleInfo(schedule, resources, actuators);
-    
-    //TODO populate resource, actuator and sensor pool by name
-    //     then initialize these elements in the task frame
-    
+    resources.add(resource);
+    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources);
+    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources);
+    taskFrame.addScheduleInfo(schedule, 
+                              consoleOutput, 
+                              consoleInput);
     
     //taskFrame.setTaskGoal(taskGoal);    
   }

@@ -59,7 +59,7 @@ public class CycAccess {
      */
     public CycAccess() throws IOException, UnknownHostException {
         if (persistentConnection)
-            cycConnection = new CycConnection();
+            cycConnection = new CycConnection(this);
         initializeConstants();
     }
 
@@ -71,7 +71,7 @@ public class CycAccess {
     public CycAccess(String hostName) throws IOException, UnknownHostException {
         this.hostName = hostName;
         if (persistentConnection)
-            cycConnection = new CycConnection(hostName);
+            cycConnection = new CycConnection(hostName, this);
         initializeConstants();
     }
 
@@ -83,7 +83,7 @@ public class CycAccess {
     public CycAccess(int port) throws IOException, UnknownHostException {
         this.port = port;
         if (persistentConnection)
-            cycConnection = new CycConnection(port);
+            cycConnection = new CycConnection(port, this);
         initializeConstants();
     }
 
@@ -97,7 +97,7 @@ public class CycAccess {
         this.hostName = hostName;
         this.port = port;
         if (persistentConnection)
-            cycConnection = new CycConnection(port);
+            cycConnection = new CycConnection(port, this);
         initializeConstants();
     }
 
@@ -110,7 +110,7 @@ public class CycAccess {
     public CycAccess(boolean persistentConnection) throws IOException, UnknownHostException {
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection();
+            cycConnection = new CycConnection(this);
         initializeConstants();
     }
 
@@ -125,7 +125,7 @@ public class CycAccess {
         this.hostName = hostName;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(hostName);
+            cycConnection = new CycConnection(hostName, this);
         initializeConstants();
     }
 
@@ -141,7 +141,7 @@ public class CycAccess {
         this.port = port;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(port);
+            cycConnection = new CycConnection(port, this);
         initializeConstants();
     }
 
@@ -159,7 +159,7 @@ public class CycAccess {
         this.port = port;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(port);
+            cycConnection = new CycConnection(port, this);
         initializeConstants();
     }
 
@@ -203,7 +203,7 @@ public class CycAccess {
     private Object [] converse(String command)  throws IOException, UnknownHostException {
         Object [] response = {new Integer(0), ""};
         if (! persistentConnection)
-            cycConnection = new CycConnection(hostName, port);
+            cycConnection = new CycConnection(hostName, port, this);
         response = cycConnection.converse(command);
         if (! persistentConnection)
             cycConnection.close();
@@ -300,7 +300,7 @@ public class CycAccess {
     /**
      * Gets a CycConstant by using its GUID.
      */
-    public CycConstant getConstantByGuid (String guid)  throws IOException, UnknownHostException {
+    public CycConstant getConstantByGuid (Guid guid)  throws IOException, UnknownHostException {
         Object [] response = {new Integer(0), ""};
         String command = "(find-constant-by-guid (string-to-guid \"" + guid + "\"))";
         response = converse(command);
@@ -464,7 +464,7 @@ public class CycAccess {
      * Gets the paraphrase for a Cyc assertion.
      */
     public String getParaphrase (CycList assertion)  throws IOException, UnknownHostException {
-        return converseString("(with-precise-paraphrase-on (generate-phrase '" + assertion.toString() + "))");
+        return converseString("(with-precise-paraphrase-on (generate-phrase '" + assertion.cyclify() + "))");
     }
 
     /**
@@ -679,8 +679,8 @@ public class CycAccess {
             return answerPhrases;
         CycList iter = listAnswer;
 
-        for (int i = 0; i < answerPhrases.size(); i++) {
-            CycList assertion = (CycList) ((CycList) answerPhrases.get(i)).first();
+        for (int i = 0; i < listAnswer.size(); i++) {
+            CycList assertion = (CycList) ((CycList) listAnswer.get(i)).first();
             //System.out.println("assertion: " + assertion);
             answerPhrases.add(getParaphrase(assertion));
         }
@@ -1171,6 +1171,34 @@ public class CycAccess {
     public void assertIsaBinaryPredicate (CycConstant cycConstant,
                                           CycConstant mt)   throws IOException, UnknownHostException {
         assertIsa(cycConstant, binaryPredicate, mt);
+    }
+
+    /**
+     * Constructs a new <tt>CycList<tt> object by parsing a string.
+     *
+     * @param string the string in CycL external (EL). For example:<BR>
+     * <code>(#$isa #$Dog #$TameAnimal)</code>
+     */
+    public CycList makeCycList(String string) {
+        return (new CycListParser(this)).read(string);
+    }
+
+    /**
+     * Constructs a new <tt>CycConstant</tt> object using the constant name.
+     *
+     * @param name Name of the constant. If prefixed with "#$", then the prefix is
+     * removed for canonical representation.
+     */
+    public CycConstant makeCycConstant(String name)
+        throws UnknownHostException, IOException {
+        CycConstant cycConstant = CycConstant.getCache(name);
+        if (cycConstant == null) {
+            cycConstant = this.getConstantByName(name);
+            if (cycConstant == null)
+                cycConstant = this.createNewPermanent(name);
+            CycConstant.addCache(cycConstant);
+        }
+        return cycConstant;
     }
 
 

@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import java.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * Provides attribute and behavior for a horn clause assertion, used by the constraint solver
@@ -72,9 +73,12 @@ public class HornClause {
 
     /**
      * Constructs a new <tt>HornClause</tt> object from the given cyclified string representation.
+     *
+     * @param hornClauseString the cyclified string representation of the horn clause
+     * @param cycAccess the OpenCyc api connection
      */
-    public HornClause(String hornClauseString) {
-        CycList hornClause = new CycList(hornClauseString);
+    public HornClause(String hornClauseString, CycAccess cycAccess) {
+        CycList hornClause = cycAccess.makeCycList(hornClauseString);
         if (hornClause.size() != 3)
             throw new RuntimeException("HornClause list is not length 3 " + hornClauseString);
         CycConstant implies = (CycConstant) hornClause.first();

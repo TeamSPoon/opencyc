@@ -72,8 +72,8 @@ public class UnitTest extends TestCase {
         System.out.println("**** testCycConnection ****");
         CycConnection cycConnection = null;
         try {
-            cycConnection = new CycConnection();
-            cycConnection.trace = true;
+            cycConnection = new CycConnection(new CycAccess());
+            //cycConnection.trace = true;
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -177,7 +177,7 @@ public class UnitTest extends TestCase {
 
         // getConstantByGuid.
         try {
-            cycConstant = cycAccess.getConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            cycConstant = cycAccess.getConstantByGuid(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -447,7 +447,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("dogs", phrase);
+        Assert.assertEquals("dogs (domesticated animals)", phrase);
 
         // getSingularGeneratedPhrase.
         phrase = null;
@@ -461,7 +461,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("Brazil", phrase);
+        Assert.assertEquals("Brazil (country)", phrase);
 
         // getGeneratedPhrase.
         phrase = null;
@@ -475,7 +475,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("doers", phrase);
+        Assert.assertEquals("doer", phrase);
 
 
 
@@ -505,7 +505,8 @@ public class UnitTest extends TestCase {
         // getParaphrase.
         String phrase = null;
         try {
-            phrase = cycAccess.getParaphrase(new CycList("(#$isa #$Brazil #$Country)"));
+            //cycAccess.traceOn();
+            phrase = cycAccess.getParaphrase(cycAccess.makeCycList("(#$isa #$Brazil #$Country)"));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -514,7 +515,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("Brazil is a country", phrase);
+        Assert.assertEquals("Brazil (country) is a country (political entity)", phrase);
 
         // getComment.
         String comment = null;
@@ -678,6 +679,10 @@ public class UnitTest extends TestCase {
         List allSpecs = null;
         try {
             allSpecs = cycAccess.getAllSpecs(cycAccess.getConstantByName("#$CanineAnimal"));
+            Assert.assertNotNull(allSpecs);
+            Assert.assertTrue(allSpecs instanceof CycList);
+            Assert.assertTrue(allSpecs.contains(cycAccess.getConstantByName("Jackal")));
+            Assert.assertTrue(allSpecs.contains(cycAccess.getConstantByName("Retriever-Dog")));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -685,16 +690,16 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertNotNull(allSpecs);
-        Assert.assertTrue(allSpecs instanceof CycList);
-        Assert.assertTrue(allSpecs.contains("Jackal"));
-        Assert.assertTrue(allSpecs.contains("Retriever-Dog"));
 
         // getAllGenlsWrt.
         List allGenlsWrt = null;
         try {
             allGenlsWrt = cycAccess.getAllGenlsWrt(cycAccess.getConstantByName("Dog"),
                                                    cycAccess.getConstantByName("#$Animal"));
+            Assert.assertNotNull(allGenlsWrt);
+            Assert.assertTrue(allGenlsWrt instanceof CycList);
+            Assert.assertTrue(allGenlsWrt.contains(cycAccess.getConstantByName("TameAnimal")));
+            Assert.assertTrue(allGenlsWrt.contains(cycAccess.getConstantByName("AirBreathingVertebrate")));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -702,15 +707,15 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertNotNull(allGenlsWrt);
-        Assert.assertTrue(allGenlsWrt instanceof CycList);
-        Assert.assertTrue(allGenlsWrt.contains("TameAnimal"));
-        Assert.assertTrue(allGenlsWrt.contains("AirBreathingVertebrate"));
 
         // getAllDependentSpecs.
         List allDependentSpecs = null;
         try {
             allDependentSpecs = cycAccess.getAllDependentSpecs(cycAccess.getConstantByName("CanineAnimal"));
+            Assert.assertNotNull(allDependentSpecs);
+            Assert.assertTrue(allDependentSpecs instanceof CycList);
+            Assert.assertTrue(allDependentSpecs.contains(cycAccess.getConstantByName("Wolf-Gray")));
+            Assert.assertTrue(allDependentSpecs.contains(cycAccess.getConstantByName("Wolf")));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -718,10 +723,6 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertNotNull(allDependentSpecs);
-        Assert.assertTrue(allDependentSpecs instanceof CycList);
-        Assert.assertTrue(allDependentSpecs.contains("Wolf-Gray"));
-        Assert.assertTrue(allDependentSpecs.contains("Wolf"));
 
         // getSampleLeafSpecs.
         List sampleLeafSpecs = null;
@@ -862,11 +863,12 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(whyGenl);
         Assert.assertTrue(whyGenl instanceof CycList);
-        CycList expectedWhyGenl = new CycList("(((genls Dog DomesticatedAnimal) :TRUE) " +
-            "((genls DomesticatedAnimal TameAnimal) :TRUE) " +
-            "((genls TameAnimal NonPersonAnimal) :TRUE) " +
-            "((genls NonPersonAnimal SentientAnimal) :TRUE) " +
-            "((genls SentientAnimal Animal) :TRUE))");
+        CycList expectedWhyGenl =
+            cycAccess.makeCycList("(((#$genls #$Dog #$DomesticatedAnimal) :TRUE) " +
+                                  "((#$genls #$DomesticatedAnimal #$TameAnimal) :TRUE) " +
+                                  "((#$genls #$TameAnimal #$NonPersonAnimal) :TRUE) " +
+                                  "((#$genls #$NonPersonAnimal #$SentientAnimal) :TRUE) " +
+                                  "((#$genls #$SentientAnimal #$Animal) :TRUE))");
         Assert.assertEquals(expectedWhyGenl.toString(), whyGenl.toString());
         Assert.assertEquals(expectedWhyGenl, whyGenl);
 
@@ -883,7 +885,8 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(whyGenlParaphrase);
-        Assert.assertTrue(whyGenlParaphrase.contains("for every ?OBJ, if ?OBJ is a dog, then ?OBJ is a domesticated animal"));
+        //System.out.println(whyGenlParaphrase);
+        Assert.assertTrue(whyGenlParaphrase.contains("a domesticated animal (tame animal) is a kind of tame animal"));
 
         // getWhyCollectionsIntersect.
         List whyCollectionsIntersect = null;
@@ -900,14 +903,16 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(whyCollectionsIntersect);
         Assert.assertTrue(whyCollectionsIntersect instanceof CycList);
-        CycList expectedWhyCollectionsIntersect = new CycList("(((genls DomesticatedAnimal TameAnimal) :TRUE) " +
-            "((genls TameAnimal NonPersonAnimal) :TRUE))");
+        CycList expectedWhyCollectionsIntersect =
+            cycAccess.makeCycList("(((#$genls #$DomesticatedAnimal #$TameAnimal) :TRUE) " +
+                                  "((#$genls #$TameAnimal #$NonPersonAnimal) :TRUE))");
         Assert.assertEquals(expectedWhyCollectionsIntersect.toString(), whyCollectionsIntersect.toString());
         Assert.assertEquals(expectedWhyCollectionsIntersect, whyCollectionsIntersect);
 
         // getWhyCollectionsIntersectParaphrase.
         ArrayList whyCollectionsIntersectParaphrase = null;
         try {
+            //cycAccess.traceOn();
             whyCollectionsIntersectParaphrase =
                 cycAccess.getWhyCollectionsIntersectParaphrase(cycAccess.getConstantByName("DomesticatedAnimal"),
                                                                cycAccess.getConstantByName("NonPersonAnimal"));
@@ -919,12 +924,17 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(whyCollectionsIntersectParaphrase);
-        Assert.assertTrue(whyCollectionsIntersectParaphrase.contains("for every ?OBJ, if ?OBJ is a domesticated animal, then ?OBJ is a tame animal"));
+        //System.out.println(whyCollectionsIntersectParaphrase);
+        Assert.assertTrue(whyCollectionsIntersectParaphrase.contains("a domesticated animal (tame animal) is a kind of tame animal"));
 
         // getCollectionLeaves.
         List collectionLeaves = null;
         try {
             collectionLeaves = cycAccess.getCollectionLeaves(cycAccess.getConstantByName("CanineAnimal"));
+            Assert.assertNotNull(collectionLeaves);
+            Assert.assertTrue(collectionLeaves instanceof CycList);
+            Assert.assertTrue(collectionLeaves.contains(cycAccess.getConstantByName("RedWolf")));
+            Assert.assertTrue(collectionLeaves.contains(cycAccess.getConstantByName("SanJoaquinKitFox")));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -932,10 +942,6 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertNotNull(collectionLeaves);
-        Assert.assertTrue(collectionLeaves instanceof CycList);
-        Assert.assertTrue(collectionLeaves.contains("RedWolf"));
-        Assert.assertTrue(collectionLeaves.contains("SanJoaquinKitFox"));
 
         // getLocalDisjointWith.
         List localDisjointWiths = null;
@@ -948,7 +954,7 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals(localDisjointWiths, new CycList("(Animal)"));
+        Assert.assertEquals(localDisjointWiths, cycAccess.makeCycList("(#$Animal)"));
 
         // areDisjoint.
         boolean answer = true;
@@ -968,6 +974,7 @@ public class UnitTest extends TestCase {
         List minIsas = null;
         try {
             minIsas = cycAccess.getMinIsas(cycAccess.getConstantByName("Wolf"));
+            Assert.assertTrue(minIsas.contains(cycAccess.getConstantByName("OrganismClassificationType")));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -975,7 +982,6 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertTrue(minIsas.contains("OrganismClassificationType"));
 
         // getInstances.
         List instances = null;
@@ -1007,7 +1013,10 @@ public class UnitTest extends TestCase {
         // getAllIsa.
         List allIsas = null;
         try {
+            //cycAccess.traceOn();
             allIsas = cycAccess.getAllIsa(cycAccess.getConstantByName("Animal"));
+            //System.out.println(allIsas);
+            Assert.assertTrue(allIsas.contains(cycAccess.getConstantByName("#$OrganismClassificationType")));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1015,7 +1024,6 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertTrue(allIsas.contains("PerceptualAgent"));
 
         // getAllInstances.
         List allInstances = null;

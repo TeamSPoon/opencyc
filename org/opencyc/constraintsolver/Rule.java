@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import java.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a constraint rule.<p>
@@ -58,9 +59,10 @@ public class Rule {
      *
      * @param ruleString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
+     * @param cycAccess the OpenCyc api connection
      */
-    public Rule (String ruleString) {
-        rule = new CycList(ruleString);
+    public Rule (String ruleString, CycAccess cycAccess) {
+        rule = cycAccess.makeCycList(ruleString);
         gatherVariables();
     }
 
@@ -69,7 +71,7 @@ public class Rule {
      *
      * <pre>
      *  String ruleAsString = "(#$isa ?x #$Cathedral)";
-     *  Rule rule1 = new Rule (new CycList(ruleAsString));
+     *  Rule rule1 = new Rule (cycAccess.makeCycList(ruleAsString));
      * </pre>
      *
      * @param rule the rule's formula, which must be a well formed OpenCyc

@@ -59,7 +59,7 @@ public class Guid {
      * Constructs a new <tt>Guid</tt> object. Non-public to enforce the
      * use of the cache during object creation.
      */
-    protected Guid(String guidString) {
+    private Guid(String guidString) {
         this.guidString = guidString;
     }
 

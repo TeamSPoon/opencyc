@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import java.util.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a constraint problem.<p>
@@ -33,6 +34,11 @@ import org.opencyc.cycobject.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ConstraintProblem {
+
+    /**
+     * CycAccess object which provides the OpenCyc api.
+     */
+    CycAccess cycAccess;
 
     /**
      * <tt>ProblemParser</tt> object for this <tt>ConstraintProblem</tt>.
@@ -82,7 +88,7 @@ public class ConstraintProblem {
     /**
      * The OpenCyc microtheory in which the constraint rules should be asked.
      */
-    public CycConstant mt = CycConstant.makeCycConstant("EverythingPSC");
+    public CycConstant mt;
 
     /**
      * When <tt>true</tt> randomizes the order of the variables and domain values before
@@ -146,6 +152,15 @@ public class ConstraintProblem {
      * Constructs a new <tt>ConstraintProblem</tt> object.
      */
     public ConstraintProblem() {
+        try {
+            cycAccess = new CycAccess();
+            mt = cycAccess.makeCycConstant("EverythingPSC");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Cannot access OpenCyc server " + e.getMessage());
+            System.exit(1);
+        }
     }
 
     /**

@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import org.opencyc.cycobject.*;
 import java.util.*;
+import org.opencyc.api.*;
 
 /**
  * <tt>RuleEvaluator</tt> object evaluates constraint rules
@@ -48,32 +49,32 @@ public class RuleEvaluator {
     /**
      * Cached reference to #$numericallyEqual predicate.
      */
-    protected CycConstant numericallyEqual = CycConstant.makeCycConstant("numericallyEqual");
+    protected CycConstant numericallyEqual;
 
     /**
      * Cached reference to #$and logical operator.
      */
-    protected CycConstant and = CycConstant.makeCycConstant("and");
+    protected CycConstant and;
 
     /**
      * Cached reference to #$or logical operator.
      */
-    protected CycConstant or = CycConstant.makeCycConstant("or");
+    protected CycConstant or;
 
     /**
      * Cached reference to #$not logical operator.
      */
-    protected CycConstant not = CycConstant.makeCycConstant("not");
+    protected CycConstant not;
 
     /**
      * Cached reference to #$different predicate.
      */
-    protected CycConstant different = CycConstant.makeCycConstant("different");
+    protected CycConstant different;
 
     /**
      * Cached reference to #$PlusFn function.
      */
-    protected CycConstant plusFn = CycConstant.makeCycConstant("PlusFn");
+    protected CycConstant plusFn;
 
     /**
      * Constructs a new <tt>RuleEvaluator</tt> object for the parent
@@ -83,6 +84,18 @@ public class RuleEvaluator {
      */
     public RuleEvaluator(ConstraintProblem constraintProblem) {
         this.constraintProblem = constraintProblem;
+        try {
+            numericallyEqual = constraintProblem.cycAccess.makeCycConstant("numericallyEqual");
+            and = constraintProblem.cycAccess.makeCycConstant("and");
+            or = constraintProblem.cycAccess.makeCycConstant("or");
+            not = constraintProblem.cycAccess.makeCycConstant("not");
+            different = constraintProblem.cycAccess.makeCycConstant("different");
+            plusFn = constraintProblem.cycAccess.makeCycConstant("PlusFn");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Cannot access OpenCyc server " + e.getMessage());
+        }
     }
 
     /**

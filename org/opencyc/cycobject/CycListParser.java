@@ -4,6 +4,7 @@ package org.opencyc.cycobject;
 import java.util.*;
 import java.io.*;
 import org.opencyc.util.*;
+import org.opencyc.api.*;
 
 /**
  * Provides a parser that reads a <tt>String</tt> representation and constructs
@@ -42,6 +43,12 @@ public class CycListParser  {
     private int parenLevel = 0;
     private StackWithPointer readStack = new StackWithPointer();
     private StackWithPointer quoteStack = new StackWithPointer();
+
+    /**
+     * Cyc api support.
+     */
+    CycAccess cycAccess;
+
     private static final String consMarkerSymbol = "**consMarkerSymbol**";
     private static final int STWORD = StreamTokenizer.TT_WORD;
     private static final int STNUMBER = StreamTokenizer.TT_NUMBER;
@@ -55,7 +62,8 @@ public class CycListParser  {
     /**
      * Constructs a new <tt>CycListParser</tt> object.
      */
-    public CycListParser() {
+    public CycListParser(CycAccess cycAccess) {
+        this.cycAccess = cycAccess;
     }
 
     /**
@@ -313,12 +321,13 @@ public class CycListParser  {
      *
      * @param the input <tt>StreamTokenizer</tt> from which to get the word value.
      */
-    private void scanWord(StreamTokenizer st) {
+    private void scanWord(StreamTokenizer st)
+        throws IOException {
 
         //System.out.println(st.sval );
         Object w = null;
         if (st.sval.startsWith("#$"))
-            w = CycConstant.makeCycConstant(st.sval);
+            w = cycAccess.makeCycConstant(st.sval);
         else if (st.sval.startsWith("?"))
             w = CycVariable.makeCycVariable(st.sval);
         else

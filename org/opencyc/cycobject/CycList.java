@@ -110,19 +110,6 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Constructs a new <tt>CycList<tt> object by parsing a string.
-     *
-     * @param string the string in CycL external (EL). For example:<BR>
-     * <code>(#$isa #$Dog #$TameAnimal)</code>
-     */
-    public CycList(String string) {
-        CycList cycList = (new CycListParser()).read(string);
-        addAll(cycList);
-        if (! cycList.isProperList())
-            setDottedElement(cycList.getDottedElement());
-    }
-
-    /**
      * Creates and returns a copy of this <tt>CycList</tt>.
      *
      * @return a clone of this instance

@@ -95,9 +95,9 @@ public class Main {
             "  (#$elementOf ?water (#$TheSet 1 2 3 4 5)) " +
             "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
             "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
-        CycList zebraPuzzleCycList = new CycList(zebraPuzzleString);
-        ArrayList zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
         ConstraintProblem zebraProblem = new ConstraintProblem();
+        CycList zebraPuzzleCycList = zebraProblem.cycAccess.makeCycList(zebraPuzzleString);
+        ArrayList zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
         zebraProblem.setVerbosity(1);
         zebraProblem.solve(zebraPuzzleCycList);
     }

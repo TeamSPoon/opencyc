@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.*;
 import junit.framework.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * Provides a suite of JUnit test cases for the <tt>org.opencyc.constraintsolver</tt> package.<p>
@@ -70,24 +71,38 @@ public class UnitTest extends TestCase {
     public void testRuleEvaluator() {
         System.out.println("** testRuleEvaluator **");
 
-        RuleEvaluator ruleEvaluator = new RuleEvaluator(new ConstraintProblem());
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual 1 1)")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$numericallyEqual 2 1)")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$different 2 1)")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$different 2 2)")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$different \"a\" \"b\")")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$different \"a\" \"a\")")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$not (#$different 1 1))")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$not (#$not (#$different 1 1)))")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 3))")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 2) (#$numericallyEqual 3 3))")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 4))")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 3) (#$numericallyEqual 4 4))")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$or (#$numericallyEqual 1 2) (#$numericallyEqual 3 3))")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$or (#$numericallyEqual 1 2) (#$numericallyEqual 3 4))")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual 2 (#$PlusFn 1))")));
-        Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual (#$PlusFn 1) 2)")));
-        Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$numericallyEqual (#$PlusFn 1) 5)")));
+        ConstraintProblem constraintProblem = new ConstraintProblem();
+        CycAccess cycAccess = constraintProblem.cycAccess;
+        RuleEvaluator ruleEvaluator = new RuleEvaluator(constraintProblem);
+        try {
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual 1 1)", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$numericallyEqual 2 1)", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$different 2 1)", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$different 2 2)", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$different \"a\" \"b\")", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$different \"a\" \"a\")", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$not (#$different 1 1))", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$not (#$not (#$different 1 1)))", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 3))", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 2) (#$numericallyEqual 3 3))", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 4))", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$and (#$numericallyEqual 1 1) (#$numericallyEqual 3 3) (#$numericallyEqual 4 4))", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$or (#$numericallyEqual 1 2) (#$numericallyEqual 3 3))", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$or (#$numericallyEqual 1 2) (#$numericallyEqual 3 4))", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual 2 (#$PlusFn 1))", cycAccess)));
+            Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual (#$PlusFn 1) 2)", cycAccess)));
+            Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$numericallyEqual (#$PlusFn 1) 5)", cycAccess)));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testRuleEvaluator OK **");
     }
@@ -113,91 +128,134 @@ public class UnitTest extends TestCase {
     public void testRule() {
         System.out.println("** testRule **");
 
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
         // Construction
-        String ruleAsString = "(#$isa ?x #$Cathedral)";
-        Rule rule1 = new Rule (new CycList(ruleAsString));
-        Assert.assertNotNull(rule1);
-        Assert.assertNotNull(rule1.getRule());
-        CycList cycList = rule1.getRule();
-        Assert.assertEquals(ruleAsString, cycList.cyclify());
-        Assert.assertEquals(ruleAsString, rule1.cyclify());
+        String ruleAsString = null;
+        Rule rule1 = null;
+        try {
+            ruleAsString = "(#$isa ?x #$Cathedral)";
+            rule1 = new Rule (cycAccess.makeCycList(ruleAsString));
+            Assert.assertNotNull(rule1);
+            Assert.assertNotNull(rule1.getRule());
+            CycList cycList = rule1.getRule();
+            Assert.assertEquals(ruleAsString, cycList.cyclify());
+            Assert.assertEquals(ruleAsString, rule1.cyclify());
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         // Equality
-        Rule rule2 = new Rule (new CycList(ruleAsString));
-        Assert.assertEquals(rule1.toString(), rule2.toString());
-        Assert.assertEquals(rule1.cyclify(), rule2.cyclify());
-        Assert.assertEquals(rule1, rule2);
+        try {
+            Rule rule2 = new Rule (cycAccess.makeCycList(ruleAsString));
+            Assert.assertEquals(rule1.toString(), rule2.toString());
+            Assert.assertEquals(rule1.cyclify(), rule2.cyclify());
+            Assert.assertEquals(rule1, rule2);
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         // gatherVariables and arity.
         Assert.assertEquals(1, rule1.getArity());
         Assert.assertTrue(rule1.getVariables().contains(CycVariable.makeCycVariable("?x")));
 
         // simplifyRuleExpression
-        CycList ruleExpression = new CycList("(isa ?x Cathedral)");
-        ArrayList rules = Rule.simplifyRuleExpression(ruleExpression);
-        Assert.assertNotNull(rules);
-        Assert.assertEquals(1, rules.size());
-        Assert.assertTrue(rules.get(0) instanceof Rule);
-        Rule rule3 = (Rule) rules.get(0);
-        Assert.assertEquals(ruleExpression.cyclify(), rule3.cyclify());
+        try {
+            CycList ruleExpression = cycAccess.makeCycList("(isa ?x Cathedral)");
+            ArrayList rules = Rule.simplifyRuleExpression(ruleExpression);
+            Assert.assertNotNull(rules);
+            Assert.assertEquals(1, rules.size());
+            Assert.assertTrue(rules.get(0) instanceof Rule);
+            Rule rule3 = (Rule) rules.get(0);
+            Assert.assertEquals(ruleExpression.cyclify(), rule3.cyclify());
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         // instantiate
-        Rule rule4 = new Rule("(#$isa ?x #$Cathedral)");
-        Rule rule5 = rule4.instantiate(CycVariable.makeCycVariable("?x"),
-                                       CycConstant.makeCycConstant("#$NotreDame"));
+        Rule rule5 = null;
+        try {
+            Rule rule4 = new Rule("(#$isa ?x #$Cathedral)", cycAccess);
+            rule5 = rule4.instantiate(CycVariable.makeCycVariable("?x"),
+                                      cycAccess.makeCycConstant("#$NotreDame"));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
         Assert.assertEquals("(#$isa #$NotreDame #$Cathedral)", rule5.cyclify());
 
+
         // isDifferent
-        Rule rule6 = new Rule("(#$isa ?x #$Cathedral)");
+        Rule rule6 = new Rule("(#$isa ?x #$Cathedral)", cycAccess);
         Assert.assertTrue(! rule6.isAllDifferent());
-        Rule rule7 = new Rule("(#$different ?x ?y)");
+        Rule rule7 = new Rule("(#$different ?x ?y)", cycAccess);
         Assert.assertTrue(rule7.isAllDifferent());
 
         // isEvaluatable
-        Rule rule8 = new Rule("(#$isa ?x #$Cathedral)");
+        Rule rule8 = new Rule("(#$isa ?x #$Cathedral)", cycAccess);
         Assert.assertTrue(! rule8.isEvaluatable());
-        Rule rule9 = new Rule("(#$numericallyEqual ?x 1)");
+        Rule rule9 = new Rule("(#$numericallyEqual ?x 1)", cycAccess);
         Assert.assertTrue(rule9.isEvaluatable());
-        Rule rule10 = new Rule("(#$and (#$isa ?x #$Cathedral) (#$numericallyEqual ?x 2))");
+        Rule rule10 = new Rule("(#$and (#$isa ?x #$Cathedral) (#$numericallyEqual ?x 2))", cycAccess);
         Assert.assertTrue(! rule10.isEvaluatable());
-        Rule rule11 = new Rule("(#$and (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))");
+        Rule rule11 = new Rule("(#$and (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))",
+                               cycAccess);
         Assert.assertTrue(rule11.isEvaluatable());
-        Rule rule12 = new Rule("(#$or (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))");
+        Rule rule12 = new Rule("(#$or (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))",
+                               cycAccess);
         Assert.assertTrue(rule11.isEvaluatable());
-
 
         // evaluateConstraintRule
-        CycList cycList13 = new CycList("(#$numericallyEqual 0 0)");
-        Assert.assertTrue(Rule.evaluateConstraintRule(cycList13));
-        CycList cycList14 = new CycList("(#$numericallyEqual 1 0)");
-        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList14));
-        CycList cycList15 = new CycList("(#$numericallyEqual 0 1)");
-        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList15));
-        CycList cycList16 = new CycList("(#$numericallyEqual (#$PlusFn 0) 1)");
-        Assert.assertTrue(Rule.evaluateConstraintRule(cycList16));
-        CycList cycList17 = new CycList("(#$numericallyEqual (#$PlusFn 3) 1)");
-        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList17));
-        CycList cycList18 = new CycList("(#$or (#$numericallyEqual (#$PlusFn 3) 1) " +
-                                        "      (#$numericallyEqual 4 (#$PlusFn 3)))");
-        Assert.assertTrue(Rule.evaluateConstraintRule(cycList18));
-        CycList cycList19 = new CycList("(#$or (#$numericallyEqual (#$PlusFn 3) 1) " +
-                                        "      (#$numericallyEqual 4 (#$PlusFn 7)))");
-        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList19));
-        CycList cycList20 = new CycList("(#$and (#$numericallyEqual (#$PlusFn 3) 4) " +
-                                        "       (#$numericallyEqual 4 (#$PlusFn 3)))");
-        Assert.assertTrue(Rule.evaluateConstraintRule(cycList20));
-        CycList cycList21 = new CycList("(#$and (#$numericallyEqual (#$PlusFn 3) 1) " +
-                                        "       (#$numericallyEqual 4 (#$PlusFn 7)))");
-        Assert.assertTrue(! Rule.evaluateConstraintRule(cycList21));
+        try {
+            CycList cycList13 = cycAccess.makeCycList("(#$numericallyEqual 0 0)");
+            Assert.assertTrue(Rule.evaluateConstraintRule(cycList13));
+            CycList cycList14 = cycAccess.makeCycList("(#$numericallyEqual 1 0)");
+            Assert.assertTrue(! Rule.evaluateConstraintRule(cycList14));
+            CycList cycList15 = cycAccess.makeCycList("(#$numericallyEqual 0 1)");
+            Assert.assertTrue(! Rule.evaluateConstraintRule(cycList15));
+            CycList cycList16 = cycAccess.makeCycList("(#$numericallyEqual (#$PlusFn 0) 1)");
+            Assert.assertTrue(Rule.evaluateConstraintRule(cycList16));
+            CycList cycList17 = cycAccess.makeCycList("(#$numericallyEqual (#$PlusFn 3) 1)");
+            Assert.assertTrue(! Rule.evaluateConstraintRule(cycList17));
+            CycList cycList18 = cycAccess.makeCycList("(#$or (#$numericallyEqual (#$PlusFn 3) 1) " +
+                                                      "      (#$numericallyEqual 4 (#$PlusFn 3)))");
+            Assert.assertTrue(Rule.evaluateConstraintRule(cycList18));
+            CycList cycList19 = cycAccess.makeCycList("(#$or (#$numericallyEqual (#$PlusFn 3) 1) " +
+                                                      "      (#$numericallyEqual 4 (#$PlusFn 7)))");
+            Assert.assertTrue(! Rule.evaluateConstraintRule(cycList19));
+            CycList cycList20 = cycAccess.makeCycList("(#$and (#$numericallyEqual (#$PlusFn 3) 4) " +
+                                                      "       (#$numericallyEqual 4 (#$PlusFn 3)))");
+            Assert.assertTrue(Rule.evaluateConstraintRule(cycList20));
+            CycList cycList21 = cycAccess.makeCycList("(#$and (#$numericallyEqual (#$PlusFn 3) 1) " +
+                                                      "       (#$numericallyEqual 4 (#$PlusFn 7)))");
+            Assert.assertTrue(! Rule.evaluateConstraintRule(cycList21));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         // substituteVariable
-        Rule rule22 = new Rule("(#$isa ?x #$Cathedral)");
+        Rule rule22 = new Rule("(#$isa ?x #$Cathedral)", cycAccess);
         rule22.substituteVariable(CycVariable.makeCycVariable("?x"),
                                   CycVariable.makeCycVariable("?cathedral"));
         Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", rule22.cyclify());
-        Rule rule23 = new Rule("(#$isa ?x #$Cathedral)");
-        rule23.substituteVariable(CycVariable.makeCycVariable("?x"),
-                                  CycConstant.makeCycConstant("NotreDameCathedral"));
+        Rule rule23 = new Rule("(#$isa ?x #$Cathedral)", cycAccess);
+        try {
+            rule23.substituteVariable(CycVariable.makeCycVariable("?x"),
+                                      cycAccess.makeCycConstant("NotreDameCathedral"));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
         Assert.assertEquals("(#$isa #$NotreDameCathedral #$Cathedral)", rule23.cyclify());
 
         //Zebra Puzzle rules
@@ -253,7 +311,13 @@ public class UnitTest extends TestCase {
             "  (#$elementOf ?water (#$TheSet 1 2 3 4 5)) " +
             "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
             "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
-        CycList zebraPuzzleCycList = new CycList(zebraPuzzleString);
+        CycList zebraPuzzleCycList = null;
+        try {
+            zebraPuzzleCycList = cycAccess.makeCycList(zebraPuzzleString);
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
         ArrayList zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
         FileWriter fileWriter = null;
         try {
@@ -268,6 +332,14 @@ public class UnitTest extends TestCase {
             printWriter.println(((Rule) zebraPuzzleRules.get(i)).cyclify());
         }
         printWriter.close();
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
         System.out.println("** Rule OK **");
     }
 
@@ -277,32 +349,45 @@ public class UnitTest extends TestCase {
     public void testHornClause() {
         System.out.println("** testHornClause **");
 
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
         // constructor
-        String hornClauseString =
-            "(#$implies " +
-            "  (#$and " +
-            "    (#$isa ?boat #$Boat) " +
-            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-            "    (#$floatingOn ?boat ?bodyOfWater)) " +
-            "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
-        HornClause hornClause1 = new HornClause(hornClauseString);
-        Assert.assertEquals("(#$objectFoundInLocation ?boat ?bodyOfWater)",
-                            hornClause1.consequent.cyclify());
-        Assert.assertEquals(3, hornClause1.getAntecedantConjuncts().size());
-        Assert.assertEquals(2, hornClause1.getVariables().size());
-        Assert.assertTrue(
-            hornClause1.getVariables().contains(CycVariable.makeCycVariable("?boat")));
-        Assert.assertTrue(
-            hornClause1.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
-        Assert.assertTrue(
-            hornClause1.getAntecedantConjuncts().contains(
-                new Rule("(#$isa ?boat #$Boat)")));
-        Assert.assertTrue(
-            hornClause1.getAntecedantConjuncts().contains(
-                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
-        Assert.assertTrue(
-            hornClause1.getAntecedantConjuncts().contains(
-                new Rule("(#$floatingOn ?boat ?bodyOfWater)")));
+        HornClause hornClause1 = null;
+        try {
+            String hornClauseString =
+                "(#$implies " +
+                "  (#$and " +
+                "    (#$isa ?boat #$Boat) " +
+                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+                "    (#$floatingOn ?boat ?bodyOfWater)) " +
+                "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+            hornClause1 = new HornClause(hornClauseString, cycAccess);
+            Assert.assertEquals("(#$objectFoundInLocation ?boat ?bodyOfWater)",
+                                hornClause1.consequent.cyclify());
+            Assert.assertEquals(3, hornClause1.getAntecedantConjuncts().size());
+            Assert.assertEquals(2, hornClause1.getVariables().size());
+            Assert.assertTrue(
+                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?boat")));
+            Assert.assertTrue(
+                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+            Assert.assertTrue(
+                hornClause1.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa ?boat #$Boat)", cycAccess)));
+            Assert.assertTrue(
+                hornClause1.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+            Assert.assertTrue(
+                hornClause1.getAntecedantConjuncts().contains(
+                    new Rule("(#$floatingOn ?boat ?bodyOfWater)", cycAccess)));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         // clone()
         HornClause hornClause2 = (HornClause) hornClause1.clone();
@@ -324,36 +409,40 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(2, hornClause3.getVariables().size());
         Assert.assertTrue(
             hornClause3.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
-        Assert.assertTrue(
-            hornClause3.getAntecedantConjuncts().contains(
-                new Rule("(#$isa ?waterCraft #$Boat)")));
-        Assert.assertTrue(
-            hornClause3.getAntecedantConjuncts().contains(
-                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
-        Assert.assertTrue(
-            hornClause3.getAntecedantConjuncts().contains(
-                new Rule("(#$floatingOn ?waterCraft ?bodyOfWater)")));
+        try {
+            Assert.assertTrue(
+                hornClause3.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa ?waterCraft #$Boat)", cycAccess)));
+            Assert.assertTrue(
+                hornClause3.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+            Assert.assertTrue(
+                hornClause3.getAntecedantConjuncts().contains(
+                    new Rule("(#$floatingOn ?waterCraft ?bodyOfWater)", cycAccess)));
 
-        HornClause hornClause4 = (HornClause) hornClause1.clone();
-        hornClause4.substituteVariable(
-            CycVariable.makeCycVariable("?boat"),
-            CycConstant.makeCycConstant("#$MyWaterCraft"));
-        Assert.assertTrue(
-            ! (hornClause4.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
-        Assert.assertEquals(3, hornClause4.getAntecedantConjuncts().size());
-        Assert.assertEquals(1, hornClause4.getVariables().size());
-        Assert.assertTrue(
-            hornClause4.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
-        Assert.assertTrue(
-            hornClause4.getAntecedantConjuncts().contains(
-                new Rule("(#$isa #$MyWaterCraft #$Boat)")));
-        Assert.assertTrue(
-            hornClause4.getAntecedantConjuncts().contains(
-                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
-        Assert.assertTrue(
-            hornClause4.getAntecedantConjuncts().contains(
-                new Rule("(#$floatingOn #$MyWaterCraft ?bodyOfWater)")));
-
+            HornClause hornClause4 = (HornClause) hornClause1.clone();
+            hornClause4.substituteVariable(
+                CycVariable.makeCycVariable("?boat"),
+                cycAccess.makeCycConstant("#$MyWaterCraft"));
+            Assert.assertTrue(
+                ! (hornClause4.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
+            Assert.assertEquals(3, hornClause4.getAntecedantConjuncts().size());
+            Assert.assertEquals(1, hornClause4.getVariables().size());
+            Assert.assertTrue(
+                hornClause4.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+            Assert.assertTrue(
+                hornClause4.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa #$MyWaterCraft #$Boat)", cycAccess)));
+            Assert.assertTrue(
+                hornClause4.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+            Assert.assertTrue(
+                hornClause4.getAntecedantConjuncts().contains(
+                    new Rule("(#$floatingOn #$MyWaterCraft ?bodyOfWater)", cycAccess)));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         // renameVariables
         HornClause hornClause5 = (HornClause) hornClause1.clone();
@@ -376,15 +465,27 @@ public class UnitTest extends TestCase {
             ! (hornClause5.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
         Assert.assertTrue(
             hornClause5.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
-        Assert.assertTrue(
-            ! (hornClause5.getAntecedantConjuncts().contains(
-                new Rule("(#$isa ?boat #$Boat)"))));
-        Assert.assertTrue(
-            hornClause5.getAntecedantConjuncts().contains(
-                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
-        Assert.assertTrue(
-            ! (hornClause5.getAntecedantConjuncts().contains(
-                new Rule("(#$floatingOn ?boat ?bodyOfWater)"))));
+        try {
+            Assert.assertTrue(
+                ! (hornClause5.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa ?boat #$Boat)", cycAccess))));
+            Assert.assertTrue(
+                hornClause5.getAntecedantConjuncts().contains(
+                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+            Assert.assertTrue(
+                ! (hornClause5.getAntecedantConjuncts().contains(
+                    new Rule("(#$floatingOn ?boat ?bodyOfWater)", cycAccess))));
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testHornClause OK **");
     }
@@ -396,48 +497,54 @@ public class UnitTest extends TestCase {
         System.out.println("** testUnifier **");
 
         ConstraintProblem constraintProblem = new ConstraintProblem();
+        CycAccess cycAccess = constraintProblem.cycAccess;
         Unifier unifier = constraintProblem.backchainer.unifier;
 
         // unify
-        Rule rule1 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)");
-        String hornClauseString =
-            "(#$implies " +
-            "  (#$and " +
-            "    (#$isa ?boat #$Boat) " +
-            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-            "    (#$floatingOn ?boat ?bodyOfWater)) " +
-            "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
-        HornClause hornClause1 = new HornClause(hornClauseString);
-        ArrayList unifiedConjuncts = unifier.unify(rule1, hornClause1);
-        Assert.assertEquals(3, unifiedConjuncts.size());
-        Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa #$CityOfAustinTX #$Boat)")));
-        Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa ?where #$BodyOfWater)")));
-        Assert.assertTrue(unifiedConjuncts.contains(
-            new Rule("(#$floatingOn #$CityOfAustinTX ?where)")));
+        try {
+            Rule rule1 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)", cycAccess);
+            String hornClauseString =
+                "(#$implies " +
+                "  (#$and " +
+                "    (#$isa ?boat #$Boat) " +
+                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+                "    (#$floatingOn ?boat ?bodyOfWater)) " +
+                "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+            HornClause hornClause1 = new HornClause(hornClauseString, cycAccess);
+            ArrayList unifiedConjuncts = unifier.unify(rule1, hornClause1);
+            Assert.assertEquals(3, unifiedConjuncts.size());
+            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa #$CityOfAustinTX #$Boat)", cycAccess)));
+            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa ?where #$BodyOfWater)", cycAccess)));
+            Assert.assertTrue(unifiedConjuncts.contains(
+                new Rule("(#$floatingOn #$CityOfAustinTX ?where)", cycAccess)));
 
-        Rule rule2 = new Rule("(#$doneBy #$CityOfAustinTX ?what)");
-        String hornClauseString2 =
-            "(#$implies " +
-            "  (#$and " +
-            "    (#$isa ?boat #$Boat) " +
-            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-            "    (#$floatingOn ?boat ?bodyOfWater)) " +
-            "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
-        HornClause hornClause2 = new HornClause(hornClauseString2);
-        ArrayList unifiedConjuncts2 = unifier.unify(rule2, hornClause2);
-        Assert.assertNull(unifiedConjuncts2);
+            Rule rule2 = new Rule("(#$doneBy #$CityOfAustinTX ?what)", cycAccess);
+            String hornClauseString2 =
+                "(#$implies " +
+                "  (#$and " +
+                "    (#$isa ?boat #$Boat) " +
+                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+                "    (#$floatingOn ?boat ?bodyOfWater)) " +
+                "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+            HornClause hornClause2 = new HornClause(hornClauseString2, cycAccess);
+            ArrayList unifiedConjuncts2 = unifier.unify(rule2, hornClause2);
+            Assert.assertNull(unifiedConjuncts2);
 
-        Rule rule3 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)");
-        String hornClauseString3 =
-            "(#$implies " +
-            "  (#$and " +
-            "    (#$isa ?boat #$Boat) " +
-            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-            "    (#$floatingOn ?boat ?bodyOfWater)) " +
-            "  (#$objectFoundInLocation #$CityOfHoustonTX ?bodyOfWater))";
-        HornClause hornClause3 = new HornClause(hornClauseString3);
-        ArrayList unifiedConjuncts3 = unifier.unify(rule3, hornClause3);
-        Assert.assertNull(unifiedConjuncts2);
+            Rule rule3 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)", cycAccess);
+            String hornClauseString3 =
+                "(#$implies " +
+                "  (#$and " +
+                "    (#$isa ?boat #$Boat) " +
+                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+                "    (#$floatingOn ?boat ?bodyOfWater)) " +
+                "  (#$objectFoundInLocation #$CityOfHoustonTX ?bodyOfWater))";
+            HornClause hornClause3 = new HornClause(hornClauseString3, cycAccess);
+            ArrayList unifiedConjuncts3 = unifier.unify(rule3, hornClause3);
+            Assert.assertNull(unifiedConjuncts2);
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         System.out.println("** testUnifier OK **");
     }

@@ -34,6 +34,7 @@ public class CycConnection {
     public BufferedReader in;
     public BufferedWriter out;
 
+    private CycAccess cycAccess;
     private Socket apiSocket;
     private String hostName;
     private int port;
@@ -45,21 +46,25 @@ public class CycConnection {
     private boolean isSymbolicExpression = false;
 
     /**
-     * Construct a new CycConnection object.
+     * Constructs a new CycConnection object.
      */
 
-    public CycConnection() throws IOException, UnknownHostException {
-        this(DEFAULT_HOSTNAME, DEFAULT_PORT);
+    public CycConnection(CycAccess cycAccess) throws IOException, UnknownHostException {
+        this(DEFAULT_HOSTNAME, DEFAULT_PORT, cycAccess);
     }
-    public CycConnection(String host) throws IOException, UnknownHostException {
-        this(host, DEFAULT_PORT);
+    public CycConnection(String host, CycAccess cycAccess)
+        throws IOException, UnknownHostException {
+        this(host, DEFAULT_PORT, cycAccess);
     }
-    public CycConnection(int port) throws IOException, UnknownHostException {
-        this(DEFAULT_HOSTNAME, port);
+    public CycConnection(int port, CycAccess cycAccess)
+        throws IOException, UnknownHostException {
+        this(DEFAULT_HOSTNAME, port, cycAccess);
     }
-    public CycConnection(String hostName, int port) throws IOException, UnknownHostException {
+    public CycConnection(String hostName, int port, CycAccess cycAccess)
+        throws IOException, UnknownHostException {
         this.hostName = hostName;
         this.port = port;
+        this.cycAccess = cycAccess;
         initializeApiConnection();
         System.out.println("Connection " + apiSocket);
     }
@@ -96,7 +101,8 @@ public class CycConnection {
         if (((Integer) response[0]).intValue() == 200) {
             String answer = ((String) response[1]).trim();
             if (isSymbolicExpression)
-                response[1] = new CycList(answer);
+                // Recurse if list contains CycConstant objects.
+                response[1] = cycAccess.makeCycList(answer);
             else if (answer.equals("NIL"))
                 response[1] = new CycList();
             else

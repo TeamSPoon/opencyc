@@ -3,6 +3,7 @@ package org.opencyc.cycobject;
 import java.io.Serializable;
 import org.apache.oro.util.*;
 import org.opencyc.xml.*;
+import org.opencyc.api.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc Constant.
@@ -80,23 +81,6 @@ public class CycConstant extends CycFort implements Comparable {
      */
     public static CycConstant makeCycConstant(String guidString, String name) {
         return makeCycConstant(Guid.makeGuid(guidString), name);
-    }
-
-    /**
-     * Constructs a new <tt>CycConstant</tt> object using the constant name.
-     *
-     * @param name Name of the constant. If prefixed with "#$", then the prefix is
-     * removed for canonical representation.
-     */
-    public static CycConstant makeCycConstant(String name) {
-        CycConstant cycConstant = (CycConstant) cache.getElement(name);
-        if (cycConstant == null) {
-            //TODO
-            Guid guid = new Guid("** get from OpenCyc **");
-            cycConstant = new CycConstant(guid, name);
-            cache.addElement(cycConstant.name, cycConstant);
-        }
-        return cycConstant;
     }
 
     /**
@@ -215,6 +199,13 @@ public class CycConstant extends CycFort implements Comparable {
      */
     public static void resetCache() {
         cache = new CacheLRU(500);
+    }
+
+    /**
+     * Adds the <tt>CycConstant<tt> to the cache.
+     */
+    public static void addCache(CycConstant cycConstant) {
+        cache.addElement(cycConstant.name, cycConstant);
     }
 
     /**

@@ -127,7 +127,7 @@ public class Node extends ELFObject {
    * Sends the given list of controlled resources and the given task command to
    * a sub node.
    *
-   * @param controlledResourcesthe given list of controlled resources
+   * @param controlledResources the given list of controlled resources
    * @param taskCommnd the given task command
    */
   public void doSubTask (ArrayList controlledResources, TaskCommand taskCommnd) {

@@ -33,9 +33,9 @@ public class Argument {
     protected Expression value;
 
     /**
-     * the action containing this argument
+     * the procedure containing this argument
      */
-    protected Action action;
+    protected Procedure procedure;
 
     /**
      * Constructs a new Argument object.
@@ -62,21 +62,21 @@ public class Argument {
     }
 
     /**
-     * Gets the action containing this argument
+     * Gets the procedure containing this argument
      *
-     * @return the action containing this argument
+     * @return the procedure containing this argument
      */
-    public Action getAction () {
-        return action;
+    public Procedure getProcedure () {
+        return procedure;
     }
 
     /**
-     * Sets the action containing this argument
+     * Sets the procedure containing this argument
      *
-     * @param action the action containing this argument
+     * @param procedure the action containing this argument
      */
-    public void setAction (Action action) {
-        this.action = action;
+    public void setProcedure (Procedure procedure) {
+        this.procedure = procedure;
     }
 
 

@@ -437,7 +437,7 @@ public class ExportHtml {
             }
             else if (cycAccess.isIndividual(cycFort)) {
                 if (verbosity > 2)
-                    Log.current.print("Individual");
+                    Log.current.println("Individual");
             }
             else {
                 if (verbosity > 2)
@@ -474,16 +474,14 @@ public class ExportHtml {
         Element italicsGeneratedPhraseElement = italics(htmlAnchorElement);
         Node generatedPhraseNode = htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
         italicsGeneratedPhraseElement.appendChild(generatedPhraseNode);
-
+        Element blockquoteElement = htmlDocument.createElement("blockquote");
+        htmlBodyElement.appendChild(blockquoteElement);
         HTMLAnchorElement natNoteAnchorElement =
             new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
         natNoteAnchorElement.setHref("./" + nartNoteOutputPath);
-        htmlBodyElement.appendChild(natNoteAnchorElement);
+        blockquoteElement.appendChild(natNoteAnchorElement);
         Node natNoteTextNode = htmlDocument.createTextNode("Note On Non-Atomic Terms");
         natNoteAnchorElement.appendChild(natNoteTextNode);
-
-        Element blockquoteElement = htmlDocument.createElement("blockquote");
-        htmlBodyElement.appendChild(blockquoteElement);
         createIsaNodes(cycNart, blockquoteElement);
         createGenlNodes(cycNart, blockquoteElement);
     }

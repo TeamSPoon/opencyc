@@ -207,13 +207,13 @@ public class ExportHtml {
             //exportHtml.exportedVocabularyOutputPath = "counter-terrorism-vocabulary.html";
             //exportHtml.exportedHierarchyOutputPath = "counter-terrorism-hierarchy.html";
 
-            //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
-            //exportHtml.exportedVocabularyOutputPath = "eeld-shared-vocabulary.html";
-            //exportHtml.exportedHierarchyOutputPath = "eeld-shared-hierarchy.html";
+            exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
+            exportHtml.exportedVocabularyOutputPath = "eeld-shared-vocabulary.html";
+            exportHtml.exportedHierarchyOutputPath = "eeld-shared-hierarchy.html";
 
-            exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
-            exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
-            exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
+            //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
+            //exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
+            //exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
 
             exportHtml.cycKbSubsetFilterGuid = ikbConstantGuid;
             exportHtml.export(EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE);
@@ -614,7 +614,7 @@ public class ExportHtml {
 
     /**
      * Returns the first indirect isa above the given term which is a member of the selected
-     * terms.
+     * terms. The indirection is found via an upwards traversal of the genls links.
      *
      * @param isa the cyc collection which is not a member of the selected terms.
      * @return the first indirect isa above the given term which is a member of the selected
@@ -622,36 +622,72 @@ public class ExportHtml {
      */
     protected CycFort findSelectedIsa (CycFort isa)
         throws IOException, CycApiException {
-        if (cycAccess.isa(isa, cycAccess.getKnownConstantByName("CycKBSubsetCollection"))) {
+        if (isa.equals(cycAccess.getKnownConstantByName("CycKBSubsetCollection"))) {
             if (verbosity > 4)
-                Log.current.println("  ignoring isa for " + isa);
+                Log.current.println("  ignoring isa " + isa);
             return null;
         }
-        if (cycAccess.isa(isa, cycAccess.getKnownConstantByName("CycSecureConstant"))) {
+        if (isa.equals(cycAccess.getKnownConstantByName("CycSecureConstant"))) {
             if (verbosity > 4)
-                Log.current.println("  ignoring isa for " + isa);
+                Log.current.println("  ignoring isa " + isa);
             return null;
         }
         CycList isas = cycAccess.getIsas(isa);
         CycFort directIsa;
+        CycFort indirectIsa;
         for (int i = 0; i < isas.size(); i++) {
             directIsa = (CycFort) isas.get(i);
-            if (selectedCycForts.contains(directIsa)) {
+            indirectIsa = findSelectedGenls(directIsa);
+            if (indirectIsa != null) {
                 if (verbosity > 2)
                     Log.current.println("  traversed up from isa " + isa.cyclify() +
-                                        " to find selected isa " + directIsa);
-                return directIsa;
+                                        " to find selected isa " + indirectIsa);
+                return indirectIsa;
             }
         }
-        CycFort selectedIsa;
-        for (int i = 0; i < isas.size(); i++) {
-            directIsa = (CycFort) isas.get(i);
-            selectedIsa = findSelectedIsa(directIsa);
-            if (selectedIsa != null) {
+        return null;
+    }
+
+    /**
+     * Returns the first indirect genls above the given term which is a member of the selected
+     * terms.
+     *
+     * @param collection the cyc collection which is not a member of the selected terms.
+     * @return the first indirect genls above the given term which is a member of the selected
+     * terms
+     */
+    protected CycFort findSelectedGenls (CycFort collection)
+        throws IOException, CycApiException {
+        if (collection.equals(cycAccess.getKnownConstantByName("CycKBSubsetCollection"))) {
+            if (verbosity > 4)
+                Log.current.println("  ignoring genls " + collection);
+            return null;
+        }
+        if (collection.equals(cycAccess.getKnownConstantByName("CycSecureConstant"))) {
+            if (verbosity > 4)
+                Log.current.println("  ignoring genls " + collection);
+            return null;
+        }
+        CycList genls = cycAccess.getGenls(collection);
+        CycFort directGenls;
+        for (int i = 0; i < genls.size(); i++) {
+            directGenls = (CycFort) genls.get(i);
+            if (selectedCycForts.contains(directGenls)) {
                 if (verbosity > 2)
-                    Log.current.println("traversed up from isa " + isa.cyclify() +
-                                        " to find selected isa " + directIsa);
-                return selectedIsa;
+                    Log.current.println("  traversed up from genls " + collection.cyclify() +
+                                        " to find selected genls " + directGenls);
+                return directGenls;
+            }
+        }
+        CycFort selectedGenls;
+        for (int i = 0; i < genls.size(); i++) {
+            directGenls = (CycFort) genls.get(i);
+            selectedGenls = findSelectedIsa(directGenls);
+            if (selectedGenls != null) {
+                if (verbosity > 2)
+                    Log.current.println("traversed up from genls " + collection.cyclify() +
+                                        " to find selected genls " + selectedGenls);
+                return selectedGenls;
             }
         }
         return null;

@@ -245,9 +245,9 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     Assert.assertEquals("[Resource: console]", ResourcePool.getInstance().getResource(Resource.CONSOLE).toString());
     Assert.assertNotNull(JobLibrary.getInstance());
-    Assert.assertNotNull(JobLibrary.getInstance().getJobSet(Action.CONVERSE_WITH_USER));
+    Assert.assertNotNull(JobLibrary.getInstance().getJobSets(Action.CONVERSE_WITH_USER));
     Assert.assertEquals("[[Job for [[Resource: console]] action: converse with user]]", 
-                        JobLibrary.getInstance().getJobSet(Action.CONVERSE_WITH_USER).toString());
+                        JobLibrary.getInstance().getJobSets(Action.CONVERSE_WITH_USER).toString());
     behaviorEngine.execute();
     try {
       Thread.sleep(2000);

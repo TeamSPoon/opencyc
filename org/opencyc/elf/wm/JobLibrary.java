@@ -57,7 +57,7 @@ public class JobLibrary {
    * @param commandName the given command name
    * @return the job sets that accomplishes the given command name
    */
-  public List getJobSet (String commandName) {
+  public List getJobSets (String commandName) {
     return (List) jobDictionary.get(commandName);
   }
   
@@ -69,11 +69,11 @@ public class JobLibrary {
    * @param jobSet the job set
    */
   public void addJobSet (String commandName, List jobSet) {
-    List jobs = (List) jobDictionary.get(commandName);
-    if (jobs == null)
-      jobs = new ArrayList();
-    jobs.add(jobSet);
-    jobDictionary.put(commandName, jobs);
+    List jobSets = (List) jobDictionary.get(commandName);
+    if (jobSets == null)
+      jobSets = new ArrayList();
+    jobSets.add(jobSet);
+    jobDictionary.put(commandName, jobSets);
   }
   
   //// Private Area

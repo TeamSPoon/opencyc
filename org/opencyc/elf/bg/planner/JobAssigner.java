@@ -236,7 +236,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       taskCommand = doTaskMsg.getTaskCommand();
       getLogger().info("Do task: " + taskCommand);
       Command command = taskCommand.getCommand();
-      List jobSets = JobLibrary.getInstance().getJobSet(command.getName());
+      List jobSets = JobLibrary.getInstance().getJobSets(command.getName());
       List jobs = determineBestJobSet(jobSets);
       assignJobsToSchedulers(jobs);
       sendJobsToSchedulers();
@@ -245,7 +245,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         
     /** Chooses the best of the alternative job sets.
      *
-     * @param jobSets the task frame
+     * @param jobSets the alternative job sets
      * @return the best of the alternative job sets 
      */
     protected List determineBestJobSet(List jobSets) {
@@ -334,9 +334,9 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       releaseUnusedSchedulers();
     }
 
-    /** Creates a new scheduler for the given schedule.
+    /** Creates a new scheduler for the given job.
      *
-     * @param schedule the given schedule
+     * @param job the given job
      */
     protected void createScheduler(Job job) {
       Channel schedulerChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
@@ -373,11 +373,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
      */
     protected void releaseScheduler(Scheduler scheduler) {
       ReleaseMsg releaseMsg = new ReleaseMsg(sender);
-      try {
-        scheduler.getChannel().put(releaseMsg);
-      }
-      catch (InterruptedException e) {
-      }
+      sender.sendMsgToRecipient(scheduler.getChannel(), releaseMsg);
     }
     
     /** Sends the assigned jobs to the corresponding schedulers */ 
@@ -389,12 +385,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         Job job = schedulerInfo.job;
         Scheduler scheduler = schedulerInfo.scheduler;
         ScheduleJobMsg scheduleJobMsg = new ScheduleJobMsg(sender, job);
-        try {
-          scheduler.getChannel().put(scheduleJobMsg);
-          getLogger().info("Sent job: " + job + " to scheduler: " + scheduler);
-        }
-        catch (InterruptedException e) {
-        }
+        sender.sendMsgToRecipient(scheduler.getChannel(), scheduleJobMsg);
       }
     }
 
@@ -446,13 +437,8 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         getLogger().info("The commanded task " + taskCommand + " is done");
         Status status = new Status();
         status.setValue(Status.TASK_FINISHED, Boolean.TRUE);
-        JobAssignerStatusMsg jobAssignerStatusMsg = 
-          new JobAssignerStatusMsg(sender, status);
-        try {
-          executorChannel.put(jobAssignerStatusMsg);
-        }
-        catch (InterruptedException e) {
-        }
+        JobAssignerStatusMsg jobAssignerStatusMsg = new JobAssignerStatusMsg(sender, status);
+        sender.sendMsgToRecipient(executorChannel, jobAssignerStatusMsg);
       }
     }   
   }

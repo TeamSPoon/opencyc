@@ -27,7 +27,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
-
 /** Provides a suite of JUnit test cases for the org.opencyc.elf.wm package.
  * 
  * @version $Id$
@@ -199,7 +198,10 @@ public class UnitTest extends TestCase {
     new JobLibrary();
     (new JobFactory()).getInstance().populateJobLibrary();
     Assert.assertNotNull(JobLibrary.getInstance());
-    List jobSet = JobLibrary.getInstance().getJobSet(Action.CONVERSE_WITH_USER);
+    List jobSets = JobLibrary.getInstance().getJobSets(Action.CONVERSE_WITH_USER);
+    Assert.assertNotNull(jobSets);
+    Assert.assertEquals(1, jobSets.size());
+    List jobSet = (List) jobSets.get(0);
     Assert.assertNotNull(jobSet);
     Assert.assertEquals(1, jobSet.size());
     Job job = (Job) jobSet.get(0);

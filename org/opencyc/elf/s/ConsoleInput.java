@@ -6,6 +6,7 @@ import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.bg.planner.Resource;
 
 import org.opencyc.elf.message.ObservedInputMsg;
+import org.opencyc.elf.message.ReleaseMsg;
 
 import org.opencyc.elf.wm.ResourcePool;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
 
 /** ConsoleInput is the ELF sensor for console input.
  * 
@@ -47,25 +49,29 @@ public class ConsoleInput extends DirectSensor {
   //// Constructors
   
   /**
-   * Constructs a new ConsoleInput object given its name.
+   * Constructs a new ConsoleInput.
    *
    * @param name the sensor name
    * @param resources the resources required by this sensor
    * @param sensationCapabilities the names of sensations that this sensor can sense
+   * @param sensorChannel the takable channel from which messages are input
    */
-  public ConsoleInput (String name, List resources, List sensationCapabilities) {
-    super(name, resources, sensationCapabilities);
+  public ConsoleInput (String name, List resources, List sensationCapabilities, Takable sensorChannel) {
+    super(name, resources, sensationCapabilities, sensorChannel);
+    consoleInput = this;
   }
 
   //// Public Area
   
-  /** Initializes this instance of ConsoleInput with the given
-   * output message channel.
+  /** Initializes this instance of ConsoleInput with the given output message channel.
    *
    * @param sensoryPerceptionChannel the puttable channel to which messages are output
    */
-  public void initialize (Puttable sensoryPerceptionChannel) {
+  public void initialize(Puttable sensoryPerceptionChannel, Takable sensorChannel) {
     producer = new Producer(sensoryPerceptionChannel, this);
+  }
+  
+  public void initialize(Puttable sensoryPerceptionChannel) {
   }
   
   //// Protected Area
@@ -78,6 +84,9 @@ public class ConsoleInput extends DirectSensor {
 
     /** the console input sensor which sends messages */
     protected NodeComponent sender;
+    
+    /** indicates whether to keep sensing */
+    protected boolean keepSensing = true;
     
     /** Creates a new instance of Consumer
      *
@@ -92,9 +101,10 @@ public class ConsoleInput extends DirectSensor {
 
     /** Senses the World and writes messages to the output channel. */
     public void run () {
-      while (true) {
+      while (keepSensing) {
         senseWorld();
-        sendObservedInputMsg();
+        if (keepSensing)
+          sendObservedInputMsg();
       }
     }
 
@@ -102,6 +112,17 @@ public class ConsoleInput extends DirectSensor {
     protected void senseWorld () {
       try {
         String data = bufferedReader.readLine();
+      }
+      catch (IOException e) {
+        logger.info(e.getMessage());
+        keepSensing = false;
+      }
+    }
+    
+    /** Closes the console and kills the producer thread. */
+    public void close () {
+      try {
+        bufferedReader.close();
       }
       catch (IOException e) {
         logger.severe(e.getMessage());
@@ -126,13 +147,58 @@ public class ConsoleInput extends DirectSensor {
  
   }
   
+  /** Thread which processes the input channel of messages. */
+  protected class Consumer implements Runnable {
+    
+    /** the takable channel from which messages are input */
+    protected final Takable sensorChannel;
+
+    /** the parent node component */
+    protected NodeComponent nodeComponent;
+    
+    /** Creates a new instance of Consumer.
+     *
+     * @param sensorChannel the takable channel from which messages are input
+     * @param nodeComponent the parent node component
+     */
+    protected Consumer (Takable sensorChannel, 
+                        NodeComponent nodeComponent) { 
+      this.sensorChannel = sensorChannel;
+      this.nodeComponent = nodeComponent;
+    }
+
+    /** Reads messages from the input queue and processes them. */
+    public void run () {
+      try {
+        while (true) { 
+          doAction((ReleaseMsg) sensorChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+
+    /** Outputs the data that is contained in the actuator message to the console.
+     *
+     * @param releaseMsg the given input channel message
+     */
+    protected void doAction (ReleaseMsg releaseMsg) {
+      consoleInput.getLogger().info("Releasing this sensor");
+      consoleInput.producer.close();
+    }
+  
+  }
+  
   //// Private Area
   
   //// Internal Rep
   
-  /** the thread which processes the input channel of messages */
+  protected ConsoleInput consoleInput;
+  
+  /** the thread which outputs messages */
   protected Producer producer;
   
+  /** the thread which processes the input channel of messages */
+  protected Consumer consumer;
   //// Main
   
 }

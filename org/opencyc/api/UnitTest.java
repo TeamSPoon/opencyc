@@ -1314,6 +1314,16 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
+        // countAllInstances
+        try {
+            cycAccess = CycAccess.current();
+            Assert.assertTrue(cycAccess.countAllInstances(cycAccess.getConstantByName("Country"),
+                                                          cycAccess.getConstantByName("WorldGeographyMt")) > 0);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
         //--------- last.
         try {
             cycAccess.close();

@@ -1,8 +1,9 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
 import java.util.*;
 import java.io.IOException;
+import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * <tt>ProblemParser</tt> object to model the attributes and behavior of
@@ -106,7 +107,6 @@ public class ProblemParser {
     public void initializeDomains() throws IOException {
         for (int i = 0; i < constraintProblem.domainPopulationRules.size(); i++) {
             Rule rule = (Rule) constraintProblem.domainPopulationRules.get(i);
-            //TODO handle high cardinality domains.
             if (rule.isExtensionalVariableDomainPopulatingRule()) {
                 CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
                 if (constraintProblem.valueDomains.domains.containsKey(cycVariable))
@@ -119,7 +119,40 @@ public class ProblemParser {
                     throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
                 ArrayList domainValues = new ArrayList(theSet.rest());
                 constraintProblem.valueDomains.varsDictionary.put(cycVariable, domainValues);
-           }
+            }
+            else if (rule.isIntensionalVariableDomainPopulatingRule()) {
+                CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
+                CycConstant collection = (CycConstant) rule.getArguments().second();
+                int nbrInstances = CycAccess.current().countAllInstances(collection,
+                                                                         constraintProblem.mt);
+                if (verbosity > 3) {
+                    System.out.println("intensional variable domain populating rule\n" + rule);
+                    System.out.println("  nbrInstances " + nbrInstances);
+                }
+                if (nbrInstances > constraintProblem.highCardinalityDomains.domainSizeThreshold) {
+                    if (verbosity > 3)
+                        System.out.println("  domain size " + nbrInstances +
+                                           " exceeded high cardinality threshold of " +
+                                           constraintProblem.highCardinalityDomains.domainSizeThreshold);
+                    constraintProblem.highCardinalityDomains.setDomainSize(cycVariable,
+                                                                           new Integer(nbrInstances));
+                    constraintProblem.valueDomains.varsDictionary.put(cycVariable, new ArrayList());
+                }
+                else {
+                    // Get the domain values by asking a query.
+                    CycList domainValuesCycList =
+                        CycAccess.current().askWithVariable (rule.getRule(),
+                                                             cycVariable,
+                                                             constraintProblem.mt);
+                ArrayList domainValues = new ArrayList();
+                domainValues.addAll(domainValuesCycList);
+                constraintProblem.valueDomains.varsDictionary.put(cycVariable, domainValues);
+                }
+            }
+            else {
+                if (verbosity > 1)
+                    System.out.println("Unhandled domain population rule:\n" + rule);
+            }
         }
         if (verbosity > 1)
             constraintProblem.valueDomains.displayVariablesAndDomains();

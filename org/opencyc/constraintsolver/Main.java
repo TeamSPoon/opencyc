@@ -36,8 +36,7 @@ public class Main {
      */
     public static void main(String[] args) {
         //org.opencyc.cycobject.UnitTest.runTests();
-        org.opencyc.constraintsolver.UnitTest.runTests();
-        //zebraPuzzle();
+        zebraPuzzle();
     }
 
     /**

@@ -301,5 +301,4 @@ public class ValueDomains {
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
-
 }

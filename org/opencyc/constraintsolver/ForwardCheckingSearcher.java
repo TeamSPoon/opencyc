@@ -128,7 +128,7 @@ public class ForwardCheckingSearcher {
         remainingVariables.remove(selectedVariable);
         if (verbosity > 2) {
             System.out.println("\nSearching level   " + level);
-            System.out.println("  variable         " + selectedVariable);
+            System.out.println("  variable         " + selectedVariable.cyclify());
             System.out.println("  remaining domain " + remainingDomain);
             System.out.println("  remaining vars   " + remainingVariables);
         }
@@ -241,8 +241,8 @@ public class ForwardCheckingSearcher {
                     // It can rule out remaining variable values.
 
                     if (verbosity > 4)
-                        System.out.println("Applicable rule \n  " + rule +
-                                           "  for " + currentBinding.getCycVariable());
+                        System.out.println("Applicable rule \n  " + rule.cyclify() +
+                                           "  for " + currentBinding.getCycVariable().cyclify());
                     if (! checkForwardRule(rule,
                                            remainingRuleVariables,
                                            level,
@@ -277,12 +277,12 @@ public class ForwardCheckingSearcher {
         CycList instantiatedRule = rule.getRule().subst(currentBinding.getValue(),
                                                         currentBinding.getCycVariable());
         if (verbosity > 2) {
-            System.out.println("Forward checking constraint\n  " + instantiatedRule);
+            System.out.println("Forward checking constraint\n  " + instantiatedRule.cyclify());
         }
         if (rule.isAllDifferent()) {
             if (verbosity > 2)
-                System.out.println("all-different rule\n  " + rule.getRule() +
-                                   "  for binding " + currentBinding);
+                System.out.println("all-different rule\n  " + rule.getRule().cyclify() +
+                                   "  for binding " + currentBinding.cyclify());
             return checkForwardDifferentRule(rule,
                                              remainingRuleVariables,
                                              level,
@@ -291,7 +291,7 @@ public class ForwardCheckingSearcher {
         else if (rule.isEvaluatable()) {
             if (verbosity > 2)
                 System.out.println("Evaluatable rule\n  " + rule.getRule() +
-                                   "  for binding " + currentBinding);
+                                   "  for binding " + currentBinding.cyclify());
             ArrayList bindings = new ArrayList();
             bindings.add(currentBinding);
             return checkForwardInstantiatedRule(instantiatedRule,
@@ -302,8 +302,8 @@ public class ForwardCheckingSearcher {
         }
         else {
             if (verbosity > 2)
-                System.out.println("Non-evaluatable rule " + rule.getRule() +
-                                   "\n  for binding " + currentBinding);
+                System.out.println("Non-evaluatable rule " + rule.getRule().cyclify() +
+                                   "\n  for binding " + currentBinding.cyclify());
             return checkForwardNonEvaluatableRule(rule,
                                                   level,
                                                   currentBinding);
@@ -342,7 +342,7 @@ public class ForwardCheckingSearcher {
                 if (highCardinalityDomains.getPopulatingRule(variable) == null) {
                     // A rule has not yet populated the high cardinality domain.
                     if (verbosity > 2)
-                        System.out.println("Using " + instantiatedRule +
+                        System.out.println("Using " + instantiatedRule.cyclify() +
                                            "\nto populate the domain of " + variable);
                     highCardinalityDomains.setPopulatingRule(variable, rule);
                 }
@@ -386,7 +386,7 @@ public class ForwardCheckingSearcher {
             boolean instantiatedRuleResult = constraintRuleAsk(instantiatedRule);
             if (verbosity > 2) {
                 System.out.println("Bindings " + bindings);
-                System.out.println(instantiatedRule + " --> " + instantiatedRuleResult);
+                System.out.println(instantiatedRule.cyclify() + " --> " + instantiatedRuleResult);
             }
             if (instantiatedRuleResult) {
                 CycVariable variable;
@@ -402,8 +402,8 @@ public class ForwardCheckingSearcher {
                         // Other rules cannot extend a high cardinality domain.
                         valueDomains.domainHasValue(variable, value))
                         if (verbosity > 2)
-                            System.out.println("  " + binding + " is permitted by " +
-                                               currentBinding);
+                            System.out.println("  " + binding.cyclify() + " is permitted by " +
+                                               currentBinding.cyclify());
                         valueDomains.markDomain(variable, value, Boolean.TRUE);
                     }
                 }
@@ -434,15 +434,15 @@ public class ForwardCheckingSearcher {
                     Binding binding = new Binding(variable, value);
                     if (valueDomains.domainHasValue(variable, value)) {
                         if (verbosity > 2)
-                            System.out.println("  " + binding + " is permitted by " +
-                                               currentBinding);
+                            System.out.println("  " + binding.cyclify() + " is permitted by " +
+                                               currentBinding.cyclify());
                         valueDomains.markDomain(variable, value, Boolean.TRUE);
                     }
                     else {
                         // initial population of high cardinality domain
                         if (verbosity > 2)
-                            System.out.println("  " + binding + " is new and permitted by " +
-                                               currentBinding);
+                            System.out.println("  " + binding.cyclify() + " is new and permitted by " +
+                                               currentBinding.cyclify());
                         valueDomains.addDomainValue(variable, value);
                         valueDomains.markDomain(variable, value, Boolean.TRUE);
                     }
@@ -458,8 +458,8 @@ public class ForwardCheckingSearcher {
                     Object value = domainValues.get(i);
                     if (valueDomains.domainHasValue(variable, value)) {
                         if (verbosity > 2)
-                            System.out.println("  " + (new Binding(variable, value)) +
-                                               " is permitted by " + currentBinding);
+                            System.out.println("  " + (new Binding(variable, value)).cyclify() +
+                                               " is permitted by " + currentBinding.cyclify());
                         valueDomains.markDomain(variable, value, Boolean.TRUE);
                     }
 
@@ -487,7 +487,7 @@ public class ForwardCheckingSearcher {
                 newBindings.add(new Binding(variable, value));
                 newInstantiatedRule = instantiatedRule.subst(value, variable);
                 if (verbosity > 4)
-                    System.out.println("  instantiated rule " + newInstantiatedRule);
+                    System.out.println("  instantiated rule " + newInstantiatedRule.cyclify());
                 ArrayList newRemainingVariables = (ArrayList) remainingVariables.clone();
                 newRemainingVariables.remove(0);
                 this.markPermittedRemainingBindings(newInstantiatedRule,
@@ -510,9 +510,15 @@ public class ForwardCheckingSearcher {
     protected ArrayList askWithVariable(CycList instantiatedRule, CycVariable variable)
         throws IOException {
         ArrayList result = new ArrayList();
-        result.addAll(constraintProblem.cycAccess.askWithVariable(instantiatedRule,
-                                                                  variable,
-                                                                  constraintProblem.mt));
+        CycList kbValues = constraintProblem.cycAccess.askWithVariable(instantiatedRule,
+                                                                       variable,
+                                                                       constraintProblem.mt);
+        result.addAll(kbValues);
+        if (verbosity > 3)
+            System.out.println("Bindings for " + variable +
+                               "\n" + instantiatedRule.cyclify() +
+                               "\n  in mt " + constraintProblem.mt.cyclify() +
+                               "\n  --> " + kbValues.cyclify());
         return result;
     }
 
@@ -530,14 +536,14 @@ public class ForwardCheckingSearcher {
         if (isQueryTrue != null) {
             answer = isQueryTrue.booleanValue();
             if (verbosity > 3)
-                System.out.println("Cached answer to \n" + instantiatedRule + " --> " + answer);
+                System.out.println("Cached answer to \n" + instantiatedRule.cyclify() + " --> " + answer);
             return answer;
         }
         constraintProblem.nbrAsks++;
         answer = constraintProblem.cycAccess.isQueryTrue(instantiatedRule, constraintProblem.mt);
         askCache.addElement(instantiatedRule, new Boolean(answer));
         if (verbosity > 3)
-            System.out.println("Answer to \n" + instantiatedRule + " --> " + answer);
+            System.out.println("Answer to \n" + instantiatedRule.cyclify() + " --> " + answer);
         return answer;
     }
 
@@ -563,12 +569,12 @@ public class ForwardCheckingSearcher {
             if (valueDomains.getUnmarkedDomainValues(differentVariable).contains(value) &&
                 ! valueDomains.isDomainMarked(differentVariable, value)) {
                 if (verbosity > 6)
-                    System.out.println("  " + (new Binding(differentVariable, value)) +
-                                       " is ruled out by " + currentBinding);
+                    System.out.println("  " + (new Binding(differentVariable, value)).cyclify() +
+                                       " is ruled out by " + currentBinding.cyclify());
                 valueDomains.markDomain(differentVariable, value, new Integer(level));
                 if (valueDomains.isDomainWipedOut(differentVariable)) {
                     if (verbosity > 6)
-                        System.out.println("  domain wiped out for " + differentVariable);
+                        System.out.println("  domain wiped out for " + differentVariable.cyclify());
                     return false;
                 }
             }
@@ -598,7 +604,8 @@ public class ForwardCheckingSearcher {
             boolean instantiatedRuleResult = Rule.evaluateConstraintRule(instantiatedRule);
             if (verbosity > 2) {
                 System.out.println("  bindings " + bindings);
-                System.out.println("  " + instantiatedRule + " --> " + instantiatedRuleResult);
+                System.out.println("  " + instantiatedRule.cyclify() + " --> " +
+                                   instantiatedRuleResult);
             }
             if (! instantiatedRuleResult) {
                 CycVariable variable;
@@ -609,8 +616,8 @@ public class ForwardCheckingSearcher {
                     if (! variable.equals(selectedVariable)) {
                         value = binding.getValue();
                         if (verbosity > 6)
-                            System.out.println("  " + binding + " is ruled out by " +
-                                               currentBinding);
+                            System.out.println("  " + binding.cyclify() + " is ruled out by " +
+                                               currentBinding.cyclify());
                         valueDomains.markDomain(variable, value, new Integer(level));
                         if (valueDomains.isDomainWipedOut(variable)) {
                             if (verbosity > 6)
@@ -642,7 +649,7 @@ public class ForwardCheckingSearcher {
                 newBindings.add(new Binding(variable, value));
                 newInstantiatedRule = instantiatedRule.subst(value, variable);
                 if (verbosity > 4)
-                    System.out.println("  instantiated rule\n  " + newInstantiatedRule);
+                    System.out.println("  instantiated rule\n  " + newInstantiatedRule.cyclify());
                 ArrayList newRemainingRuleVariables = (ArrayList) remainingRuleVariables.clone();
                 newRemainingRuleVariables.remove(0);
                 if (! checkForwardInstantiatedRule(newInstantiatedRule,
@@ -670,7 +677,8 @@ public class ForwardCheckingSearcher {
                 Object value = domainValues.get(j);
                 if (valueDomains.isDomainMarkedAtLevel(cycVariable, value, intLevel)) {
                     if (verbosity > 2)
-                        System.out.println("  restoring " + (new Binding(cycVariable, value)));
+                        System.out.println("  restoring " +
+                                           (new Binding(cycVariable, value)).cyclify());
                     valueDomains.unmarkDomain(cycVariable, value);
                 }
             }
@@ -695,9 +703,13 @@ public class ForwardCheckingSearcher {
             if (ruleVariables.contains(variable) &&
                 variables.containsAll(ruleVariables)) {
                 degree++;
-                if (verbosity > 8)
-                    System.out.println("Rule " + rule + "\n  between " +
-                                       variable + " and " + variables);
+                if (verbosity > 8) {
+                    ArrayList candidateVariables = (ArrayList) variables.clone();
+                    candidateVariables.remove(variable);
+                    System.out.println("Rule " + rule.cyclify() + "\n  between " +
+                                       variable + " and candidate variables " +
+                                       candidateVariables);
+                }
             }
         }
         if (verbosity > 8)

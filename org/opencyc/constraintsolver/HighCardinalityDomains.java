@@ -159,7 +159,7 @@ public class HighCardinalityDomains {
         item[1] = rule;
         if (verbosity > 8)
             System.out.println("\nset high cardinality populating rule for " +
-                               cycVariable + " to " + rule);
+                               cycVariable.cyclify() + " to " + rule.cyclify());
     }
 
     /**

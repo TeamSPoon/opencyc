@@ -41,24 +41,31 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Main method in case tracing is prefered over running JUnit.
+     * Main method in case tracing is prefered over running JUnit GUI.
      */
     public static void main(String[] args) {
-        runTests();
+        boolean allTests = false;
+        //boolean allTests = true;
+        runTests(allTests);
     }
 
     /**
      * Runs the unit tests
      */
-    public static void runTests() {
-        TestSuite testSuite = new TestSuite(UnitTest.class);
-        //testSuite.addTest(new UnitTest("testHelloWorld"));
-        //testSuite.addTest(new UnitTest("testRule"));
-        //testSuite.addTest(new UnitTest("testHornClause"));
-        //testSuite.addTest(new UnitTest("testBinding"));
-        //testSuite.addTest(new UnitTest("testSolution"));
-        //testSuite.addTest(new UnitTest("testRuleEvaluator"));
-        testSuite.addTest(new UnitTest("testConstraintProblem"));
+    public static void runTests(boolean allTests) {
+        TestSuite testSuite;
+        if (allTests)
+            testSuite = new TestSuite(UnitTest.class);
+        else {
+            testSuite = new TestSuite();
+            //testSuite.addTest(new UnitTest("testHelloWorld"));
+            //testSuite.addTest(new UnitTest("testRule"));
+            //testSuite.addTest(new UnitTest("testHornClause"));
+            //testSuite.addTest(new UnitTest("testBinding"));
+            //testSuite.addTest(new UnitTest("testSolution"));
+            //testSuite.addTest(new UnitTest("testRuleEvaluator"));
+            testSuite.addTest(new UnitTest("testConstraintProblem"));
+        }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
     }
@@ -116,7 +123,7 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(binding1);
         Assert.assertEquals(CycVariable.makeCycVariable("?x"), binding1.getCycVariable());
         Assert.assertEquals("abc", binding1.getValue());
-        Assert.assertEquals("x = \"abc\"", binding1.toString());
+        Assert.assertEquals("?x = \"abc\"", binding1.toString());
 
         System.out.println("** testBinding OK **");
     }
@@ -768,7 +775,16 @@ public class UnitTest extends TestCase {
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         System.out.println(europeanCathedralsString);
         ConstraintProblem europeanCathedralsProblem = new ConstraintProblem();
-        europeanCathedralsProblem.setVerbosity(9);
+        europeanCathedralsProblem.setVerbosity(1);
+        // Request all solutions.
+        europeanCathedralsProblem.nbrSolutionsRequested = null;
+        try {
+            europeanCathedralsProblem.mt =
+                CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+        }
+        catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
         solutions = europeanCathedralsProblem.solve(cycAccess.makeCycList(europeanCathedralsString));
         Assert.assertNotNull(solutions);
 

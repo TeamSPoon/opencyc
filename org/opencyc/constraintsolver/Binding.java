@@ -66,6 +66,18 @@ public class Binding implements Comparable {
     }
 
     /**
+     * Returns a cyclified <tt>String</tt> representation of the <tt>Binding</tt> object.
+     *
+     * @return a cyclified <tt>String</tt> representation of the <tt>Binding</tt> object.
+     */
+    public String cyclify() {
+        if (value instanceof String)
+            return cycVariable.cyclify() + " = \"" + value + "\"";
+        else
+            return cycVariable.cyclify() + " = " + value;
+    }
+
+    /**
      * Returns the <tt>CycVariable</tt> which is bound.
      *
      * @return the <tt>CycVariable</tt> which is bound.

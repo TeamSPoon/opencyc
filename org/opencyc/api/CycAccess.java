@@ -292,6 +292,23 @@ public class CycAccess {
     }
 
     /**
+     * Converses with Cyc to perform an API command whose result is returned as an int.
+     *
+     * @param command the command string
+     * @return the result of processing the API command
+     */
+    public int converseInt(String command)  throws IOException, UnknownHostException {
+        Object [] response = {new Integer(0), ""};
+        response = converse(command);
+        responseCode = (Integer) response[0];
+        if (responseCode.equals(OK_RESPONSE_CODE)) {
+            return (new Integer(response[1].toString())).intValue();
+        }
+        else
+            throw new IOException(response[1].toString());
+    }
+
+    /**
      * Converses with Cyc to perform an API command whose result is void.
      *
      * @param command the command string
@@ -1265,6 +1282,17 @@ public class CycAccess {
         return response.size() > 0;
     }
 
-
+    /**
+     * Return the count of the instances of the given collection.
+     *
+     * @param collection the collection whose instances are counted
+     * @param mt microtheory (including its genlMts) in which the count is determined
+     * @return the count of the instances of the given collection
+     */
+    public int countAllInstances(CycConstant collection, CycConstant mt) throws IOException {
+        return this.converseInt("(count-all-instances " +
+                                collection.cyclify() + " " +
+                                mt.cyclify() + ")");
+    }
 
 }

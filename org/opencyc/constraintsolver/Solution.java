@@ -175,5 +175,4 @@ public class Solution {
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
-
 }

@@ -98,6 +98,10 @@ public class UnitTest extends TestCase {
         CycSymbol cycSymbol3 = CycSymbol.makeCycSymbol(symbolName);
         Assert.assertEquals(cycSymbol, cycSymbol3);
         Assert.assertEquals(5, CycSymbol.getCacheSize());
+        String symbolName4 = "why-isa?";
+        CycSymbol cycSymbol4 = CycSymbol.makeCycSymbol(symbolName4);
+        Assert.assertEquals(cycSymbol.toString(), cycSymbol4.toString());
+        Assert.assertEquals(cycSymbol, cycSymbol4);
 
         // compareTo
         ArrayList symbols = new ArrayList();
@@ -130,6 +134,12 @@ public class UnitTest extends TestCase {
         CycConstant cycConstant2 = CycConstant.makeCycConstant(guidString, constantName);
         Assert.assertEquals(1, CycConstant.getCacheSize());
         Assert.assertEquals(cycConstant1, cycConstant2);
+
+        CycConstant cycConstant3 = CycConstant.makeCycConstant(guidString, constantName);
+        Assert.assertEquals(cycConstant1.toString(), cycConstant3.toString());
+        Assert.assertEquals(cycConstant1.cyclify(), cycConstant3.cyclify());
+        Assert.assertEquals(cycConstant1, cycConstant3);
+
 
         // compareTo
         ArrayList constants = new ArrayList();
@@ -204,13 +214,17 @@ public class UnitTest extends TestCase {
         System.out.println("** testCycVariable **");
         CycVariable cycVariable1 = new CycVariable("?X");
         Assert.assertNotNull(cycVariable1);
-        Assert.assertEquals("X", cycVariable1.toString());
+        Assert.assertEquals("?X", cycVariable1.toString());
         Assert.assertEquals("?X", cycVariable1.cyclify());
         System.out.println("** testCycVariable OK **");
         CycVariable cycVariable2 = new CycVariable("?variable");
         Assert.assertNotNull(cycVariable2);
-        Assert.assertEquals("variable", cycVariable2.toString());
+        Assert.assertEquals("?variable", cycVariable2.toString());
         Assert.assertEquals("?variable", cycVariable2.cyclify());
+        CycVariable cycVariable3 = new CycVariable("?X");
+        Assert.assertEquals(cycVariable1.toString(), cycVariable3.toString());
+        Assert.assertEquals(cycVariable1.cyclify(), cycVariable3.cyclify());
+        Assert.assertEquals(cycVariable1, cycVariable3);
 
         // compareTo
         ArrayList variables = new ArrayList();
@@ -221,10 +235,10 @@ public class UnitTest extends TestCase {
         variables.add(CycVariable.makeCycVariable("?z"));
         variables.add(CycVariable.makeCycVariable("?x"));
         Collections.sort(variables);
-        Assert.assertEquals("[X, Y, Z, x, y, z]", variables.toString());
+        Assert.assertEquals("[?X, ?Y, ?Z, ?x, ?y, ?z]", variables.toString());
 
         // makeUniqueCycVariable
-        CycVariable x = CycVariable.makeCycVariable("x");
+        CycVariable x = CycVariable.makeCycVariable("?x");
         CycVariable x1 = CycVariable.makeUniqueCycVariable(x);
         CycVariable x2 = CycVariable.makeUniqueCycVariable(x);
         CycVariable x3 = CycVariable.makeUniqueCycVariable(x);

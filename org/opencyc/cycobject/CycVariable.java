@@ -51,6 +51,8 @@ public class CycVariable implements Comparable {
      * @param variableName a <tt>String</tt> name.
      */
     public static CycVariable makeCycVariable(String variableName) {
+        if (variableName.startsWith("?"))
+            variableName = variableName.substring(1);
         CycVariable cycVariable = (CycVariable) cache.getElement(variableName);
         if (cycVariable == null) {
             cycVariable = new CycVariable(variableName);
@@ -65,7 +67,7 @@ public class CycVariable implements Comparable {
      * @param modelCycVariable a <tt>CycVariable</tt> to suffix
      */
     public static CycVariable makeUniqueCycVariable(CycVariable modelCycVariable) {
-        String variableName = modelCycVariable.toString() + "_" + suffix++;
+        String variableName = modelCycVariable.variableName + "_" + suffix++;
         CycVariable cycVariable = (CycVariable) cache.getElement(variableName);
         if (cycVariable == null) {
             cycVariable = new CycVariable(variableName);
@@ -93,7 +95,8 @@ public class CycVariable implements Comparable {
      * @return the representation of the <tt>CycVariable</tt> as a <tt>String</tt>
      */
     public String toString() {
-        return variableName;
+        return cyclify();
+        //return variableName;
     }
 
     /**
@@ -115,7 +118,7 @@ public class CycVariable implements Comparable {
     public boolean equals(Object object) {
         if (! (object instanceof CycVariable))
             return false;
-        return ((CycVariable) object).toString().equals(variableName);
+        return ((CycVariable) object).variableName.equals(variableName);
     }
 
     /**

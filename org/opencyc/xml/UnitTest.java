@@ -105,11 +105,12 @@ public class UnitTest extends TestCase {
      */
     public void testTextUtil() {
         System.out.println("\n*** testTextUtil ***");
-
-
-
-
-
+        String xmlText = "abc def";
+        Assert.assertEquals(xmlText, TextUtil.doEntityReference(xmlText));
+        Assert.assertEquals(xmlText, TextUtil.undoEntityReference(xmlText));
+        xmlText = "abc&def<hij>klm";
+        Assert.assertEquals("abc&amp;def&lt;hij&gt;klm", TextUtil.doEntityReference(xmlText));
+        Assert.assertEquals(xmlText, TextUtil.undoEntityReference("abc&amp;def&lt;hij&gt;klm"));
         System.out.println("*** testTextUtil OK ***");
     }
 

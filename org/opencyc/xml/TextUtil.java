@@ -38,7 +38,7 @@ public class TextUtil {
      */
     public static String doEntityReference (String text) {
         StringBuffer result = new StringBuffer();
-        for (int i = 1; i < text.length(); i++) {
+        for (int i = 0; i < text.length(); i++) {
             char ch = text.charAt(i);
             if (ch == '<')
                 result.append("&lt;");
@@ -60,8 +60,8 @@ public class TextUtil {
      */
     public static String undoEntityReference (String text) {
         String result = Strings.change(text, "&lt;", "<");
-        result = Strings.change(text, "&amp;", "&");
-        result = Strings.change(text, "&gt;", ">");
+        result = Strings.change(result, "&amp;", "&");
+        result = Strings.change(result, "&gt;", ">");
         return result;
     }
 }

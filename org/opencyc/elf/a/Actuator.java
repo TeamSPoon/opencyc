@@ -8,6 +8,7 @@ import org.opencyc.elf.message.ActuateMsg;
 
 //// External Imports
 import EDU.oswego.cs.dl.util.concurrent.Executor;
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
@@ -51,6 +52,7 @@ public class Actuator extends NodeComponent {
    * @param actuatorChannel the takable channel from which messages are input
    */
   public Actuator(Takable actuatorChannel) {
+    this.actuatorChannel = actuatorChannel;
     consumer = new Consumer(actuatorChannel, this);
     executor = new ThreadedExecutor();
     try {
@@ -71,6 +73,18 @@ public class Actuator extends NodeComponent {
    */
   public String toString() {
     return "Actuator for " + node.getName();
+  }
+  
+  /** 
+   * Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   *
+   */
+  public Puttable getChannel() {
+    return (Puttable) actuatorChannel;
   }
   
   //// Protected Area
@@ -131,6 +145,11 @@ public class Actuator extends NodeComponent {
   
   //// Internal Rep
 
+  /**
+   * the takable channel from which messages are input
+   */
+  protected Takable actuatorChannel = null;
+    
   /**
    * the thread which processes the input channel of messages
    */

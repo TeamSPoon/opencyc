@@ -1,6 +1,9 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+
+import org.opencyc.elf.Result;
+
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
@@ -104,7 +107,7 @@ public class ScheduleEvaluationResultMsg extends GenericMsg {
    *
    * @return the schedule evaluation result
    */
-  public Object getResult () {
+  public Result getResult () {
     return result;
   }
 
@@ -113,7 +116,7 @@ public class ScheduleEvaluationResultMsg extends GenericMsg {
    *
    * @param result the schedule evaluation result
    */
-  public void setResult (Object result) {
+  public void setResult (Result result) {
     this.result = result;
   }
   
@@ -142,7 +145,7 @@ public class ScheduleEvaluationResultMsg extends GenericMsg {
   /**
    * the schedule evaluation result
    */
-  protected Object result;
+  protected Result result;
   
   //// Main
   

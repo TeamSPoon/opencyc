@@ -3,11 +3,32 @@ package org.opencyc.elf.bg.planner;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+import org.opencyc.elf.Result;
 import org.opencyc.elf.Status;
 
+import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
+import org.opencyc.elf.message.ExecutorStatusMsg;
+import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.message.PredictedInputMsg;
+import org.opencyc.elf.message.PredictionRequestMsg;
+import org.opencyc.elf.message.ReplanMsg;
+import org.opencyc.elf.message.ScheduleConsistencyEvaluationMsg;
+import org.opencyc.elf.message.ScheduleConsistencyRequestMsg;
+import org.opencyc.elf.message.ScheduleEvaluationResultMsg;
+import org.opencyc.elf.message.SchedulerStatusMsg;
+import org.opencyc.elf.message.ScheduleJobMsg;
+import org.opencyc.elf.message.SimulateScheduleMsg;
+import org.opencyc.elf.message.SimulationFailureNotificationMsg;
+
 //// External Imports
+
+import java.util.ArrayList;
+
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
+import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
  * <P>
@@ -45,6 +66,37 @@ public class Scheduler extends NodeComponent {
   public Scheduler() {
   }
 
+  /** 
+   * Creates a new instance of Scheduler with the given
+   * input and output channels.
+   *
+   * @param schedulerChannel the takable channel from which messages are input
+   * @param jobAssignerChannel the puttable channel to which messages are output to the
+   * job assigner
+   * @param planSimulatorChannel the puttable channel to which messages are output to the
+   * plan simulator
+   * @param predictorChannel the puttable channel to which messages are output to the predictor
+   */
+  public Scheduler (Takable schedulerChannel,
+                    Puttable jobAssignerChannel,
+                    Puttable planSimulatorChannel,
+                    Puttable predictorChannel) {
+    this.schedulerChannel = schedulerChannel;           
+    consumer = new Consumer(schedulerChannel,
+                            jobAssignerChannel,
+                            planSimulatorChannel,
+                            predictorChannel,
+                            this);
+    consumerExecutor = new ThreadedExecutor();
+    try {
+      consumerExecutor.execute(consumer);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+
   //// Public Area
 
   /**
@@ -73,138 +125,300 @@ public class Scheduler extends NodeComponent {
     return "";
   }
 
+  /**
+   * Gets the executor for this sceduler
+   *
+   * @return the executor for this sceduler
+   */
+  public org.opencyc.elf.bg.executor.Executor getExecutor () {
+    return executor;
+  }
+
+  /**
+   * Sets the executor for this sceduler
+   *
+   * @param executor the executor for this sceduler
+   */
+  public void setExecutor (org.opencyc.elf.bg.executor.Executor executor) {
+    this.executor = executor;
+  }
+
+  /**
+   * Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   */
+  public Puttable getChannel() {
+    return (Puttable) schedulerChannel;
+  }
+
   //// Protected Area
   
   /**
-   * Receives schedule job message from the job assigner
+   * Thread which processes the input message channel.
    */
-  protected void receiveScheduleJob () {
-    //TODO
-    // receive via channel from the job assigner
-    // TaskCommand taskCommand
-  }
-  
-  /**
-   * Receives the plan selector status message from the plan selector
-   *
-   * @param taskCommand the task command
-   * @param schedule the schedule
-   * @param the plan selector status
-   */
-  protected void receivePlanSelectorStatus () {
-    //TODO
-    // receive via channel from the plan selector
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // Status status
-  }
-  
-  /**
-   * Receives the executor status message from the executor associated with
-   * this scheduler.
-   */
-  protected void receiveExecutorStatus () {
-    //TODO
-    // receive via channel from he executor associated with this scheduler
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // Status status
-  }
-  
-  /**
-   * Receives the value judgement status from behavior generation which forwarded it
-   * from value judgement.
-   */
-  protected void receiveValueJudgementStatus () {
-    //TODO
-    // receive via channel from ?
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // Status status
-  }
+  protected class Consumer implements Runnable {
+    
+    /**
+     * the takable channel from which messages are input
+     */
+    protected final Takable schedulerChannel;
+    
+    /**
+     * the puttable channel to which messages are output to the
+     * job assigner
+     */
+    protected final Puttable jobAssignerChannel;
+    
+    /**
+     * the puttable channel to which messages are output to the
+     * plan simulator
+     */
+    protected final Puttable planSimulatorChannel;
+    
+    /**
+     * the puttable channel to which messages are output to the predictor
+     */
+    protected final Puttable predictorChannel;
+    
+    /**
+     * the parent node component
+     */
+    protected NodeComponent nodeComponent;
+          
+    /**
+     * the node's controlled resources
+     */
+    protected ArrayList controlledResources;
+    
+    /**
+     * the node's commanded task
+     */
+    protected TaskCommand taskCommand;
+        
+    /**
+     * the schedule which is planned to accomplish the commanded task
+     */
+    protected Schedule schedule;
+    
+    /**
+     * Creates a new instance of Consumer.
+     *
+     * @param schedulerChannel the takable channel from which messages are input
+     * @param jobAssignerChannel the puttable channel to which messages are output to the
+     * job assigner
+     * @param planSimulatorChannel the puttable channel to which messages are output to the
+     * plan simulator
+     * @param predictorChannel the puttable channel to which messages are output to the predictor
+     * @param nodeComponent the parent node component
+     */
+    protected Consumer (Takable schedulerChannel,
+                        Puttable jobAssignerChannel,
+                        Puttable planSimulatorChannel,
+                        Puttable predictorChannel,
+                        NodeComponent nodeComponent) { 
+      this.schedulerChannel = schedulerChannel;
+      this.jobAssignerChannel = jobAssignerChannel;
+      this.planSimulatorChannel = planSimulatorChannel;
+      this.predictorChannel = predictorChannel;
+      this.nodeComponent = nodeComponent;
+    }
 
-  /**
-   * Receives simulation failure notification message forwarded from behavior generation on
-   * behalf of world model.
-   */
-  protected void receiveSimulationFailureNotification () {
-    // TODO
-    // receive via channel from behavior generation
-    // TaskCommand taskCommand
-    // Schedule schedule
-  }
+    /**
+     * Reads messages from the input queue and processes them.
+     */
+    public void run () {
+      try {
+        while (true) { 
+          dispatchMsg((GenericMsg) schedulerChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+     
+    //TODO think about conversations and thread safety
+    
+    /**
+     * Dispatches the given input channel message by type.
+     *
+     * @param genericMsg the given input channel message
+     */
+    void dispatchMsg (GenericMsg genericMsg) {
+      if (genericMsg instanceof ScheduleJobMsg)
+        processScheduleJobMsg((ScheduleJobMsg) genericMsg);
+      else if (genericMsg instanceof PredictedInputMsg)
+        processPredictedInputMsg((PredictedInputMsg) genericMsg);
+      else if (genericMsg instanceof ScheduleEvaluationResultMsg)
+        processScheduleEvaluationResultMsg((ScheduleEvaluationResultMsg) genericMsg);
+      else if (genericMsg instanceof ReplanMsg)
+        processReplanMsg((ReplanMsg) genericMsg);
+      else if (genericMsg instanceof ExecutorStatusMsg)
+        processExecutorStatusMsg((ExecutorStatusMsg) genericMsg); 
+      else if (genericMsg instanceof ScheduleConsistencyRequestMsg)
+        processScheduleConsistencyRequestMsg((ScheduleConsistencyRequestMsg) genericMsg); 
+    }
   
-  /**
-   * Receives the check schedule consistent message from ?.
-   */
-  protected void receiveCheckScheduleConsistent () {
-    // TODO
-    // receive via channel from ?
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-  }
+    /**
+     * Processes the schedule job message.
+     *
+     * @param scheduleJobMsg the schedule job message
+     */
+    protected void processScheduleJobMsg (ScheduleJobMsg scheduleJobMsg) {
+      taskCommand = scheduleJobMsg.getTaskCommand();
+      //TODO
+    }
+        
+    /**
+     * Processes the predicted input message.
+     *
+     * @param predictedInputMsg the predicted input message
+     */
+    protected void processPredictedInputMsg (PredictedInputMsg predictedInputMsg) {
+      Object obj = predictedInputMsg.getObj();
+      Object data = predictedInputMsg.getData();
+      //TODO
+    }
+        
+    /**
+     * Processes the schedule evaluation result message.
+     *
+     * @param scheduleEvaluationResult the schedule evaluation result message
+     */
+    protected void processScheduleEvaluationResultMsg (ScheduleEvaluationResultMsg scheduleEvaluationResultMsg) {
+      //TODO
+      Result result = scheduleEvaluationResultMsg.getResult();
+    }
+        
+    /**
+     * Processes the replan message.
+     *
+     * @param replanMsg the replan message
+     */
+    protected void processReplanMsg (ReplanMsg replanMsg) {
+      //TODO
+    }
+        
+    /**
+     * Processes the executor status message.
+     *
+     * @param executorStatusMsg the executor status message
+     */
+    protected void processExecutorStatusMsg (ExecutorStatusMsg executorStatusMsg) {
+      //TODO
+      Status status = executorStatusMsg.getStatus();
+    }
+    
+    /**
+     * Processes the schedule consistency message.
+     *
+     * @param scheduleConsistencyRequestMsg the schedule consistency request message
+     */
+    protected void processScheduleConsistencyRequestMsg (ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg) {
+      ArrayList peerControlledResources = scheduleConsistencyRequestMsg.getControlledResources();
+      TaskCommand peerTaskCommand = scheduleConsistencyRequestMsg.getTaskCommand();
+      Schedule peerSchedule = scheduleConsistencyRequestMsg.getSchedule();
+      //TODO
+    }
+    
+    /**
+     * Sends the scheduler status message to the job assigner.
+     */
+    protected void sendSchedulerStatusMsg () {
+      //TODO
+      Status status = new Status();
+      
+      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg();
+      schedulerStatusMsg.setSender(nodeComponent);
+      schedulerStatusMsg.setStatus(status);
+      nodeComponent.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
+    }
+    
+    /**
+     * Requests a predicted value for the given object.
+     *
+     * @param obj the given object whose predicted value is requested from
+     * the predictor
+     */
+    protected void sendPredictionRequestMsg (Object obj) {
+      PredictionRequestMsg predictionRequestMsg = new PredictionRequestMsg();
+      predictionRequestMsg.setSender(nodeComponent);
+      predictionRequestMsg.setReplyToChannel((Puttable) schedulerChannel);
+      predictionRequestMsg.setObj(obj);
+      nodeComponent.sendMsgToRecipient(predictorChannel, predictionRequestMsg);
+    }    
 
-  /**
-   * Receives the schedule consistency evaluation message from ?.
-   */
-  protected void receiveScheduleConsistencyEvaluation () {
-    // TODO
-    // receive via channel from 
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-  }
-  
-  /**
-   * Sends the request simulate schedule message to behavior generation
-   */
-  protected void requestSimulateSchedule () {
-    // TODO
-    // send via channel to ?
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // send forwardSimulateSchedule(controlledResources, taskCommand, schedule)
-    // to behaviorGeneration
-  }
-  
-  /**
-   * Sends the check if schedule consistent message to ?
-   */
-  protected void checkIfScheduleConsistent () {
-    // TODO
-    // send via channel?
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-  }
-  
-  /**
-   * Sends the schedule consistency evaluation message to ?
-   */
-  protected void sendScheduleConsistencyEvaluation () {
-    // TODO
-    // send via channel to ?
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-  }
-  
-  /**
-   * Sends the scheduler status message to job assigner.
-   */
-  protected void schedulerStatus () {
-    // TODO
-    // send via channel to ?
-    // ArrayList controlledResources
-    // Status status
-    // send schedulerStatus(controlledResources, status) to jobAssigner
-  }
-  
-  public void run() {
+    /**
+     * Sends a schedule simulation request message to the plan simulator.
+     */
+    protected void sendSimulateScheduleMsg () {
+      SimulateScheduleMsg simulateScheduleMsg = new SimulateScheduleMsg();
+      simulateScheduleMsg.setSender(nodeComponent);
+      simulateScheduleMsg.setReplyToChannel((Puttable) schedulerChannel);
+      simulateScheduleMsg.setControlledResources(controlledResources);
+      simulateScheduleMsg.setTaskCommand(taskCommand);
+      simulateScheduleMsg.setSchedule(schedule);
+      nodeComponent.sendMsgToRecipient(planSimulatorChannel, simulateScheduleMsg);
+    }    
+
+    /**
+     * Sends a schedule consistency request to a peer scheduler.
+     *
+     * @param peerScheduler the peer scheduler
+     */
+    protected void sendScheduleConsistencyRequestMsg (Scheduler peerScheduler) {
+      ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg = 
+        new ScheduleConsistencyRequestMsg();
+      scheduleConsistencyRequestMsg.setSender(nodeComponent);
+      scheduleConsistencyRequestMsg.setReplyToChannel((Puttable) schedulerChannel);
+      scheduleConsistencyRequestMsg.setControlledResources(controlledResources);
+      scheduleConsistencyRequestMsg.setTaskCommand(taskCommand);
+      scheduleConsistencyRequestMsg.setSchedule(schedule);
+      nodeComponent.sendMsgToRecipient(peerScheduler.getChannel(), 
+                                       scheduleConsistencyRequestMsg);
+    }    
+
+    /**
+     * Sends a schedule consistency evaluation message to a peer scheduler in
+     * response to its schedule consistency request.
+     *
+     * @param scheduleConsistencyRequestMsg the given schedule consistency request message
+     */
+    protected void sendScheduleConsistencyEvaluationMsg (ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg) {
+      ScheduleConsistencyEvaluationMsg scheduleConsistencyEvaluationMsg = 
+        new ScheduleConsistencyEvaluationMsg();
+      scheduleConsistencyEvaluationMsg.setSender(nodeComponent);
+      scheduleConsistencyEvaluationMsg.setInReplyToMsg(scheduleConsistencyRequestMsg);
+      scheduleConsistencyEvaluationMsg.setControlledResources(controlledResources);
+      scheduleConsistencyEvaluationMsg.setTaskCommand(taskCommand);
+      scheduleConsistencyEvaluationMsg.setSchedule(schedule);
+      nodeComponent.sendMsgToRecipient(scheduleConsistencyRequestMsg.getReplyToChannel(),
+                                       scheduleConsistencyEvaluationMsg);
+    }    
   }
   
   //// Private Area
+
   //// Internal Rep
+
+  /**
+   * the takable channel from which messages are input
+   */
+  protected Takable schedulerChannel;
+
+  /**
+   * the thread which processes the input channel of messages
+   */
+  protected Consumer consumer;
+
+  /**
+   * the consumer thread executor
+   */
+  protected EDU.oswego.cs.dl.util.concurrent.Executor consumerExecutor;
+  
+  /**
+   * the executor for this scheduler
+   */
+  org.opencyc.elf.bg.executor.Executor executor;
 }

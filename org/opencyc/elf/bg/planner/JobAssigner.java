@@ -63,7 +63,7 @@ public class JobAssigner extends NodeComponent {
 
   /** 
    * Creates a new instance of JobAssigner with the given
-   * input channel.
+   * input and output channels.
    *
    * @param jobAssignerChannel the takable channel from which messages are input
    * @param executorChannel the puttable channel to which messages are output to the higher
@@ -76,6 +76,7 @@ public class JobAssigner extends NodeComponent {
                       Puttable executorChannel,
                       Puttable knowledgeBaseChannel,
                       Puttable predictorChannel) {
+    this.jobAssignerChannel = jobAssignerChannel;
     consumer = new Consumer(jobAssignerChannel,
                             executorChannel,
                             knowledgeBaseChannel,
@@ -92,6 +93,18 @@ public class JobAssigner extends NodeComponent {
   }
 
   //// Public Area
+
+  /** 
+   * Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   *
+   */
+  public Puttable getChannel() {
+    return (Puttable) jobAssignerChannel;
+  }  
 
   /**
    * Returns true if the given object equals this object.
@@ -119,6 +132,24 @@ public class JobAssigner extends NodeComponent {
     return "";
   }
   
+  /**
+   * Gets the list of schedulers for this job assigner
+   *
+   * @return the list of schedulers for this job assigner
+   */
+  public ArrayList getSchedulers () {
+    return schedulers;
+  }
+
+  /**
+   * Sets the list of schedulers for this job assigner
+   *
+   * @param schedulers the list of schedulers for this job assigner
+   */
+  public void setSchedulers (ArrayList schedulers) {
+    this.schedulers = schedulers;
+  }
+
   //// Protected Area
 
   /**
@@ -197,7 +228,9 @@ public class JobAssigner extends NodeComponent {
       }
       catch (InterruptedException ex) {}
     }
-      
+     
+    //TODO think about conversations and thread safety
+    
     /**
      * Dispatches the given input channel message by type.
      *
@@ -255,53 +288,46 @@ public class JobAssigner extends NodeComponent {
       //TODO
       Status status = schedulerStatusMsg.getStatus();
     }
-        
-    //TODO add methods to send the output messages
-  }
-
-  /**
-   * Receives the do task message from behavior generation.  This
-   * triggers the fetch task message to be sent back to behavior generation.
-   */
-  protected void doTask () {
-    //TODO
-    // received via channel from behavior generation
-    // TaskCommand taskCommand
-    fetchTaskFrame();
-    // may trigger scheduleJob(TaskCommand)
-    // may trigger jobAssignerStatus(status)
-  }
-  
-  /**
-   * Receives the scheduler status message from a scheduler
-   */
-  protected void schedulerStatus () {
-    //TODO
-    // received via channel from a scheduler
-    // ArrayList controlledResources
-    // Status status
-  }
-  
-  /**
-   * Receives the schedule job message from ?.  Subsequently the message is
-   * sent to the appropriate scheduler.
-   */
-  protected void ScheduleJob (TaskCommand taskCommand) {
-    //TODO
-    // received via channel from ?
-    // send via channel to appropriate scheduler
-    // TaskCommand taskCommand
-    // send receiveScheduleJob(taskCommand) to (appropriate) scheduler
-  }
-  
-  /**
-   * Sends the fetch task frame message to behavior generation
-   */
-  protected void fetchTaskFrame () {
-    //TODO
-    // send via channel to behavior generation
-    // TaskCommand taskCommand
-    // send forwardFetchTaskFrame(taskCommand) to behaviorGeneration
+    
+    /**
+     * Sends the job assignment status message to the higher-level executor.
+     */
+    protected void sendJobAssignmentStatus () {
+      //TODO
+      Status status = new Status();
+      
+      JobAssignmentStatus jobAssignmentStatus = new JobAssignmentStatus();
+      jobAssignmentStatus.setSender(nodeComponent);
+      jobAssignmentStatus.setStatus(status);
+    }
+    
+    /**
+     * Requests the given object from the knowledge base.
+     *
+     * @param obj the given object whose value is requested from the
+     * knowledge base
+     */
+    protected void sendKBObjectRequestMsg (Object obj) {
+      KBObjectRequestMsg kbObjectRequestMsg = new KBObjectRequestMsg();
+      kbObjectRequestMsg.setSender(nodeComponent);
+      kbObjectRequestMsg.setReplyToChannel((Puttable) jobAssignerChannel);
+      kbObjectRequestMsg.setObj(obj);
+      nodeComponent.sendMsgToRecipient(knowledgeBaseChannel, kbObjectRequestMsg);
+    }
+    
+    /**
+     * Requests a predicted value for the given object.
+     *
+     * @param obj the given object whose predicted value is requested from
+     * the predictor
+     */
+    protected void sendPredictionRequestMsg (Object obj) {
+      PredictionRequestMsg predictionRequestMsg = new PredictionRequestMsg();
+      predictionRequestMsg.setSender(nodeComponent);
+      predictionRequestMsg.setReplyToChannel((Puttable) jobAssignerChannel);
+      predictionRequestMsg.setObj(obj);
+      nodeComponent.sendMsgToRecipient(predictorChannel, predictionRequestMsg);
+    }    
   }
   
   /**
@@ -321,20 +347,30 @@ public class JobAssigner extends NodeComponent {
     //TODO
     // TaskCommand taskCommand
   }
-  
-  
+    
   //// Private Area
+
   //// Internal Rep
   
   /**
+   * the takable channel from which messages are input
+   */
+  protected Takable jobAssignerChannel;
+    
+  /**
    * the thread which processes the input channel of messages
    */
-  Consumer consumer;
+  protected Consumer consumer;
   
   /**
    * the executor of the consumer thread
    */
-  Executor executor;
+  protected Executor executor;
+  
+  /**
+   * the list of schedulers for this job assigner
+   */
+  protected ArrayList schedulers;
   
   //// main
 }

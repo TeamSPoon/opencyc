@@ -12,6 +12,7 @@ import org.opencyc.elf.message.EvaluateScheduleMsg;
 import org.opencyc.elf.message.PredictedInputMsg;
 import org.opencyc.elf.message.PredictionRequestMsg;
 import org.opencyc.elf.message.SimulateScheduleMsg;
+import org.opencyc.elf.message.SimulationFailureNotificationMsg;
 
 //// External Imports
 
@@ -81,6 +82,9 @@ public class PlanSimulator extends NodeComponent {
     }
   }
   
+  public Puttable getChannel() {
+  }
+  
   //// Public Area
   
   //// Protected Area
@@ -106,6 +110,12 @@ public class PlanSimulator extends NodeComponent {
     protected final Puttable predictorChannel;
     
     /**
+     * the scheduler's input channel used for a failure
+     * notification message
+     */
+    protected Puttable schedulerChannel;
+    
+    /**
      * the parent node component
      */
     protected NodeComponent nodeComponent;
@@ -125,6 +135,8 @@ public class PlanSimulator extends NodeComponent {
      */
     protected Schedule schedule;
       
+    protected SimulateScheduleMsg simulateScheduleMsg;
+    
     /**
      * Creates a new instance of Consumer.
      *
@@ -174,9 +186,11 @@ public class PlanSimulator extends NodeComponent {
      * @param simulateScheduleMsg the simulate schedule message
      */
     protected void processSimulateScheduleMsg(SimulateScheduleMsg simulateScheduleMsg) {
+      this.simulateScheduleMsg = simulateScheduleMsg;
       controlledResources =  simulateScheduleMsg.getControlledResources();
       taskCommand =  simulateScheduleMsg.getTaskCommand();
       schedule =  simulateScheduleMsg.getSchedule();
+      schedulerChannel = simulateScheduleMsg.getReplyToChannel();
       //TODO
     }
     
@@ -218,6 +232,24 @@ public class PlanSimulator extends NodeComponent {
       evaluateScheduleMsg.setTaskCommand(taskCommand);
       evaluateScheduleMsg.setSchedule(schedule);
       sendMsgToRecipient(planEvaluatorChannel, evaluateScheduleMsg);
+    }
+
+    /**
+     * Sends the simulation failure notification message back to
+     * the scheduler which requested the plan simulation.
+     */
+    protected void sendSimulationFailureNotificationMsg() {
+      //TODO
+      Object result = null;
+      
+      SimulationFailureNotificationMsg simulationFailureNotificationMsg = 
+        new SimulationFailureNotificationMsg();
+      simulationFailureNotificationMsg.setSender(nodeComponent);
+      simulationFailureNotificationMsg.setInReplyToMsg(simulateScheduleMsg);
+      simulationFailureNotificationMsg.setControlledResources(controlledResources);
+      simulationFailureNotificationMsg.setTaskCommand(taskCommand);
+      simulationFailureNotificationMsg.setSchedule(schedule);
+      sendMsgToRecipient(schedulerChannel, simulationFailureNotificationMsg);
     }
   }
   

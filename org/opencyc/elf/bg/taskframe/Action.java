@@ -5,8 +5,6 @@ import org.opencyc.elf.ELFException;
 
 import org.opencyc.elf.bg.state.State;
 
-import org.opencyc.elf.bg.procedure.Procedure;
-
 //// External Imports
 import java.util.ArrayList;
 
@@ -50,65 +48,64 @@ public class Action {
   }
   
   //// Public Area
-  
+
   /**
-   * Gets the action state, including the procedure, parameters and action modifiers
+   * Gets the name of the action
    *
-   * @return the action state, including the procedure, parameters and action modifiers
+   * @return name the name of the action
+   */
+  public String getName () {
+    return name;
+  }
+
+  /**
+   * Sets the name of the action
+   *
+   * @param name the name of the action
+   */
+  public void setName (String name) {
+    this.name = name;
+  }  
+  /**
+   * Gets the action state, including the parameters and action modifiers
+   *
+   * @return the action state, including the parameters and action modifiers
    */
   public State getState () {
     return state;
   }
-
-  /**
-   * Gets the procedure to be performed for this action.
-   *
-   * @return he procedure to be performed for this action
-   */
-  public Procedure getProcedure () {
-    return (Procedure) state.getStateValue(State.PROCEDURE);
-  }
   
   /**
-   * Sets the procedure to be performed for this action.
+   * Gets the parameter names for this action.
    *
-   * @param procedure the procedure to be performed for this action
-   */
-  public void setProcedure (Procedure procedure) {
-    state.setStateValue(State.PROCEDURE, procedure);
-  }
-  
-  /**
-   * Gets the procedure parameter names for this action.
-   *
-   * @return the procedure parameter names for this action
+   * @return the parameter names for this action
    */
   public ArrayList getParameterNames () {
-    return (ArrayList) getProcedure().getParameterNames();
+    return (ArrayList) state.getStateValue(State.PARAMETER_TYPES);
   }
    
   /**
-   * Gets the procedure parameter types for this action.
+   * Gets the parameter types for this action.
    *
-   * @return the procedure parameter types for this action
+   * @return the parameter types for this action
    */
   public ArrayList getParameterTypes () {
-    return (ArrayList) getProcedure().getParameterTypes();
+    return (ArrayList) state.getStateValue(State.PARAMETER_TYPES);
   }
     
   /**
-   * Gets the procedure parameter values for this action.
+   * Gets the parameter values for this action.
    *
-   * @return the procedure parameter values for this action
+   * @return the parameter values for this action
    */
   public ArrayList getParameterValues () {
     return (ArrayList) state.getStateValue(State.PARAMETER_VALUES);
   }
   
   /**
-   * Sets the procedure parameter values for this action.
+   * Sets the parameter values for this action.
    *
-   * @param parameterNames the procedure parameter values for this action
+   * @param parameterNames the parameter values for this action
    */
   public void setParameterValues (ArrayList parameterValues) {
     if (parameterValues.size() != getParameterTypes().size())
@@ -133,22 +130,22 @@ public class Action {
    * @return the output type for this action
    */
   public Class getOutputType () {
-    return getProcedure().getOutputType();
-  }
+    return (Class) state.getStateValue(State.OUTPUT_TYPE);
+   }
   
   /**
-   * Gets the procedure output value for this (completed) action.
+   * Gets the utput value for this (completed) action.
    *
-   * @return the procedure parameter values for this (completed) action
+   * @return the parameter values for this (completed) action
    */
   public Object getOutputValue () {
-    return state.getStateValue(State.PROCEDURE_OUTPUT_VALUE);
+    return state.getStateValue(State.OUTPUT_VALUE);
   }
     
   /**
-   * Sets the action state, including the object, method, parameters and action modifiers
+   * Sets the action state.
    *
-   * @param state the action state, including the object, method, parameters and action modifiers
+   * @param state the action state
    */
   public void setState (State state) {
     this.state = state;
@@ -156,14 +153,19 @@ public class Action {
   
   //// Protected Area
   
-  /**
-   * the action state, including the procedure, parameters and action modifiers
-   */
-  protected State state;
-  
   //// Private Area
   
   //// Internal Rep
+  
+  /**
+   * the action state
+   */
+  protected State state;
+  
+  /**
+   * the name of the action
+   */
+  protected String name;
   
   //// Main
   

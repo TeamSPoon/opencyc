@@ -56,7 +56,6 @@ public class Interpreter {
      */
     protected Event currentEvent;
 
-
     /**
      * the state machine
      */
@@ -78,10 +77,15 @@ public class Interpreter {
     protected ArrayList selectedTransitions;
 
     /**
+     * the java expression evaluator
+     */
+    protected ExpressionEvaluator expressionEvaluator;
+
+    /**
      * Constructs a new Interpreter object.
      */
     public Interpreter() {
-        Log.makeLog("state-machine-interpreter.log");
+        initialization();
     }
 
     /**
@@ -90,6 +94,15 @@ public class Interpreter {
      */
     public Interpreter(StateMachine stateMachine) {
         this.stateMachine = stateMachine;
+        initialization();
+    }
+
+    /**
+     * Performs initialization of this object.
+     */
+    protected void initialization () {
+        Log.makeLog("state-machine-interpreter.log");
+        expressionEvaluator = new ExpressionEvaluator();
     }
 
     /**
@@ -107,9 +120,56 @@ public class Interpreter {
      */
     public void interpret () {
         while (true) {
+            eventDispatcher();
             eventProcessor();
             fireSelectedTransitions();
         }
+    }
+
+    /**
+     * Processes dispatched event instances according to the general semantics
+     * of UML state machines and the specific form of this state machine.
+     * Selects the transitions from active source states which are triggered
+     * by the current event.
+     */
+    protected void eventProcessor () {
+        selectedTransitions = new ArrayList();
+        Stack stateNodeStack = new Stack();
+        stateNodeStack.push(stateConfiguration.getRoot());
+        while (! stateNodeStack.empty()) {
+            DefaultMutableTreeNode stateNode = (DefaultMutableTreeNode) stateNodeStack.pop();
+            Enumeration containedStates = stateNode.children();
+            while (containedStates.hasMoreElements()) {
+                DefaultMutableTreeNode containedState =
+                        (DefaultMutableTreeNode) containedStates.nextElement();
+                stateNodeStack.push(containedState);
+                State state = (State) containedState.getUserObject();
+                Iterator transitions = state.getOutgoing().listIterator();
+                while (transitions.hasNext()) {
+                    Transition transition = (Transition) transitions.next();
+                    if (transition.getTrigger().equals(currentEvent)) {
+                        BooleanExpression guardExpression = transition.getGuard().getexpression();
+                        if ((guardExpression == null) ||
+                            expressionEvaluator.evaluateBoolean(guardExpression)) {
+                            selectedTransitions.add(transition);
+                        }
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    /**
+     * Selects and dequeues event instances from the event queue for
+     * processing.
+     */
+    protected void eventDispatcher () {
+        if (eventQueue.isEmpty())
+            currentEvent = null;
+        else
+            currentEvent = (Event) eventQueue.get();
     }
 
     /**
@@ -127,63 +187,6 @@ public class Interpreter {
      */
     public void enqueueEvent (Event event) {
         eventQueue.add(event);
-    }
-
-    /**
-     * Selects and dequeues event instances from the event queue for
-     * processing.
-     */
-    protected void eventDispatcher () {
-        if (eventQueue.isEmpty())
-            currentEvent = null;
-        else
-            currentEvent = (Event) eventQueue.get();
-    }
-
-    /**
-     * Processes dispatched event instances according to the general semantics
-     * of UML state machines and the specific form of this state machine.
-     */
-    protected void eventProcessor () {
-        eventDispatcher();
-        while (currentEvent != null) {
-            selectTransitions();
-            eventDispatcher();
-        }
-    }
-
-    /**
-     * Selects the transitions from active source states which are triggered
-     * by the current event.
-     */
-    protected void selectTransitions() {
-        selectedTransitions = new ArrayList();
-        Stack stateNodeStack = new Stack();
-        stateNodeStack.push(stateConfiguration.getRoot());
-        while (! stateNodeStack.empty()) {
-            DefaultMutableTreeNode stateNode = (DefaultMutableTreeNode) stateNodeStack.pop();
-            Enumeration containedStates = stateNode.children();
-            while (containedStates.hasMoreElements()) {
-                DefaultMutableTreeNode containedState =
-                        (DefaultMutableTreeNode) containedStates.nextElement();
-                stateNodeStack.push(containedState);
-                State state = (State) containedState.getUserObject();
-                Iterator transitions = state.getOutgoing().listIterator();
-                while (transitions.hasNext()) {
-                    Transition transition = (Transition) transitions.next();
-                    if (transition.getTrigger().equals(currentEvent)) {
-                        BooleanExpression guardExpression = transition.getGuard().getexpression();
-                        /*
-                        if (evaluateBoolean(guardExpression.getBody()) {
-                        }
-                        */
-                    }
-                }
-
-            }
-
-        }
-
     }
 
     /**

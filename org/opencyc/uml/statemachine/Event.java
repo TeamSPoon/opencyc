@@ -41,6 +41,15 @@ public class Event extends ModelElement {
     public Event() {
     }
 
+    /**
+     * Returns true if the given object equals this object.
+     *
+     * @param object the given object
+     * @return true if the given object equals this object, otherwise returns false
+     */
+    public boolean equals (Object object) {
+        return object instanceof Event;
+    }
 
     /**
      * Gets the parameters of this event.

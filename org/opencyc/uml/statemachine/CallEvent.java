@@ -41,6 +41,16 @@ public class CallEvent extends Event {
     }
 
     /**
+     * Returns true if the given object equals this object.
+     *
+     * @param object the given object
+     * @return true if the given object equals this object, otherwise returns false
+     */
+    public boolean equals (Object object) {
+        return object instanceof CallEvent;
+    }
+
+    /**
      * Gets the operation of this call event
      *
      * @return the operation of this call event

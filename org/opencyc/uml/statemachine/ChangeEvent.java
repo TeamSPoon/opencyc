@@ -41,6 +41,16 @@ public class ChangeEvent extends Event {
     }
 
     /**
+     * Returns true if the given object equals this object.
+     *
+     * @param object the given object
+     * @return true if the given object equals this object, otherwise returns false
+     */
+    public boolean equals (Object object) {
+        return object instanceof ChangeEvent;
+    }
+
+    /**
      * Gets the change expression for this change event
      *
      * @return the change expression for this change event

@@ -25,7 +25,7 @@ package org.opencyc.uml.commonbehavior;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class BooleanExpression {
+public class BooleanExpression extends Expression {
 
     /**
      * Constructs a new BooleanExpression object.

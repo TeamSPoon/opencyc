@@ -41,6 +41,16 @@ public class TimeEvent extends Event {
     }
 
     /**
+     * Returns true if the given object equals this object.
+     *
+     * @param object the given object
+     * @return true if the given object equals this object, otherwise returns false
+     */
+    public boolean equals (Object object) {
+        return object instanceof TimeEvent;
+    }
+
+    /**
      * Gets the time expression for this time event
      *
      * @return the time expression for this time event

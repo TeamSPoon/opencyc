@@ -1,5 +1,4 @@
-
- package org.opencyc.constraintsolver;
+package org.opencyc.constraintsolver;
 
 import java.util.*;
 import java.io.IOException;

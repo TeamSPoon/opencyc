@@ -267,11 +267,6 @@ public class ArgumentTypeConstrainer {
         return true;
     }
 
-
-
-
-
-
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.

@@ -50,29 +50,6 @@ public class ResourceFactory {
     resourcePool.setResource(Resource.CONSOLE, resource);
   }
   
-  /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (! (obj instanceof Class))
-      return false;
-    //TODO
-    return true;
-  }
-  
-  /**
-   * Returns a string representation of this object.
-   *
-   * @return a string representation of this object
-   */
-  public String toString() {
-    //TODO
-    return "";
-  }
-  
   //// Protected Area
   
   //// Private Area

@@ -204,7 +204,9 @@ public class SensoryPerception extends NodeComponent {
      */
     void dispatchMsg (GenericMsg genericMsg) {
       if (genericMsg instanceof ObservedInputMsg)
-        processObservedInputMsg((ObservedInputMsg) genericMsg);
+        processPredictedInputMsg((PredictedInputMsg) genericMsg);
+      else if (genericMsg instanceof PerceivedSensoryInputMsg)
+        processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
       else if (genericMsg instanceof PerceivedSensoryInputMsg)
         processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
     }

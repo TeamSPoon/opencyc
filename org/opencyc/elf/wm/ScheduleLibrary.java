@@ -4,7 +4,8 @@ package org.opencyc.elf.wm;
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.ActionFactory;
+
+import org.opencyc.elf.wm.ActionFactory;
 
 //// External Imports
 import java.util.ArrayList;

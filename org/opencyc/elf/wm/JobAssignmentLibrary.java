@@ -5,7 +5,8 @@ import org.opencyc.elf.bg.planner.JobAssignment;
 import org.opencyc.elf.bg.planner.Resource;
 
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.ActionFactory;
+
+import org.opencyc.elf.wm.ActionFactory;
 
 //// External Imports
 import java.util.ArrayList;

@@ -6,7 +6,6 @@ import org.opencyc.elf.a.Actuator;
 import org.opencyc.elf.bg.BehaviorGeneration;
 
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.ActionFactory;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.bg.planner.JobAssigner;
@@ -27,6 +26,7 @@ import org.opencyc.elf.vj.EntityEvaluator;
 import org.opencyc.elf.vj.PlanEvaluator;
 import org.opencyc.elf.vj.ValueJudgement;
 
+import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.PlanSimulator;

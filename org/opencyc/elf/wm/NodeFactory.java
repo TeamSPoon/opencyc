@@ -10,7 +10,6 @@ import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 
 import org.opencyc.elf.bg.taskframe.Action;
-import org.opencyc.elf.bg.taskframe.TaskFrame;
 
 import org.opencyc.elf.s.Sensation;
 import org.opencyc.elf.s.Sensor;
@@ -86,30 +85,6 @@ public class NodeFactory {
     return nodeFactory;
   }
   
-  /** Makes a node given the set of task frames that it must process.
-   *
-   * @param taskFrames the set of task frames that it must process
-   */
-  public Node makeNode(List taskFrames) {
-    HashSet scheduleNames = new HashSet();
-    Iterator taskFrameIterator = taskFrames.iterator();
-    while (taskFrameIterator.hasNext()) {
-      TaskFrame taskFrame = (TaskFrame) taskFrameIterator.next();
-      scheduleNames.add(taskFrame.getTaskName());
-    }
-    StringBuffer stringBuffer = new StringBuffer();
-    Iterator scheduleNameIterator = scheduleNames.iterator();
-    while (scheduleNameIterator.hasNext()) {
-      stringBuffer.append(scheduleNameIterator.next().toString());
-      stringBuffer.append(" / ");
-    }
-    if (stringBuffer.length() > 0)
-      stringBuffer.deleteCharAt(stringBuffer.length() - 1);
-    String name = stringBuffer.toString();
-    node = makeNodeShell(name);
-    return node;
-  }
-  
   /** Makes a shell node.
    *
    * @param name the node name
@@ -142,10 +117,8 @@ public class NodeFactory {
   /** Makes a behavior generation shell. */
   protected void makeBehaviorGenerationShell () {
     behaviorGeneration = new BehaviorGeneration(node);
-    List actionCapabilities = new ArrayList();
-    actionCapabilities.add(Action.CONVERSE_WITH_USER);
     Channel jobAssignerChannel = new BoundedBuffer(CHANNEL_CAPACITY);
-    jobAssigner = new JobAssigner(node, actionCapabilities, jobAssignerChannel);
+    jobAssigner = new JobAssigner(node, jobAssignerChannel);
     planSelector = new PlanSelector();
     planSelector.setNode(node);
     behaviorGeneration.setPlanSelector(planSelector);

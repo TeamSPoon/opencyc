@@ -8,7 +8,7 @@ import org.opencyc.elf.Status;
 
 import org.opencyc.elf.a.DirectActuator;
 
-import org.opencyc.elf.bg.taskframe.TaskCommand;
+import org.opencyc.elf.bg.taskframe.Command;
 
 import org.opencyc.elf.message.ExecutorStatusMsg;
 import org.opencyc.elf.message.GenericMsg;
@@ -70,7 +70,7 @@ public class Scheduler extends NodeComponent {
   public Scheduler (Node node,
                     Takable schedulerChannel) {
     setNode(node);
-    this.schedulerChannel = schedulerChannel;           
+    this.schedulerChannel = schedulerChannel;         
   }
 
   //// Public Area
@@ -155,8 +155,8 @@ public class Scheduler extends NodeComponent {
     /** the puttable channel to which messages are output to the job assigner */
     protected final Puttable jobAssignerChannel;
     
-    /** the parent node component */
-    protected NodeComponent nodeComponent;
+    /** the reference to this node component as a message sender */
+    protected NodeComponent sender;
           
     /** the node's controlled resources */
     protected List controlledResources;
@@ -166,15 +166,15 @@ public class Scheduler extends NodeComponent {
      * @param schedulerChannel the takable channel from which messages are input
      * @param jobAssignerChannel the puttable channel to which messages are output to the
      * job assigner
-     * @param nodeComponent the parent node component
+     * @param sender the reference to this node component as a message sender
      */
     protected Consumer (Takable schedulerChannel,
                         Puttable jobAssignerChannel,
-                        NodeComponent nodeComponent) { 
+                        NodeComponent sender) { 
       getLogger().info("Creating Scheduler.Consumer");
       this.schedulerChannel = schedulerChannel;
       this.jobAssignerChannel = jobAssignerChannel;
-      this.nodeComponent = nodeComponent;
+      this.sender = sender;
     }
 
     /** Reads messages from the input queue and processes them. */
@@ -265,7 +265,7 @@ public class Scheduler extends NodeComponent {
      */
     protected void processScheduleConsistencyRequestMsg (ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg) {
       List peerControlledResources = scheduleConsistencyRequestMsg.getControlledResources();
-      TaskCommand peerTaskCommand = scheduleConsistencyRequestMsg.getTaskCommand();
+      Command peerCommand = scheduleConsistencyRequestMsg.getCommand();
       Schedule peerSchedule = scheduleConsistencyRequestMsg.getSchedule();
       //TODO
     }
@@ -275,10 +275,8 @@ public class Scheduler extends NodeComponent {
       //TODO
       Status status = new Status();
       
-      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg();
-      schedulerStatusMsg.setSender(nodeComponent);
-      schedulerStatusMsg.setStatus(status);
-      nodeComponent.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
+      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(sender, status);
+      sender.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
     }
     
     /** Sends a schedule consistency request to a peer scheduler.
@@ -287,14 +285,13 @@ public class Scheduler extends NodeComponent {
      */
     protected void sendScheduleConsistencyRequestMsg (Scheduler peerScheduler) {
       ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg = 
-        new ScheduleConsistencyRequestMsg();
-      scheduleConsistencyRequestMsg.setSender(nodeComponent);
+        new ScheduleConsistencyRequestMsg(sender,
+                                          controlledResources,
+                                          job.getCommand(),
+                                          schedule);
       scheduleConsistencyRequestMsg.setReplyToChannel((Puttable) schedulerChannel);
-      scheduleConsistencyRequestMsg.setControlledResources(controlledResources);
-      scheduleConsistencyRequestMsg.setTaskCommand(taskCommand);
-      scheduleConsistencyRequestMsg.setSchedule(schedule);
-      nodeComponent.sendMsgToRecipient(peerScheduler.getChannel(), 
-                                       scheduleConsistencyRequestMsg);
+      sender.sendMsgToRecipient(peerScheduler.getChannel(), 
+                                scheduleConsistencyRequestMsg);
     }    
 
     /** Sends a schedule consistency evaluation message to a peer scheduler in
@@ -304,14 +301,10 @@ public class Scheduler extends NodeComponent {
      */
     protected void sendScheduleConsistencyEvaluationMsg (ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg) {
       ScheduleConsistencyEvaluationMsg scheduleConsistencyEvaluationMsg = 
-        new ScheduleConsistencyEvaluationMsg();
-      scheduleConsistencyEvaluationMsg.setSender(nodeComponent);
+        new ScheduleConsistencyEvaluationMsg(sender, schedule, controlledResources);
       scheduleConsistencyEvaluationMsg.setInReplyToMsg(scheduleConsistencyRequestMsg);
-      scheduleConsistencyEvaluationMsg.setControlledResources(controlledResources);
-      scheduleConsistencyEvaluationMsg.setTaskCommand(taskCommand);
-      scheduleConsistencyEvaluationMsg.setSchedule(schedule);
-      nodeComponent.sendMsgToRecipient(scheduleConsistencyRequestMsg.getReplyToChannel(),
-                                       scheduleConsistencyEvaluationMsg);
+      sender.sendMsgToRecipient(scheduleConsistencyRequestMsg.getReplyToChannel(),
+                                scheduleConsistencyEvaluationMsg);
     }    
   }
   

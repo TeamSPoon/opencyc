@@ -61,9 +61,7 @@ public class ActuatorFactory {
   public void populateActuatorPool() {
     List resources = new ArrayList();
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    ArrayList actionCapabilities = new ArrayList();
-    actionCapabilities.add(Action.CONSOLE_PROMPTED_INPUT);
-    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources, actionCapabilities);
+    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources);
     ActuatorPool.getInstance().setActuator(consoleOutput.getName(), consoleOutput);
   }
   

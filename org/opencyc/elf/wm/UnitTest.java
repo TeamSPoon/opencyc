@@ -7,7 +7,7 @@ import org.opencyc.elf.a.ConsoleOutput;
 import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.planner.ConditionalScheduleSet;
-import org.opencyc.elf.bg.planner.JobAssignment;
+import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
 
 import org.opencyc.elf.bg.taskframe.Action;
@@ -77,7 +77,7 @@ public class UnitTest extends TestCase {
     testSuite.addTest(new UnitTest("testActionLibrary"));
     testSuite.addTest(new UnitTest("testGoalLibrary"));
     testSuite.addTest(new UnitTest("testResourcePool"));
-    testSuite.addTest(new UnitTest("testJobAssignmentLibrary"));
+    testSuite.addTest(new UnitTest("testJobLibrary"));
     testSuite.addTest(new UnitTest("testActuatorPool"));
     testSuite.addTest(new UnitTest("testSensorPool"));
     return testSuite;
@@ -184,9 +184,9 @@ public class UnitTest extends TestCase {
     System.out.println("*** testResourcePool OK ***");
   }
   
-  /** Tests job assignment library and job assignment factory behavior. */
-  public void testJobAssignmentLibrary() {
-    System.out.println("\n*** testJobAssignmentLibrary ***");
+  /** Tests job library and job factory behavior. */
+  public void testJobLibrary() {
+    System.out.println("\n*** testJobLibrary ***");
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
     new ActionLibrary();
@@ -196,23 +196,23 @@ public class UnitTest extends TestCase {
     (new GoalFactory()).getInstance().populateGoalLibrary();
     new ResourcePool();
     (new ResourceFactory()).getInstance().populateResourcePool();
-    new JobAssignmentLibrary();
-    (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
-    Assert.assertNotNull(JobAssignmentLibrary.getInstance());
-    JobAssignment jobAssignment = JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER);
-    Assert.assertNotNull(jobAssignment);
-    Assert.assertEquals("[JobAssignment for [[Resource: console]] action: converse with user]", 
-                        jobAssignment.toString());
-    Assert.assertNotNull(jobAssignment.getActionName());
-    Assert.assertEquals("converse with user", jobAssignment.getActionName());
-    Action action = jobAssignment.getActionForScheduling();
-    Assert.assertNotNull(action);    
-    Assert.assertEquals("[Action: console prompted input( prompt: null)]", action.toString());
-    List requiredResources = jobAssignment.getRequiredResources();
+    new JobLibrary();
+    (new JobFactory()).getInstance().populateJobLibrary();
+    Assert.assertNotNull(JobLibrary.getInstance());
+    List jobSet = JobLibrary.getInstance().getJobSet(Action.CONVERSE_WITH_USER);
+    Assert.assertNotNull(jobSet);
+    Assert.assertEquals(1, jobSet.size());
+    Job job = (Job) jobSet.get(0);
+    Assert.assertNotNull(job);
+    Assert.assertEquals("[Job for [[Resource: console]] action: converse with user]", 
+                        job.toString());
+    Assert.assertNotNull(job.getCommand());
+    Assert.assertEquals("converse with user", job.getCommand().toString());
+    List requiredResources = job.getRequiredResources();
     Assert.assertNotNull(requiredResources);
     Assert.assertEquals(1, requiredResources.size());
     Assert.assertEquals("[Resource: console]", requiredResources.get(0).toString());
-    System.out.println("*** testJobAssignmentLibrary OK ***");
+    System.out.println("*** testJobLibrary OK ***");
   }
   
   /** Tests actuator pool and actuator factory behavior. */

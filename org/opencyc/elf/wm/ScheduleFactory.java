@@ -11,6 +11,8 @@ import org.opencyc.elf.bg.predicate.True;
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.Command;
 
+import org.opencyc.elf.goal.Goal;
+
 import org.opencyc.elf.s.DirectSensor;
 
 //// External Imports
@@ -67,7 +69,9 @@ public class ScheduleFactory {
     PredicateExpression predicateExpression = new PredicateExpression(new True()); 
     List plannedCommands = new ArrayList();
     plannedCommands.add(ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT));
+    plannedCommands.add(GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT));
     List plannedTimeMilliseconds = new ArrayList();
+    plannedTimeMilliseconds.add(new Integer(100));
     plannedTimeMilliseconds.add(new Integer(300000));
     Schedule schedule = new Schedule(predicateExpression, 
                                      plannedCommands, 

@@ -60,18 +60,18 @@ public class GoalFactory {
   public void populateGoalLibrary() {
     // get input from user
     Goal goal = new Goal();
-    goal.setGoalName(Goal.GET_USER_INPUT);
+    goal.setName(Goal.GET_USER_INPUT);
     goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
                                                         StateVariable.USER_INPUT));
     goal.setImportance(new Importance(Importance.NEUTRAL));
-    GoalLibrary.getInstance().setGoal(goal.getGoalName(), goal);
+    GoalLibrary.getInstance().setGoal(goal.getName(), goal);
     // get console prompted input
     goal = new Goal();
-    goal.setGoalName(Goal.GET_CONSOLE_PROMPTED_INPUT);
+    goal.setName(Goal.GET_CONSOLE_PROMPTED_INPUT);
     goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
                                                         StateVariable.CONSOLE_INPUT));
     goal.setImportance(new Importance(Importance.NEUTRAL));
-    GoalLibrary.getInstance().setGoal(goal.getGoalName(), goal);
+    GoalLibrary.getInstance().setGoal(goal.getName(), goal);
   }
   
   //// Protected Area

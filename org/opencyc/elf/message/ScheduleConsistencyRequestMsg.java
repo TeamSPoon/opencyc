@@ -5,7 +5,7 @@ import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.planner.Schedule;
 
-import org.opencyc.elf.bg.taskframe.TaskCommand;
+import org.opencyc.elf.bg.taskframe.Command;
 
 //// External Imports
 import java.util.List;
@@ -42,17 +42,17 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
    *
    * @param sender the sender of the message
    * @param controlledResources the resources controlled by this node
-   * @param taskCommand the node's commanded task
-   * @param schedule a proposed schedule of actions to carry out the commanded task using
+   * @param command the requesting scheduler's command
+   * @param schedule the requesting scheduler's proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    */
   public ScheduleConsistencyRequestMsg(NodeComponent sender,
                                        List controlledResources,
-                                       TaskCommand taskCommand,
+                                       Command command,
                                        Schedule schedule) {
     this.sender = sender;
     this.controlledResources = controlledResources;
-    this.taskCommand = taskCommand;
+    this.command = command;
     this.schedule = schedule;
   }
   
@@ -66,8 +66,8 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[ScheduleConsistencyRequestMsg: ");
     stringBuffer.append(controlledResources.toString());
-    stringBuffer.append(" taskCommand: ");
-    stringBuffer.append(taskCommand.toString());
+    stringBuffer.append(" command: ");
+    stringBuffer.append(command.toString());
     stringBuffer.append(" schedule: ");
     stringBuffer.append(schedule.toString());
     stringBuffer.append("]");
@@ -82,18 +82,18 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return controlledResources;
   }
 
-  /** Gets the node's commanded task
+  /** Gets the requesting scheduler's command
    *
-   * @return the node's commanded task
+   * @return the requesting scheduler's command
    */
-  public TaskCommand getTaskCommand () {
-    return taskCommand;
+  public Command getCommand () {
+    return command;
   }
 
-  /** Gets a proposed schedule of actions to carry out the commanded task using
+  /** Gets the requesting scheduler's proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    *
-   * @return a proposed schedule of actions to carry out the commanded task using
+   * @return the requesting scheduler's proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    */
   public Schedule getSchedule () {
@@ -109,10 +109,10 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
   /** the resources controlled by this node */
   protected List controlledResources;
   
-  /** the node's commanded task */
-  protected TaskCommand taskCommand;
+  /** the requesting scheduler's command */
+  protected Command command;
   
-  /** a proposed schedule of actions to carry out the commanded task using
+  /** the requesting scheduler's proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    */
   protected Schedule schedule;

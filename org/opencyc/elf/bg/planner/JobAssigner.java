@@ -76,7 +76,6 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
     setNode(node);
     this.jobAssignerChannel = jobAssignerChannel;
     node.getBehaviorGeneration().setJobAssigner(this);
-    thisJobAssigner = this;
   }
   
   //// Public Area
@@ -173,25 +172,23 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
      */
     protected Puttable executorChannel;
     
-    /** the parent node component */
-    protected NodeComponent nodeComponent;
-    
-    /** t
+    /** the reference to this node component as a message sender */
+    protected NodeComponent sender;
     
     /** Creates a new instance of Consumer.
      *
      * @param jobAssignerChannel the takable channel from which messages are input
      * @param executorChannel the puttable channel to which messages are output to the higher
      * level executor, or null if this is the highest level
-     * @param nodeComponent the parent node component
+     * @param sender the reference to this node component as a message sender
      */
     protected Consumer(Takable jobAssignerChannel,
-    Puttable executorChannel,
-    NodeComponent nodeComponent) {
+                       Puttable executorChannel,
+                       NodeComponent sender) {
       getLogger().info("Creating JobAssigner.Consumer");
       this.jobAssignerChannel = jobAssignerChannel;
       this.executorChannel = executorChannel;
-      this.nodeComponent = nodeComponent;
+      this.sender = sender;
     }
     
     /** Reads messages from the input queue and processes them. */
@@ -375,8 +372,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
      * @param scheduler the given unused scheduler
      */
     protected void releaseScheduler(Scheduler scheduler) {
-      ReleaseMsg releaseMsg = new ReleaseMsg();
-      releaseMsg.setSender(thisJobAssigner);
+      ReleaseMsg releaseMsg = new ReleaseMsg(sender);
       try {
         scheduler.getChannel().put(releaseMsg);
       }
@@ -392,9 +388,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         schedulerInfo.isBusy = true;
         Job job = schedulerInfo.job;
         Scheduler scheduler = schedulerInfo.scheduler;
-        ScheduleJobMsg scheduleJobMsg = new ScheduleJobMsg();
-        scheduleJobMsg.setSender(thisJobAssigner);
-        scheduleJobMsg.setJob(job);
+        ScheduleJobMsg scheduleJobMsg = new ScheduleJobMsg(sender, job);
         try {
           scheduler.getChannel().put(scheduleJobMsg);
           getLogger().info("Sent job: " + job + " to scheduler: " + scheduler);
@@ -450,11 +444,10 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       }
       else {
         getLogger().info("The commanded task " + taskCommand + " is done");
-        JobAssignerStatusMsg jobAssignerStatusMsg = new JobAssignerStatusMsg();
-        jobAssignerStatusMsg.setSender(thisJobAssigner);
         Status status = new Status();
         status.setValue(Status.TASK_FINISHED, Boolean.TRUE);
-        jobAssignerStatusMsg.setStatus(status);
+        JobAssignerStatusMsg jobAssignerStatusMsg = 
+          new JobAssignerStatusMsg(sender, status);
         try {
           executorChannel.put(jobAssignerStatusMsg);
         }
@@ -497,9 +490,6 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
     
   /** the list of scheduler infos for this job assigner */
   protected List schedulerInfos = new ArrayList();
-  
-  /** a convenient reference to this object for use in the Consumer thread */
-  protected JobAssigner thisJobAssigner;
   
   //// main
 }

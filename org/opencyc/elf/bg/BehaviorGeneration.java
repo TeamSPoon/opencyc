@@ -10,7 +10,6 @@ import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
-import org.opencyc.elf.bg.taskframe.TaskFrame;
 
 import org.opencyc.elf.Result;
 

@@ -9,9 +9,13 @@ import java.util.logging.Logger;
 
 //// Internal Imports
 import org.opencyc.elf.bg.predicate.NotNull;
+
 import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
+
 import org.opencyc.elf.message.DoTaskMsg;
+
 import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ActionLibrary;
 import org.opencyc.elf.wm.ActuatorClassFactory;
@@ -20,8 +24,8 @@ import org.opencyc.elf.wm.ActuatorPool;
 import org.opencyc.elf.wm.ExperienceLibrary;
 import org.opencyc.elf.wm.GoalFactory;
 import org.opencyc.elf.wm.GoalLibrary;
-import org.opencyc.elf.wm.JobAssignmentFactory;
-import org.opencyc.elf.wm.JobAssignmentLibrary;
+import org.opencyc.elf.wm.JobFactory;
+import org.opencyc.elf.wm.JobLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.NodeFactory;
 import org.opencyc.elf.wm.PredicateClassFactory;
@@ -66,7 +70,7 @@ public class BehaviorEngine {
   /** Executes the behavior engine
    */
   public void execute() {
-    Node node = NodeFactory.getInstance().makeNode(taskFrames);
+    Node node = NodeFactory.getInstance().makeNodeShell("root");
 
     // no node superior to the root node.
     node.getSensoryPerception().initialize((Puttable) null);
@@ -74,12 +78,10 @@ public class BehaviorEngine {
           (Puttable) null);
     node.getWorldModel().setState(new State());
 
-    TaskCommand taskCommand = new TaskCommand();
-    taskCommand.setActionCommand(rootTaskFrame.getTaskAction());
-    taskCommand.setGoalCommand(rootTaskFrame.getTaskGoal());
+    Command rootCommand = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
+    TaskCommand taskCommand = new TaskCommand(rootCommand, null);
 
-    DoTaskMsg doTaskMsg = new DoTaskMsg();
-    doTaskMsg.setTaskCommand(taskCommand);
+    DoTaskMsg doTaskMsg = new DoTaskMsg(null, taskCommand);
 
     try {
       node.getBehaviorGeneration().getJobAssigner().getChannel().put(
@@ -105,10 +107,8 @@ public class BehaviorEngine {
     (new GoalFactory()).getInstance().populateGoalLibrary();
     new ResourcePool();
     (new ResourceFactory()).getInstance().populateResourcePool();
-    new JobAssignmentLibrary();
-    (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
-    new TaskFrameLibrary();
-    (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
+    new JobLibrary();
+    (new JobFactory()).getInstance().populateJobLibrary();
     new ExperienceLibrary();
     new ActuatorPool();
     (new ActuatorFactory()).getInstance().populateActuatorPool();

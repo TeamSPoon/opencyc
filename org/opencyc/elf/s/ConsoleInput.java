@@ -76,18 +76,18 @@ public class ConsoleInput extends DirectSensor {
     /** the puttable channel to which messages are output */
     protected final Puttable sensoryPerceptionChannel;
 
-    /** the parent node component */
-    protected NodeComponent nodeComponent;
+    /** the console input sensor which sends messages */
+    protected NodeComponent sender;
     
     /** Creates a new instance of Consumer
      *
      * @param sensoryPerceptionChannel the puttable channel to which messages are output
-     * @param nodeComponent the parent node component
+     * @param sender this sensor which sends messages
      */
     protected Producer (Puttable sensoryPerceptionChannel,
-                        NodeComponent nodeComponent) { 
+                        NodeComponent sender) { 
       this.sensoryPerceptionChannel = sensoryPerceptionChannel; 
-      this.nodeComponent = nodeComponent;
+      this.sender = sender;
     }
 
     /** Senses the World and writes messages to the output channel. */
@@ -106,14 +106,12 @@ public class ConsoleInput extends DirectSensor {
       catch (IOException e) {
         logger.severe(e.getMessage());
       }
-
     }
     
     /** Sends the sensed object message. */
     protected void sendObservedInputMsg () {
       ObservedInputMsg observedInputMsg = 
-        new ObservedInputMsg(new Sensation(Sensation.CONSOLE_INPUT, obj, data));
-      observedInputMsg.setSender(nodeComponent);
+        new ObservedInputMsg(sender, new Sensation(Sensation.CONSOLE_INPUT, obj, data));
       sendMsgToRecipient(sensoryPerceptionChannel, observedInputMsg);
     }
       

@@ -193,10 +193,8 @@ public class UnitTest extends TestCase {
     (new GoalFactory()).getInstance().populateGoalLibrary();
     new ResourcePool();
     (new ResourceFactory()).getInstance().populateResourcePool();
-    new JobAssignmentLibrary();
-    (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
-    new TaskFrameLibrary();
-    (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
+    new JobLibrary();
+    (new JobFactory()).getInstance().populateJobLibrary();
     new ExperienceLibrary();
     new ActuatorPool();
     (new ActuatorFactory()).getInstance().populateActuatorPool();
@@ -218,10 +216,8 @@ public class UnitTest extends TestCase {
     node.getSensoryPerception().initialize((Puttable) null);
     node.getBehaviorGeneration().getJobAssigner().initialize((Puttable) null);
     //jobAssigner generates consolePromptedInput action for the ConsoleActuator
-    TaskCommand taskCommand = new TaskCommand();
-    taskCommand.setActionCommand(converseWithUserAction);
-    DoTaskMsg doTaskMsg = new DoTaskMsg();
-    doTaskMsg.setTaskCommand(taskCommand);
+    TaskCommand taskCommand = new TaskCommand(converseWithUserAction, null);
+    DoTaskMsg doTaskMsg = new DoTaskMsg((NodeComponent) null, taskCommand);
     Assert.assertEquals("[TaskCommand: [Action: converse with user( prompt: \">\")]]", 
                         taskCommand.toString());
     try {
@@ -248,10 +244,10 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(ResourcePool.getInstance());
     Assert.assertNotNull(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     Assert.assertEquals("[Resource: console]", ResourcePool.getInstance().getResource(Resource.CONSOLE).toString());
-    Assert.assertNotNull(JobAssignmentLibrary.getInstance());
-    Assert.assertNotNull(JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER));
-    Assert.assertEquals("[JobAssignment for [[Resource: console]] action: converse with user]", 
-                        JobAssignmentLibrary.getInstance().getJobAssignment(Action.CONVERSE_WITH_USER).toString());
+    Assert.assertNotNull(JobLibrary.getInstance());
+    Assert.assertNotNull(JobLibrary.getInstance().getJobSet(Action.CONVERSE_WITH_USER));
+    Assert.assertEquals("[[Job for [[Resource: console]] action: converse with user]]", 
+                        JobLibrary.getInstance().getJobSet(Action.CONVERSE_WITH_USER).toString());
     behaviorEngine.execute();
     try {
       Thread.sleep(2000);

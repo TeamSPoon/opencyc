@@ -43,5 +43,6 @@ public interface Actuator {
    */
   public List getResources();
   
-  
+  /** the console output actuator name */
+  public static final String CONSOLE_OUTPUT = "console output";
 }

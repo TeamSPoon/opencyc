@@ -1,7 +1,11 @@
 package org.opencyc.javacyc;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import  org.doomdark.uuid.*;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.util.*;
 
 /**
  * Provides the main function for JavaCyc, which is the Java VM coupled
@@ -33,6 +37,28 @@ import org.opencyc.cycobject.*;
 public class JavaCyc {
 
     /**
+     * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
+     * CycAccess object which manages the Cyc connection and provides api methods
+     */
+    protected CycAccess cycAccess;
+
+    /**
+     * the Cyc server base tcp port
+     */
+    protected int cycBasePort = CycConnection.DEFAULT_BASE_PORT;
+
+    /**
      * Constructs a new JavaCyc object.
      */
     public JavaCyc() {
@@ -44,6 +70,53 @@ public class JavaCyc {
      * @param args not used
      */
     public static void main(String[] args) {
-        JavaCyc javaCyc1 = new JavaCyc();
+        Log.makeLog("JavaCyc.log");
+        JavaCyc javaCyc = new JavaCyc();
+        try {
+            javaCyc.initialize();
+        }
+        catch (Exception e) {
+            Log.current.println(e.getMessage());
+            Log.current.printStackTrace(e);
+            System.exit(1);
+        }
     }
+
+    /**
+     * Initializes the JavaCyc object.
+     */
+    protected void initialize ()
+        throws CycApiException, IOException, UnknownHostException {
+        String cycBasePortProperty = System.getProperty("org.opencyc.javacyc.cycBasePort", "");
+        if (! cycBasePortProperty.equalsIgnoreCase(""))
+            cycBasePort = (new Integer(cycBasePortProperty)).intValue();
+        cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                  cycBasePort,
+                                  CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                  CycAccess.DEFAULT_CONNECTION);
+        Log.current.println("JavaCyc connected to Cyc " + cycAccess.getCycImageID());
+        Log.current.println("Cyc base tcp port is " + cycBasePort);
+        cycAccess.traceOn();
+        if (verbosity > 2)
+            Log.current.println("Indentifying JavaCyc as a java client to Cyc.");
+        UUID uuid = cycAccess.getCycConnection().getUuid();
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("set-javacyc-guid"));
+        command.add(uuid.toString());
+        cycAccess.converseVoid(command);
+
+
+
+    }
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+    }
+
 }

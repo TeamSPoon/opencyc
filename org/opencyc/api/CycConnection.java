@@ -353,6 +353,7 @@ public class CycConnection implements CycConnectionInterface {
             else
                 Log.current.println("Binary connection " + cfaslSocket);
         }
+        uuid = UUIDGenerator.getInstance().generateTimeBasedUUID();
         if (this.messagingMode == CONCURRENT_MESSAGING_MODE)
             initializeConcurrentProcessing();
     }
@@ -402,7 +403,6 @@ public class CycConnection implements CycConnectionInterface {
         // our awaiting listener.
         CycList request = new CycList();
         request.add(new CycSymbol("INITIALIZE-JAVA-API-SOCKET"));
-        uuid = UUIDGenerator.getInstance().generateTimeBasedUUID();
         request.add(uuid.toString());
         request.add(InetAddress.getLocalHost().getHostName());
         request.add(new Integer(TaskProcessorBinaryResponseHandler.LOCAL_CLIENT_LISTENER_PORT));
@@ -1131,6 +1131,15 @@ public class CycConnection implements CycConnectionInterface {
         return "host " + hostName +
             ", asciiPort " + asciiPort +
             ", cfaslPort " + cfaslPort;
+    }
+
+    /**
+     * Returns the UUID that identifies this java api client connection.
+     *
+     * @return the UUID that identifies this java api client connection
+     */
+    public UUID getUuid () {
+        return uuid;
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.opencyc.api;
 
+import  org.doomdark.uuid.*;
 import java.io.*;
 import  org.opencyc.util.*;
 
@@ -95,5 +96,13 @@ public interface CycConnectionInterface {
      * Turns on the detailed diagnostic trace of socket messages.
      */
     public void traceOnDetailed();
+
+    /**
+     * Returns the UUID that identifies this java api client connection.
+     *
+     * @return the UUID that identifies this java api client connection
+     */
+    public UUID getUuid ();
+
 
 }

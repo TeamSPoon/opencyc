@@ -6,6 +6,7 @@ import  fipaos.ont.fipa.*;
 import  fipaos.ont.fipa.fipaman.*;
 import  fipaos.util.*;
 import  org.jdom.JDOMException;
+import  org.doomdark.uuid.*;
 import  org.opencyc.util.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.cycagent.*;
@@ -235,5 +236,13 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
                ", agent community " + super.agentCommunityName();
     }
 
+    /**
+     * Returns the UUID that identifies this java api client connection.
+     *
+     * @return the UUID that identifies this java api client connection
+     */
+    public UUID getUuid () {
+        return null;
+    }
 
 }

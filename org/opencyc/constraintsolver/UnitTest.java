@@ -59,11 +59,12 @@ public class UnitTest extends TestCase {
             testSuite = new TestSuite(UnitTest.class);
         else {
             testSuite = new TestSuite();
-            //testSuite.addTest(new UnitTest("testHelloWorld"));
-            //testSuite.addTest(new UnitTest("testRuleEvaluator"));
-            //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
-            //testSuite.addTest(new UnitTest("testProblemParser"));
+            testSuite.addTest(new UnitTest("testHelloWorld"));
+            testSuite.addTest(new UnitTest("testRuleEvaluator"));
+            testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
+            testSuite.addTest(new UnitTest("testProblemParser"));
             testSuite.addTest(new UnitTest("testConstraintProblem1"));
+            testSuite.addTest(new UnitTest("testConstraintProblem2"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -328,7 +329,7 @@ public class UnitTest extends TestCase {
             CycList zebraPuzzleCycList = cycAccess.makeCycList(zebraPuzzleString);
             ArrayList zebraPuzzleRules = ConstraintRule.simplifyConstraintRuleExpression(zebraPuzzleCycList);
 
-            zebraProblem.setVerbosity(1);
+            zebraProblem.setVerbosity(3);
             ArrayList solutions = null;
             solutions = zebraProblem.solve(zebraPuzzleCycList);
             Assert.assertNotNull(solutions);
@@ -384,6 +385,80 @@ public class UnitTest extends TestCase {
         }
 
         System.out.println("** testConstraintProblem1 OK **");
+    }
+
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem2() {
+        System.out.println("** testConstraintProblem2 **");
+
+        //Zebra Puzzle
+        String zebraPuzzleString =
+            "(#$and " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?norwegian (#$PlusFn ?blue 1)) " +
+            "    (#$numericallyEqual ?blue (#$PlusFn ?norwegian 1))) " +
+            "  (#$numericallyEqual ?japanese ?volkswagen) " +
+            "  (#$numericallyEqual ?mercedes-benz ?orange-juice) " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?ford (#$PlusFn ?horse 1)) " +
+            "    (#$numericallyEqual ?horse (#$PlusFn ?ford 1))) " +
+            "  (#$or " +
+            "    (#$numericallyEqual ?chevrolet (#$PlusFn ?fox 1)) " +
+            "    (#$numericallyEqual ?fox (#$PlusFn ?chevrolet 1))) " +
+            "  (#$numericallyEqual ?norwegian 1) " +
+            "  (#$numericallyEqual ?milk 3) " +
+            "  (#$numericallyEqual ?ford ?yellow) " +
+            "  (#$numericallyEqual ?oldsmobile ?snails) " +
+            "  (#$numericallyEqual ?green (#$PlusFn ?ivory 1)) " +
+            "  (#$numericallyEqual ?ukranian ?eggnog) " +
+            "  (#$numericallyEqual ?cocoa ?green) " +
+            "  (#$numericallyEqual ?spaniard ?dog) " +
+            "  (#$numericallyEqual ?english ?red) " +
+            "  (#$different ?ford ?chevrolet ?oldsmobile ?mercedes-benz ?volkswagen) " +
+            "  (#$different ?orange-juice ?cocoa ?eggnog ?milk ?water) " +
+            "  (#$different ?dog ?snails ?horse ?fox ?zebra) " +
+            "  (#$different ?english ?spaniard ?norwegian ?japanese ?ukranian) " +
+            "  (#$different ?blue ?red ?green ?yellow ?ivory) " +
+            "  (#$elementOf ?blue (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?chevrolet (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?cocoa (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?dog (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?eggnog (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?english (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ford (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?fox (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?green (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?horse (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ivory (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?japanese (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?mercedes-benz (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?milk (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?norwegian (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?oldsmobile (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?orange-juice (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?red (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?snails (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?spaniard (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?ukranian (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?volkswagen (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?water (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
+            "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
+        ConstraintProblem zebraProblem = new ConstraintProblem();
+        CycAccess cycAccess = zebraProblem.cycAccess;
+        try {
+            zebraProblem.setVerbosity(9);
+            ArrayList solution = zebraProblem.solve(cycAccess.makeCycList(zebraPuzzleString));
+            System.out.println(solution);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem2 OK **");
     }
 
 

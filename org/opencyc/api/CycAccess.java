@@ -7054,6 +7054,19 @@ public class CycAccess {
     }
 
 
+    /**
+     * Returns the Cyc image ID.
+     *
+     * @return the Cyc image ID string
+     */
+    public String getCycImageID ()
+        throws IOException, UnknownHostException, CycApiException {
+        CycList query = new CycList();
+        query.add(CycObjectFactory.makeCycSymbol("cyc-image-id"));
+        return converseString(query);
+    }
+
+
 
 
 

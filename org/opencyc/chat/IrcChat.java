@@ -460,6 +460,7 @@ public class IrcChat extends Thread  implements ChatSender {
      */
     public void servicePublicMessage(String from, String hostmask, String returnpath,String params) {
 
+	if (!returnpath.startsWith("#")) returnpath = from;
 	String lcparams = params.toLowerCase().trim();
 
 	int ccol = params.indexOf(':');

@@ -241,6 +241,7 @@ public class JobAssigner extends BufferedNodeComponent {
      * @param doTaskMsg the do task message that contains the commanded task
      */
     protected void processDoTaskMsg (DoTaskMsg doTaskMsg) {
+      getLogger().info("JobAssigner proccessing " + doTaskMsg);
       taskCommand = doTaskMsg.getTaskCommand();
       getLogger().info("Do task: " + taskCommand);
       

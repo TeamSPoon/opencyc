@@ -8,8 +8,7 @@ import org.opencyc.elf.bg.BehaviorGeneration;
 import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.planner.Scheduler;
 
-import org.opencyc.elf.bg.procedure.Procedure;
-
+import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
@@ -60,21 +59,21 @@ public class Executor extends NodeComponent {
   }
   
   /**
-   * Gets the procedure to execute
+   * Gets the schedule to execute
    * 
-   * @return the procedure to execute
+   * @return the schedule to execute
    */
-  public Procedure getProcedureToExecute() {
-    return procedureToExecute;
+  public Schedule getScheduleToExecute() {
+    return scheduleToExecute;
   }
 
   /**
-   * Sets the procedure to execute
+   * Sets the schedule to execute
    * 
-   * @param procedureToExecute the procedure to execute
+   * @param scheduleToExecute the schedule to execute
    */
-  public void setProcedureToExecute(Procedure procedureToExecute) {
-    this.procedureToExecute = procedureToExecute;
+  public void setScheduleToExecute(Schedule scheduleToExecute) {
+    this.scheduleToExecute = scheduleToExecute;
   }
 
   /**
@@ -164,8 +163,8 @@ public class Executor extends NodeComponent {
   
   //// Internal Rep
   
-  /** the procedure to execute */
-  protected Procedure procedureToExecute;
+  /** the schedule to execute */
+  protected Schedule scheduleToExecute;
 
   /** the behavior generation instance which owns this executor */
   protected BehaviorGeneration behaviorGeneration;

@@ -178,6 +178,8 @@ public class WebServer extends Thread {
          * Processes the HTTP request.
          */
         public void run() {
+            if (traceRequests)
+                Log.current.println("connection accepted from " + sock.getInetAddress());
             notFoundPath = "";
             try {
                 out = new DataOutputStream(sock.getOutputStream());
@@ -228,13 +230,15 @@ public class WebServer extends Thread {
             int ch = 0;
             boolean postMethod;
             methodLine = in.readLine();
-            //Log.current.println("methodLine=" + methodLine);
+            //if (traceRequests)
+            //    Log.current.println("methodLine=" + methodLine);
             bodyLine = "";
             if (methodLine.startsWith("POST /"))
                 postMethod = true;
             else
                 postMethod = false;
-            //Log.current.println("postMethod=" + postMethod);
+            //if (traceRequests)
+            //    Log.current.println("postMethod=" + postMethod);
 
             int ch1 = -1;
             int ch2 = -1;
@@ -251,6 +255,16 @@ public class WebServer extends Thread {
                 ch4 = ch;
                 if (ch1 == '\r' && ch2 == '\n' && ch3 == '\r' && ch4 == '\n')
                     break;
+                if ((! postMethod) &&
+                    (! in.ready()) &&
+                    ch1 == -1 &&
+                    ch2 == -1 &&
+                    ch3 == '\r' &&
+                    ch4 == '\n') {
+                    inBytes.add(new Integer('\r'));
+                    inBytes.add(new Integer('\n'));
+                    break;
+                }
             }
             byte[] byteArray = new byte[inBytes.size()];
             for (int i = 0; i < inBytes.size(); i++) {

@@ -243,24 +243,24 @@ public class CycAccess {
      * Turns on the diagnostic trace of socket messages.
      */
     public void traceOn() {
-        cycConnection.trace = CycConnection.API_TRACE_MESSAGES;
-        saveTrace = cycConnection.trace;
+        cycConnection.traceOn();
+        saveTrace = CycConnection.API_TRACE_MESSAGES;
     }
 
     /**
      * Turns on the detailed diagnostic trace of socket messages.
      */
     public void traceOnDetailed() {
-        cycConnection.trace = CycConnection.API_TRACE_DETAILED;
-        saveTrace = cycConnection.trace;
+        cycConnection.traceOnDetailed();
+        saveTrace = CycConnection.API_TRACE_DETAILED;
     }
 
     /**
      * Turns off the diagnostic trace of socket messages.
      */
     public void traceOff() {
-        cycConnection.trace = CycConnection.API_TRACE_NONE;
-        saveTrace = cycConnection.trace;
+        cycConnection.traceOff();
+        saveTrace = CycConnection.API_TRACE_NONE;
     }
 
     /**

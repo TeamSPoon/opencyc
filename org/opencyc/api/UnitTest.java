@@ -47,7 +47,8 @@ public class UnitTest extends TestCase {
     public static void runTests() {
         TestSuite testSuite = new TestSuite();
         //testSuite.addTest(new UnitTest("testAsciiCycConnection"));
-        //testSuite.addTest(new UnitTest("testBinaryCycConnection"));
+        //testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
+        testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
@@ -60,7 +61,7 @@ public class UnitTest extends TestCase {
         //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
         //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
@@ -192,8 +193,8 @@ public class UnitTest extends TestCase {
     /**
      * Tests the fundamental aspects of the binary (cfasl) api connection to the OpenCyc server.
      */
-    public void testBinaryCycConnection () {
-        System.out.println("**** testBinaryCycConnection ****");
+    public void testBinaryCycConnection1 () {
+        System.out.println("**** testBinaryCycConnection1 ****");
         CycAccess cycAccess = null;
         CycConnection cycConnection = null;
         try {
@@ -301,7 +302,114 @@ public class UnitTest extends TestCase {
                             response[1].toString());
 
         cycConnection.close();
-        System.out.println("**** testBinaryCycConnection OK ****");
+        System.out.println("**** testBinaryCycConnection1 OK ****");
+    }
+
+    /**
+     * Tests the fundamental aspects of the binary (cfasl) api connection to the OpenCyc server.
+     * CycAccess is set to null;
+     */
+    public void testBinaryCycConnection2 () {
+        System.out.println("**** testBinaryCycConnection2 ****");
+        CycConnection cycConnection = null;
+        try {
+            cycConnection = new CycConnection(null);
+            //cycConnection.trace = true;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
+
+        // Test return of atom.
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("+"));
+        command.add(new Integer(2));
+        command.add(new Integer(3));
+        Object [] response = {new Integer(0), ""};
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (Exception e) {
+            cycConnection.close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals(new Integer(5), response[1]);
+
+        // Test return of string.
+        command = new CycList();
+        command.add(CycObjectFactory.quote);
+        command.add("abc");
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (Exception e) {
+            cycConnection.close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("abc", response[1]);
+
+        // Test return of symbolic expression.
+        command = new CycList();
+        command.add(CycObjectFactory.quote);
+        CycList cycList2 = new CycList();
+        command.add(cycList2);
+        cycList2.add(CycObjectFactory.makeCycSymbol("a"));
+        cycList2.add(CycObjectFactory.makeCycSymbol("b"));
+        CycList cycList3 = new CycList();
+        cycList2.add(cycList3);
+        cycList3.add(CycObjectFactory.makeCycSymbol("c"));
+        cycList3.add(CycObjectFactory.makeCycSymbol("d"));
+        CycList cycList4 = new CycList();
+        cycList3.add(cycList4);
+        cycList4.add(CycObjectFactory.makeCycSymbol("e"));
+        cycList3.add(CycObjectFactory.makeCycSymbol("f"));
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (Exception e) {
+            cycConnection.close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("(A B (C D (E) F))", response[1].toString());
+
+        // Test return of improper list.
+        command = new CycList();
+        command.add(CycObjectFactory.quote);
+        cycList2 = new CycList();
+        command.add(cycList2);
+        cycList2.add(CycObjectFactory.makeCycSymbol("A"));
+        cycList2.setDottedElement(CycObjectFactory.makeCycSymbol("B"));
+        try {
+            //cycConnection.trace = true;
+            response = cycConnection.converse(command);
+            //cycConnection.trace = false;
+        }
+        catch (Exception e) {
+            cycConnection.close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("(A . B)", response[1].toString());
+
+        // Test error return
+        command = new CycList();
+        command.add(CycObjectFactory.nil);
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (Exception e) {
+            cycConnection.close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Operator NIL is not defined in the API\")",
+                            response[1].toString());
+
+        cycConnection.close();
+        System.out.println("**** testBinaryCycConnection2 OK ****");
     }
 
     /**
@@ -907,7 +1015,7 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(genlSiblings);
         Assert.assertTrue(genlSiblings instanceof CycList);
         genlSiblings = ((CycList) genlSiblings).sort();
-        Assert.assertEquals("(Animal DomesticPet FemaleAnimal JuvenileAnimal)", genlSiblings.toString());
+        Assert.assertEquals("(Animal FemaleAnimal JuvenileAnimal)", genlSiblings.toString());
 
         // getSiblings.
         List siblings = null;
@@ -1996,10 +2104,37 @@ public class UnitTest extends TestCase {
                                       CycConnection.DEFAULT_BASE_PORT,
                                       CycConnection.BINARY_MODE,
                                       CycAccess.PERSISTENT_CONNECTION);
+
+            // Java ByteArray  and SubL byte-vector are used only in the binary api.
+            // turn on api if not on.
+            String script = "(pwhen (boundp '*eval-in-api?*) \n" +
+                     "       (csetq *eval-in-api?* t))";
+            cycAccess.converseVoid(script);
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script = "(csetq my-byte-vector (vector 0 1 2 3 4 255))";
+            Object responseObject = cycAccess.converseObject(script);
+            Assert.assertNotNull(responseObject);
+            Assert.assertTrue(responseObject instanceof ByteArray);
+            byte[] myBytes = {0, 1, 2, 3, 4, -1};
+            ByteArray myByteArray = new ByteArray(myBytes);
+            Assert.assertEquals(myByteArray, responseObject);
+            CycList command = new CycList();
+            command.add(CycObjectFactory.makeCycSymbol("equalp"));
+            command.add(CycObjectFactory.makeCycSymbol("my-byte-vector"));
+            CycList command1 = new CycList();
+            command.add(command1);
+            command1.add(CycObjectFactory.quote);
+            command1.add(myByteArray);
+            Assert.assertTrue(cycAccess.converseBoolean(command));
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
+
 
         doTestCycAccess7(cycAccess);
 
@@ -3156,6 +3291,7 @@ public class UnitTest extends TestCase {
                 "    (csetq result t)) \n" +
                 "  result)";
             Assert.assertEquals((Object) CycObjectFactory.nil, cycAccess.converseObject(script));
+
 
             //cycAccess.traceOn();
         }

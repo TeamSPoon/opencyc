@@ -2,7 +2,12 @@ package  org.opencyc.util;
 
 /*****************************************************************************
  * Contains an array of bytes, as an object that directly represents a SubL
- * byte vector.
+ * byte vector.  The primitive element in java is a byte having a signed numerical
+ * value between -128 and +127.  The corresponding primitive element in SubL is a
+ * byte having an unsigned numerical value between 0 and 255.<p>
+ *
+ * The ByteArray object can only be used in the OpenCyc binary api because it does not
+ * have a string representation in either SubL or java.
  *
  * @version $Id$
  * @author Bjørn Aldag
@@ -46,6 +51,43 @@ public class ByteArray {
     public byte[] byteArrayValue () {
         return  bytes;
     }
+
+    /**
+     * Returns <tt>true</tt> iff some object equals this <tt>ByteArray</tt>
+     *
+     * @param object the <tt>Object</tt> for equality comparison
+     * @return equals <tt>boolean</tt> value indicating equality or non-equality.
+     */
+    public boolean equals(Object object) {
+        if (! (object instanceof ByteArray))
+            return false;
+        if (bytes.length != ((ByteArray) object).bytes.length)
+            return false;
+        for (int i = 0; i < bytes.length; i++)
+            if (bytes[i] != ((ByteArray) object).bytes[i])
+                return false;
+        return true;
+    }
+
+    /**
+     * Returns the string representation of the <tt>ByteArray</tt>
+     *
+     * @return the representation of the <tt>ByteArray</tt> as a <tt>String</tt>
+     */
+    public String toString() {
+        StringBuffer result = new StringBuffer("[ByteArray len:");
+        result.append(bytes.length);
+        result.append(" ");
+        if (bytes.length > 0)
+            result.append((new Byte(bytes[0])).toString());
+        for (int i = 1; i < bytes.length; i++) {
+            result.append(",");
+            result.append((new Byte(bytes[i])).toString());
+        }
+        result.append("]");
+        return result.toString();
+    }
+
 }
 
 

@@ -36,6 +36,27 @@ import  org.opencyc.util.ByteArray;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class CfaslInputStream extends BufferedInputStream {
+
+    /**
+     * No api trace.
+     */
+    public static final int API_TRACE_NONE = 0;
+
+    /**
+     * Message-level api trace.
+     */
+    public static final int API_TRACE_MESSAGES = 1;
+
+    /**
+     * Detailed api trace.
+     */
+    public static final int API_TRACE_DETAILED = 2;
+
+    /**
+     * Parameter that, when true, causes a trace of the messages to and from the server.
+     */
+    public int trace = API_TRACE_NONE;
+
     protected static final int CFASL_IMMEDIATE_FIXNUM_CUTOFF = 128;
     protected static final int CFASL_IMMEDIATE_FIXNUM_OFFSET = 256 - CFASL_IMMEDIATE_FIXNUM_CUTOFF;
     protected static final int CFASL_P_8BIT_INT = 0;
@@ -80,7 +101,6 @@ public class CfaslInputStream extends BufferedInputStream {
     protected static final int CFASL_DICTIONARY = 64;
     protected static final int CFASL_SERVER_DEATH = -1;
     protected static final int DEFAULT_READ_LIMIT = 1024;
-    protected CycConnection cycConnection;
 
     static HashMap cfaslOpcodeDescriptions = null;
 
@@ -118,7 +138,7 @@ public class CfaslInputStream extends BufferedInputStream {
         cfaslOpcodeDescriptions.put(new Integer(23), "CFASL_P_BIGNUM");
         cfaslOpcodeDescriptions.put(new Integer(24), "CFASL_N_BIGNUM");
         cfaslOpcodeDescriptions.put(new Integer(25), "CFASL_GUID");
-	cfaslOpcodeDescriptions.put(new Integer(26), "CFASL_BYTE_VECTOR");
+    cfaslOpcodeDescriptions.put(new Integer(26), "CFASL_BYTE_VECTOR");
         cfaslOpcodeDescriptions.put(new Integer(30), "CFASL_CONSTANT");
         cfaslOpcodeDescriptions.put(new Integer(31), "CFASL_NART");
         cfaslOpcodeDescriptions.put(new Integer(33), "CFASL_ASSERTION");
@@ -140,11 +160,9 @@ public class CfaslInputStream extends BufferedInputStream {
      * specified underlying input stream.
      *
      * @param in the underlying input stream.
-     * @param cycConnection the parent <tt>CycConnection</tt> object
      */
-    public CfaslInputStream (InputStream in, CycConnection cycConnection) {
+    public CfaslInputStream (InputStream in) {
         super(in, DEFAULT_READ_LIMIT);
-        this.cycConnection = cycConnection;
         initializeOpcodeDescriptions();
     }
 
@@ -159,12 +177,12 @@ public class CfaslInputStream extends BufferedInputStream {
     public Object readObject () throws IOException {
         int cfaslOpcode = read();
         Object o = null;
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("reading opcode = " + cfaslOpcode + " (" +
                                cfaslOpcodeDescriptions.get(new Integer(cfaslOpcode)) +")");
         if (cfaslOpcode >= CFASL_IMMEDIATE_FIXNUM_OFFSET) {
             o = new Integer(cfaslOpcode - CFASL_IMMEDIATE_FIXNUM_OFFSET);
-            if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+            if (trace == API_TRACE_DETAILED)
                 System.out.println("Reading Immediate Fixnum: " + o);
         }
         else {
@@ -249,7 +267,7 @@ public class CfaslInputStream extends BufferedInputStream {
                     o = readGuid();
                     break;
                 case CFASL_BYTE_VECTOR:
-	            o = readByteArray();
+                o = readByteArray();
                     break;
                 case CFASL_CONSTANT:
                     o = readConstant();
@@ -290,7 +308,7 @@ public class CfaslInputStream extends BufferedInputStream {
                     throw  new RuntimeException("Unknown cfasl opcode: " + cfaslOpcode);
             }
         }
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readObject = " + o + " (" + o.getClass() + ")");
         return  o;
     }
@@ -388,14 +406,14 @@ public class CfaslInputStream extends BufferedInputStream {
      *         used for magnitude).
      */
     private int readFixnumBody (int nBytes, int sign) throws IOException {
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readFixnumBody sign=" + sign + " length=" + nBytes);
         if (nBytes > 4)
             throw  new ArithmeticException("Cannot fit " + nBytes + " bytes into an int");
         int num = 0;
         for (int i = 0; i < nBytes; i++) {
             int j = read();
-            if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+            if (trace == API_TRACE_DETAILED)
                 System.out.println("\t" + j);
             num |= (j << (8*i));
         }
@@ -414,12 +432,12 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     private BigInteger readBignumBody (int sign) throws IOException {
         int length = readInt();
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readBignumBody sign=" + sign + " length=" + length);
         byte b[] = new byte[length];
         for (int i = length - 1; i >= 0; i--) {
             int j = readInt();
-            if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+            if (trace == API_TRACE_DETAILED)
                 System.out.println("\t" + j);
             b[i] = (byte)j;
         }
@@ -436,7 +454,7 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     private double readFloatBody (int sign) throws IOException {
         long signif, exp;
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readFloatBody sign=" + sign);
         Object obj = readObject();
         if (obj instanceof BigInteger) {
@@ -449,7 +467,7 @@ public class CfaslInputStream extends BufferedInputStream {
         else
             signif = ((Number)obj).longValue();
         exp = readInt();
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readFloatBody sign=" + sign + " signif=" + signif + " exp= " + exp);
         return  ((double)sign*(double)signif*Math.pow(2.0, exp));
     }
@@ -489,11 +507,11 @@ public class CfaslInputStream extends BufferedInputStream {
     }
 
   /**
-   * Reads a byte vector from the CfaslInputStream. The CFASL opcode 
+   * Reads a byte vector from the CfaslInputStream. The CFASL opcode
    * has already been read in at this point, so we only read in what follows.
    *
    * @return the <tt>ByteArray</tt> read
-   */ 
+   */
   public ByteArray readByteArray() throws IOException {
     int off = 0;
     int len = readInt();
@@ -512,13 +530,13 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public CycList readCycList () throws IOException {
         int size = readInt();
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readCycList.size: " + size);
         CycList cycList = new CycList();
         for (int i = 0; i < size; i++) {
             cycList.add(readObject());
         }
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readCycList.readObject: " + cycList);
         return  cycList;
     }
@@ -531,21 +549,21 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public CycList readCons () throws IOException {
         int size = readInt();
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readCons.size: " + size);
         CycList cycList = new CycList();
         //for (int i = 0; i < (size - 1); i++) {
         for (int i = 0; i < size; i++) {
             Object consObject = readObject();
-            if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+            if (trace == API_TRACE_DETAILED)
                 System.out.println("readCons.consObject: " + consObject);
             cycList.add(consObject);
         }
         Object cdrObject = readObject();
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readCons.cdrObject: " + cdrObject);
         cycList.setDottedElement(cdrObject);
-        if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+        if (trace == API_TRACE_DETAILED)
             System.out.println("readCons.readCons: " + cycList);
         return  cycList;
     }

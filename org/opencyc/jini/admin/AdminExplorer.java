@@ -504,7 +504,7 @@ public class AdminExplorer extends JPanel {
                             serviceIcon = defaultServiceIcon;
                             try {
                                 // Get icon from the service.
-                                serviceIcon = ((GenericServiceInterface)userObject).getIcon();
+                                serviceIcon = ((GenericServiceInterface) userObject).getIcon();
                                 // cache service's icon to avoid calling it again.
                                 nodeInfo.setIcon(serviceIcon);
                             }

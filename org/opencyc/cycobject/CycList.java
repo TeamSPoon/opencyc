@@ -187,6 +187,7 @@ public class CycList extends ArrayList {
                 object instanceof Integer ||
                 object instanceof Guid ||
                 object instanceof Float ||
+                object instanceof ByteArray ||
                 object instanceof CycConstant ||
                 object instanceof CycNart)
                 continue;

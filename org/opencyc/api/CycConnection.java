@@ -10,7 +10,8 @@ import  org.opencyc.cycobject.*;
  * Provides a binary connection and an ascii connection to the OpenCyc server.  The ascii connection is
  * legacy and its use is deprecated.<p>
  *
- * Collaborates with the <tt>CycAccess</tt> class which wraps the api functions.
+ * Collaborates with the <tt>CycAccess</tt> class which wraps the api functions.  CycAccess may be
+ * specified as null in the CycConnection constructors when the binary api is used.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -79,7 +80,7 @@ public class CycConnection {
     /**
      * Parameter that, when true, causes a trace of the messages to and from the server.
      */
-    public int trace = API_TRACE_NONE;
+    protected int trace = API_TRACE_NONE;
 
     /**
      * Ascii mode connnection to the OpenCyc server.
@@ -221,8 +222,10 @@ public class CycConnection {
         }
         else {
             cfaslSocket = new Socket(hostName, cfaslPort);
-            cfaslInputStream = new CfaslInputStream(cfaslSocket.getInputStream(), this);
-            cfaslOutputStream = new CfaslOutputStream(cfaslSocket.getOutputStream(), this);
+            cfaslInputStream = new CfaslInputStream(cfaslSocket.getInputStream());
+            cfaslInputStream.trace = trace;
+            cfaslOutputStream = new CfaslOutputStream(cfaslSocket.getOutputStream());
+            cfaslOutputStream.trace = trace;
         }
     }
 
@@ -370,8 +373,11 @@ public class CycConnection {
             CycList messageCycList;
             if (message instanceof CycList)
                 messageCycList = (CycList) message;
-            else if (message instanceof String)
-                messageCycList = this.cycAccess.makeCycList((String) message);
+            else if (message instanceof String) {
+                if (cycAccess == null)
+                    throw new RuntimeException("CycAccess is required to process commands in string form");
+                messageCycList = cycAccess.makeCycList((String) message);
+            }
             else
                 throw new CycApiException("Invalid class for message " + message);
             messageCycList = substituteForBackquote(messageCycList);
@@ -395,6 +401,8 @@ public class CycConnection {
             CycList substituteCycList = new CycList();
             substituteCycList.add(CycObjectFactory.makeCycSymbol("read-from-string"));
             substituteCycList.add(messageCycList.cyclify());
+            if (cycAccess == null)
+                throw new RuntimeException("CycAccess is required to process commands with backquote");
             return cycAccess.converseList(substituteCycList);
         }
         else {
@@ -461,7 +469,9 @@ public class CycConnection {
             return answer;
         }
         answer[0] = Boolean.TRUE;
-        if (cycAccess.deferObjectCompletion)
+        if (cycAccess == null)
+            answer[1] = response;
+        else if (cycAccess.deferObjectCompletion)
             answer[1] = response;
         else
             answer[1] = cycAccess.completeObject(response);
@@ -497,6 +507,8 @@ public class CycConnection {
             }
             if (isSymbolicExpression) {
                 // Recurse to complete contained CycConstant, CycNart objects.
+                if (cycAccess == null)
+                    throw new RuntimeException("CycAccess is required to process commands in string form");
                 response[1] = CycAccess.current().makeCycList(answer);
                 // Return the CycList object.
                 return response;
@@ -507,6 +519,8 @@ public class CycConnection {
                 return response;
             }
             if (answer.startsWith("#$")) {
+                if (cycAccess == null)
+                    throw new RuntimeException("CycAccess is required to process commands in string form");
                 response[1] = CycAccess.current().makeCycConstant(answer);
                 // Return the constant.
                 return response;
@@ -682,6 +696,34 @@ public class CycConnection {
         in.reset();
         return  result.toString();
     }
+
+    /**
+     * Turns on the diagnostic trace of socket messages.
+     */
+    public void traceOn() {
+        trace = API_TRACE_MESSAGES;
+        cfaslInputStream.trace = trace;
+        cfaslOutputStream.trace = trace;
+    }
+
+    /**
+     * Turns on the detailed diagnostic trace of socket messages.
+     */
+    public void traceOnDetailed() {
+        trace = API_TRACE_DETAILED;
+        cfaslInputStream.trace = trace;
+        cfaslOutputStream.trace = trace;
+    }
+
+    /**
+     * Turns off the diagnostic trace of socket messages.
+     */
+    public void traceOff() {
+        trace = API_TRACE_NONE;
+        cfaslInputStream.trace = trace;
+        cfaslOutputStream.trace = trace;
+    }
+
 }
 
 

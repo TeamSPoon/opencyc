@@ -32,6 +32,7 @@ package  org.opencyc.jini.shared;
 
 import  java.util.*;
 import  java.io.*;
+import  java.net.URL;
 import  java.rmi.*;
 import  java.rmi.server.*;
 import  javax.swing.*;
@@ -417,8 +418,10 @@ public class GenericService extends UnicastRemoteObject
      * distinguishing icon.
      */
     public Icon getIcon () throws RemoteException {
-        if (serviceIcon == null)
-            serviceIcon = new ImageIcon("small_green_box.gif");
+        if (serviceIcon == null) {
+            URL serviceIconURL = ClassLoader.getSystemResource("small_green_box.gif");
+            serviceIcon = new ImageIcon(serviceIconURL);
+        }
         return  serviceIcon;
     }
 

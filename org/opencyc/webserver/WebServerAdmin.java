@@ -31,6 +31,7 @@ package  org.opencyc.webserver;
 
 import  java.util.*;
 import  java.io.*;
+import  java.net.*;
 import  java.rmi.*;
 import  java.rmi.server.*;
 import  javax.swing.*;
@@ -75,7 +76,14 @@ public class WebServerAdmin extends GenericService
     public static void makeWebServerAdmin (WebServer webServer) {
         initialize();
         // Name entry for LookupService, set the property on the command line.
-        Name nameAttribute = new Name(System.getProperty("org.opencyc.jini.service.name", "default service"));
+        //Name nameAttribute = new Name(System.getProperty("org.opencyc.jini.service.name", "default service"));
+        Name nameAttribute = null;
+        try {
+            nameAttribute = new Name(InetAddress.getLocalHost().getHostName() + " web server");
+        }
+        catch (java.net.UnknownHostException e) {
+            nameAttribute = new Name("unknown web server");
+        }
         // ServiceInfo entry for LookupService, clients match by name.
         String name = "WebServerAdmin Service";
         String manufacturer = "Cycorp Inc.";
@@ -89,7 +97,8 @@ public class WebServerAdmin extends GenericService
                                                   version,
                                                   model,
                                                   serialNumber);
-        ImageIcon serviceIcon = new ImageIcon("w.jpg");
+        URL serviceIconURL = ClassLoader.getSystemResource("w.jpg");
+        ImageIcon serviceIcon = new ImageIcon(serviceIconURL);
         WebServerAdmin service = null;
         try {
             service = new WebServerAdmin(serviceIcon, nameAttribute, serviceInfo, webServer);

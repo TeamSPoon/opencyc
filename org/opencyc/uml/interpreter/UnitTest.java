@@ -473,6 +473,8 @@ public class UnitTest extends TestCase {
         Assert.assertNull(interpreter.getCurrentEvent());
         Assert.assertEquals(stateMachine, interpreter.getStateMachine());
         Assert.assertTrue(interpreter.expressionEvaluator instanceof ExpressionEvaluator);
+
+        interpreter.formInitialStateConfiguration();
         interpreter.eventDispatcher();
 
 

@@ -101,6 +101,8 @@ public class Interpreter {
     public Interpreter(StateMachine stateMachine) {
         this.stateMachine = stateMachine;
         initialize();
+        if (verbosity > 2)
+            Log.current.println("Interpreting " + stateMachine.toString());
     }
 
     /**
@@ -139,39 +141,37 @@ public class Interpreter {
      */
     protected void formInitialStateConfiguration () {
         State topState = stateMachine.getTop();
+        if (verbosity > 2)
+            Log.current.println("Forming initial state configuration from " + topState.toString());
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(topState);
         activeStates = new HashMap();
         activeStates.put(topState, root);
         stateConfiguration = new DefaultTreeModel(root);
         if (topState instanceof CompositeState) {
-            formCompositeStateConfigurationFrom((CompositeState) topState, root);
+            CompositeState compositeTopState = (CompositeState) topState;
+            if (compositeTopState.isConcurrent()) {
+                //TODO
+                throw new RuntimeException("Concurrent initial states are not implemented.");
+            }
+            Iterator subVertices = compositeTopState.getSubVertex().iterator();
+            while (subVertices.hasNext()) {
+                StateVertex subVertex = (StateVertex) subVertices.next();
+                if (subVertex instanceof PseudoState &&
+                    ((PseudoState) subVertex).getKind() == PseudoState.PK_INITIAL) {
+                    if (verbosity > 2)
+                        Log.current.println("Starting from " + subVertex.toString());
+                    PseudoState initialState = (PseudoState) subVertex;
+                    Transition transition = (Transition) initialState.getOutgoing().get(0);
+                    transitionEnter(transition);
+                }
+            }
         }
         else {
             topState.isActive();
-            topState.setStateInterpreter(new StateInterpreter(this));
-            topState.getStateInterpreter().enterState(topState);
+            topState.setStateInterpreter(new StateInterpreter(this, topState));
+            topState.getStateInterpreter().enter();
         }
     }
-
-    /**
-     * Forms the portion of the (active) state configuration downward from
-     * the given composite state and corresponding state configuration tree
-     * node.
-     *
-     * @param compositeState the given composite state
-     * @param stateConfigurationNode the given state configuration tree node
-     */
-    protected void formCompositeStateConfigurationFrom (CompositeState compositeState,
-                                                        DefaultMutableTreeNode stateConfigurationNode) {
-        Iterator subVertices = compositeState.getSubVertex().iterator();
-        while (subVertices.hasNext()) {
-            StateVertex subVertex = (StateVertex) subVertices.next();
-
-            //TODO
-
-        }
-    }
-
 
     /**
      * Processes dispatched event instances according to the general semantics
@@ -217,18 +217,46 @@ public class Interpreter {
         Iterator iter = selectedTransitions.iterator();
         while (iter.hasNext()) {
             Transition transition = (Transition) iter.next();
-            StateVertex source = transition.getSource();
-            if (source instanceof State)
-                ((State) source).getStateInterpreter().interpretTransitionExit(transition);
-            else {
-                //TODO handle vertices
-            }
-            StateVertex target = transition.getTarget();
-            if (target instanceof State)
-                ((State) target).getStateInterpreter().interpretTransitionEntry(transition);
-            else {
-                //TODO handle vertices
-            }
+            transitionExit(transition);
+            transitionEnter(transition);
+        }
+    }
+
+    /**
+     * Transitions from a state with the given transition.
+     *
+     * @param transition the given transition
+     */
+    protected void transitionExit (Transition transition) {
+        StateVertex source = transition.getSource();
+        if (source instanceof State) {
+            State sourceState = (State) source;
+            if (sourceState.getStateInterpreter() == null)
+                sourceState.setStateInterpreter(new StateInterpreter(this, sourceState));
+            sourceState.getStateInterpreter().interpretTransitionExit(transition);
+        }
+        else {
+            //TODO handle vertices
+            throw new RuntimeException("Transitions from vertices not yet implemented.");
+        }
+    }
+
+    /**
+     * Transitions into a state with the given transition.
+     *
+     * @param transition the given transition
+     */
+    protected void transitionEnter (Transition transition) {
+        StateVertex target = transition.getTarget();
+        if (target instanceof State) {
+            State targetState = (State) target;
+            if (targetState.getStateInterpreter() == null)
+                targetState.setStateInterpreter(new StateInterpreter(this, targetState));
+            targetState.getStateInterpreter().interpretTransitionEntry(transition);
+        }
+        else {
+            //TODO handle vertices
+            throw new RuntimeException("Transitions into vertices not yet implemented.");
         }
     }
 
@@ -307,6 +335,5 @@ public class Interpreter {
         DefaultMutableTreeNode stateTreeNode = (DefaultMutableTreeNode) activeStates.get(state);
         return (State[]) stateTreeNode.getUserObjectPath();
     }
-
 
 }

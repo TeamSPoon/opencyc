@@ -134,4 +134,11 @@ public abstract class ModelElement extends Element {
     public void setComment (Comment comment) {
         this.comment = comment;
     }
+
+    /**
+     * Returns a string representation of this object.
+     */
+    public String toString() {
+        return getName();
+    }
 }

@@ -57,18 +57,17 @@ public class StateInterpreter extends Thread {
     protected State state;
 
     /**
-     * the log of state transitions and actions
-     */
-    protected ArrayList log = new ArrayList();
-
-    /**
      * Constructs a new StateInterpreter object given the
-     * parent state machine interpreter.
+     * parent state machine interpreter and the state to
+     * interpret.
      *
      * @param interpreter the parent state machine interpreter
+     * @param state the state to interpret
      */
-    public StateInterpreter(Interpreter interpreter) {
+    public StateInterpreter(Interpreter interpreter,
+                            State state) {
         this.interpreter = interpreter;
+        this.state = state;
     }
 
     /**
@@ -90,6 +89,8 @@ public class StateInterpreter extends Thread {
      * @param transition the transistion
      */
     public void interpretTransitionEntry (Transition transition) {
+        if (verbosity > 2)
+            Log.current.println(transition.toString() + " entering " + state.toString());
         Procedure procedure = transition.getEffect();
         if (procedure != null)
             new ProcedureInterpreter(procedure);
@@ -112,22 +113,26 @@ public class StateInterpreter extends Thread {
         for (int i = 0; i < statesFromRootToTarget.length; i++) {
             if ((i > statesFromRootToSource.length) ||
                 (! statesFromRootToSource[i].equals(statesFromRootToTarget[i]))) {
-                    enterState(statesFromRootToTarget[i]);
+                    State state = statesFromRootToTarget[i];
+                    StateInterpreter stateInterpreter = state.getStateInterpreter();
+                    if (stateInterpreter == null)
+                        state.setStateInterpreter(new StateInterpreter(interpreter, state));
+                    stateInterpreter.enter();
             }
         }
     }
 
     /**
-     * Enters the given state, performing the entry action and the do-activity.
-     *
-     * @param stateToEnter the given state to enter
+     * Enters this state, performing the entry action and the do-activity.
      */
-    protected void enterState (State stateToEnter) {
-        stateToEnter.setIsActive(true);
-        if (stateToEnter.getEntry() != null)
-            new ProcedureInterpreter(stateToEnter.getEntry());
-        if (stateToEnter.getDoActivity() != null)
-            new DoActivity(stateToEnter);
+    protected void enter () {
+        if (verbosity > 2)
+            Log.current.println("Entering " + state.toString());
+        state.setIsActive(true);
+        if (state.getEntry() != null)
+            new ProcedureInterpreter(state.getEntry());
+        if (state.getDoActivity() != null)
+            new DoActivity(state);
     }
 
     /**
@@ -137,7 +142,7 @@ public class StateInterpreter extends Thread {
      */
     public void interpretTransitionExit (Transition transition) {
         if (! isCompositeState()) {
-            exitState(state);
+            exit();
             return;
         }
         DefaultMutableTreeNode treeNode = interpreter.getActiveStatesRootedAt(state);
@@ -152,20 +157,20 @@ public class StateInterpreter extends Thread {
                 treeNodeStack.push(children.nextElement());
         }
         for (int i = activeSubstateList.size() - 1; i > -1; i--)
-            exitState((State) activeSubstateList.get(i));
+            ((State) activeSubstateList.get(i)).getStateInterpreter().exit();
     }
 
     /**
-     * Exits the given state.
-     *
-     * @param stateToExit the given state to exit
+     * Exits this state.
      */
-    protected void exitState (State stateToExit) {
-        DoActivity doActivityThread = stateToExit.getDoActivityThread();
+    protected void exit () {
+        if (verbosity > 2)
+            Log.current.println("Exiting " + state.toString());
+        DoActivity doActivityThread = state.getDoActivityThread();
         doActivityThread.terminate();
-        if (stateToExit.getExit() != null)
+        if (state.getExit() != null)
             new ProcedureInterpreter(state.getExit());
-        CompletionEvent completionEvent = new CompletionEvent(stateToExit);
+        CompletionEvent completionEvent = new CompletionEvent(state);
         interpreter.enqueueEvent(completionEvent);
     }
 
@@ -217,12 +222,4 @@ public class StateInterpreter extends Thread {
         this.verbosity = verbosity;
     }
 
-    /**
-     * Displays the state machine log.
-     */
-    public void displayLog () {
-        Iterator logItems = log.iterator();
-        while (logItems.hasNext())
-            Log.current.println(logItems.next().toString());
-    }
 }

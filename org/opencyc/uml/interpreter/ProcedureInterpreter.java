@@ -1,5 +1,6 @@
 package org.opencyc.uml.interpreter;
 
+import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 
@@ -31,6 +32,18 @@ import org.opencyc.uml.commonbehavior.*;
 public class ProcedureInterpreter {
 
     /**
+     * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
      * the procedure to interpret
      */
     Procedure procedure;
@@ -43,6 +56,8 @@ public class ProcedureInterpreter {
      */
     public ProcedureInterpreter(Procedure procedure) {
         this.procedure = procedure;
+        if (verbosity > 2)
+            Log.current.println("Interpreting " + procedure.toString());
     }
 
     /**
@@ -52,6 +67,16 @@ public class ProcedureInterpreter {
      */
     public Procedure getProcedure () {
         return procedure;
+    }
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 
 }

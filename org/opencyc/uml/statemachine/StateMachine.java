@@ -130,5 +130,4 @@ public class StateMachine extends ModelElement {
     public void setSubmachineState (SubmachineState submachineState) {
         this.submachineState = submachineState;
     }
-
 }

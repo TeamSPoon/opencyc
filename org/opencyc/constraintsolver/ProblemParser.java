@@ -107,10 +107,10 @@ public class ProblemParser {
      * domains, and those which subsequently constrain the search for
      * one or more solutions.  Obtains additional argument type constraints for the constraint
      * rules.  If a ground fact discovered among the rule set is proven false, then immediately
-     * return the value false.
+     * return the value false.  If a rule has no instances, then immediately return the value false
      *
-     * @return <tt>false</tt> if a ground fact (rule with no variables) is proven false, otherwise
-     * return <tt>true</tt>
+     * @return <tt>false</tt> if no further backchaining is possible and a rule cannot be satisfied,
+     * otherwise return <tt>true</tt>
      */
     public boolean extractRulesAndDomains() throws IOException {
         simplifiedRules.addAll(Rule.simplifyRuleExpression(constraintProblem.problem));
@@ -118,27 +118,71 @@ public class ProblemParser {
         Collections.sort(simplifiedRules);
         for (int i = 0; i < simplifiedRules.size(); i++) {
             Rule rule = (Rule) simplifiedRules.get(i);
-            if (rule.isGround()) {
-                if (verbosity > 3)
-                    System.out.println("Ground fact\n" + rule);
-                boolean isTrueFact;
-                if (rule.isEvaluatable())
-                    isTrueFact = Rule.evaluateConstraintRule(rule.getFormula());
-                else
-                    isTrueFact = CycAccess.current().isQueryTrue(rule.getFormula(), constraintProblem.mt);
-                if (verbosity > 3)
-                    System.out.println("  --> " + isTrueFact);
-                if (! isTrueFact)
-                    return false;
-            }
+            if ((constraintProblem.backchainer.backchainDepth ==
+                 constraintProblem.backchainer.maxBackchainDepth) &&
+                (! isRuleSatisfiable(rule)))
+                return false;
             if (rule.isVariableDomainPopulatingRule())
                 placeDomainPopulatingRule(rule);
-            else {
+            else
                 placeConstraintRule(rule);
-            }
+        }
+        for (int i = 0; i < constraintRules.size(); i++) {
+            Rule rule = (Rule) constraintRules.get(i);
+
+            //TODO add backchaining on constraint rules during search.
+            //     then add backchain limit check here
+
+            if (! isRuleSatisfiable(rule))
+                return false;
         }
         if (verbosity > 1)
             constraintProblem.displayConstraintRules();
+        return true;
+    }
+
+    /**
+     * Returns <tt>true</tt> iff the rule cannot be satisfied.
+     *
+     * @param rule the rule to check in the KB
+     * @return <tt>true</tt> iff the rule cannot be satisfied
+     */
+    protected boolean isRuleSatisfiable(Rule rule) throws IOException {
+        if (rule.isGround()) {
+            if (verbosity > 3)
+                System.out.println("Ground fact with no backchaining possible\n" + rule);
+            boolean isTrueFact;
+            if (rule.isEvaluatable())
+                isTrueFact = Rule.evaluateConstraintRule(rule.getFormula());
+            else
+                isTrueFact = CycAccess.current().isQueryTrue(rule.getFormula(), constraintProblem.mt);
+            if (verbosity > 3)
+                System.out.println("  --> " + isTrueFact);
+            if (! isTrueFact)
+                return false;
+        }
+        CycConstant term = null;
+        Integer argumentPostion = null;
+        for (int j = 0; j < rule.getArguments().size(); j++) {
+            Object argument = rule.getArguments().get(j);
+            if (argument instanceof CycConstant) {
+                term = (CycConstant) argument;
+                argumentPostion = new Integer(j + 1);
+                break;
+            }
+        }
+        if (term != null) {
+            boolean someInstancesExist =
+                CycAccess.current().hasSomePredicateUsingTerm(rule.getPredicate(),
+                                                              term,
+                                                              argumentPostion,
+                                                              constraintProblem.mt);
+            if (! someInstancesExist) {
+                if (verbosity > 3)
+                    System.out.println("No instances exist and with no backchaining possible\n" + rule);
+                return false;
+            }
+        }
         return true;
     }
 
@@ -220,7 +264,8 @@ public class ProblemParser {
                     }
                     return;
                 }
-                if (domainPopulationPredicate.equals(CycAccess.isa)) {
+                if (domainPopulationPredicate.equals(CycAccess.isa) &&
+                    (! (domainPopulationRule.getArguments().get(1) instanceof CycVariable))) {
                     if (candidatePredicate.equals(CycAccess.isa)) {
                         Object object = domainPopulationRule.getArguments().get(1);
                         CycFort domainPopulationCollection;

@@ -1930,12 +1930,10 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is required
      */
     public boolean isBackchainRequired(CycConstant predicate, CycFort mt) throws IOException {
-        CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
-        command.add(predicate);
-        command.add(this.getKnownConstantByName("backchainRequired"));
-        command.add(mt.cycListApiValue());
-        return this.converseBoolean(command);
+        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainRequired"),
+                                         predicate,
+                                         new Integer(1),
+                                         mt);
     }
 
     /**
@@ -1946,12 +1944,10 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is encouraged
      */
     public boolean isBackchainEncouraged(CycConstant predicate, CycFort mt) throws IOException {
-        CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
-        command.add(predicate);
-        command.add(this.getKnownConstantByName("backchainEncouraged"));
-        command.add(mt.cycListApiValue());
-        return this.converseBoolean(command);
+        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainEncouraged"),
+                                         predicate,
+                                         new Integer(1),
+                                         mt);
     }
 
     /**
@@ -1962,12 +1958,10 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is discouraged
      */
     public boolean isBackchainDiscouraged(CycConstant predicate, CycFort mt) throws IOException {
-        CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
-        command.add(predicate);
-        command.add(this.getKnownConstantByName("backchainDiscouraged"));
-        command.add(mt.cycListApiValue());
-        return this.converseBoolean(command);
+        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainDiscouraged"),
+                                         predicate,
+                                         new Integer(1),
+                                         mt);
     }
 
     /**
@@ -1978,12 +1972,12 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is forbidden
      */
     public boolean isBackchainForbidden(CycConstant predicate, CycFort mt) throws IOException {
-        CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
-        command.add(predicate);
-        command.add(this.getKnownConstantByName("backchainForbidden"));
-        command.add(mt.cycListApiValue());
-        return this.converseBoolean(command);
+        if (predicate.equals(getKnownConstantByName("objectFoundInLocation")))
+            return false;
+        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainForbidden"),
+                                         predicate,
+                                         new Integer(1),
+                                         mt);
     }
 
     /**
@@ -1997,6 +1991,38 @@ public class CycAccess {
      */
     public boolean isIrreflexivePredicate(CycConstant predicate, CycFort mt) throws IOException {
         return this.isa(predicate, getKnownConstantByName("IrreflexiveBinaryPredicate"), mt);
+    }
+    /**
+     * Returns <tt>true</tt> iff any ground formula instances exist having the given predicate,
+     * and the given term in the given argument position.
+     *
+     * @param term the term present at the given argument position
+     * @param predicate the <tt>CycConstant</tt> predicate for the formula
+     * @param argumentPosition the argument position of the given term in the ground formula
+     * @param mt microtheory (including its genlMts) in which the existence is sought
+     * @return <tt>true</tt> iff any ground formula instances exist having the given predicate,
+     * and the given term in the given argument position
+     */
+    public boolean hasSomePredicateUsingTerm(CycConstant predicate,
+                                             CycFort term,
+                                             Integer argumentPosition,
+                                             CycFort mt) throws IOException {
+        CycList command = new CycList();
+        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
+            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+            command.add(CycSymbol.makeCycSymbol("some-pred-value-in-any-mt"));
+            command.add(term.cycListApiValue());
+            command.add(predicate.cycListApiValue());
+        }
+        else {
+            command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
+            command.add(term.cycListApiValue());
+            command.add(predicate.cycListApiValue());
+            command.add(mt.cycListApiValue());
+        }
+        command.add(argumentPosition);
+        //this.traceOn();
+        return converseBoolean(command);
     }
 
 }

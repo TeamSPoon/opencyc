@@ -1974,6 +1974,27 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.toString());
         }
+
+        // hasSomePredicateUsingTerm
+        try {
+            Assert.assertTrue(cycAccess.hasSomePredicateUsingTerm(cycAccess.getKnownConstantByName("#$percentOfRegionIs"),
+                                                                  cycAccess.getKnownConstantByName("#$Algeria"),
+                                                                  new Integer(1),
+                                                                  cycAccess.getKnownConstantByName("CIAWorldFactbook1995Mt")));
+
+            Assert.assertTrue(cycAccess.hasSomePredicateUsingTerm(cycAccess.getKnownConstantByName("#$percentOfRegionIs"),
+                                                                  cycAccess.getKnownConstantByName("#$Algeria"),
+                                                                  new Integer(1),
+                                                                  cycAccess.getKnownConstantByName("#$InferencePSC")));
+            Assert.assertTrue(! cycAccess.hasSomePredicateUsingTerm(cycAccess.getKnownConstantByName("#$percentOfRegionIs"),
+                                                                    cycAccess.getKnownConstantByName("#$Algeria"),
+                                                                    new Integer(2),
+                                                                    cycAccess.getKnownConstantByName("CIAWorldFactbook1995Mt")));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
     }
 }
 

@@ -72,14 +72,15 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testConstraintProblem4"));
             //testSuite.addTest(new UnitTest("testConstraintProblem5"));
             //testSuite.addTest(new UnitTest("testConstraintProblem6"));
-            testSuite.addTest(new UnitTest("testConstraintProblem7"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem7"));
             //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
 
-            //testSuite.addTest(new UnitTest("testBackchainer3"));
+            testSuite.addTest(new UnitTest("testBackchainer3"));
 
             //testSuite.addTest(new UnitTest("testBackchainer4"));
             //testSuite.addTest(new UnitTest("testBackchainer5"));
+            //testSuite.addTest(new UnitTest("testBackchainer6"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -1167,7 +1168,6 @@ public class UnitTest extends TestCase {
         System.out.println("** testConstraintProblem6 OK **");
     }
 
-
     /**
      * Tests the <tt>ConstraintProblem</tt> class.
      */
@@ -1197,6 +1197,11 @@ public class UnitTest extends TestCase {
 
         System.out.println("** testConstraintProblem7 OK **");
     }
+
+
+    // (and (isa (GovernmentFn ?STATE) Organization) (physicalExtent (GovernmentFn ?STATE) ?PLACE) (physicalParts ?PLACE ?CAP) (isa ?CAP ConstructionArtifact))
+
+
     /**
      * Tests the <tt>Backchainer</tt> class.
      */
@@ -1363,4 +1368,39 @@ public class UnitTest extends TestCase {
         }
         System.out.println("** testBackchainer5 OK **");
     }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer6() {
+        System.out.println("** testBackchainer6 **");
+
+        // austinIsaHarbor.
+        String austinIsaHarborString =
+            "(#$and (#$isa ?WHAT #$Ship) " +
+            "       (#$objectFoundInLocation ?WHAT ?L) " +
+            "       (#$isa ?L #$PortCity) " +
+            "       (#$isa #$CityOfAustinTX #$Harbor) " +
+            "       (#$geographicalSubRegions ?L #$CityOfAustinTX))";
+        System.out.println(austinIsaHarborString);
+        ConstraintProblem austinIsaHarborProblem = new ConstraintProblem();
+        austinIsaHarborProblem.setMaxBackchainDepth(1);
+        austinIsaHarborProblem.setVerbosity(9);
+        // Request all solutions.
+        austinIsaHarborProblem.nbrSolutionsRequested = null;
+        try {
+            austinIsaHarborProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = austinIsaHarborProblem.solve(austinIsaHarborString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testBackchainer6 OK **");
+    }
+
 }

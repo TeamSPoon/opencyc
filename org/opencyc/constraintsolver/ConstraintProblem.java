@@ -230,7 +230,7 @@ public class ConstraintProblem {
             if (! problemParser.extractRulesAndDomains()) {
                 long endMilliseconds = System.currentTimeMillis();
                 if (verbosity > 0) {
-                    System.out.println("No solution because an input fact was not true");
+                    System.out.println("No solution because an input constraint cannot be satisfied");
                     System.out.println((endMilliseconds - startMilliseconds) + " milliseconds");
                 }
                 return new ArrayList();

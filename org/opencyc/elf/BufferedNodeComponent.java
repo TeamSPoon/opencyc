@@ -1,8 +1,6 @@
 package org.opencyc.elf;
 
-
 //// Internal Imports
-import org.opencyc.elf.bg.procedure.Procedure;
 
 //// External Imports
 import EDU.oswego.cs.dl.util.concurrent.Puttable;

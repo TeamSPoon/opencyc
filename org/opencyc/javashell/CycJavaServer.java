@@ -51,10 +51,10 @@ public class CycJavaServer extends Thread {
 		    clientJshell = new CycJavaShell();
 		    CycAccess cycAccess = new CycAccess(clientKey,CycConnection.DEFAULT_BASE_PORT,CycConnection.DEFAULT_COMMUNICATION_MODE,CycAccess.DEFAULT_CONNECTION);
 		    clientJshell.ensureClientSupportsShell(cycAccess,
-							   cycAccess.makeCycConstant("#$JavaDataMt"),
-							   cycAccess.makeCycConstant("#$JavaVocabularyMt"),
-							   cycAccess.makeCycConstant("#$JavaMappingMt"),
-							   cycAccess.makeCycConstant("#$JavaTheoryMt"));
+							   cycAccess.makeCycConstant("JavaDataMt"),
+							   cycAccess.makeCycConstant("JavaVocabularyMt"),
+							   cycAccess.makeCycConstant("JavaMappingMt"),
+							   cycAccess.makeCycConstant("JavaTheoryMt"));
 		    allShells.put(clientKey,clientJshell);
 		}
 		CycJavaClient client = new CycJavaClient(clientSock,clientJshell);

@@ -39,31 +39,31 @@ import org.opencyc.cyclobject.*;
 
 
 public class CycJavaCommandline extends Thread {
-    static CycAccess cycAccess = null;
-    static CycJavaShell clientJshell;
-    static HashMap allShells = new HashMap();
 
-    public CycJavaCommandline(String clientKey) throws Exception {
-	clientJshell = new CycJavaShell();
-	cycAccess = new CycAccess(clientKey,CycConnection.DEFAULT_BASE_PORT,CycConnection.DEFAULT_COMMUNICATION_MODE,CycAccess.DEFAULT_CONNECTION);
-	cycAccess.setCyclist(cycAccess.makeCycConstant("#$CycAdministrator"));
-	cycAccess.setKePurpose(cycAccess.makeCycConstant("#$OpenCycProject"));
-	clientJshell.ensureClientSupportsShell(cycAccess,
-					       cycAccess.makeCycConstant("#$JavaDataMt"),
-					       cycAccess.makeCycConstant("#$JavaVocabularyMt"),
-					       cycAccess.makeCycConstant("#$JavaMappingMt"),
-					       cycAccess.makeCycConstant("#$JavaTheoryMt"));
-	allShells.put(clientKey,clientJshell);
+    public CycJavaCommandline()  {
     }
 
     public static void main(String[] arg) throws Exception {
+	String clientKey = "localhost";
+	CycAccess cycAccess = new CycAccess(clientKey,CycConnection.DEFAULT_BASE_PORT,CycConnection.DEFAULT_COMMUNICATION_MODE,CycAccess.DEFAULT_CONNECTION);
+	cycAccess.setCyclist(cycAccess.makeCycConstant("CycAdministrator"));
+	cycAccess.setKePurpose(cycAccess.makeCycConstant("OpenCycProject"));
+	CycJavaShell clientJshell = new CycJavaShell();
+	clientJshell.ensureClientSupportsShell(cycAccess,
+					       cycAccess.findOrCreate("JavaDataMt"),
+					       cycAccess.findOrCreate("JavaVocabularyMt"),
+					       cycAccess.findOrCreate("JavaMappingMt"),
+					       cycAccess.findOrCreate("JavaTheoryMt"));
+
+	System.out.println(clientJshell.toCycClass(cycAccess.getClass()));
+	/*
 	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-	CycJavaCommandline obj = new CycJavaCommandline("localhost");
 	while( true ) {
 	    try {
+
 		CycListParser cyclp = new CycListParser(cycAccess); 
 		CycList todo = cyclp.read(in.readLine());
-		Object result = clientJshell.invoke(todo);        
+        	Object result = clientJshell.invoke(todo);        
 		if( result instanceof CycObject ) {
 		    System.out.println("200 "+((CycObject)result).cyclify());
 		} else if( result instanceof String ) {
@@ -75,6 +75,7 @@ public class CycJavaCommandline extends Thread {
 		System.out.println("500 \""+e+"\"");
 	    }
 	}
+*/
 
     }
 }

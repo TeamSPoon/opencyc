@@ -2908,7 +2908,6 @@ public class UnitTest extends TestCase {
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("(4 3 2 1)"), responseList);
 
-cycAccess.traceOn();
             // mapping
             script = "(mapcar #'list '(a b c))";
             responseList = cycAccess.converseList(script);
@@ -2917,6 +2916,80 @@ cycAccess.traceOn();
             script = "(mapcar #'list '(a b c) '(d e f))";
             responseList = cycAccess.converseList(script);
             Assert.assertEquals(cycAccess.makeCycList("((a d) (b e) (c f))"), responseList);
+
+            script = "(mapcar #'eq '(a b c) '(d b f))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(nil t nil)"), responseList);
+
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script = "(csetq answer nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.nil, responseObject);
+
+cycAccess.traceOn();
+            script = "(csetq my-small-dictionary (new-dictionary #'eq 3))";
+            responseObject = cycAccess.converseObject(script);
+            script = "(progn \n" +
+                     "  (dictionary-enter my-small-dictionary 'a 1) \n" +
+                     "  (dictionary-enter my-small-dictionary 'b 2) \n" +
+                     "  (dictionary-enter my-small-dictionary 'c 3))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("a"), responseObject);
+
+            script =
+                "(define-in-api my-mapdictionary-fn (key value) \n" +
+                "  (cpush (list key value) answer) \n" +
+                "  (ret nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-mapdictionary-fn"), responseObject);
+
+            script = "(mapdictionary my-small-dictionary #'my-mapdictionary-fn)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(a 1)")));
+            Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(b 2)")));
+            Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(c 3)")));
+
+            script = "(csetq my-large-dictionary (new-dictionary #'eq 200))";
+            responseObject = cycAccess.converseObject(script);
+            script = "(clet ((cities (remove-duplicates \n" +
+                     "                 (with-all-mts \n" +
+                     "                   (instances #$IndependentCountry)))) \n" +
+                     "        capital-city) \n" +
+                     "  (cdolist (city cities) \n" +
+                     "    (csetq capital-city (pred-values-in-any-mt city #$capitalCity)) \n" +
+                     "    (dictionary-enter my-large-dictionary \n" +
+                     "                      city \n" +
+                     "                      (fif (consp capital-city) \n" +
+                     "                           (first capital-city) \n" +
+                     "                           ;; else \n" +
+                     "                           nil))))";
+            responseObject = cycAccess.converseObject(script);
+
+            script = "(mapdictionary my-large-dictionary #'my-mapdictionary-fn)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertTrue(responseList.contains(
+                cycAccess.makeCycList("(#$Brazil #$CityOfBrasiliaBrazil)")));
+
+            script =
+                "(define-in-api my-parameterized-mapdictionary-fn (key value args) \n" +
+                "  (cpush (list key value args) answer) \n" +
+                "  (ret nil))";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-parameterized-mapdictionary-fn"),
+                                responseObject);
+
+            script = "(mapdictionary my-small-dictionary #'my-parameterized-mapdictionary-fn `(\"x\"))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(a 1 (\"x\"))")));
+            Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(b 2 (\"x\"))")));
+            Assert.assertTrue(responseList.contains(cycAccess.makeCycList("(c 3 (\"x\"))")));
+
+            script = "(mapdictionary my-large-dictionary #'my-parameterized-mapdictionary-fn `(1 2))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertTrue(responseList.contains(
+                cycAccess.makeCycList("(#$Brazil #$CityOfBrasiliaBrazil (1 2))")));
+
 
 
 

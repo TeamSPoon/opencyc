@@ -7,6 +7,8 @@ import koala.dynamicjava.parser.wrapper.*;
 import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
+import org.opencyc.elf.a.*;
+import org.opencyc.elf.s.*;
 
 /**
  * Provides the lowest level Node container for the Elementary Loop

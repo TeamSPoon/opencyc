@@ -4,10 +4,12 @@ package org.opencyc.elf.goal;
 import java.util.*;
 import org.opencyc.elf.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.uml.core.*;
 import org.opencyc.uml.statemachine.*;
 
 /**
- * Provides the Goal container for the Elementary Loop Functioning (ELF).<br>
+ * Provides the Goal container for the Elementary Loop Functioning (ELF). Either
+ * a goal state or a goal procedure is specified.<br>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -34,20 +36,31 @@ import org.opencyc.uml.statemachine.*;
 public class Goal extends ELFObject {
 
     /**
-     * the goal state
+     * the goal state, which is mutally exclusive with the goal
+     * procedure
      */
     protected State goalState;
+
+    /**
+     * the goal procedure, which is mutually exclusive with the
+     * goal state
+     */
+    protected Procedure goalProcedure;
 
     /**
      * the goal sentence stated in CycL
      */
     protected CycAssertion goalSentence;
 
-//think about parameterized goals (procedure signatures)
+    /**
+     * the goal stated in natural language
+     */
+    protected String goalComment;
 
-//add list of goal failure states.
-
-
+    /**
+     * the list of states which if entered, indicate goal failure
+     */
+    protected ArrayList goalFailureStates;
 
     /**
      * the parent goal of this goal
@@ -94,6 +107,24 @@ public class Goal extends ELFObject {
     }
 
     /**
+     * Gets the goal procedure
+     *
+     * @return the goal procedure
+     */
+    public Procedure getGoalProcedure () {
+        return goalProcedure;
+    }
+
+    /**
+     * Sets the goal procedure
+     *
+     * @param goalProcedure the goal procedure
+     */
+    public void setGoalProcedure (Procedure goalProcedure) {
+        this.goalProcedure = goalProcedure;
+    }
+
+    /**
      * Gets the goal sentence stated in CycL
      *
      * @return the goal sentence stated in CycL
@@ -109,6 +140,42 @@ public class Goal extends ELFObject {
      */
     public void setGoalSentence (CycAssertion goalSentence) {
         this.goalSentence = goalSentence;
+    }
+
+    /**
+     * Gets the goal stated in natural language
+     *
+     * @return the goal stated in natural language
+     */
+    public String getGoalComment () {
+        return goalComment;
+    }
+
+    /**
+     * Sets the goal stated in natural language
+     *
+     * @param goalComment the goal stated in natural language
+     */
+    public void setGoalComment (String goalComment) {
+        this.goalComment = goalComment;
+    }
+
+    /**
+     * Gets the list of states which if entered, indicate goal failure
+     *
+     * @return the list of states which if entered, indicate goal failure
+     */
+    public ArrayList getGoalFailureStates () {
+        return goalFailureStates;
+    }
+
+    /**
+     * Sets the list of states which if entered, indicate goal failure
+     *
+     * @param goalFailureStates the list of states which if entered, indicate goal failure
+     */
+    public void setGoalFailureStates (ArrayList goalFailureStates) {
+        this.goalFailureStates = goalFailureStates;
     }
 
     /**

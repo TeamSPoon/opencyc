@@ -1,6 +1,11 @@
 package org.opencyc.elf;
 
 import java.util.*;
+import org.opencyc.elf.bg.*;
+import org.opencyc.elf.sp.*;
+import org.opencyc.elf.vj.*;
+import org.opencyc.elf.wm.*;
+
 
 /**
  * Provides the Node container for the Elementary Loop Functioning (ELF).<br>

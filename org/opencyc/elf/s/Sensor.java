@@ -1,7 +1,13 @@
 package org.opencyc.elf.s;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+import org.opencyc.elf.message.SensedObjectMsg;
+
+//// External Imports
+
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
  * Provides Sensors for the Elementary Loop Functioning (ELF).<br>
@@ -27,12 +33,32 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Sensor extends NodeComponent {
+  
+  //// Constructors
+  
   /**
    * Constructs a new Sensor object.
    */
-  public Sensor() {
+  public Sensor () {
   }
 
+  /** 
+   * Creates a new instance of Senso with the given
+   * output message channel.
+   *
+   * @param sensorChannel the puttable channel to which messages are output
+   */
+  public Sensor (Puttable sensorChannel) {
+    producer = new Producer(sensorChannel, this);
+  }
+  //// Public Area
+  
+  /**
+   * Provides the method to be executed when the thread is started.
+   */  
+  public void run() {
+  }
+  
   /**
    * Returns a string representation of this object.
    * 
@@ -42,7 +68,82 @@ public class Sensor extends NodeComponent {
     return "Sensor for " + node.getName();
   }
   
-  public void run() {
+  //// Protected Area
+  
+  /**
+   * Thread which processes the output channel of messages.
+   */
+  protected class Producer implements Runnable {
+    
+    /**
+     * the puttable channel to which messages are output
+     */
+    protected final Puttable sensorChannel;
+
+    /**
+     * the parent node component
+     */
+    protected NodeComponent nodeComponent;
+    
+    /**
+     * Creates a new instance of Consumer
+     *
+     * @param sensorChannel the puttable channel to which messages are output
+     * @nodeComponent the parent node component
+     */
+    protected Producer (Puttable sensorChannel,
+                        NodeComponent nodeComponent) { 
+      this.sensorChannel = sensorChannel; 
+      this.nodeComponent = nodeComponent;
+    }
+
+    /**
+     * Senses the World and writes messages to the output channel.
+     */
+    public void run () {
+      while (true) {
+        senseWorld();
+        sendSensedObjectMsg();
+      }
+    }
+
+    /**
+     * Senses the world.
+     */
+    protected void senseWorld () {
+    }
+    
+    /**
+     * Sends the sensed object message.
+     */
+    protected void sendSensedObjectMsg () {
+      SensedObjectMsg sensedObjectMsg = new SensedObjectMsg();
+      sensedObjectMsg.setSender(nodeComponent);
+      sensedObjectMsg.setObj(obj);
+      sensedObjectMsg.setData(data);
+      sendMsgToRecipient(sensorChannel, sensedObjectMsg);
+    }
+      
+    /**
+     * the object for which data is sensed
+     */  
+    protected Object obj;
+
+    /**
+     * the sensed data associated with the object
+     */  
+    protected Object data;
   }
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /**
+   * the thread which processes the input channel of messages
+   */
+  Producer producer;
+  
+  //// Main
   
 }

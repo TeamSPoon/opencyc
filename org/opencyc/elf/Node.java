@@ -16,6 +16,8 @@ import org.opencyc.elf.wm.WorldModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import java.util.logging.Logger;
+
 /**
  * Provides the Node container for the Elementary Loop Functioning (ELF).<br>
  * 
@@ -47,6 +49,7 @@ public class Node extends ELFObject {
    * Constructs a new Node object.
    */
   public Node() {
+    logger = Logger.getLogger("org.opencyc.elf.Node");
   }
 
   //// Public Area
@@ -246,6 +249,15 @@ public class Node extends ELFObject {
     this.siblingNodes = siblingNodes;
   }
   
+  /**
+   * Gets the logger
+   *
+   * @return the logger
+   */
+  public Logger getLogger () {
+    return logger;
+  }
+  
   //// Protected Area
   
   
@@ -286,4 +298,8 @@ public class Node extends ELFObject {
   /** the list of sibling nodes at this ELF resolution level */
   protected ArrayList siblingNodes;
   
+  /**
+   * the logger
+   */
+  protected Logger logger;
 }

@@ -92,8 +92,6 @@ public class JobAssigner extends BufferedNodeComponent {
 
   //// Public Area
 
-  
-  
   /** 
    * Gets the puttable channel for this node component to which other node
    * components can send messages.
@@ -245,6 +243,8 @@ public class JobAssigner extends BufferedNodeComponent {
      */
     protected void processDoTaskMsg (DoTaskMsg doTaskMsg) {
       taskCommand = doTaskMsg.getTaskCommand();
+      getLogger().info("Do task: " + taskCommand);
+      
       //TOTO
     }
                 

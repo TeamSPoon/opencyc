@@ -4,6 +4,7 @@ import  java.net.Socket;
 import  java.io.PrintWriter;
 import  java.io.*;
 import  java.util.Collection;
+import  fipaos.ont.fipa.fipaman.*;
 import  fipaos.ont.fipa.*;
 import  fipaos.parser.*;
 import  org.opencyc.api.*;
@@ -92,7 +93,7 @@ class CycInputHandler implements Runnable {
     protected int trace = API_TRACE_NONE;
 
     /**
-     * Agent Communication Language (e.g. "amp")
+     * Agent Communication Language
      */
     private String acl = null;
 
@@ -116,25 +117,25 @@ class CycInputHandler implements Runnable {
             cfaslOutputStream.trace = trace;
         }
         catch (Exception e) {
-            Log.current.println("Exception creating socket i/o: " + e);
-            throw new RuntimeException("Exception creating socket i/o: " + e);
+            Log.current.println("Exception creating socket i/o: " + e.getMessage());
+            throw new RuntimeException("Exception creating socket i/o: " + e.getMessage());
         }
         Object fipaTransportMessage = null;
         try {
             fipaTransportMessage = cfaslInputStream.readObject();
         }
         catch (Exception e) {
-            Log.current.println("Exception reading socket i/o: " + e);
+            Log.current.println("Exception reading socket i/o: " + e.getMessage());
             return;
         }
         if (! (fipaTransportMessage instanceof CycList)) {
-            Log.current.println(fipaTransportMessage + "\nis not a CycList");
-            throw new RuntimeException(fipaTransportMessage + "\nis not a CycList");
+            Log.current.println(fipaTransportMessage + "\nfipaTransportMessage is not a CycList");
+            throw new RuntimeException(fipaTransportMessage + "\nfipaTransportMessage is not a CycList");
         }
         if (((CycList) fipaTransportMessage).size() != 3) {
-            Log.current.println(fipaTransportMessage + "\nhas invalid length of " +
+            Log.current.println(fipaTransportMessage + "\nfipaTransportMessage has invalid length of " +
                                 ((CycList) fipaTransportMessage).size());
-            throw new RuntimeException(fipaTransportMessage + "\nhas invalid length of " +
+            throw new RuntimeException(fipaTransportMessage + "\nfipaTransportMessage has invalid length of " +
                                 ((CycList) fipaTransportMessage).size());
         }
         if (! (((CycList) fipaTransportMessage).first().equals(CycObjectFactory.makeCycSymbol("FIPA-ENVELOPE")))) {
@@ -142,38 +143,87 @@ class CycInputHandler implements Runnable {
             throw new RuntimeException("Invalid cyc message directive " + fipaTransportMessage);
         }
 
-        Object envelope = ((CycList) fipaTransportMessage).second();
-        if (! (envelope instanceof CycList)) {
-            Log.current.println(envelope + "\nis not a CycList");
-            throw new RuntimeException(envelope + "\nis not a CycList");
+        if (! (((CycList) fipaTransportMessage).second() instanceof CycList)) {
+            Log.current.println(((CycList) fipaTransportMessage).second() +
+                                "\nenvelope is not a CycList");
+            throw new RuntimeException(((CycList) fipaTransportMessage).second() +
+                                       "\nenvelope is not a CycList");
         }
-        Object payload = ((CycList) fipaTransportMessage).third();
-        if (! (envelope instanceof CycList)) {
-            Log.current.println(envelope + "\nis not a CycList");
-            throw new RuntimeException(envelope + "\nis not a CycList");
+        CycList envelope = (CycList) ((CycList) fipaTransportMessage).second();
+        if (! (((CycList) fipaTransportMessage).third() instanceof CycList)) {
+            Log.current.println(((CycList) fipaTransportMessage).third() +
+                                "\npayload is not a CycList");
+            throw new RuntimeException(((CycList) fipaTransportMessage).third() +
+                                       "\npayload is not a CycList");
         }
-
-
-
-/*
-        if (verbosity > 0)
-            Log.current.println("Processing the message without waiting for the reply");
-        String aclString = ((CycList) cycRequest.second()).cyclify();
-        Log.current.println("aclString: " + aclString);
-        ACL acl = null;
+        CycList payload = (CycList) ((CycList) fipaTransportMessage).third();
+        if (! (payload.second() instanceof CycList)) {
+            Log.current.println(payload.second() + "\naclList is not a CycList");
+            throw new RuntimeException(payload.second() + "\naclList is not a CycList");
+        }
+        CycList aclList = (CycList) payload.second();
+        ACL acl = new ACL();
+        acl.setPerformative(aclList.first().toString());
+        Object senderObj = CycObjectFactory.makeCycSymbol(":sender");
+        if (! (senderObj instanceof CycList)) {
+            Log.current.println(senderObj + "\nsenderObj is not a CycList");
+            throw new RuntimeException(senderObj + "\nsenderObj is not a CycList");
+        }
+        AgentID senderAID = null;
         try {
-            acl = new ACL(aclString);
-            AgentManager.agentManager.getAgentCommunityAdapter().converseMessage(acl, new Timer());
+            senderAID = new AgentID(((CycList) senderObj).cyclify());
         }
         catch (ParserException e) {
-            Log.current.println("Cannot parse message " + aclString + e.getMessage());
+            Log.current.println(e.getMessage() + "\nannot parse sender " + senderObj);
+            throw new RuntimeException(e.getMessage() + "\nannot parse sender " + senderObj);
+        }
+        acl.setSenderAID(senderAID);
+        Object receiverObj = CycObjectFactory.makeCycSymbol(":receiver");
+        if (! (receiverObj instanceof CycList)) {
+            Log.current.println(receiverObj + "\nreceiverObj is not a CycList");
+            throw new RuntimeException(receiverObj + "\nreceiverObj is not a CycList");
+        }
+        AgentID receiverAID = null;
+        try {
+            receiverAID = new AgentID(((CycList) receiverObj).cyclify());
+        }
+        catch (ParserException e) {
+            Log.current.println(e.getMessage() + "\ncannot parse receiver " + receiverObj);
+            throw new RuntimeException(e.getMessage() + "\nannot parse receiver " + receiverObj);
+        }
+        acl.setReceiverAID(receiverAID);
+        Object contentObj = aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":content"));
+        if (! (contentObj instanceof CycList)) {
+            Log.current.println(contentObj + "\ncontentObj is not a CycList");
+            throw new RuntimeException(contentObj + "\ncontentObj is not a CycList");
+        }
+        String contentXml = null;
+        try {
+            contentXml = "\n" + ((CycList) contentObj).toXMLString();
+        }
+        catch (IOException e) {
+            Log.current.println(e.getMessage() +
+                                "\nCannot convert to XML string " + contentObj);
+            throw new RuntimeException(e.getMessage() +
+                                       "\nCannot convert to XML string " + contentObj);
+        }
+        acl.setContentObject(contentXml, ACL.BYTELENGTH_ENCODING);
+        acl.setLanguage(FIPACONSTANTS.XML);
+        acl.setOntology(AgentCommunityAdapter.CYC_API_ONTOLOGY);
+        acl.setReplyWith(AgentManager.agentManager.getAgentCommunityAdapter().nextMessageId());
+
+        if (verbosity > 0)
+            Log.current.println("Processing the message without waiting for the reply");
+
+        try {
+            AgentManager.agentManager.getAgentCommunityAdapter().sendMessage(acl);
         }
         catch (Exception e) {
             Log.current.println("Exception when sending\n" + acl + "\n" + e.getMessage());
         }
         close();
-        */
     }
+
 
     /**
      * Closes the socket

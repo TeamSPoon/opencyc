@@ -6,6 +6,19 @@ import fipaos.ont.fipa.*;
 import org.opencyc.api.*;
 import org.opencyc.util.*;
 
+
+
+
+
+// TO-DO combine with CycProxy
+
+
+
+
+
+
+
+
 /**
  * Provides a FIPA-OS agent proxy and a Grid proxy for an OpenCyc server.<p>
  *

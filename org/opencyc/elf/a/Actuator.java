@@ -153,11 +153,11 @@ public class Actuator extends NodeComponent {
   /**
    * the thread which processes the input channel of messages
    */
-  Consumer consumer;
+  protected Consumer consumer;
 
   /**
    * the executor of the consumer thread
    */
-  Executor executor;
+  protected Executor executor;
   
 }

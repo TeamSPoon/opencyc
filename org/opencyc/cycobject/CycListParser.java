@@ -1,6 +1,5 @@
 package org.opencyc.cycobject;
 
-
 import java.util.*;
 import java.io.*;
 import ViolinStrings.*;
@@ -76,13 +75,31 @@ public class CycListParser  {
      */
     public CycList read (String string) throws CycApiException {
         currentString = string;
+        StreamTokenizer st = makeStreamTokenizer(string);
+        return read(st);
+    }
+
+    /**
+     * Returns a configured StreamTokenizer.
+     *
+     * @param string the string to be parsed
+     * @return a configured StreamTokenizer
+     */
+    protected static StreamTokenizer makeStreamTokenizer (String string) {
         StringReader stringReader = new StringReader(string);
         StreamTokenizer st = new StreamTokenizer(stringReader);
+        st.resetSyntax();
         st.ordinaryChar('(');
         st.ordinaryChar(')');
         st.ordinaryChar('\'');
         st.ordinaryChar('`');
         st.ordinaryChar('.');
+        st.whitespaceChars(0, ' ');
+        st.quoteChar('"');
+        st.wordChars('0', '9');
+        st.wordChars('a', 'z');
+        st.wordChars('A', 'Z');
+        st.wordChars(128 + 32, 255);
         st.wordChars('=', '=');
         st.wordChars('+', '+');
         st.wordChars('-', '-');
@@ -106,9 +123,7 @@ public class CycListParser  {
         st.wordChars('%', '%');
         st.wordChars('&', '&');
         st.eolIsSignificant(false);
-        st.parseNumbers();
-
-        return read(st);
+        return st;
     }
 
     /**
@@ -145,8 +160,9 @@ public class CycListParser  {
                             scanWord(st);
                             break;
                         case STNUMBER:
-                            scanNumber(st, true);
-                            break;
+                            throw new RuntimeException("Unexpected number");
+                            //scanNumber(st, true);
+                            //break;
                         case 34:	// "
                             scanString(st);
                             break;
@@ -294,28 +310,21 @@ public class CycListParser  {
     /**
      * Scans a number while reading.
      *
-     * @param the input <tt>StreamTokenizer</tt> from which to get the numerical value.
+     * @param string the input string from which to get the numerical value.
      */
-    private void scanNumber(StreamTokenizer st, boolean positive) {
+    private void scanNumber(String string) {
+        Double parsedNumber = new Double(string);
         Double doubleNumber;
         Integer integerNumber;
         Long longNumber;
         Object number = null;
 
         if (verbosity > 5)
-            System.out.println(st.nval );
+            System.out.println(string);
         // Try representing the scanned number as both java double and long.
-        if (positive) {
-            doubleNumber = new Double (st.nval);
-            integerNumber = new Integer(doubleNumber.intValue());
-            longNumber = new Long(doubleNumber.longValue());
-        }
-        else {
-            doubleNumber = new Double (- st.nval);
-            integerNumber = new Integer(- doubleNumber.intValue());
-            longNumber = new Long(- doubleNumber.longValue());
-        }
-
+        doubleNumber = parsedNumber;
+        integerNumber = new Integer(doubleNumber.intValue());
+        longNumber = new Long(doubleNumber.longValue());
 
         if (integerNumber.doubleValue() == doubleNumber.doubleValue())
             // Choose integer if no loss of accuracy.
@@ -397,13 +406,13 @@ public class CycListParser  {
      */
     private void scanWord(StreamTokenizer st)
         throws IOException, CycApiException {
-
         if (verbosity > 5)
             System.out.println(st.sval);
         Object w = null;
+        String firstChar = st.sval.substring(0, 1);
         if (st.sval.startsWith("#$"))
             w = cycAccess.makeCycConstant(st.sval);
-        else if (st.sval.startsWith("?"))
+        else if (firstChar.equals("?"))
             w = CycObjectFactory.makeCycVariable(st.sval);
         else if (st.sval.equals("#")) {
             int nextTok = st.nextToken();
@@ -416,15 +425,10 @@ public class CycListParser  {
                 w = CycObjectFactory.makeCycSymbol(st.sval);
             }
         }
-        else if (st.sval.equals("-")) {
-            int nextTok = st.nextToken();
-            st.pushBack();
-            if (nextTok == STNUMBER) {
-                scanNumber(st, false);
-                return;
-            }
-            else
-                w = CycObjectFactory.makeCycSymbol(st.sval);
+        else if ((firstChar.equals("-") && (! st.sval.equals("-"))) ||
+                 Strings.isDigit(firstChar)) {
+            scanNumber(st.sval);
+            return;
         }
         else
             w = CycObjectFactory.makeCycSymbol(st.sval);

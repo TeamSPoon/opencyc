@@ -7,7 +7,6 @@ import org.opencyc.api.*;
 import org.opencyc.xml.*;
 import ViolinStrings.*;
 
-
 /**
  * Provides a suite of JUnit test cases for the <tt>org.opencyc.cycobject</tt> package.<p>
  *
@@ -60,6 +59,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testCycVariable"));
         testSuite.addTest(new UnitTest("testCycConstant"));
         testSuite.addTest(new UnitTest("testCycNart"));
+        testSuite.addTest(new UnitTest("testStreamTokenizer"));
         testSuite.addTest(new UnitTest("testCycList"));
         testSuite.addTest(new UnitTest("testCycListVisitor"));
         return testSuite;
@@ -491,6 +491,60 @@ public class UnitTest extends TestCase {
     }
 
     /**
+     * Tests StreamTokenizer CycList parsing behavior.
+     */
+    public void testStreamTokenizer() {
+        System.out.println("\n*** testStreamTokenizer ***");
+        try {
+        String string = "()";
+        StreamTokenizer st = CycListParser.makeStreamTokenizer(string);
+        Assert.assertEquals(40, st.nextToken());
+        Assert.assertEquals(41, st.nextToken());
+        Assert.assertEquals(st.TT_EOF, st.nextToken());
+
+        string = "(1)";
+        st = CycListParser.makeStreamTokenizer(string);
+        Assert.assertEquals(40, st.nextToken());
+
+        int token = st.nextToken();
+        Assert.assertEquals(st.TT_WORD, token);
+        Assert.assertEquals("1", st.sval);
+
+        Assert.assertEquals(41, st.nextToken());
+        Assert.assertEquals(st.TT_EOF, st.nextToken());
+        string = "(-10 -2 -1.0 -5.2E05)";
+        st = CycListParser.makeStreamTokenizer(string);
+        Assert.assertEquals(40, st.nextToken());
+
+        token = st.nextToken();
+        Assert.assertEquals(st.TT_WORD, token);
+        Assert.assertEquals("-10", st.sval);
+
+        token = st.nextToken();
+        Assert.assertEquals(st.TT_WORD, token);
+        Assert.assertEquals("-2", st.sval);
+
+        token = st.nextToken();
+        Assert.assertEquals(st.TT_WORD, token);
+        Assert.assertEquals("-1.0", st.sval);
+
+        token = st.nextToken();
+        Assert.assertEquals(st.TT_WORD, token);
+        Assert.assertEquals("-5.2E05", st.sval);
+
+        Assert.assertEquals(41, st.nextToken());
+        Assert.assertEquals(st.TT_EOF, st.nextToken());
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+
+        System.out.println("*** testStreamTokenizer OK ***");
+    }
+
+    /**
      * Tests <tt>CycList</tt> object behavior.
      */
     public void testCycList() {
@@ -568,6 +622,17 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("(10 . Brazil)", cycList7.toString());
         //CycListParser.verbosity = 10;
 
+        try {
+            CycListParser cycListParser = new CycListParser(null);
+            CycList cycList7_1 = cycListParser.read("(a b c)");
+            Assert.assertEquals("(A B C)", cycList7_1.toString());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+
         CycAccess cycAccess = null;
         try {
             cycAccess = new CycAccess();
@@ -643,10 +708,9 @@ public class UnitTest extends TestCase {
                            " 3 4 5)";
             CycList cycList19 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(cycList13, cycList19);
-            Double doubleValue = new Double(.0000001);
-            listAsString = "(" + doubleValue.toString() + ")";
-            CycList cycList20 = cycAccess.makeCycList(listAsString);
-            Assert.assertEquals(listAsString, cycList20.cyclify());
+            listAsString = "(" + Double.toString(1.0E-05) + ")";
+            CycList cycList19a = cycAccess.makeCycList(listAsString);
+            Assert.assertEquals(listAsString, cycList19a.cyclify());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -843,7 +907,7 @@ public class UnitTest extends TestCase {
                                       "#$BiologicalSpecies " +
                                       "#$OrganismClassificationType " +
                                       "#$PublicConstant " +
-                                      "#$DomesticatedAnimalType))");
+                                      "#$CollectionType))");
             cycListXMLString = Marshaller.marshall(cycList48);
             //System.out.println(cycListXMLString);
             object = CycObjectFactory.unmarshall(cycListXMLString);

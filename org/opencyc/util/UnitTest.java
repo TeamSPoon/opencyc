@@ -1,5 +1,6 @@
 package org.opencyc.util;
 
+import java.io.*;
 import java.util.*;
 import junit.framework.*;
 
@@ -30,34 +31,41 @@ import junit.framework.*;
 public class UnitTest extends TestCase {
 
     /**
-     * Main method in case tracing is prefered over running JUnit.
-     */
-    public static void main(String[] args) {
-        runTests();
-    }
-
-    /**
-     * Constructs a new UnitTest object.
-     * @param name the test case name.
+     * Creates a <tt>UnitTest</tt> object with the given name.
      */
     public UnitTest(String name) {
         super(name);
     }
 
     /**
-     * Runs the unit tests
+     * Returns the test suite.
+     *
+     * @return the test suite
      */
-    public static void runTests() {
-        TestSuite testSuite = new TestSuite(UnitTest.class);
-        TestResult testResult = new TestResult();
-        testSuite.run(testResult);
+    public static Test suite() {
+        TestSuite testSuite = new TestSuite();
+        testSuite.addTest(new UnitTest("testHasDuplicates"));
+        testSuite.addTest(new UnitTest("testHasIntersection"));
+        testSuite.addTest(new UnitTest("testRemoveDelimiters"));
+        testSuite.addTest(new UnitTest("testIsDelimitedString"));
+        testSuite.addTest(new UnitTest("testIsNumeric"));
+        testSuite.addTest(new UnitTest("testWordsToString"));
+        testSuite.addTest(new UnitTest("testEscapeDoubleQuotes"));
+        return testSuite;
+    }
+
+    /**
+     * Main method in case tracing is prefered over running JUnit.
+     */
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
     }
 
     /**
      * Tests the OcCollectionUtils.hasDuplicates method.
      */
     public void testHasDuplicates() {
-        System.out.println("** testHasDuplicates **");
+        System.out.println("\n** testHasDuplicates **");
         ArrayList collection1 = new ArrayList();
         collection1.add("a");
         collection1.add("b");
@@ -84,7 +92,7 @@ public class UnitTest extends TestCase {
      * Tests the OcCollectionUtils.hasIntersection method.
      */
     public void testHasIntersection() {
-        System.out.println("** testHasIntersection **");
+        System.out.println("\n** testHasIntersection **");
         ArrayList a = new ArrayList();
         ArrayList b = new ArrayList();
         Assert.assertTrue(! OcCollectionUtils.hasIntersection(a, b));
@@ -119,7 +127,7 @@ public class UnitTest extends TestCase {
      * Tests the StringUtils.removeDelimiters method.
      */
     public void testRemoveDelimiters() {
-        System.out.println("** testRemoveDelimiters **");
+        System.out.println("\n** testRemoveDelimiters **");
         Assert.assertEquals("abc", StringUtils.removeDelimiters("\"abc\""));
         System.out.println("** testRemoveDelimiters OK**");
     }
@@ -128,7 +136,7 @@ public class UnitTest extends TestCase {
      * Tests the StringUtils.isDelimitedString method.
      */
     public void testIsDelimitedString() {
-        System.out.println("** testIsDelimitedString **");
+        System.out.println("\n** testIsDelimitedString **");
         Assert.assertTrue(StringUtils.isDelimitedString("\"abc\""));
         Assert.assertTrue(StringUtils.isDelimitedString("\"\""));
         Assert.assertTrue(! StringUtils.isDelimitedString("\""));
@@ -142,7 +150,7 @@ public class UnitTest extends TestCase {
      * Tests the StringUtils.isNumeric method.
      */
     public void testIsNumeric() {
-        System.out.println("** testIsNumeric **");
+        System.out.println("\n** testIsNumeric **");
         Assert.assertTrue(StringUtils.isNumeric("0"));
         Assert.assertTrue(StringUtils.isNumeric("1"));
         Assert.assertTrue(StringUtils.isNumeric("2"));
@@ -173,7 +181,7 @@ public class UnitTest extends TestCase {
      * Tests the StringUtils.wordsToString method.
      */
     public void testWordsToString() {
-        System.out.println("** testWordsToString **");
+        System.out.println("\n** testWordsToString **");
         ArrayList words = new ArrayList();
         Assert.assertEquals("", StringUtils.wordsToPhrase(words));
         words.add("word1");
@@ -190,7 +198,7 @@ public class UnitTest extends TestCase {
      * Tests the StringUtils.escapeDoubleQuotes method.
      */
     public void testEscapeDoubleQuotes() {
-        System.out.println("** testEscapeDoubleQuotes **");
+        System.out.println("\n** testEscapeDoubleQuotes **");
         String string = "";
         Assert.assertEquals(string, StringUtils.escapeDoubleQuotes(string));
         string = "1 2 3";

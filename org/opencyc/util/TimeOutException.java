@@ -1,6 +1,5 @@
 package  org.opencyc.util;
 
-
 /**
  * Implements an exception class for the Timer.<p>
  *

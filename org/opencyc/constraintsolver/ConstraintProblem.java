@@ -150,13 +150,43 @@ public class ConstraintProblem {
     protected CycList problem = null;
 
     /**
-     * Constructs a new <tt>ConstraintProblem</tt> object.
+     * Constructs a new <tt>ConstraintProblem</tt> object, creating a new <tt>CycAccess</tt>
+     * object.
      */
     public ConstraintProblem() {
+        this(initializeCycAccess());
+    }
+
+    /**
+     * Creates a <tt>CycAccess</tt> object to connect to the OpenCyc server and provide api
+     * services.
+     *
+     * @return a <tt>CycAccess</tt> object to connect to the OpenCyc server and provide api
+     * services
+     */
+    protected static CycAccess initializeCycAccess() {
+        CycAccess cycAccess = null;
         try {
             cycAccess = new CycAccess();
-            if (verbosity > 3)
-                System.out.println("Initialized OpenCyc connection.");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Cannot access OpenCyc server " + e.getMessage());
+            System.exit(1);
+        }
+        return cycAccess;
+    }
+
+    /**
+     * Constructs a new <tt>ConstraintProblem</tt> object given an existing connection to the
+     * OpenCyc server.
+     *
+     * @param cycAccess the <tt>CycAccess</tt> object to use for this constraint problem
+     */
+    public ConstraintProblem(CycAccess cycAccess) {
+        this.cycAccess = cycAccess;
+        try {
+            // Default microtheory
             mt = cycAccess.makeCycConstant("EverythingPSC");
         }
         catch (Exception e) {
@@ -211,8 +241,13 @@ public class ConstraintProblem {
                 nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();
             if (verbosity > 0) {
-                if (nbrSolutionsRequested == null)
-                    System.out.println("Solving for all solutions");
+                if (nbrSolutionsRequested == null) {
+                    if (backchainer.backchainDepth > 0)
+                        System.out.println("Solving for all solutions at backchain depth " +
+                                           backchainer.backchainDepth);
+                    else
+                        System.out.println("Solving for all solutions");
+                }
                 else if (nbrSolutionsRequested.intValue() == 1)
                     System.out.println("Solving for the first solution");
                 else
@@ -228,7 +263,7 @@ public class ConstraintProblem {
         }
         long endMilliseconds = System.currentTimeMillis();
         if (verbosity > 0)
-            System.out.println((endMilliseconds - startMilliseconds) + " milliseconds");
+            System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
 
         return solution.solutions;
     }
@@ -267,13 +302,22 @@ public class ConstraintProblem {
      * Displays the input constraint rules.
      */
     public void displayConstraintRules() {
-        System.out.println("Domain Population Rules\n");
-        for (int i = 0; i < domainPopulationRules.size(); i++)
-            System.out.println("  " + domainPopulationRules.get(i));
+        if (domainPopulationRules.size() > 0) {
+            System.out.println("Domain Population Rules");
+            for (int i = 0; i < domainPopulationRules.size(); i++)
+                System.out.println("  " + domainPopulationRules.get(i));
+        }
+        else
+            System.out.println("No domain population rules");
 
-        System.out.println("\nConstraint Rules\n");
-        for (int i = 0; i < constraintRules.size(); i++)
-            System.out.println("  " + constraintRules.get(i));
+        if (constraintRules.size() > 0) {
+            System.out.println("Constraint Rules");
+            for (int i = 0; i < constraintRules.size(); i++)
+                System.out.println("  " + constraintRules.get(i));
+        }
+        else
+            System.out.println("No Constraint rules");
+        System.out.println();
     }
 
     /**

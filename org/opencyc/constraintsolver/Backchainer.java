@@ -93,16 +93,18 @@ public class Backchainer {
         if (rule.getVariables().size() != 1)
             throw new RuntimeException("Attempt to backchain on non-unary rule " + rule);
         CycVariable variable = (CycVariable) rule.getVariables().get(0);
-        if (verbosity > 3)
-            System.out.println("Backchaining on " + rule +
+        if (verbosity > 1)
+            System.out.println("Backchaining at depth " + backchainDepth + " on\n  " + rule +
                                "\n  to get bindings for " + variable);
 
         ArrayList backchainRules = getBackchainRules(rule);
         for (int i = 0; i < backchainRules.size(); i++) {
             Rule backchainRule = (Rule) backchainRules.get(i);
-            if (verbosity > 3)
-                System.out.println("\n\nRecursive constraint problem to solve " + backchainRule);
-            ConstraintProblem backchainProblem = new ConstraintProblem();
+            if (verbosity > 1)
+                System.out.println("\nRecursive constraint problem to solve\n  " + backchainRule);
+            // Reuse the existing <tt>CycAccess</tt> object for the new constraint problem.
+            ConstraintProblem backchainProblem =
+                new ConstraintProblem(constraintProblem.cycAccess);
             backchainProblem.setVerbosity(verbosity);
             //backchainProblem.setVerbosity(9);
             // Request all solutions.
@@ -113,20 +115,26 @@ public class Backchainer {
             // Increment the depth of backchaining.
             backchainProblem.backchainer.backchainDepth = this.backchainDepth + 1;
             ArrayList solutions = backchainProblem.solve(backchainRule.rule);
+            boolean solutionFound = false;
             for (int j = 0; j < solutions.size(); j++) {
                 ArrayList solutionBindings = (ArrayList) solutions.get(j);
                 if (verbosity > 3)
-                    System.out.println("Found bindings " + solutionBindings +
+                    System.out.println("  Found bindings " + solutionBindings +
                                        "\n  for " + variable);
                 for (int k = 0; k < solutionBindings.size(); k++) {
                     Binding binding = (Binding) solutionBindings.get(k);
                     if (binding.getCycVariable().equals(variable)) {
                         Object value = binding.getValue();
-                        if (verbosity > 2)
+                        if (verbosity > 1)
                             System.out.println("  adding value " + value + " for " + variable);
                         values.add(value);
+                        solutionFound = true;
                     }
                 }
+            }
+            if (verbosity > 1) {
+                if (! solutionFound)
+                    System.out.println("  No bindings found for " + variable);
             }
         }
         return values;
@@ -163,12 +171,12 @@ public class Backchainer {
         int nbrCandidateRules = candidateImplicationRules.size();
         for (int i = 0; i < nbrCandidateRules; i++) {
             Rule candidateImplicationRule = (Rule) candidateImplicationRules.get(i);
-            if (verbosity > 3)
+            if (verbosity > 4)
                 System.out.println("\nConsidering implication rule\n" + candidateImplicationRule.cyclify());
             HornClause hornClause = new HornClause(candidateImplicationRule);
             ArrayList antecedants = unifier.semanticallyUnify(rule, hornClause);
             if (antecedants != null) {
-                if (verbosity > 3)
+                if (verbosity > 4)
                     System.out.println("Unified antecedants\n" + antecedants);
                 nbrAcceptedRules++;
                 CycList conjunctiveAntecedantRule = new CycList();
@@ -180,11 +188,11 @@ public class Backchainer {
                 result.add(new Rule(conjunctiveAntecedantRule));
             }
         }
-        if (verbosity > 3) {
-            System.out.println("\nSummary of accepted backchain rules\n");
+        if (verbosity > 1) {
+            System.out.println("\nSummary of accepted backchain rules");
             for (int i = 0; i < result.size(); i++)
-                System.out.println(((Rule) result.get(i)).cyclify());
-            System.out.println("\nAccepted " + nbrAcceptedRules + " backchain rules from " +
+                System.out.println("  " + ((Rule) result.get(i)).cyclify());
+            System.out.println("Accepted " + nbrAcceptedRules + " backchain rules from " +
                                nbrCandidateRules + " candidates");
         }
         return result;

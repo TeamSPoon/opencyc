@@ -73,7 +73,7 @@ public class ValueDomains {
      * Displays the variables and their value domains.
      */
     public void displayVariablesAndDomains() {
-        System.out.println("\nVariables and value domains\n");
+        System.out.println("Variables and value domains");
         CycList orderedVariables = new CycList(constraintProblem.variables);
         orderedVariables = orderedVariables.sort();
         for (int i = 0; i < orderedVariables.size(); i++) {

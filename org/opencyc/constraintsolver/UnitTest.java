@@ -1224,7 +1224,7 @@ public class UnitTest extends TestCase {
             "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
         System.out.println(whatIsInAustinString);
         ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
-        whatIsInAustinProblem.setVerbosity(1);
+        whatIsInAustinProblem.setVerbosity(2);
         whatIsInAustinProblem.setMaxBackchainDepth(3);
         // Request all solutions.
         whatIsInAustinProblem.nbrSolutionsRequested = null;

@@ -407,7 +407,6 @@ public class ProblemParser {
                 valueDomains.varsDictionary.put(cycVariable, domainValues);
             }
             else if (rule.isIntensionalVariableDomainPopulatingRule()) {
-                System.out.println("\nIntensional variable domain populating rule\n" + rule);
                 CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
                 if (rule.getPredicate().equals(CycAccess.isa) ||
                     rule.getPredicate().equals(CycAccess.genls)) {

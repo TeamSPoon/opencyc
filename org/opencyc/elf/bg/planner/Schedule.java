@@ -37,6 +37,7 @@ import java.util.List;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Schedule {
+  
   //// Constructors
 
   /** Creates a new instance of Schedule. */
@@ -59,38 +60,6 @@ public class Schedule {
    */
   public void setName (String name) {
     this.name = name;
-  }
-
-  /** Gets the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   *
-   * @return the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   */
-  public Action getAssignedJobAction () {
-    return assignedJobAction;
-  }
-
-  /** Sets the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   *
-   * @param assignedJobAction the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   */
-  public void setAssignedJobAction (Action assignedJobAction) {
-    this.assignedJobAction = assignedJobAction;
-  }
-
-  /** Gets the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   *
-   * @return the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   */
-  public Goal getAssignedJobGoal () {
-    return assignedJobGoal;
-  }
-
-  /** Sets the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   *
-   * @param assignedJobGoal the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task
-   */
-  public void setAssignedJobGoal (Goal assignedJobGoal) {
-    this.assignedJobGoal = assignedJobGoal;
   }
 
   /** Gets the list of planned actions that accomplish the assigned action or achieve the assigned goal
@@ -214,14 +183,12 @@ public class Schedule {
   
   //// Protected Area
 
+  //// Private Area
+
+  //// Internal Rep
+
   // the schedule name or description
   protected String name = "";
-  
-  /** the action assigned to a scheduler by the job assigner which has spatially decomposed its commanded task */
-  protected Action assignedJobAction;
-  
-  /** the goal assigned to a scheduler by the job assigner which has spatially decomposed its commanded task */
-  protected Goal assignedJobGoal;
   
   /** the list of planned actions that accomplish the assigned action or achieve the assigned goal */
   protected List plannedActions = new ArrayList();

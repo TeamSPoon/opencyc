@@ -56,25 +56,12 @@ public class TaskFrame {
   //// Public Area
 
   /** Creates and returns a copy of this object as initialized by the task frame factory
-   * when the task frame library is populated.  The remaining instance variables in the
-   * cloned task frame are set by the job assinger according to the commanded task.
+   * when the task frame library was populated.
    */
   public Object clone () {
     TaskFrame taskFrame = new TaskFrame();
     taskFrame.setTaskName(taskName);
-    List clonedScheduleAlternatives = new ArrayList();
-    Iterator alternativeIterator = scheduleAlternatives.iterator();
-    while (alternativeIterator.hasNext()) {
-      List conditionalScheduleSets = (List) alternativeIterator.next();
-      List clonedConditionalScheduleSets = new ArrayList();
-      Iterator iter = conditionalScheduleSets.iterator();
-      while (iter.hasNext()) {
-        ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) iter.next();
-        clonedConditionalScheduleSets.add((ConditionalScheduleSet) conditionalScheduleSet.clone());
-      }
-      clonedScheduleAlternatives.add(clonedConditionalScheduleSets);
-    }
-    taskFrame.setScheduleAlternatives(clonedScheduleAlternatives);
+    taskFrame.setJobAssignmentAlternatives(jobAssignmentAlternatives);
     taskFrame.setTaskAction((Action) taskAction.clone());
     taskFrame.setTaskGoal(taskGoal);    
     return taskFrame;
@@ -211,30 +198,30 @@ public class TaskFrame {
     this.taskConstraints = taskConstraints;
   }
 
-  /** Gets the schedule alternaives, each of which is a list of conditional schedule sets
+  /** Gets the job assignment alternaives, each of which is a list of job assignments.
    * 
-   * @return the schedule alternaives, each of which is a list of conditional schedule sets
+   * @return the job assignment alternaives, each of which is a list of job assignments
    */
-  public List getScheduleAlternatives () {
-    return scheduleAlternatives;
+  public List getJobAssignmentAlternatives () {
+    return jobAssignmentAlternatives;
   }
  
-  /** Adds athe schedule alternaives, each of which is a list of conditional schedule sets.
+  /** Adds the given job assignment alternative.
    *
-   * @param conditionalScheduleSets the given alternative conditional schedule sets to add
+   * @param jobAssignments the job assignments
    */
-  public void addScheduleAlternatives(List conditionalScheduleSets) {
-    scheduleAlternatives.add(conditionalScheduleSets);
+  public void addJobAssignmentAlternatives(List jobAssignments) {
+    jobAssignmentAlternatives.add(jobAssignments);
   }
   
   //// Protected Area
 
-  /** Sets the schedule alternaives, each of which is a list of conditional schedule sets.
+  /** Sets the job assignment alternaives, each of which is a list of job assignments.
    *
-   * @param scheduleAlternatives the schedule alternaives, each of which is a list of conditional schedule sets
+   * @param jobAssignmentAlternatives the job assignment alternaives, each of which is a list of job assignments
    */
-  protected void setScheduleAlternatives (List scheduleAlternatives) {
-    this.scheduleAlternatives = scheduleAlternatives;
+  protected void setJobAssignmentAlternatives (List jobAssignmentAlternatives) {
+    this.jobAssignmentAlternatives = jobAssignmentAlternatives;
   }
   
   //// Private Area
@@ -262,6 +249,6 @@ public class TaskFrame {
   /** the constraints upon the performance of the task */
   protected List taskConstraints = new ArrayList();
 
-  /** the schedule alternaives, each of which is a list of conditional schedule sets */
-  protected List scheduleAlternatives = new ArrayList();
+  /** the job assignment alternaives, each of which is a list of job assignments */
+  protected List jobAssignmentAlternatives = new ArrayList();
 }

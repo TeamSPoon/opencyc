@@ -162,7 +162,7 @@ public class ExpressionEvaluator {
             evaluateProgramBlockFn((CycList) cycLExpressionList.rest());
         }
         else if (cycLExpressionList.first().equals(programConditionFn)) {
-            evaluateProgramConditionFn((CycList) cycLExpressionList.rest());
+            evaluateProgramConditionFn((CycList) cycLExpressionList.second());
         }
         else
             throw new ExpressionEvaluationException("Unhandled expression " + cycLExpression);
@@ -193,13 +193,9 @@ public class ExpressionEvaluator {
     public boolean evaluateProgramConditionFn (CycList cycLExpression)
             throws IOException, CycApiException, ExpressionEvaluationException {
         boolean answer;
-        CycList query = new CycList();
-        query.add(evaluate);
-        query.add(trueValue);
-        query.add(cycLExpression);
-        answer = cycAccess.isQueryTrue(query, stateMt);
+        answer = cycAccess.isQueryTrue(cycLExpression, stateMt);
         if (verbosity > 2)
-            Log.current.println(cycLExpression + " evaluates to " + answer);
+            Log.current.println(cycLExpression.cyclify() + "\n evaluates to " + answer);
         return answer;
     }
 
@@ -263,6 +259,12 @@ public class ExpressionEvaluator {
             cycLObject instanceof Double)
             value = cycLObject;
         else if (cycLObject instanceof CycFort) {
+            value = cycAccess.getArg2(softwareParameterValue,
+                                      (CycFort) cycLObject,
+                                      stateMt);
+        }
+        else if (cycLObject instanceof CycList) {
+            // TODO non-reifiable function
             value = cycAccess.getArg2(softwareParameterValue,
                                       (CycFort) cycLObject,
                                       stateMt);

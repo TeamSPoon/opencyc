@@ -163,21 +163,33 @@ public class UnitTest extends TestCase {
             expression.setBody(body);
             expressionEvaluator.evaluate(expression);
             queryText =
-                    "(#$softwareParameterValue \n" +
-                    "  (#$SoftwareParameterFromSyntaxFn #$TestStateMachine-OutputPin2-X) 0)";
+                "(#$softwareParameterValue \n" +
+                "  (#$SoftwareParameterFromSyntaxFn #$TestStateMachine-OutputPin2-X) 0)";
             query = cycAccess.makeCycList(queryText);
             Assert.assertTrue(cycAccess.isQueryTrue(query, stateMt));
             Assert.assertEquals(2, cycAccess.getAllAssertionsInMt(stateMt).size());
 
-            cycAccess.traceNamesOn();
-            body =
-                cycAccess.getAssertionArg2("umlBody",
-                                           "TestStateMachine-BooleanExpression1",
-                                           "UMLStateMachineTest01Mt");
-            System.out.println("body: " + ((CycList) body).cyclify());
+            Expression testExpression = new Expression();
+            Object testBody =
+                cycAccess.getArg2("umlBody",
+                                  "TestStateMachine-BooleanExpression1",
+                                  "UMLStateMachineTest01Mt");
+            System.out.println("body: " + ((CycList) testBody).cyclify());
+            testExpression.setBody(testBody);
+            Assert.assertTrue(!
+                expressionEvaluator.evaluateProgramConditionFn(
+                    (CycList) ((CycList) testExpression.getBody()).second()));
 
-            expression.setBody(body);
-            expressionEvaluator.evaluate(expression);
+            Expression incrementExpression = new Expression();
+            Object incrementBody =
+                cycAccess.getArg2("umlBody",
+                                  "TestStateMachine-IncrementProcedure",
+                                  "UMLStateMachineTest01Mt");
+            System.out.println("body: " + ((CycList) testBody).cyclify());
+            incrementExpression.setBody(incrementBody);
+            cycAccess.traceNamesOn();
+            expressionEvaluator.evaluate(incrementExpression);
+
         }
         catch (Exception e) {
             e.printStackTrace();

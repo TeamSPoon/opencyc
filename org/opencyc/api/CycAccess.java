@@ -5151,7 +5151,7 @@ public class CycAccess {
     }
 
     /**
-     * Returns <tt>true</tt> iff the ground query is true in the knowledge base.
+     * Returns <tt>true</tt> iff the query is true in the knowledge base.
      *
      * @param query the query to be asked in the knowledge base
      * @param mt the microtheory in which the query is asked
@@ -5164,7 +5164,7 @@ public class CycAccess {
                                 CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         CycList command = new CycList();
-        command.add(CycObjectFactory.makeCycSymbol("removal-ask"));
+        command.add(CycObjectFactory.makeCycSymbol("cyc-query"));
         CycList command1 = new CycList();
         command.add(command1);
         command1.add(CycObjectFactory.quote);

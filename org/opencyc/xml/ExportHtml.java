@@ -589,52 +589,65 @@ public class ExportHtml {
     }
 
     /**
-     * Creates nodes for rewritten NARTs.  Recursive for the NART components.
+     * Creates nodes for rewritten NARTs.  Recursive for the NART components, putting
+     * hyperlinks where possible.
      *
      * @param object the given ojbect for processing in a #$rewriteOf
      * @param parentElement the parent HTML element for inserting rewriteOf text
      */
     protected void processRewrittenNart (Object object, Element parentElement)
         throws UnknownHostException, IOException, CycApiException {
-        if (! (object instanceof CycNart)) {
-            if (object instanceof CycConstant) {
-                CycConstant cycConstant = (CycConstant) object;
-                if (selectedCycForts.contains(object)) {
-                    HTMLAnchorElement cycConstantAnchorElement =
-                        new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-                    cycConstantAnchorElement.setHref("#" + cycConstant.cyclify());
-                    parentElement.appendChild(cycConstantAnchorElement);
-                    cycConstantAnchorElement.appendChild(htmlDocument.createTextNode(cycConstant.cyclify()));
-                }
-                else
-                    parentElement.appendChild(htmlDocument.createTextNode(cycConstant.cyclify()));
+        if (object instanceof CycList) {
+            CycList cycList = (CycList) object;
+            for (int i = 0; i < cycList.size(); i++) {
+                Object item = cycList.get(i);
+                parentElement.appendChild(htmlDocument.createTextNode(" "));
+                // recurse for each list item
+                processRewrittenNart(item, parentElement);
             }
-            else
-                parentElement.appendChild(htmlDocument.createTextNode(object.toString()));
             return;
         }
-        CycNart cycNart = (CycNart) object;
-        if (selectedCycForts.contains(cycNart)) {
-            HTMLAnchorElement cycFortAnchorElement =
-                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-            cycFortAnchorElement.setHref("#" + cycNart.cyclify());
-            parentElement.appendChild(cycFortAnchorElement);
-            cycFortAnchorElement.appendChild(htmlDocument.createTextNode("( "));
+        if (object instanceof CycConstant) {
+            CycConstant cycConstant = (CycConstant) object;
+            if (selectedCycForts.contains(object)) {
+                HTMLAnchorElement cycConstantAnchorElement =
+                    new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+                cycConstantAnchorElement.setHref("#" + cycConstant.cyclify());
+                parentElement.appendChild(cycConstantAnchorElement);
+                cycConstantAnchorElement.appendChild(htmlDocument.createTextNode(cycConstant.cyclify()));
+            }
+            else
+                parentElement.appendChild(htmlDocument.createTextNode(cycConstant.cyclify()));
+            return;
         }
-        else
-            parentElement.appendChild(htmlDocument.createTextNode("("));
-        CycFort functor = cycNart.getFunctor();
-        // recurse for the functor
-        processRewrittenNart(functor, parentElement);
-        for (int i = 0; i < cycNart.getArguments().size(); i++) {
-            Object argument = cycNart.getArguments().get(i);
-            parentElement.appendChild(htmlDocument.createTextNode(" "));
-            // recurse for each arg
-            processRewrittenNart(argument, parentElement);
+        if (object instanceof CycNart) {
+            CycNart cycNart = (CycNart) object;
+            if (selectedCycForts.contains(cycNart)) {
+                HTMLAnchorElement cycFortAnchorElement =
+                    new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+                cycFortAnchorElement.setHref("#" + cycNart.cyclify());
+                parentElement.appendChild(cycFortAnchorElement);
+                cycFortAnchorElement.appendChild(htmlDocument.createTextNode("( "));
+            }
+            else
+                parentElement.appendChild(htmlDocument.createTextNode("("));
+            CycFort functor = cycNart.getFunctor();
+            // recurse for the functor
+            processRewrittenNart(functor, parentElement);
+            for (int i = 0; i < cycNart.getArguments().size(); i++) {
+                Object argument = cycNart.getArguments().get(i);
+                parentElement.appendChild(htmlDocument.createTextNode(" "));
+                // recurse for each arg
+                processRewrittenNart(argument, parentElement);
+            }
+            Node rightParenTextNode = htmlDocument.createTextNode(")");
+            parentElement.appendChild(rightParenTextNode);
+            return;
         }
-        Node rightParenTextNode = htmlDocument.createTextNode(")");
-        parentElement.appendChild(rightParenTextNode);
-        }
+        parentElement.appendChild(htmlDocument.createTextNode(object.toString()));
+}
+
+
 
     /**
      * Creates a paragraph break in the HTML document.

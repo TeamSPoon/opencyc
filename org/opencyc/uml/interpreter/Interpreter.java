@@ -2,6 +2,8 @@ package org.opencyc.uml.interpreter;
 
 import java.util.*;
 import javax.swing.tree.*;
+import koala.dynamicjava.interpreter.*;
+import koala.dynamicjava.parser.wrapper.*;
 import org.apache.commons.collections.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.statemachine.*;
@@ -62,6 +64,20 @@ public class Interpreter {
     protected StateMachine stateMachine;
 
     /**
+     * The state configuration of all states, which is a tree consisting of a top state
+     * at the root down to individual simple states at the leaves.  States
+     * other than the leaf states are composite states, and branches in
+     * the state configuration are concurrent composite states.
+     */
+    protected DefaultTreeModel allStatesConfiguration;
+
+    /**
+     * a dictionary associating states with tree nodes in the all
+     * states configuration
+     */
+    protected HashMap allStates = new HashMap();
+
+    /**
      * The (active) state configuration, which is a tree consisting of a top state
      * at the root down to individual active simple states at the leaves.  States
      * other than the leaf states are composite states, and branches in
@@ -83,9 +99,19 @@ public class Interpreter {
     protected ArrayList selectedTransitions;
 
     /**
-     * the java expression evaluator
+     * TreeInterpreter that interprets java source code statements.
+     */
+    protected TreeInterpreter treeInterpreter;
+
+    /**
+     * an expression evaluator
      */
     protected ExpressionEvaluator expressionEvaluator;
+
+    /**
+     * the state machine factory used to create and destroy events
+     */
+    protected StateMachineFactory stateMachineFactory;
 
     /**
      * Constructs a new Interpreter object.
@@ -110,7 +136,11 @@ public class Interpreter {
      */
     protected void initialize () {
         Log.makeLog("state-machine-interpreter.log");
-        expressionEvaluator = new ExpressionEvaluator();
+        treeInterpreter = new TreeInterpreter(new JavaCCParserFactory());
+        expressionEvaluator = new ExpressionEvaluator(treeInterpreter);
+        stateMachineFactory = new StateMachineFactory();
+        stateMachineFactory.setStateMachine(stateMachine);
+        stateMachineFactory.setNamespace(stateMachine.getNamespace());
     }
 
     /**
@@ -127,11 +157,49 @@ public class Interpreter {
      * Interprets the state machine.
      */
     public void interpret () {
+        formAllStatesConfiguration();
         formInitialStateConfiguration();
         while (true) {
             eventDispatcher();
             eventProcessor();
             fireSelectedTransitions();
+        }
+    }
+
+    /**
+     * Forms the all states configuration for this
+     * state machine.
+     */
+    protected void formAllStatesConfiguration () {
+        State topState = stateMachine.getTop();
+        if (verbosity > 2)
+            Log.current.println("Forming all states configuration from " + topState.toString());
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(topState);
+        allStates.put(topState, root);
+        allStatesConfiguration = new DefaultTreeModel(root);
+        formAllStatesConfigurationFrom(topState, root);
+    }
+
+    /**
+     * Recursively forms the all states configuration from the given
+     * state and tree node.
+     *
+     * @param state the given state to be placed into the all states configuration
+     * @param parentNode the parent tree node in the all states configuration tree
+     */
+    protected void formAllStatesConfigurationFrom(State state, DefaultMutableTreeNode parentNode) {
+        if (state instanceof CompositeState) {
+            CompositeState compositeState = (CompositeState) state;
+            Iterator subVertices = compositeState.getSubVertex().iterator();
+            while (subVertices.hasNext()) {
+                StateVertex subVertex = (StateVertex) subVertices.next();
+                if (subVertex instanceof State) {
+                    DefaultMutableTreeNode stateNode = new DefaultMutableTreeNode(subVertex);
+                    parentNode.add(stateNode);
+                    allStates.put(subVertex, stateNode);
+                    formAllStatesConfigurationFrom((State) subVertex, stateNode);
+                }
+            }
         }
     }
 
@@ -199,14 +267,25 @@ public class Interpreter {
     }
 
     /**
+     * Determines whether the given transition can be triggered by the given event.
+     */
+
+
+    /**
      * Selects and dequeues event instances from the event queue for
      * processing.
      */
     protected void eventDispatcher () {
-        if (eventQueue.isEmpty())
+        if (eventQueue.isEmpty()) {
             currentEvent = null;
-        else
+            if (verbosity > 2)
+                Log.current.println("No events to dispatch");
+        }
+        else {
             currentEvent = (Event) eventQueue.get();
+            if (verbosity > 2)
+                Log.current.println("Dispatching " + currentEvent.toString());
+        }
     }
 
     /**
@@ -219,6 +298,13 @@ public class Interpreter {
             Transition transition = (Transition) iter.next();
             transitionExit(transition);
             transitionEnter(transition);
+            Event event = transition.getTrigger();
+            if (event != null) {
+                if (verbosity > 2)
+                    Log.current.println("Destroying " + event.toString());
+                stateMachineFactory.destroyEvent(event);
+                transition.setTrigger(null);
+            }
         }
     }
 
@@ -325,15 +411,111 @@ public class Interpreter {
 
     /**
      * Returns the list of states from the root down to the given state
-     * in the active state configuration tree.
+     * in the all states configuration tree.
      *
      * @param state the given state
      * @return the list of states from the root down to the given state
-     * in the active state configuration tree
+     * in the all states configuration tree
      */
-    protected State[] getStatesFromRootTo (State state) {
-        DefaultMutableTreeNode stateTreeNode = (DefaultMutableTreeNode) activeStates.get(state);
-        return (State[]) stateTreeNode.getUserObjectPath();
+    protected Object[] getStatesFromRootTo (State state) {
+        DefaultMutableTreeNode stateTreeNode = (DefaultMutableTreeNode) allStates.get(state);
+        return (Object[]) stateTreeNode.getUserObjectPath();
     }
 
+    /**
+     * Returns the tree node associated with the given state in the
+     * active configuration state tree.
+     *
+     * @param state the given state
+     * @return  the tree node associated with the given state in the
+     * active configuration state tree
+     */
+    public DefaultMutableTreeNode getActiveStateConfigurationTreeNode (State state) {
+        return (DefaultMutableTreeNode) activeStates.get(state);
+    }
+
+    /**
+     * Gets the tree interpreter which interprets java statements
+     *
+     * @return the tree interpreter which interprets java statements
+     */
+    public TreeInterpreter getTreeInterpreter () {
+        return treeInterpreter;
+    }
+
+    /**
+     * Returns an indented string representation of the all states configuration
+     * tree.
+     */
+    public String displayAllStatesConfigurationTree() {
+        StringBuffer stringBuffer = new StringBuffer();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) allStatesConfiguration.getRoot();
+        formStringTree(root,
+                       0,
+                       stringBuffer);
+        return stringBuffer.toString();
+    }
+
+    /**
+     * Returns an indented string representation of the active state configuration
+     * tree.
+     */
+    public String displayStateConfigurationTree() {
+        StringBuffer stringBuffer = new StringBuffer();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) stateConfiguration.getRoot();
+        formStringTree(root,
+                       0,
+                       stringBuffer);
+        return stringBuffer.toString();
+    }
+
+    /**
+     * Recursively builds the indented string representation of the given
+     * state configuration tree.
+     *
+     * @param stateTreeNode the current tree node
+     * @param nestingDepth the nesting depth
+     * @param stringBuffer the buffer containing the partially completed string
+     * representation of the state configuration tree
+     */
+    protected void formStringTree(DefaultMutableTreeNode stateTreeNode,
+                                  int nestingDepth,
+                                  StringBuffer stringBuffer) {
+        for (int i = 0; i < nestingDepth; i++)
+            stringBuffer.append("  ");
+        stringBuffer.append(stateTreeNode.getUserObject().toString());
+        stringBuffer.append("\n");
+        Enumeration children = stateTreeNode.children();
+        while (children.hasMoreElements())
+            formStringTree((DefaultMutableTreeNode) children.nextElement(),
+                           nestingDepth + 1,
+                           stringBuffer);
+    }
+
+    /**
+     * Returns the parent state of the given state, or null if
+     * given the top state.
+     *
+     * @param state the given state
+     * @return the parent state of this state, or null if
+     * given the top state
+     */
+    public State getParentState(State state) {
+        if (state.equals(stateMachine.getTop()))
+            return null;
+        DefaultMutableTreeNode stateTreeNode = (DefaultMutableTreeNode) allStates.get(state);
+        DefaultMutableTreeNode parentTreeNode = (DefaultMutableTreeNode) stateTreeNode.getParent();
+        return (State) parentTreeNode.getUserObject();
+    }
+
+    /**
+     * Gets the state machine factory used by this interpreter for event
+     * creation and destruction.
+     *
+     * @return  the state machine factory used by this interpreter for event
+     * creation and destruction
+     */
+    public StateMachineFactory getStateMachineFactory () {
+        return stateMachineFactory;
+    }
 }

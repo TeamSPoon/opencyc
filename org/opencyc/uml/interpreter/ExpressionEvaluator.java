@@ -33,31 +33,46 @@ import org.opencyc.uml.commonbehavior.*;
 
 public class ExpressionEvaluator {
 
-    /**
-     * TreeInterpreter that interprets java source code statements.
-     */
-    protected TreeInterpreter interpreter;
 
     /**
-     * Constructs a new ExpressionEvaluator object.
+     * the tree interpreter which interprets java statements
      */
-    public ExpressionEvaluator() {
-        interpreter = new TreeInterpreter(new JavaCCParserFactory());
+    TreeInterpreter treeInterpreter;
+
+    /**
+     * Constructs a new ExpressionEvaluator object given the tree
+     * interpreter which interprets java statements
+     *
+     * @param treeInterpreter the given tree interpreter
+     */
+    public ExpressionEvaluator(TreeInterpreter treeInterpreter) {
+        this.treeInterpreter = treeInterpreter;
     }
 
     /**
-     * Evaluates the given boolean java expression.
+     * Evaluates the given boolean java expression in the context of the TreeInterpreter.
      *
      * @param booleanExpression the given boolean java expression
      * @return the result of evaluating the given boolean java expression
      */
     public boolean evaluateBoolean (BooleanExpression booleanExpression) {
+
         StringReader stringReader = new StringReader(booleanExpression.getBody());
-        Object result = interpreter.interpret(stringReader, "boolean expression");
+        Object result = treeInterpreter.interpret(stringReader, "boolean expression");
         if (result instanceof Boolean)
             return ((Boolean) result).booleanValue();
         else
             throw new RuntimeException("Result of evaluating " + booleanExpression.getBody() +
                                        "\nis not a Boolean " + result.toString());
+    }
+
+    /**
+     * Evaluates the given java expression in the context of the TreeInterpreter.
+     *
+     * @param expression the given java expression
+     */
+    public void evaluate (Expression expression) {
+        StringReader stringReader = new StringReader(expression.getBody());
+        treeInterpreter.interpret(stringReader, "boolean expression");
     }
 }

@@ -93,6 +93,31 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(result instanceof Boolean);
         Assert.assertEquals(Boolean.TRUE, result);
 
+        ExpressionEvaluator expressionEvaluator =
+            new ExpressionEvaluator(new TreeInterpreter(new JavaCCParserFactory()));
+        Expression expression1 = new Expression();
+        expression1.setBody("int x;");
+        expressionEvaluator.evaluate(expression1);
+
+        Expression expression2 = new Expression();
+        expression2.setBody("x = 0;");
+        expressionEvaluator.evaluate(expression2);
+
+        BooleanExpression booleanExpression1 = new BooleanExpression();
+        booleanExpression1.setBody("x < 9;");
+        Assert.assertTrue(expressionEvaluator.evaluateBoolean(booleanExpression1));
+
+        Expression expression4 = new Expression();
+        expression4.setBody("x++;");
+        for (int i = 0; i < 9; i++)
+            expressionEvaluator.evaluate(expression4);
+        Assert.assertTrue(! expressionEvaluator.evaluateBoolean(booleanExpression1));
+
+        BooleanExpression booleanExpression2 = new BooleanExpression();
+        booleanExpression2.setBody("x == 9;");
+        Assert.assertTrue(expressionEvaluator.evaluateBoolean(booleanExpression2));
+
+
         System.out.println("\n**** testExpressionEvaluation ****");
     }
 
@@ -348,7 +373,7 @@ public class UnitTest extends TestCase {
         commentString = "Transition 1 for the test state machine.";
         String guardExpressionLanguage = null;
         String guardExpressionBody = null;
-        Procedure effect = null;
+        Procedure effect = initializeNumberToZero;
         Event trigger = null;
         StateVertex source = initialState;
         StateVertex target = counterState;
@@ -383,7 +408,7 @@ public class UnitTest extends TestCase {
         name = "TestStateMachine-Transition2";
         commentString = "Transition 2 for the test state machine.";
         guardExpressionLanguage = "java";
-        guardExpressionBody = "x < 10";
+        guardExpressionBody = "x < 9;";
         effect = increment;
         trigger = null;
         source = counterState;
@@ -426,7 +451,7 @@ public class UnitTest extends TestCase {
         name = "TestStateMachine-Transition3";
         commentString = "Transition 3 for the test state machine.";
         guardExpressionLanguage = "java";
-        guardExpressionBody = "x == 10";
+        guardExpressionBody = "x == 9;";
         effect = null;
         trigger = null;
         source = counterState;
@@ -472,10 +497,15 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(interpreter.eventQueue.isEmpty());
         Assert.assertNull(interpreter.getCurrentEvent());
         Assert.assertEquals(stateMachine, interpreter.getStateMachine());
-        Assert.assertTrue(interpreter.expressionEvaluator instanceof ExpressionEvaluator);
+        Assert.assertTrue(interpreter.getTreeInterpreter() instanceof TreeInterpreter);
 
+        interpreter.formAllStatesConfiguration();
+        System.out.print(interpreter.displayAllStatesConfigurationTree());
         interpreter.formInitialStateConfiguration();
+        Assert.assertEquals(new Integer(0), interpreter.treeInterpreter.getVariable("x"));
+        System.out.print(interpreter.displayStateConfigurationTree());
         interpreter.eventDispatcher();
+        interpreter.eventProcessor();
 
 
         System.out.println("\n**** testSimpleStateMachine ****");

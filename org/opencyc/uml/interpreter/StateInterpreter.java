@@ -52,6 +52,11 @@ public class StateInterpreter extends Thread {
     protected Interpreter interpreter;
 
     /**
+     * the procedure interpreter
+     */
+    protected ProcedureInterpreter procedureInterpreter;
+
+    /**
      * the interpreted active state
      */
     protected State state;
@@ -68,6 +73,7 @@ public class StateInterpreter extends Thread {
                             State state) {
         this.interpreter = interpreter;
         this.state = state;
+        procedureInterpreter = new ProcedureInterpreter(interpreter.getTreeInterpreter());
     }
 
     /**
@@ -92,10 +98,21 @@ public class StateInterpreter extends Thread {
         if (verbosity > 2)
             Log.current.println(transition.toString() + " entering " + state.toString());
         Procedure procedure = transition.getEffect();
-        if (procedure != null)
-            new ProcedureInterpreter(procedure);
+        if (procedure != null) {
+            if (verbosity > 2)
+                Log.current.println("Evaluating effect " + procedure.toString());
+            procedureInterpreter.interpret(procedure);
+        }
         if (! transition.isSelfTransition())
             performEntryActions(transition);
+        CompletionEvent completionEvent =
+            interpreter.getStateMachineFactory().makeCompletionEvent(transition.toString() +
+                                                                     "EntyrInto" + state.toString(),
+                                                                     "Completion of " + transition.toString() +
+                                                                     " entering " + state.toString(),
+                                                                     state);
+
+        interpreter.enqueueEvent(completionEvent);
     }
 
     /**
@@ -106,31 +123,60 @@ public class StateInterpreter extends Thread {
      * @param transition the transition
      */
     protected void performEntryActions (Transition transition) {
-        State[] statesFromRootToTarget = interpreter.getStatesFromRootTo(state);
+        Object[] statesFromRootToTarget = interpreter.getStatesFromRootTo(state);
         //TODO think more about how to handle complex tranistions whose source is a vertex
-        State source = (State)transition.getSource();
-        State[] statesFromRootToSource = interpreter.getStatesFromRootTo(source);
-        for (int i = 0; i < statesFromRootToTarget.length; i++) {
-            if ((i > statesFromRootToSource.length) ||
-                (! statesFromRootToSource[i].equals(statesFromRootToTarget[i]))) {
-                    State state = statesFromRootToTarget[i];
-                    StateInterpreter stateInterpreter = state.getStateInterpreter();
-                    if (stateInterpreter == null)
-                        state.setStateInterpreter(new StateInterpreter(interpreter, state));
-                    stateInterpreter.enter();
+        StateVertex sourceStateVertex = (StateVertex)transition.getSource();
+        if (sourceStateVertex instanceof State) {
+            State source = (State) sourceStateVertex;
+            Object[] statesFromRootToSource = interpreter.getStatesFromRootTo(source);
+            for (int i = 0; i < statesFromRootToTarget.length; i++)
+                if ((i > statesFromRootToSource.length) ||
+                    (! statesFromRootToSource[i].equals(statesFromRootToTarget[i])))
+                    enterState((State) statesFromRootToTarget[i]);
+        }
+        else {
+            for (int i = 0; i < statesFromRootToTarget.length; i++)
+                enterState((State) statesFromRootToTarget[i]);
+        }
+    }
+
+
+    /**
+     * Enters the given state, which might be the state interpreted by
+     * this state interpreter, or might be another state.
+     *
+     * @param entryState the given state
+     */
+    public void enterState (State entryState) {
+        if (entryState.equals(state))
+            enter();
+        else {
+            StateInterpreter stateInterpreter = entryState.getStateInterpreter();
+            if (stateInterpreter == null) {
+                stateInterpreter = new StateInterpreter(interpreter, entryState);
+                state.setStateInterpreter(stateInterpreter);
             }
+            stateInterpreter.enter();
         }
     }
 
     /**
      * Enters this state, performing the entry action and the do-activity.
      */
-    protected void enter () {
+    public void enter () {
         if (verbosity > 2)
             Log.current.println("Entering " + state.toString());
         state.setIsActive(true);
+
+        if (! isTopState()) {
+            DefaultMutableTreeNode parentStateNode =
+                    interpreter.getActiveStateConfigurationTreeNode(getParentState());
+            DefaultMutableTreeNode stateNode = new DefaultMutableTreeNode(state);
+            parentStateNode.add(stateNode);
+        }
+
         if (state.getEntry() != null)
-            new ProcedureInterpreter(state.getEntry());
+            procedureInterpreter.interpret(state.getEntry());
         if (state.getDoActivity() != null)
             new DoActivity(state);
     }
@@ -163,13 +209,13 @@ public class StateInterpreter extends Thread {
     /**
      * Exits this state.
      */
-    protected void exit () {
+    public void exit () {
         if (verbosity > 2)
             Log.current.println("Exiting " + state.toString());
         DoActivity doActivityThread = state.getDoActivityThread();
         doActivityThread.terminate();
         if (state.getExit() != null)
-            new ProcedureInterpreter(state.getExit());
+            procedureInterpreter.interpret(state.getExit());
         CompletionEvent completionEvent = new CompletionEvent(state);
         interpreter.enqueueEvent(completionEvent);
     }
@@ -220,6 +266,29 @@ public class StateInterpreter extends Thread {
      */
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
+    }
+
+    /**
+     * Returns true if the interpreted state is the top state.
+     *
+     * @return  true if the interpreted state is the top state
+     */
+    public boolean isTopState() {
+        return state.equals(interpreter.getStateMachine().getTop());
+    }
+
+    /**
+     * Returns the parent state of the this state, or null if
+     * this is the top state.
+     *
+     * @param state the given state
+     * @return the parent state of this state, or null if
+     * given the top state
+     */
+    public State getParentState() {
+        if (isTopState())
+            return null;
+        return interpreter.getParentState(state);
     }
 
 }

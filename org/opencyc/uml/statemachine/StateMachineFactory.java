@@ -1,5 +1,6 @@
 package org.opencyc.uml.statemachine;
 
+import java.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.action.*;
@@ -267,9 +268,9 @@ public class StateMachineFactory {
      * @return the new change event object
      */
     public TimeEvent makeTimeEvent (String name,
-                                        String commentString,
-                                        String language,
-                                        String body) {
+                                    String commentString,
+                                    String language,
+                                    String body) {
         TimeEvent timeEvent = new TimeEvent();
         setNamespaceNameComment(timeEvent,
                                 name,
@@ -280,6 +281,7 @@ public class StateMachineFactory {
         timeEvent.setWhen(when);
         return timeEvent;
     }
+
 
     /**
      * Adds a parameter to the given event.
@@ -303,6 +305,52 @@ public class StateMachineFactory {
             parameter.setBehavioralFeature(((CallEvent) event).getOperation());
         parameter.setType(type);
         return parameter;
+    }
+
+    /**
+     * Destroys the given event, its parameters and its comment by unlinking
+     * them from their associations.
+     *
+     * @param event the given event to be destroyed
+     */
+    public void destroyEvent (Event event) {
+        Comment comment = event.getComment();
+        Namespace namespace = comment.getNamespace();
+        namespace.getOwnedElement().remove(comment);
+        Iterator parameters = event.getParameter().iterator();
+        while (parameters.hasNext())
+            destroyParameter((Parameter) parameters.next());
+        namespace.getOwnedElement().remove(event);
+        event.setComment(null);
+        event.setNamespace(null);
+    }
+
+    /**
+     * Destroys the given comment by unlinking it from its associations.
+     *
+     * @param comment the given comment to destroy
+     */
+    public void destroyComment (Comment comment) {
+        Namespace namespace = comment.getNamespace();
+        namespace.getOwnedElement().remove(comment);
+        comment.setComment(null);
+        comment.setNamespace(null);
+        comment.setAnnotatedElement(null);
+    }
+
+    /**
+     * Destroys the given parameter by unlinking it from its associations.
+     *
+     * @param parameter the given parameter to destroy
+     */
+    public void destroyParameter (Parameter parameter) {
+        destroyComment(parameter.getComment());
+        Namespace namespace = parameter.getNamespace();
+        namespace.getOwnedElement().remove(parameter);
+        parameter.setComment(null);
+        parameter.setNamespace(null);
+        parameter.setBehavioralFeature(null);
+        parameter.setDefaultValue(null);
     }
 
     /**
@@ -533,5 +581,23 @@ public class StateMachineFactory {
         return transition;
     }
 
+    /**
+     * Sets the state machine for this state machine factory in the case where
+     * the state machine already exists.
+     *
+     * @param stateMachine the state machine to extend or modify
+     */
+    public void setStateMachine (StateMachine stateMachine) {
+        this.stateMachine = stateMachine;
+    }
 
+    /**
+     * Sets the namespace for this state machine factory in the case where
+     * the state machine already exists.
+     *
+     * @param namespace the namespace for the state machine model elements
+     */
+    public void setNamespace (Namespace namespace) {
+        this.namespace = namespace;
+    }
 }

@@ -1,5 +1,9 @@
 package org.opencyc.uml.interpreter;
 
+import java.util.*;
+import java.io.*;
+import koala.dynamicjava.interpreter.*;
+import koala.dynamicjava.parser.wrapper.*;
 import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
@@ -44,20 +48,38 @@ public class ProcedureInterpreter {
     protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
+     * the tree interpreter which interprets java statements
+     */
+    TreeInterpreter treeInterpreter;
+
+    /**
      * the procedure to interpret
      */
     Procedure procedure;
 
     /**
-     * Constructs a new ProcedureInterpreter object given the procedure
-     * to interpret.
+     * Constructs a new ProcedureInterpreter object given the tree
+     * interpreter which interprets java statements
+     *
+     * @param treeInterpreter the given tree interpreter
+     */
+    public ProcedureInterpreter(TreeInterpreter treeInterpreter) {
+        this.treeInterpreter = treeInterpreter;
+    }
+
+    /**
+     * Interprets the given procedure.
      *
      * @param procedure the procedure to interpret
      */
-    public ProcedureInterpreter(Procedure procedure) {
+    public void interpret (Procedure procedure) {
         this.procedure = procedure;
         if (verbosity > 2)
-            Log.current.println("Interpreting " + procedure.toString());
+            Log.current.println("Interpreting " + procedure.toString() +
+                                "\n  " + procedure.getBody());
+        //TODO handle arguments
+        StringReader stringReader = new StringReader(procedure.getBody());
+        treeInterpreter.interpret(stringReader, "procedure");
     }
 
     /**

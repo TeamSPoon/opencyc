@@ -277,6 +277,28 @@ public class CycNart extends CycFort implements Comparable {
     }
 
     /**
+     * Returns a list representation of the OpenCyc NART.
+     *
+     * @return a <tt>CycList</tt> representation of the OpenCyc NART.
+     */
+    public CycList toCycList() {
+        CycList cycList = new CycList();
+        if (this.functor instanceof CycNart)
+            cycList.add(((CycNart) functor).toCycList());
+        else
+            cycList.add(functor);
+        ListIterator iterator = this.getArguments().listIterator();
+        while (iterator.hasNext()) {
+            Object argument = iterator.next();
+            if (argument instanceof CycNart)
+                cycList.add(((CycNart) argument).toCycList());
+            else
+                cycList.add(argument);
+        }
+        return cycList;
+    }
+
+    /**
      * Returns a string representation of the OpenCyc NART.
      *
      * @return a <tt>String</tt> representation of the OpenCyc NART.
@@ -455,6 +477,14 @@ public class CycNart extends CycFort implements Comparable {
         return this.arguments.equals(thatNart.arguments);
     }
 
+    /**
+     * Returns true if the functor and arguments are instantiated.
+     *
+     * @return true if the functor and arguments are instantiated
+     */
+    public boolean hasFunctorAndArgs() {
+        return (functor != null) && (this.arguments != null);
+    }
 
 }
 

@@ -138,6 +138,11 @@ public class CycAccess {
     public static CycConstant or = null;
 
     /**
+     * Convenient reference to #$not.
+     */
+    public static CycConstant not = null;
+
+    /**
      * Convenient reference to #$numericallyEqual.
      */
     public static CycConstant numericallyEqual = null;
@@ -499,6 +504,8 @@ public class CycAccess {
             and = getKnownConstantByGuid("bd5880f9-9c29-11b1-9dad-c379636f7270");
         if (or == null)
             or = getKnownConstantByGuid("bd5880fa-9c29-11b1-9dad-c379636f7270");
+        if (not == null)
+            not = getKnownConstantByGuid("bd5880fb-9c29-11b1-9dad-c379636f7270");
         if (numericallyEqual == null)
             numericallyEqual = getKnownConstantByGuid("bd589d90-9c29-11b1-9dad-c379636f7270");
         if (plusFn == null)
@@ -832,13 +839,22 @@ public class CycAccess {
     /**
      * Completes the instantiation of a <tt>CycNart</tt> returned by the binary api. The
      * binary api sends only constant ids, and the constant names and guids must be retrieved
-     * if the constant is not cached.
+     * if the constant is not cached.  Also finds the id of the CycNart if the functor
+     * and arguments are instantiated.
      *
      * @param cycNart the <tt>CycNart</tt> whose constants are to be completed
      * @param the completed <tt>CycNart</tt> object
      */
     public CycNart completeCycNart (CycNart cycNart)
         throws IOException, UnknownHostException, CycApiException {
+        Integer id = cycNart.getId();
+        if (id == null && cycNart.hasFunctorAndArgs()) {
+            id = findNartId(cycNart);
+            if (id != null)
+                cycNart.setId(id);
+        }
+        if (id == null)
+            throw new CycApiException("CycNart has no id " + cycNart.safeToString());
         return getCycNartById(cycNart.getId());
     }
 
@@ -853,6 +869,32 @@ public class CycAccess {
     public CycAssertion completeCycAssertion (CycAssertion cycAssertion)
         throws IOException, UnknownHostException, CycApiException {
         return getAssertionById(cycAssertion.getId());
+    }
+
+    /**
+     * Finds the id of a CycNart given its formula.
+     *
+     * @param cycNart the CycNart object with functor and arguments instantiated
+     * @return the id of the nart if found in the KB, otherwise null
+     */
+    public Integer findNartId (CycNart cycNart)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("find-nart"));
+        command.addQuoted(cycNart.toCycList());
+        Object object = converseObject(command);
+        if (object.equals(CycObjectFactory.nil))
+            return null;
+        CycNart foundCycNart = null;
+        if (object instanceof CycNart)
+            foundCycNart = (CycNart) object;
+        else
+            throw new CycApiException("findNart did not return an null or a nart " + object +
+                                      " (" + object.getClass() + ")");
+        command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("nart-id"));
+        command.add(foundCycNart);
+        return new Integer(converseInt(command));
     }
 
     /**

@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.*;
 import org.opencyc.api.*;
 import org.opencyc.xml.*;
+import ViolinStrings.*;
 
 
 /**
@@ -290,117 +291,139 @@ public class UnitTest extends TestCase {
      */
     public void testCycNart() {
         System.out.println("\n*** testCycNart ***");
-        CycConstant fruitFn =
-            new CycConstant("FruitFn",
-                            CycObjectFactory.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f7270"),
-                            new Integer(10614));
-        CycObjectFactory.addCycConstantCacheById(fruitFn);
-        CycObjectFactory.addCycConstantCacheByName(fruitFn);
-        CycObjectFactory.addCycConstantCacheByGuid(fruitFn);
-        CycConstant appleTree =
-            new CycConstant("AppleTree",
-                            CycObjectFactory.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f0000"),
-                            new Integer(16797));
-        CycObjectFactory.addCycConstantCacheById(appleTree);
-        CycObjectFactory.addCycConstantCacheByName(appleTree);
-        CycObjectFactory.addCycConstantCacheByGuid(appleTree);
-        CycNart cycNart = new CycNart(fruitFn, appleTree);
-        Assert.assertNotNull(cycNart);
-        Assert.assertEquals("(FruitFn AppleTree)",cycNart.toString());
-        Assert.assertEquals("(#$FruitFn #$AppleTree)",cycNart.cyclify());
-
-        CycConstant fruitFn2 =
-            new CycConstant("FruitFn",
-                            CycObjectFactory.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f7270"),
-                            new Integer(10614));
-        CycObjectFactory.addCycConstantCacheById(fruitFn2);
-        CycObjectFactory.addCycConstantCacheByName(fruitFn2);
-        CycObjectFactory.addCycConstantCacheByGuid(fruitFn2);
-        CycConstant appleTree2 =
-            new CycConstant("AppleTree",
-                            CycObjectFactory.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f0000"),
-                            new Integer(16797));
-        CycObjectFactory.addCycConstantCacheById(appleTree2);
-        CycObjectFactory.addCycConstantCacheByName(appleTree2);
-        CycObjectFactory.addCycConstantCacheByGuid(appleTree2);
-        CycNart cycNart2 = new CycNart(fruitFn2, appleTree2);
-        Assert.assertEquals(cycNart.toString(), cycNart2.toString());
-        Assert.assertEquals(cycNart, cycNart2);
-
-        // compareTo
-        ArrayList narts = new ArrayList();
-        CycConstant governmentFn =
-            new CycConstant("GovernmentFn",
-                            CycObjectFactory.makeGuid("c10aef3d-9c29-11b1-9dad-c379636f7270"),
-                            new Integer(62025533));
-        CycObjectFactory.addCycConstantCacheById(governmentFn);
-        CycObjectFactory.addCycConstantCacheByName(governmentFn);
-        CycObjectFactory.addCycConstantCacheByGuid(governmentFn);
-        CycConstant brazil =
-            new CycConstant("#$Brazil",
-                            CycObjectFactory.makeGuid("bd588f01-9c29-11b1-9dad-c379636f7270"),
-                            new Integer(3841));
-        CycObjectFactory.addCycConstantCacheById(brazil);
-        CycObjectFactory.addCycConstantCacheByName(brazil);
-        CycObjectFactory.addCycConstantCacheByGuid(brazil);
-        CycList nartCycList = new CycList();
-        nartCycList.add(governmentFn);
-        nartCycList.add(brazil);
-        narts.add(new CycNart(nartCycList));
-        Assert.assertEquals("[(GovernmentFn Brazil)]", narts.toString());
-        CycConstant plusFn =
-            new CycConstant("PlusFn",
-                            CycObjectFactory.makeGuid("bd5880ae-9c29-11b1-9dad-c379636f7270"),
-                            new Integer(174));
-        CycObjectFactory.addCycConstantCacheById(plusFn);
-        CycObjectFactory.addCycConstantCacheByName(plusFn);
-        CycObjectFactory.addCycConstantCacheByGuid(plusFn);
-        CycList nartCycList2 = new CycList();
-        nartCycList2.add(plusFn);
-        nartCycList2.add(new Integer(100));
-        narts.add(new CycNart(nartCycList2));
-        CycList nartCycList3 = new CycList();
-        nartCycList3.add(fruitFn2);
-        nartCycList3.add(appleTree2);
-        narts.add(new CycNart(nartCycList3));
-        Collections.sort(narts);
-        Assert.assertEquals("[(FruitFn AppleTree), (GovernmentFn Brazil), (PlusFn 100)]",
-                            narts.toString());
-
-        // coerceToCycNart
-        CycNart cycNart4 = new CycNart(fruitFn2, appleTree2);
-        Assert.assertEquals(cycNart4, CycNart.coerceToCycNart(cycNart4));
-        CycList cycList4 = new CycList();
-        cycList4.add(fruitFn2);
-        cycList4.add(appleTree2);
-        Assert.assertEquals(cycNart2, CycNart.coerceToCycNart(cycList4));
-
-        // toXML, toXMLString
-        cycNart4.setId(new Integer(1234));
-        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        CycAccess cycAccess = null;
         try {
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      //CycConnection.DEFAULT_BASE_PORT,
+                                      3640,
+                                      CycConnection.BINARY_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+            CycConstant fruitFn =
+                cycAccess.getKnownConstantByGuid(
+                    CycObjectFactory.makeGuid("bd58a976-9c29-11b1-9dad-c379636f7270"));
+            CycConstant appleTree =
+                cycAccess.getKnownConstantByGuid(
+                    CycObjectFactory.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f7270"));
+            CycNart cycNart = new CycNart(fruitFn, appleTree);
+            CycNart apple = cycNart;
+            Assert.assertNotNull(cycNart);
+            Assert.assertEquals("(FruitFn AppleTree)",cycNart.toString());
+            Assert.assertEquals("(#$FruitFn #$AppleTree)",cycNart.cyclify());
+
+            CycNart cycNart2 = new CycNart(fruitFn, appleTree);
+            Assert.assertEquals(cycNart.toString(), cycNart2.toString());
+            Assert.assertEquals(cycNart, cycNart2);
+
+            // compareTo
+            ArrayList narts = new ArrayList();
+            CycConstant governmentFn =
+                cycAccess.getKnownConstantByGuid(
+                    CycObjectFactory.makeGuid("c10aef3d-9c29-11b1-9dad-c379636f7270"));
+            CycConstant unitedStatesOfAmerica =
+                cycAccess.getKnownConstantByGuid(
+                    CycObjectFactory.makeGuid("bd58a42a-9c29-11b1-9dad-c379636f7270"));
+            CycList nartCycList = new CycList();
+            nartCycList.add(governmentFn);
+            nartCycList.add(unitedStatesOfAmerica);
+            CycNart usGovernment = new CycNart(nartCycList);
+            narts.add(usGovernment);
+            Assert.assertEquals("[(GovernmentFn UnitedStatesOfAmerica)]", narts.toString());
+            CycConstant studyFn =
+                cycAccess.getKnownConstantByGuid(
+                    CycObjectFactory.makeGuid("c0884eab-9c29-11b1-9dad-c379636f7270"));
+            CycList nartCycList2 = new CycList();
+            nartCycList2.add(studyFn);
+            nartCycList2.add(usGovernment);
+            narts.add(new CycNart(nartCycList2));
+            CycList nartCycList3 = new CycList();
+            nartCycList3.add(fruitFn);
+            nartCycList3.add(appleTree);
+            narts.add(new CycNart(nartCycList3));
+            Collections.sort(narts);
+            Assert.assertEquals("[(FruitFn AppleTree), (GovernmentFn UnitedStatesOfAmerica), (StudyFn (GovernmentFn UnitedStatesOfAmerica))]",
+                                narts.toString());
+
+            // hasFunctorAndArgs
+            Assert.assertTrue(apple.hasFunctorAndArgs());
+            Assert.assertTrue(! (new CycNart()).hasFunctorAndArgs());
+
+            // toCycList()
+            CycList cycList = new CycList();
+            cycList.add(fruitFn);
+            cycList.add(appleTree);
+            Assert.assertEquals(cycList, apple.toCycList());
+
+
+            // check cfasl representation of narts in a list
+            CycList myNarts = new CycList();
+            myNarts.addAll(narts);
+            Assert.assertNotNull(cycAccess.findNartId(apple));
+
+            for (int i = 0; i < myNarts.size(); i++) {
+                Assert.assertTrue(myNarts.get(i) instanceof CycNart);
+                CycNart myCycNart = (CycNart) myNarts.get(i);
+
+                cycAccess.completeCycNart(myCycNart);
+            }
+            CycList command = new CycList();
+            command.add(CycObjectFactory.makeCycSymbol("csetq"));
+            command.add(CycObjectFactory.makeCycSymbol("my-narts"));
+            command.addQuoted(myNarts);
+            CycList myNartsBackFromCyc = cycAccess.converseList(command);
+            for (int i = 0; i < myNartsBackFromCyc.size(); i++) {
+                Assert.assertTrue(myNartsBackFromCyc.get(i) instanceof CycNart);
+                CycNart myNartBackFromCyc = (CycNart) myNartsBackFromCyc.get(i);
+                System.out.println("myNartBackFromCyc " + myNartBackFromCyc.cyclify());
+                Assert.assertTrue(myNartBackFromCyc.getFunctor() instanceof CycFort);
+                Assert.assertTrue(myNartBackFromCyc.getArguments() instanceof ArrayList);
+                ArrayList args = (ArrayList) myNartBackFromCyc.getArguments();
+                for (int j = 0; j < args.size(); j++) {
+                    Object arg = args.get(j);
+                    System.out.println("myNartBackFromCyc arg " + arg + "  (" + arg.getClass() + ")");
+                    Assert.assertTrue(arg instanceof CycFort);
+                }
+
+            }
+
+            // coerceToCycNart
+            CycNart cycNart4 = new CycNart(fruitFn, appleTree);
+            Assert.assertEquals(cycNart4, CycNart.coerceToCycNart(cycNart4));
+            CycList cycList4 = new CycList();
+            cycList4.add(fruitFn);
+            cycList4.add(appleTree);
+            Assert.assertEquals(cycNart2, CycNart.coerceToCycNart(cycList4));
+
+            // toXML, toXMLString
+            cycNart4.setId(new Integer(1234));
+            XMLStringWriter xmlStringWriter = new XMLStringWriter();
             cycNart4.toXML(xmlStringWriter, 0, false);
             //System.out.println(xmlStringWriter.toString());
+
             String expectedXML =
                 "<nat>\n" +
                 "  <id>1234</id>\n" +
                 "  <functor>\n" +
                 "    <constant>\n" +
-                "      <guid>bd58c19d-9c29-11b1-9dad-c379636f7270</guid>\n" +
+                "      <guid>bd58a976-9c29-11b1-9dad-c379636f7270</guid>\n" +
                 "      <name>FruitFn</name>\n" +
                 "      <id>10614</id>\n" +
                 "    </constant>\n" +
                 "  </functor>\n" +
                 "  <arg>\n" +
                 "    <constant>\n" +
-                "      <guid>bd58c19d-9c29-11b1-9dad-c379636f0000</guid>\n" +
+                "      <guid>bd58c19d-9c29-11b1-9dad-c379636f7270</guid>\n" +
                 "      <name>AppleTree</name>\n" +
                 "      <id>16797</id>\n" +
                 "    </constant>\n" +
                 "  </arg>\n" +
                 "</nat>\n";
-            Assert.assertEquals(expectedXML, xmlStringWriter.toString());
-            Assert.assertEquals(expectedXML, cycNart4.toXMLString());
+
+            // TODO - restore this test after removing ids from the expected and actual
+            // xml strings, because the ids are unique only to a given cyc image.
+
+            //Assert.assertEquals(expectedXML, xmlStringWriter.toString());
+            //Assert.assertEquals(expectedXML, cycNart4.toXMLString());
+
             String cycNartXMLString = cycNart4.toXMLString();
             Object object = CycObjectFactory.unmarshall(cycNartXMLString);
             Assert.assertTrue(object instanceof CycNart);
@@ -961,6 +984,12 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
+
+        // addQuoted
+        CycList cycList51 = new CycList();
+        cycList51.add(new Integer(1));
+        cycList51.addQuoted(CycObjectFactory.makeCycSymbol("quote-me"));
+        Assert.assertEquals("(1 (QUOTE QUOTE-ME))", cycList51.toString());
 
         System.out.println("*** testCycList OK ***");
     }

@@ -804,4 +804,16 @@ public class CycList extends ArrayList {
         }
         return null;
     }
+
+    /**
+     * Forms a quote expression for the given object and adds it to the list.
+     *
+     * @param object the object to be quoted and added to this list
+     */
+    public void addQuoted (Object object) {
+        CycList cycList = new CycList();
+        this.add(cycList);
+        cycList.add(CycObjectFactory.quote);
+        cycList.add(object);
+    }
 }

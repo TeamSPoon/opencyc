@@ -1,15 +1,19 @@
 package  org.opencyc.jxta;
 
 import  java.io.*;
+import  java.util.*;
 import  javax.naming.TimeLimitExceededException;
 import  net.jxta.peergroup.*;
+import  net.jxta.peer.*;
 import  net.jxta.exception.*;
 import  net.jxta.protocol.*;
 import  net.jxta.resolver.*;
-import  net.jxta.impl.protocol.ResolverResponse;
+import  net.jxta.rendezvous.*;
+import  net.jxta.impl.protocol.*;
 import  fipaos.ont.fipa.*;
 import  fipaos.ont.fipa.fipaman.*;
 import  fipaos.util.*;
+import  fipaos.parser.ParserException;
 import  org.opencyc.api.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.cycagent.*;
@@ -59,14 +63,24 @@ public class Peer implements QueryHandler {
     public static final String JXTA_CREDENTIALS = "JXTACRED";
 
     /**
-     * outbound message serial number.
+     * outbound message serial number
      */
     public int msgSerialNumber = 0;
+
+    /**
+     * jxta ResolverService query id
+     */
+    public int queryId = 0;
 
     /**
      * jxta peer group
      */
     protected PeerGroup peerGroup = null;
+
+    /**
+     * jxta ResolverService
+     */
+    protected ResolverService resolverService;
 
     /**
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
@@ -91,7 +105,14 @@ public class Peer implements QueryHandler {
      */
     public Peer () {
         Log.makeLog();
-        cycAccess = new CycAccess();
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            System.exit(1);
+        }
     }
 
     /**
@@ -116,6 +137,7 @@ public class Peer implements QueryHandler {
         Log.makeLog();
         Peer peer = new Peer();
         peer.startJxta();
+        peer.registerEchoService();
         peer.test();
         peer.close();
         System.exit(0);
@@ -128,22 +150,18 @@ public class Peer implements QueryHandler {
         Log.current.println("\nHello from JXTA group " + peerGroup.getPeerGroupName());
         Log.current.println("  Group ID = " + peerGroup.getPeerGroupID().toString());
         Log.current.println("  Peer name = " + peerGroup.getPeerName());
-        Log.current.println("  Peer ID = " + peerGroup.getPeerID().toString() + "\n");
+        Log.current.println("  Peer ID = " + peerGroup.getPeerID().toString());
+        RendezVousService rendezVousService = peerGroup.getRendezVousService();
+        if (rendezVousService.isRendezVous())
+            Log.current.println("  is a rendezvous server");
+        else
+            Log.current.println("  is not a rendezvous server");
+        if (rendezVousService.isConnectedToRendezVous())
+            Log.current.println("  is connected to a rendezvous server");
+        else
+            Log.current.println("  is not connected to a rendezvous server");
 
-        doResolverEcho("hello world!", 10);
-
-        CycApiResponseMsg cycApiResponseMsg = new CycApiResponseMsg(queryAcl);
-        ResolverResponse resolverResponse = new ResolverResponse(HANDLER_NAME,
-                                                                 JXTA_CREDENTIALS,
-                                                                 0,
-                                                                 cycApiResponseMsg.toString());
-
-        resolverService.sendResponse(null, resolverResponse);
-
-
-        String echoReplyXml = (String) replyAcl.getContentObject();
-        Log.current.println("\nReceived from remote agent " + remoteAgentName + ":" + echoReplyXml);
-
+        doResolverEcho("hello world!", 60);
     }
 
     /**
@@ -153,31 +171,37 @@ public class Peer implements QueryHandler {
      * @param waitSeconds seconds to wait for peer responses
      */
     public void doResolverEcho (String echoMessageText, int waitSeconds) {
-        ACL acl = new ACL();
-        acl.setPerformative(FIPACONSTANTS.REQUEST);
+        ACL queryAcl = new ACL();
+        queryAcl.setPerformative(FIPACONSTANTS.REQUEST);
         AgentID senderAid = new AgentID();
-        agentID.setName(peerGroup.getPeerName());
-        acl.setSenderAID(senderAid);
+        senderAid.setName(peerGroup.getPeerName());
+        queryAcl.setSenderAID(senderAid);
         String echoRequestXml =
             "\n<list>\n" +
             "  <symbol>ECHO</symbol>\n" +
             "  <string>" + TextUtil.doEntityReference(echoMessageText) + "</string>\n" +
             "</list>";
-        acl.setContentObject(echoRequestXml, ACL.BYTELENGTH_ENCODING);
-        acl.setLanguage(FIPACONSTANTS.XML);
-        acl.setOntology(AgentCommunityAdapter.CYC_ECHO_ONTOLOGY);
-        acl.setReplyWith(nextMessageId());
-        acl.setProtocol(FIPACONSTANTS.FIPA_REQUEST);
+        queryAcl.setContentObject(echoRequestXml, ACL.BYTELENGTH_ENCODING);
+        queryAcl.setLanguage(FIPACONSTANTS.XML);
+        queryAcl.setOntology(AgentCommunityAdapter.CYC_ECHO_ONTOLOGY);
+        queryAcl.setReplyWith(nextMessageId());
+        queryAcl.setProtocol(FIPACONSTANTS.FIPA_REQUEST);
 
         System.out.println("\nBroadcasting to peers:" + echoRequestXml +
                            "\nwaiting " + waitSeconds + " seconds for responses");
-        resolverQuery(acl);
+        ResolverQuery resolverQuery =
+            new ResolverQuery(ECHO_HANDLER_NAME,
+                              JXTA_CREDENTIALS,
+                              peerGroup.getPeerID().toString(),
+                              queryAcl.toString(),
+                              ++queryId);
+        sendQuery(null, resolverQuery);
         try {
-            Thread.sleep(1000 * waitSeconds);
+            Thread.sleep((long) (1000 * waitSeconds));
         }
         catch (Exception e) {
         }
-        Log.current.errorPrintln(waitSeconds + " elapsed");
+        Log.current.println("\n" + waitSeconds + " seconds elapsed\n");
     }
 
 
@@ -204,83 +228,81 @@ public class Peer implements QueryHandler {
      */
     protected void registerEchoService () {
         // Get the Resolver service for the current peer group.
-        Log.current.errorPrintln("\nGetting ResolverService");
-        ResolverService resolverService = peerGroup.getResolverService();
+        Log.current.println("\nGetting ResolverService");
+        resolverService = peerGroup.getResolverService();
         String localPeerId = peerGroup.getPeerID().toString();
 
         // Register the handler with the resolver service.
-        Log.current.errorPrintln("Registering with ResolverService");
+        Log.current.println("Registering with ResolverService");
         resolverService.registerHandler(ECHO_HANDLER_NAME, this);
     }
 
     /**
-     * Queries the ResolverService with the given ACL.
+     * Sends the query to the given peer.  If the peer is null, then the
+     * query is propagated.
      *
-     * @param queryAcl the Agent Communication Language query
+     * @param resolverQueryMsg the query
+     * @param receivingPeer the peer to which the query will be sent
      */
-    protected resolverQuery (ACL queryAcl) {
+    protected void sendQuery (String receivingPeer, ResolverQueryMsg resolverQueryMsg) {
+        System.out.println("\nsendQuery:" + resolverQueryMsg + " to peer " + receivingPeer);
+        resolverService.sendQuery(receivingPeer, resolverQueryMsg);
     }
 
     /**
-     * Processes the resolver query, and generate the response.
+     * Receives the echo query from a peer, and generates the echo response.
      *
      * @param resolverQueryMsg the message which this handler processes
      * @return the response to this message
      */
-    public ResolverResponseMsg processQuery(ResolverQueryMsg query)
+    public ResolverResponseMsg processQuery(ResolverQueryMsg resolverQueryMsg)
         throws IOException,
                NoResponseException,
                DiscardQueryException,
                ResendQueryException {
-        Log.current.println("Processing query...");
-        ResolverResponse resolverResponse;
-        CycApiQueryMsg cycApiQueryMsg;
-        double answer = 0.0;
-
+        ACL queryAcl = null;
         try {
-            cycApiQueryMsg =
-                new CycApiQueryMsg(new ByteArrayInputStream((query.getQuery()).getBytes()));
+            queryAcl = new ACL(resolverQueryMsg.getQuery());
         }
-        catch (Exception e) {
-            throw new IOException();
+        catch (ParserException e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            System.exit(1);
         }
-        CycApiResponseMsg cycApiResponseMsg = new CycApiResponseMsg(cycApiQueryMsg.getBase(),
-                                                                    cycApiQueryMsg.getPower(),
-                                                                    answer);
+        Log.current.println("Processing " + ECHO_HANDLER_NAME +
+                            " query\n" + queryAcl.toString());
+        ACL responseAcl = (ACL) queryAcl.clone();
+        AgentID senderAid = new AgentID();
+        senderAid.setName(peerGroup.getPeerName());
+        responseAcl.setSenderAID(senderAid);
+        responseAcl.setReceiverAID(queryAcl.getSenderAID());
+        ResolverResponse resolverResponse =
+            new ResolverResponse(ECHO_HANDLER_NAME,
+                                 JXTA_CREDENTIALS,
+                                 resolverQueryMsg.getQueryId(),
+                                 responseAcl.toString());
 
-        // Wrap the response message in a resolver response message.
-        resolverResponse = new ResolverResponse(HANDLER_NAME,
-                                                JXTA_CREDENTIALS,
-                                                query.getQueryId(),
-                                                cycApiResponseMsg.toString());
-
+        Log.current.println("Responding with\n" + responseAcl.toString());
         return resolverResponse;
     }
 
     /**
-     * Process a Resolver response message.
+     * Processes the echo response messages.
      *
      * @param resolverResponseMsg the response message to a previous query.
      */
     public void processResponse(ResolverResponseMsg resolverResponseMsg) {
-        Log.current.println("Processing response...");
-        CycApiResponseMsg cycApiResponseMsg;
-
+        ACL responseAcl = null;
         try {
-            // Extract the message from the Resolver response.
-            cycApiResponseMsg =
-                new CycApiResponseMsg(new ByteArrayInputStream((resolverResponseMsg.getResponse()).getBytes()));
-
-            // Print out the answer given in the response.
-            Log.current.println("\nThe value of " + cycApiResponseMsg.getBase() +
-                                " raised to " + cycApiResponseMsg.getPower() +
-                                " is " + cycApiResponseMsg.getAnswer() + "\n");
+            responseAcl = new ACL(resolverResponseMsg.getResponse());
         }
-        catch (Exception e) {
-            // This is not the right type of response message, or
-            // the message is improperly formed. Ignore the message,
-            // do nothing.
+        catch (ParserException e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            System.exit(1);
         }
+        Log.current.println("Received " + ECHO_HANDLER_NAME +
+                            " response\n" + responseAcl.toString());
     }
 
     /**
@@ -302,10 +324,6 @@ public class Peer implements QueryHandler {
         this.verbosity = verbosity;
     }
 }
-
-
-
-
 
 
 

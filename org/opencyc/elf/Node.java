@@ -152,7 +152,7 @@ public class Node {
 
   /** Adds the given node to the Child nodes of this node
    * 
-   * @param the given node to add as a child of this node
+   * @param node the given node to add as a child of this node
    */
   public void addChildNode(Node node) {
     childNodes.add(node);

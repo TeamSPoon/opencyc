@@ -71,7 +71,7 @@ public abstract class Operator {
    *
    * @param arg1Num the first numeric argument
    * @param arg2Num the second numeric argument
-   * @ return the converted numeric objects in an array
+   * @return the converted numeric objects in an array
    */
   public Number[] convertNumericArguments(Number arg1Num, Number arg2Num) {
     Number[] result = {arg1Num, arg2Num};

@@ -176,7 +176,7 @@ public class Executor extends BufferedNodeComponent {
     
     /** Processes the execute schedule message. 
      * 
-     * @param executeSceduleMsg the execute schedule message
+     * @param executeScheduleMsg the execute schedule message
      */
     protected void processExecutorScheduleMsg(ExecuteScheduleMsg executeScheduleMsg) {
       executor.schedule = executeScheduleMsg.getSchedule();

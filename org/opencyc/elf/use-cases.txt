@@ -6,9 +6,55 @@ Use Cases for the Behavior Engine
 
 BEL (Behavior Engine Language):
 
-define ConverseWithUser to obtain ?USER-INPUT which is saved in the state at this level as ?USER-INPUT
+;; define the direct actuators
+
+(define-direct-actuator ConsoleOutput
+  (:name "ConsoleOutput"
+   :capabilities ("ConsolePromptedInput")))
+
+;; define the direct sensors
+
+(define-actuator-sensor CycApi
+  (:name "CycApi"
+   :input-formal-parameters ((?CYC-API-REQUEST CycList))
+   :sensation ?CYC-API-RESPONSE))
+
+;; define the actuator-sensors
+
+;; define the actions
+
+(define-action ConsolePromptedInput
+  (:name "ConsolePromptedInput"
+   :input-formal-parameters ((?PROMPT String))
+   :output-formal-parameters ()))
+
+;; waits until the given variable has a value or a goal timeout occurs
+(define-goal PerceiveSensation
+  (:name "PerceiveSensation"
+   :input-formal-parameters ((?PERCEIVED-SENSATION Object))
+   :when (NotNull ?PERCEIVED-SENSATION)))
+
+(define-sensor ConsoleInput
+
+(define-sensor UserInput (:sensation ?USER-INPUT)
+
+
+;; 
+(define-action ConverseWithUser
+  (:name "ConverseWithUser"
+   :input-formal-parameters ((?USER CycFort))
+   :output-formal-parameters ((?USER-INPUT String))
+   :sensor
+  (perform ConsolePromptedInput 
+    (:input-parameter-values (">"))
+  (achieve PerceiveSensation
+    (:input-parameter-values (?USER-INPUT)))
+    
+
+
+define ConverseWithUser
   [command name: "ConverseWithUser"
-   input formal parameters: none
+   input formal parameters: ?USER
    output formal parameters: "?USER-INPUT" (String)
    output state variables: "?USER-INPUT"]
   
@@ -24,9 +70,9 @@ define ConverseWithUser to obtain ?USER-INPUT which is saved in the state at thi
 
 The Schedule for ConverseWithUser
 
-(ConverseWithUser perceiving ?USER-INPUT)
+(ConverseWithUser using SteveReed as ?User perceiving ?CONSOLE-INPUT as ?USER-INPUT)
   (ConsolePromptedInput using ">")
-  (PerceiveSensation perceiving when (not-null ?USER-INPUT))
+  (PerceiveSensation when (not-null ?CONSOLE-INPUT))
 
 
 

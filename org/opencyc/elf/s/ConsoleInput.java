@@ -52,10 +52,12 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    *
    * @param name the sensor name
    * @param resources the resources required by this sensor
+   * @param sensationCapabilities the names of sensations that this sensor can sense
    */
-  public ConsoleInput (String name, ArrayList resources) {
+  public ConsoleInput (String name, ArrayList resources, ArrayList sensationCapabilities) {
     this.name = name;
     this.resources = resources;
+    this.sensationCapabilities = sensationCapabilities;
     logger = Logger.getLogger("org.opencyc.elf");
   }
 
@@ -105,6 +107,15 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    */
   public ArrayList getResources() {
     return resources;
+  }
+  
+  /**
+   * Gets the names of sensations that this sensor can sense.
+   *
+   * @return the names of sensations that this sensor can sense
+   */
+  public ArrayList getSensationCapabilities() {
+    return sensationCapabilities;
   }
   
   //// Protected Area
@@ -160,14 +171,15 @@ public class ConsoleInput extends NodeComponent implements Sensor {
     
     /** Sends the sensed object message. */
     protected void sendObservedInputMsg () {
-      ObservedInputMsg observedInputMsg = new ObservedInputMsg();
+      ObservedInputMsg observedInputMsg = 
+        new ObservedInputMsg(new Sensation(Sensation.CONSOLE_INPUT, obj, data));
       observedInputMsg.setSender(nodeComponent);
-      //TODO
-      //observedInputMsg.setObj(sensedObject);
-      observedInputMsg.setData(data);
       sendMsgToRecipient(sensoryPerceptionChannel, observedInputMsg);
     }
       
+    /** the sensed object */
+    protected Object obj = ResourcePool.getInstance().getResource(Resource.CONSOLE);
+    
     /** the sensed data associated with the object */
     protected Object data;
     
@@ -182,6 +194,9 @@ public class ConsoleInput extends NodeComponent implements Sensor {
   
   /** the name of the sensor */
   protected String name;
+  
+  /** the names of sensations that this sensor can sense */
+  protected ArrayList sensationCapabilities;
   
   /** the resources required by this sensor */
   protected ArrayList resources;

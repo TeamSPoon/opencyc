@@ -1,7 +1,6 @@
 package org.opencyc.elf.goal;
 
-import java.util.ArrayList;
-
+//// Internal Imports
 import org.opencyc.cycobject.CycAssertion;
 import org.opencyc.cycobject.CycFort;
 
@@ -9,6 +8,8 @@ import org.opencyc.elf.ELFObject;
 import org.opencyc.elf.bg.procedure.Procedure;
 import org.opencyc.elf.bg.state.State;
 
+//// External Imports
+import java.util.ArrayList;
 
 /**
  * Provides the Goal container for the Elementary Loop Functioning (ELF).
@@ -35,36 +36,23 @@ import org.opencyc.elf.bg.state.State;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Goal extends ELFObject {
-  /** the goal state */
-  protected State goalState;
-
-  /** the goal sentence stated in CycL */
-  protected CycAssertion goalSentence;
-
-  /** the goal stated in natural language */
-  protected String goalComment;
-
-  /** the list of states which if entered, indicate goal failure */
-  protected ArrayList goalFailureStates;
-
-  /** the parent goal of this goal */
-  protected Goal parent;
-
-  /** the subgoals of this goal */
-  protected ArrayList subGoals = new ArrayList();
-
-  /** the goal importance */
-  protected Importance importance;
-
-  /** the context of the goal */
-  protected CycFort context;
-
+  //// Constructors
   /**
    * Constructs a new Goal object.
    */
   public Goal() {
   }
 
+  //// Public Area
+  
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "Goal for " + goalState.toString();
+  }
   /**
    * Gets the goal state
    * 
@@ -209,4 +197,36 @@ public class Goal extends ELFObject {
   public void setContext(CycFort context) {
     this.context = context;
   }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the goal state */
+  protected State goalState;
+
+  /** the goal sentence stated in CycL */
+  protected CycAssertion goalSentence;
+
+  /** the goal stated in natural language */
+  protected String goalComment;
+
+  /** the list of states which if entered, indicate goal failure */
+  protected ArrayList goalFailureStates;
+
+  /** the parent goal of this goal */
+  protected Goal parent;
+
+  /** the subgoals of this goal */
+  protected ArrayList subGoals = new ArrayList();
+
+  /** the goal importance */
+  protected Importance importance;
+
+  /** the context of the goal */
+  protected CycFort context;
+
+  //// Main
 }

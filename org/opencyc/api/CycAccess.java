@@ -239,7 +239,6 @@ public class CycAccess {
         CycAccess.sharedCycAccessInstance = sharedCycAccessInstance;
     }
 
-
     /**
      * Turns on the diagnostic trace of socket messages.
      */

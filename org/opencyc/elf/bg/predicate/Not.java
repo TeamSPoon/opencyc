@@ -66,7 +66,7 @@ public class Not extends Operator implements Predicate {
    */
   public String toString(List arguments) {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("(or ");
+    stringBuffer.append("(not ");
     stringBuffer.append(arguments.get(0).toString());
     stringBuffer.append(")");
     return stringBuffer.toString();

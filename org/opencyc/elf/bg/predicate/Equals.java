@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycList;
 import org.opencyc.elf.bg.expression.Operator;
 
 import org.opencyc.elf.wm.state.State;
@@ -70,7 +71,27 @@ public class Equals extends Operator implements Predicate {
   public String toString(List arguments) {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("(equal ");
-    stringBuffer.append(arguments.get(0).toString());
+    Object obj = arguments.get(0);
+    if (obj instanceof String) {
+      stringBuffer.append('"');
+      stringBuffer.append(obj);
+      stringBuffer.append('"');
+    }
+    else if (obj instanceof CycList)
+      stringBuffer.append(((CycList) obj).cyclify());
+    else
+      stringBuffer.append(obj.toString());
+    stringBuffer.append(" ");
+    obj = arguments.get(1);
+    if (obj instanceof String) {
+      stringBuffer.append('"');
+      stringBuffer.append(obj);
+      stringBuffer.append('"');
+    }
+    else if (obj instanceof CycList)
+      stringBuffer.append(((CycList) obj).cyclify());
+    else
+      stringBuffer.append(obj.toString());
     stringBuffer.append(")");
     return stringBuffer.toString();
   }

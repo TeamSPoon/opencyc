@@ -1,16 +1,22 @@
 package org.opencyc.elf.bg.predicate;
 
 //// Internal Imports
+import org.opencyc.cycobject.CycList;
+
+import org.opencyc.elf.BehaviorEngineException;
+
 import org.opencyc.elf.bg.expression.Operator;
 
 import org.opencyc.elf.wm.state.State;
 
 //// External Imports
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * Different is a predicate of arity two that returns true if its arguments
- * are not equal to each other.
+ * Different is a predicate of variable aritythat returns true if its arguments
+ * are all different from each other.
  *
  * @version $Id$
  * @author  reed
@@ -45,22 +51,45 @@ public class Different extends Operator implements Predicate {
   //// Public Area
     
   /** 
-   * Evaluates the given arguments and returns true if the first and second are
-   * not equal to each other.
+   * Evaluates the given arguments and returns if all are different from each other.
    *
    * @param arguments the given arguments to evaluate
    * @param state the given state
    * @return true if the first and second are not equal to each other
    */
    public Object evaluate(List arguments, State state) {
-     Object argument1 = evaluateArgument(arguments.get(0), state);
-     Object argument2 = evaluateArgument(arguments.get(1), state);
-     if (argument1 == null) 
-       return new Boolean(argument2 != null);
-     else if (argument2 == null)
-       return new Boolean(argument1 != null);
+     if (arguments.size() == 2) {
+       // most common case
+       Object argument1 = evaluateArgument(arguments.get(0), state);
+       Object argument2 = evaluateArgument(arguments.get(1), state);
+       if (argument1 == null) 
+         return new Boolean(argument2 != null);
+       else if (argument2 == null)
+         return new Boolean(argument1 != null);
+       else
+         return new Boolean(! argument1.equals(argument2));
+     }
+     else if (arguments.size() < 2)
+       throw new BehaviorEngineException("At least two arguments are required " + arguments);
+     // for three or more arguments use a hash set to detect duplicates
+     boolean haveNullValue = false;
+     HashSet hashSet = new HashSet();
+     Iterator iter = arguments.iterator();
+     while (iter.hasNext()) {
+       Object evaluatedArg = evaluateArgument(iter.next(), state);
+       if (evaluatedArg == null) {
+         if (haveNullValue)
+           return Boolean.FALSE;
+         else
+           haveNullValue = true;
+       }
+       else
+         hashSet.add(evaluatedArg);
+     }
+     if (haveNullValue)
+       return new Boolean(hashSet.size() == (arguments.size() - 1));
      else
-       return new Boolean(! argument1.equals(argument2));
+       return new Boolean(hashSet.size() == arguments.size());
   }
   
   /**
@@ -72,8 +101,21 @@ public class Different extends Operator implements Predicate {
    */
   public String toString(List arguments) {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("(different ");
-    stringBuffer.append(arguments.get(0).toString());
+    stringBuffer.append("(different");
+    Iterator iter = arguments.iterator();
+    while (iter.hasNext()) {
+      stringBuffer.append(" ");
+      Object obj = iter.next();
+      if (obj instanceof String) {
+        stringBuffer.append('"');
+        stringBuffer.append(obj);
+        stringBuffer.append('"');
+      }
+      else if (obj instanceof CycList)
+        stringBuffer.append(((CycList) obj).cyclify());
+      else
+        stringBuffer.append(obj.toString());
+    }
     stringBuffer.append(")");
     return stringBuffer.toString();
   }

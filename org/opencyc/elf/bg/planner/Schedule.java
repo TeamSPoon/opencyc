@@ -120,6 +120,42 @@ public class Schedule {
   }
 
   /**
+   * Gets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+   *
+   * @return the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+   */
+  public String getActuatorName () {
+    return actuatorName;
+  }
+
+  /**
+   * Sets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+   *
+   * @param actuatorName the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+   */
+  public void setActuatorName (String actuatorName) {
+    this.actuatorName = actuatorName;
+  }
+
+  /**
+   * Gets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+   *
+   * @return the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+   */
+  public String getSensorName () {
+    return sensorName;
+  }
+
+  /**
+   * Sets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+   *
+   * @param sensorName the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+   */
+  public void setSensorName (String sensorName) {
+    this.sensorName = sensorName;
+  }
+
+  /**
    * Returns true if the given object equals this object.
    * 
    * @param obj the given object
@@ -134,7 +170,9 @@ public class Schedule {
     return 
       this.plannedActions.equals(that.plannedActions) &&
       this.plannedGoals.equals(that.plannedGoals) &&
-      this.plannedGoalTimeMilliseconds.equals(that.plannedGoalTimeMilliseconds);
+      this.plannedGoalTimeMilliseconds.equals(that.plannedGoalTimeMilliseconds) &&
+      this.actuatorName.equals(that.actuatorName) &&
+      this.sensorName.equals(that.sensorName);
   }
 
   /**
@@ -146,6 +184,10 @@ public class Schedule {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[Schedule ");
     stringBuffer.append(plannedActions.toString());
+    stringBuffer.append(" actuator: ");
+    stringBuffer.append(actuatorName);
+    stringBuffer.append(" sensor: ");
+    stringBuffer.append(sensorName);
     stringBuffer.append("]");
     return stringBuffer.toString();
   }
@@ -186,4 +228,9 @@ public class Schedule {
    */
   protected List plannedGoalTimeMilliseconds = new ArrayList();
 
+  /** the name of the actuator or virtual actuator that achieves or accomplishes the schedule */
+  protected String actuatorName = "";
+
+  /** the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule */
+  protected String sensorName = "";
 }

@@ -189,7 +189,8 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2", "drc-dc");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2", "ves");
         ontologyNicknames.put("http://orlando.drc.com/daml/Ontology/daml-extension/3.2/daml-ext-ont", "daml-ext");
-
+        ontologyNicknames.put("http://www.daml.org/cgi-bin/geonames", "geonames");
+        ontologyNicknames.put("http://www.daml.org/cgi-bin/airport", "airport");
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont.daml", "factbook");
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook/factbook-ont", "factbook");
         ontologyNicknames.put("http://www.daml.org/2001/12/factbook", "factbook");

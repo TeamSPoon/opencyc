@@ -296,7 +296,8 @@ public class ImportDaml implements StatementHandler {
             importIsa(subjectTermInfo, objLitTermInfo);
             return;
         }
-        if (damlPredicate.equals("rdfs:subClassOf")) {
+        if (damlPredicate.equals("rdfs:subClassOf") ||
+            damlPredicate.equals("daml:subClassOf")) {
             importGenls(subjectTermInfo, objLitTermInfo);
             return;
         }
@@ -537,6 +538,10 @@ public class ImportDaml implements StatementHandler {
                                   DamlTermInfo literalTermInfo)
         throws IOException, UnknownHostException, CycApiException {
         CycFort term = importTerm(subjectTermInfo);
+        if (term == null) {
+            Log.current.println("\n*** " + subjectTermInfo.toString() + " is an invalid constant ***");
+            return;
+        }
         String comment = literalTermInfo.literalValue().replace('\n', ' ');
         cycAccess.assertComment(term,
                                 comment,
@@ -657,7 +662,7 @@ public class ImportDaml implements StatementHandler {
             damlTermInfo.isURI = false;
             int index = aResource.getURI().indexOf("?");
             localName = aResource.getURI().substring(index + 1);
-            nameSpace = aResource.getURI().substring(0, index);
+            nameSpace = aResource.getURI().substring(0, index + 1);
         }
         else if (! hasUriNamespaceSyntax(aResource.getURI())) {
             damlTermInfo.isURI = true;

@@ -77,7 +77,7 @@ public class ImportDaml {
         Log.makeLog();
         initializeDocumentsToImport();
         //for (int i = 0; i < documentsToImport.size(); i++) {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 5; i++) {
             String damlPath = (String) documentsToImport.get(i);
             ImportDaml importDaml = new ImportDaml();
             importDaml.initialize();
@@ -172,8 +172,8 @@ public class ImportDaml {
             Literal literal = damlClass.prop_label().getValue();
             if (literal != null)
                 System.out.println("  label " + literal.toString());
-            LiteralAccessor comment = damlClass.prop_comment();
-            if (literal != null)
+            Literal comment = damlClass.prop_comment().getValue();
+            if (comment != null)
                 System.out.println("  comment " + comment.toString());
             Iterator iterSuperClasses = damlClass.getSuperClasses(false);
             while (iterSuperClasses.hasNext()) {

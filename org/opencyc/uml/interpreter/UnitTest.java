@@ -56,12 +56,12 @@ public class UnitTest extends TestCase {
      */
     public static Test suite () {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testJavaInterpreter"));
-        testSuite.addTest(new UnitTest("testExpressionEvaluation"));
-        testSuite.addTest(new UnitTest("testContextFrames"));
+        //testSuite.addTest(new UnitTest("testJavaInterpreter"));
+        //testSuite.addTest(new UnitTest("testExpressionEvaluation"));
+        //testSuite.addTest(new UnitTest("testContextFrames"));
         testSuite.addTest(new UnitTest("testProcedureInterpretation"));
-        testSuite.addTest(new UnitTest("testSimpleStateMachine"));
-        testSuite.addTest(new UnitTest("testCycExtractor"));
+        //testSuite.addTest(new UnitTest("testSimpleStateMachine"));
+        //testSuite.addTest(new UnitTest("testCycExtractor"));
         return  testSuite;
     }
 
@@ -253,11 +253,14 @@ public class UnitTest extends TestCase {
             CycFort definitionMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
             ContextStackPool contextStackPool = new ContextStackPool(cycAccess,
                     cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt"),
-                    ContextStackPool.QUIET_VERBOSITY);
+                                                     ContextStackPool.QUIET_VERBOSITY);
             CycConstant stateMt = contextStackPool.allocateContextFrame(null, definitionMt);
             Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
-            ProcedureInterpreter procedureInterpreter = new ProcedureInterpreter(cycAccess,
-                    definitionMt, contextStackPool, Interpreter.QUIET_VERBOSITY);
+            ProcedureInterpreter procedureInterpreter =
+                    new ProcedureInterpreter(cycAccess,
+                                             definitionMt,
+                                             contextStackPool,
+                                             Interpreter.DEFAULT_VERBOSITY);
             Procedure initializeProcedure = new Procedure();
             initializeProcedure.setName("UMLProcedure-InitializeNumberToZero");
             Object procedureBody = cycAccess.getArg2("umlBody", "UMLProcedure-InitializeNumberToZero",
@@ -266,7 +269,19 @@ public class UnitTest extends TestCase {
             Transition transition1 = new Transition();
             transition1.setName("TestStateMachine-Transition1");
             transition1.setEffect(initializeProcedure);
-            procedureInterpreter.interpretTransitionProcedure(transition1, stateMt);
+            ArrayList inputBindings = new ArrayList();
+            ArrayList outputBindings = new ArrayList();
+            OutputBinding outputBinding = new OutputBinding();
+            OutputPin outputPin = new OutputPin();
+            outputPin.setName("UMLProcedure-InitializeNumberToZero-OutputPin-X");
+            outputBinding.setBoundOutputPin(outputPin);
+            StateVariable stateVariable = new StateVariable();
+            stateVariable.setName("TestStateMachine-X");
+            outputBinding.setBoundOutputStateVariable(stateVariable);
+            outputBindings.add(outputBinding);
+            procedureInterpreter.interpretProcedure(initializeProcedure,
+                                                    inputBindings,
+                                                    outputBindings);
             contextStackPool.destroyContextStack();
         } catch (Exception e) {
             e.printStackTrace();

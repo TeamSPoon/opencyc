@@ -46,6 +46,11 @@ public class Transition extends ModelElement {
     protected Procedure effect;
 
     /**
+     * (extension) the input pin bindings
+     */
+    protected ArrayList effectInputBinding;
+
+    /**
      * the input pin bindings for the transition effect
      */
     protected ArrayList effectInputBindings;
@@ -134,11 +139,11 @@ public class Transition extends ModelElement {
      * @return the input pin bindings for the transition effect
      */
     public void addEffectInputBinding (InputPin inputPin, Object boundObject) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(inputPin, boundObject);
+        InputBinding inputBinding =
+            new InputBinding(inputPin, boundObject);
         if (effectInputBindings == null)
             effectInputBindings = new ArrayList();
-        effectInputBindings.add(procedureArgumentBinding);
+        effectInputBindings.add(inputBinding);
     }
 
     /**
@@ -167,11 +172,11 @@ public class Transition extends ModelElement {
      * @return the output pin bindings for the transition effect
      */
     public void addEffectOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(outputPin, stateVariable);
+        OutputBinding outputBinding =
+            new OutputBinding(outputPin, stateVariable);
         if (effectOutputBindings == null)
             effectOutputBindings = new ArrayList();
-        effectOutputBindings.add(procedureArgumentBinding);
+        effectOutputBindings.add(outputBinding);
     }
 
     /**

@@ -147,8 +147,9 @@ public class StateInterpreter extends Thread {
         if (procedure != null) {
             if (verbosity > 2)
                 Log.current.println("Evaluating effect " + procedure.toString());
-            procedureInterpreter.interpretTransitionProcedure(transition,
-                                                              interpreter.getStateMt());
+            procedureInterpreter.interpretProcedure(procedure,
+                                                    transition.getEffectInputBindings(),
+                                                    transition.getEffectOutputBindings());
         }
         if (state instanceof FinalState) {
             state.getContainer().getStateInterpreter().complete();
@@ -213,9 +214,11 @@ public class StateInterpreter extends Thread {
             parentStateNode.add(stateNode);
             interpreter.getActiveStates().put(state, stateNode);
         }
-
-        if (state.getEntry() != null)
-            procedureInterpreter.interpretStateEntryProcedure(state, interpreter.getStateMt());
+        Procedure procedure = state.getEntry();
+        if (procedure != null)
+            procedureInterpreter.interpretProcedure(procedure,
+                                                    state.getEntryInputBindings(),
+                                                    state.getEntryOutputBindings());
         if (state.getDoActivity() != null)
             new DoActivity(state);
     }
@@ -255,8 +258,11 @@ public class StateInterpreter extends Thread {
         DoActivity doActivityThread = state.getDoActivityThread();
         if (doActivityThread != null)
             doActivityThread.terminate();
-        if (state.getExit() != null)
-            procedureInterpreter.interpretStateExitProcedure(state);
+        Procedure procedure = state.getExit();
+        if (procedure != null)
+            procedureInterpreter.interpretProcedure(procedure,
+                                                    state.getExitInputBindings(),
+                                                    state.getExitOutputBindings());
         DefaultMutableTreeNode stateNode =
             (DefaultMutableTreeNode) interpreter.getActiveStates().get(state);
         interpreter.getActiveStates().remove(state);

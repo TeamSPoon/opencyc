@@ -49,6 +49,30 @@ public class InputBinding extends ModelElement {
     }
 
     /**
+     * Creates a new InputBinding object.
+     */
+    public InputBinding(InputPin boundInputPin,
+                        Object boundInputValueExpression) {
+        this.boundInputPin = boundInputPin;
+        this.boundInputValueExpression = boundInputValueExpression;
+    }
+
+    /**
+     * Returns a string representation of this object.
+     *
+     * @return a string representation of this object
+     */
+    public String toString () {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("[");
+        stringBuffer.append(boundInputValueExpression.toString());
+        stringBuffer.append("-->");
+        stringBuffer.append(boundInputPin.toString());
+        stringBuffer.append("]");
+        return stringBuffer.toString();
+    }
+
+    /**
      * Gets the bound input pin
      *
      * @return the bound input pin

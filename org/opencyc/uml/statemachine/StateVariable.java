@@ -1,9 +1,9 @@
 package org.opencyc.uml.statemachine;
 
-import org.opencyc.uml.core.ModelElement;
+import org.opencyc.uml.core.Attribute;
 
 /**
- * Contains a state machine state variable
+ * Contains a state machine state variable (extension to UML)
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -27,14 +27,11 @@ import org.opencyc.uml.core.ModelElement;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class StateVariable extends ModelElement {
+public class StateVariable extends Attribute {
 
     /**
-     * Creates a new StateVariable with the given name.
-     *
-     * @param name the name of the state variable
+     * Creates a new StateVariable object.
      */
-    public StateVariable(String name) {
-        this.name = name;
+    public StateVariable() {
     }
 }

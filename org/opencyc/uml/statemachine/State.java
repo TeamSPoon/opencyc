@@ -152,11 +152,11 @@ public abstract class State extends StateVertex {
      * @return the input pin bindings for the state entry procedure
      */
     public void addEntryInputBinding (InputPin inputPin, Object boundObject) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(inputPin, boundObject);
+        InputBinding inputBinding =
+            new InputBinding(inputPin, boundObject);
         if (entryInputBindings == null)
             entryInputBindings = new ArrayList();
-        entryInputBindings.add(procedureArgumentBinding);
+        entryInputBindings.add(inputBinding);
     }
 
     /**
@@ -185,11 +185,11 @@ public abstract class State extends StateVertex {
      * @return the output pin bindings for the state entry procedure
      */
     public void addEntryOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(outputPin, stateVariable);
+        OutputBinding outputBinding =
+            new OutputBinding(outputPin, stateVariable);
         if (entryOutputBindings == null)
             entryOutputBindings = new ArrayList();
-        entryOutputBindings.add(procedureArgumentBinding);
+        entryOutputBindings.add(outputBinding);
     }
 
     /**
@@ -236,11 +236,11 @@ public abstract class State extends StateVertex {
      * @return the input pin bindings for the state exit procedure
      */
     public void addExitInputBinding (InputPin inputPin, Object boundObject) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(inputPin, boundObject);
+        InputBinding inputBinding =
+            new InputBinding(inputPin, boundObject);
         if (exitInputBindings == null)
             exitInputBindings = new ArrayList();
-        exitInputBindings.add(procedureArgumentBinding);
+        exitInputBindings.add(inputBinding);
     }
 
     /**
@@ -269,11 +269,11 @@ public abstract class State extends StateVertex {
      * @return the output pin bindings for the state exit procedure
      */
     public void addExitOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(outputPin, stateVariable);
+        OutputBinding outputBinding =
+            new OutputBinding(outputPin, stateVariable);
         if (exitOutputBindings == null)
             exitOutputBindings = new ArrayList();
-        exitOutputBindings.add(procedureArgumentBinding);
+        exitOutputBindings.add(outputBinding);
     }
 
     /**
@@ -397,11 +397,11 @@ public abstract class State extends StateVertex {
      * @return the input pin bindings for the state doActivity procedure
      */
     public void addDoActivityInputBinding (InputPin inputPin, Object boundObject) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(inputPin, boundObject);
+        InputBinding inputBinding =
+            new InputBinding(inputPin, boundObject);
         if (doActivityInputBindings == null)
             doActivityInputBindings = new ArrayList();
-        doActivityInputBindings.add(procedureArgumentBinding);
+        doActivityInputBindings.add(inputBinding);
     }
 
     /**
@@ -430,11 +430,11 @@ public abstract class State extends StateVertex {
      * @return the output pin bindings for the state doActivity procedure
      */
     public void addDoActivityOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
-        ProcedureArgumentBinding procedureArgumentBinding =
-            new ProcedureArgumentBinding(outputPin, stateVariable);
+        OutputBinding outputBinding =
+            new OutputBinding(outputPin, stateVariable);
         if (doActivityOutputBindings == null)
             doActivityOutputBindings = new ArrayList();
-        doActivityOutputBindings.add(procedureArgumentBinding);
+        doActivityOutputBindings.add(outputBinding);
     }
 
     /**

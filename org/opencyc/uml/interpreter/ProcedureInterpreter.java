@@ -5,6 +5,7 @@ import java.io.*;
 import org.opencyc.api.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
+import org.opencyc.uml.action.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.statemachine.*;
@@ -54,12 +55,6 @@ public class ProcedureInterpreter {
     protected Procedure procedure;
 
     /**
-     * the procedure binding term which is the association
-     * between the procedure and a particular calling transition or state
-     */
-    protected CycFort procedureBinding;
-
-    /**
      * the expression evaluator
      */
     protected ExpressionEvaluator expressionEvaluator;
@@ -99,31 +94,6 @@ public class ProcedureInterpreter {
      * the procedure CycFort
      */
     protected CycFort procedureTerm;
-
-    /**
-     * #$umlProcedureBinding-CalledByStateEntry
-     */
-    protected CycConstant umlProcedureBinding_CalledByStateEntry;
-
-    /**
-     * #$umlProcedureBinding-CalledByStateDoActivity
-     */
-    protected CycConstant umlProcedureBinding_CalledByStateDoActivity;
-
-    /**
-     * #$umlProcedureBinding-CalledByStateExit
-     */
-    protected CycConstant umlProcedureBinding_CalledByStateExit;
-
-    /**
-     * #$umlProcedureBinding-CalledByTransition
-     */
-    protected CycConstant umlProcedureBinding_CalledByTransition;
-
-    /**
-     * #$umlProcedureBinding-Procedure
-     */
-    protected CycConstant umlProcedureBinding_Procedure;
 
     /**
      * #$umlProcedureInputBinding
@@ -170,15 +140,8 @@ public class ProcedureInterpreter {
      * Initializes this procedure interpreter.
      */
     protected void initialize ()
-    throws IOException, CycApiException {
+        throws IOException, CycApiException {
         expressionEvaluator = new ExpressionEvaluator(cycAccess, verbosity);
-        umlProcedureBinding_CalledByStateEntry = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateEntry");
-        umlProcedureBinding_CalledByStateDoActivity = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateDoActivity");
-        umlProcedureBinding_CalledByStateExit = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByStateExit");
-        umlProcedureBinding_CalledByTransition = cycAccess.getKnownConstantByName("umlProcedureBinding-CalledByTransition");
-        umlProcedureBinding_Procedure = cycAccess.getKnownConstantByName("umlProcedureBinding-Procedure");
-        umlProcedureInputBinding = cycAccess.getKnownConstantByName("umlProcedureInputBinding");
-        umlProcedureOutputBinding = cycAccess.getKnownConstantByName("umlProcedureOutputBinding");
         softwareParameterValue = cycAccess.getKnownConstantByName("softwareParameterValue");
         softwareParameterFromSyntaxFn = cycAccess.getKnownConstantByName("SoftwareParameterFromSyntaxFn");
         if (verbosity > 2)
@@ -188,150 +151,40 @@ public class ProcedureInterpreter {
 
 
     /**
-     * Interprets the procedure which is called from the calling transition.
-     *
-     * @param transition the transition which called the procedure to be interpreted
-     * @param parentContextFrame the parent context frame
-     */
-    public void interpretTransitionProcedure (Transition transition,
-                                              CycConstant parentContextFrame)
-        throws IOException, CycApiException, ExpressionEvaluationException {
-        this.parentContextFrame = parentContextFrame;
-        procedure = transition.getEffect();
-        if (verbosity > 2)
-            Log.current.println("Interpreting " + procedure.toString() +
-                                " at " + transition.toString() +
-                                "\n  body: " + procedure.getBody());
-        // get procedure binding term
-        procedureTerm = cycAccess.getKnownConstantByName(procedure.getName());
-        CycList query = new CycList();
-        query.add(CycAccess.and);
-        CycList query1 = new CycList();
-        query1.add(umlProcedureBinding_CalledByTransition);
-        CycVariable cycVariable = CycObjectFactory.makeCycVariable("?PROCEDURE-BINDING");
-        query1.add(cycVariable);
-        query1.add(cycAccess.getKnownConstantByName(transition.toString()));
-        query.add(query1);
-        CycList query2 = new CycList();
-        query2.add(umlProcedureBinding_Procedure);
-        query2.add(cycVariable);
-        query2.add(cycAccess.getKnownConstantByName(procedure.toString()));
-        query.add(query2);
-        CycList queryResult =
-            cycAccess.askWithVariable(query, cycVariable, stateMachineDefinitionMt);
-        if (queryResult.isEmpty())
-            throw new CycApiException("umlProcedureBinding-Procedure " + procedure.toString() +
-                                      " or \numlProcedureBinding-CalledByTransition not found for " +
-                                      transition.toString() +
-                                      " with mt " + stateMachineDefinitionMt.cyclify() +
-                                      "\n in query \n" + query.toPrettyString(""));
-        procedureBinding = (CycFort) queryResult.first();
-        contextFrame =
-            contextStackPool.allocateProcedureContextFrame(parentContextFrame,
-                                                           stateMachineDefinitionMt,
-                                                           procedureTerm);
-        interpretProcedure();
-        contextStackPool.deallocateContextFrame(contextFrame);
-    }
-
-    /**
-     * Interprets the procedure which is called from the given state as its
-     * entry action.
-     *
-     * @param state the state whose entry action called the procedure
-     * @param parentContextFrame the parent context frame
-     */
-    public void interpretStateEntryProcedure (State state,
-                                              CycConstant parentContextFrame)
-        throws IOException, CycApiException, ExpressionEvaluationException {
-        this.parentContextFrame = parentContextFrame;
-        procedure = state.getEntry();
-        if (verbosity > 2)
-            Log.current.println("Interpreting " + procedure.toString() +
-                                " at entry action for " + state.toString() +
-                                "\n  " + procedure.getBody());
-        // get procedure binding term
-        CycFort procedureTerm = cycAccess.getKnownConstantByName(procedure.getName());
-        contextFrame =
-            contextStackPool.allocateProcedureContextFrame(parentContextFrame,
-                                                           stateMachineDefinitionMt,
-                                                           procedureTerm);
-        procedureBinding =
-            (CycFort) cycAccess.getArg1(umlProcedureBinding_Procedure,
-                                        procedureTerm,
-                                        contextFrame);
-        interpretProcedure();
-        contextStackPool.deallocateContextFrame(contextFrame);
-    }
-
-    /**
-     * Interprets theprocedure which is called from the given state as its
-     * entry action.
-     *
-     * @param state the state whose doActivity called the procedure
-     * @param parentContextFrame the parent context frame
-     */
-    public void interpretStateDoActivityProcedure (State state,
-                                                   CycConstant parentContextFrame)
-        throws IOException, CycApiException, ExpressionEvaluationException {
-        procedure = state.getDoActivity();
-        if (verbosity > 2)
-            Log.current.println("Interpreting " + procedure.toString() +
-                                " at doActivity for " + state.toString() +
-                                "\n  " + procedure.getBody());
-        //TODO
-    }
-
-    /**
-     * Interprets the given procedure which is called from the given state as its
-     * entry action.
-     *
-     * @param procedure the procedure to interpret
-     * @param state the state whose exit action called the procedure
-     */
-    public void interpretStateExitProcedure (State state)
-        throws IOException, CycApiException, ExpressionEvaluationException {
-        procedure = state.getExit();
-        if (verbosity > 2)
-            Log.current.println("Interpreting " + procedure.toString() +
-                                " at exit action for " + state.toString() +
-                                "\n  " + procedure.getBody());
-        //TODO
-    }
-
-    /**
      * Interprets the procedure using the procedure binding term.
      */
-    protected void interpretProcedure ()
+    protected void interpretProcedure (Procedure procedure,
+                                       ArrayList inputBindings,
+                                       ArrayList outputBindings)
         throws IOException, CycApiException, ExpressionEvaluationException {
         if (verbosity > 2)
-            Log.current.println("procedureBinding: " + procedureBinding.cyclify());
-        // clear interpretation context
-        cycAccess.unassertMtContentsWithoutTranscript(contextFrame);
+            Log.current.println("Interpreting " + procedure.toString() +
+                                "\n  body: " + procedure.getBody());
+        contextFrame =
+            contextStackPool.allocateProcedureContextFrame(parentContextFrame,
+                                                           stateMachineDefinitionMt,
+                                                           procedureTerm);
         if (verbosity > 2)
-            Log.current.println("contextFrame: " + contextFrame.cyclify());
-        // bind input values
-        CycList gatherArgs = new CycList();
-        gatherArgs.add(new Integer(2));
-        gatherArgs.add(new Integer(3));
-        CycList inputBindingTuples =
-            cycAccess.getPredicateValueTuplesInMt(procedureBinding,
-                                                  umlProcedureInputBinding,
-                                                  1,
-                                                  gatherArgs,
-                                                  stateMachineDefinitionMt);
-        if (verbosity > 2)
-            Log.current.println("Input binding tuples: " + inputBindingTuples.cyclify());
-        Iterator iter = inputBindingTuples.iterator();
+            Log.current.println("Input bindings: " + inputBindings.toString());
+        Iterator iter = inputBindings.iterator();
         while (iter.hasNext()) {
-            CycList inputBindingTuple = (CycList) iter.next();
-            CycFort inputPin = (CycFort) inputBindingTuple.first();
-            CycNart inputPinParameter = new CycNart(softwareParameterFromSyntaxFn, inputPin);
-            CycFort stateVariable = (CycFort) inputBindingTuple.second();
-            Object value =
-                cycAccess.getArg2(softwareParameterValue,
-                                  stateVariable,
-                                  parentContextFrame);
+            InputBinding inputBinding = (InputBinding) iter.next();
+            InputPin inputPin = inputBinding.getBoundInputPin();
+            CycFort inputPinTerm = cycAccess.getKnownConstantByName(inputPin.toString());
+            CycNart inputPinParameter = new CycNart(softwareParameterFromSyntaxFn, inputPinTerm);
+            Object valueExpression = inputBinding.getBoundInputValueExpression();
+            Object value = null;
+            if (valueExpression instanceof CycConstant) {
+                // lookup the value of the state variable
+                value = cycAccess.getArg2(softwareParameterValue,
+                                          (CycFort) valueExpression,
+                                          parentContextFrame);
+            }
+            else
+                // a literal
+                value = valueExpression;
+            //TODO interpret evaluatable expressions as inpput arguments
+
             CycList softwareParameterValueSentence = new CycList();
             softwareParameterValueSentence.add(softwareParameterValue);
             softwareParameterValueSentence.add(inputPinParameter);
@@ -345,30 +198,26 @@ public class ProcedureInterpreter {
                                                    contextFrame);
 
         // bind output values
-        CycList outputBindingTuples =
-            cycAccess.getPredicateValueTuplesInMt(procedureBinding,
-                                                  umlProcedureOutputBinding,
-                                                  1,
-                                                  gatherArgs,
-                                                  stateMachineDefinitionMt);
         if (verbosity > 2)
-            Log.current.println("Output binding tuples: " + outputBindingTuples.cyclify());
-        iter = outputBindingTuples.iterator();
+            Log.current.println("Output bindings: " + outputBindings.toString());
+        iter = outputBindings.iterator();
         while (iter.hasNext()) {
-            CycList outputBindingTuple = (CycList) iter.next();
-            CycFort outputPin = (CycFort) outputBindingTuple.first();
-            CycFort stateVariable = (CycFort) outputBindingTuple.second();
-            CycNart outputPinParameter = new CycNart(softwareParameterFromSyntaxFn, outputPin);
+            OutputBinding outputBinding = (OutputBinding)  iter.next();
+            OutputPin outputPin = outputBinding.getBoundOutputPin();
+            CycFort outputPinTerm = cycAccess.getKnownConstantByName(outputPin.toString());
+            StateVariable stateVariable = outputBinding.getBoundOutputStateVariable();
+            CycFort stateVariableTerm = cycAccess.getKnownConstantByName(stateVariable.toString());
+            CycNart outputPinParameter = new CycNart(softwareParameterFromSyntaxFn, outputPinTerm);
             Object value =
                 cycAccess.getArg2(softwareParameterValue,
                                   outputPinParameter,
                                   contextFrame);
             CycList softwareParameterValueSentence = new CycList();
             softwareParameterValueSentence.add(softwareParameterValue);
-            softwareParameterValueSentence.add(stateVariable);
+            softwareParameterValueSentence.add(stateVariableTerm);
             softwareParameterValueSentence.add(value);
             cycAccess.unassertMatchingAssertionsWithoutTranscript(softwareParameterValue,
-                                                                  stateVariable,
+                                                                  stateVariableTerm,
                                                                   parentContextFrame);
             if (verbosity > 0)
                 Log.current.println("asserting " + softwareParameterValueSentence +
@@ -376,6 +225,7 @@ public class ProcedureInterpreter {
             cycAccess.assertWithBookkeepingAndWithoutTranscript(softwareParameterValueSentence,
                                                                 parentContextFrame);
         }
+        contextStackPool.deallocateContextFrame(contextFrame);
     }
 
     /**
@@ -385,16 +235,6 @@ public class ProcedureInterpreter {
      */
     public Procedure getProcedure () {
         return procedure;
-    }
-
-    /**
-     * Gets the procedure binding term which is the association
-     * between the procedure and a particular calling transition or state.
-     *
-     * @return procedure binding term
-     */
-    public CycFort getProcedureBinding () {
-        return procedureBinding;
     }
 
     /**

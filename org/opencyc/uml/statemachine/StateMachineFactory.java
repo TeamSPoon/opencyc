@@ -111,25 +111,26 @@ public class StateMachineFactory {
      * @param ordering the ordering of the attribute
      * @param initialValue the initial value expression
      */
-    public void addStateVariableToClassifier (String name,
-                                              String commentString,
-                                              int targetScope,
-                                              Object type,
-                                              int changeability,
-                                              Multiplicity multiplicity,
-                                              int ordering,
-                                              Expression initialValue) {
-        Attribute attribute = new Attribute();
-        setNamespaceNameComment(attribute,
+    public StateVariable addStateVariableToClassifier (String name,
+                                                       String commentString,
+                                                       int targetScope,
+                                                       Object type,
+                                                       int changeability,
+                                                       Multiplicity multiplicity,
+                                                       int ordering,
+                                                       Expression initialValue) {
+        StateVariable stateVariable = new StateVariable();
+        setNamespaceNameComment(stateVariable,
                                 name,
                                 commentString);
-        attribute.setType(type);
-        attribute.setChangeability(changeability);
-        attribute.setMultiplicity(multiplicity);
-        attribute.setOrdering(ordering);
-        attribute.setInitialValue(initialValue);
-        attribute.setTargetScope(targetScope);
-        stateMachine.getContext().addFeature(attribute);
+        stateVariable.setType(type);
+        stateVariable.setChangeability(changeability);
+        stateVariable.setMultiplicity(multiplicity);
+        stateVariable.setOrdering(ordering);
+        stateVariable.setInitialValue(initialValue);
+        stateVariable.setTargetScope(targetScope);
+        stateMachine.getContext().addFeature(stateVariable);
+        return stateVariable;
     }
 
     /**

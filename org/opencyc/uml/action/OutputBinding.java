@@ -1,6 +1,7 @@
 package org.opencyc.uml.action;
 
 import org.opencyc.uml.core.ModelElement;
+import org.opencyc.uml.statemachine.StateVariable;
 
 /**
  * OutputBinding which is an extenstion to the UML action package.
@@ -32,15 +33,26 @@ import org.opencyc.uml.core.ModelElement;
 public class OutputBinding extends ModelElement {
 
     /**
-     * the bound input pin
+     * the bound output pin
      */
     protected OutputPin boundOutputPin;
 
     /**
-     * the bound input value expression which could be a literal,
-     * state variable, or expression
+     * the bound output state variable
      */
-    protected Object boundOutputValueExpression;
+    protected StateVariable boundOutputStateVariable;
+
+    /**
+     * Creates a new OutputBinding object.
+     *
+     * @param boundOutputPin
+     * @param boundOutputValueExpression
+     */
+    public OutputBinding(OutputPin boundOutputPin,
+                         StateVariable boundOutputStateVariable) {
+        this.boundOutputPin = boundOutputPin;
+        this.boundOutputStateVariable = boundOutputStateVariable;
+    }
 
     /**
      * Creates a new OutputBinding object.
@@ -49,41 +61,54 @@ public class OutputBinding extends ModelElement {
     }
 
     /**
-     * Gets the bound input pin
+     * Returns a string representation of this object.
      *
-     * @return the bound input pin
+     * @return a string representation of this object
+     */
+    public String toString () {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("[");
+        stringBuffer.append(boundOutputPin.toString());
+        stringBuffer.append("-->");
+        stringBuffer.append(boundOutputStateVariable.toString());
+        stringBuffer.append("]");
+        return stringBuffer.toString();
+    }
+
+    /**
+     * Gets the bound output pin
+     *
+     * @return the bound output pin
      */
     public OutputPin getBoundOutputPin () {
         return boundOutputPin;
     }
 
     /**
-     * Sets the bound input pin
+     * Sets the bound output pin
      *
-     * @param boundOutputPin the bound input pin
+     * @param boundOutputPin the bound output pin
      */
     public void setBoundOutputPin (OutputPin boundOutputPin) {
         this.boundOutputPin = boundOutputPin;
     }
 
     /**
-     * Gets the bound input value expression which could be a literal,
-     * state variable, or expression
+     * Gets the bound output state variable
      *
-     * @return the bound input value expression
+     * @return the bound output state variable
      */
-    public Object getBoundOutputValueExpression () {
-        return boundOutputValueExpression;
+    public StateVariable getBoundOutputStateVariable () {
+        return boundOutputStateVariable;
     }
 
     /**
-     * Sets the bound input value expression which could be a literal,
-     * state variable, or expression
+     * Sets the bound output state variable
      *
-     * @param boundOutputValueExpression the bound input value expression
+     * @param boundOutputStateVariable  the bound output state variable
      */
-    public void setBoundOutputValueExpression (Object boundOutputValueExpression) {
-        this.boundOutputValueExpression = boundOutputValueExpression;
+    public void setBoundOutputStateVariable (StateVariable boundOutputStateVariable) {
+        this.boundOutputStateVariable = boundOutputStateVariable;
     }
 
 }

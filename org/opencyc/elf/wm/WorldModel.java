@@ -54,11 +54,104 @@ public class WorldModel extends NodeComponent {
     return "WorldModel for " + node.getName();
   }
   
+
+  /**
+   * Gets the knowledge base node component
+   *
+   * @return the knowledge base node component
+   */
+  public KnowledgeBase getKnowledgeBase () {
+    return knowledgeBase;
+  }
+
+  /**
+   * Sets the knowledge base node component
+   *
+   * @param knowledgeBase the knowledge base node component
+   */
+  public void setKnowledgeBase (KnowledgeBase knowledgeBase) {
+    this.knowledgeBase = knowledgeBase;
+  }
+
+  /**
+   * Gets the plan simulator node component
+   *
+   * @return the plan simulator node component
+   */
+  public PlanSimulator getPlanSimulator () {
+    return planSimulator;
+  }
+
+  /**
+   * Sets the plan simulator node component
+   *
+   * @param planSimulator the plan simulator node component
+   */
+  public void setPlanSimulator (PlanSimulator planSimulator) {
+    this.planSimulator = planSimulator;
+  }
+
+  /**
+   * Gets the predictor node component
+   *
+   * @return the predictor node component
+   */
+  public Predictor getPredictor () {
+    return predictor;
+  }
+
+  /**
+   * Sets the predictor node component
+   *
+   * @param predictor the predictor node component
+   */
+  public void setPredictor (Predictor predictor) {
+    this.predictor = predictor;
+  }
+
+  /**
+   * Gets the entity of attention
+   *
+   * @return the entity of attention
+   */
+  public EntityFrame getEntityOfAttention () {
+    return entityOfAttention;
+  }
+
+  /**
+   * Sets the entity of attention
+   *
+   * @param entityOfAttention the entity of attention
+   */
+  public void setEntityOfAttention (EntityFrame entityOfAttention) {
+    this.entityOfAttention = entityOfAttention;
+  }
+
   //// Protected Area
    
   //// Private Area
   
   //// Internal Rep
+  
+  /**
+   * the knowledge base node component
+   */
+  protected KnowledgeBase knowledgeBase;
+  
+  /**
+   * the plan simulator node component
+   */
+  protected PlanSimulator planSimulator;
+  
+  /**
+   * the predictor node component
+   */
+  protected Predictor predictor;
+  
+  /**
+   * the entity of attention
+   */
+  protected EntityFrame entityOfAttention;
   
   //// Main
 }

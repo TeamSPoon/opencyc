@@ -494,7 +494,10 @@ public class CycListParser  {
                 return improperList;
             }
         }
-        return CycList.construct(reduceDottedPairs(cycList.first()),
-                                 reduceDottedPairs(cycList.rest()));
+        Object firstReducedDottedPair = reduceDottedPairs(cycList.first());
+        Object restReducedDottedPair = reduceDottedPairs(cycList.rest());
+        CycList constructedCycList = CycList.construct(firstReducedDottedPair,
+                                                       restReducedDottedPair);
+        return constructedCycList;
     }
 }

@@ -103,7 +103,10 @@ public class CycList extends ArrayList {
         if (object2.equals(CycObjectFactory.nil))
             return cycList;
         if (object2 instanceof CycList) {
-            cycList.addAll((CycList) object2);
+            CycList cycList2 = (CycList) object2;
+            cycList.addAll(cycList2);
+            if (! cycList2.isProperList)
+                cycList.setDottedElement(cycList2.getDottedElement());
             return cycList;
         }
         cycList.setDottedElement(object2);

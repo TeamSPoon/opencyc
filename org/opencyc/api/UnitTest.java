@@ -1305,8 +1305,8 @@ public class UnitTest extends TestCase {
         try {
             CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
             Assert.assertEquals(dog, whyGenlFirst);
-            CycConstant collection = cycAccess.getKnownConstantByGuid("bd5880cc-9c29-11b1-9dad-c379636f7270");
-            Assert.assertEquals(collection, whyGenlLast);
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            Assert.assertEquals(animal, whyGenlLast);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1410,7 +1410,7 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals(localDisjointWiths, cycAccess.makeCycList("(#$Animal)"));
+        Assert.assertEquals(cycAccess.makeCycList("(#$Animal)"), localDisjointWiths);
 
         // areDisjoint.
         boolean answer = true;

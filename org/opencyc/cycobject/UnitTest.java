@@ -1,19 +1,32 @@
 package org.opencyc.cycobject;
 
-/**
- * A suite of JUnit test cases for the <tt>org.opencyc.cycobject</tt> package.<p>
- *
- * @version $Id$
- * @author Stephen Reed
- *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- */
-
 import junit.framework.*;
 import java.util.*;
 
+/**
+ * Provides a suite of JUnit test cases for the <tt>org.opencyc.cycobject</tt> package.<p>
+ *
+ * @version $Id$
+ * @author Stephen L. Reed
+ *
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class UnitTest extends TestCase {
 
     /**
@@ -25,7 +38,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Run the unit tests
+     * Runs the unit tests
      */
     public static void runTests() {
         TestSuite testSuite = new TestSuite(UnitTest.class);
@@ -41,7 +54,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test the test harness itself.
+     * Tests the test harness itself.
      */
     public void testTestHarness() {
         System.out.println("** testTestHarness **");
@@ -50,7 +63,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test <tt>Guid</tt> object behavior.
+     * Tests <tt>Guid</tt> object behavior.
      */
     public void testGuid() {
         System.out.println("** testGuid **");
@@ -69,7 +82,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test <tt>CycSymbol</tt> object behavior.
+     * Tests <tt>CycSymbol</tt> object behavior.
      */
     public void testCycSymbol() {
         System.out.println("** testCycSymbol **");
@@ -89,7 +102,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test <tt>CycConstant</tt> object behavior.
+     * Tests <tt>CycConstant</tt> object behavior.
      */
     public void testCycConstant() {
         System.out.println("** testCycConstant **");
@@ -112,7 +125,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test <tt>CycNart</tt> object behavior.
+     * Tests <tt>CycNart</tt> object behavior.
      */
     public void testCycNart() {
         System.out.println("** testCycNart **");
@@ -141,7 +154,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test <tt>CycVariable</tt> object behavior.
+     * Tests <tt>CycVariable</tt> object behavior.
      */
     public void testCycVariable() {
         System.out.println("** testCycVariable **");
@@ -158,7 +171,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test <tt>CycList</tt> object behavior.
+     * Tests <tt>CycList</tt> object behavior.
      */
     public void testCycList() {
         System.out.println("** testCycList **");
@@ -277,7 +290,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test <tt>CycListVisitor</tt> object behavior.
+     * Tests <tt>CycListVisitor</tt> object behavior.
      */
     public void testCycListVisitor() {
         System.out.println("** testCycListVisitor **");

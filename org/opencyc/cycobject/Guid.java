@@ -1,27 +1,39 @@
 package org.opencyc.cycobject;
 
-/*****************************************************************************
+import org.apache.oro.util.*;
+
+/**
  * Provides the behavior and attributes of an OpenCyc GUID (Globally Unique
  * IDentifier). Each OpenCyc constant has an associated guid.
  *
  * @version $0.1$
- * @author
- *      Stephen L. Reed<P>
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- *****************************************************************************/
-
-import java.util.*;
-
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class Guid {
 
     /**
-     * Cache of guids, so that a reference to an existing <tt>Guid</tt>
+     * Least Recently Used Cache of guids, so that a reference to an existing <tt>Guid</tt>
      * is returned instead of constructing a duplicate.
      */
-    protected static HashMap cache = new HashMap();
+    protected static Cache cache = new CacheLRU(500);
 
     /**
      * The GUID in string form.
@@ -29,22 +41,22 @@ public class Guid {
     protected String guidString;
 
     /**
-     * Construct a new Guid object.
+     * Returns a cached <tt>Guid</tt> object or construct a new
+     * Guid object from a guid string if the guid is not found in the cache.
      *
      * @param guid a <tt>String</tt> form of a GUID.
      */
     public static Guid makeGuid(String guidString) {
-        if (cache.containsKey(guidString))
-            return (Guid) cache.get(guidString);
-        else {
-            Guid guid = new Guid(guidString);
-            cache.put(guidString, guid);
-            return guid;
+        Guid guid = (Guid) cache.getElement(guidString);
+        if (guid == null ) {
+            guid = new Guid(guidString);
+            cache.addElement(guidString, guid);
         }
+        return guid;
     }
 
     /**
-     * Construct a new <tt>Guid</tt> object. Non-public to enforce the
+     * Constructs a new <tt>Guid</tt> object. Non-public to enforce the
      * use of the cache during object creation.
      */
     protected Guid(String guidString) {
@@ -52,7 +64,7 @@ public class Guid {
     }
 
     /**
-     * Return <tt>true</tt> if the object equals this object.
+     * Returns <tt>true</tt> if the object equals this object.
      *
      * @return <tt>boolean</tt> indicating equality of an object with this object.
      */
@@ -66,7 +78,7 @@ public class Guid {
     }
 
     /**
-     * Return a string representation of the <tt>Guid</tt>.
+     * Returns a string representation of the <tt>Guid</tt>.
      *
      * @return the <tt>Guid</tt> formated as a <tt>String</tt>.
      */
@@ -75,36 +87,34 @@ public class Guid {
     }
 
     /**
-     * Reset the <tt>Guid</tt> cache.
+     * Resets the <tt>Guid</tt> cache.
      */
     public static void resetCache() {
-        cache = new HashMap();
+        cache = new CacheLRU(500);
     }
 
     /**
-     * Retrieve the <tt>Guid</tt> with <tt>guidName</tt>,
+     * Retrieves the <tt>Guid</tt> with <tt>guidName</tt>,
      * returning null if not found in the cache.
      *
      * @return the <tt>Guid</tt> if it is found in the cache, otherwise
      * <tt>null</tt>
      */
     public static Guid getCache(String guidName) {
-        if (cache.containsKey(guidName))
-            return (Guid) cache.get(guidName);
-        else
-            return null;
+        return (Guid) cache.getElement(guidName);
     }
 
     /**
-     * Remove the <tt>Guid</tt> from the cache if it is contained within.
+     * Removes the <tt>Guid</tt> from the cache if it is contained within.
      */
     public static void removeCache(Guid guid) {
-        if (cache.containsKey(guid.guidString))
-            cache.remove(guid.guidString);
+        Object element = cache.getElement(guid.guidString);
+        if (element != null)
+            cache.addElement(guid.guidString, null);
     }
 
     /**
-     * Return the size of the <tt>Guid</tt> object cache.
+     * Returns the size of the <tt>Guid</tt> object cache.
      *
      * @return an <tt>int</tt> indicating the number of <tt>Guid</tt> objects in the cache
      */

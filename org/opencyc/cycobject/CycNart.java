@@ -1,22 +1,36 @@
 package org.opencyc.cycobject;
 
-/*****************************************************************************
- * This class implements the behavior and attributes of a
- * an OpenCyc Non Atomic Reified Term.
- *
- * @version $Id$
- * @author
- *      Stefano Bertolo<BR>
- *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- *****************************************************************************/
 import java.io.Serializable;
 
 import java.util.*;
 //import com.cyc.xml.XMLPrintWriter;
 
+/**
+ * This class implements the behavior and attributes of a
+ * an OpenCyc NART (Non Atomic Reified Term).
+ *
+ * @version $Id$
+ * @author Stefano Bertolo
+ * @author Stephen L. Reed
+ *
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class CycNart extends CycFort {
 
     /**
@@ -45,7 +59,7 @@ public class CycNart extends CycFort {
     protected List arguments;
 
     /**
-     * Construct a new <ttt>CycNart</tt> object.
+     * Constructs a new <ttt>CycNart</tt> object.
      *
      * @param functor a <tt>CycFort</tt> which is the functor of this
      * <tt>CycNart</tt> object.
@@ -58,7 +72,7 @@ public class CycNart extends CycFort {
     }
 
     /**
-     * Construct a new unary <ttt>CycNart</tt> object.
+     * Constructs a new unary <ttt>CycNart</tt> object.
      *
      * @param functor a <tt>CycFort</tt> which is the functor of this
      * <tt>CycNart</tt> object.
@@ -73,7 +87,7 @@ public class CycNart extends CycFort {
     }
 
     /**
-     * Construct a new binary <ttt>CycNart</tt> object.
+     * Constructs a new binary <ttt>CycNart</tt> object.
      *
      * @param functor a <tt>CycFort</tt> which is the functor of this
      * <tt>CycNart</tt> object.
@@ -141,7 +155,7 @@ public class CycNart extends CycFort {
     }
 */
     /**
-     * Return a string representation of the OpenCyc NART.
+     * Returns a string representation of the OpenCyc NART.
      *
      * @return a <tt>String</tt> representation of the OpenCyc NART.
      */
@@ -157,7 +171,7 @@ public class CycNart extends CycFort {
     }
 
     /**
-     * Return a cyclified string representation of the OpenCyc NART.
+     * Returns a cyclified string representation of the OpenCyc NART.
      * Embedded constants are prefixed with ""#$".
      *
      * @return a cyclified <tt>String</tt>.
@@ -182,7 +196,7 @@ public class CycNart extends CycFort {
     }
 
     /**
-     * Return a string representation of the <ttt>CycNart</tt> with the guid in place
+     * Returns a string representation of the <ttt>CycNart</tt> with the guid in place
      * of the constant name.
      *
      * @return a <tt>String</tt> representation of the <ttt>CycNart</tt> with <tt>Guid</tt>
@@ -212,7 +226,7 @@ public class CycNart extends CycFort {
     }
 
     /**
-     * Return a metaName representation of the <tt>CycNart</tt>.
+     * Returns a metaName representation of the <tt>CycNart</tt>.
      *
      * @return a <tt>String</tt> metaName representation
      */
@@ -244,7 +258,7 @@ public class CycNart extends CycFort {
     }
 
     /**
-     * Return <tt>true</tt> some object equals this <tt>CycNart</tt>
+     * Returns <tt>true</tt> some object equals this <tt>CycNart</tt>
      *
      * @param object the <tt>Object</tt> for equality comparison
      * @return equals <tt>boolean</tt> value indicating equality or non-equality.

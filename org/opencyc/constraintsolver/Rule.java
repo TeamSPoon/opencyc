@@ -1,19 +1,34 @@
 package org.opencyc.constraintsolver;
 
+import java.util.*;
+import org.opencyc.cycobject.*;
+
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a constraint rule.<p>
  *
  * @version $Id$
- * @author Stephen Reed
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @see UnitTest#testRule
  */
-
-import java.util.*;
-import org.opencyc.cycobject.*;
-
 public class Rule {
 
     /**
@@ -30,10 +45,27 @@ public class Rule {
     protected ArrayList variables;
 
     /**
-     * Simplify a rule expression.<p>
+     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt>.<p>
+     *
+     * <pre>
+     *  String ruleAsString = "(#$isa ?x #$Cathedral)";
+     *  Rule rule1 = new Rule (new CycList(ruleAsString));
+     * </pre>
+     *
+     * @param rule the rule's formula, which must be a well formed OpenCyc
+     * query represented by a <tt>CycList</tt>.
+     */
+    public Rule (CycList rule) {
+        this.rule = rule;
+        gatherVariables();
+    }
+
+    /**
+     * Simplifies a rule expression.<p>
      * (#$and (<rule1> <rule2> ... <ruleN>) becomes <rule1> <rule2> ... <ruleN>
      *
      * @return an <tt>ArrayList</tt> of <tt>Rule</tt> objects.
+     * @see UnitTest#testRule
      */
     public static ArrayList simplifyRuleExpression(CycList cycList) {
         ArrayList rules = new ArrayList();
@@ -49,18 +81,7 @@ public class Rule {
     }
 
     /**
-     * Construct a new <tt>Rule</tt> object.
-     *
-     * @param rule the rule's formula, which must be a well formed OpenCyc
-     * query represented by a <tt>CycList</tt>.
-     */
-    public Rule (CycList rule) {
-        this.rule = rule;
-        gatherVariables();
-    }
-
-    /**
-     * Gather the unique variables from the rule's formula.
+     * Gathers the unique variables from the rule's formula.
      */
     private void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
@@ -77,7 +98,7 @@ public class Rule {
 
 
     /**
-     * Get the rule's formula.
+     * Gets the rule's formula.
      *
      * @return a <tt>CycList</tt> which is the rule's formula.
      */
@@ -86,7 +107,7 @@ public class Rule {
     }
 
     /**
-     * Get the rule's variables.
+     * Gets the rule's variables.
      *
      * @return the <tt>ArrayList</tt> which lists the unique <tt>CycVariables</tt> that are
      * used in the rule's formula.
@@ -96,7 +117,7 @@ public class Rule {
     }
 
     /**
-     * Get the rule's arity, which is the number of variables
+     * Gets the rule's arity, which is the number of variables
      * in this <tt>Rule</tt>.
      *
      * @return an <tt>int</tt> which is the number of <tt>CycVariables</tt>
@@ -107,7 +128,7 @@ public class Rule {
     }
 
     /**
-     * Return <tt>true</tt> if the object equals this object.
+     * Returns <tt>true</tt> if the object equals this object.
      *
      * @return <tt>boolean</tt> indicating equality of an object with this object.
      */
@@ -119,7 +140,7 @@ public class Rule {
     }
 
     /**
-     * Return the predicate of this <tt>Rule</tt> object.
+     * Returns the predicate of this <tt>Rule</tt> object.
      *
      * @return the predicate <tt>CycConstant</tt> or <tt>CycSymbol</tt>
      * of this <tt>Rule</tt> object
@@ -129,7 +150,7 @@ public class Rule {
     }
 
     /**
-     * Return <tt>true</tt> if this is a variable domain populating <tt>Rule</tt>.
+     * Returns <tt>true</tt> if this is a variable domain populating <tt>Rule</tt>.
      *
      * @return <tt>boolean</tt> indicating if this is a variable domain populating
      * <tt>Rule</tt>.
@@ -149,20 +170,20 @@ public class Rule {
     }
 
     /**
-     * Return a string representation of the <tt>Rule</tt>.
+     * Returns a string representation of the <tt>Rule</tt>.
      *
      * @return the rule's formula formated as a <tt>String</tt>.
      */
     public String toString() {
         return rule.toString();
     }
+
     /**
-     * Return a cyclified string representation of the rule's formula.
+     * Returns a cyclified string representation of the rule's formula.
      * Embedded constants are prefixed with ""#$".
      *
      * @return a cyclified <tt>String</tt>.
      */
-
     public String cyclify() {
         return rule.cyclify();
     }

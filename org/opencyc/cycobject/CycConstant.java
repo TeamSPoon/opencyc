@@ -1,22 +1,34 @@
 package org.opencyc.cycobject;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import org.apache.oro.util.*;
 //import org.opencyc.xml.XMLPrintWriter;
 
-/*****************************************************************************
- * This class implements the behavior and attributes of an OpenCyc Constant.
+/**
+ * Provides the behavior and attributes of an OpenCyc Constant.
  *
  * @version $Id$
- * @author
- *      Stefano Bertolo<BR>
- *      Stephen Reed<BR>
+ * @author Stefano Bertolo
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- *****************************************************************************/
-
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class CycConstant extends CycFort {
 
     /**
@@ -29,10 +41,10 @@ public class CycConstant extends CycFort {
     public static String guid_xml_tag = "guid";
 
     /**
-     * Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
+     * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
      * is returned instead of constructing a duplicate.
      */
-    protected static HashMap cache = new HashMap();
+    protected static Cache cache = new CacheLRU(500);
 
     public static int indent_length = 2;
 
@@ -48,7 +60,8 @@ public class CycConstant extends CycFort {
     public String name;
 
     /**
-     * Construct a new <tt>CycConstant</tt> object.
+     * Constructs a new <tt>CycConstant</tt> object, given a guidString and constant
+     * name.
      *
      * @param guidString Globally Unique Identifier <tt>String</tt> representation
      * @param name Name of the constant. If prefixed with "#$", then the prefix is
@@ -59,41 +72,41 @@ public class CycConstant extends CycFort {
     }
 
     /**
-     * Construct a new <tt>CycConstant</tt> object.
+     * Constructs a new <tt>CycConstant</tt> object using the constant name.
      *
      * @param name Name of the constant. If prefixed with "#$", then the prefix is
      * removed for canonical representation.
      */
     public static CycConstant makeCycConstant(String name) {
-        if (cache.containsKey(name))
-            return (CycConstant) cache.get(name);
-        else {
+        CycConstant cycConstant = (CycConstant) cache.getElement(name);
+        if (cycConstant == null) {
+            //TODO
             Guid guid = new Guid("** get from OpenCyc **");
-            CycConstant cycConstant = new CycConstant(guid, name);
-            cache.put(cycConstant.name, cycConstant);
-            return cycConstant;
+            cycConstant = new CycConstant(guid, name);
+            cache.addElement(cycConstant.name, cycConstant);
         }
+        return cycConstant;
     }
 
     /**
-     * Construct a new <tt>CycConstant</tt> object.
+     * Constructs a new <tt>CycConstant</tt> object given the guid and constant name.
      *
      * @param guid Globally Unique Identifier
      * @param name Name of the constant. If prefixed with "#$", then the prefix is
      * removed for canonical representation.
      */
     public static CycConstant makeCycConstant(Guid guid, String name) {
-        if (cache.containsKey(name))
-            return (CycConstant) cache.get(name);
-        else {
-            CycConstant cycConstant = new CycConstant(guid, name);
-            cache.put(cycConstant.name, cycConstant);
+        CycConstant cycConstant = (CycConstant) cache.getElement(name);
+        if (cycConstant == null) {
+            cycConstant = new CycConstant(guid, name);
+            cache.addElement(cycConstant.name, cycConstant);
             return cycConstant;
         }
+        return cycConstant;
     }
 
     /**
-     * Create a <tt>CycConstant<tt> object.
+     * Constructs a <tt>CycConstant<tt> object given the guid and constant name.
      *
      * @param guid Globally Unique Identifier
      * @param name Name of the constant. If prefixed with "#$", then the prefix is
@@ -143,12 +156,18 @@ public class CycConstant extends CycFort {
         xml_writer.printXMLEndTag(constant_xml_tag, -indent_length, true);
     }
 */
+
+    /**
+     * Provides the hash code appropriate for the <tt>CycConstant</tt>.
+     *
+     * @return the hash code for the <tt>CycConstant</tt>
+     */
     public int hashCode() {
         return this.guid.hashCode();
     }
 
     /**
-     * Return <tt>true</tt> some object equals this <tt>CycConstant</tt>
+     * Returns <tt>true</tt> some object equals this <tt>CycConstant</tt>
      *
      * @param object the <tt>Object</tt> for equality comparison
      * @return equals <tt>boolean</tt> value indicating equality or non-equality.
@@ -163,6 +182,9 @@ public class CycConstant extends CycFort {
             return false;
     }
 
+    /**
+     * Returns a String representation of the <tt>CycConstant</tt>.
+     */
     public String toString() {
         return name;
     }
@@ -171,37 +193,40 @@ public class CycConstant extends CycFort {
         return cycName();
     }
 
+    /**
+     * Returns the name of the <tt>CycConstant</tt> with "#$" prefixed.
+     *
+     * @return the name of the <tt>CycConstant</tt> with "#$" prefixed.
+     */
     public String cycName() {
         return "#$" + name;
     }
 
     /**
-     * Reset the Cyc constant cache.
+     * Resets the Cyc constant cache.
      */
     public static void resetCache() {
-        cache = new HashMap();
+        cache = new CacheLRU(500);
     }
 
     /**
-     * Retrieve the <tt>CycConstant<tt> with name, returning null if not found in the cache.
+     * Retrieves the <tt>CycConstant<tt> with name, returning null if not found in the cache.
      */
     public static CycConstant getCache(String name) {
-        if (cache.containsKey(name))
-            return (CycConstant) cache.get(name);
-        else
-            return null;
+        return (CycConstant) cache.getElement(name);
     }
 
     /**
-     * Remove the cycConstant from the cache if it is contained within.
+     * Removes the cycConstant from the cache if it is contained within.
      */
     public static void removeCache(CycConstant cycConstant) {
-        if (cache.containsKey(cycConstant.name))
-            cache.remove(cycConstant.name);
+        Object element = cache.getElement(cycConstant.name);
+        if (element != null)
+            cache.addElement(cycConstant.name, null);
     }
 
     /**
-     * Make a valid constant name from the candidate name by substituting
+     * Makes a valid constant name from the candidate name by substituting
      * an underline character for the invalid characters.
      */
     public static String makeValidConstantName(String candidateName) {
@@ -218,7 +243,7 @@ public class CycConstant extends CycFort {
     }
 
     /**
-     * Return the size of the <tt>CycConstant</tt> object cache.
+     * Returns the size of the <tt>CycConstant</tt> object cache.
      *
      * @return an <tt>int</tt> indicating the number of <tt>CycConstant</tt> objects in the cache
      */

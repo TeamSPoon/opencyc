@@ -1,25 +1,38 @@
 package org.opencyc.constraintsolver;
 
-/**
- * A suite of JUnit test cases for the <tt>org.opencyc.constraintsolver</tt> package.<p>
- *
- * @version $Id$
- * @author Stephen Reed
- *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- */
-
 import java.util.*;
 import java.io.*;
 import junit.framework.*;
 import org.opencyc.cycobject.*;
 
+/**
+ * Provides a suite of JUnit test cases for the <tt>org.opencyc.constraintsolver</tt> package.<p>
+ *
+ * @version $Id$
+ * @author Stephen L. Reed
+ *
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class UnitTest extends TestCase {
 
     /**
-     * Construct a new UnitTest object.
+     * Constructs a new UnitTest object.
      * @param name the test case name.
      */
     public UnitTest(String name) {
@@ -27,7 +40,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Run the unit tests
+     * Runs the unit tests
      */
     public static void runTests() {
         TestSuite testSuite = new TestSuite(UnitTest.class);
@@ -39,7 +52,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test the test harness itself.
+     * Tests the test harness itself.
      */
     public void testHelloWorld() {
         System.out.println("** testHelloWorld **");
@@ -48,7 +61,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test the <tt>Rule</tt> class.
+     * Tests the <tt>Rule</tt> class.
      */
     public void testRule() {
         System.out.println("** Rule **");
@@ -154,7 +167,7 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Test the <tt>ConstraintProblem</tt> class.
+     * Tests the <tt>ConstraintProblem</tt> class.
      */
     public void testConstraintProblem() {
         System.out.println("** testConstraintProblem **");

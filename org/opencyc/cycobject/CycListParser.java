@@ -5,19 +5,31 @@ import java.util.*;
 import java.io.*;
 import org.opencyc.util.*;
 
-/*****************************************************************************
- * Provides a parser that reads <tt>String</tt> representation and constructs
+/**
+ * Provides a parser that reads a <tt>String</tt> representation and constructs
  * the corresponding <tt>CycList</tt>.
  *
  * @version $0.1$
- * @author
- *      Stephen L. Reed<P>
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- *****************************************************************************/
-
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class CycListParser  {
 
     // Read/scan functions' lexical analysis variables.
@@ -41,13 +53,13 @@ public class CycListParser  {
     public static int verbosity = 0;
 
     /**
-     * Construct a new <tt>CycListParser</tt> object.
+     * Constructs a new <tt>CycListParser</tt> object.
      */
     public CycListParser() {
     }
 
     /**
-     * Parse a <tt>CycList</tt> string representation.
+     * Parses a <tt>CycList</tt> string representation.
      *
      * @param st a <tt>StreamTokenizer</tt> whose source is the
      * <tt>CycList</tt> string representation.
@@ -86,7 +98,7 @@ public class CycListParser  {
     }
 
     /**
-     * Parse a <tt>CycList</tt> string representation.
+     * Parses a <tt>CycList</tt> string representation.
      *
      * @param st a <tt>StreamTokenizer</tt> whose source is the
      * <tt>CycList</tt> string representation.
@@ -179,7 +191,7 @@ public class CycListParser  {
     }
 
     /**
-     * Expand 's to (quote s  when reading.
+     * Expands 's to (quote s  when reading.
      */
     private void scanQuote() {
         Integer i;
@@ -196,7 +208,7 @@ public class CycListParser  {
     }
 
     /**
-     * Scan a left parenthesis when reading.
+     * Scans a left parenthesis when reading.
      */
     private void ScanLeftParen() {
         //System.out.println("(");
@@ -206,7 +218,7 @@ public class CycListParser  {
     }
 
     /**
-     * Scan a right parenthesis when reading.
+     * Scans a right parenthesis when reading.
      */
     private void scanRightParen() {
         CycConstant cons;
@@ -253,7 +265,7 @@ public class CycListParser  {
         }
 
     /**
-     * Scan a number while reading.
+     * Scans a number while reading.
      *
      * @param the input <tt>StreamTokenizer</tt> from which to get the numerical value.
      */
@@ -282,7 +294,7 @@ public class CycListParser  {
     }
 
     /**
-     * Scan a minus while reading.
+     * Scans a minus while reading.
      */
     private void scanMinus() {
         //System.out.println("-");
@@ -297,7 +309,7 @@ public class CycListParser  {
     }
 
     /**
-     * Scan a word while reading.
+     * Scans a word while reading.
      *
      * @param the input <tt>StreamTokenizer</tt> from which to get the word value.
      */
@@ -321,7 +333,7 @@ public class CycListParser  {
     }
 
     /**
-     * Scan a string while reading.
+     * Scans a string while reading.
      */
     private void scanString(StreamTokenizer st) {
         String string = new String(st.sval);
@@ -363,7 +375,7 @@ public class CycListParser  {
     }
 
     /**
-     * Perform a lexical analysis of the list and perform dot
+     * Performs a lexical analysis of the list and perform dot
      * cons cell operations.
      *
      * @param the <tt>Object</tt> under consideration.

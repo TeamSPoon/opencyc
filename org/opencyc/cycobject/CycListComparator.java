@@ -1,30 +1,42 @@
 package org.opencyc.cycobject;
 
-/*****************************************************************************
- * Provides a comparator for the <tt>sort</tt> method of the
+import java.util.*;
+
+/**
+ * Implements a <tt>Comparator</tt> for the <tt>sort</tt> method of the
  * <tt>CycList</tt> class.
  *
  * @version $0.1$
- * @author
- *      Stephen L. Reed<P>
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- *****************************************************************************/
-
-import java.util.*;
-
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class CycListComparator implements Comparator {
 
     /**
-     * Construct a new CycListComparator object.
+     * Constructs a new CycListComparator object.
      */
     public CycListComparator() {
     }
 
     /**
-     * Compare two <tt>CycList</tt> elements, according to their string
+     * Compares two <tt>CycList</tt> elements, according to their string
      * representations.
      *
      * @param o1 an Object for comparison
@@ -41,7 +53,7 @@ public class CycListComparator implements Comparator {
     }
 
     /**
-     * Return <tt>true</tt> if some other object is equal to this <tt>Comparator</tt>
+     * Returns <tt>true</tt> if some other object is equal to this <tt>Comparator</tt>
      *
      * @param object the reference object with which to compare.
      * @return <tt>true</tt> only if the specified object is also a

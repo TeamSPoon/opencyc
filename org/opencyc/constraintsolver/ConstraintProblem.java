@@ -1,19 +1,32 @@
 package org.opencyc.constraintsolver;
 
+import java.util.*;
+import org.opencyc.cycobject.*;
+
 /**
  * <tt>Rule</tt> object to model the attributes and behavior of a constraint problem.<p>
  *
  * @version $Id$
- * @author Stephen Reed
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import java.util.*;
-import org.opencyc.cycobject.*;
-
 public class ConstraintProblem {
 
     /**
@@ -23,7 +36,7 @@ public class ConstraintProblem {
     public int verbosity = 3;
 
     /**
-     * When <tt>true</tt> randomize the order of the variables and domain values before
+     * When <tt>true</tt> randomizes the order of the variables and domain values before
      * beginning the search for a solution.  Do this when tuning search heuristics to avoid
      * bias for a particular order of input.
      */
@@ -118,14 +131,14 @@ public class ConstraintProblem {
     protected int nbrSolutionsFound = 0;
 
     /**
-     * Construct a new <tt>ConstraintProblem</tt> object.
+     * Constructs a new <tt>ConstraintProblem</tt> object.
      */
     public ConstraintProblem() {
     }
 
     /**
-     * Solve a constraint problem and return a list of solutions if one or more
-     * was found, otherwise return <tt>null</tt>.
+     * Solves a constraint problem and return a list of solutions if one or more
+     * was found, otherwise returns <tt>null</tt>.
      *
      * @param problem a constraint problem in the form of an OpenCyc query <tt>CycList</tt>
      * @return an <tt>ArrayList</tt> of solutions or <tt>null</tt> if no solutions were
@@ -143,8 +156,8 @@ public class ConstraintProblem {
     }
 
     /**
-     * Simplify the input problem into its constituent <tt>Rule</tt> objects,
-     * then divide the input rules into those which populate the variable
+     * Simplifies the input problem into its constituent <tt>Rule</tt> objects,
+     * then divides the input rules into those which populate the variable
      * domains, and those which subsequently constrain the search for
      * one or more solutions.
      */
@@ -160,7 +173,7 @@ public class ConstraintProblem {
     }
 
     /**
-     * Gather the unique variables used in this constraint problem.
+     * Gathers the unique variables used in this constraint problem.
      */
     protected void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
@@ -173,7 +186,7 @@ public class ConstraintProblem {
     }
 
     /**
-     * Return the number of variable domain populating <tt>Rule</tt>
+     * Returns the number of variable domain populating <tt>Rule</tt>
      * objects derived from the input problem.
      *
      * @return the number of variable domain populating <tt>Rule</tt> objects.
@@ -183,7 +196,7 @@ public class ConstraintProblem {
     }
 
     /**
-     * Return the number of constraint <tt>Rule</tt> objects derived from
+     * Returns the number of constraint <tt>Rule</tt> objects derived from
      * the input problem.
      *
      * @return the number of constraint <tt>Rule</tt> objects.
@@ -193,7 +206,7 @@ public class ConstraintProblem {
     }
 
     /**
-     * Return the number of <tt>Variable</tt> objects derived from
+     * Returns the number of <tt>Variable</tt> objects derived from
      * the input problem.
      *
      * @return the number of <tt>CycVariable</tt> objects.

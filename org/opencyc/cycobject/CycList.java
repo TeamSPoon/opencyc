@@ -4,43 +4,54 @@ import java.util.*;
 import java.io.*;
 import org.opencyc.util.*;
 
-/*****************************************************************************
+/**
  * Provides the behavior and attributes of an OpenCyc list, typically used
  * to represent assertions in their external (EL) form.
  *
  * @version $0.1$
- * @author
- *      Stephen L. Reed<P>
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- *****************************************************************************/
-
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class CycList extends ArrayList {
 
     private boolean isProperList = true;
     private Object dottedElement;
 
     /**
-     * Construct a new <tt>CycList</tt> object.
+     * Constructs a new empty <tt>CycList</tt> object.
      */
     public CycList() {
     }
 
     /**
-     * Construct a new <tt>CycList</tt> object, containing the elements of the
+     * Constructs a new <tt>CycList</tt> object, containing the elements of the
      * specified collection, in the order they are returned by the collection's iterator.
      *
      * @param c the collection of assumed valid OpenCyc objects.
-     * @see isValid
      */
     public CycList(Collection c) {
         super(c);
     }
 
     /**
-     * Construct a new <tt>CycList</tt> object, containing as its first element
+     * Constructs a new <tt>CycList</tt> object, containing as its first element
      * <tt>firstElement</tt>, and containing as its remaining elements the
      * contents of the <tt>Collection</tt> remaining elements.
      *
@@ -55,7 +66,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Construct a new <tt>CycList</tt> object, containing as its sole element
+     * Constructs a new <tt>CycList</tt> object, containing as its sole element
      * <tt>element</tt>
      *
      * @param element the object which becomes the head of the <tt>CycList</tt>
@@ -65,7 +76,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Construct a new <tt>CycList</tt> object, containing as its first element
+     * Constructs a new <tt>CycList</tt> object, containing as its first element
      * <tt>element1</tt>, and <tt>element2</tt> as its second element.
      *
      * @param element1 the object which becomes the head of the <tt>CycList</tt>
@@ -77,9 +88,9 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Construct a CycList using the semantics of Lisp symbolic expressions.
-     * 1.  construct(a, NIL) --> (a)
-     * 2.  construct(a, b) --> (a . b)
+     * Constructs a CycList using the semantics of Lisp symbolic expressions.<br>
+     * 1.  construct(a, NIL) --> (a)<br>
+     * 2.  construct(a, b) --> (a . b)<br>
      *
      * @param object1 the first <tt>Object</tt> in the <tt>CycList</tt>
      * @param object2 <tt>NIL</tt> or an <tt>Object</tt>
@@ -99,7 +110,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Construct a new <tt>CycList<tt> object by parsing a string.
+     * Constructs a new <tt>CycList<tt> object by parsing a string.
      *
      * @param string the string in CycL external (EL). For example:<BR>
      * <code>(#$isa #$Dog #$TameAnimal)</code>
@@ -112,7 +123,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Get the dotted element.
+     * Gets the dotted element.
      *
      * @return the <tt>Object</tt> which forms the dotted element of this <tt>CycList</tt>
      */
@@ -121,7 +132,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Set the dotted element and set the improper list attribute to <tt>true</tt>.
+     * Sets the dotted element and set the improper list attribute to <tt>true</tt>.
      */
     public void setDottedElement(Object dottedElement) {
         this.dottedElement = dottedElement;
@@ -129,7 +140,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return <tt>true</tt> if this is a proper list.
+     * Returns <tt>true</tt> if this is a proper list.
      *
      * @return <tt>true</tt> if this is a proper list, otherwise return <tt>false</tt>
      */
@@ -137,7 +148,7 @@ public class CycList extends ArrayList {
         return isProperList;
     }
     /**
-     * Answer true iff the CycList contains valid elements.  This is a necessary, but
+     * Answers true iff the CycList contains valid elements.  This is a necessary, but
      * not sufficient condition for CycL well-formedness.
      */
     public boolean isValid() {
@@ -162,7 +173,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return the first element of the <tt>CycList</tt>.
+     * Returns the first element of the <tt>CycList</tt>.
      *
      * @return the <tt>Object</tt> which is the first element of the list.
      */
@@ -173,7 +184,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return the second element of the <tt>CycList</tt>.
+     * Returns the second element of the <tt>CycList</tt>.
      *
      * @return the <tt>Object</tt> which is the first second of the list.
      */
@@ -184,7 +195,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return the third element of the <tt>CycList</tt>.
+     * Returns the third element of the <tt>CycList</tt>.
      *
      * @return the <tt>Object</tt> which is the third element of the list.
      */
@@ -195,7 +206,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return the CycList after removing the first element.
+     * Returns the CycList after removing the first element.
      *
      * @ret urn new <tt>CycList</tt> with first element removed.
      */
@@ -252,7 +263,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return a cyclified string representation of the OpenCyc <tt>CycList</tt>.
+     * Returns a cyclified string representation of the OpenCyc <tt>CycList</tt>.
      * Embedded constants are prefixed with ""#$".
      *
      * @return a <tt>String</tt> representation in cyclified form.
@@ -296,7 +307,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return a new CycList, which is sorted in the default collating sequence.
+     * Returns a new CycList, which is sorted in the default collating sequence.
      *
      * @return a new <tt>CycList</tt>, sorted in the default collating sequence.
      */
@@ -307,7 +318,7 @@ public class CycList extends ArrayList {
     }
 
     /**
-     * Return a <tt>CycListVisitor</tt> enumeration of the non-CycList and non-nil elements.
+     * Returns a <tt>CycListVisitor</tt> enumeration of the non-CycList and non-nil elements.
      *
      * @return a <tt>CycListVisitor</tt> enumeration of the non-CycList and non-nil elements.
      */

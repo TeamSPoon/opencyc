@@ -1,27 +1,39 @@
 package org.opencyc.cycobject;
 
-/*****************************************************************************
+import org.apache.oro.util.*;
+
+/**
  * Provides the behavior and attributes of an OpenCyc symbol, typically used
  * to represent api function names, and non <tt>CycConstant</tt> parameters.
  *
  * @version $0.1$
- * @author
- *      Stephen L. Reed<P>
+ * @author Stephen L. Reed
  *
- * Copyright 2001 OpenCyc.org, license is open source GNU LGPL.<p>
- * <a href="http://www.opencyc.org">www.opencyc.org</a>
- * <a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
- *****************************************************************************/
-
-import java.util.*;
-
+ * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p><a href="http://www.opencyc.org/license.txt">the license</a>
+ * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
+ * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
+ * <p>
+ * THIS SOFTWARE AND KNOWLEDGE BASE CONTENT ARE PROVIDED ``AS IS'' AND
+ * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OPENCYC
+ * ORGANIZATION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
+ * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 public class CycSymbol {
 
     /**
-     * Cache of CycSymbols, so that a reference to an existing <tt>CycSymbol</tt>
+     * Least Recently Used Cache of CycSymbols, so that a reference to an existing <tt>CycSymbol</tt>
      * is returned instead of constructing a duplicate.
      */
-    protected static HashMap cache = new HashMap();
+    protected static Cache cache = new CacheLRU(500);
 
     /**
      * Built in CycSymbols.
@@ -37,22 +49,21 @@ public class CycSymbol {
     protected String symbolName;
 
     /**
-     * Construct a new <tt>CycSymbol</tt> object.
+     * Constructs a new <tt>CycSymbol</tt> object.
      *
      * @param symbolName a <tt>String</tt> name.
      */
     public static CycSymbol makeCycSymbol(String symbolName) {
-        if (cache.containsKey(symbolName))
-            return (CycSymbol) cache.get(symbolName);
-        else {
-            CycSymbol cycSymbol = new CycSymbol(symbolName);
-            cache.put(symbolName, cycSymbol);
-            return cycSymbol;
+        CycSymbol cycSymbol = (CycSymbol) cache.getElement(symbolName);
+        if (cycSymbol == null) {
+            cycSymbol = new CycSymbol(symbolName);
+            cache.addElement(symbolName, cycSymbol);
         }
+        return cycSymbol;
     }
 
     /**
-     * Construct a new <tt>CycSymbol</tt> object.  Non-public to enforce
+     * Constructs a new <tt>CycSymbol</tt> object.  Non-public to enforce
      * use of the object cache.
      *
      * @param symbolName the <tt>String</tt> name of the <tt>CycSymbol</tt>.
@@ -62,7 +73,7 @@ public class CycSymbol {
     }
 
     /**
-     * Return the string representation of the <tt>CycSymbol</tt>
+     * Returns the string representation of the <tt>CycSymbol</tt>
      *
      * @return the representation of the <tt>CycSymbol</tt> as a <tt>String</tt>
      */
@@ -71,7 +82,7 @@ public class CycSymbol {
     }
 
     /**
-     * Return <tt>true</tt> some object equals this <tt>CycSymbol</tt>
+     * Returns <tt>true</tt> some object equals this <tt>CycSymbol</tt>
      *
      * @param object the <tt>Object</tt> for equality comparison
      * @return equals <tt>boolean</tt> value indicating equality or non-equality.
@@ -83,10 +94,10 @@ public class CycSymbol {
     }
 
     /**
-     * Reset the <tt>CycSymbol</tt> cache.
+     * Resets the <tt>CycSymbol</tt> cache.
      */
     public static void resetCache() {
-        cache = new HashMap();
+        cache = new CacheLRU(500);
         nil = makeCycSymbol("NIL");
         quote = makeCycSymbol("QUOTE");
         cons = makeCycSymbol("CONS");
@@ -94,28 +105,26 @@ public class CycSymbol {
     }
 
     /**
-     * Retrieve the <tt>CycSymbol</tt> with <tt>symbolName</tt>,
+     * Retrieves the <tt>CycSymbol</tt> with <tt>symbolName</tt>,
      * returning null if not found in the cache.
      *
      * @return a <tt>CycSymbol</tt> if found in the cache, otherwise <tt>null</tt>
      */
     public static CycSymbol getCache(String symbolName) {
-        if (cache.containsKey(symbolName))
-            return (CycSymbol) cache.get(symbolName);
-        else
-            return null;
+        return (CycSymbol) cache.getElement(symbolName);
     }
 
     /**
-     * Remove the <tt>CycSymbol</tt> from the cache if it is contained within.
+     * Removes the <tt>CycSymbol</tt> from the cache if it is contained within.
      */
     public static void removeCache(CycSymbol cycSymbol) {
-        if (cache.containsKey(cycSymbol.symbolName))
-            cache.remove(cycSymbol.symbolName);
+        Object element = cache.getElement(cycSymbol.symbolName);
+        if (element != null)
+            cache.addElement(cycSymbol.symbolName, null);
     }
 
     /**
-     * Return the size of the <tt>Guid</tt> object cache.
+     * Returns the size of the <tt>Guid</tt> object cache.
      *
      * @return an <tt>int</tt> indicating the number of <tt>CycSymbol</tt> objects in the cache
      */

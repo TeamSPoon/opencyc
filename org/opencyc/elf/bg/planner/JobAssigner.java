@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.BufferedNodeComponent;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
 
@@ -48,7 +49,7 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class JobAssigner extends NodeComponent {
+public class JobAssigner extends BufferedNodeComponent {
   //// Constructors
 
   /**
@@ -155,7 +156,7 @@ public class JobAssigner extends NodeComponent {
      * the puttable channel to which messages are output to the higher
      * level executor, or null if this is the highest level
      */
-    protected final Puttable executorChannel;
+    protected Puttable executorChannel;
     
     /**
      * the parent node component
@@ -200,6 +201,17 @@ public class JobAssigner extends NodeComponent {
       catch (InterruptedException ex) {}
     }
      
+    /**
+     * Sets the puttable channel to which messages are output to the higher
+     * level executor
+     *
+     * @param executorChannel the puttable channel to which messages are output to the higher
+     * level executor, or null if this is the highest level
+     */
+    public void setExecutorChannel (Puttable executorChannel) {
+      this.executorChannel = executorChannel;
+    }
+    
     //TODO think about conversations and thread safety
     
     /**

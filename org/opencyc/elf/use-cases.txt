@@ -14,52 +14,62 @@ CBL (Cyc Behavior Language):
 
 ;; define the direct actions
 
-(define-action OutputTextToConsole
-  (:input-formal-parameters ((:name ?OUTPUT-TEXT :type String))
-   :output-formal-parameters ())
+(define-action OutputTextToConsoleAction
+  (:input-formal-parameters (:name ?OUTPUT-TEXT :type String)))
 
-(define-action CycApiRequest
-  (:input-formal-parameters ((:name ?CYC_API_REQUEST :type CycList))
-   :output-formal-parameters ((:name ?CYC_API_RESPONSE :type Object))))
+(define-action CycApiRequestAction
+  (:input-formal-parameters (:name ?CYC_API_REQUEST :type CycList)
+   :output-formal-parameters (:name ?CYC_API_RESPONSE :type Object)))
 
 ;; define the direct sensations
 
-(define-sensation ConsoleInput
+(define-sensation ConsoleInputSensation
   (:type String))
 
-(define-sensation CycApiResponse
+(define-sensation CycApiResponseSensation
   (:type Object))
 
 ;; define the direct sensors
 
-(define-direct-sensor ConsoleInput
+(define-direct-sensor ConsoleInputSensor
   (:sensation ConsoleInput))
 
 ;; define the direct actuator-sensors
 
-(define-direct-actuator-sensor CycApi
-  (:command-capabilities (CycApiRequest)
-   :resources ((:host-port "crapgame.cyc.com:3660"))
-   :sensation CycApiResponse))
+(define-direct-actuator-sensor CycApiActuatorSensor
+  (:command-capabilities (CycApiRequestAction)
+   :resources (:host-port "crapgame.cyc.com:3660")
+   :sensation CycApiResponseSensation))
 
 ;; define the direct actuators
 
-(define-direct-actuator ConsoleOutput
-  (:command-capabilities (ConsoleOutput)))
+(define-direct-actuator ConsoleOutputActuator
+  (:command-capabilities ConsoleOutputAction))
 
 ;; define the goals
 
-(define-goal PerceiveSensation
-  (:input-formal-parameters ((?PERCEIVED-SENSATION Object))
+(define-goal PerceiveSensationGoal
+  (:input-formal-parameters (:name ?PERCEIVED-SENSATION :type Object)
    :when (NotNull ?PERCEIVED-SENSATION)))
+
+;; define the jobs
+
+(define-job ConsolePromptedInputJob
+  (:direct-sensor ConsoleInputSensor
+   :direct-actuator ConsoleOutputActuator))
+
+;; define the job sets
+
+(define-job-set ConverseWithUserJobSet
+  (:job-set ConsolePromptedInputJob))
 
 ;; define the schedule sets
 
 (define-schedule-set ConverseWithUser
-  (:input-formal-parameters ((:name ?USER :type CycFort)))
-  (:output-formal-parameters ((:name ?USER-INPUT :type String)))
+  (:input-formal-parameters (:name ?USER :type CycFort))
+  (:output-formal-parameters (:name ?USER-INPUT :type String))
   (:schedules
-    (:predicate-expression null
+    (:default
      :commands
        (:perform ConsolePromptedInput :input-parameter-values (">"))
        (:achieve PerceiveSensation :input-parameter-values (?USER-INPUT)))
@@ -80,157 +90,6 @@ CBL (Cyc Behavior Language):
         :resources ((((CycAccess) ?CycAccess).getHostnamePort)))
        (:call (((CycAccess) ?CycAccess).close)))))
 
-    
-CBL Grammar
-
-<NAME> ::= symbol
-<TYPE> ::= symbol
-<EXPRESSION> ::= (True) |
-                 <OPERATOR-EXPRESSION>
-<OPERATOR-EXPRESSION> ::= (<OPERATOR> [<ARGUMENT>*])
-<OPERATOR> ::= <MinusOperator> |
-               <PlusOperator> |
-               
-
-TODO
-
-<ARGUMENT> ::= <LITERAL> |
-               <STATE-VARIABLE>
-               <OPERATOR-EXPRESSION>
-<LITERAL> ::= number | 
-              string | 
-              list | 
-              cyc object | 
-              dictionary 
-<STATE-VARIABLE> ::= ?symbol
-<SYMBOL-HOLDER> ::= symbol | <STATE-VARIABLE>
-<TYPE-HOLDER> ::= symbol | <STATE-VARIABLE>
-<PARAMETER> ::= (:name <SYMBOL-HOLDER> :type <SYMBOL-HOLDER>)
-<KEYWORD> ::= :symbol
-<RESOURCE-SPECIFICATION> ::= (<KEYWORD> <LITERAL>)
-<RESOURCE-REQUIREMENT> ::= (<KEYWORD> <ARGUMENT>)
-<RELEVANCY-RELATIONSHIP> ::= <NAME>
-
-;; direct action signature definition
-
-<DIRECT-ACTION-NAME> ::= <NAME>
-
-(define-action <DIRECT-ACTION-NAME>
-  (:input-formal-parameters <PARAMETER>*)
-   :output-formal-parameters <PARAMETER>*)
-
-;; sensation signature definition
-
-<SENSATION-NAME> ::= <NAME>
-
-(define-sensation <SENSATION-NAME>
-  (:type <TYPE>))
-
-;; direct sensor signature definition
-
-<DIRECT-SENSOR-NAME> ::= <NAME>
-
-(define-direct-sensor <DIRECT-SENSOR-NAME>
-  (:sensation <SENSATION-NAME>*))
-
-;; direct actuator-sensor signature definition
-
-<DIRECT-ACTUATOR-SENSOR-NAME> ::= <NAME>
-<INDIRECT-ACTION-NAME> ::= <NAME>
-<ACTION-NAME> ::= <DIRECT-ACTION-NAME> |
-                  <INDIRECT-ACTION-NAME>
-
-(define-direct-actuator-sensor <DIRECT-ACTUATOR-SENSOR-NAME>
-  (:command-capabilities <ACTION-NAME>*
-   :resources <RESOURCE-SPECIFICATION>*
-   :sensation <SENSATION-NAME>*))
-
-;; direct actuator signature definition
-
-<DIRECT-ACTUATOR-NAME> ::= <NAME>
-
-(define-direct-actuator <DIRECT-ACTUATOR-NAME>
-  (:command-capabilities <ACTION-NAME>*))
-
-;; goal definition
-
-<GOAL-NAME> ::= <NAME>
-
-(define-goal <GOAL-NAME>
-  (:input-formal-parameters <PARAMETER>*)
-   :when <EXPRESSION>))
-
-;; job definition
-
-<JOB-NAME> ::= <NAME>
-
-(define-job <JOB-NAME>
-  ([:resources <RESOURCE-SPECIFICATION>*]
-   [:direct-sensor <DIRECT-SENSOR-NAME>]
-   [:direct-actuator <DIRECT-ACTUATOR-NAME>]
-   [:direct-actuator-sensor <DIRECT-ACTUATOR-SENSOR-NAME>))
-
-(define-job-set <COMMAND-NAME>
-  (:job-set <JOB>*))
-
-;; schedule set definition
-
-<SCHEDULE-SET-NAME> ::= <JOB-NAME>
-
-<SCHEDULE-PREDICATE-SPECIFICATION> ::= :default |
-                                       :when <EXPRESSION>
-
-(define-schedule-set <SCHEDULE-SET-NAME>
-  (:input-formal-parameters <PARAMETER>*)
-  (:output-formal-parameters <PARAMETER>*)
-  (:schedules
-    (<SCHEDULE-PREDICATE-SPECIFICATION>
-     :commands <COMMAND-SPECIFICATION>*
-     :perceptions <PERCEPTION>*)))
-
-<PERCEPTION> ::= (:achieve <SENSATION-NAME> :input-parameter-values <PARAMETER>*)
-<COMMAND> ::= <ACTION-COMMAND> |
-              <ALTERNATIVE-CHOICE-COMMAND> |
-              <ASSIGN-COMMAND> |
-              <CALL-COMMAND> |
-              <CONDITIONAL-COMMAND> |
-              <ITERATED-COMMAND> |
-              <LEARNING-EPISODE-COMMAND> |
-              <MACRO-COMMAND> |
-              <ORDERING-CHOICE-COMMAND> |
-              <PARALLEL-COMMAND> |
-              <RELEVANT-OBJECTS-COMMAND> |
-              <RELEVANT-OBJECTS-LEARNING-COMMAND> |
-              <SENSE-COMMAND> |
-              <SUBSET-CHOICE-COMMAND> 
-
-<ACTION-COMMAND> ::= 
-  (:perform <ACTION-NAME> [:input-parameter-values <ARGUMENT>*]
-        [:output-state-variables <ARGUMENT>*]
-        [:required-resources <RESOURCE-REQUIREMENT>*])
-<ASSIGN-COMMAND> ::= (:assign <EXPRESSION> :to <STATE-VARIABLE>)
-<CALL-COMMAND> ::= (:call (((<TYPE-HOLDER>) <SYMBOL-HOLDER>).<SYMBOL-HOLDER> <ARGUMENTS>*))
-<CONDITIONAL-COMMAND> ::= (:when <EXPRESSION> <COMMAND>*)
-<ITERATED-COMMAND> ::= (:while <EXPRESSION> <COMMAND>*)
-<MACRO-COMMAND> ::= (:expand <MACRO-NAME> <ARGUMENTS>*)
-<PARALLEL-COMMAND> ::= (:parallel <COMMAND>*)
-<SENSE-COMMAND> ::= (:sense <SENSATION> :into <STATE-VARIABLE>)
-
-<REWARD-SPECIFICATION> ::= (:when <EXPRESSION> :reward <EXPRESSION>)
-<LEARNING-EPISODE-COMMAND> ::= (:learn-while-doing <COMMAND>* :rewards <REWARD-SPECIFICATION>*)
-<ALTERNATIVE-CHOICE-COMMAND> ::= (:choose-among <COMMAND>* :given <STATE-VARIABLE>*)
-<SUBSET-CHOICE-COMMAND> ::= (:choose-one-or-more <COMMAND>* :given <STATE-VARIABLE>*)
-<ORDERING-CHOICE-COMMAND> ::= (:choose-order <COMMAND>* :given <STATE-VARIABLE>*)
-
-<RELEVANT-OBJECTS-COMMAND> ::= 
-  (:get-objects-into <STATE-VARIABLE> :relevant-by <RELEVANCY-RELATIONSHIP> :given <STATE-VARIABLE>*)
-<RELEVANT-OBJECTS-LEARNING-COMMAND> ::= 
-  (:training-objects <ARGUMENTS>* :relevant-for <RELEVANCY-RELATIONSHIP> :given <STATE-VARIABLE>*)
-
-
-; macro definition
-
-(define-macro-command <MACRO-NAME> :input-parameters <ARGUMENTS>* <COMMAND>*)
 
 
 

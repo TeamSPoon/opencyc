@@ -50,17 +50,22 @@ public class State {
   /**
    * state variable for the list of parameter names
    */
-  public static final String PARAMETER_NAMES = "parameter names";
+  public static final String PARAMETER_NAMES = "procedure parameter names";
   
   /**
    * state variable for the list of parameter types
    */
-  public static final String PARAMETER_TYPES = "parameter types";
+  public static final String PARAMETER_TYPES = "procedure parameter types";
   
   /**
    * state variable for the list of parameter values
    */
-  public static final String PARAMETER_VALUES = "parameter values";
+  public static final String PARAMETER_VALUES = "procedure parameter values";
+  
+  /**
+   * state variable for the procedure output value
+   */
+  public static final String PROCEDURE_OUTPUT_VALUE = "procedure output value";
   
   /**
    * Returns true if the given object equals this state.
@@ -216,6 +221,10 @@ public class State {
 
   //// Protected Area
 
+  //// Private Area
+  
+  //// Internal Rep
+  
   /**
    * the state represented as a dictionary of concepts and a dictionary of
    * stateVariable/values.
@@ -224,4 +233,8 @@ public class State {
 
   /** the state context */
   protected Object context;
+
+  //// Main
+  
+
 }

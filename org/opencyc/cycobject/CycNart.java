@@ -327,10 +327,12 @@ public class CycNart extends CycFort implements Comparable {
                cyclifiedObject = ((CycObject) object).cyclify();
             } else if (object instanceof CycList) {
                cyclifiedObject = ((CycList) object).cyclify();
+            } else if (object instanceof String) {
+               cyclifiedObject = "\"" + object + "\"";
             } else {
                 cyclifiedObject = object.toString();
             }
-            /*  
+            /*
             if (object instanceof CycConstant)
                 cyclifiedObject = ((CycConstant) object).cyclify();
             else if (object instanceof CycNart)

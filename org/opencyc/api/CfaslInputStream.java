@@ -143,7 +143,7 @@ public class CfaslInputStream extends BufferedInputStream {
         cfaslOpcodeDescriptions.put(new Integer(23), "CFASL_P_BIGNUM");
         cfaslOpcodeDescriptions.put(new Integer(24), "CFASL_N_BIGNUM");
         cfaslOpcodeDescriptions.put(new Integer(25), "CFASL_GUID");
-    cfaslOpcodeDescriptions.put(new Integer(26), "CFASL_BYTE_VECTOR");
+        cfaslOpcodeDescriptions.put(new Integer(26), "CFASL_BYTE_VECTOR");
         cfaslOpcodeDescriptions.put(new Integer(30), "CFASL_CONSTANT");
         cfaslOpcodeDescriptions.put(new Integer(31), "CFASL_NART");
         cfaslOpcodeDescriptions.put(new Integer(33), "CFASL_ASSERTION");

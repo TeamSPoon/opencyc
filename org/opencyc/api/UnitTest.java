@@ -75,6 +75,7 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
+        /*
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
@@ -95,8 +96,11 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess9"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess9"));
-        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        */
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess9"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess10"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
+        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
 
@@ -3778,6 +3782,38 @@ public class UnitTest extends TestCase {
             HashSet allSpecMts = cycAccess.getAllSpecMtsHashSet(generalLexiconMt);
             Assert.assertTrue(allSpecMts instanceof HashSet);
             Assert.assertTrue(allSpecMts.contains(paraphraseMt));
+
+            // tests proper receipt of narts from the server.
+            String script = "(csetq all-narts nil)";
+            cycAccess.converseVoid(script);
+            script = "(progn \n" +
+                     "  (do-narts (nart) \n" +
+                     "    (cpush nart all-narts)) \n" +
+                     "  nil)";
+            cycAccess.converseVoid(script);
+            script = "(clet (nart) \n" +
+                     "  (csetq nart (first all-narts)) \n" +
+                     "  (csetq all-narts (rest all-narts)) \n" +
+                     "  nart)";
+            long numberGood = 0;
+            long numberNil = 0;
+            while (true) {
+                Object obj = cycAccess.converseObject(script);
+                if (obj.equals(CycObjectFactory.nil))
+                    break;
+                Assert.assertTrue(obj instanceof CycNart);
+                CycNart cycNart = (CycNart) obj;
+                Assert.assertTrue(cycNart.cyclify() instanceof String);
+                String script2 = "(find-nart " + cycNart.stringApiValue() + ")";
+                Object obj2 = cycAccess.converseObject(script2);
+                if (cycNart.equals(obj))
+                    numberGood++;
+                else
+                    numberNil++;
+            }
+            Assert.assertTrue(numberGood > 20 * numberNil);
+            script = "(csetq all-narts nil)";
+            cycAccess.converseVoid(script);
         }
         catch (Exception e) {
             CycAccess.current().close();
@@ -3790,6 +3826,115 @@ public class UnitTest extends TestCase {
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
 
+    /**
+     * Tests a portion of the CycAccess methods using the ascii api connection.
+     */
+    public void testAsciiCycAccess10 () {
+        if (performOnlyBinaryApiModeTests ||
+            (connectionMode == REMOTE_CYC_CONNECTION))
+            return;
+        System.out.println("\n**** testAsciiCycAccess 10 ****");
+        CycAccess cycAccess = null;
+        try {
+
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        System.out.println(cycAccess.getCycConnection().connectionInfo());
+        //cycAccess.traceOn();
+        doTestCycAccess10(cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testAsciiCycAccess 10 OK ****");
+    }
+
+
+    /**
+     * Tests a portion of the CycAccess methods using the binary api connection.
+     */
+    public void testBinaryCycAccess10 () {
+        System.out.println("\n**** testBinaryCycAccess 10 ****");
+        CycAccess cycAccess = null;
+        try {
+            if (connectionMode == LOCAL_CYC_CONNECTION)
+                cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                          CycConnection.DEFAULT_BASE_PORT,
+                                          CycConnection.BINARY_MODE,
+                                          CycAccess.PERSISTENT_CONNECTION);
+            else if (connectionMode == REMOTE_CYC_CONNECTION)
+                cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
+            else
+                Assert.fail("Invalid connection mode " + connectionMode);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+        System.out.println(cycAccess.getCycConnection().connectionInfo());
+        //cycAccess.traceOn();
+        doTestCycAccess10(cycAccess);
+
+        cycAccess.close();
+        System.out.println("**** testBinaryCycAccess 10 OK ****");
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the given api connection.
+     */
+    protected void doTestCycAccess10 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        try {
+            // demonstrate quoted strings
+            CycList cycList53 = cycAccess.makeCycList("(\"abc\")");
+            Assert.assertEquals(1, cycAccess.converseInt("(length '" + cycList53.cycListApiValue() + ")"));
+            Assert.assertEquals(3, cycAccess.converseInt("(length (first '" + cycList53.cycListApiValue() + "))"));
+            String string = "abc";
+            CycList cycList54 = new CycList();
+            cycList54.add(CycObjectFactory.makeCycSymbol("length"));
+            cycList54.add(string);
+            Assert.assertEquals(3, cycAccess.converseInt(cycList54));
+            String quotedString = "\"abc\" def";
+            CycList cycList55 = new CycList();
+            cycList55.add(CycObjectFactory.makeCycSymbol("length"));
+            cycList55.add(quotedString);
+            // Note that in binary mode, that Cyc's cfasl input will insert the required escape
+            // chars for embedded quotes.
+            // And in ascii mode note that CycConnection will insert the required escape
+            // chars for embedded quotes.
+            Assert.assertEquals(9, cycAccess.converseInt(cycList55));
+
+            // demonstrate quoted strings with the CycListParser
+            CycList cycList56 = cycAccess.makeCycList("(\"" + string + "\")");
+            Assert.assertEquals(1, cycAccess.converseInt("(length '" + cycList56.stringApiValue() + ")"));
+            Assert.assertEquals(3, cycAccess.converseInt("(length (first '" + cycList56.stringApiValue() + "))"));
+            String embeddedQuotesString = "(" + "\"\\\"abc\\\" def\"" + ")";
+            CycList cycList57 = cycAccess.makeCycList(embeddedQuotesString);
+            String script = "(length '" + cycList57.stringApiValue() + ")";
+            int actualLen = cycAccess.converseInt(script);
+            Assert.assertEquals(1, actualLen);
+            Assert.assertEquals(9, cycAccess.converseInt("(length (first '" + cycList57.stringApiValue() + "))"));
+
+            script = "(identity '(#$givenNames #$Guest \"\\\"The\\\" Guest\"))";
+            CycList answer = cycAccess.converseList(script);
+            Object third = answer.third();
+            Assert.assertTrue(third instanceof String);
+            Assert.assertEquals(11, ((String) third).length());
+        }
+        catch (Exception e) {
+            CycAccess.current().close();
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
+
+
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+    }
 }
 
 

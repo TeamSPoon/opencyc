@@ -385,8 +385,7 @@ public class ExportDaml {
         createCycGuidNode();
         cycAccess =
             new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                          3620,
-                          //CycConnection.DEFAULT_BASE_PORT
+                          CycConnection.DEFAULT_BASE_PORT,
                           CycConnection.DEFAULT_COMMUNICATION_MODE,
                           CycAccess.DEFAULT_CONNECTION);
         if (exportCommand == ExportDaml.EXPORT_ENTIRE_KB) {

@@ -300,6 +300,7 @@ public class ExportHtml {
                 exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
                 exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
                 exportHtml.upwardClosureKbSubsetCollectionGuids.add(eeldSharedOntologyCoreConstantGuid);
+                exportHtml.addAllCategories();
             }
             else if (choice.equals("eeld")) {
                 exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
@@ -1624,7 +1625,7 @@ public class ExportHtml {
      */
     protected void addAllCategories ()
         throws CycApiException, IOException , UnknownHostException {
-        addAllHorusRef();
+        addAllIETRef();
         addAllSyracuseRef();
         addAllSraRef();
         addAllVeridianRef();
@@ -1650,16 +1651,16 @@ public class ExportHtml {
 
 
     /**
-     * Categorizes all ontology constants directly referenced in the Horus Ontology.
+     * Categorizes all ontology constants directly referenced in the IET Mapping.
      */
-    protected void addAllHorusRef ()
+    protected void addAllIETRef ()
         throws CycApiException, IOException , UnknownHostException {
         Category category = new Category();
         categories.add(category);
-        category.title = "Constants corresponding to terms in the Horus ontology";
-        category.outputPath = "all-horus-ref.html";
+        category.title = "IET Synthetic Data set constants";
+        category.outputPath = "all-iet-ref.html";
         category.queryString =
-            " (#$isa ?TERM #$HorusConstant)\n";
+            "(#$isa ?TERM #$EELDSyntheticDataConstant)\n";
         category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 

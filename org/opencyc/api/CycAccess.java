@@ -582,11 +582,19 @@ public class CycAccess {
      */
     public Integer getConstantId (String constantName)
         throws IOException, UnknownHostException, CycApiException {
-        String command = "(boolean (find-constant \"" + constantName + "\"))";
+        String command = "(cand (boolean (find-constant \"" + constantName + "\"))\n" +
+                         "      (valid-constant (find-constant \"" + constantName + "\")))";
         boolean constantExists = converseBoolean(command);
         if (constantExists) {
             command = "(constant-internal-id (find-constant \"" + constantName + "\"))";
-            return new Integer(converseInt(command));
+            try {
+                return new Integer(converseInt(command));
+            }
+            catch (NumberFormatException e) {
+                e.printStackTrace();
+                throw new RuntimeException("NumberFormatException\n" + e.getMessage() +
+                                           "\nConstantName: " + constantName);
+            }
         }
         else
             return null;

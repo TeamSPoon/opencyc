@@ -470,13 +470,17 @@ public class CycConnection implements CycConnectionInterface {
     public synchronized Object[] converse (Object message, Timer timeout)
         throws IOException, TimeOutException, CycApiException {
         if (communicationMode == CycConnection.ASCII_MODE) {
-            String messageString;
-            if (message instanceof String)
-                messageString = (String) message;
+            CycList messageCycList;
+            if (message instanceof String) {
+                if (cycAccess == null)
+                    throw new RuntimeException("CycAccess is required to process commands in string form");
+                messageCycList = cycAccess.makeCycList((String) message);
+            }
             else if (message instanceof CycList)
-                messageString = ((CycList) message).cyclify();
+                messageCycList = (CycList) message;
             else
                 throw new CycApiException("Invalid class for message " + message);
+            String messageString = messageCycList.cyclifyWithEscapeChars();
             return  converseAscii(messageString, timeout);
         }
         else {

@@ -410,6 +410,13 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(object instanceof CycNart);
             Assert.assertEquals(cycNart5, (CycNart) object);
 
+            /*
+            CycAssertion cycAssertion = cycAccess.getAssertionById(new Integer(968857));
+            CycNart complexNart = (CycNart) cycAssertion.getFormula().second();
+            System.out.println(complexNart.toString());
+            System.out.println(complexNart.cyclify());
+            */
+
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -935,13 +942,6 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-        try {
-            cycAccess.close();
-        }
-        catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
-
         // addQuoted
         CycList cycList51 = new CycList();
         cycList51.add(new Integer(1));
@@ -954,6 +954,13 @@ public class UnitTest extends TestCase {
         Assert.assertNull(cycList52.first());
         Assert.assertEquals("(null)", cycList52.toString());
 
+        try {
+            cycAccess.close();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
         System.out.println("*** testCycList OK ***");
     }
 
@@ -963,6 +970,7 @@ public class UnitTest extends TestCase {
     public void testCycListVisitor() {
         System.out.println("\n*** testCycListVisitor ***");
 
+        CycListParser.verbosity = 0;
         CycAccess cycAccess = null;
         try {
             cycAccess = new CycAccess();

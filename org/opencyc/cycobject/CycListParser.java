@@ -42,6 +42,7 @@ public class CycListParser  {
     private int parenLevel = 0;
     private StackWithPointer readStack = new StackWithPointer();
     private StackWithPointer quoteStack = new StackWithPointer();
+    private String currentString = "";
 
     /**
      * Cyc api support.
@@ -73,6 +74,7 @@ public class CycListParser  {
      * @return the corresponding <tt>CycList</tt>
      */
     public CycList read (String string) throws CycApiException {
+        currentString = string;
         StringReader stringReader = new StringReader(string);
         StreamTokenizer st = new StreamTokenizer(stringReader);
         st.ordinaryChar('(');
@@ -181,7 +183,9 @@ public class CycListParser  {
                                             "  st: " +
                                             st.toString() +
                                             "  tok: " +
-                                            tok);
+                                            tok +
+                                            "\nreadStack: " + readStack.toString() +
+                                            "\nstring: " + currentString);
         }
         catch ( IOException ioe ) {
             throw new RuntimeException(ioe.getMessage());
@@ -444,14 +448,14 @@ public class CycListParser  {
             if (index == -1)
                 break;
 
-            line1 = new String (string.substring( 0, index ));
-            line2 = new String ( string.substring( index + 2 ));
+            line1 = new String (string.substring( 0, index));
+            line2 = new String ( string.substring( index + 2));
             string = line1 + "\r\n" + line2;
         }
 
         if (verbosity > 5)
-            System.out.println(st.sval );
-        if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
+            System.out.println(st.sval);
+        if ((parenLevel > 0 ) && (readStack.sp != parenLevel))
             // Within a list.
             readStack.push(consMarkerSymbol );
 

@@ -6,6 +6,7 @@ import java.lang.reflect.*;
 import org.opencyc.util.*;
 import org.opencyc.xml.*;
 import org.opencyc.api.*;
+import ViolinStrings.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc list, typically used
@@ -50,7 +51,6 @@ public class CycList extends ArrayList {
 
     private boolean isProperList = true;
     private Object dottedElement;
-
     /**
      * Constructs a new empty <tt>CycList</tt> object.
      */
@@ -580,6 +580,55 @@ public class CycList extends ArrayList {
 
     /**
      * Returns a cyclified string representation of the OpenCyc <tt>CycList</tt>.
+     * Embedded constants are prefixed with ""#$".  Embedded quote chars in strings
+     * are escaped.
+     *
+     * @return a <tt>String</tt> representation in cyclified form.
+     *
+     */
+  public String cyclifyWithEscapeChars() {
+        StringBuffer result = new StringBuffer("(");
+        String cyclifiedObject = null;
+        for (int i = 0; i < this.size(); i++) {
+            Object object = this.get(i);
+            if (object == null)
+                throw new RuntimeException("Invalid null element after " + result);
+            if (object instanceof CycConstant)
+                cyclifiedObject = ((CycConstant) object).cyclify();
+            else if (object instanceof CycNart)
+                cyclifiedObject = ((CycNart) object).cyclify();
+            else if (object instanceof CycVariable)
+                cyclifiedObject = ((CycVariable) object).cyclify();
+            else if (object instanceof String) {
+                String stringObject = escapeQuoteChars((String) object);
+                cyclifiedObject = "\"" + stringObject + "\"";
+            }
+            else if (object instanceof CycList)
+                cyclifiedObject = ((CycList) object).cyclifyWithEscapeChars();
+            else
+                cyclifiedObject = object.toString();
+            if (i > 0)
+                result.append(" ");
+            result.append(cyclifiedObject);
+        }
+        if (! isProperList) {
+            result.append(" . ");
+            if (dottedElement instanceof CycConstant)
+                cyclifiedObject = ((CycConstant) dottedElement).cyclify();
+            else if (dottedElement instanceof CycNart)
+                cyclifiedObject = ((CycNart) dottedElement).cyclify();
+            else if (dottedElement instanceof CycList)
+                cyclifiedObject = ((CycList) dottedElement).cyclifyWithEscapeChars();
+            else
+                cyclifiedObject = dottedElement.toString();
+            result.append(cyclifiedObject);
+        }
+        result.append(")");
+        return result.toString();
+  }
+
+    /**
+     * Returns a cyclified string representation of the OpenCyc <tt>CycList</tt>.
      * Embedded constants are prefixed with ""#$".
      *
      * @return a <tt>String</tt> representation in cyclified form.
@@ -599,7 +648,7 @@ public class CycList extends ArrayList {
             else if (object instanceof CycVariable)
                 cyclifiedObject = ((CycVariable) object).cyclify();
             else if (object instanceof String)
-                cyclifiedObject = "\"" + object + "\"";
+                cyclifiedObject = "\"" + (String) object + "\"";
             else if (object instanceof CycList)
                 cyclifiedObject = ((CycList) object).cyclify();
             else
@@ -625,12 +674,22 @@ public class CycList extends ArrayList {
     }
 
     /**
+     * Inserts an escape character before each quote character in the given string.
+     *
+     * @param string the given string
+     * @return the string with an escape character before each quote character
+     */
+    public String escapeQuoteChars(String string) {
+        return Strings.change(string, "\"", "\\\"");
+    }
+
+    /**
      * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
      *
      * @return this object in a form suitable for use as an <tt>String</tt> api expression value
      */
     public String stringApiValue() {
-        return cyclify();
+        return this.cyclifyWithEscapeChars();
     }
 
     /**

@@ -33,6 +33,7 @@ import org.opencyc.elf.bg.state.State;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Resource {
+
   //// Constructors
 
   /**

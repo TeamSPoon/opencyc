@@ -1,6 +1,10 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.Status;
+
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
 //// External Imports
 
 /**
@@ -41,6 +45,65 @@ public class Scheduler {
 
   //// Public Area
 
+  /**
+   * Receives the task command for scheduling.
+   *
+   * @param taskCommand the task command
+   */
+  public void receiveScheduleJob (TaskCommand taskCommand) {
+    //TODO
+    // receive via channel
+  }
+  
+  /**
+   * Receives the status from the plan selector given the task command and
+   * schedule
+   *
+   * @param taskCommand the task command
+   * @param schedule the schedule
+   * @param the plan selector status
+   */
+  public void receivePlanSelectorStatus (TaskCommand taskCommand,
+                                         Schedule schedule,
+                                         Status status) {
+    //TODO
+    // receive via channel
+  }
+  
+  /**
+   * Receives the status from the executor given the task command and
+   * schedule
+   *
+   * @param taskCommand the task command
+   * @param schedule the schedule
+   * @param the executor status
+   */
+  public void receiveExecutorStatus (TaskCommand taskCommand,
+                                     Schedule schedule,
+                                     Status status) {
+    //TODO
+    // receive via channel
+  }
+  
+  /**
+   * Receives the status from value judgement given the task command and
+   * schedule
+   *
+   * @param taskCommand the task command
+   * @param schedule the schedule
+   * @param the value judgement status
+   */
+  public void receiveValueJudgementStatus (TaskCommand taskCommand,
+                                           Schedule schedule,
+                                           Status status) {
+    //TODO
+    // receive via channel
+  }
+
+  
+  // TODO
+  
+  
   /**
    * Returns true if the given object equals this object.
    * 

@@ -76,7 +76,7 @@ public class ELFFactory {
    * 
    * @return the ELF factory singleton instance
    */
-  public ELFFactory getInstance () {
+  public static ELFFactory getInstance () {
     return elfFactory;
   }
   

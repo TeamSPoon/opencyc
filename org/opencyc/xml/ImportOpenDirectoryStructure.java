@@ -74,25 +74,6 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
      */
     public ImportOpenDirectoryStructure()
         throws IOException, UnknownHostException, CycApiException {
-        String localHostName = InetAddress.getLocalHost().getHostName();
-        Log.current.println("Connecting to Cyc server from " + localHostName);
-        if (localHostName.equals("crapgame.cyc.com")) {
-            cycAccess = new CycAccess("localhost",
-                                      3600,
-                                      CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                      true);
-        }
-        else if (localHostName.equals("thinker")) {
-            cycAccess = new CycAccess("TURING",
-                                      3600,
-                                      CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                      true);
-        }
-        else {
-            cycAccess = new CycAccess();
-        }
-
-        initializeDamlVocabulary();
     }
 
     /**
@@ -105,7 +86,11 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
         Log.current.println("Import DAML starting");
         ImportOpenDirectoryStructure importOpenDirectoryStructure;
         try {
+
             importOpenDirectoryStructure = new ImportOpenDirectoryStructure();
+            importOpenDirectoryStructure.initializeOntologyNicknames();
+            importOpenDirectoryStructure.gatherOdpTitles();
+            importOpenDirectoryStructure.initializeDamlVocabulary();
             importOpenDirectoryStructure.importDaml();
         }
         catch (Exception e) {
@@ -115,13 +100,21 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
     }
 
     /**
+     * Gathers the ODP topic titles.
+     */
+    protected void gatherOdpTitles () throws IOException {
+        GatherOpenDirectoryTitles gatherOpenDirectoryTitles =
+            new GatherOpenDirectoryTitles(ontologyNicknames);
+        gatherOpenDirectoryTitles.gatherTitles("file:///H:/OpenCyc/open-directory-structure.daml");
+    }
+
+    /**
      * Import the ODP DAML ontologies into Cyc.
      */
     protected void importDaml ()
         throws IOException, UnknownHostException, CycApiException {
 
         initializeDocumentsToImport();
-        initializeOntologyNicknames();
         initializeMappedTerms();
         //importDaml.actuallyImport = false;
         for (int i = 0; i < damlDocInfos.size(); i++) {
@@ -519,6 +512,23 @@ public class ImportOpenDirectoryStructure extends ImportDaml {
      */
     protected void initializeDamlVocabulary ()
         throws IOException, UnknownHostException, CycApiException {
+        String localHostName = InetAddress.getLocalHost().getHostName();
+        Log.current.println("Connecting to Cyc server from " + localHostName);
+        if (localHostName.equals("crapgame.cyc.com")) {
+            cycAccess = new CycAccess("localhost",
+                                      3600,
+                                      CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                      true);
+        }
+        else if (localHostName.equals("thinker")) {
+            cycAccess = new CycAccess("TURING",
+                                      3600,
+                                      CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                      true);
+        }
+        else {
+            cycAccess = new CycAccess();
+        }
         Log.current.println("Creating DAML vocabulary");
         if (cycAccess.isOpenCyc()) {
             cycAccess.setCyclist("CycAdministrator");

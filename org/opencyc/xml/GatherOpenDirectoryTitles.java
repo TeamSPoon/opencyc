@@ -50,7 +50,7 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
      * The default verbosity of this application.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    public static final int DEFAULT_VERBOSITY = 2;
 
     /**
      * Sets verbosity of this application.  0 --> quiet ... 9 -> maximum
@@ -62,12 +62,6 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
      * Another RDF Parser instance.
      */
     protected ARP arp;
-
-    /**
-     * Cyc terms which have semantic counterparts in DAML.
-     * DAML term --> Cyc term
-     */
-    protected static HashMap equivalentDamlCycTerms;
 
     /**
      * Ontology library nicknames, which become namespace identifiers
@@ -98,13 +92,9 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
      * to the Cyc server and provides Cyc API services
      * @param ontologyNicknames the dictionary associating each ontology uri with
      * the nickname used for the Cyc namespace qualifier
-     * @param kbSubsetCollectionName the name of the Cyc KbSubsetCollection
-     * which identifies each of the imported terms
      */
-    public GatherOpenDirectoryTitles(HashMap ontologyNicknames,
-                                     HashMap equivalentDamlCycTerms) {
+    public GatherOpenDirectoryTitles(HashMap ontologyNicknames) {
         this.ontologyNicknames = ontologyNicknames;
-        this.equivalentDamlCycTerms = equivalentDamlCycTerms;
         arp = new ARP();
         arp.setStatementHandler(this);
     }
@@ -116,7 +106,7 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
      * @param importMtName the microtheory into which DAML content is asserted
      */
     protected void gatherTitles (String damlOntologyDefiningURLString)
-        throws IOException, CycApiException {
+        throws IOException {
         this.damlOntologyDefiningURLString = damlOntologyDefiningURLString;
         if (verbosity > 0)
             Log.current.println("\nGathering titles from " + damlOntologyDefiningURLString);
@@ -170,12 +160,14 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
             DamlTermInfo subjectTermInfo = resource(subject, null);
             DamlTermInfo predicateTermInfo = resource(predicate, null);
             DamlTermInfo objectTermInfo = resource(object, predicateTermInfo);
+            /*
             displayTriple(subjectTermInfo,
                           predicateTermInfo,
                           objectTermInfo);
-            importTriple(subjectTermInfo,
-                         predicateTermInfo,
-                         objectTermInfo);
+            */
+            examineTriple(subjectTermInfo,
+                          predicateTermInfo,
+                          objectTermInfo);
         }
         catch (Exception e) {
             Log.current.errorPrintln(e.getMessage());
@@ -196,11 +188,12 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
                 DamlTermInfo subjectTermInfo = resource(subject, null);
                 DamlTermInfo predicateTermInfo = resource(predicate, null);
                 DamlTermInfo literalTermInfo = literal(literal);
+                /*
                 displayTriple(subjectTermInfo,
                               predicateTermInfo,
                               literalTermInfo);
-
-                importTriple(subjectTermInfo,
+                */
+                examineTriple(subjectTermInfo,
                              predicateTermInfo,
                              literalTermInfo);
             }
@@ -212,36 +205,23 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
     }
 
     /**
-     * Imports the RDF triple.
+     * Examines the RDF triple and gathers the topic titles.
      *
      * @param subjectTermInfo the subject DamlTermInfo object
      * @param predicateTermInfo the predicate DamlTermInfo object
      * @param objLitTermInfo the object or literal DamlTermInfo object
      */
-    protected void importTriple (DamlTermInfo subjectTermInfo,
+    protected void examineTriple (DamlTermInfo subjectTermInfo,
                                   DamlTermInfo predicateTermInfo,
                                   DamlTermInfo objLitTermInfo)
         throws IOException, UnknownHostException, CycApiException {
         if (predicateTermInfo.isURI)
             predicateTermInfo.coerceToNamespace();
         String damlPredicate = predicateTermInfo.toString();
-        if (! subjectTermInfo.hasEquivalentCycTerm()) {
-            if (damlPredicate.equals("isa")) {
-
-
-
-
-                return;
-            }
-            if (damlPredicate.equals("nameString")) {
-
-
-
-
-
-
-                return;
-            }
+        if (damlPredicate.equals("rdfs:label")) {
+            String dmozId = subjectTermInfo.toString();
+            String topic = objLitTermInfo.toOriginalString();
+            Log.current.println(dmozId + " --> " + topic);
         }
     }
 
@@ -326,11 +306,6 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
         damlTermInfo.ontologyNickname = ontologyNickname;
         String constantName = ontologyNickname + ":" + localName;
         damlTermInfo.constantName = constantName;
-        if (equivalentDamlCycTerms.containsKey(constantName))
-            damlTermInfo.equivalentDamlCycTerm =
-                (String) equivalentDamlCycTerms.get(constantName);
-        else if (ontologyNickname.equals("xsd"))
-            Log.current.println("\n*** unhandled primitive datatype: " + constantName + "\n");
         return damlTermInfo;
     }
 
@@ -392,8 +367,9 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
         String key = nameSpace.substring(0, len);
         String nickname = (String) ontologyNicknames.get(key);
         if (nickname == null) {
-            Log.current.println("\n*** Ontology nickname not found for " + key +
-                                "\nResource " + resource.toString());
+            if (verbosity > 2)
+                Log.current.println("\n*** Ontology nickname not found for " + key +
+                                    "\nResource " + resource.toString());
             nickname = "unknown";
         }
         return nickname;

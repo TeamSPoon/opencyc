@@ -75,16 +75,13 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-/*
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
-        */
         testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
-        /*
         testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
@@ -103,7 +100,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess11"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
-*/
+
         return testSuite;
     }
 

@@ -623,6 +623,8 @@ public class CycAccess {
             thing = getKnownConstantByGuid("bd5880f4-9c29-11b1-9dad-c379636f7270");
         if (inferencePSC == null)
             inferencePSC = getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        if (universalVocabularyMt == null)
+            universalVocabularyMt = getKnownConstantByGuid("dff4a041-4da2-11d6-82c0-0002b34c7c9f");
     }
 
     /**
@@ -4168,6 +4170,43 @@ public class CycAccess {
 
     /**
      * Assert that the genlsCollection is a genls of specCollection,
+     * in the UniversalVocabularyMt
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param specCollectionName the name of the more specialized collection
+     * @param genlsCollectionName the name of the more generalized collection
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGenls (String specCollectionName,
+                             String genlsCollectionName)
+        throws IOException, UnknownHostException, CycApiException {
+        assertGaf(universalVocabularyMt,
+                  genls,
+                  getKnownConstantByName(specCollectionName),
+                  getKnownConstantByName(genlsCollectionName));
+    }
+
+    /**
+     * Assert that the genlsCollection is a genls of specCollection,
+     * in the UniveralVocabularyMt.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param specCollection the more specialized collection
+     * @param genlsCollection the more generalized collection
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGenls (CycFort specCollection,
+                             CycFort genlsCollection)
+        throws IOException, UnknownHostException, CycApiException {
+        assertGaf(universalVocabularyMt, genls, specCollection, genlsCollection);
+    }
+
+    /**
+     * Assert that the genlsCollection is a genls of specCollection,
      * in the specified defining microtheory MT.
      * The operation will be added to the KB transcript for replication and archive.
      *
@@ -5125,6 +5164,12 @@ public class CycAccess {
             cycConstant = createNewPermanent(constantName);
         assertIsa(cycConstant, kbSubsetCollection);
         assertComment(cycConstant, comment, baseKB);
+        assertGenls(cycConstant, thing);
+        CycFort variableOrderCollection =
+            getKnownConstantByGuid("36cf85d0-20a1-11d6-8000-0050dab92c2f");
+        assertIsa(cycConstant,
+                  variableOrderCollection,
+                  baseKB);
         return cycConstant;
         }
 

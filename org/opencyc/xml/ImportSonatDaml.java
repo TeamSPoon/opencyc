@@ -480,6 +480,14 @@ public class ImportSonatDaml {
                                         // genFormatList
                                         "()"
                                         );
+
+    /*
+
+(xmlNameSpace <nickname> <url>)
+(#$synonymousExternalConcept <mapped-cyc-term>
+                             #$WorldWideWeb-DynamicIndexedInfoSource
+                             <namespace:localname>)
+    */
     }
 
     /**

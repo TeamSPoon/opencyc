@@ -3,9 +3,10 @@ package org.opencyc.elf.bg.planner;
 //// Internal Imports
 import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
-
 import org.opencyc.elf.Result;
 import org.opencyc.elf.Status;
+
+import org.opencyc.elf.a.DirectActuator;
 
 import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
@@ -18,11 +19,17 @@ import org.opencyc.elf.message.ScheduleConsistencyRequestMsg;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
 
+import org.opencyc.elf.s.DirectSensor;
+
+import org.opencyc.elf.wm.NodeFactory;
+
 //// External Imports
 
 import java.util.ArrayList;
 import java.util.List;
 
+import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
+import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
@@ -206,9 +213,29 @@ public class Scheduler extends NodeComponent {
       getLogger().info("Scheduler proccessing " + scheduleJobMsg);
       schedule = scheduleJobMsg.getSchedule();
       taskCommand = scheduleJobMsg.getTaskCommand();
+      if (executor == null)
+        createExecutor(schedule);
+      
+      
+      
+      // if the executor exists then pass the schedule actions one a time
       
     }
                 
+    /** Creates a new scheduler for the given schedule.
+     *
+     * @param schedule the given schedule
+     */
+    protected void createExecutor(Schedule schedule) {
+      Channel executorChannel = new BoundedBuffer(NodeFactory.CHANNEL_CAPACITY);
+      executor = new org.opencyc.elf.bg.executor.Executor();
+      //executor.initialize((Puttable) schedulerChannel);
+      
+      //TODO make exectutor a buffered node component
+      
+      getLogger().info("Created new executor: " + executor + " for schedule: " + schedule);
+    }
+    
     /** Processes the replan message.
      *
      * @param replanMsg the replan message

@@ -164,6 +164,17 @@ cycAssert(CycL,Mt):-
       invokeSubL('CYC-ASSERT'(quote(CycLGood),MtGood)).
 
 % ===================================================================
+%  Cyc Unassert/Retract
+% ===================================================================
+
+cycRetract(CycL,Mt):-cycUnassert(CycL,Mt).
+cycUnassert(CycL,Mt):-
+      retractall(cached_query(_,_)),
+      cyclifyNew(CycL,CycLGood),
+      cyclify(Mt,MtGood),
+      invokeSubL('CYC-UNASSERT'(quote(CycLGood),MtGood)).
+
+% ===================================================================
 %  Cyc Query
 % ===================================================================
      
@@ -205,7 +216,7 @@ cycQueryReal(CycL,Mt,Result):-
       repeat,
       (peek_code(InStream,PCode), 
       isDebug(format('PCODE (~q)~n',[PCode])),
-      ((PCode=35,finishCycConnection(SocketId,OutStream,InStream),!,fail);true), % 35 is No
+      ((member(PCode,[35,73]),finishCycConnection(SocketId,OutStream,InStream),!,fail);true), % 35 is No
       ((PCode=78,finishCycConnection(SocketId,OutStream,InStream),!);(    % 78 is Yes
       readCycL(InStream,Trim),
       peek_code(InStream,Code), 

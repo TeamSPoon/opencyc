@@ -4,6 +4,7 @@ package org.opencyc.elf.s;
 import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * Sensor defines the sensor interface for the Elementary Loop Functioning (ELF).
@@ -38,11 +39,11 @@ public interface Sensor {
   public String getName();
 
   /**
-   * Gets the object for which data is sensed.
+   * Gets the resources required by this sensor.
    *
-   * @return the object for which data is sensed
+   * @return the resources required by this sensor
    */
-  public Resource getSensedObject();
+  public ArrayList getResources();
   
   /** the console input sensor name */
   public static final String CONSOLE_INPUT = "console input";

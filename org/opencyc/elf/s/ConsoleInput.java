@@ -14,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
@@ -49,11 +51,11 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    * Constructs a new ConsoleInput object given its name.
    *
    * @param name the sensor name
-   * @param sensedObject the object for which data is sensed
+   * @param resources the resources required by this sensor
    */
-  public ConsoleInput (String name, Resource sensedObject) {
+  public ConsoleInput (String name, ArrayList resources) {
     this.name = name;
-    this.sensedObject = sensedObject;
+    this.resources = resources;
     logger = Logger.getLogger("org.opencyc.elf");
   }
 
@@ -90,6 +92,15 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    */
   public String getName() {
     return name;
+  }
+  
+  /**
+   * Gets the resources required by this sensor.
+   *
+   * @return the resources required by this sensor
+   */
+  public ArrayList getResources() {
+    return resources;
   }
   
   //// Protected Area
@@ -147,7 +158,8 @@ public class ConsoleInput extends NodeComponent implements Sensor {
     protected void sendObservedInputMsg () {
       ObservedInputMsg observedInputMsg = new ObservedInputMsg();
       observedInputMsg.setSender(nodeComponent);
-      observedInputMsg.setObj(sensedObject);
+      //TODO
+      //observedInputMsg.setObj(sensedObject);
       observedInputMsg.setData(data);
       sendMsgToRecipient(sensoryPerceptionChannel, observedInputMsg);
     }
@@ -167,8 +179,8 @@ public class ConsoleInput extends NodeComponent implements Sensor {
   /** the name of the sensor */
   protected String name;
   
-  /** the object for which data is sensed */
-  protected Object sensedObject;
+  /** the resources required by this sensor */
+  protected ArrayList resources;
   
   /** the thread which processes the input channel of messages */
   protected Producer producer;

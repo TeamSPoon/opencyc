@@ -567,7 +567,7 @@ public abstract class ImportDaml implements StatementHandler {
         if (objectTermInfo.constantName.equals("daml:UnambiguousProperty")) {
             cycAccess.assertArg1FormatSingleEntry(subjectTermInfo.cycFort);
             Log.current.println("(#$arg1Format " +
-                                term.cyclify() + " #$SingleEntryFormat)\n");
+                                term.cyclify() + " #$SingleEntryFormat)");
             return;
         }
         CycFort collection = importTerm(objectTermInfo);
@@ -577,9 +577,9 @@ public abstract class ImportDaml implements StatementHandler {
         }
         cycAccess.assertIsa(term,
                             collection);
-        Log.current.println("(#$isa " +
+        Log.current.println("\n(#$isa " +
                             term.cyclify() + " " +
-                            collection.cyclify() + ")\n");
+                            collection.cyclify() + ")");
     }
 
     /**
@@ -605,7 +605,7 @@ public abstract class ImportDaml implements StatementHandler {
                               collection);
         Log.current.println("(#$genls " +
                             term.cyclify() + " " +
-                            collection.cyclify() + ")\n");
+                            collection.cyclify() + ")");
     }
 
     /**
@@ -627,7 +627,7 @@ public abstract class ImportDaml implements StatementHandler {
         Log.current.println("(#$synonymousExternalConcept " +
                             subjectTermInfo.cycFort.cyclify() + " " +
                             "WorldWideWeb-DynamicIndexedInfoSource \"" +
-                            objectTermInfo.toOriginalString() + "\")\n");
+                            objectTermInfo.toOriginalString() + "\")");
     }
 
     /**
@@ -648,7 +648,7 @@ public abstract class ImportDaml implements StatementHandler {
         cycAccess.assertArgIsa(term1, 1, term2);
         Log.current.println("(#$arg1Isa " +
                             term1.cyclify() + " " +
-                            term2.cyclify() + ")\n");
+                            term2.cyclify() + ")");
     }
 
     /**
@@ -669,7 +669,7 @@ public abstract class ImportDaml implements StatementHandler {
         cycAccess.assertArgIsa(term1, 2, term2);
         Log.current.println("(#$arg2Isa " +
                           term1.cyclify() + " " +
-                          term2.cyclify() + ")\n");
+                          term2.cyclify() + ")");
     }
 
     /**
@@ -688,7 +688,7 @@ public abstract class ImportDaml implements StatementHandler {
                                             importMt);
         Log.current.println("(#$conceptuallyRelated " +
                           term1.cyclify() + " " +
-                          term2.cyclify() + ")\n");
+                          term2.cyclify() + ")");
     }
 
     /**
@@ -711,7 +711,7 @@ public abstract class ImportDaml implements StatementHandler {
                                   genlPred);
         Log.current.println("(#$genlPreds " +
                           specPred.cyclify() + " " +
-                          genlPred.cyclify() + ")\n");
+                          genlPred.cyclify() + ")");
     }
 
     /**
@@ -754,7 +754,7 @@ public abstract class ImportDaml implements StatementHandler {
                                 importMt);
         Log.current.println("(#$comment " +
                           term.cyclify() + " \"" +
-                          comment + "\")\n");
+                          comment + "\")");
     }
 
     /**
@@ -803,7 +803,7 @@ public abstract class ImportDaml implements StatementHandler {
                             term);
         Log.current.println("(#$containsInformationAbout " +
                             resource.cyclify() + " " +
-                            term.cyclify() + ")\n");
+                            term.cyclify() + ")");
     }
 
     /**

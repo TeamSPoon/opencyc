@@ -46,6 +46,15 @@ public abstract class Predicate {
   //// Public Area
     
   /**
+   * Gets the singleton instance of predicate.
+   *
+   * @return the singleton instance of predicate
+   */
+  public static Predicate getInstance () {
+    return predicate;
+  }
+  
+  /**
    * Evaluates the given arguments and returns the result.  The semantics
    * of the predicate are defined by each implementing class.
    *

@@ -88,7 +88,9 @@ CBL Grammar
 <EXPRESSION> ::= (True) |
                  <OPERATOR-EXPRESSION>
 <OPERATOR-EXPRESSION> ::= (<OPERATOR> [<ARGUMENT>*])
-<OPERATOR> ::=
+<OPERATOR> ::= <MinusOperator> |
+               <PlusOperator> |
+               
 
 TODO
 
@@ -160,14 +162,25 @@ TODO
 
 ;; job definition
 
-TODO
+<JOB-NAME> ::= <NAME>
+
+(define-job <JOB-NAME>
+  ([:resources <RESOURCE-SPECIFICATION>*]
+   [:direct-sensor <DIRECT-SENSOR-NAME>]
+   [:direct-actuator <DIRECT-ACTUATOR-NAME>]
+   [:direct-actuator-sensor <DIRECT-ACTUATOR-SENSOR-NAME>))
+
+(define-job-set <COMMAND-NAME>
+  (:job-set <JOB>*))
 
 ;; schedule set definition
+
+<SCHEDULE-SET-NAME> ::= <JOB-NAME>
 
 <SCHEDULE-PREDICATE-SPECIFICATION> ::= :default |
                                        :when <EXPRESSION>
 
-(define-schedule-set <INDIRECT-ACTION-NAME>
+(define-schedule-set <SCHEDULE-SET-NAME>
   (:input-formal-parameters <PARAMETER>*)
   (:output-formal-parameters <PARAMETER>*)
   (:schedules

@@ -1,7 +1,5 @@
 package org.opencyc.cycobject;
 
-import org.apache.oro.util.*;
-
 /**
  * Provides the behavior and attributes of an OpenCyc symbol, typically used
  * to represent api function names, and non <tt>CycConstant</tt> parameters.
@@ -30,47 +28,16 @@ import org.apache.oro.util.*;
 public class CycSymbol implements Comparable {
 
     /**
-     * Least Recently Used Cache of CycSymbols, so that a reference to an existing <tt>CycSymbol</tt>
-     * is returned instead of constructing a duplicate.
-     */
-    protected static Cache cache = new CacheLRU(500);
-
-    /**
-     * Built in CycSymbols.
-     */
-    public static CycSymbol t = makeCycSymbol("T");
-    public static CycSymbol nil = makeCycSymbol("NIL");
-    public static CycSymbol quote = makeCycSymbol("QUOTE");
-    public static CycSymbol cons = makeCycSymbol("CONS");
-    public static CycSymbol dot = makeCycSymbol(".");
-
-    /**
      * The symbol represented as a <tt>String</tt>.
      */
-    protected String symbolName;
+    public String symbolName;
 
     /**
      * Constructs a new <tt>CycSymbol</tt> object.
      *
-     * @param symbolName a <tt>String</tt> name.
-     */
-    public static CycSymbol makeCycSymbol(String symbolNameAnyCase) {
-        String symbolName = symbolNameAnyCase.toUpperCase();
-        CycSymbol cycSymbol = (CycSymbol) cache.getElement(symbolName);
-        if (cycSymbol == null) {
-            cycSymbol = new CycSymbol(symbolName);
-            cache.addElement(symbolName, cycSymbol);
-        }
-        return cycSymbol;
-    }
-
-    /**
-     * Constructs a new <tt>CycSymbol</tt> object.  Non-public to enforce
-     * use of the object cache.
-     *
      * @param symbolName the <tt>String</tt> name of the <tt>CycSymbol</tt>.
      */
-    private CycSymbol(String symbolName) {
+    public CycSymbol(String symbolName) {
         if (! (symbolName.equals(symbolName.toUpperCase())))
             throw new RuntimeException("symbol name must be upper case " + symbolName);
         this.symbolName = symbolName;
@@ -139,44 +106,6 @@ public class CycSymbol implements Comparable {
                 return false;
         }
         return true;
-    }
-    /**
-     * Resets the <tt>CycSymbol</tt> cache.
-     */
-    public static void resetCache() {
-        cache = new CacheLRU(500);
-        nil = makeCycSymbol("NIL");
-        quote = makeCycSymbol("QUOTE");
-        cons = makeCycSymbol("CONS");
-        dot = makeCycSymbol(".");
-    }
-
-    /**
-     * Retrieves the <tt>CycSymbol</tt> with <tt>symbolName</tt>,
-     * returning null if not found in the cache.
-     *
-     * @return a <tt>CycSymbol</tt> if found in the cache, otherwise <tt>null</tt>
-     */
-    public static CycSymbol getCache(String symbolName) {
-        return (CycSymbol) cache.getElement(symbolName);
-    }
-
-    /**
-     * Removes the <tt>CycSymbol</tt> from the cache if it is contained within.
-     */
-    public static void removeCache(CycSymbol cycSymbol) {
-        Object element = cache.getElement(cycSymbol.symbolName);
-        if (element != null)
-            cache.addElement(cycSymbol.symbolName, null);
-    }
-
-    /**
-     * Returns the size of the <tt>Guid</tt> object cache.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>CycSymbol</tt> objects in the cache
-     */
-    public static int getCacheSize() {
-        return cache.size();
     }
 
 }

@@ -295,7 +295,7 @@ public class CycAccess {
         Object [] response = {null, null};
         response = converse(command);
         if (response[0].equals(Boolean.TRUE))
-            if (response[1].equals(CycSymbol.nil))
+            if (response[1].equals(CycObjectFactory.nil))
                 return new CycList();
             else
                 return (CycList) response[1];
@@ -435,7 +435,7 @@ public class CycAccess {
         String name = constantName;
         if (constantName.startsWith("#$"))
             name = name.substring(2);
-        CycConstant answer = CycConstant.getCacheByName(name);
+        CycConstant answer = CycObjectFactory.getCycConstantCacheByName(name);
         if (answer != null)
             return answer;
         answer = new CycConstant();
@@ -445,8 +445,8 @@ public class CycAccess {
             return null;
         answer.setId(id);
         answer.setGuid(getConstantGuid(name));
-        CycConstant.addCacheByName(answer);
-        CycConstant.addCacheById(answer);
+        CycObjectFactory.addCycConstantCacheByName(answer);
+        CycObjectFactory.addCycConstantCacheById(answer);
         return answer;
     }
 
@@ -500,7 +500,7 @@ public class CycAccess {
         throws IOException, UnknownHostException {
         String command = "(guid-to-string (constant-guid (find-constant \"" +
                          constantName + "\")))";
-        return Guid.makeGuid(converseString(command));
+        return CycObjectFactory.makeGuid(converseString(command));
     }
 
     /**
@@ -513,15 +513,15 @@ public class CycAccess {
         throws IOException, UnknownHostException {
         // Optimized for the binary api.
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("guid-to-string"));
+        command.add(CycObjectFactory.makeCycSymbol("guid-to-string"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("constant-guid"));
+        command1.add(CycObjectFactory.makeCycSymbol("constant-guid"));
         CycList command2 = new CycList();
         command1.add(command2);
-        command2.add(CycSymbol.makeCycSymbol("find-constant-by-id"));
+        command2.add(CycObjectFactory.makeCycSymbol("find-constant-by-id"));
         command2.add(id);
-        return Guid.makeGuid(converseString(command));
+        return CycObjectFactory.makeGuid(converseString(command));
     }
 
     /**
@@ -533,10 +533,10 @@ public class CycAccess {
     public CycConstant getConstantById (Integer id)  throws IOException, UnknownHostException {
         // Optimized for the binary api.
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("boolean"));
+        command.add(CycObjectFactory.makeCycSymbol("boolean"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("find-constant-by-id"));
+        command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-id"));
         command1.add(id);
         boolean constantExists = converseBoolean(command);
         if (! constantExists)
@@ -545,8 +545,8 @@ public class CycAccess {
         answer.setName(getConstantName(id));
         answer.setId(id);
         answer.setGuid(getConstantGuid(id));
-        CycConstant.addCacheByName(answer);
-        CycConstant.addCacheById(answer);
+        CycObjectFactory.addCycConstantCacheByName(answer);
+        CycObjectFactory.addCycConstantCacheById(answer);
         return answer;
     }
 
@@ -560,10 +560,10 @@ public class CycAccess {
         throws IOException, UnknownHostException {
         // Optimized for the binary api.
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("constant-name"));
+        command.add(CycObjectFactory.makeCycSymbol("constant-name"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("find-constant-by-id"));
+        command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-id"));
         command1.add(id);
         return converseString(command);
     }
@@ -578,10 +578,10 @@ public class CycAccess {
         throws IOException, UnknownHostException {
         // Optimized for the binary api.
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("variable-name"));
+        command.add(CycObjectFactory.makeCycSymbol("variable-name"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("find-variable-by-id"));
+        command1.add(CycObjectFactory.makeCycSymbol("find-variable-by-id"));
         command1.add(id);
         return converseString(command);
     }
@@ -594,7 +594,7 @@ public class CycAccess {
      */
     public CycConstant getKnownConstantByGuid (String guidString)
         throws IOException, UnknownHostException {
-        Guid guid = Guid.makeGuid(guidString);
+        Guid guid = CycObjectFactory.makeGuid(guidString);
         return getKnownConstantByGuid(guid);
     }
 
@@ -661,10 +661,10 @@ public class CycAccess {
      */
     public CycConstant completeCycConstant (CycConstant cycConstant) throws IOException, UnknownHostException {
         cycConstant.setName(getConstantName(cycConstant.getId()));
-        CycConstant cachedConstant = CycConstant.getCacheByName(cycConstant.getName());
+        CycConstant cachedConstant = CycObjectFactory.getCycConstantCacheByName(cycConstant.getName());
         if (cachedConstant == null) {
             cycConstant.setGuid(getConstantGuid(cycConstant.getId()));
-            CycConstant.addCacheByName(cycConstant);
+            CycObjectFactory.addCycConstantCacheByName(cycConstant);
             return cycConstant;
         }
         else
@@ -686,9 +686,9 @@ public class CycAccess {
         throws IOException, UnknownHostException {
         if (cycVariable.name == null)
             cycVariable.name = getVariableName(cycVariable.id);
-        CycVariable cachedVariable = CycVariable.getCache(cycVariable.name);
+        CycVariable cachedVariable = CycObjectFactory.getCycVariableCache(cycVariable.name);
         if (cachedVariable == null) {
-            CycVariable.addCache(cycVariable);
+            CycObjectFactory.addCycVariableCache(cycVariable);
             return cycVariable;
         }
         else
@@ -751,7 +751,7 @@ public class CycAccess {
      * Gets a CycNart by using its id.
      */
     public CycNart getCycNartById (Integer id)  throws IOException, UnknownHostException {
-        CycNart cycNart = CycNart.getCache(id);
+        CycNart cycNart = CycObjectFactory.getCycNartCache(id);
         if (cycNart != null) {
             return cycNart;
         }
@@ -759,11 +759,12 @@ public class CycAccess {
             cycNart = new CycNart();
             cycNart.setId(id);
         }
+        CycObjectFactory.addCycNartCache(cycNart);
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("nart-el-formula"));
+        command.add(CycObjectFactory.makeCycSymbol("nart-el-formula"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("find-nart-by-id"));
+        command1.add(CycObjectFactory.makeCycSymbol("find-nart-by-id"));
         command1.add(id);
         CycList formula = converseList(command);
         cycNart.setFunctor((CycFort) formula.first());
@@ -775,18 +776,19 @@ public class CycAccess {
      * Gets a CycAssertion by using its id.
      */
     public CycAssertion getAssertionById (Integer id)  throws IOException, UnknownHostException {
-        CycAssertion cycAssertion = CycAssertion.getCache(id);
+        CycAssertion cycAssertion = CycObjectFactory.getAssertionCache(id);
         if (cycAssertion != null) {
             if (cycAssertion.getFormula() != null)
                 return cycAssertion;
         }
         else
             cycAssertion = new CycAssertion(id);
+        CycObjectFactory.addAssertionCache(cycAssertion);
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("assertion-el-formula"));
+        command.add(CycObjectFactory.makeCycSymbol("assertion-el-formula"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("find-assertion-by-id"));
+        command1.add(CycObjectFactory.makeCycSymbol("find-assertion-by-id"));
         command1.add(id);
         cycAssertion.setFormula(converseList(command));
         return cycAssertion;
@@ -1182,7 +1184,7 @@ public class CycAccess {
     public boolean isa (CycFort term, CycFort collection, CycFort mt)
         throws IOException, UnknownHostException {
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("isa?"));
+        command.add(CycObjectFactory.makeCycSymbol("isa?"));
         command.add(term.cycListApiValue());
         command.add(collection.cycListApiValue());
         command.add(mt.cycListApiValue());
@@ -1333,10 +1335,10 @@ public class CycAccess {
      */
     public boolean isEvaluatablePredicate (CycConstant predicate)  throws IOException, UnknownHostException {
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("with-all-mts"));
+        command.add(CycObjectFactory.makeCycSymbol("with-all-mts"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("evaluatable-predicate?"));
+        command1.add(CycObjectFactory.makeCycSymbol("evaluatable-predicate?"));
         command1.add(predicate);
         return converseBoolean(command);
     }
@@ -1391,7 +1393,7 @@ public class CycAccess {
      */
     public synchronized void kill (CycConstant cycConstant)   throws IOException, UnknownHostException {
         converseBoolean("(cyc-kill " + cycConstant.stringApiValue() + ")");
-        CycConstant.removeCaches(cycConstant);
+        CycObjectFactory.removeCaches(cycConstant);
     }
 
     public synchronized void kill (CycConstant[] cycConstants)   throws IOException, UnknownHostException {
@@ -1689,8 +1691,8 @@ public class CycAccess {
             cycConstant = this.createNewPermanent(name);
             if (cycConstant == null)
                 throw new RuntimeException("Cannot create new constant for " + name);
-            CycConstant.addCacheByName(cycConstant);
-            CycConstant.addCacheById(cycConstant);
+            CycObjectFactory.addCycConstantCacheByName(cycConstant);
+            CycObjectFactory.addCycConstantCacheById(cycConstant);
         }
         return cycConstant;
     }
@@ -1753,10 +1755,10 @@ public class CycAccess {
     public boolean isQueryTrue (CycList query,
                                 CycFort mt)  throws IOException, UnknownHostException {
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("removal-ask"));
+        command.add(CycObjectFactory.makeCycSymbol("removal-ask"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.quote);
+        command1.add(CycObjectFactory.quote);
         command1.add(query);
         command.add(mt);
         CycList response = converseList(command);
@@ -1983,7 +1985,7 @@ public class CycAccess {
     public void setSymbolValue (CycSymbol cycSymbol, Object value)
         throws IOException, UnknownHostException {
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("csetq"));
+        command.add(CycObjectFactory.makeCycSymbol("csetq"));
         command.add(cycSymbol);
         command.add(value);
         converseVoid(command);
@@ -1994,13 +1996,13 @@ public class CycAccess {
      */
     public boolean isWellFormedFormula (CycList cycList)  throws IOException, UnknownHostException {
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("with-all-mts"));
+        command.add(CycObjectFactory.makeCycSymbol("with-all-mts"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("el-wff?"));
+        command1.add(CycObjectFactory.makeCycSymbol("el-wff?"));
         CycList command2 = new CycList();
         command1.add(command2);
-        command2.add(CycSymbol.quote);
+        command2.add(CycObjectFactory.quote);
         command2.add(cycList);
         return converseBoolean(command);
     }
@@ -2103,12 +2105,12 @@ public class CycAccess {
         CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
         if (mt.equals(inferencePsc) ||
             mt.equals(everythingPsc)) {
-            command.add(CycSymbol.makeCycSymbol("some-pred-value-in-any-mt"));
+            command.add(CycObjectFactory.makeCycSymbol("some-pred-value-in-any-mt"));
             command.add(term.cycListApiValue());
             command.add(predicate.cycListApiValue());
         }
         else {
-            command.add(CycSymbol.makeCycSymbol("some-pred-value-in-relevant-mts"));
+            command.add(CycObjectFactory.makeCycSymbol("some-pred-value-in-relevant-mts"));
             command.add(term.cycListApiValue());
             command.add(predicate.cycListApiValue());
             command.add(mt.cycListApiValue());
@@ -2134,21 +2136,21 @@ public class CycAccess {
         CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
         if (mt.equals(inferencePsc) ||
             mt.equals(everythingPsc)) {
-            command.add(CycSymbol.makeCycSymbol("with-all-mts"));
+            command.add(CycObjectFactory.makeCycSymbol("with-all-mts"));
         }
         else {
-            command.add(CycSymbol.makeCycSymbol("with-mt"));
+            command.add(CycObjectFactory.makeCycSymbol("with-mt"));
             command.add(mt.cycListApiValue());
         }
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycSymbol.makeCycSymbol("best-index-count"));
+        command1.add(CycObjectFactory.makeCycSymbol("best-index-count"));
         CycList command2 = new CycList();
         command1.add(command2);
-        command2.add(CycSymbol.quote);
+        command2.add(CycObjectFactory.quote);
         command2.add(formula.cycListApiValue());
-        command1.add(CycSymbol.t);
-        command1.add(CycSymbol.t);
+        command1.add(CycObjectFactory.t);
+        command1.add(CycObjectFactory.t);
         //this.traceOn();
         return converseInt(command);
     }

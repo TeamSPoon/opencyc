@@ -3,6 +3,7 @@ package org.opencyc.cycobject;
 import java.util.*;
 import java.io.*;
 import org.opencyc.util.*;
+import org.opencyc.api.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc list, typically used
@@ -99,7 +100,7 @@ public class CycList extends ArrayList {
      */
     public static CycList construct(Object object1, Object object2) {
         CycList cycList = new CycList(object1);
-        if (object2.equals(CycSymbol.nil))
+        if (object2.equals(CycObjectFactory.nil))
             return cycList;
         if (object2 instanceof CycList) {
             cycList.addAll((CycList) object2);

@@ -30,36 +30,14 @@ import org.apache.oro.util.*;
 public class Guid {
 
     /**
-     * Least Recently Used Cache of guids, so that a reference to an existing <tt>Guid</tt>
-     * is returned instead of constructing a duplicate.
-     */
-    protected static Cache cache = new CacheLRU(500);
-
-    /**
      * The GUID in string form.
      */
-    protected String guidString;
+    public String guidString;
 
     /**
-     * Returns a cached <tt>Guid</tt> object or construct a new
-     * Guid object from a guid string if the guid is not found in the cache.
-     *
-     * @param guid a <tt>String</tt> form of a GUID.
+     * Constructs a new <tt>Guid</tt> object.
      */
-    public static Guid makeGuid(String guidString) {
-        Guid guid = (Guid) cache.getElement(guidString);
-        if (guid == null ) {
-            guid = new Guid(guidString);
-            cache.addElement(guidString, guid);
-        }
-        return guid;
-    }
-
-    /**
-     * Constructs a new <tt>Guid</tt> object. Non-public to enforce the
-     * use of the cache during object creation.
-     */
-    private Guid(String guidString) {
+    public Guid(String guidString) {
         this.guidString = guidString;
     }
 
@@ -86,40 +64,5 @@ public class Guid {
         return guidString;
     }
 
-    /**
-     * Resets the <tt>Guid</tt> cache.
-     */
-    public static void resetCache() {
-        cache = new CacheLRU(500);
-    }
-
-    /**
-     * Retrieves the <tt>Guid</tt> with <tt>guidName</tt>,
-     * returning null if not found in the cache.
-     *
-     * @return the <tt>Guid</tt> if it is found in the cache, otherwise
-     * <tt>null</tt>
-     */
-    public static Guid getCache(String guidName) {
-        return (Guid) cache.getElement(guidName);
-    }
-
-    /**
-     * Removes the <tt>Guid</tt> from the cache if it is contained within.
-     */
-    public static void removeCache(Guid guid) {
-        Object element = cache.getElement(guid.guidString);
-        if (element != null)
-            cache.addElement(guid.guidString, null);
-    }
-
-    /**
-     * Returns the size of the <tt>Guid</tt> object cache.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>Guid</tt> objects in the cache
-     */
-    public static int getCacheSize() {
-        return cache.size();
-    }
 
 }

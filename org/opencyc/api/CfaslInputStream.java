@@ -208,7 +208,7 @@ public class CfaslInputStream extends BufferedInputStream {
                     o = readSymbol();
                     break;
                 case CFASL_NIL:
-                    o = CycSymbol.nil;
+                    o = CycObjectFactory.nil;
                     break;
                 case CFASL_LIST:
                     o = readCycList();
@@ -448,7 +448,7 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return the keyword <tt>CycSymbol</tt> read
      */
     public CycSymbol readKeyword () throws IOException {
-        return  CycSymbol.makeCycSymbol(":" + (String)readObject());
+        return  CycObjectFactory.makeCycSymbol(":" + (String)readObject());
     }
 
     /**
@@ -460,9 +460,9 @@ public class CfaslInputStream extends BufferedInputStream {
     public Object readSymbol () throws IOException {
         String name = (String) readObject();
         if (name.startsWith("?"))
-            return  CycVariable.makeCycVariable(name);
+            return  CycObjectFactory.makeCycVariable(name);
         else
-            return  CycSymbol.makeCycSymbol(name);
+            return  CycObjectFactory.makeCycSymbol(name);
     }
 
     /**
@@ -472,7 +472,7 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return the <tt>Guid</tt> read
      */
     public Guid readGuid () throws IOException {
-        return  Guid.makeGuid((String)readObject());
+        return  CycObjectFactory.makeGuid((String)readObject());
     }
 
     /**

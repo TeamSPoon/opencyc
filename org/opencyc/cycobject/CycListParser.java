@@ -173,7 +173,7 @@ public class CycListParser  {
                 if ((readStack.sp > 0) && (parenLevel == 0)) {
                     // Parsed a complete symbolic expression.
                     Object object = readStack.pop();
-                    if (object.equals(CycSymbol.nil))
+                    if (object.equals(CycObjectFactory.nil))
                         return new CycList(new ArrayList());
                     else
                         return (CycList) reduceDottedPairs((CycList) object);
@@ -207,7 +207,7 @@ public class CycListParser  {
 
         readStack.push(consMarkerSymbol);
         quoteStack.push(new Integer(++parenLevel));
-        readStack.push(CycSymbol.quote);
+        readStack.push(CycObjectFactory.quote);
     }
 
     /**
@@ -233,12 +233,12 @@ public class CycListParser  {
         if (parenLevel == 0)
             throw new RuntimeException( "read: Extra right parenthesis" );
         else if ((readStack.sp == parenLevel) &&
-                 (readStack.peek().equals(CycSymbol.cons)))
+                 (readStack.peek().equals(CycObjectFactory.cons)))
             // Have an empty list.
             readStack.pop();
 
         // Terminate the list.
-        readStack.push(CycSymbol.nil);
+        readStack.push(CycObjectFactory.nil);
         --parenLevel;
 
         checkQuotes();
@@ -301,7 +301,7 @@ public class CycListParser  {
      */
     private void scanMinus() {
         //System.out.println("-");
-        CycSymbol w = CycSymbol.makeCycSymbol("-");
+        CycSymbol w = CycObjectFactory.makeCycSymbol("-");
 
         if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
             // Within a list.
@@ -324,9 +324,9 @@ public class CycListParser  {
         if (st.sval.startsWith("#$"))
             w = cycAccess.makeCycConstant(st.sval);
         else if (st.sval.startsWith("?"))
-            w = CycVariable.makeCycVariable(st.sval);
+            w = CycObjectFactory.makeCycVariable(st.sval);
         else
-            w = CycSymbol.makeCycSymbol(st.sval);
+            w = CycObjectFactory.makeCycSymbol(st.sval);
 
         if ((parenLevel > 0) && (readStack.sp != parenLevel))
             // Within a list.
@@ -393,7 +393,7 @@ public class CycListParser  {
         if (cycList.size() == 0)
             return s;
         else if (cycList.size() == 3 &&
-                 cycList.second().equals(CycSymbol.dot)) {
+                 cycList.second().equals(CycObjectFactory.dot)) {
             Object first = reduceDottedPairs(cycList.first());
             Object third = reduceDottedPairs(cycList.third());
             if (cycList.third() instanceof CycList) {

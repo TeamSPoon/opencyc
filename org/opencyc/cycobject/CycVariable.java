@@ -1,7 +1,5 @@
 package org.opencyc.cycobject;
 
-import org.apache.oro.util.*;
-
 /**
  * Provides the behavior and attributes of an OpenCyc variable, typically used
  * in rule and query expressions.
@@ -30,12 +28,6 @@ import org.apache.oro.util.*;
 public class CycVariable implements Comparable {
 
     /**
-     * Least Recently Used Cache of CycVariables, so that a reference to an existing <tt>CycVariable</tt>
-     * is returned instead of constructing a duplicate.
-     */
-    protected static Cache cache = new CacheLRU(500);
-
-    /**
      * The variable represented as a <tt>String</tt>.
      */
     public String name;
@@ -47,54 +39,17 @@ public class CycVariable implements Comparable {
     public Integer id;
 
     /**
-     * A variable name suffix used to make unique names.
-     */
-    protected static int suffix = 1;
-
-    /**
-     * Constructs a new <tt>CycVariable</tt> object using the variable name.
-     *
-     * @param name a <tt>String</tt> name.
-     */
-    public static CycVariable makeCycVariable(String name) {
-        if (name.startsWith("?"))
-            name = name.substring(1);
-        CycVariable cycVariable = (CycVariable) cache.getElement(name);
-        if (cycVariable == null) {
-            cycVariable = new CycVariable(name);
-            cache.addElement(name, cycVariable);
-        }
-        return cycVariable;
-    }
-
-    /**
-     * Constructs a new <tt>CycVariable</tt> object by suffixing the given variable.
-     *
-     * @param modelCycVariable a <tt>CycVariable</tt> to suffix
-     */
-    public static CycVariable makeUniqueCycVariable(CycVariable modelCycVariable) {
-        String name = modelCycVariable.name + "_" + suffix++;
-        CycVariable cycVariable = (CycVariable) cache.getElement(name);
-        if (cycVariable == null) {
-            cycVariable = new CycVariable(name);
-            cache.addElement(name, cycVariable);
-        }
-        return cycVariable;
-    }
-
-    /**
      * Constructs a new empty <tt>CycVariable</tt> object.
      */
     public CycVariable() {
     }
 
     /**
-     * Constructs a new <tt>CycVariable</tt> object.  Non-public to enforce
-     * use of the object cache.
+     * Constructs a new <tt>CycVariable</tt> object.
      *
      * @param name the <tt>String</tt> name of the <tt>CycVariable</tt>.
      */
-    protected CycVariable(String name) {
+    public CycVariable(String name) {
         if (name.startsWith("?"))
             this.name = name.substring(1);
         else
@@ -166,48 +121,4 @@ public class CycVariable implements Comparable {
         return this.name.compareTo(((CycVariable) object).name);
      }
 
-    /**
-     * Resets the <tt>CycVariable</tt> cache.
-     */
-    public static void resetCache() {
-        cache = new CacheLRU(500);
-    }
-
-    /**
-     * Adds the <tt>CycVariable<tt> to the cache.
-     */
-    public static void addCache(CycVariable cycVariable) {
-        if (cycVariable.name == null)
-            throw new RuntimeException("Invalid variable for caching " + cycVariable);
-        cache.addElement(cycVariable.name, cycVariable);
-    }
-
-    /**
-     * Retrieves the <tt>CycVariable</tt> with <tt>name</tt>,
-     * returning null if not found in the cache.
-     *
-     * @return a <tt>CycVariable</tt> if found in the cache, otherwise
-     * <tt>null</tt>
-     */
-    public static CycVariable getCache(String name) {
-        return (CycVariable) cache.getElement(name);
-    }
-
-    /**
-     * Removes the <tt>CycVariable</tt> from the cache if it is contained within.
-     */
-    public static void removeCache(CycVariable cycVariable) {
-        Object element = cache.getElement(cycVariable.name);
-        if (element != null)
-            cache.addElement(cycVariable.name, null);
-    }
-
-    /**
-     * Returns the size of the <tt>CycVariable</tt> object cache.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>CycVariable</tt> objects in the cache
-     */
-    public static int getCacheSize() {
-        return cache.size();
-    }
 }

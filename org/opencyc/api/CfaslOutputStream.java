@@ -120,9 +120,9 @@ public class CfaslOutputStream extends BufferedOutputStream {
         if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
             System.out.println("writeBoolean = " + v);
         if (v)
-            writeSymbol(CycSymbol.t);
+            writeSymbol(CycObjectFactory.t);
         else
-            writeSymbol(CycSymbol.nil);
+            writeSymbol(CycObjectFactory.nil);
     }
 
     /**
@@ -427,7 +427,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
             writeKeyword(cycSymbol);
             return;
         }
-        if (cycSymbol.equals(CycSymbol.nil)) {
+        if (cycSymbol.equals(CycObjectFactory.nil)) {
             if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
                 System.out.println("writing CFASL_NIL");
             write(CFASL_NIL);

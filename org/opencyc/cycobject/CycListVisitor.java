@@ -1,6 +1,7 @@
 package org.opencyc.cycobject;
 
 import java.util.*;
+import org.opencyc.api.*;
 
 /**
  * Implements an <tt>Enumeration</tt> for <tt>CycList</tt> objects which traverses
@@ -95,7 +96,7 @@ public class CycListVisitor implements Enumeration {
                 continue;
             }
             Object element = iterator.next();
-            if (element.equals(CycSymbol.nil))
+            if (element.equals(CycObjectFactory.nil))
                 // bypass nils.
                 continue;
             if (! (element instanceof CycList)) {

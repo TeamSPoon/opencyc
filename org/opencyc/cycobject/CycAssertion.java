@@ -2,7 +2,6 @@ package  org.opencyc.cycobject;
 
 import  java.io.IOException;
 import  java.util.*;
-import  org.apache.oro.util.*;
 import  org.opencyc.api.*;
 
 
@@ -37,15 +36,9 @@ import  org.opencyc.api.*;
  */
 public class CycAssertion {
     /**
-     * Least Recently Used Cache of CycAssertions, so that a reference to an existing <tt>CycAssertion</tt>
-     * is returned instead of constructing a duplicate.
-     */
-    protected static Cache cache = new CacheLRU(500);
-
-    /**
      * Assertion id assigned by the local KB server.  Not globally unique.
      */
-    protected Integer id;
+    public Integer id;
 
     /**
      * The assertion in the form of a <tt>CycList</tt>.
@@ -141,44 +134,6 @@ public class CycAssertion {
         return id;
     }
 
-    /**
-     * Resets the Cyc assertion cache.
-     */
-    public static void resetCache() {
-        cache = new CacheLRU(500);
-    }
-
-    /**
-     * Adds the <tt>CycAssertion<tt> to the cache.
-     */
-    public static void addCache(CycAssertion cycAssertion) {
-        cache.addElement(cycAssertion.id, cycAssertion);
-    }
-
-    /**
-     * Retrieves the <tt>CycConstant<tt> with guid, returning null if not found in the cache.
-     */
-    public static CycAssertion getCache(Integer id) {
-        return (CycAssertion) cache.getElement(id);
-    }
-
-    /**
-     * Removes the cycConstant from the cache if it is contained within.
-     */
-    public static void removeCache(Integer id) {
-        Object element = cache.getElement(id);
-        if (element != null)
-            cache.addElement(id, null);
-    }
-
-    /**
-     * Returns the size of the <tt>CycAssertion</tt> object cache.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>CycAssertion</tt> objects in the cache
-     */
-    public static int getCacheSize() {
-        return cache.size();
-    }
 }
 
 

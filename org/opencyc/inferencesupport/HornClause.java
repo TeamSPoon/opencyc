@@ -174,7 +174,7 @@ public class HornClause {
         for (int i = 0; i < otherVariables.size(); i++) {
             CycVariable otherVariable = (CycVariable) otherVariables.get(i);
             if (variables.contains(otherVariable)) {
-                CycVariable uniqueVariable = CycVariable.makeUniqueCycVariable(otherVariable);
+                CycVariable uniqueVariable = CycObjectFactory.makeUniqueCycVariable(otherVariable);
                 this.substituteVariable(otherVariable, uniqueVariable, verbosity);
                 if (verbosity > 3)
                     System.out.println("renamed " + otherVariable.cyclify() +

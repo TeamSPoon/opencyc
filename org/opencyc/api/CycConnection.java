@@ -266,7 +266,7 @@ public class CycConnection {
         if (cfaslSocket != null) {
             if (cfaslOutputStream != null) {
                 CycList command = new CycList();
-                command.add(CycSymbol.makeCycSymbol("API-QUIT"));
+                command.add(CycObjectFactory.makeCycSymbol("API-QUIT"));
                 try {
                     cfaslOutputStream.writeObject(command);
                 }
@@ -393,7 +393,7 @@ public class CycConnection {
         Object status = cfaslInputStream.readObject();
         Object response = cfaslInputStream.readObject();
         if (status == null ||
-            status.equals(CycSymbol.nil)) {
+            status.equals(CycObjectFactory.nil)) {
             answer[0] = Boolean.FALSE;
             answer[1] = response;
             if (trace > API_TRACE_NONE)
@@ -442,7 +442,7 @@ public class CycConnection {
                 return response;
             }
             if (answer.equals("NIL")) {
-                response[1] = CycSymbol.nil;
+                response[1] = CycObjectFactory.nil;
                 // Return the symbol nil.
                 return response;
             }
@@ -452,7 +452,7 @@ public class CycConnection {
                 return response;
             }
             if (answer.startsWith("?")) {
-                response[1] = CycVariable.makeCycVariable(answer);
+                response[1] = CycObjectFactory.makeCycVariable(answer);
                 // Return the variable.
                 return response;
             }
@@ -462,7 +462,7 @@ public class CycConnection {
                 return response;
             }
             if (CycSymbol.isValidSymbolName(answer)) {
-                response[1] = CycSymbol.makeCycSymbol(answer);
+                response[1] = CycObjectFactory.makeCycSymbol(answer);
                 // Return the symbol.
                 return response;
             }

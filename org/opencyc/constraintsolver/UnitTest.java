@@ -354,7 +354,7 @@ public class UnitTest extends TestCase {
         // test ValueDomains.initializeDomains()
         Assert.assertEquals(25, zebraProblem.valueDomains.domains.size());
         Assert.assertEquals(25, zebraProblem.valueDomains.varsDictionary.size());
-        CycVariable blue = CycVariable.makeCycVariable("?blue");
+        CycVariable blue = CycObjectFactory.makeCycVariable("?blue");
         Assert.assertNotNull(zebraProblem.valueDomains.varsDictionary.get(blue));
         Assert.assertTrue(zebraProblem.valueDomains.varsDictionary.get(blue) instanceof ArrayList);
         ArrayList domainValues = (ArrayList) zebraProblem.valueDomains.varsDictionary.get(blue);
@@ -382,11 +382,11 @@ public class UnitTest extends TestCase {
 
         // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
         Assert.assertEquals(2, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?milk")));
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?norwegian")));
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycObjectFactory.makeCycVariable("?milk")));
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycObjectFactory.makeCycVariable("?norwegian")));
         Assert.assertEquals(5, zebraProblem.nodeConsistencyAchiever.allDifferentRules.size());
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycVariable.makeCycVariable("milk")));
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycVariable.makeCycVariable("norwegian")));
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycObjectFactory.makeCycVariable("milk")));
+        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycObjectFactory.makeCycVariable("norwegian")));
 
         System.out.println("** testConstraintProblem1 OK **");
     }

@@ -2,7 +2,6 @@ package org.opencyc.cycobject;
 
 import java.io.Serializable;
 import java.io.*;
-import org.apache.oro.util.*;
 import org.opencyc.xml.*;
 import org.opencyc.api.*;
 
@@ -54,33 +53,15 @@ public class CycConstant extends CycFort implements Comparable {
     public static int indentLength = 2;
 
     /**
-     * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
-     * is returned instead of constructing a duplicate.  Indexed via the name, so is optimised for the ascii api.
-     */
-    protected static Cache cacheByName = new CacheLRU(500);
-
-    /**
-     * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
-     * is returned instead of constructing a duplicate.  Indexed via the id, so is optimised for the binary api.
-     */
-    protected static Cache cacheById = new CacheLRU(500);
-
-    /**
-     * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
-     * is returned instead of constructing a duplicate.  Indexed via the guid.
-     */
-    protected static Cache cacheByGuid = new CacheLRU(500);
-
-    /**
      * The GUID (Globally Unique IDentifier) of the <tt>CycConstant<tt> object.
      * A string such as "c10af8ae-9c29-11b1-9dad-c379636f7270"
      */
-    private Guid guid;
+    public Guid guid;
 
     /**
      * The name of the <tt>CycConstant<tt> object. A string such as "HandGrenade"
      */
-    private String name;
+    public String name;
 
     /**
      * Constructs a new incomplete <tt>CycConstant</tt> object.
@@ -102,9 +83,6 @@ public class CycConstant extends CycFort implements Comparable {
             this.name = name;
         this.guid = guid;
         setId(id);
-        addCacheById(this);
-        addCacheByName(this);
-        addCacheByGuid(this);
     }
 
     /**
@@ -118,7 +96,7 @@ public class CycConstant extends CycFort implements Comparable {
                 if (name == null)
                     throw new RuntimeException("Invalid CycConstant - no name to obtain id");
                     super.setId(CycAccess.current().getConstantId(name));
-                addCacheById(this);
+                //addCacheById(this);
             }
             return super.getId();
         }
@@ -138,7 +116,7 @@ public class CycConstant extends CycFort implements Comparable {
                 if (super.getId() == null)
                     throw new RuntimeException("Invalid CycConstant - no id to obtain name");
                     name = CycAccess.current().getConstantName(super.getId());
-                addCacheByName(this);
+                //CycObjectFactory.addCycConstantCacheByName(this);
             }
             return name;
         }
@@ -288,103 +266,6 @@ public class CycConstant extends CycFort implements Comparable {
     public Object cycListApiValue() {
         return this;
     }
-
-    /**
-     * Resets the Cyc constant caches.
-     */
-    public static void resetCaches() {
-        cacheById = new CacheLRU(500);
-        cacheByName = new CacheLRU(500);
-        cacheByGuid = new CacheLRU(500);
-    }
-
-    /**
-     * Adds the <tt>CycConstant<tt> to the cache by id.
-     */
-    public static void addCacheById(CycConstant cycConstant) {
-        if (((CycFort) cycConstant).getId() == null)
-            throw new RuntimeException("Invalid constant for caching " + cycConstant);
-        cacheById.addElement(cycConstant.getId(), cycConstant);
-    }
-
-    /**
-     * Adds the <tt>CycConstant<tt> to the cache by name.
-     */
-    public static void addCacheByName(CycConstant cycConstant) {
-        if (cycConstant.name == null)
-            throw new RuntimeException("Invalid constant for caching " + cycConstant);
-        cacheByName.addElement(cycConstant.getName(), cycConstant);
-    }
-
-    /**
-     * Adds the <tt>CycConstant<tt> to the cache by guid.
-     */
-    public static void addCacheByGuid(CycConstant cycConstant) {
-        if (cycConstant.guid == null)
-            throw new RuntimeException("Invalid constant for caching " + cycConstant);
-        cacheByGuid.addElement(cycConstant.getGuid(), cycConstant);
-    }
-
-    /**
-     * Retrieves the <tt>CycConstant<tt> with id, returning null if not found in the cache.
-     */
-    public static CycConstant getCacheById(Integer id) {
-        return (CycConstant) cacheById.getElement(id);
-    }
-
-    /**
-     * Retrieves the <tt>CycConstant<tt> with name, returning null if not found in the cache.
-     */
-    public static CycConstant getCacheByName(String name) {
-        return (CycConstant) cacheByName.getElement(name);
-    }
-
-    /**
-     * Retrieves the <tt>CycConstant<tt> with guid, returning null if not found in the cache.
-     */
-    public static CycConstant getCacheByGuid(Guid guid) {
-        return (CycConstant) cacheByGuid.getElement(guid);
-    }
-
-    /**
-     * Removes the <tt>CycConstant</tt> from the caches if it is contained within.
-     */
-    public static void removeCaches(CycConstant cycConstant) {
-        if (cycConstant.name != null) {
-            Object element = cacheByName.getElement(cycConstant.name);
-            if (element != null)
-                cacheByName.addElement(cycConstant.name, null);
-        }
-        if (((CycFort) cycConstant).getId() != null) {
-            Object element = cacheById.getElement(cycConstant.getId());
-            if (element != null)
-                cacheById.addElement(cycConstant.getId(), null);
-        }
-        if (cycConstant.guid != null) {
-            Object element = cacheByGuid.getElement(cycConstant.guid);
-            if (element != null)
-                cacheByGuid.addElement(cycConstant.guid, null);
-        }
-    }
-
-    /**
-     * Returns the size of the <tt>CycConstant</tt> object cache by id.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>CycConstant</tt> objects in the cache by id
-     */
-    public static int getCacheByIdSize() {
-        return cacheById.size();
-    }
-
-    /**
-     * Returns the size of the <tt>CycConstant</tt> object cache by id.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>CycConstant</tt> objects in the cache by id
-     */
-    public static int getCacheByNameSize() {
-        return cacheByName.size();
-    }
-
 
     /**
      * Makes a valid constant name from the candidate name by substituting

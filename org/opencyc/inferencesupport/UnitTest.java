@@ -77,9 +77,9 @@ public class UnitTest extends TestCase {
     public void testBinding() {
         System.out.println("** testBinding **");
 
-        Binding binding1 = new Binding(CycVariable.makeCycVariable("?x"), "abc");
+        Binding binding1 = new Binding(CycObjectFactory.makeCycVariable("?x"), "abc");
         Assert.assertNotNull(binding1);
-        Assert.assertEquals(CycVariable.makeCycVariable("?x"), binding1.getCycVariable());
+        Assert.assertEquals(CycObjectFactory.makeCycVariable("?x"), binding1.getCycVariable());
         Assert.assertEquals("abc", binding1.getValue());
         Assert.assertEquals("?x = \"abc\"", binding1.toString());
 
@@ -174,7 +174,7 @@ public class UnitTest extends TestCase {
 
         // gatherVariables and arity.
         Assert.assertEquals(1, rule1.getArity());
-        Assert.assertTrue(rule1.getVariables().contains(CycVariable.makeCycVariable("?x")));
+        Assert.assertTrue(rule1.getVariables().contains(CycObjectFactory.makeCycVariable("?x")));
 
         // simplifyRuleExpression
         try {
@@ -195,7 +195,7 @@ public class UnitTest extends TestCase {
         try {
             //cycAccess.traceOn();
             ConstraintRule rule4 = new ConstraintRule("(#$isa ?x #$Cathedral)");
-            rule5 = rule4.instantiate(CycVariable.makeCycVariable("?x"),
+            rule5 = rule4.instantiate(CycObjectFactory.makeCycVariable("?x"),
                                       cycAccess.makeCycConstant("NotreDame"));
         }
         catch (Exception e) {
@@ -263,12 +263,12 @@ public class UnitTest extends TestCase {
 
         // substituteVariable
         ConstraintRule rule22 = new ConstraintRule("(#$isa ?x #$Cathedral)");
-        rule22.substituteVariable(CycVariable.makeCycVariable("?x"),
-                                  CycVariable.makeCycVariable("?cathedral"));
+        rule22.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
+                                  CycObjectFactory.makeCycVariable("?cathedral"));
         Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", rule22.cyclify());
         ConstraintRule rule23 = new ConstraintRule("(#$isa ?x #$Cathedral)");
         try {
-            rule23.substituteVariable(CycVariable.makeCycVariable("?x"),
+            rule23.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
                                       cycAccess.makeCycConstant("NotreDameCathedral"));
         }
         catch (Exception e) {
@@ -459,7 +459,7 @@ public class UnitTest extends TestCase {
 
         // gatherVariables and arity.
         Assert.assertEquals(1, queryLiteral1.getArity());
-        Assert.assertTrue(queryLiteral1.getVariables().contains(CycVariable.makeCycVariable("?x")));
+        Assert.assertTrue(queryLiteral1.getVariables().contains(CycObjectFactory.makeCycVariable("?x")));
 
         // simplifyQueryLiteralExpression
         try {
@@ -480,7 +480,7 @@ public class UnitTest extends TestCase {
         try {
             //cycAccess.traceOn();
             QueryLiteral queryLiteral4 = new QueryLiteral("(#$isa ?x #$Cathedral)");
-            queryLiteral5 = queryLiteral4.instantiate(CycVariable.makeCycVariable("?x"),
+            queryLiteral5 = queryLiteral4.instantiate(CycObjectFactory.makeCycVariable("?x"),
                                       cycAccess.makeCycConstant("NotreDame"));
         }
         catch (Exception e) {
@@ -519,12 +519,12 @@ public class UnitTest extends TestCase {
 
         // substituteVariable
         QueryLiteral queryLiteral22 = new QueryLiteral("(#$isa ?x #$Cathedral)");
-        queryLiteral22.substituteVariable(CycVariable.makeCycVariable("?x"),
-                                  CycVariable.makeCycVariable("?cathedral"));
+        queryLiteral22.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
+                                  CycObjectFactory.makeCycVariable("?cathedral"));
         Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", queryLiteral22.cyclify());
         QueryLiteral queryLiteral23 = new QueryLiteral("(#$isa ?x #$Cathedral)");
         try {
-            queryLiteral23.substituteVariable(CycVariable.makeCycVariable("?x"),
+            queryLiteral23.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
                                       cycAccess.makeCycConstant("NotreDameCathedral"));
         }
         catch (Exception e) {
@@ -591,7 +591,7 @@ public class UnitTest extends TestCase {
             CycListVisitor cycListVisitor = new CycListVisitor(conjoinedFormula);
             Assert.assertEquals(CycAccess.and, cycListVisitor.nextElement());
             Assert.assertEquals(CycAccess.isa, cycListVisitor.nextElement());
-            Assert.assertEquals(CycVariable.makeCycVariable("?country"), cycListVisitor.nextElement());
+            Assert.assertEquals(CycObjectFactory.makeCycVariable("?country"), cycListVisitor.nextElement());
 
             QueryLiteral queryLiteral43 = QueryLiteral.conjoin(queryLiteral41, queryLiteral42);
             Assert.assertNotNull(queryLiteral43);
@@ -653,9 +653,9 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(3, hornClause1.getAntecedantConjuncts().size());
             Assert.assertEquals(2, hornClause1.getVariables().size());
             Assert.assertTrue(
-                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?BOAT")));
+                hornClause1.getVariables().contains(CycObjectFactory.makeCycVariable("?BOAT")));
             Assert.assertTrue(
-                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
+                hornClause1.getVariables().contains(CycObjectFactory.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 hornClause1.getAntecedantConjuncts().contains(
                     new ConstraintRule("(#$isa ?BOAT #$Watercraft-Surface)")));
@@ -681,17 +681,17 @@ public class UnitTest extends TestCase {
         try {
             HornClause hornClause3 = (HornClause) hornClause1.clone();
             hornClause3.substituteVariable(
-                CycVariable.makeCycVariable("?BOAT"),
-                CycVariable.makeCycVariable("?waterCraft"),
+                CycObjectFactory.makeCycVariable("?BOAT"),
+                CycObjectFactory.makeCycVariable("?waterCraft"),
                 0);
             Assert.assertTrue(
-                ! (hornClause3.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
+                ! (hornClause3.getVariables().contains(CycObjectFactory.makeCycVariable("?BOAT"))));
             Assert.assertTrue(
-                hornClause3.getVariables().contains(CycVariable.makeCycVariable("?waterCraft")));
+                hornClause3.getVariables().contains(CycObjectFactory.makeCycVariable("?waterCraft")));
             Assert.assertEquals(3, hornClause3.getAntecedantConjuncts().size());
             Assert.assertEquals(2, hornClause3.getVariables().size());
             Assert.assertTrue(
-                hornClause3.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
+                hornClause3.getVariables().contains(CycObjectFactory.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 hornClause3.getAntecedantConjuncts().contains(
                     new ConstraintRule("(#$isa ?waterCraft #$Watercraft-Surface)")));
@@ -704,15 +704,15 @@ public class UnitTest extends TestCase {
 
             HornClause hornClause4 = (HornClause) hornClause1.clone();
             hornClause4.substituteVariable(
-                CycVariable.makeCycVariable("?BOAT"),
+                CycObjectFactory.makeCycVariable("?BOAT"),
                 cycAccess.makeCycConstant("#$Motorboat"),
                 0);
             Assert.assertTrue(
-                ! (hornClause4.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
+                ! (hornClause4.getVariables().contains(CycObjectFactory.makeCycVariable("?BOAT"))));
             Assert.assertEquals(3, hornClause4.getAntecedantConjuncts().size());
             Assert.assertEquals(1, hornClause4.getVariables().size());
             Assert.assertTrue(
-                hornClause4.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
+                hornClause4.getVariables().contains(CycObjectFactory.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 hornClause4.getAntecedantConjuncts().contains(
                     new ConstraintRule("(#$isa #$Motorboat #$Watercraft-Surface)")));
@@ -736,20 +736,20 @@ public class UnitTest extends TestCase {
             hornClause5.renameVariables(otherVariables, verbosity);
             Assert.assertTrue(hornClause5.equals(hornClause1));
 
-            otherVariables.add(CycVariable.makeCycVariable("?animal"));
+            otherVariables.add(CycObjectFactory.makeCycVariable("?animal"));
             hornClause5.renameVariables(otherVariables, verbosity);
             Assert.assertTrue(hornClause5.equals(hornClause1));
 
-            otherVariables.add(CycVariable.makeCycVariable("?BOAT"));
+            otherVariables.add(CycObjectFactory.makeCycVariable("?BOAT"));
             hornClause5.renameVariables(otherVariables, verbosity);
             Assert.assertEquals("(#$in-Floating ?BOAT_1 ?WATER)",
                                 hornClause5.consequent.cyclify());
             Assert.assertEquals(3, hornClause5.getAntecedantConjuncts().size());
             Assert.assertEquals(2, hornClause5.getVariables().size());
             Assert.assertTrue(
-                ! (hornClause5.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
+                ! (hornClause5.getVariables().contains(CycObjectFactory.makeCycVariable("?BOAT"))));
             Assert.assertTrue(
-                hornClause5.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
+                hornClause5.getVariables().contains(CycObjectFactory.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 ! (hornClause5.getAntecedantConjuncts().contains(
                     new ConstraintRule("(#$isa ?BOAT #$Watercraft-Surface)"))));
@@ -846,7 +846,7 @@ public class UnitTest extends TestCase {
         try {
             ConstraintRule rule1 = new ConstraintRule("(#$objectFoundInLocation ?what #$CityOfAustinTX)");
             backchainer.variables = new ArrayList();
-            backchainer.variables.add(CycVariable.makeCycVariable("?what"));
+            backchainer.variables.add(CycObjectFactory.makeCycVariable("?what"));
             String hornClauseString =
                 "(#$implies " +
                 " (#$and " +
@@ -911,7 +911,7 @@ public class UnitTest extends TestCase {
 
         // getSolutions
         Assert.assertTrue(solution.getSolutions().size() == 1);
-        Binding binding1 = new Binding(CycVariable.makeCycVariable("?x"), new Integer(1));
+        Binding binding1 = new Binding(CycObjectFactory.makeCycVariable("?x"), new Integer(1));
 
         // addBindingToCurrentSolution
         solution.addBindingToCurrentSolution(binding1);
@@ -923,8 +923,8 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(solution.getCurrentSolution().size() == 0);
 
         // addBindingToCurrentSolution
-        Binding binding2 = new Binding(CycVariable.makeCycVariable("?y"), new Integer(2));
-        Binding binding3 = new Binding(CycVariable.makeCycVariable("?z"), new Integer(3));
+        Binding binding2 = new Binding(CycObjectFactory.makeCycVariable("?y"), new Integer(2));
+        Binding binding3 = new Binding(CycObjectFactory.makeCycVariable("?z"), new Integer(3));
         solution.addBindingToCurrentSolution(binding2);
         solution.addBindingToCurrentSolution(binding3);
         Assert.assertTrue(solution.getCurrentSolution().size() == 2);

@@ -2,7 +2,6 @@ package org.opencyc.cycobject;
 
 import java.io.*;
 import java.util.*;
-import org.apache.oro.util.*;
 import org.opencyc.xml.XMLPrintWriter;
 import org.opencyc.api.*;
 
@@ -58,12 +57,6 @@ public class CycNart extends CycFort implements Comparable {
      * The list of the arguments of the <ttt>CycNart</tt> object.
      */
     private CycList arguments = new CycList();
-
-    /**
-     * Least Recently Used Cache of CycNarts, so that a reference to an existing <tt>CycNart</tt>
-     * is returned instead of constructing a duplicate.
-     */
-    protected static Cache cache = new CacheLRU(500);
 
     /**
      * Constructs a new incomplete <tt>CycNart</tt> object.
@@ -315,7 +308,7 @@ public class CycNart extends CycFort implements Comparable {
      */
     public Object cycListApiValue() {
         CycList apiValue = new CycList();
-        apiValue.add(CycSymbol.quote);
+        apiValue.add(CycObjectFactory.quote);
         apiValue.add(this);
         return apiValue;
     }
@@ -417,44 +410,6 @@ public class CycNart extends CycFort implements Comparable {
         return this.toString().compareTo(object.toString());
      }
 
-    /**
-     * Resets the <tt>CycNart</tt> cache.
-     */
-    public static void resetCache() {
-        cache = new CacheLRU(500);
-    }
-
-    /**
-     * Adds the <tt>CycNart</tt> to the cache.
-     */
-    public static void addCache(CycNart cycNart) {
-        cache.addElement(cycNart.getId(), cycNart);
-    }
-
-    /**
-     * Retrieves the <tt>CycNart</tt> with name, returning null if not found in the cache.
-     */
-    public static CycNart getCache(Integer id) {
-        return (CycNart) cache.getElement(id);
-    }
-
-    /**
-     * Removes the <tt>CycNart</tt> from the cache if it is contained within.
-     */
-    public static void removeCache(CycNart cycNart) {
-        Object element = cache.getElement(cycNart.getId());
-        if (element != null)
-            cache.addElement(cycNart.getId(), null);
-    }
-
-    /**
-     * Returns the size of the <tt>CycNart</tt> object cache.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>CycNart</tt> objects in the cache
-     */
-    public static int getCacheSize() {
-        return cache.size();
-    }
 
 }
 

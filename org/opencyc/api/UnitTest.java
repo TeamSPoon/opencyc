@@ -162,7 +162,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertEquals(Boolean.TRUE, response[0]);
-        Assert.assertEquals(CycSymbol.t, response[1]);
+        Assert.assertEquals(CycObjectFactory.t, response[1]);
 
         // Test KB Ask.
         command = "(removal-ask '(#$genls #$DomesticPet #$DomesticatedAnimal) #$HumanActivitiesMt)";
@@ -203,7 +203,7 @@ public class UnitTest extends TestCase {
 
         // Test return of atom.
         CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("+"));
+        command.add(CycObjectFactory.makeCycSymbol("+"));
         command.add(new Integer(2));
         command.add(new Integer(3));
         Object [] response = {new Integer(0), ""};
@@ -218,7 +218,7 @@ public class UnitTest extends TestCase {
 
         // Test return of string.
         command = new CycList();
-        command.add(CycSymbol.quote);
+        command.add(CycObjectFactory.quote);
         command.add("abc");
         try {
             response = cycConnection.converse(command);
@@ -231,19 +231,19 @@ public class UnitTest extends TestCase {
 
         // Test return of symbolic expression.
         command = new CycList();
-        command.add(CycSymbol.quote);
+        command.add(CycObjectFactory.quote);
         CycList cycList2 = new CycList();
         command.add(cycList2);
-        cycList2.add(CycSymbol.makeCycSymbol("a"));
-        cycList2.add(CycSymbol.makeCycSymbol("b"));
+        cycList2.add(CycObjectFactory.makeCycSymbol("a"));
+        cycList2.add(CycObjectFactory.makeCycSymbol("b"));
         CycList cycList3 = new CycList();
         cycList2.add(cycList3);
-        cycList3.add(CycSymbol.makeCycSymbol("c"));
-        cycList3.add(CycSymbol.makeCycSymbol("d"));
+        cycList3.add(CycObjectFactory.makeCycSymbol("c"));
+        cycList3.add(CycObjectFactory.makeCycSymbol("d"));
         CycList cycList4 = new CycList();
         cycList3.add(cycList4);
-        cycList4.add(CycSymbol.makeCycSymbol("e"));
-        cycList3.add(CycSymbol.makeCycSymbol("f"));
+        cycList4.add(CycObjectFactory.makeCycSymbol("e"));
+        cycList3.add(CycObjectFactory.makeCycSymbol("f"));
         try {
             response = cycConnection.converse(command);
         }
@@ -255,11 +255,11 @@ public class UnitTest extends TestCase {
 
         // Test return of improper list.
         command = new CycList();
-        command.add(CycSymbol.quote);
+        command.add(CycObjectFactory.quote);
         cycList2 = new CycList();
         command.add(cycList2);
-        cycList2.add(CycSymbol.makeCycSymbol("A"));
-        cycList2.setDottedElement(CycSymbol.makeCycSymbol("B"));
+        cycList2.add(CycObjectFactory.makeCycSymbol("A"));
+        cycList2.setDottedElement(CycObjectFactory.makeCycSymbol("B"));
         try {
             //cycConnection.trace = true;
             response = cycConnection.converse(command);
@@ -273,7 +273,7 @@ public class UnitTest extends TestCase {
 
         // Test error return
         command = new CycList();
-        command.add(CycSymbol.nil);
+        command.add(CycObjectFactory.nil);
         try {
             response = cycConnection.converse(command);
         }
@@ -348,7 +348,7 @@ public class UnitTest extends TestCase {
      */
     protected void doTestCycAccess1(CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
-        CycConstant.resetCaches();
+        CycObjectFactory.resetCycConstantCaches();
         // getConstantByName.
         CycConstant cycConstant = null;
         try {
@@ -365,7 +365,7 @@ public class UnitTest extends TestCase {
 
         // getConstantByGuid.
         try {
-            cycConstant = cycAccess.getConstantByGuid(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"));
+            cycConstant = cycAccess.getConstantByGuid(CycObjectFactory.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -391,7 +391,7 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(cycConstant);
         Assert.assertEquals("#$Dog", cycConstant.cyclify());
         Assert.assertEquals("Dog", cycConstant.getName());
-        Assert.assertEquals(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"),
+        Assert.assertEquals(CycObjectFactory.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"),
                             cycConstant.getGuid());
 
         // getComment.
@@ -500,7 +500,7 @@ public class UnitTest extends TestCase {
      */
     protected void doTestCycAccess2 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
-        CycConstant.resetCaches();
+        CycObjectFactory.resetCycConstantCaches();
         // getGenls.
         List genls = null;
         try {
@@ -855,7 +855,7 @@ public class UnitTest extends TestCase {
      */
     protected void doTestCycAccess3 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
-        CycConstant.resetCaches();
+        CycObjectFactory.resetCycConstantCaches();
         // getParaphrase.
         String phrase = null;
         try {
@@ -1278,7 +1278,7 @@ public class UnitTest extends TestCase {
      */
     protected void doTestCycAccess4 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
-        CycConstant.resetCaches();
+        CycObjectFactory.resetCycConstantCaches();
         // getWhyGenl.
         CycList whyGenl = null;
         try {
@@ -1580,7 +1580,7 @@ public class UnitTest extends TestCase {
      */
     protected void doTestCycAccess5 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
-        CycConstant.resetCaches();
+        CycObjectFactory.resetCycConstantCaches();
         // createNewPermanent.
         CycConstant cycConstant = null;
         try {
@@ -1794,7 +1794,7 @@ public class UnitTest extends TestCase {
         // askWithVariable
         try {
             CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)");
-            CycVariable variable = CycVariable.makeCycVariable("?WHAT");
+            CycVariable variable = CycObjectFactory.makeCycVariable("?WHAT");
             CycConstant everythingPSC = CycAccess.current().getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
             mt = everythingPSC;
             CycList response = CycAccess.current().askWithVariable(query, variable, mt);
@@ -1809,8 +1809,8 @@ public class UnitTest extends TestCase {
         try {
             CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation ?WHAT ?WHERE)");
             ArrayList variables = new ArrayList();
-            variables.add(CycVariable.makeCycVariable("?WHAT"));
-            variables.add(CycVariable.makeCycVariable("?WHERE"));
+            variables.add(CycObjectFactory.makeCycVariable("?WHAT"));
+            variables.add(CycObjectFactory.makeCycVariable("?WHERE"));
             CycConstant universeDataMt = CycAccess.current().getKnownConstantByGuid("bd58d0f3-9c29-11b1-9dad-c379636f7270");
             CycList response = CycAccess.current().askWithVariables(query, variables, universeDataMt);
             Assert.assertNotNull(response);
@@ -1911,7 +1911,7 @@ public class UnitTest extends TestCase {
      */
     protected void doTestCycAccess6 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
-        CycConstant.resetCaches();
+        CycObjectFactory.resetCycConstantCaches();
         // Test common constants.
         try {
             Assert.assertEquals(cycAccess.getConstantByName("and"), CycAccess.and);
@@ -1986,15 +1986,15 @@ public class UnitTest extends TestCase {
 
         // setSymbolValue, getSymbolValue
         try {
-            CycSymbol a = CycSymbol.makeCycSymbol("a");
+            CycSymbol a = CycObjectFactory.makeCycSymbol("a");
             cycAccess.setSymbolValue(a, new Integer(1));
             Assert.assertEquals(new Integer(1), cycAccess.getSymbolValue(a));
             cycAccess.setSymbolValue(a, "abc");
             Assert.assertEquals("abc", cycAccess.getSymbolValue(a));
-            cycAccess.setSymbolValue(a, CycSymbol.t);
-            Assert.assertEquals(CycSymbol.t, cycAccess.getSymbolValue(a));
-            cycAccess.setSymbolValue(a, CycSymbol.nil);
-            Assert.assertEquals(CycSymbol.nil, cycAccess.getSymbolValue(a));
+            cycAccess.setSymbolValue(a, CycObjectFactory.t);
+            Assert.assertEquals(CycObjectFactory.t, cycAccess.getSymbolValue(a));
+            cycAccess.setSymbolValue(a, CycObjectFactory.nil);
+            Assert.assertEquals(CycObjectFactory.nil, cycAccess.getSymbolValue(a));
             CycConstant brazil = cycAccess.makeCycConstant("#$Brazil");
             cycAccess.setSymbolValue(a, brazil);
             Assert.assertEquals(brazil, cycAccess.getSymbolValue(a));
@@ -2030,12 +2030,12 @@ public class UnitTest extends TestCase {
             CycNart nart2 = cycAccess.getCycNartById(nartId);
             Assert.assertEquals(nart1, nart2);
             CycList valueList = new CycList();
-            valueList.add(CycSymbol.quote);
+            valueList.add(CycObjectFactory.quote);
             CycList nartList = new CycList();
             valueList.add(nartList);
             nartList.add(nart1);
             nartList.add(nart2);
-            CycSymbol a = CycSymbol.makeCycSymbol("a");
+            CycSymbol a = CycObjectFactory.makeCycSymbol("a");
             cycAccess.setSymbolValue(a, valueList);
             Object object = cycAccess.getSymbolValue(a);
             Assert.assertNotNull(object);

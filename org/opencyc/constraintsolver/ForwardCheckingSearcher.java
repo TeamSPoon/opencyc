@@ -199,7 +199,7 @@ public class ForwardCheckingSearcher {
                 if (verbosity > 2)
                     System.out.println("Populating high cardinality variable " + variable +
                                        "\n  with rule\n" + rule.cyclify());
-                ArrayList permittedValues = askWithVariable(rule.getRule(), variable);
+                ArrayList permittedValues = askWithVariable(rule.getFormula(), variable);
                 for (int j = 0; i < permittedValues.size(); j++) {
                     Object value = permittedValues.get(j);
                     Binding binding = new Binding(variable, value);
@@ -310,14 +310,14 @@ public class ForwardCheckingSearcher {
                                        ArrayList remainingRuleVariables,
                                        int level,
                                        Binding currentBinding) throws IOException {
-        CycList instantiatedRule = rule.getRule().subst(currentBinding.getValue(),
+        CycList instantiatedRule = rule.getFormula().subst(currentBinding.getValue(),
                                                         currentBinding.getCycVariable());
         if (verbosity > 2) {
             System.out.println("Forward checking constraint\n  " + instantiatedRule.cyclify());
         }
         if (rule.isAllDifferent()) {
             if (verbosity > 2)
-                System.out.println("all-different rule\n  " + rule.getRule().cyclify() +
+                System.out.println("all-different rule\n  " + rule.getFormula().cyclify() +
                                    "  for binding " + currentBinding.cyclify());
             return checkForwardDifferentRule(rule,
                                              remainingRuleVariables,
@@ -326,7 +326,7 @@ public class ForwardCheckingSearcher {
         }
         else if (rule.isEvaluatable()) {
             if (verbosity > 2)
-                System.out.println("Evaluatable rule\n  " + rule.getRule() +
+                System.out.println("Evaluatable rule\n  " + rule.getFormula() +
                                    "  for binding " + currentBinding.cyclify());
             ArrayList bindings = new ArrayList();
             bindings.add(currentBinding);
@@ -338,7 +338,7 @@ public class ForwardCheckingSearcher {
         }
         else {
             if (verbosity > 2)
-                System.out.println("Non-evaluatable rule " + rule.getRule().cyclify() +
+                System.out.println("Non-evaluatable rule " + rule.getFormula().cyclify() +
                                    "\n  for binding " + currentBinding.cyclify());
             return checkForwardNonEvaluatableRule(rule,
                                                   level,
@@ -366,7 +366,7 @@ public class ForwardCheckingSearcher {
         remainingRuleVariables.remove(currentBinding.getCycVariable());
         Collections.sort(remainingRuleVariables,
                          new VariablesByAscendingDomainSizeComparator(valueDomains));
-        CycList instantiatedRule = rule.getRule().subst(currentBinding.getValue(),
+        CycList instantiatedRule = rule.getFormula().subst(currentBinding.getValue(),
                                                         currentBinding.getCycVariable());
         // For variables with high domain cardinality, use the first applicable
         // rule to obtain the initial domain.

@@ -149,17 +149,20 @@ public class Unifier {
 
     /**
      * Checks any ground antecedant conjuncts (having no variables) for truthfullness via KB
-     * lookup, returning <tt>false</tt> iff any ground conjunct is false;
+     * lookup, returning <tt>false</tt> iff any ground conjunct is false.  This check is not
+     * performed if subsequent backchaining could prove the ground fact true.
      *
      * @param antecedantConjuncts
      * @return <tt>false</tt> iff any ground conjunct is false
      */
     protected boolean anyFalseViaKbLookup(ArrayList antecedantConjuncts) throws IOException {
+        if (backchainer.backchainDepth < backchainer.maxBackchainDepth)
+            return false;
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
             Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
             if (antecedantConjunct.isGround()) {
                 boolean isAntecedantConjunctTrue =
-                    CycAccess.current().isQueryTrue(antecedantConjunct.getRule(),
+                    CycAccess.current().isQueryTrue(antecedantConjunct.getFormula(),
                                                     backchainer.constraintProblem.mt);
                     if (verbosity > 8)
                         System.out.println("asking KB about antecedant conjunct\n" +

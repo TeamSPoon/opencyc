@@ -78,7 +78,7 @@ public class HornClause {
      * @param rule the given implication <tt>Rule</tt>
      */
     public HornClause(Rule rule) {
-        this(rule.getRule());
+        this(rule.getFormula());
     }
 
     /**
@@ -210,14 +210,14 @@ public class HornClause {
             Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
             if (antecedantConjunct.getVariables().contains(variable)) {
                 antecedantConjunct.substituteVariable(variable, newObject);
-                if (! CycAccess.current().isWellFormedFormula(antecedantConjunct.getRule())) {
+                if (! CycAccess.current().isWellFormedFormula(antecedantConjunct.getFormula())) {
                     if (verbosity > 3)
-                        System.out.println(antecedantConjunct.getRule() + "\n  is not well formed");
+                        System.out.println(antecedantConjunct.getFormula() + "\n  is not well formed");
                     return false;
                 }
                 else {
                     if (verbosity > 3)
-                        System.out.println(antecedantConjunct.getRule() + "\n  is well formed");
+                        System.out.println(antecedantConjunct.getFormula() + "\n  is well formed");
                 }
             }
         }

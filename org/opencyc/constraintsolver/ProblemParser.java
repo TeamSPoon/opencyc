@@ -123,9 +123,9 @@ public class ProblemParser {
                     System.out.println("Ground fact\n" + rule);
                 boolean isTrueFact;
                 if (rule.isEvaluatable())
-                    isTrueFact = Rule.evaluateConstraintRule(rule.getRule());
+                    isTrueFact = Rule.evaluateConstraintRule(rule.getFormula());
                 else
-                    isTrueFact = CycAccess.current().isQueryTrue(rule.getRule(), constraintProblem.mt);
+                    isTrueFact = CycAccess.current().isQueryTrue(rule.getFormula(), constraintProblem.mt);
                 if (verbosity > 3)
                     System.out.println("  --> " + isTrueFact);
                 if (! isTrueFact)
@@ -400,7 +400,7 @@ public class ProblemParser {
                 valueDomains.domains.put(cycVariable, null);
                 if (valueDomains.varsDictionary.containsKey(cycVariable))
                     throw new RuntimeException("Duplicate varsDictionary entry for " + cycVariable);
-                CycList theSet =  (CycList) rule.getRule().third();
+                CycList theSet =  (CycList) rule.getFormula().third();
                 if (! (theSet.first().toString().equals("TheSet")))
                     throw new RuntimeException("Invalid TheSet entry for " + cycVariable);
                 ArrayList domainValues = new ArrayList(theSet.rest());
@@ -452,7 +452,7 @@ public class ProblemParser {
      */
     protected void populateDomainViaQuery(Rule rule, CycVariable cycVariable) throws IOException {
         CycList domainValuesCycList =
-            CycAccess.current().askWithVariable (rule.getRule(),
+            CycAccess.current().askWithVariable (rule.getFormula(),
                                                  cycVariable,
                                                  constraintProblem.mt);
         ArrayList domainValues = new ArrayList();

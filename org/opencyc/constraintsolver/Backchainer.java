@@ -121,7 +121,7 @@ public class Backchainer {
             backchainProblem.setMaxBackchainDepth(this.maxBackchainDepth);
             // Increment the depth of backchaining.
             backchainProblem.backchainer.backchainDepth = this.backchainDepth + 1;
-            ArrayList solutions = backchainProblem.solve(backchainRule.rule);
+            ArrayList solutions = backchainProblem.solve(backchainRule.formula);
             boolean solutionFound = false;
             for (int j = 0; j < solutions.size(); j++) {
                 ArrayList solutionBindings = (ArrayList) solutions.get(j);
@@ -190,7 +190,7 @@ public class Backchainer {
                 conjunctiveAntecedantRule.add(CycAccess.and);
                 for (int j = 0; j < antecedants.size(); j++) {
                     Rule antecedant = (Rule) antecedants.get(j);
-                    conjunctiveAntecedantRule.add(antecedant.getRule());
+                    conjunctiveAntecedantRule.add(antecedant.getFormula());
                 }
                 result.add(new Rule(conjunctiveAntecedantRule));
             }

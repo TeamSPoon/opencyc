@@ -36,7 +36,7 @@ public class Rule  implements Comparable{
     /**
      * The constraint rule formula as an OpenCyc query.
      */
-    protected CycList rule;
+    protected CycList formula;
 
     /**
      * The collection of <tt>CycVariables</tt> used in the rule.  There should
@@ -75,11 +75,11 @@ public class Rule  implements Comparable{
      * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> <tt>String</tt>
      * representation.<p>
      *
-     * @param ruleString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
+     * @param formulaString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public Rule (String ruleString) {
-        rule = CycAccess.current().makeCycList(ruleString);
+    public Rule (String formulaString) {
+        formula = CycAccess.current().makeCycList(formulaString);
         gatherVariables();
     }
 
@@ -91,11 +91,11 @@ public class Rule  implements Comparable{
      *  Rule rule1 = new Rule (cycAccess.makeCycList(ruleAsString));
      * </pre>
      *
-     * @param rule the rule's formula, which must be a well formed OpenCyc
+     * @param formula the rule's formula, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public Rule(CycList rule) {
-        this.rule = rule;
+    public Rule(CycList formula) {
+        this.formula = formula;
         gatherVariables();
     }
 
@@ -108,12 +108,12 @@ public class Rule  implements Comparable{
      *  Rule rule1 = new Rule (new CycList(ruleAsString), 2);
      * </pre>
      *
-     * @param rule the rule's formula, which must be a well formed OpenCyc
+     * @param formula the rule's formula, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      * @param backchainDepth the depth of backchaining when this rule is introduced
      */
-    public Rule(CycList rule, int backchainDepth) {
-        this.rule = rule;
+    public Rule(CycList formula, int backchainDepth) {
+        this.formula = formula;
         this.backchainDepth = backchainDepth;
         gatherVariables();
     }
@@ -145,7 +145,7 @@ public class Rule  implements Comparable{
      */
     protected void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
-        Enumeration e = rule.cycListVisitor();
+        Enumeration e = formula.cycListVisitor();
         while (true) {
             if (! e.hasMoreElements())
                 break;
@@ -162,8 +162,8 @@ public class Rule  implements Comparable{
      *
      * @return a <tt>CycList</tt> which is the rule's formula.
      */
-    public CycList getRule() {
-        return rule;
+    public CycList getFormula() {
+        return formula;
     }
 
     /**
@@ -206,7 +206,7 @@ public class Rule  implements Comparable{
         if (! (object instanceof Rule))
             return false;
         Rule thatRule = (Rule) object;
-        return this.rule.equals(thatRule.getRule());
+        return this.formula.equals(thatRule.getFormula());
     }
 
     /**
@@ -328,7 +328,7 @@ public class Rule  implements Comparable{
      * @return a clone of this instance
      */
     public Object clone() {
-        return new Rule((CycList) this.rule.clone());
+        return new Rule((CycList) this.formula.clone());
     }
 
     /**
@@ -338,7 +338,7 @@ public class Rule  implements Comparable{
      * of this <tt>Rule</tt> object
      */
     public CycConstant getPredicate() {
-        return (CycConstant) rule.first();
+        return (CycConstant) formula.first();
     }
 
     /**
@@ -347,7 +347,7 @@ public class Rule  implements Comparable{
      * @return the arguments of this <tt>Rule</tt> object
      */
     public CycList getArguments() {
-        return (CycList) rule.rest();
+        return (CycList) formula.rest();
     }
 
     /**
@@ -362,7 +362,7 @@ public class Rule  implements Comparable{
         variables.remove(variable);
         if (newObject instanceof CycVariable)
             variables.add(newObject);
-        rule = rule.subst(newObject, variable);
+        formula = formula.subst(newObject, variable);
     }
 
     /**
@@ -427,7 +427,7 @@ public class Rule  implements Comparable{
      * @return <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments
      */
     public boolean hasEvaluatableNumericalArgs() throws IOException {
-        CycList args = this.getRule().rest();
+        CycList args = this.getFormula().rest();
         for (int i = 0; i < args.size(); i++) {
             Object arg = args.get(i);
             if (arg instanceof CycVariable)
@@ -600,7 +600,7 @@ public class Rule  implements Comparable{
      * @return the rule's formula formated as a <tt>String</tt>.
      */
     public String toString() {
-        return rule.toString();
+        return formula.toString();
     }
 
     /**
@@ -610,7 +610,7 @@ public class Rule  implements Comparable{
      * @return a cyclified <tt>String</tt>.
      */
     public String cyclify() {
-        return rule.cyclify();
+        return formula.cyclify();
     }
 
     /**
@@ -626,7 +626,7 @@ public class Rule  implements Comparable{
         if (! variables.contains(cycVariable))
             throw new RuntimeException("Cannot instantiate " + cycVariable +
                                        " in rule " + this);
-        CycList newRule = rule.subst(value, cycVariable);
+        CycList newRule = formula.subst(value, cycVariable);
         return new Rule(newRule);
     }
 

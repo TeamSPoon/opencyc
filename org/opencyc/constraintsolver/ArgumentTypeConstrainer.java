@@ -82,22 +82,40 @@ public class ArgumentTypeConstrainer {
      * @return the argument type constraint rules for the given rule
      */
     public ArrayList retrieveArgumentTypeConstraintRules(Rule rule) throws IOException {
-        ArrayList result = new ArrayList();
-        CycConstant predicate = rule.getPredicate();
         if (verbosity > 3)
             System.out.println("Gathering type constraints for\n" + rule.cyclify());
-        for (int i = 0; i < rule.getArguments().size(); i++) {
-            Object argument = rule.getArguments().get(i);
-            if (rule.getVariables().contains(argument)) {
+        return gatherPredicateVariableArgConstaints(rule.formula);
+    }
+
+    /**
+     * Returns the argument type constraint rules for the variables within the given expression.
+     *
+     * @param expression the expression which possibly contains variables
+     * @return the argument type constraint rules for the variables within the given expression
+     */
+    protected ArrayList gatherPredicateVariableArgConstaints(CycList expression)
+        throws IOException {
+        ArrayList result = new ArrayList();
+        Object arg0 = expression.get(0);
+        if (! (arg0 instanceof CycConstant))
+            return result;
+        CycConstant predicateOrFunction = (CycConstant) arg0;
+        for (int i = 1; i < expression.size(); i++) {
+            Object argument = expression.get(i);
+            if (argument instanceof CycVariable) {
                 CycVariable cycVariable = (CycVariable) argument;
-                int argPosition = i + 1;
-                result.addAll(retrieveArgumentTypeConstraintRules(predicate,
+                int argPosition = i;
+                result.addAll(retrieveArgumentTypeConstraintRules(predicateOrFunction,
                                                                   argPosition,
                                                                   cycVariable));
             }
+            else if (argument instanceof CycList)
+                // Handle variables embedded within expressions.
+                result.addAll(gatherPredicateVariableArgConstaints((CycList) argument));
         }
         return result;
     }
+
 
     /**
      * Retrieves the argument type constraint rules for the given predicate at the given

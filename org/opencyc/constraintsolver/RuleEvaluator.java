@@ -118,7 +118,7 @@ public class RuleEvaluator {
     public boolean ask(Rule rule) throws IOException {
         Object predicate = rule.getPredicate();
         if (predicate.equals(and)) {
-            CycList arguments = rule.getRule().rest();
+            CycList arguments = rule.getFormula().rest();
             for (int i = 0; i < arguments.size(); i++) {
                 Object argument = arguments.get(i);
                 if (! (argument instanceof CycList))
@@ -130,7 +130,7 @@ public class RuleEvaluator {
             return true;
         }
         else if (predicate.equals(or)) {
-            CycList arguments = rule.getRule().rest();
+            CycList arguments = rule.getFormula().rest();
             for (int i = 0; i < arguments.size(); i++) {
                 Object argument = arguments.get(i);
                 if (! (argument instanceof CycList))
@@ -142,7 +142,7 @@ public class RuleEvaluator {
             return false;
         }
         else if (predicate.equals(not)) {
-            CycList expression = (CycList) rule.getRule().second();
+            CycList expression = (CycList) rule.getFormula().second();
             if (! (expression instanceof CycList) ||
                 expression.size() < 2)
                 throw new RuntimeException("Invalid #$not expression: " +
@@ -150,7 +150,7 @@ public class RuleEvaluator {
             return ! ask(new Rule(expression));
         }
         else if (predicate.equals(numericallyEqual)) {
-            Object argument1 = rule.getRule().second();
+            Object argument1 = rule.getFormula().second();
             int argument1Integer = 0;
             if (argument1 instanceof CycList) {
                 if (((CycList) argument1).first().equals(plusFn) &&
@@ -161,9 +161,9 @@ public class RuleEvaluator {
                 argument1Integer = ((Integer) argument1).intValue();
             else
                 // Ask OpenCyc.
-                return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
+                return CycAccess.current().isQueryTrue_Cached(rule.getFormula(),
                                                               constraintProblem.mt);
-            Object argument2 = rule.getRule().third();
+            Object argument2 = rule.getFormula().third();
             int argument2Integer = 0;
             if (argument2 instanceof CycList) {
                 if (((CycList) argument2).first().equals(plusFn) &&
@@ -174,17 +174,17 @@ public class RuleEvaluator {
                 argument2Integer = ((Integer) argument2).intValue();
             else
                 // Ask OpenCyc.
-                return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
+                return CycAccess.current().isQueryTrue_Cached(rule.getFormula(),
                                                               constraintProblem.mt);
             return argument1Integer == argument2Integer;
         }
         else if (predicate.equals(different)) {
-            CycList arguments = rule.getRule().rest();
+            CycList arguments = rule.getFormula().rest();
             return ! arguments.containsDuplicates();
         }
         else
             // Ask OpenCyc.
-            return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
+            return CycAccess.current().isQueryTrue_Cached(rule.getFormula(),
                                                           constraintProblem.mt);
     }
 

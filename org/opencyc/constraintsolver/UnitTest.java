@@ -72,10 +72,12 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testConstraintProblem4"));
             //testSuite.addTest(new UnitTest("testConstraintProblem5"));
             //testSuite.addTest(new UnitTest("testConstraintProblem6"));
-            testSuite.addTest(new UnitTest("testBackchainer1"));
+            testSuite.addTest(new UnitTest("testConstraintProblem7"));
+            //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
 
             //testSuite.addTest(new UnitTest("testBackchainer3"));
+
             //testSuite.addTest(new UnitTest("testBackchainer4"));
             //testSuite.addTest(new UnitTest("testBackchainer5"));
         }
@@ -217,8 +219,8 @@ public class UnitTest extends TestCase {
             ruleAsString = "(#$isa ?x #$Cathedral)";
             rule1 = new Rule (cycAccess.makeCycList(ruleAsString));
             Assert.assertNotNull(rule1);
-            Assert.assertNotNull(rule1.getRule());
-            CycList cycList = rule1.getRule();
+            Assert.assertNotNull(rule1.getFormula());
+            CycList cycList = rule1.getFormula();
             Assert.assertEquals(ruleAsString, cycList.cyclify());
             Assert.assertEquals(ruleAsString, rule1.cyclify());
         }
@@ -689,6 +691,19 @@ public class UnitTest extends TestCase {
         }
 
         try{
+            Rule rule1 = new Rule("(#$holdsIn (#$YearFn 1993) (#$totalDebt ?X (#$BillionDollars 7)))");
+            ArrayList argConstraints =
+                constraintProblem.argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(rule1);
+            Rule rule2 = new Rule ("(#$isa ?X #$GeographicalRegion)");
+            Assert.assertNotNull(argConstraints);
+            Assert.assertEquals(1, argConstraints.size());
+            Assert.assertTrue(argConstraints.contains(rule2));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+        try{
             Rule rule1 = new Rule("(#$countryOfCity ?country ?city)");
             ArrayList argConstraints =
                 constraintProblem.argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(rule1);
@@ -1152,6 +1167,36 @@ public class UnitTest extends TestCase {
         System.out.println("** testConstraintProblem6 OK **");
     }
 
+
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem7() {
+        System.out.println("** testConstraintProblem7 **");
+
+        // NFn.
+        String nFnString =
+            "(#$and (#$physicalParts #$CityOfAustinTX (#$NFn ?COL ?N ?INDEX)) " +
+            "       (#$groupMembers (#$NFn ?COL ?N ?INDEX) ?MEMBER))";
+        System.out.println(nFnString);
+        ConstraintProblem nFnProblem = new ConstraintProblem();
+        nFnProblem.setVerbosity(9);
+        // Request all solutions.
+        nFnProblem.nbrSolutionsRequested = null;
+        try {
+            nFnProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = nFnProblem.solve(nFnString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem7 OK **");
+    }
     /**
      * Tests the <tt>Backchainer</tt> class.
      */

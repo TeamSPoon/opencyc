@@ -1762,7 +1762,7 @@ public class CycAccess {
             command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :backward) ");
             command.append("       (csetq formula (assertion-el-formula rule)) ");
             command.append("       (pwhen (cand (eq (first formula) #$implies) ");
-            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
+            command.append("                    (unify-el-possible '" + rule.getFormula().stringApiValue() + " ");
             command.append("                                          (third formula))) ");
             command.append("         (cpush formula backchain-rules)))) ");
             command.append("   backchain-rules)");
@@ -1773,12 +1773,48 @@ public class CycAccess {
             command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :backward) ");
             command.append("       (csetq formula (assertion-el-formula rule)) ");
             command.append("       (pwhen (cand (eq (first formula) #$implies) ");
-            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
+            command.append("                    (unify-el-possible '" + rule.getFormula().stringApiValue() + " ");
             command.append("                                          (third formula))) ");
             command.append("         (cpush formula backchain-rules)))) ");
             command.append("   backchain-rules)");
         }
         //this.traceOn();
+        return converseList(command.toString());
+    }
+
+    /**
+     * Gets a list of the forward chaining rules which might apply to the given rule.
+     *
+     * @param rule the rule for which backchaining rules are sought
+     * @param mt the microtheory (and its genlMts) in which the search for forward chaining rules takes place
+     * @return a list of the forward chaining rules which might apply to the given predicate
+     */
+    public CycList getForwardChainRules (Rule rule, CycFort mt)
+        throws IOException, UnknownHostException {
+        StringBuffer command = new StringBuffer();
+        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
+            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+            command.append("(clet (backchain-rules formula) ");
+            command.append("  (with-all-mts ");
+            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :forward) ");
+            command.append("       (csetq formula (assertion-el-formula rule)) ");
+            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
+            command.append("                    (unify-el-possible '" + rule.getFormula().stringApiValue() + " ");
+            command.append("                                          (third formula))) ");
+            command.append("         (cpush formula backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
+        else {
+            command.append("(clet (backchain-rules formula) ");
+            command.append("  (with-mt " + mt.stringApiValue() + " ");
+            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :forward) ");
+            command.append("       (csetq formula (assertion-el-formula rule)) ");
+            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
+            command.append("                    (unify-el-possible '" + rule.getFormula().stringApiValue() + " ");
+            command.append("                                          (third formula))) ");
+            command.append("         (cpush formula backchain-rules)))) ");
+            command.append("   backchain-rules)");
+        }
         return converseList(command.toString());
     }
 
@@ -1809,43 +1845,7 @@ public class CycAccess {
             command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
             command.append("   backchain-rules)");
         }
-        this.traceOn();
-        return converseList(command.toString());
-    }
-
-    /**
-     * Gets a list of the forward chaining rules which might apply to the given predicate.
-     *
-     * @param rule the rule for which backchaining rules are sought
-     * @param mt the microtheory (and its genlMts) in which the search for forward chaining rules takes place
-     * @return a list of the forward chaining rules which might apply to the given predicate
-     */
-    public CycList getForwardChainRules (Rule rule, CycFort mt)
-        throws IOException, UnknownHostException {
-        StringBuffer command = new StringBuffer();
-        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
-            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
-            command.append("(clet (backchain-rules formula) ");
-            command.append("  (with-all-mts ");
-            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :forward) ");
-            command.append("       (csetq formula (assertion-el-formula rule)) ");
-            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
-            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
-            command.append("                                          (third formula))) ");
-            command.append("         (cpush formula backchain-rules)))) ");
-            command.append("   backchain-rules)");
-        }
-        else {
-            command.append("(clet (backchain-rules formula) ");
-            command.append("  (with-mt " + mt.stringApiValue() + " ");
-            command.append("    (do-rule-index (rule " + rule.getPredicate().stringApiValue() + " :pos nil :forward) ");
-            command.append("       (csetq formula (assertion-el-formula rule)) ");
-            command.append("       (pwhen (cand (eq (first formula) #$implies) ");
-            command.append("                    (unify-el-possible '" + rule.getRule().stringApiValue() + " ");
-            command.append("                                          (third formula))) ");
-            command.append("         (cpush formula backchain-rules)))) ");
-            command.append("   backchain-rules)");
-        }
+        //this.traceOn();
         return converseList(command.toString());
     }
 

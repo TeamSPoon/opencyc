@@ -38,7 +38,7 @@ public abstract class ModelElement extends Element {
     /**
      * the model elment namespace
      */
-    protected String namespace;
+    protected Namespace namespace;
 
     /**
      * the model element comment
@@ -104,7 +104,7 @@ public abstract class ModelElement extends Element {
      *
      * @return the model elment namespace
      */
-    public String getNamespace () {
+    public Namespace getNamespace () {
         return namespace;
     }
 
@@ -113,7 +113,7 @@ public abstract class ModelElement extends Element {
      *
      * @param namespace the model elment namespace
      */
-    public void setNamespace (String namespace) {
+    public void setNamespace (Namespace namespace) {
         this.namespace = namespace;
     }
 

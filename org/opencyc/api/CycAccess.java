@@ -3688,7 +3688,10 @@ public class CycAccess {
      */
     public synchronized void kill (CycConstant cycConstant)
         throws IOException, UnknownHostException, CycApiException {
-        converseBoolean("(cyc-kill " + cycConstant.stringApiValue() + ")");
+        String command =
+            withBookkeepingInfo() +
+            "(ke-kill-now " + cycConstant.stringApiValue() + "))";
+        converseBoolean(command);
         CycObjectFactory.removeCaches(cycConstant);
     }
 
@@ -3739,7 +3742,14 @@ public class CycAccess {
      */
     public synchronized  void kill (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
-        converseBoolean("(cyc-kill '" + cycFort.toString() + ")");
+        if (cycFort instanceof CycConstant)
+            kill((CycConstant) cycFort);
+        else {
+            String command =
+                withBookkeepingInfo() +
+                "(ke-kill-now '" + cycFort.stringApiValue() + "))";
+            converseBoolean(command);
+        }
     }
 
     /**
@@ -3795,7 +3805,7 @@ public class CycAccess {
     }
 
     /**
-     * Asserts the given sentence and bookkeeping info, and then places it on
+     * Asserts the given sentence, and then places it on
      * the transcript queue.
      *
      * @param sentence the given sentence for assertion
@@ -3806,12 +3816,71 @@ public class CycAccess {
      */
     public void assertWithTranscript (CycList sentence, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
+        assertWithTranscript(sentence.cyclify(), mt);
+    }
+
+    /**
+     * Asserts the given sentence, and then places it on
+     * the transcript queue.
+     *
+     * @param sentence the given sentence for assertion
+     * @param mt the microtheory in which the assertion is placed
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertWithTranscript (String sentence, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
         String command =
             "(clet ((*the-cyclist* " + cyclist.cyclify() + ")\n" +
             "       (*ke-purpose* " + project.cyclify() + "))\n" +
             "  (ke-assert-now\n" +
-            "    '" + sentence.cyclify() + "\n" +
+            "    '" + sentence + "\n" +
             "    " + mt.cyclify() + "))";
+        converseVoid(command);
+    }
+
+    /**
+     * Asserts the given sentence, and then places it on
+     * the transcript queue.
+     *
+     * @param sentence the given sentence for assertion
+     * @param mt the microtheory in which the assertion is placed
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertWithTranscriptAndBookkeeping (CycList sentence, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        assertWithTranscript(sentence.cyclify(), mt);
+    }
+
+    /**
+     * Asserts the given sentence, and then places it on
+     * the transcript queue.
+     *
+     * @param sentence the given sentence for assertion
+     * @param mt the microtheory in which the assertion is placed
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertWithTranscriptAndBookkeeping (String sentence, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String projectName = "nil";
+        if (project != null)
+            projectName = project.stringApiValue();
+        String cyclistName = "nil";
+        if (cyclist != null)
+            cyclistName = cyclist.stringApiValue();
+        String command =
+            "(with-bookkeeping-info \n" +
+            "  (new-bookkeeping-info " + cyclistName + " (the-date) " + projectName + "(the-second))\n" +
+            "  (clet ((*the-cyclist* " + cyclistName + ")\n" +
+            "         (*ke-purpose* " + projectName + "))\n" +
+            "    (ke-assert-now\n" +
+            "      '" + sentence + "\n" +
+            "      " + mt.cyclify() + ")))";
         converseVoid(command);
     }
 
@@ -3859,16 +3928,7 @@ public class CycAccess {
      */
     public CycConstant createNewPermanent (String constantName)
         throws IOException, UnknownHostException, CycApiException {
-        CycConstant cycConstant = getConstantByName(constantName);
-        if (cycConstant != null)
-            return cycConstant;
-        String name = constantName;
-        if (name.startsWith("#$"))
-            name = name.substring(2);
-        String command = withBookkeepingInfo() +
-            "(cyc-create-new-permanent \"" + name + "\"))";
-        converseVoid(command);
-        return getConstantByName(name);
+        return makeCycConstant(constantName);
     }
 
     /**
@@ -3889,13 +3949,11 @@ public class CycAccess {
                            CycFort arg2)
         throws IOException, UnknownHostException, CycApiException {
         // (predicate <CycFort> <CycFort>)
-        String command = withBookkeepingInfo() +
-            "(cyc-assert '(" +
-            gafApiValue(predicate) + " " +
-            gafApiValue(arg1) + " " +
-            gafApiValue(arg2) + ")" +
-            gafApiValue(mt) + "))";
-        converseVoid(command);
+        String sentence =
+            "(" + predicate.cyclify() + " " +
+            arg1.cyclify() + " " +
+            arg2.cyclify() + ")";
+        assertWithTranscriptAndBookkeeping(sentence, mt);
     }
 
     /**
@@ -3916,13 +3974,11 @@ public class CycAccess {
                            String arg2)
         throws IOException, UnknownHostException, CycApiException {
         // (predicate <CycFort> <String>)
-        String command = withBookkeepingInfo() +
-            "(cyc-assert '(" +
-            gafApiValue(predicate) + " " +
-            gafApiValue(arg1) + " " +
-            "\"" + arg2 + "\")" +
-            gafApiValue(mt) + "))";
-        converseVoid(command);
+        String sentence =
+            "(" + predicate.cyclify() + " " +
+            arg1.cyclify() + " \"" +
+            arg2 + "\")";
+        assertWithTranscriptAndBookkeeping(sentence, mt);
     }
 
     /**
@@ -3943,13 +3999,11 @@ public class CycAccess {
                            CycList arg2)
         throws IOException, UnknownHostException, CycApiException {
         // (predicate <CycFort> <List>)
-        String command = withBookkeepingInfo() +
-            "(cyc-assert '(" +
-            gafApiValue(predicate) + " " +
-            gafApiValue(arg1) + " " +
-            arg2.cyclify() + ")" +
-            gafApiValue(mt) + "))";
-        converseVoid(command);
+        String sentence =
+            "(" + predicate.cyclify() + " " +
+            arg1.cyclify() + " " +
+            arg2.cyclify() + ")";
+        assertWithTranscriptAndBookkeeping(sentence, mt);
     }
 
     /**
@@ -3970,28 +4024,17 @@ public class CycAccess {
                            int arg2)
         throws IOException, UnknownHostException, CycApiException {
         // (predicate <CycFort> <int>)
-        String command = withBookkeepingInfo() +
-            "(cyc-assert '(" +
-            gafApiValue(predicate) + " " +
-            gafApiValue(arg1) + " " +
-            arg2 + ")" +
-            gafApiValue(mt) + "))";
-        converseVoid(command);
+        String sentence =
+            "(" + predicate.cyclify() + " " +
+            arg1.cyclify() + " " +
+            Integer.toString(arg2) + ")";
+        assertWithTranscriptAndBookkeeping(sentence, mt);
     }
 
-
-
-
-    // TODO assertGaf does *not* write to the transcript.
-    // figure out a way to encapsulate the choices whether to use
-    // bookkeeping and the transcript.  Maybe just CycAccess booleans.
-
-
-
-
     /**
-     * Asserts a ground atomic formula (gaf) in the specified microtheory MT.  The operation
-     * will be added to the KB transcript for replication and archive.
+     * Asserts a ground atomic formula (gaf) in the specified microtheory MT.
+     * The operation and its bookkeeping info will be added to the KB transcript
+     * for replication and archive.
      *
      * @param mt the microtheory in which the assertion is made
      * @param predicate the ternary predicate of the assertion
@@ -4009,31 +4052,12 @@ public class CycAccess {
                            CycFort arg3)
         throws IOException, UnknownHostException, CycApiException {
         // (predicate <CycFort> <CycFort> <CycFort>)
-        String command = withBookkeepingInfo() +
-            "(cyc-assert '(" +
-            gafApiValue(predicate) + " " +
-            gafApiValue(arg1) + " " +
-            gafApiValue(arg2) + " " +
-            gafApiValue(arg3) + ")" +
-            gafApiValue(mt) + "))";
-        converseVoid(command);
-    }
-
-
-    /**
-     * Returns a string form of the given term that is used in gaf assertions.
-     *
-     * @param cycFort the given term used in a gaf assertion
-     * @return the string form of the given term that is used in gaf assertions
-     */
-    protected String gafApiValue (CycFort cycFort) {
-        return cycFort.cyclify();
-        /*
-        if (cycFort instanceof CycConstant)
-            return cycFort.cyclify();
-        else
-            return cycFort.toString();
-            */
+        String sentence =
+            "(" + predicate.cyclify() + " " +
+            arg1.cyclify() + " " +
+            arg2.cyclify() + " " +
+            arg3.cyclify() + ")";
+        assertWithTranscriptAndBookkeeping(sentence, mt);
     }
 
 
@@ -4050,11 +4074,7 @@ public class CycAccess {
     public void assertGaf (CycList gaf,
                            CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
-        String command = withBookkeepingInfo() +
-            "(cyc-assert '" +
-            gaf.stringApiValue() +
-            mt.stringApiValue() + "))";
-        converseVoid(command);
+        assertWithTranscriptAndBookkeeping(gaf, mt);
     }
 
     /**
@@ -4070,7 +4090,7 @@ public class CycAccess {
                             CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
         String command = withBookkeepingInfo() +
-            "(cyc-unassert '" +
+            "(ke-unassert-now '" +
             gaf.stringApiValue() +
             mt.stringApiValue() + "))";
         converseVoid(command);
@@ -4662,32 +4682,46 @@ public class CycAccess {
     }
 
     /**
-     * Constructs a new <tt>CycConstant</tt> object using the constant name.
+     * Returns a new <tt>CycConstant</tt> object using the constant name,
+     * recording bookkeeping information and archiving to the Cyc transcript.
      *
      * @param name Name of the constant. If prefixed with "#$", then the prefix is
      * removed for canonical representation.
+     * @return a new <tt>CycConstant</tt> object using the constant name,
+     * recording bookkeeping information and archiving to the Cyc transcript
      * @throws UnknownHostException if cyc server host not found on the network
      * @throws IOException if a data communication error occurs
      * @throws CycApiException if the api request results in a cyc server error
      */
     public CycConstant makeCycConstant(String name)
         throws UnknownHostException, IOException, CycApiException {
+        String constantName = name;
+        if (constantName.startsWith("#$"))
+            constantName = constantName.substring(2);
         CycConstant cycConstant = this.getConstantByName(name);
-        if (cycConstant == null) {
-            String command =
-                withBookkeepingInfo() +
-                "(clet ((*require-case-insensitive-name-uniqueness* nil)) \n" +
-                "  (cyc-create \"" + name + "\" nil)))";
-            Object object = converseObject(command);
-            if (object instanceof CycConstant)
-                cycConstant = (CycConstant) object;
-            else
-                throw new CycApiException("Cannot create new constant for " + name);
-            cycConstant.getName();
-            cycConstant.getGuid();
-            CycObjectFactory.addCycConstantCacheByName(cycConstant);
-            CycObjectFactory.addCycConstantCacheById(cycConstant);
-        }
+        if (cycConstant != null)
+            return cycConstant;
+        String projectName = "nil";
+        if (project != null)
+            projectName = project.stringApiValue();
+        String cyclistName = "nil";
+        if (cyclist != null)
+            cyclistName = cyclist.stringApiValue();
+        String command =
+            withBookkeepingInfo() +
+            "(clet ((*require-case-insensitive-name-uniqueness* nil)\n" +
+            "       (*the-cyclist* " + cyclistName + ")\n" +
+            "       (*ke-purpose* " + projectName + "))\n" +
+            "  (ke-create-now \"" + name + "\")))";
+        Object object = converseObject(command);
+        if (object instanceof CycConstant)
+            cycConstant = (CycConstant) object;
+        else
+            throw new CycApiException("Cannot create new constant for " + name);
+        cycConstant.getName();
+        cycConstant.getGuid();
+        CycObjectFactory.addCycConstantCacheByName(cycConstant);
+        CycObjectFactory.addCycConstantCacheById(cycConstant);
         return cycConstant;
     }
 
@@ -5742,10 +5776,12 @@ public class CycAccess {
                               CycFort argNIsa)
         throws IOException, UnknownHostException, CycApiException {
         // (#$argIsa relation argPosition argNIsa)
-        assertGaf(universalVocabularyMt,
-                  getKnownConstantByGuid("bee22d3d-9c29-11b1-9dad-c379636f7270"),
-                  relation,
-                  argNIsa);
+        CycList sentence = new CycList();
+        sentence.add(getKnownConstantByGuid("bee22d3d-9c29-11b1-9dad-c379636f7270"));
+        sentence.add(relation);
+        sentence.add(new Integer(argPosition));
+        sentence.add(argNIsa);
+        assertGaf(sentence, universalVocabularyMt);
     }
 
     /**

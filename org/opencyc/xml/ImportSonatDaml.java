@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
 
 /**
@@ -34,12 +35,12 @@ import org.opencyc.util.*;
 public class ImportSonatDaml {
 
     /**
-     * The list of DAML documents and import microtheories.
+     * the list of DAML documents and import microtheories
      */
     protected ArrayList damlDocInfos = new ArrayList();
 
     /**
-     * CycAccess object to manage api connection the the Cyc server.
+     * CycAccess object to manage api connection the the Cyc server
      */
     protected CycAccess cycAccess;
 
@@ -51,10 +52,21 @@ public class ImportSonatDaml {
     protected HashMap ontologyNicknames = new HashMap();
 
     /**
-     * The name of the KB Subset collection which identifies ontology import
-     * terms in Cyc.
+     * the name of the KB Subset collection which identifies ontology import
+     * terms in Cyc
      */
     protected String kbSubsetCollectionName = "DamlSonatConstant";
+
+    /**
+     * head of the SONAT DAML microtheory spindle
+     */
+    protected String damlSonatSpindleHeadMt = "DamlSonatSpindleHeadMt";
+
+    /**
+     * collector (bottom) of the SONAT DAML microtheory spindle
+     */
+    protected String damlSonatSpindleCollectorMt = "DamlSonatSpindleCollectorMt";
+
 
     /**
      * Constructs a new ImportSonatDaml object.
@@ -108,6 +120,10 @@ public class ImportSonatDaml {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
+            if (cycAccess.isOpenCyc()) {
+                cycAccess.assertGenlMt(importMt, damlSonatSpindleHeadMt);
+                cycAccess.assertGenlMt(damlSonatSpindleCollectorMt, importMt);
+            }
             initializeDamlOntologyMt(importMt);
             importDaml.initialize();
             importDaml.importDaml(damlPath, importMt);
@@ -126,7 +142,7 @@ public class ImportSonatDaml {
                                          "DamlSonatDrcVesOntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/10/html/airport-ont.daml",
                                          "DamlSonatAirportOntologyMt"));
-        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips-10-4",
+        damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips-10-4-ont",
                                          "DamlSonatFips10-4OntologyMt"));
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2001/09/countries/fips.daml",
                                          "DamlSonatFipsOntologyMt"));
@@ -279,12 +295,9 @@ public class ImportSonatDaml {
     protected void initializeDamlVocabulary ()
         throws IOException, UnknownHostException, CycApiException {
         Log.current.println("Creating DAML vocabulary");
-        if (cycAccess.isOpenCyc()
-            //TODO
-            || true) {
+        if (cycAccess.isOpenCyc()) {
             cycAccess.setCyclist("CycAdministrator");
             cycAccess.setKePurpose("OpenCycProject");
-
             // DamlSonatConstant
             String term = "DamlSonatConstant";
             String comment = "The KB subset collection of DAML SONAT terms.";
@@ -293,31 +306,36 @@ public class ImportSonatDaml {
             cycAccess.assertIsa(term, "VariableOrderCollection");
             cycAccess.assertGenls(term, "CycLConstant");
 
-            // DamlDatatypeProperty
-            cycAccess.createCollection("DamlDatatypeProperty",
-                                       "The collection of #$Predicates having a " +
-                                       "SubLAtomicTerm as the second argument.",
-                                       "BaseKB",
-                                       "PredicateCategory",
-                                       "IrreflexiveBinaryPredicate");
-            // DamlObjectProperty
-            cycAccess.createCollection("DamlObjectProperty",
-                                       "The collection of #$Predicates not having a " +
-                                       "SubLAtomicTerm as the second argument.",
-                                       "BaseKB",
-                                       "PredicateCategory",
-                                       "BinaryPredicate");
-
-            // URLFn
-            cycAccess.createIndivDenotingUnaryFunction(
-                "URLFn",
-                "An instance of both IndividualDenotingFunction and ReifiableFunction. " +
-                "Given a URL string as its single argument, URLFn returns the correspond " +
-                " instance of UniformResourceLocator.",
-                "BaseKB",
-                "CharacterString",
-                "UniformResourceLocator");
         }
+        else {
+            cycAccess.setCyclist("SteveReed");
+            cycAccess.setKePurpose("DAMLProject");
+        }
+
+        // DamlDatatypeProperty
+        cycAccess.createCollection("DamlDatatypeProperty",
+                                   "The collection of #$Predicates having a " +
+                                   "SubLAtomicTerm as the second argument.",
+                                   "BaseKB",
+                                   "PredicateCategory",
+                                   "IrreflexiveBinaryPredicate");
+        // DamlObjectProperty
+        cycAccess.createCollection("DamlObjectProperty",
+                                   "The collection of #$Predicates not having a " +
+                                   "SubLAtomicTerm as the second argument.",
+                                   "BaseKB",
+                                   "PredicateCategory",
+                                   "BinaryPredicate");
+
+        // URLFn
+        cycAccess.createIndivDenotingUnaryFunction(
+            "URLFn",
+            "An instance of both IndividualDenotingFunction and ReifiableFunction. " +
+            "Given a URL string as its single argument, URLFn returns the correspond " +
+            " instance of UniformResourceLocator.",
+            "BaseKB",
+            "CharacterString",
+            "UniformResourceLocator");
     }
 
     /**

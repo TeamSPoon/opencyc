@@ -430,12 +430,10 @@ public class ImportDaml implements StatementHandler {
                               DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
-        String collectionName = objectTermInfo.toString();
-        CycFort collection = cycAccess.getConstantByName(collectionName);
-        if (collection == null) {
-            Log.current.println("*** " + collectionName + " is undefined ***\n");
-            collection = importTerm(objectTermInfo);
+        CycFort collection = importTerm(objectTermInfo);
+        if (! cycAccess.isCollection(collection)) {
             cycAccess.assertIsaCollection(collection);
+            Log.current.println("*** forward reference to collection " + collection.cyclify());
         }
         cycAccess.assertIsa(term,
                             collection);
@@ -454,16 +452,10 @@ public class ImportDaml implements StatementHandler {
                                 DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
-        if (term == null) {
-            Log.current.println("\n*** " + subjectTermInfo.toString() + " is an invalid constant ***");
-            return;
-        }
-        String collectionName = objectTermInfo.toString();
-        CycFort collection = cycAccess.getConstantByName(collectionName);
-        if (collection == null) {
-            Log.current.println("\n*** " + collectionName + " is undefined ***");
-            collection = importTerm(objectTermInfo);
+        CycFort collection = importTerm(objectTermInfo);
+        if (! cycAccess.isCollection(collection)) {
             cycAccess.assertIsaCollection(collection);
+            Log.current.println("*** forward reference to collection " + collection.cyclify());
         }
         cycAccess.assertGenls(term,
                               collection);
@@ -502,6 +494,10 @@ public class ImportDaml implements StatementHandler {
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term1 = importTerm(subjectTermInfo);
         CycFort term2 = importTerm(objectTermInfo);
+        if (! cycAccess.isCollection(term2)) {
+            cycAccess.assertIsaCollection(term2);
+            Log.current.println("*** forward reference to collection " + term2.cyclify());
+        }
         cycAccess.assertArgIsa(term1, 1, term2);
         Log.current.println("(#$arg1Isa " +
                             term1.cyclify() + " " +
@@ -519,6 +515,10 @@ public class ImportDaml implements StatementHandler {
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term1 = importTerm(subjectTermInfo);
         CycFort term2 = importTerm(objectTermInfo);
+        if (! cycAccess.isCollection(term2)) {
+            cycAccess.assertIsaCollection(term2);
+            Log.current.println("*** forward reference to collection " + term2.cyclify());
+        }
         cycAccess.assertArgIsa(term1, 2, term2);
         Log.current.println("(#$arg2Isa " +
                           term1.cyclify() + " " +
@@ -555,6 +555,11 @@ public class ImportDaml implements StatementHandler {
         throws IOException, UnknownHostException, CycApiException  {
         CycFort specPred = importTerm(subjectTermInfo);
         CycFort genlPred = importTerm(objectTermInfo);
+        if (! cycAccess.isBinaryPredicate((CycConstant) genlPred)) {
+            // forward reference
+            cycAccess.assertIsaBinaryPredicate(genlPred);
+            Log.current.println("*** forward reference to predicate " + genlPred.cyclify());
+        }
         cycAccess.assertGenlPreds(specPred,
                                   genlPred);
         Log.current.println("(#$genlPreds " +
@@ -1184,7 +1189,15 @@ public class ImportDaml implements StatementHandler {
         protected void formInterArgIsaConstraint()
             throws IOException, UnknownHostException, CycApiException {
             if (toClasses.size() == 1) {
+                if (! cycAccess.isBinaryPredicate((CycConstant) property)) {
+                    cycAccess.assertIsaBinaryPredicate(property);
+                    Log.current.println("*** forward reference to predicate " + property.cyclify());
+                }
                 CycFort toClass = (CycFort) toClasses.get(0);
+                if (! cycAccess.isCollection(toClass)) {
+                    cycAccess.assertIsaCollection(toClass);
+                    Log.current.println("*** forward reference to collection " + toClass.cyclify());
+                }
                 String interArgIsaConstraintString =
                     "(#$interArgIsa1-2 " +
                     property.cyclify() + " " +

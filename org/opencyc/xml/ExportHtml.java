@@ -232,17 +232,17 @@ public class ExportHtml {
             //exportHtml.exportedVocabularyOutputPath = "counter-terrorism-vocabulary.html";
             //exportHtml.exportedHierarchyOutputPath = "counter-terrorism-hierarchy.html";
 
+            exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
+            exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
+            exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
+
             //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
             //exportHtml.exportedVocabularyOutputPath = "eeld-shared-vocabulary.html";
             //exportHtml.exportedHierarchyOutputPath = "eeld-shared-hierarchy.html";
 
-            exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCandidateConstantGuid;
-            exportHtml.exportedVocabularyOutputPath = "eeld-shared-candidate-vocabulary.html";
-            exportHtml.exportedHierarchyOutputPath = "eeld-shared-candidate-hierarchy.html";
-
-            //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
-            //exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
-            //exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
+            //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCandidateConstantGuid;
+            //exportHtml.exportedVocabularyOutputPath = "eeld-shared-candidate-vocabulary.html";
+            //exportHtml.exportedHierarchyOutputPath = "eeld-shared-candidate-hierarchy.html";
 
             exportHtml.cycKbSubsetFilterGuid = ikbConstantGuid;
             exportHtml.export(EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE);
@@ -1067,6 +1067,10 @@ public class ExportHtml {
         return  upwardClosure;
     }
 }
+
+
+
+
 
 
 

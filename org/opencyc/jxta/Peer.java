@@ -219,6 +219,7 @@ public class Peer implements QueryHandler {
             // could not instantiate the group, print the stack and exit
             Log.current.errorPrintln("fatal error : group creation failure");
             Log.current.printStackTrace(e);
+
             System.exit(1);
         }
     }
@@ -238,7 +239,7 @@ public class Peer implements QueryHandler {
     }
 
     /**
-     * Sends the query to the given peer.  If the peer is null, then the
+     * Sends the query to the given peer.  If the peer is null, then th
      * query is propagated.
      *
      * @param resolverQueryMsg the query
@@ -324,6 +325,10 @@ public class Peer implements QueryHandler {
         this.verbosity = verbosity;
     }
 }
+
+
+
+
 
 
 

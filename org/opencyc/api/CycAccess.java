@@ -912,14 +912,32 @@ public class CycAccess {
         }
         CycObjectFactory.addCycNartCache(cycNart);
         CycList command = new CycList();
-        command.add(CycObjectFactory.makeCycSymbol("nart-el-formula"));
-        CycList command1 = new CycList();
-        command.add(command1);
-        command1.add(CycObjectFactory.makeCycSymbol("find-nart-by-id"));
-        command1.add(id);
-        CycList formula = converseList(command);
-        cycNart.setFunctor((CycFort) formula.first());
-        cycNart.setArguments(formula.rest());
+        if (communicationMode == CycConnection.BINARY_MODE) {
+            command.add(CycObjectFactory.makeCycSymbol("nart-hl-formula"));
+            CycList command1 = new CycList();
+            command.add(command1);
+            command1.add(CycObjectFactory.makeCycSymbol("find-nart-by-id"));
+            command1.add(id);
+            CycList formula = converseList(command);
+            cycNart.setFunctor((CycFort) formula.first());
+            cycNart.setArguments(formula.rest());
+        }
+        else {
+            command.add(CycObjectFactory.makeCycSymbol("nart-el-formula"));
+            CycList command1 = new CycList();
+            command.add(command1);
+            command1.add(CycObjectFactory.makeCycSymbol("find-nart-by-id"));
+            command1.add(id);
+            CycList formula = converseList(command);
+            cycNart.setFunctor((CycFort) formula.first());
+            cycNart.setArguments(formula.rest());
+            List arguments = cycNart.getArguments();
+            for (int i = 0; i < arguments.size(); i++) {
+                Object argument = arguments.get(i);
+                if (argument instanceof CycList)
+                    arguments.set(i, new CycNart((CycList) argument));
+            }
+        }
         return cycNart;
     }
 

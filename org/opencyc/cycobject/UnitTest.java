@@ -373,13 +373,11 @@ public class UnitTest extends TestCase {
             for (int i = 0; i < myNartsBackFromCyc.size(); i++) {
                 Assert.assertTrue(myNartsBackFromCyc.get(i) instanceof CycNart);
                 CycNart myNartBackFromCyc = (CycNart) myNartsBackFromCyc.get(i);
-                System.out.println("myNartBackFromCyc " + myNartBackFromCyc.cyclify());
                 Assert.assertTrue(myNartBackFromCyc.getFunctor() instanceof CycFort);
                 Assert.assertTrue(myNartBackFromCyc.getArguments() instanceof ArrayList);
                 ArrayList args = (ArrayList) myNartBackFromCyc.getArguments();
                 for (int j = 0; j < args.size(); j++) {
                     Object arg = args.get(j);
-                    System.out.println("myNartBackFromCyc arg " + arg + "  (" + arg.getClass() + ")");
                     Assert.assertTrue(arg instanceof CycFort);
                 }
 

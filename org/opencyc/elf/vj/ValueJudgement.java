@@ -1,6 +1,17 @@
 package org.opencyc.elf.vj;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
+
+import org.opencyc.elf.Result;
+
+import org.opencyc.elf.Status;
+
+import org.opencyc.elf.bg.planner.Schedule;
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
+//// External Imports
+import java.util.ArrayList;
 
 
 /**
@@ -28,12 +39,18 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ValueJudgement extends NodeComponent {
-  /**
+  
+  //// Constructors
+  
+   /**
    * Constructs a new ValueJudgement object.
    */
   public ValueJudgement() {
   }
 
+  
+  //// Public Area
+  
   /**
    * Returns a string representation of this object.
    * 
@@ -42,4 +59,68 @@ public class ValueJudgement extends NodeComponent {
   public String toString() {
     return "ValueJudgement for " + node.getName();
   }
+  
+  //// Protected Area
+  
+  /**
+   * Receives the evaluate schedule message from ?.
+   */
+  protected void receiveEvaluateSchedule () {
+    //TODO
+    // receive via channel from ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Sends the schedule evaluation message to ?.
+   */
+  protected void sendScheduleEvaluation () {
+    //TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // Result result
+  }
+  
+  /**
+   * Receives the predicted input message from ?.
+   */
+  protected void receivePredictedInput () {
+    //TODO
+    // receive via channel from ?
+    // Object obj
+  }
+  
+  /**
+   * Receives the update message from ?.
+   */
+  protected void receiveUpdate () {
+    //TODO
+    // receive via channel from ?
+    // Object obj
+    // Object data
+  }
+  
+  /**
+   * Sends the value Judgement status message to ?.
+   */
+  protected void sendValueJudgementStatus () {
+    //TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // Status status
+  }
+  
+  
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
 }

@@ -1,6 +1,7 @@
 package org.opencyc.cycobject;
 
 import org.opencyc.api.*;
+import org.opencyc.cycobject.databinding.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc GUID (Globally Unique
@@ -70,8 +71,8 @@ public class Guid {
      *
      * @return the GuidXmlDataBindingImpl object which contains this Guid
      */
-    public GuidXmlDataBindingImpl toGuidXmlDataBindingImpl () {
-        GuidXmlDataBindingImpl guidXmlDataBindingImpl = new GuidXmlDataBindingImpl();
+    public GuidXmlDataBinding toGuidXmlDataBinding () {
+        GuidXmlDataBinding guidXmlDataBindingImpl = new GuidXmlDataBindingImpl();
         guidXmlDataBindingImpl.setGuidString(guidString);
         return guidXmlDataBindingImpl;
     }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.io.*;
 import org.opencyc.xml.*;
 import org.opencyc.api.*;
+import org.opencyc.cycobject.databinding.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc Constant.
@@ -297,11 +298,11 @@ public class CycConstant extends CycFort implements Comparable {
      *
      * @return the CycConstantXmlDataBindingImpl object which contains this CycConstant
      */
-    public CycConstantXmlDataBindingImpl toCycConstantXmlDataBindingImpl () {
-        CycConstantXmlDataBindingImpl cycConstantXmlDataBindingImpl = new CycConstantXmlDataBindingImpl();
+    public CycConstantXmlDataBinding toCycConstantXmlDataBinding () {
+        CycConstantXmlDataBinding cycConstantXmlDataBindingImpl = new CycConstantXmlDataBindingImpl();
         cycConstantXmlDataBindingImpl.setId(this.getId());
         cycConstantXmlDataBindingImpl.setName(name);
-        cycConstantXmlDataBindingImpl.setGuidXmlDataBindingImpl(guid.toGuidXmlDataBindingImpl());
+        cycConstantXmlDataBindingImpl.setGuidXmlDataBinding(guid.toGuidXmlDataBinding());
         return cycConstantXmlDataBindingImpl;
     }
 }

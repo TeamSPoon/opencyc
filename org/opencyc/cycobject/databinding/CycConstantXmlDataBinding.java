@@ -25,7 +25,7 @@ package org.opencyc.cycobject.databinding;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface CycConstantXmlDataBinding extends CycFortXmlDataBinding {
+public interface CycConstantXmlDataBinding  extends CycFortXmlDataBinding {
 
     public GuidXmlDataBinding getGuidXmlDataBinding ();
 

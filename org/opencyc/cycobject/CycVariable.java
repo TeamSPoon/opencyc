@@ -1,5 +1,6 @@
 package org.opencyc.cycobject;
 
+import org.opencyc.cycobject.databinding.*;
 /**
  * Provides the behavior and attributes of an OpenCyc variable, typically used
  * in rule and query expressions.
@@ -127,8 +128,8 @@ public class CycVariable implements Comparable {
      *
      * @return the CycVariableXmlDataBindingImpl object which contains this CycVariable
      */
-    public CycVariableXmlDataBindingImpl toCycVariableXmlDataBindingImpl () {
-        CycVariableXmlDataBindingImpl cycVariableXmlDataBindingImpl = new CycVariableXmlDataBindingImpl();
+    public CycVariableXmlDataBinding toCycVariableXmlDataBinding () {
+        CycVariableXmlDataBinding cycVariableXmlDataBindingImpl = new CycVariableXmlDataBindingImpl();
         cycVariableXmlDataBindingImpl.setId(id);
         cycVariableXmlDataBindingImpl.setName(name);
         return cycVariableXmlDataBindingImpl;

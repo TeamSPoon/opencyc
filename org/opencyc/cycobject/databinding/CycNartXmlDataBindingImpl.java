@@ -31,22 +31,22 @@ import java.util.*;
 public class CycNartXmlDataBindingImpl  extends CycFortXmlDataBindingImpl
     implements CycNartXmlDataBinding {
 
-    private CycFortXmlDataBinding functor;
-    private CycListXmlDataBinding argumentList;
+    private FunctorXmlDataBinding functorXmlDataBinding;
+    private CycListXmlDataBinding arguments;
 
     public CycNartXmlDataBindingImpl() {
     }
 
-    public CycFortXmlDataBinding getFunctor() {
-        return functor;
+    public FunctorXmlDataBinding getFunctorXmlDataBinding() {
+        return functorXmlDataBinding;
     }
-    public void setFunctor (CycFortXmlDataBinding functor) {
-        this.functor = functor;
+    public void setFunctorXmlDataBinding (FunctorXmlDataBinding functorXmlDataBinding) {
+        this.functorXmlDataBinding = functorXmlDataBinding;
     }
-    public CycListXmlDataBinding getArgumentList () {
-        return argumentList;
+    public CycListXmlDataBinding getArguments () {
+        return arguments;
     }
-    public void setArgumentList (CycListXmlDataBinding argumentList) {
-        this.argumentList = argumentList;
+    public void setArguments (CycListXmlDataBinding arguments) {
+        this.arguments = arguments;
     }
 }

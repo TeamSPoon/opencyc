@@ -1,7 +1,8 @@
 package org.opencyc.cycobject.databinding;
 
 /**
- * Defines the interface for an XML databinding compatible container for CycFort objects.
+ * Provides an XML databinding compatible container for the functor component
+ * of a CycNart.
  *
  * @version $0.1$
  * @author Stephen L. Reed
@@ -25,9 +26,27 @@ package org.opencyc.cycobject.databinding;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface CycFortXmlDataBinding {
+public class FunctorXmlDataBindingImpl implements FunctorXmlDataBinding {
 
-    public Integer getId ();
-    public void setId (Integer id);
+    private CycConstantXmlDataBinding cycConstantXmlDataBinding;
+    private CycNartXmlDataBinding cycNartXmlDataBinding;
 
+    public FunctorXmlDataBindingImpl() {
+    }
+
+    public CycConstantXmlDataBinding getCycConstantXmlDataBinding() {
+        return cycConstantXmlDataBinding;
+    }
+
+    public void setCycConstantXmlDataBinding(CycConstantXmlDataBinding cycConstantXmlDataBinding) {
+        this.cycConstantXmlDataBinding = cycConstantXmlDataBinding;
+    }
+
+    public CycNartXmlDataBinding getCycNartXmlDataBinding() {
+        return cycNartXmlDataBinding;
+    }
+
+    public void setCycNartXmlDataBinding(CycNartXmlDataBinding cycNartXmlDataBinding) {
+        this.cycNartXmlDataBinding = cycNartXmlDataBinding;
+    }
 }

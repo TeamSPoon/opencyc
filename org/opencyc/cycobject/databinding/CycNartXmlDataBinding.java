@@ -29,11 +29,11 @@ import java.util.*;
 
 public interface CycNartXmlDataBinding extends CycFortXmlDataBinding {
 
-    public CycFortXmlDataBinding getFunctor();
+    public FunctorXmlDataBinding getFunctorXmlDataBinding();
 
-    public void setFunctor (CycFortXmlDataBinding functor);
+    public void setFunctorXmlDataBinding (FunctorXmlDataBinding functorXmlDataBinding);
 
-    public CycListXmlDataBinding getArgumentList ();
+    public CycListXmlDataBinding getArguments ();
 
-    public void setArgumentList (CycListXmlDataBinding argumentList);
+    public void setArguments (CycListXmlDataBinding arguments);
 }

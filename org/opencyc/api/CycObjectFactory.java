@@ -4,8 +4,8 @@ import java.util.*;
 import java.io.*;
 import org.apache.oro.util.*;
 import org.opencyc.util.*;
-import org.opencyc.cycobject.*;
 import org.opencyc.cycobject.databinding.*;
+import org.opencyc.cycobject.*;
 
 /**
  * Provides the way to create cyc objects and reuse previously cached instances.<br>
@@ -104,7 +104,7 @@ public class CycObjectFactory {
      *
      * @pararm cycListXmlDataBindingImpl the xml databinding object
      */
-    public static CycList makeCycList (CycListXmlDataBindingImpl cycListXmlDataBindingImpl) {
+    public static CycList makeCycList (CycListXmlDataBinding cycListXmlDataBindingImpl) {
         CycList cycList = new CycList();
         for (int i = 0; i < cycListXmlDataBindingImpl.getElementList().size(); i++) {
             Object element = cycListXmlDataBindingImpl.getElementList().get(i);
@@ -158,7 +158,7 @@ public class CycObjectFactory {
      *
      * @pararm cycSymbolXmlDataBindingImpl the xml databinding object
      */
-    public static CycSymbol makeCycSymbol (CycSymbolXmlDataBindingImpl cycSymbolXmlDataBindingImpl) {
+    public static CycSymbol makeCycSymbol (CycSymbolXmlDataBinding cycSymbolXmlDataBindingImpl) {
         CycSymbol cycSymbol = getCycSymbolCache(cycSymbolXmlDataBindingImpl.getSymbolName());
         if (cycSymbol != null)
             return cycSymbol;
@@ -218,8 +218,8 @@ public class CycObjectFactory {
      *
      * @pararm cycConstantXmlDataBindingImpl the xml databinding object
      */
-    public static CycConstant makeCycConstant (CycConstantXmlDataBindingImpl cycConstantXmlDataBindingImpl) {
-        Guid guid = makeGuid(cycConstantXmlDataBindingImpl.getGuidXmlDataBindingImpl().getGuidString());
+    public static CycConstant makeCycConstant (CycConstantXmlDataBinding cycConstantXmlDataBindingImpl) {
+        Guid guid = makeGuid(cycConstantXmlDataBindingImpl.getGuidXmlDataBinding().getGuidString());
         CycConstant cycConstant =
             getCycConstantCacheByGuid(guid);
         if (cycConstant != null)
@@ -332,17 +332,30 @@ public class CycObjectFactory {
      *
      * @pararm cycNartXmlDataBindingImpl the xml databinding object
      */
-    public static CycNart makeCycNart (CycNartXmlDataBindingImpl cycNartXmlDataBindingImpl) {
-        CycNart cycNart = getCycNartCache(cycNartXmlDataBindingImpl.getId());
-        if (cycNart != null)
-            return cycNart;
+    public static CycNart makeCycNart (CycNartXmlDataBinding cycNartXmlDataBindingImpl) {
+        Integer id = cycNartXmlDataBindingImpl.getId();
+        CycNart cycNart;
+        if (id != null) {
+            cycNart = getCycNartCache(cycNartXmlDataBindingImpl.getId());
+            if (cycNart != null)
+                return cycNart;
+        }
         cycNart = new CycNart();
-        cycNart.setId(cycNartXmlDataBindingImpl.getId());
-        if (cycNartXmlDataBindingImpl.getFunctor() instanceof CycConstantXmlDataBindingImpl)
-            cycNart.setFunctor(makeCycConstant((CycConstantXmlDataBindingImpl)cycNartXmlDataBindingImpl.getFunctor()));
+        cycNart.setId(id);
+        FunctorXmlDataBinding functorXmlDataBinding = cycNartXmlDataBindingImpl.getFunctorXmlDataBinding();
+        if (functorXmlDataBinding.getCycConstantXmlDataBinding() != null) {
+            if (functorXmlDataBinding.getCycNartXmlDataBinding() != null)
+                throw new RuntimeException("Invalid " + functorXmlDataBinding);
+            CycConstant cycConstant = makeCycConstant(functorXmlDataBinding.getCycConstantXmlDataBinding());
+            cycNart.setFunctor(cycConstant);
+        }
+        else if (functorXmlDataBinding.getCycNartXmlDataBinding() != null) {
+            CycNart cycNartFunctor = makeCycNart(functorXmlDataBinding.getCycNartXmlDataBinding());
+            cycNart.setFunctor(cycNartFunctor);
+        }
         else
-             cycNart.setFunctor(makeCycNart((CycNartXmlDataBindingImpl) cycNartXmlDataBindingImpl.getFunctor()));
-        cycNart.setArguments(makeCycList(cycNartXmlDataBindingImpl.getArgumentList()));
+            throw new RuntimeException("Invalid functor " + functorXmlDataBinding + " of " + cycNartXmlDataBindingImpl);
+        cycNart.setArguments(makeCycList(cycNartXmlDataBindingImpl.getArguments()));
         return cycNart;
     }
 
@@ -452,7 +465,7 @@ public class CycObjectFactory {
      *
      * @pararm cycVariableXmlDataBindingImpl the xml databinding object
      */
-    public static CycVariable makeCycVariable (CycVariableXmlDataBindingImpl cycVariableXmlDataBindingImpl) {
+    public static CycVariable makeCycVariable (CycVariableXmlDataBinding cycVariableXmlDataBindingImpl) {
         CycVariable cycVariable = getCycVariableCache(cycVariableXmlDataBindingImpl.getName());
         if (cycVariable != null)
             return cycVariable;
@@ -527,7 +540,7 @@ public class CycObjectFactory {
      *
      * @pararm GuidXmlDataBindingImpl the xml databinding object
      */
-    public static Guid makeGuid (GuidXmlDataBindingImpl guidXmlDataBindingImpl) {
+    public static Guid makeGuid (GuidXmlDataBinding guidXmlDataBindingImpl) {
         Guid guid =
             makeGuid(guidXmlDataBindingImpl.getGuidString());
         if (guid != null)

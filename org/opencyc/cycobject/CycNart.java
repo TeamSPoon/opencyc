@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import org.opencyc.xml.XMLWriter;
 import org.opencyc.api.*;
+import org.opencyc.cycobject.databinding.*;
 
 /**
  * This class implements the behavior and attributes of a
@@ -422,14 +423,18 @@ public class CycNart extends CycFort implements Comparable {
      *
      * @return the CycNartXmlDataBindingImpl object which contains this CycConstant
      */
-    public CycNartXmlDataBindingImpl toCycNartXmlDataBindingImpl () {
-        CycNartXmlDataBindingImpl cycNartXmlDataBindingImpl = new CycNartXmlDataBindingImpl();
+    public CycNartXmlDataBinding toCycNartXmlDataBinding () {
+        CycNartXmlDataBinding cycNartXmlDataBindingImpl = new CycNartXmlDataBindingImpl();
         cycNartXmlDataBindingImpl.setId(this.getId());
+        FunctorXmlDataBinding functorXmlDataBinding = new FunctorXmlDataBindingImpl();
         if (functor instanceof CycConstant)
-            cycNartXmlDataBindingImpl.setFunctor(((CycConstant) functor).toCycConstantXmlDataBindingImpl());
+            functorXmlDataBinding.setCycConstantXmlDataBinding(((CycConstant) functor).toCycConstantXmlDataBinding());
+        else if (functor instanceof CycNart)
+            functorXmlDataBinding.setCycNartXmlDataBinding(((CycNart) functor).toCycNartXmlDataBinding());
         else
-            cycNartXmlDataBindingImpl.setFunctor(((CycNart) functor).toCycNartXmlDataBindingImpl());
-        cycNartXmlDataBindingImpl.setArgumentList(arguments.toCycListXmlDataBindingImpl());
+            throw new RuntimeException("Invalid functor " + functor + " of " + this);
+        cycNartXmlDataBindingImpl.setFunctorXmlDataBinding(functorXmlDataBinding);
+        cycNartXmlDataBindingImpl.setArguments(arguments.toCycListXmlDataBinding());
         return cycNartXmlDataBindingImpl;
     }
 

@@ -33,36 +33,144 @@ public class Action extends ModelElement {
     /**
      * recurrence of this action
      */
-    public IterationExpression recurrence;
+    protected IterationExpression recurrence;
 
     /**
      * target of this action's result
      */
-    public ObjectSetExpression target;
+    protected ObjectSetExpression target;
 
     /**
      * asynchronous action indicator
      */
-    public boolean isAsychronous;
+    protected boolean isAsychronous;
 
     /**
      * this action's script
      */
-    public ActionExpression script;
+    protected ActionExpression script;
 
     /**
      * arguments for this action
      */
-    public ArrayList actualArgument = new ArrayList();
+    protected ArrayList actualArgument = new ArrayList();
 
     /**
      * action sequence for this action
      */
-    public ActionSequence actionSequence;
+    protected ActionSequence actionSequence;
 
     /**
      * Constructs a new Action object.
      */
     public Action() {
     }
+
+    /**
+     * Gets the recurrence of this action.
+     *
+     * @return the recurrence of this action
+     */
+    public IterationExpression getRecurrence() {
+        return recurrence;
+    }
+
+    /**
+     * Sets the recurrence of this action.
+     *
+     * @param recurrence the recurrence of this action
+     */
+    public void setRecurrence (IterationExpression recurrence) {
+        this.recurrence = recurrence;
+    }
+
+    /**
+     * Gets the target of this action's result
+     *
+     * @return the target of this action's result
+     */
+    public ObjectSetExpression getTarget () {
+        return target;
+    }
+
+    /**
+     * Sets the target of this action's result
+     *
+     * @param target the target of this action's result
+     */
+    public void setTarget (ObjectSetExpression target) {
+        this.target = target;
+    }
+
+    /**
+     * Gets the asynchronous action indicator
+     *
+     * @return the asynchronous action indicator
+     */
+    public boolean isAsychronous () {
+        return isAsychronous;
+    }
+
+    /**
+     * Sets the asynchronous action indicator
+     *
+     * @param isAsychronous the asynchronous action indicator
+     */
+    public void setIsAsychronous (boolean isAsychronous) {
+        this.isAsychronous = isAsychronous;
+    }
+
+    /**
+     * Gets this action's script
+     *
+     * @return this action's script
+     */
+    public ActionExpression getScript () {
+        return script;
+    }
+
+    /**
+     * Sets this action's script
+     *
+     * @param script this action's script
+     */
+    public void setScript (ActionExpression script) {
+        this.script = script;
+    }
+
+    /**
+     * Gets the arguments for this action
+     *
+     * @return the arguments for this action
+     */
+    public ArrayList getActualArgument () {
+        return actualArgument;
+    }
+
+    /**
+     * Sets the arguments for this action
+     *
+     * @param actualArgument the arguments for this action
+     */
+    public void setActualArgument (ArrayList actualArgument) {
+        this.actualArgument = actualArgument;
+    }
+    /**
+     * Gets the action sequence for this action
+     *
+     * @return the action sequence for this action
+     */
+    public ActionSequence getActionSequence () {
+        return actionSequence;
+    }
+
+    /**
+     * Sets the action sequence for this action
+     *
+     * @param actionSequence the action sequence for this action
+     */
+    public void setActionSequence (ActionSequence actionSequence) {
+        this.actionSequence = actionSequence;
+    }
+
 }

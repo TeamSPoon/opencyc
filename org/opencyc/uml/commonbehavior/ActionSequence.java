@@ -39,4 +39,22 @@ public class ActionSequence extends Action {
      */
     public ActionSequence() {
     }
+
+    /**
+     * Gets the actions for this action sequence.
+     *
+     * @return the actions for this action sequence
+     */
+    public ArrayList getAction () {
+        return action;
+    }
+
+    /**
+     * Sets the actions for this action sequence.
+     *
+     * @param action the actions for this action sequence
+     */
+    public void setAction (ArrayList action) {
+        this.action = action;
+    }
 }

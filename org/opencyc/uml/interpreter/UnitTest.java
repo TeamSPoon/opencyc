@@ -47,7 +47,6 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-
         testSuite.addTest(new UnitTest("testExpressionEvaluation"));
         return testSuite;
     }
@@ -70,6 +69,25 @@ public class UnitTest extends TestCase {
         interpreter.defineVariable("integer1", integer1);
         StringReader stringReader = new StringReader("integer1.intValue() + 1;");
         Object result = interpreter.interpret(stringReader, "statement");
+        Assert.assertTrue(result instanceof Integer);
+        Assert.assertEquals(new Integer(2), result);
+
+        StringBuffer statements = new StringBuffer();
+        statements.append("String testString;\n");
+        statements.append("testString = \"abcdef\";\n");
+        statements.append("testString.substring(3);\n");
+        result = interpreter.interpret(new StringReader(statements.toString()), "statements");
+        Assert.assertTrue(result instanceof String);
+        Assert.assertEquals("def", result);
+
+        statements = new StringBuffer();
+        statements.append("String testString2;\n");
+        statements.append("testString2 = testString + \"1234\";\n");
+        statements.append("testString2.startsWith(\"abc\");\n");
+        result = interpreter.interpret(new StringReader(statements.toString()), "statements");
+        Assert.assertTrue(result instanceof Boolean);
+        Assert.assertEquals(Boolean.TRUE, result);
+
         System.out.println("\n**** testExpressionEvaluation ****");
     }
 

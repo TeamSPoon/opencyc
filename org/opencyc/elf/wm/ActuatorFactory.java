@@ -6,8 +6,6 @@ import org.opencyc.elf.a.ConsoleOutput;
 
 import org.opencyc.elf.bg.planner.Resource;
 
-import org.opencyc.elf.wm.ResourcePool;
-
 //// External Imports
 
 /**
@@ -57,13 +55,11 @@ public class ActuatorFactory {
     return actuatorFactory;
   }
     
-  /**
-   * Populates the actuator pool.
-   */
+  /** Populates the actuator pool. */
   public void populateActuatorPool() {
     ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, 
                                                     ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    
+    ActuatorPool.getInstance().setActuator(consoleOutput.getName(), consoleOutput);
   }
   
   //// Protected Area
@@ -72,8 +68,6 @@ public class ActuatorFactory {
   
   //// Internal Rep
   
-  /**
-   * the singleton actuator factory instance
-   */
+  /** the singleton actuator factory instance */
   protected static ActuatorFactory actuatorFactory;
 }

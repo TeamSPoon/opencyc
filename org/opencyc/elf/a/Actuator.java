@@ -133,11 +133,7 @@ public abstract class Actuator extends NodeComponent {
      *
      * @param actuateMsg the given input channel message
      */
-    void doAction (ActuateMsg actuateMsg) {
-      Object obj = actuateMsg.getObj();
-      Object data = actuateMsg.getData();
-      //TODO
-    }
+    public abstract void doAction (ActuateMsg actuateMsg);
   
   }
   //// Private Area

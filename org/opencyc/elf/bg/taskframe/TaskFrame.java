@@ -95,7 +95,7 @@ public class TaskFrame {
    */
   public String toString () {
     StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[");
+    stringBuffer.append("[TaskFrame task: ");
     stringBuffer.append(taskName);
     stringBuffer.append(" goal: ");
     stringBuffer.append(taskGoal);
@@ -396,17 +396,34 @@ public class TaskFrame {
       return sensor;
     }
     
+    /**
+     * Returns a string representation of this object.
+     *
+     * @return a string representation of this object
+     */
+    public String toString() {
+      StringBuffer stringBuffer = new StringBuffer();
+      stringBuffer.append("[ScheduleInfo schedule: ");
+      stringBuffer.append(schedule.toString());
+      stringBuffer.append(" actuator: ");
+      stringBuffer.append(actuator.toString());
+      stringBuffer.append(" sensor: ");
+      stringBuffer.append(sensor.toString());
+      stringBuffer.append("]");
+      return stringBuffer.toString();
+    }
+    
     /** the schedule of actions */
-    public Schedule schedule;
+    protected Schedule schedule;
     
     /** the actuator or virtual actuator (a lower level ELF) that achieves or accomplishes the schedule */
-    public Actuator actuator;
+    protected Actuator actuator;
     
     /** 
      * the sensor or virtual sensor (a lower level ELF) that senses the achievements or accomplishments 
      * of the schedule 
      */
-    public Sensor sensor;
+    protected Sensor sensor;
   }
   
   //// Protected Area

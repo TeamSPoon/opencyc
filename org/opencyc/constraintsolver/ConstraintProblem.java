@@ -231,7 +231,8 @@ public class ConstraintProblem {
             problemParser.extractRulesAndDomains();
             problemParser.gatherVariables();
             problemParser.initializeDomains();
-            nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
+            if (variables.size() > 1)
+                nodeConsistencyAchiever.applyUnaryRulesAndPropagate();
             valueDomains.initializeDomainValueMarking();
             if (verbosity > 0) {
                 if (nbrSolutionsRequested == null)

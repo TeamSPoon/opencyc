@@ -1,7 +1,9 @@
 package org.opencyc.constraintsolver;
 
 import java.util.*;
+import java.io.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.api.*;
 
 /**
  * Provides additional constraint rules through backwards KB inference using the input constraint
@@ -75,7 +77,7 @@ public class Backchainer {
      * @param domainPopulationRules collection of the rules which populate variable domains
      * @return the augmented input constraint domain-populating constraint rule set
      */
-    public ArrayList backchain(ArrayList domainPopulationRules) {
+    public ArrayList backchain(ArrayList domainPopulationRules) throws IOException {
         ArrayList result = new ArrayList();
         for (int i = 0; i < domainPopulationRules.size(); i++) {
             Rule domainPopulationRule = (Rule) domainPopulationRules.get(i);
@@ -90,7 +92,7 @@ public class Backchainer {
      * @param rule a rule is to be proven via backchaining
      * @return the implication rules which can prove the given rule
      */
-    public ArrayList backchain(Rule rule) {
+    public ArrayList backchain(Rule rule) throws IOException {
         ArrayList result = new ArrayList();
         int backchainDepth = rule.getBackchainDepth();
         if (backchainDepth >= this.maxBackchainDepth) {
@@ -103,10 +105,12 @@ public class Backchainer {
             System.out.println("backchaining on\n" + rule);
 
         ArrayList candidateImplicationRules = gatherRulesConcluding(rule);
-
-        // TODO implement rule filtering
-
-
+        for (int i = 0; i < candidateImplicationRules.size(); i++) {
+            // TODO implement rule filtering
+            Rule candidateImplicationRule = (Rule) candidateImplicationRules.get(i);
+            if (verbosity > 3)
+                System.out.println("Considering implication rule\n" + candidateImplicationRule.cyclify());
+        }
         return result;
     }
 
@@ -114,13 +118,22 @@ public class Backchainer {
      * Gathers the implication rules which conclude the given rule.
      *
      * @param rule the rule to be proven via backchaining
-     * @return the implication rules which coonclde the given rule
+     * @return the implication rules which conclude the given rule
      */
-    public ArrayList gatherRulesConcluding(Rule rule) {
+    public ArrayList gatherRulesConcluding(Rule rule) throws IOException {
         ArrayList result = new ArrayList();
-
-        //TODO implement
-
+        CycList backchainRules = CycAccess.current().getBackchainRules(rule.getPredicate(),
+                                                                       constraintProblem.mt);
+        for (int i = 0; i < backchainRules.size(); i++) {
+            Rule backchainRule = new Rule((CycList) backchainRules.get(i));
+            result.add(backchainRule);
+        }
+        CycList forwardChainRules = CycAccess.current().getForwardChainRules(rule.getPredicate(),
+                                                                             constraintProblem.mt);
+        for (int i = 0; i < forwardChainRules.size(); i++) {
+            Rule forwardChainRule = new Rule((CycList) forwardChainRules.get(i));
+            result.add(forwardChainRule);
+        }
         return result;
     }
 

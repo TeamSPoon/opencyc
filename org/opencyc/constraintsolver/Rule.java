@@ -522,15 +522,7 @@ public class Rule {
      * <tt>Rule</tt>.
      */
     public boolean isIntensionalVariableDomainPopulatingRule() throws IOException {
-        if (this.getArity() != 1)
-            // Only unary rules can populate a domain.
-            return false;
-        if (this.getPredicate().equals(CycAccess.isa))
-            return true;
-        else if (this.getPredicate().equals(CycAccess.genls))
-            return true;
-        else
-            return false;
+        return this.getArity() == 1;
     }
 
     /**

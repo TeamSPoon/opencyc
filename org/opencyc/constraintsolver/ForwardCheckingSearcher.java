@@ -119,6 +119,12 @@ public class ForwardCheckingSearcher {
      */
     public boolean search(ArrayList variables, int level) throws IOException {
         CycVariable selectedVariable = selectVariable(variables);
+
+        // Handle the atypical case where a high cardinality variable is selected first.
+        if (this.highCardinalityDomains.contains(selectedVariable) &&
+            this.highCardinalityDomains.getPopulatingRule(selectedVariable) == null)
+            populatePostponedDomain(selectedVariable);
+
         ArrayList remainingDomain = valueDomains.getUnmarkedDomainValues(selectedVariable);
         ArrayList remainingVariables = (ArrayList) variables.clone();
         remainingVariables.remove(selectedVariable);
@@ -179,6 +185,35 @@ public class ForwardCheckingSearcher {
         }
         // Done with this branch of the search tree, and keep searching.
         return false;
+    }
+
+    /**
+     * Populates the domain of an unpopulated high cardinality variable, choosing from
+     * among applicable rules.
+     */
+    protected void populatePostponedDomain (CycVariable variable) throws IOException {
+        for (int i = 0; i < constraintProblem.domainPopulationRules.size(); i++) {
+            Rule rule = (Rule) constraintProblem.domainPopulationRules.get(i);
+            if (rule.getArity() == 1 &&
+                rule.getVariables().get(0).equals(variable)) {
+                if (verbosity > 2)
+                    System.out.println("Populating high cardinality variable " + variable +
+                                       "\n  with rule\n" + rule.cyclify());
+                ArrayList permittedValues = askWithVariable(rule.getRule(), variable);
+                for (int j = 0; i < permittedValues.size(); j++) {
+                    Object value = permittedValues.get(j);
+                    Binding binding = new Binding(variable, value);
+                    if (verbosity > 2)
+                        System.out.println("  " + binding.cyclify() +
+                                           " is new");
+                    valueDomains.addDomainValue(variable, value);
+                    valueDomains.markDomain(variable, value, Boolean.TRUE);
+                }
+                return;
+            }
+        }
+        throw new RuntimeException("Expected domain population rule not found for " +
+                                   variable);
     }
 
     /**
@@ -319,7 +354,8 @@ public class ForwardCheckingSearcher {
      */
     protected boolean checkForwardNonEvaluatableRule(Rule rule,
                                                      int level,
-                                                     Binding currentBinding) throws IOException {
+                                                     Binding currentBinding)
+        throws IOException {
         // Order the remaining variables by ascending domain size.
         ArrayList remainingRuleVariables = (ArrayList) rule.getVariables().clone();
         remainingRuleVariables.remove(currentBinding.getCycVariable());

@@ -155,7 +155,7 @@ public class ProblemParser {
             Rule domainPopulationRule = (Rule) tempDomainPopulationRules.get(i);
             CycVariable domainPopulationVariable =
                 (CycVariable) domainPopulationRule.getVariables().get(0);
-            if (domainPopulationVariable.equals(variable)) {
+            if (variable.equals(domainPopulationVariable)) {
                 if (verbosity > 3)
                     System.out.println("Comparing to \n" + domainPopulationRule.cyclify());
                 CycConstant domainPopulationPredicate = domainPopulationRule.getPredicate();
@@ -164,10 +164,11 @@ public class ProblemParser {
                     if (candidatePredicate.equals(CycAccess.elementOf))
                         // Add another #$elementOf domain population rule
                         placeAsDomainPopulationRule(candidateRule);
-                    else
+                    else {
                         // Existing #$elementOf domain population rule takes
                         // priority over the non-#$elementOf candidate rule.
                         placeConstraintRule(candidateRule);
+                    }
                     return;
                 }
                 if (candidatePredicate.equals(CycAccess.elementOf)) {
@@ -192,10 +193,11 @@ public class ProblemParser {
                             // (and replaces) the existing #$genls domain population rule.
                             replaceDomainPopulationRule(domainPopulationRule, candidateRule);
                     }
-                    else
+                    else {
                         // Existing #$genls domain population rule takes
                         // priority over the non-#$genls candidate rule.
                         placeConstraintRule(candidateRule);
+                    }
                     return;
                 }
                 if (domainPopulationPredicate.equals(CycAccess.isa)) {
@@ -214,84 +216,20 @@ public class ProblemParser {
                             // (and replaces) the existing #$isa domain population rule.
                             replaceDomainPopulationRule(domainPopulationRule, candidateRule);
                     }
-                    else
-                        // Existing #$genls domain population rule takes
-                        // priority over the non-#$genls candidate rule.
+                    else {
+                        // Existing #$isa domain population rule takes
+                        // priority over the non-#$isa candidate rule.
                         placeConstraintRule(candidateRule);
+                    }
                     return;
                 }
-                throw new RuntimeException("Could not place candidate domain populating rule " +
-                                           candidateRule.cyclify());
+                // Existing constraint is not proveably more general.
+                placeConstraintRule(candidateRule);
+                return;
             }
         }
+        // No existing rules for comparison.
         placeAsDomainPopulationRule(candidateRule);
-    }
-
-    /**
-     * Places the candidate rule into the the set of domainPopulationRules
-     *
-     * @param candidateRule the given candidate domain population rule
-     */
-    protected void placeAsDomainPopulationRule(Rule candidateRule) {
-        domainPopulationRules.add(candidateRule);
-        if (verbosity > 3)
-            System.out.println("  placed \n" + candidateRule.cyclify() +
-                               " as domain population rule");
-    }
-
-    /**
-     * Places the candidate rule into the the set of constraintRules. If the predicate is
-     * neither #$isa nor #$genls, then gathers the type constraints of the predicate as
-     * additional candidate domain population rules.
-     *
-     * @param candidateRule the given candidate domain population rule
-     */
-    protected void placeAsConstraintRule(Rule candidateRule) throws IOException {
-        constraintRules.add(candidateRule);
-        if (verbosity > 3)
-            System.out.println("  placed \n" + candidateRule.cyclify() +
-                               " as constraint rule");
-        CycConstant predicate = candidateRule.getPredicate();
-        if ((! (predicate.equals(CycAccess.isa))) &&
-            (! (predicate.equals(CycAccess.genls)))) {
-            ArrayList argConstraints =
-                argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(candidateRule);
-            placeDomainPopulatingRules(argConstraints);
-        }
-    }
-
-    /**
-     * Replaces the given domainPopulatingRule with the candidate rule,
-     * moving the domainPopulatingRule into the the set of constraintRules
-     *
-     * @param domainPopulationRule the domain population rule which is to be replaced
-     * @param candidateRule the given candidate domain population rule
-     */
-    protected void replaceDomainPopulationRule(Rule domainPopulationRule, Rule candidateRule) {
-        domainPopulationRules.remove(domainPopulationRule);
-        constraintRules.add(domainPopulationRule);
-        domainPopulationRules.add(candidateRule);
-        if (verbosity > 3) {
-            System.out.println(domainPopulationRule.cyclify() + "\n  replaced with \n" + candidateRule.cyclify() +
-                               " as domain populating rule");
-            System.out.println("  placed \n" + domainPopulationRule.cyclify() +
-                               " as constraint rule");
-        }
-    }
-
-    /**
-     * Replaces the given constraintRule with the candidate rule.
-     *
-     * @param constraintRule the constraint rule which is to be replaced
-     * @param candidateRule the given candidate constraint rule
-     */
-    protected void replaceConstraintRule(Rule constraintRule, Rule candidateRule) {
-        constraintRules.remove(constraintRule);
-        constraintRules.add(candidateRule);
-        if (verbosity > 3) {
-            System.out.println(constraintRule.cyclify() + "\n  replaced with \n" + candidateRule.cyclify() +
-                               " as constraint rule");
-        }
     }
 
     /**
@@ -335,6 +273,77 @@ public class ProblemParser {
             }
         }
         placeAsConstraintRule(candidateRule);
+    }
+
+    /**
+     * Places the candidate rule into the the set of domainPopulationRules
+     *
+     * @param candidateRule the given candidate domain population rule
+     */
+    protected void placeAsDomainPopulationRule(Rule candidateRule) {
+        domainPopulationRules.add(candidateRule);
+        if (verbosity > 3)
+            System.out.println("  placed \n" + candidateRule.cyclify() +
+                               " as domain population rule");
+    }
+
+    /**
+     * Places the candidate rule into the the set of constraintRules. If the predicate is
+     * neither #$isa nor #$genls, then gathers the type constraints of the predicate as
+     * additional candidate domain population rules.
+     *
+     * @param candidateRule the given candidate domain population rule
+     */
+    protected void placeAsConstraintRule(Rule candidateRule) throws IOException {
+        constraintRules.add(candidateRule);
+        if (verbosity > 3)
+            System.out.println("  placed \n" + candidateRule.cyclify() +
+                               " as constraint rule");
+        CycConstant predicate = candidateRule.getPredicate();
+        if ((! (predicate.equals(CycAccess.isa))) &&
+            (! (predicate.equals(CycAccess.genls)))) {
+            ArrayList argConstraints =
+                argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(candidateRule);
+            placeDomainPopulatingRules(argConstraints);
+        }
+    }
+
+    /**
+     * Replaces the given domainPopulatingRule with the candidate rule,
+     * moving the domainPopulatingRule into the the set of constraintRules
+     *
+     * @param domainPopulationRule the domain population rule which is to be replaced
+     * @param candidateRule the given candidate domain population rule
+     */
+    protected void replaceDomainPopulationRule(Rule domainPopulationRule,
+                                               Rule candidateRule) throws IOException {
+        domainPopulationRules.remove(domainPopulationRule);
+        domainPopulationRules.add(candidateRule);
+        placeConstraintRule(domainPopulationRule);
+        if (verbosity > 3) {
+            System.out.println(domainPopulationRule.cyclify() + "\n  replaced with \n" +
+                               candidateRule.cyclify() +
+                               " as domain populating rule");
+            System.out.println("  placed \n" + domainPopulationRule.cyclify() +
+                               " as constraint rule");
+        }
+    }
+
+    /**
+     * Replaces the given constraintRule with the candidate rule.
+     *
+     * @param constraintRule the constraint rule which is to be replaced
+     * @param candidateRule the given candidate constraint rule
+     */
+    protected void replaceConstraintRule(Rule constraintRule,
+                                         Rule candidateRule) throws IOException {
+        constraintRules.remove(constraintRule);
+        placeConstraintRule(candidateRule);
+        if (verbosity > 3) {
+            System.out.println(constraintRule.cyclify() + "\n  replaced with \n" +
+                               candidateRule.cyclify() +
+                               " as constraint rule");
+        }
     }
 
     /**

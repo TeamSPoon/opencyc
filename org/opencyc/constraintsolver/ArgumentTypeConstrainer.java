@@ -140,7 +140,7 @@ public class ArgumentTypeConstrainer {
             Rule rule = new Rule(ruleString);
             result.add(rule);
             if (verbosity > 3)
-                System.out.println(predicate.cyclify() +
+                System.out.println("  " + predicate.cyclify() +
                                    " has #$argNIsa constraint at arg position " + argPosition +
                                    "  \n" + rule.cyclify());
         }
@@ -170,7 +170,7 @@ public class ArgumentTypeConstrainer {
             Rule rule = new Rule(ruleString);
             result.add(rule);
             if (verbosity > 3)
-                System.out.println(predicate.cyclify() +
+                System.out.println("  " + predicate.cyclify() +
                                    " has #$argNGenl constraint at arg position " + argPosition +
                                    "  \n" + rule.cyclify());
         }

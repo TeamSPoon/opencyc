@@ -66,8 +66,10 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testRuleEvaluator"));
             //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
             //testSuite.addTest(new UnitTest("testProblemParser"));
-            testSuite.addTest(new UnitTest("testConstraintProblem1"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem1"));
             //testSuite.addTest(new UnitTest("testConstraintProblem2"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem3"));
+            testSuite.addTest(new UnitTest("testBackchainer"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -898,7 +900,7 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(zebraProblem.highCardinalityDomains.highCardinalityDomains.size() == 0);
 
         // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
-        Assert.assertEquals(27, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
+        Assert.assertEquals(20, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?milk")));
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?norwegian")));
         Assert.assertEquals(5, zebraProblem.nodeConsistencyAchiever.allDifferentRules.size());
@@ -907,6 +909,7 @@ public class UnitTest extends TestCase {
 
         System.out.println("** testConstraintProblem1 OK **");
     }
+
     /**
      * Tests the <tt>ConstraintProblem</tt> class.
      */
@@ -922,7 +925,7 @@ public class UnitTest extends TestCase {
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         System.out.println(europeanCathedralsString2);
         ConstraintProblem europeanCathedralsProblem2 = new ConstraintProblem();
-        europeanCathedralsProblem2.setVerbosity(8);
+        europeanCathedralsProblem2.setVerbosity(1);
         // Request one solution.
         europeanCathedralsProblem2.nbrSolutionsRequested = new Integer(1);
         // Request all solutions.
@@ -966,6 +969,71 @@ public class UnitTest extends TestCase {
 
 
         System.out.println("** testConstraintProblem2 OK **");
+    }
+
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem3() {
+        System.out.println("** testConstraintProblem3 **");
+
+        // European Cathedrals with arg type discovery
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        ConstraintProblem whatIsInAustinProblem2 = new ConstraintProblem();
+        whatIsInAustinProblem2.setVerbosity(8);
+        // Request one solution.
+        //whatIsInAustinProblem2.nbrSolutionsRequested = new Integer(1);
+        // Request all solutions.
+        whatIsInAustinProblem2.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem2.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = whatIsInAustinProblem2.solve(whatIsInAustinString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem3 OK **");
+    }
+
+    /**
+     * Tests the <tt>Backchainer</tt> class.
+     */
+    public void testBackchainer() {
+        System.out.println("** testBackchainer **");
+
+        // European Cathedrals with arg type discovery
+        String whatIsInAustinString =
+            "(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)";
+        System.out.println(whatIsInAustinString);
+        ConstraintProblem whatIsInAustinProblem = new ConstraintProblem();
+        whatIsInAustinProblem.setVerbosity(8);
+        // Request one solution.
+        //whatIsInAustinProblem.nbrSolutionsRequested = new Integer(1);
+        // Request all solutions.
+        whatIsInAustinProblem.nbrSolutionsRequested = null;
+        try {
+            whatIsInAustinProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            whatIsInAustinProblem.problem = CycAccess.current().makeCycList(whatIsInAustinString);
+            whatIsInAustinProblem.problemParser.extractRulesAndDomains();
+            ArrayList backchainRules =
+                whatIsInAustinProblem.backchainer.backchain(whatIsInAustinProblem.domainPopulationRules);
+            Assert.assertNotNull(backchainRules);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testBackchainer OK **");
     }
 
 }

@@ -643,6 +643,10 @@ public class UnitTest extends TestCase {
                            " 3 4 5)";
             CycList cycList19 = cycAccess.makeCycList(listAsString);
             Assert.assertEquals(cycList13, cycList19);
+            Double doubleValue = new Double(.0000001);
+            listAsString = "(" + doubleValue.toString() + ")";
+            CycList cycList20 = cycAccess.makeCycList(listAsString);
+            System.out.println(cycList20.cyclify());
         }
         catch (Exception e) {
             e.printStackTrace();

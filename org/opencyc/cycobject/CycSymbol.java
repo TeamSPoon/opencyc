@@ -38,6 +38,7 @@ public class CycSymbol implements Comparable {
     /**
      * Built in CycSymbols.
      */
+    public static CycSymbol t = makeCycSymbol("T");
     public static CycSymbol nil = makeCycSymbol("NIL");
     public static CycSymbol quote = makeCycSymbol("QUOTE");
     public static CycSymbol cons = makeCycSymbol("CONS");
@@ -82,7 +83,7 @@ public class CycSymbol implements Comparable {
     }
 
     /**
-     * Returns <tt>true</tt> some object equals this <tt>CycSymbol</tt>
+     * Returns <tt>true</tt> iff some object equals this <tt>CycSymbol</tt>
      *
      * @param object the <tt>Object</tt> for equality comparison
      * @return equals <tt>boolean</tt> value indicating equality or non-equality.
@@ -91,6 +92,15 @@ public class CycSymbol implements Comparable {
         if (! (object instanceof CycSymbol))
             return false;
         return ((CycSymbol) object).toString().equals(symbolName);
+    }
+
+    /**
+     * Returns <tt>true</tt> iff this symbol is a SubL keyword.
+     *
+     * @return <tt>true</tt> iff this symbol is a SubL keyword
+     */
+    public boolean isKeyword() {
+        return this.symbolName.startsWith(":");
     }
 
     /**

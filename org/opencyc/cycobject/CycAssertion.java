@@ -1,10 +1,21 @@
-package org.opencyc.cycobject;
+package  org.opencyc.cycobject;
+
+import  java.io.IOException;
+import  java.util.*;
+import  org.apache.oro.util.*;
+import  org.opencyc.api.*;
+
 
 /**
- * Provides the behavior and attributes of an <tt>CycAssertion</tt>.<p>
+ * Provides the behavior and attributes of OpenCyc assertions.<p>
+ * <p>
+ * Assertions are communicated over the binary API using their Id number (an int).
+ * The associated formula, microtheory, truth-value, direction, and remaining attributes are
+ * is fetched later.
  *
  * @version $Id$
  * @author Stephen L. Reed
+ * @author Dan Lipofsky
  *
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
@@ -25,26 +36,29 @@ package org.opencyc.cycobject;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class CycAssertion {
+    /**
+     * Least Recently Used Cache of CycAssertions, so that a reference to an existing <tt>CycAssertion</tt>
+     * is returned instead of constructing a duplicate.
+     */
+    protected static Cache cache = new CacheLRU(500);
+
+    /**
+     * Assertion id assigned by the local KB server.  Not globally unique.
+     */
+    protected Integer id;
 
     /**
      * The assertion in the form of a <tt>CycList</tt>.
      */
-    private CycList cycList;
+    protected CycList formula;
 
     /**
-     * Constructs a new <tt>CycAssertion</tt> object from a <tt>CycList</tt>.
-     */
-    public CycAssertion(CycList cycList) {
-        this.cycList = cycList;
-    }
-
-    /**
-     * Returns the assertion in the form of a <tt>CycList</tt>.
+     * Constructs an incomplete <tt>CycAssertion</tt> object given its local KB id.
      *
-     * @return the assertion in the form of a <tt>CycList</tt>
+     * @param id the assertion id assigned by the local KB
      */
-    public CycList asCycList() {
-        return cycList;
+    public CycAssertion (Integer id) {
+        this.id = id;
     }
 
     /**
@@ -53,11 +67,11 @@ public class CycAssertion {
      * @return <tt>true</tt> if the object is equal to this object, otherwise
      * returns <tt>false</tt>
      */
-    public boolean equals(Object object) {
-        if (! (object instanceof CycAssertion))
-            return false;
-        CycAssertion cycAssertion = (CycAssertion) object;
-        return cycList.equals(cycAssertion.asCycList());
+    public boolean equals (Object object) {
+        if (!(object instanceof CycAssertion))
+            return  false;
+        CycAssertion cycAssertion = (CycAssertion)object;
+        return formula.equals(cycAssertion.id);
     }
 
     /**
@@ -65,18 +79,77 @@ public class CycAssertion {
      *
      * @return a <tt>String</tt> representation of the <tt>CycAssertion</tt>
      */
-    public String toString() {
-        return cycList.toString();
+    public String toString () {
+        return formula.cyclify();
     }
 
     /**
-     * Returns an <tt>String</tt> representation of the <tt>CycAssertion</tt>,
-     * in which CycConstants are prefixed with "#$".
+     * Returns the formula for this assertion.
      *
-     * @return an <tt>String</tt> representation of the <tt>CycAssertion</tt>
-     * in which CycConstants are prefixed with "#$".
+     * @return the formula for this assertion
      */
-    public String cyclify() {
-        return cycList.cyclify();
+    public CycList getFormula () {
+        return formula;
     }
+
+    /**
+     * Sets the formula for this assertion.
+     *
+     * @param formula the formula for this assertion
+     */
+    public void setFormula (CycList formula) {
+        this.formula = formula;
+    }
+
+    /**
+     * Returns the id for this assertion.
+     *
+     * @return the id for this assertion
+     */
+    public Integer getId () {
+        return id;
+    }
+
+    /**
+     * Resets the Cyc assertion cache.
+     */
+    public static void resetCache() {
+        cache = new CacheLRU(500);
+    }
+
+    /**
+     * Adds the <tt>CycAssertion<tt> to the cache.
+     */
+    public static void addCache(CycAssertion cycAssertion) {
+        cache.addElement(cycAssertion.id, cycAssertion);
+    }
+
+    /**
+     * Retrieves the <tt>CycConstant<tt> with guid, returning null if not found in the cache.
+     */
+    public static CycAssertion getCache(Integer id) {
+        return (CycAssertion) cache.getElement(id);
+    }
+
+    /**
+     * Removes the cycConstant from the cache if it is contained within.
+     */
+    public static void removeCache(Integer id) {
+        Object element = cache.getElement(id);
+        if (element != null)
+            cache.addElement(id, null);
+    }
+
+    /**
+     * Returns the size of the <tt>CycAssertion</tt> object cache.
+     *
+     * @return an <tt>int</tt> indicating the number of <tt>CycAssertion</tt> objects in the cache
+     */
+    public static int getCacheSize() {
+        return cache.size();
+    }
+
 }
+
+
+

@@ -58,7 +58,11 @@ public class CycConstant extends CycFort implements Comparable {
      */
     protected static Cache cache = new CacheLRU(500);
 
-    public static int indent_length = 2;
+    /**
+     * The ID of the <tt>CycConstant<tt> object which is an integer unique within an OpenCyc
+     * KB but not necessarily unique globally.
+     */
+    public int id;
 
     /**
      * The GUID (Globally Unique IDentifier) of the <tt>CycConstant<tt> object.
@@ -70,6 +74,15 @@ public class CycConstant extends CycFort implements Comparable {
      * The name of the <tt>CycConstant<tt> object. A string such as "HandGrenade"
      */
     public String name;
+
+    /**
+     * Constructs a new incomplete <tt>CycConstant</tt> object, given an id.
+     *
+     * @param id the local KB id for this constant
+     */
+    public CycConstant (int id) {
+        this.id = id;
+    }
 
     /**
      * Constructs a new <tt>CycConstant</tt> object, given a guidString and constant
@@ -91,10 +104,10 @@ public class CycConstant extends CycFort implements Comparable {
      * removed for canonical representation.
      */
     public static CycConstant makeCycConstant(Guid guid, String name) {
-        CycConstant cycConstant = (CycConstant) cache.getElement(name);
+        CycConstant cycConstant = getCache(guid);
         if (cycConstant == null) {
             cycConstant = new CycConstant(guid, name);
-            cache.addElement(cycConstant.name, cycConstant);
+            addCache(cycConstant);
             return cycConstant;
         }
         return cycConstant;
@@ -151,8 +164,7 @@ public class CycConstant extends CycFort implements Comparable {
      */
     public boolean equals(Object object) {
         if (object instanceof CycConstant &&
-            this.guid.equals(((CycConstant)object).guid) &&
-            this.name.equals(((CycConstant)object).name)) {
+            this.guid.equals(((CycConstant)object).guid)) {
             return true;
         }
         else
@@ -205,23 +217,32 @@ public class CycConstant extends CycFort implements Comparable {
      * Adds the <tt>CycConstant<tt> to the cache.
      */
     public static void addCache(CycConstant cycConstant) {
-        cache.addElement(cycConstant.name, cycConstant);
+        cache.addElement(cycConstant.guid, cycConstant);
     }
 
     /**
-     * Retrieves the <tt>CycConstant<tt> with name, returning null if not found in the cache.
+     * Retrieves the <tt>CycConstant<tt> with guid, returning null if not found in the cache.
      */
-    public static CycConstant getCache(String name) {
-        return (CycConstant) cache.getElement(name);
+    public static CycConstant getCache(Guid guid) {
+        return (CycConstant) cache.getElement(guid);
     }
 
     /**
      * Removes the cycConstant from the cache if it is contained within.
      */
-    public static void removeCache(CycConstant cycConstant) {
-        Object element = cache.getElement(cycConstant.name);
+    public static void removeCache(Guid guid) {
+        Object element = cache.getElement(guid);
         if (element != null)
-            cache.addElement(cycConstant.name, null);
+            cache.addElement(guid, null);
+    }
+
+    /**
+     * Returns the size of the <tt>CycConstant</tt> object cache.
+     *
+     * @return an <tt>int</tt> indicating the number of <tt>CycConstant</tt> objects in the cache
+     */
+    public static int getCacheSize() {
+        return cache.size();
     }
 
     /**
@@ -241,12 +262,4 @@ public class CycConstant extends CycFort implements Comparable {
         return answer;
     }
 
-    /**
-     * Returns the size of the <tt>CycConstant</tt> object cache.
-     *
-     * @return an <tt>int</tt> indicating the number of <tt>CycConstant</tt> objects in the cache
-     */
-    public static int getCacheSize() {
-        return cache.size();
-    }
 }

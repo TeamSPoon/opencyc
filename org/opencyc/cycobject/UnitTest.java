@@ -111,6 +111,12 @@ public class UnitTest extends TestCase {
         Collections.sort(symbols);
         Assert.assertEquals("[define-private, isa?, nil]", symbols.toString());
 
+        // isKeyword
+        CycSymbol cycSymbol5 = CycSymbol.makeCycSymbol("nil");
+        Assert.assertTrue(! cycSymbol5.isKeyword());
+        CycSymbol cycSymbol6 = CycSymbol.makeCycSymbol(":pos");
+        Assert.assertTrue(cycSymbol6.isKeyword());
+
         System.out.println("** testCycSymbol OK **");
     }
 

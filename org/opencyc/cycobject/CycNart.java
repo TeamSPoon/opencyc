@@ -46,6 +46,12 @@ public class CycNart extends CycFort implements Comparable {
     public static int indentLength = 2;
 
     /**
+     * The ID of the <tt>CycNart<tt> object which is an integer unique within an OpenCyc
+     * KB but not necessarily unique globally.
+     */
+    public int id;
+
+    /**
      * The functor of the <ttt>CycNart</tt> object. For example, the <tt>CycConstant</tt>
      * corresponding to #$FruitFn in (#$FruitFn #$AppleTree). This must be a CycFort
      * (i.e. cannot be assumed to be a CycConstant) because functors can themselves be
@@ -57,6 +63,15 @@ public class CycNart extends CycFort implements Comparable {
      * The list of the arguments of the <ttt>CycNart</tt> object.
      */
     protected List arguments = new ArrayList();
+
+    /**
+     * Constructs a new incomplete <tt>CycNart</tt> object from the id.
+     *
+     * @param id the id for this NART in the local KB
+     */
+    public CycNart (int id) {
+        this.id = id;
+    }
 
     /**
      * Constructs a new <tt>CycNart</tt> object from the given functor and

@@ -2,20 +2,15 @@ package org.opencyc.elf.as;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
-
 import org.opencyc.elf.bg.planner.Resource;
-
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.message.ObservedInputMsg;
 import org.opencyc.elf.message.ReleaseMsg;
-
 import org.opencyc.elf.s.Sensation;
-
 import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
 import java.util.List;
-
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
@@ -52,7 +47,7 @@ public class CycApi extends DirectActuatorSensor {
    * required resources.
    *
    * @param name tthe name of the actuator-sensor
-   * @param resources the resources requried by this actuator-sensor
+   * @param resources the resources required by this actuator-sensor
    * @param actuatorSensorChannel the takable channel from which messages are input
    */
   public CycApi(String name, 

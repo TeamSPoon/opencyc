@@ -1,10 +1,16 @@
 Use Cases for the Behavior Engine
 
 1. Emit a prompt and read the response from the console.
-1. emit the prompt (actuator)
-2. read the response (sensor)
+1.1 emit the prompt (actuator)
+1.2 read the response (sensor)
 
-BL (Behavior Language):
+2. Get the Cyc image id from a given Cyc server.
+2.1 make a new CycAccess object that communicates with the given hostname/port
+2.2 assemble the api command (cyc-image-id)
+2.3 perform the api request returning the cyc image id
+2.4 close the CycAccess connection
+
+CBL (Cyc Behavior Language):
 
 ;; define the direct actions
 
@@ -33,6 +39,7 @@ BL (Behavior Language):
 
 (define-direct-actuator-sensor CycApi
   (:command-capabilities (CycApiRequest)
+   :resources ((:host-port "crapgame.cyc.com:3660"))
    :sensation CycApiResponse))
 
 ;; define the direct actuators
@@ -54,20 +61,154 @@ BL (Behavior Language):
   (:schedules
     (:predicate-expression null
      :commands
-       (:perform ConsolePromptedInput :input-paramter-values (">"))
-       (:achieve PerceiveSensation :input-parameter-values (?USER-INPUT)))))
+       (:perform ConsolePromptedInput :input-parameter-values (">"))
+       (:achieve PerceiveSensation :input-parameter-values (?USER-INPUT)))
+     :perceptions 
+       (:sense ConsoleInput (:sensation ConsoleInput :output-state-variable (?USER-INPUT)))))
 
 (define-schedule-set GetCycImageId
   (:input-formal-parameters ((:name ?CYC-ACCESS :type CycAccess)))
   (:output-formal-parameters ((:name ?CYC-IMAGE-ID :type String)))
   (:schedules
-    (:predicate-expression null
+    (:default
      :commands
+       (:assign ?COMMAND (TheEmptyList))
+       (:assign ?COMMAND (JoinLists ?COMMAND (TheList (new CycSymbol "cyc-image-id")))) 
        (:perform CycApiRequest 
-        :input-parameter-values ("(cyc-image-id)")
-        :output-state-variables (?CYC-IMAGE-ID)))))
+        :input-parameter-values (?CycAccess ?COMMAND)
+        :output-state-variables (?CYC-IMAGE-ID)
+        :resources ((((CycAccess) ?CycAccess).getHostnamePort)))
+       (:call (((CycAccess) ?CycAccess).close)))))
 
     
+CBL Grammar
+
+<NAME> ::= symbol
+<TYPE> ::= symbol
+<EXPRESSION> ::= (True) |
+                 <OPERATOR-EXPRESSION>
+<OPERATOR-EXPRESSION> ::= (<OPERATOR> [<ARGUMENT>*])
+<OPERATOR> ::=
+<ARGUMENT> ::= <LITERAL> |
+               <STATE-VARIABLE>
+               <OPERATOR-EXPRESSION>
+<LITERAL> ::= number | 
+              string | 
+              list | 
+              cyc object | 
+              dictionary 
+<STATE-VARIABLE> ::= ?symbol
+<SYMBOL-HOLDER> ::= symbol | <STATE-VARIABLE>
+<TYPE-HOLDER> ::= symbol | <STATE-VARIABLE>
+<PARAMETER> ::= (:name <SYMBOL-HOLDER> :type <SYMBOL-HOLDER>)
+<KEYWORD> ::= :symbol
+<RESOURCE-SPECIFICATION> ::= (<KEYWORD> <LITERAL>)
+<RESOURCE-REQUIREMENT> ::= (<KEYWORD> <ARGUMENT>)
+<RELEVANCY-RELATIONSHIP> ::= <NAME>
+
+;; direct action signature definition
+
+<DIRECT-ACTION-NAME> ::= <NAME>
+
+(define-action <DIRECT-ACTION-NAME>
+  (:input-formal-parameters <PARAMETER>*)
+   :output-formal-parameters <PARAMETER>*)
+
+;; sensation signature definition
+
+<SENSATION-NAME> ::= <NAME>
+
+(define-sensation <SENSATION-NAME>
+  (:type <TYPE>))
+
+;; direct sensor signature definition
+
+<DIRECT-SENSOR-NAME> ::= <NAME>
+
+(define-direct-sensor <DIRECT-SENSOR-NAME>
+  (:sensation <SENSATION-NAME>*))
+
+;; direct actuator-sensor signature definition
+
+<DIRECT-ACTUATOR-SENSOR-NAME> ::= <NAME>
+<INDIRECT-ACTION-NAME> ::= <NAME>
+<ACTION-NAME> ::= <DIRECT-ACTION-NAME> |
+                  <INDIRECT-ACTION-NAME>
+
+(define-direct-actuator-sensor <DIRECT-ACTUATOR-SENSOR-NAME>
+  (:command-capabilities <ACTION-NAME>*
+   :resources <RESOURCE-SPECIFICATION>*
+   :sensation <SENSATION-NAME>*))
+
+;; direct actuator signature definition
+
+<DIRECT-ACTUATOR-NAME> ::= <NAME>
+
+(define-direct-actuator <DIRECT-ACTUATOR-NAME>
+  (:command-capabilities <ACTION-NAME>*))
+
+;; goal definition
+
+<GOAL-NAME> ::= <NAME>
+
+(define-goal <GOAL-NAME>
+  (:input-formal-parameters <PARAMETER>*)
+   :when <EXPRESSION>))
+
+;; schedule set definition
+
+<SCHEDULE-PREDICATE-SPECIFICATION> ::= :default |
+                                       :when <EXPRESSION>
+
+(define-schedule-set <INDIRECT-ACTION-NAME>
+  (:input-formal-parameters <PARAMETER>*)
+  (:output-formal-parameters <PARAMETER>*)
+  (:schedules
+    (<SCHEDULE-PREDICATE-SPECIFICATION>
+     :commands <COMMAND-SPECIFICATION>*
+     :perceptions <PERCEPTION>*)))
+
+<PERCEPTION> ::= (:achieve <SENSATION-NAME> :input-parameter-values <PARAMETER>*)
+<COMMAND> ::= <ACTION-COMMAND> |
+              <ALTERNATIVE-CHOICE-COMMAND> |
+              <ASSIGN-COMMAND> |
+              <CALL-COMMAND> |
+              <CONDITIONAL-COMMAND> |
+              <ITERATED-COMMAND> |
+              <LEARNING-EPISODE-COMMAND> |
+              <MACRO-COMMAND> |
+              <ORDERING-CHOICE-COMMAND> |
+              <PARALLEL-COMMAND> |
+              <RELEVANT-OBJECTS-COMMAND> |
+              <RELEVANT-OBJECTS-LEARNING-COMMAND> |
+              <SUBSET-CHOICE-COMMAND> 
+
+<ACTION-COMMAND> ::= 
+  (:perform <ACTION-NAME> [:input-parameter-values <ARGUMENT>*]
+        [:output-state-variables <ARGUMENT>*]
+        [:required-resources <RESOURCE-REQUIREMENT>*])
+<ASSIGN-COMMAND> ::= (:assign <STATE-VARIABLE> <EXPRESSION>)
+<CALL-COMMAND> ::= (:call (((<TYPE-HOLDER>) <SYMBOL-HOLDER>).<SYMBOL-HOLDER> <ARGUMENTS>*))
+<CONDITIONAL-COMMAND> ::= (:when <EXPRESSION> <COMMAND>*)
+<ITERATED-COMMAND> ::= (:while <EXPRESSION> <COMMAND>*)
+<MACRO-COMMAND> ::= (:expand <MACRO-NAME> <ARGUMENTS>*)
+<PARALLEL-COMMAND> ::= (:parallel <COMMAND>*)
+
+<REWARD-SPECIFICATION> ::= (:when <EXPRESSION> :reward <EXPRESSION>)
+<LEARNING-EPISODE-COMMAND> ::= (:learn-while-doing <COMMAND>* :rewards <REWARD-SPECIFICATION>*)
+<ALTERNATIVE-CHOICE-COMMAND> ::= (:choose-among <COMMAND>* :given <STATE-VARIABLE>*)
+<SUBSET-CHOICE-COMMAND> ::= (:choose-one-or-more <COMMAND>* :given <STATE-VARIABLE>*)
+<ORDERING-CHOICE-COMMAND> ::= (:choose-order <COMMAND>* :given <STATE-VARIABLE>*)
+
+<RELEVANT-OBJECTS-COMMAND> ::= 
+  (:get-objects-into <STATE-VARIABLE> :relevant-by <RELEVANCY-RELATIONSHIP> :given <STATE-VARIABLE>*)
+<RELEVANT-OBJECTS-LEARNING-COMMAND> ::= 
+  (:training-objects <ARGUMENTS>* :relevant-for <RELEVANCY-RELATIONSHIP> :given <STATE-VARIABLE>*)
+
+
+; macro definition
+
+(define-macro-command <MACRO-NAME> :input-parameters <ARGUMENTS>* <COMMAND>*)
 
 
 

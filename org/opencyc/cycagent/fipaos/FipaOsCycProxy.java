@@ -1,9 +1,9 @@
-package org.opencyc.cycagent.coabs;
+package org.opencyc.cycagent.fipaos;
 
 import org.opencyc.cycagent.*;
 
 /**
- * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
+ * Provides a proxy for a cyc agent on the FIPA-OS agent community.<p>
  *
  * An instance of this class is created for each unique cyc agent which makes
  * itself known to the agent manager.  A cyc image can host one or more cyc
@@ -33,7 +33,7 @@ import org.opencyc.cycagent.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class CoAbsCycProxy {
+public class FipaOsCycProxy {
 
     /**
      * the CycProxy instance.
@@ -41,15 +41,15 @@ public class CoAbsCycProxy {
     CycProxy cycProxy;
 
     /**
-     * Constructs a CoAbsCycProxy object.
+     * Constructs a FipaOsCycProxy object.
      *
      * @param myAgentName name of the local agent
      * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input
      */
-    public CoAbsCycProxy (String myAgentName, int verbosity) {
+    public FipaOsCycProxy (String myAgentName, int verbosity) {
         cycProxy = new CycProxy(myAgentName,
-                                AgentCommunityAdapter.COABS_AGENT_COMMUNTITY,
+                                AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNTITY,
                                 verbosity);
     }
 
@@ -57,9 +57,9 @@ public class CoAbsCycProxy {
      * Provides the main method.
      */
     public static void main(String[] args) {
-        CoAbsCycProxy coAbsCycProxy =
-            new CoAbsCycProxy("Agent1", AgentCommunityAdapter.QUIET_VERBOSITY);
-        coAbsCycProxy.cycProxy.initializeAgentCommunity();
+        FipaOsCycProxy fipaOsCycProxy =
+            new FipaOsCycProxy("Agent1", AgentCommunityAdapter.QUIET_VERBOSITY);
+        fipaOsCycProxy.cycProxy.initializeAgentCommunity();
         while (true)
             // Keep root thread running with minimal resource consumption, while awaiting
             // cyc api requests.
@@ -69,7 +69,7 @@ public class CoAbsCycProxy {
             catch (InterruptedException e) {
                 break;
             }
-        coAbsCycProxy.cycProxy.getAgentCommunityAdapter().deregister();
+        fipaOsCycProxy.cycProxy.getAgentCommunityAdapter().deregister();
         System.exit(0);
     }
 

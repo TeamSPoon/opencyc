@@ -10,7 +10,7 @@ import org.opencyc.util.*;
 import org.opencyc.xml.*;
 
 /**
- * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>
+ * Provides a proxy for a cyc agent on the CoABS grid or FIPA-OS agent community.<p>
  *
  * An instance of this class is created for each unique cyc agent which makes
  * itself known to the agent manager.  A cyc image can host one or more cyc
@@ -48,30 +48,18 @@ public class CycProxy extends GenericAgent {
      */
     protected static Hashtable cycConnectionCache = new Hashtable();
 
-    public CycProxy() {
-        super();
-    }
-
     /**
-     * Provides the main method.
+     * Constructs a CycProxy object.
+     *
+     * @param myAgentName name of the local agent
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
+     * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input
      */
-    public static void main(String[] args) {
+    public CycProxy(String myAgentName, int remoteAgentCommunity, int verbosity) {
+        super(myAgentName, remoteAgentCommunity, verbosity);
         if (Log.current == null)
             Log.makeLog();
-        CycProxy cycProxy = new CycProxy();
-        cycProxy.remoteAgentCommunity = AgentCommunityAdapter.COABS_AGENT_COMMUNTITY;
-        cycProxy.initializeAgentCommunity(AgentCommunityAdapter.QUIET_VERBOSITY);
-        while (true)
-            // Keep root thread running with minimal resource consumption, while awaiting
-            // cyc api requests.
-            try {
-                Thread.sleep(1000);
-            }
-            catch (InterruptedException e) {
-                break;
-            }
-        cycProxy.agentCommunityAdapter.deregister();
-        System.exit(0);
     }
 
     /**

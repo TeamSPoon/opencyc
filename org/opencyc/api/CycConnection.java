@@ -447,13 +447,19 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Sends an object to the CYC server.  If the connection is not already open, it is
      * opened.  The object must be a valid CFASL-translatable: an Integer, Float, Double,
-     * Boolean, String, Symbol, ArrayList, or an implementor of the CfaslTranslatingObject.
+     * Boolean, String, or cyc object.
      *
      * @param message the api command
      */
     private void sendBinary (Object message) throws IOException {
-        if (trace > API_TRACE_NONE)
-            System.out.println(message + " --> cyc");
+        if (trace > API_TRACE_NONE) {
+            if (message instanceof CycList)
+                System.out.println(((CycList) message).safeToString() + " --> cyc");
+            else if (message instanceof CycFort)
+                System.out.println(((CycFort) message).safeToString() + " --> cyc");
+            else
+                System.out.println(message + " --> cyc");
+        }
         cfaslOutputStream.writeObject(message);
         cfaslOutputStream.flush();
     }

@@ -45,6 +45,18 @@ public interface AgentCommunityAdapter {
     public static final int LOW_VERBOSITY = 1;
 
     /**
+     * Medium verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int MEDIUM_VERBOSITY = 3;
+
+    /**
+     * Maximum verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int MAX_VERBOSITY = 9;
+
+    /**
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */

@@ -53,7 +53,7 @@ public class GenericAgent implements MessageReceiver {
     /**
      * name of the local agent
      */
-    protected String myAgentName = "my agent";
+    protected String myAgentName = "my-agent";
 
     /**
      * name of the remote agent
@@ -83,12 +83,25 @@ public class GenericAgent implements MessageReceiver {
     }
 
     /**
-     * Initialializes the agent community with the given degree of diagnostic verbosity.
+     * Constructs a GenericAgent object.
      *
+     * @param myAgentName name of the local agent
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
      * @param verbosity the verbosity of this agent adapter's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input
      */
-    public void initializeAgentCommunity(int verbosity) {
+    public GenericAgent(String myAgentName, int remoteAgentCommunity, int verbosity) {
+        this.myAgentName = myAgentName;
+        this.remoteAgentCommunity = remoteAgentCommunity;
+        this.verbosity = verbosity;
+        Log.makeLog();
+    }
+
+    /**
+     * Initialializes the agent community with the given degree of diagnostic verbosity.
+     *
+     */
+    public void initializeAgentCommunity() {
         if (verbosity > 0)
             Log.current.println("Initializing the agent community connection");
         if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNTITY) {
@@ -142,6 +155,15 @@ public class GenericAgent implements MessageReceiver {
     }
 
     /**
+     * Returns the agent community.
+     *
+     * @return the agent community
+     */
+    public int agentCommunity () {
+        return remoteAgentCommunity;
+    }
+
+    /**
      * Returns the agent community name.
      *
      * @return the agent community name
@@ -153,6 +175,15 @@ public class GenericAgent implements MessageReceiver {
             return "FIPA-OS";
         else
             throw new RuntimeException("Invalid agent community " + remoteAgentCommunity);
+    }
+
+    /**
+     * Returns the agent community adapter
+     *
+     * @return the agent community adapter
+     */
+    public AgentCommunityAdapter getAgentCommunityAdapter () {
+        return agentCommunityAdapter;
     }
 
     /**

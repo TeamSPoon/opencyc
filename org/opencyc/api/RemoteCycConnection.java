@@ -72,10 +72,9 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
     public RemoteCycConnection(String myAgentName,
                                String remoteAgentName,
                                int remoteAgentCommunity) throws IOException {
-        super.myAgentName = myAgentName;
+        super(myAgentName, remoteAgentCommunity, AgentCommunityAdapter.DEFAULT_VERBOSITY);
         super.remoteAgentName = remoteAgentName;
-        super.remoteAgentCommunity = remoteAgentCommunity;
-        super.initializeAgentCommunity(AgentCommunityAdapter.DEFAULT_VERBOSITY);
+        super.initializeAgentCommunity();
     }
 
     /**

@@ -76,13 +76,25 @@ public class ExportDaml {
      * The default verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    public static final int DEFAULT_VERBOSITY = 3;
+    protected static final int DEFAULT_VERBOSITY = 3;
 
     /**
      * Sets verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = DEFAULT_VERBOSITY;
+    public int verbosity = DEFAULT_VERBOSITY;
+
+    /**
+     * The CycKBSubsetCollection whose elements are exported to DAML.
+     */
+    public CycFort cycKbSubsetCollection = null;
+
+    /**
+     * The CycKBSubsetCollection whose elements are exported to DAML.
+     * #$IKBConstant
+     */
+    public Guid cycKbSubsetCollectionGuid =
+        CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
 
     /**
      * The DAML export path and file name.
@@ -91,6 +103,7 @@ public class ExportDaml {
 
     public ExportDaml() {
     }
+
     public static void main(String[] args) {
         ExportDaml exportDaml = new ExportDaml();
         try {
@@ -114,14 +127,15 @@ public class ExportDaml {
 
         if (verbosity > 2)
             System.out.println("Getting terms from Cyc");
-        CycList publicConstants = cycAccess.getPublicConstants();
+        CycFort cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
+        CycList selectedConstants = cycAccess.getKbSubset(cycKbSubsetCollection);
         if (verbosity > 2)
             System.out.println("Sorting terms");
-        Collections.sort(publicConstants);
+        Collections.sort(selectedConstants);
         if (verbosity > 2)
             System.out.println("Removing non-binary properties");
-        for (int i = 0; i < publicConstants.size(); i++) {
-            CycConstant cycConstant = (CycConstant) publicConstants.get(i);
+        for (int i = 0; i < selectedConstants.size(); i++) {
+            CycConstant cycConstant = (CycConstant) selectedConstants.get(i);
             if (verbosity > 2) {
                 if ((verbosity > 5) || (i % 20 == 0))
                 System.out.println("... " + cycConstant.cyclify());

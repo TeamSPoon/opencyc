@@ -35,6 +35,12 @@ public class CompletionEvent extends Event {
     /**
      * Constructs a new CompletionEvent object.
      */
+    public CompletionEvent() {
+    }
+
+    /**
+     * Constructs a new CompletionEvent object.
+     */
     public CompletionEvent(State state) {
         this.state = state;
     }

@@ -289,24 +289,36 @@ public class Interpreter {
             State state = (State) activeStatesIter.next();
             if (verbosity > 2)
                 Log.current.println("Considering transitions from " + state.toString());
-            Iterator transitions = state.getOutgoing().listIterator();
-            while (transitions.hasNext()) {
-                Transition transition = (Transition) transitions.next();
-                if (currentEventEnables(transition)) {
+            Iterator transitions = state.getInternalTransition().iterator();
+            selectTransitions(transitions);
+            transitions = state.getOutgoing().iterator();
+            selectTransitions(transitions);
+        }
+    }
+
+    /**
+     * Selects transitions from the given state transition iterator.
+     *
+     * @param transitions the given state transition iterator
+     */
+    protected void selectTransitions (Iterator transitions) {
+        while (transitions.hasNext()) {
+            Transition transition = (Transition) transitions.next();
+            if (currentEventEnables(transition)) {
+                if (verbosity > 2)
+                    Log.current.println("  " + transition.toString() +
+                                        " enabled by " + currentEvent.toString());
+                BooleanExpression guardExpression = transition.getGuard().getexpression();
+                if ((guardExpression == null) ||
+                    expressionEvaluator.evaluateBoolean(guardExpression)) {
                     if (verbosity > 2)
-                        Log.current.println("  " + transition.toString() +
-                                            " enabled by " + currentEvent.toString());
-                    BooleanExpression guardExpression = transition.getGuard().getexpression();
-                    if ((guardExpression == null) ||
-                        expressionEvaluator.evaluateBoolean(guardExpression)) {
-                        if (verbosity > 2)
-                            Log.current.println("    selected " + transition.toString());
-                        selectedTransitions.add(transition);
-                    }
+                        Log.current.println("    selected " + transition.toString());
+                    selectedTransitions.add(transition);
                 }
             }
         }
     }
+
 
     /**
      * Determines whether the given transition can be triggered by the current event.

@@ -572,14 +572,16 @@ public class StateMachineFactory {
         transition.setEffect(effect);
         transition.setTrigger(trigger);
         transition.setSource(source);
-        source.getOutgoing().add(transition);
         transition.setTarget(target);
-        target.getIncoming().add(transition);
         transition.setStateMachine(stateMachine);
         stateMachine.getTransition().add(transition);
         if (source instanceof State &&
             source.equals(target))
             ((State) source).getInternalTransition().add(transition);
+        else {
+            source.getOutgoing().add(transition);
+            target.getIncoming().add(transition);
+        }
         return transition;
     }
 

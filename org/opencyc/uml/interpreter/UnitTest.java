@@ -450,8 +450,7 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(stateMachine, transition2.getStateMachine());
         Assert.assertEquals(trigger, transition2.getTrigger());
         Assert.assertTrue(transition2.isSelfTransition());
-        Assert.assertTrue(source.getOutgoing().contains(transition2));
-        Assert.assertTrue(target.getIncoming().contains(transition2));
+        Assert.assertTrue(((State) source).getInternalTransition().contains(transition2));
 
         name = "TestStateMachine-Transition3";
         commentString = "Transition 3 for the test state machine.";
@@ -496,7 +495,18 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(source.getOutgoing().contains(transition3));
         Assert.assertTrue(target.getIncoming().contains(transition3));
 
-        int verbosity = 0;
+        interpretStateMachine(stateMachine);
+
+        System.out.println("\n**** testSimpleStateMachine ****");
+    }
+
+    /**
+     * Tests the given instantiated state machine
+     *
+     * @param the given instantiated state machine
+     */
+    protected void interpretStateMachine (StateMachine stateMachine) {
+        int verbosity = 3;
         Interpreter interpreter = new Interpreter(stateMachine, verbosity);
         Assert.assertNotNull(interpreter);
         Assert.assertTrue(interpreter instanceof Interpreter);
@@ -526,10 +536,6 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(stateMachine.getTop(),
                             stateMachine.getTop().getStateInterpreter().getState());
 
-        Assert.assertNotNull(counterState.getStateInterpreter());
-        Assert.assertEquals(counterState,
-                            counterState.getStateInterpreter().getState());
-
         Assert.assertEquals(new Integer(1), interpreter.treeInterpreter.getVariable("x"));
         if (verbosity > 2)
             System.out.print(interpreter.displayStateConfigurationTree());
@@ -547,9 +553,8 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(new Integer(9), interpreter.treeInterpreter.getVariable("x"));
         if (verbosity > 2)
             System.out.print(interpreter.displayStateConfigurationTree());
-
-        System.out.println("\n**** testSimpleStateMachine ****");
     }
+
 
     /**
      * Tests simple state machine extraction from Cyc.
@@ -587,6 +592,12 @@ public class UnitTest extends TestCase {
             Assert.assertEquals("This is a test individual #$UMLStateMachine.",
                                 stateMachine.getComment().getBody());
             Assert.assertEquals(stateMachine, stateMachine.getComment().getAnnotatedElement());
+
+            StateMachineReport stateMachineReport = new StateMachineReport(stateMachine);
+            stateMachineReport.report();
+
+            interpretStateMachine(stateMachine);
+
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -2795,6 +2795,22 @@ public class CycAccess {
      * Returns true if CycFort TERM is a instance of CycFort COLLECTION, defaulting to all microtheories.
      *
      * @param term the term
+     * @param collectionName the name of the collection
+     * @return <tt>true</tt> if CycFort TERM is a instance of the CycFort named by COLLECTION
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public boolean isa (CycFort term, String collectionName)
+        throws IOException, UnknownHostException, CycApiException {
+        return isa(term,
+                   getKnownConstantByName(collectionName));
+    }
+
+    /**
+     * Returns true if CycFort TERM is a instance of CycFort COLLECTION, defaulting to all microtheories.
+     *
+     * @param term the term
      * @param collection the collection
      * @return <tt>true</tt> if CycFort TERM is a instance of CycFort COLLECTION
      * @throws UnknownHostException if cyc server host not found on the network
@@ -6865,6 +6881,23 @@ public class CycAccess {
         return getArg2(getKnownConstantByName(predicate),
                                   getKnownConstantByName(arg1),
                                   getKnownConstantByName(mt));
+    }
+
+    /**
+     * Returns the first arg2 term from gafs having the specified
+     * predicate and arg1 values.
+     *
+     * @param predicate the given predicate
+     * @param arg1 the given arg1 term
+     * @param mt the inference microtheory
+     * @return the first arg2 term from gafs having the specified
+     * predicate and arg1 values or null if none
+     */
+    public Object getArg2 (String predicate,
+                           CycFort arg1,
+                           CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return getArg2(getKnownConstantByName(predicate), arg1, mt);
     }
 
     /**

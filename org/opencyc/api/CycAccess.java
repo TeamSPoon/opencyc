@@ -6768,6 +6768,30 @@ public class CycAccess {
      * in the UniversalVocabularyMt.
      *
      * @param cycFort the given term
+     * @param isaConstraintName the given isa type constraint, or null
+     * @param genlsConstraintName the given genls type constraint, or null
+     */
+    public void ensureWffConstraints (String cycFort,
+                                      String isaConstraintName,
+                                      String genlsConstraintName)
+        throws IOException, UnknownHostException, CycApiException {
+        CycConstant cycConstant = find(cycFort);
+        CycConstant isaConstraint = null;
+        CycConstant genlsConstraint = null;
+        if (isaConstraintName != null)
+            isaConstraint = find(isaConstraintName);
+        if (genlsConstraintName != null)
+            genlsConstraint = find(genlsConstraintName);
+        ensureWffConstraints (cycConstant,
+                              isaConstraint,
+                              genlsConstraint);
+    }
+
+    /**
+     * Ensures that the given term meets the given isa and genl wff constraints
+     * in the UniversalVocabularyMt.
+     *
+     * @param cycFort the given term
      * @param isaConstraint the given isa type constraint, or null
      * @param genlsConstraint the given genls type constraint, or null
      */
@@ -6779,8 +6803,8 @@ public class CycAccess {
             (! isa(cycFort, isaConstraint, universalVocabularyMt)))
             assertIsa(cycFort, isaConstraint);
         if (genlsConstraint != null &&
-            (! isSpecOf(cycFort, isaConstraint, universalVocabularyMt)))
-            assertGenls(cycFort, isaConstraint);
+            (! isSpecOf(cycFort, genlsConstraint, universalVocabularyMt)))
+            assertGenls(cycFort, genlsConstraint);
     }
 
 

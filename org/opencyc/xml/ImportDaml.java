@@ -332,11 +332,11 @@ public abstract class ImportDaml implements StatementHandler {
             predicateTermInfo.coerceToNamespace();
         String damlPredicate = predicateTermInfo.toString();
         if (! subjectTermInfo.hasEquivalentCycTerm()) {
-            if (damlPredicate.equals("isa")) {
+            if (damlPredicate.equals("#$isa")) {
                 importIsa(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("genls")) {
+            if (damlPredicate.equals("#$genls")) {
                 // TODO generalize for argument order in KB.
                 if (predicateTermInfo.constantName.startsWith("dmoz:narrow"))
                     importGenls(objLitTermInfo, subjectTermInfo);
@@ -352,35 +352,35 @@ public abstract class ImportDaml implements StatementHandler {
                 importImports(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("comment")) {
+            if (damlPredicate.equals("#$comment")) {
                 importComment(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("nameString")) {
+            if (damlPredicate.equals("#$nameString")) {
                 importNameString(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("synonymousExternalConcept")) {
+            if (damlPredicate.equals("#$synonymousExternalConcept")) {
                 importSynonymousExternalConcept(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("arg1Isa")) {
+            if (damlPredicate.equals("#$arg1Isa")) {
                 importArg1Isa(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("arg2Isa")) {
+            if (damlPredicate.equals("#$arg2Isa")) {
                 importArg2Isa(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("conceptuallyRelated")) {
+            if (damlPredicate.equals("#$conceptuallyRelated")) {
                 importConceptuallyRelated(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("containsInformationAbout")) {
+            if (damlPredicate.equals("#$containsInformationAbout")) {
                 importContainsInformationAbout(subjectTermInfo, objLitTermInfo);
                 return;
             }
-            if (damlPredicate.equals("genlPreds")) {
+            if (damlPredicate.equals("#$genlPreds")) {
                 importGenlPreds(subjectTermInfo, objLitTermInfo);
                 return;
             }
@@ -820,7 +820,13 @@ public abstract class ImportDaml implements StatementHandler {
             return previousDamlTermInfo.cycFort;
 
         CycFort cycFort = null;
-        if (damlTermInfo.isURI) {
+        if (damlTermInfo.equivalentDamlCycTerm != null) {
+            // not an imported term, but an equivalent existing Cyc term
+            //Log.current.println("*** not importing " + cycFort.cyclify());
+            previousDamlTermInfo = damlTermInfo;
+            return damlTermInfo.cycFort;
+        }
+        else if (damlTermInfo.isURI) {
             cycFort = new CycNart(cycAccess.getKnownConstantByName("URLFn"),
                                   damlTermInfo.toString());
             damlTermInfo.cycFort = cycFort;
@@ -843,13 +849,6 @@ public abstract class ImportDaml implements StatementHandler {
             if (cycFort == null)
                 // error
                 return cycFort;
-            if (damlTermInfo.equivalentDamlCycTerm != null) {
-                // not an imported term, but an equivalent existing Cyc term
-                //Log.current.println("*** not importing " + cycFort.cyclify());
-                damlTermInfo.cycFort = cycFort;
-                previousDamlTermInfo = damlTermInfo;
-                return cycFort;
-            }
         }
         if (verbosity > 1)
             Log.current.println("(#$isa  " + cycFort.cyclify() + " " +
@@ -971,9 +970,11 @@ public abstract class ImportDaml implements StatementHandler {
         damlTermInfo.ontologyNickname = ontologyNickname;
         String constantName = ontologyNickname + ":" + localName;
         damlTermInfo.constantName = constantName;
-        if (equivalentDamlCycTerms.containsKey(constantName))
+        if (equivalentDamlCycTerms.containsKey(constantName)) {
             damlTermInfo.equivalentDamlCycTerm =
-                (String) equivalentDamlCycTerms.get(constantName);
+                (CycFort) equivalentDamlCycTerms.get(constantName);
+            damlTermInfo.cycFort = damlTermInfo.equivalentDamlCycTerm;
+        }
         else if (ontologyNickname.equals("xsd"))
             Log.current.println("\n*** unhandled primitive datatype: " + constantName + "\n");
         return damlTermInfo;
@@ -1738,8 +1739,8 @@ public abstract class ImportDaml implements StatementHandler {
             CycList pair = (CycList) mappings.get(i);
             CycFort cycTerm = (CycFort) pair.first();
             String damlTerm = (String) pair.second();
-            Log.current.println(damlTerm + " --> " + cycTerm.toString());
-            equivalentDamlCycTerms.put(damlTerm, cycTerm.toString());
+            Log.current.println(damlTerm + " --> " + cycTerm.cyclify());
+            equivalentDamlCycTerms.put(damlTerm, cycTerm);
         }
     }
 
@@ -1928,7 +1929,7 @@ public abstract class ImportDaml implements StatementHandler {
         String constantName;
         String uri;
         String literal;
-        String equivalentDamlCycTerm;
+        CycFort equivalentDamlCycTerm;
         CycFort cycFort;
 
         /**
@@ -1975,7 +1976,7 @@ public abstract class ImportDaml implements StatementHandler {
             else if (isLiteral)
                 return "\"" + literal + "\"";
             else if (equivalentDamlCycTerm != null)
-                return equivalentDamlCycTerm;
+                return equivalentDamlCycTerm.cyclify();
             else
                 return constantName;
         }

@@ -40,12 +40,6 @@ public class ImportSonatDaml extends ImportDaml {
     protected ArrayList damlDocInfos = new ArrayList();
 
     /**
-     * the name of the KB Subset collection which identifies ontology import
-     * terms in Cyc
-     */
-    protected String kbSubsetCollectionName = "DamlSonatConstant";
-
-    /**
      * head of the SONAT DAML microtheory spindle
      */
     protected String damlSonatSpindleHeadMt = "DamlSonatSpindleHeadMt";
@@ -64,7 +58,7 @@ public class ImportSonatDaml extends ImportDaml {
         Log.current.println("Connecting to Cyc server from " + localHostName);
         if (localHostName.equals("crapgame.cyc.com")) {
             cycAccess = new CycAccess("localhost",
-                                      3600,
+                                      3620,
                                       CycConnection.DEFAULT_COMMUNICATION_MODE,
                                       true);
         }
@@ -113,8 +107,10 @@ public class ImportSonatDaml extends ImportDaml {
 
         initializeCommonMappedTerms();
         initializeMappedTerms();
+        kbSubsetCollectionName = "DamlSonatConstant";
 
-        for (int i = 0; i < damlDocInfos.size(); i++) {
+        //for (int i = 0; i < damlDocInfos.size(); i++) {
+        for (int i = 20; i < 21; i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
@@ -180,7 +176,6 @@ public class ImportSonatDaml extends ImportDaml {
         // 15
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/elements-ont.daml",
                                          "DamlSonatElementsOfNationalPowerOntologyMt"));
-//new
         // 16
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/enp-characteristics.daml",
                                          "DamlSonatENPCharacteristicsOntologyMt"));
@@ -215,7 +210,6 @@ public class ImportSonatDaml extends ImportDaml {
         // 26
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/social-elements-ont.daml",
                                          "DamlSonatSocialElementsOntologyMt"));
-//new
         // 27
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/experiment/ontology/target-ont.daml",
                                          "DamlSonatTargetOntologyMt"));
@@ -258,12 +252,14 @@ public class ImportSonatDaml extends ImportDaml {
                     "http://www.daml.org/experiment/ontology/social-elements-ont.daml#EthnicGroups",
                     "PersonTypeByEthnicity");
 
-        if (cycAccess.find("PopulationOfTypeFn") != null)
+        if (cycAccess.find("PopulationOfTypeFn") != null) {
+            cycAccess.ensureWffConstraints("Person", null, "Animal");
             assertMapping(
                     "soci:Population",
                     "http://www.daml.org/experiment/ontology/social-elements-ont.daml",
                     "http://www.daml.org/experiment/ontology/social-elements-ont.daml#Population",
                     "(#$PopulationOfTypeFn #$Person)");
+        }
 
         if (cycAccess.find("SystemOfGovernment") != null)
             assertMapping(
@@ -314,15 +310,17 @@ public class ImportSonatDaml extends ImportDaml {
                     "http://www.daml.org/experiment/ontology/economic-elements-ont.daml#NaturalResource",
                     "NaturalResource");
 
-        if (cycAccess.find("AcademicOrganization") != null)
+        if (cycAccess.find("AcademicOrganization") != null &&
+            cycAccess.find("ScientificFieldOfStudy") != null)
             assertMapping(
                     "infr:EducationAndScience",
                     "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                     "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#EducationAndScience",
                     "(#$CollectionUnionFn \n" +
-                    "  (#$InfrastructureOfFn #$EducationalOrganization) \n" +
-                    "  (#$InfrastructureOfFn #$AcademicOrganization) \n" +
-                    "  (#$InfrastructureOfFn #$Science))");
+                    "  (#$TheSet \n" +
+                    "    (#$InfrastructureOfFn #$EducationalOrganization) \n" +
+                    "    (#$InfrastructureOfFn #$AcademicOrganization) \n" +
+                    "    (#$InfrastructureOfFn #$ScientificFieldOfStudy)))");
 
         if (cycAccess.find("Airport-Physical") != null)
             assertMapping(
@@ -336,7 +334,7 @@ public class ImportSonatDaml extends ImportDaml {
                     "infr:Bridge",
                     "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                     "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#Bridge",
-                    "(#$InfrastructureOfFn #$Bridge");
+                    "(#$InfrastructureOfFn #$Bridge)");
 
         if (cycAccess.find("Railway") != null)
             assertMapping(
@@ -569,7 +567,7 @@ public class ImportSonatDaml extends ImportDaml {
                     "infr:InlandWaterway",
                     "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml",
                     "http://www.daml.org/experiment/ontology/infrastructure-elements-ont.daml#InlandWaterway",
-                    "(#$InfrastructureOfFn #$(#$CollectionUnionFn #$River #$Canal #$Lake))");
+                    "(#$InfrastructureOfFn (#$CollectionUnionFn (#$TheSet #$River #$Canal #$Lake)))");
 
 /*
         assertMapping("",

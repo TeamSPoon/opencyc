@@ -44,7 +44,7 @@ public class ConciseLoggingFormatter extends SimpleFormatter {
   /**
    * Formats the given log record.
    *
-   * @param the given log record
+   * @param logRecord the given log record
    */
   public String format (LogRecord logRecord) {
     StringBuffer stringBuffer = new StringBuffer(logRecord.getMessage());

@@ -91,7 +91,7 @@ public class NodeFactory {
   /**
    * Makes a node given the set of task frames that it must process.
    *
-   * @param taskFrameNames the set of task frames that it must process
+   * @param taskFrames the set of task frames that it must process
    */
   public Node makeNode(List taskFrames) {
     HashSet scheduleNames = new HashSet();

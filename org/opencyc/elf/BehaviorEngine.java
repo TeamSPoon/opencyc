@@ -5,6 +5,7 @@ import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
 
+import org.opencyc.elf.wm.ExperienceLibrary;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.ScheduleLibrary;
 import org.opencyc.elf.wm.ResourcePool;
@@ -57,6 +58,7 @@ public class BehaviorEngine {
     (new ScheduleLibrary()).getInstance().initialize();
     StateVariable.initialize();
     new NotNull();
+    new ExperienceLibrary();
     
     //TODO
   }

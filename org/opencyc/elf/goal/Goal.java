@@ -4,6 +4,7 @@ package org.opencyc.elf.goal;
 import java.util.*;
 import org.opencyc.elf.*;
 import org.opencyc.cycobject.*;
+import org.opencyc.uml.statemachine.*;
 
 /**
  * Provides the Goal container for the Elementary Loop Functioning (ELF).<br>
@@ -33,9 +34,20 @@ import org.opencyc.cycobject.*;
 public class Goal extends ELFObject {
 
     /**
+     * the goal state
+     */
+    protected State goalState;
+
+    /**
      * the goal sentence stated in CycL
      */
     protected CycAssertion goalSentence;
+
+//think about parameterized goals (procedure signatures)
+
+//add list of goal failure states.
+
+
 
     /**
      * the parent goal of this goal
@@ -61,6 +73,24 @@ public class Goal extends ELFObject {
      * Constructs a new Goal object.
      */
     public Goal () {
+    }
+
+    /**
+     * Gets the goal state
+     *
+     * @return the goal state
+     */
+    public State getGoalState () {
+        return goalState;
+    }
+
+    /**
+     * Sets the goal state
+     *
+     * @param goalState the goal state
+     */
+    public void setGoalState (State goalState) {
+        this.goalState = goalState;
     }
 
     /**
@@ -129,7 +159,7 @@ public class Goal extends ELFObject {
     /**
      * Sets the goal importance
      *
-     * @param xxx the goal importance
+     * @param importance the goal importance
      */
     public void setImportance (Importance importance) {
         this.importance = importance;

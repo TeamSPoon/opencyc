@@ -195,6 +195,9 @@ toCycApiExpression(Prolog,CycLStr):-toCycApiExpression(Prolog,[],CycLStr).
 toCycApiExpression(Prolog,Vars,Chars):-var(Prolog),!,toCycVar(Prolog,Vars,Chars).
 toCycApiExpression(Prolog,Vars,Prolog):-(atom(Prolog);number(Prolog)),!.
 toCycApiExpression(Prolog,Vars,Chars):-is_string(Prolog),!,sformat(Chars,'"~s"',[Prolog]).
+toCycApiExpression(nv(List),Vars,Chars):-toCycApiExpression_l(List,Vars,Chars),!.
+toCycApiExpression([nv|List],Vars,Chars):-toCycApiExpression_l(List,Vars,Chars),!.
+   
 toCycApiExpression([P|List],Vars,Chars):-
 			toCycApiExpression_l([P|List],Vars,Term),
 			sformat(Chars,'\'(~w)',[Term]).

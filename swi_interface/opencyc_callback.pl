@@ -135,8 +135,8 @@ writeSTDERR(F,A):-((
         nl(user_error),
         flush_output(user_error))).
 
-writeErrMsg(Out,E):-message_to_string(E,S),writeFmtFlushed(Out,'<prolog:error>~s</prolog:error>\n',[S]),!.
-writeErrMsg(Out,E,Goal):-message_to_string(E,S),writeFmtFlushed(Out,'<prolog:error>goal "~q" ~s</prolog:error>\n',[Goal,S]),!.
+writeErrMsg(Out,E):-!. %message_to_string(E,S),writeFmtFlushed(Out,'<prolog:error>~s</prolog:error>\n',[S]),!.
+writeErrMsg(Out,E,Goal):-!. %message_to_string(E,S),writeFmtFlushed(Out,'<prolog:error>goal "~q" ~s</prolog:error>\n',[Goal,S]),!.
 writeFileToStream(Dest,Filename):-
         catch((
         open(Filename,'r',Input),
@@ -627,12 +627,12 @@ xmlExitTags.
 % Insert
 % ===========================================================
 parse_moo_soap(Options):-memberchk(submit=assert,Options),!,
-        getMooOption(opt_ctx_assert='GlobalContext',Ctx),
-        getMooOption(opt_theory='PrologMOO',Context),
+        getMooOption(opt_ctx_assert='#$BaseKB',Ctx),
+        getMooOption(opt_theory='#$PrologDataMt',Context),
         getMooOption(sf=surf,Assertion),
         atom_codes(Assertion,Assertion_Chars),
         getMooOption(user='Web',User),
-        getMooOption(interp='kif',Interp),
+        getMooOption(interp='cycl',Interp),
         logOnFailure(getMooOption(tn=_,EXTID)),
         %sendNote(user,'Assert',formula(NEWFORM),'Ok.'). %,logOnFailure(saveMooCache)
         logOnFailure(getCleanCharsWhitespaceProper(Assertion_Chars,Show)),!,
@@ -671,12 +671,12 @@ xml_assert(Show,NEWFORM,Vars,Ctx,Context,User):-!.
 parse_moo_soap(Options):-memberchk(submit=ask,Options),!,make,
         %write('<!DOCTYPE moo:ask SYSTEM "/opt/tomcat-4.0/webapps/moo-1.4b1/dtd/java_prolog.dtd">\n'),
         write('<moo:ask xmlns:moo="http://localhost">\n'),
-        getMooOption(opt_ctx_request='GlobalContext',Ctx),
-        getMooOption(opt_theory='PrologMOO',Context),
+        getMooOption(opt_ctx_request='#$BaseKB',Ctx),
+        getMooOption(opt_theory='#$PrologDataMt',Context),
         getMooOption(sf=surf,Askion),
         atom_codes(Askion,Askion_Chars),
         getMooOption(user='Web',User),
-        getMooOption(interp='kif',Interp),
+        getMooOption(interp='cycl',Interp),
          logOnFailure(getCleanCharsWhitespaceProper(Askion_Chars,Show)),!,
          logOnFailure(getSurfaceFromChars(Show,STERM,Vars)),!,
          logOnFailure(getMooTermFromSurface(STERM,NEWFORM)),!,
@@ -765,8 +765,8 @@ inform_each_variable([NV|Rest],Vars):-
 
 inform_nv('$VAR'(_),Vars).
 inform_nv(Name=Value,Vars):-
-        toMarkUp(kif,Name,Vars,OName),
-        toMarkUp(kif,Value,Vars,OValue),
+        toMarkUp(cycl,Name,Vars,OName),
+        toMarkUp(cycl,Value,Vars,OValue),
         writeFmt('<var varName="~w" value="~w"/>\n',[OName,OValue]).
 
 
@@ -1062,58 +1062,58 @@ sendNote_1(debug,'Belief',_,_,Vars):-!.
 
 
 sendNote_1(canonicalizer,From,Subj,Message,Vars):-
-            toMarkUp(kif,From,Vars,SFrom),
-            toMarkUp(kif,nv(Subj),Vars,SS),
-            toMarkUp(kif,nv(Message),Vars,SA),
+            toMarkUp(cycl,From,Vars,SFrom),
+            toMarkUp(cycl,nv(Subj),Vars,SS),
+            toMarkUp(cycl,nv(Message),Vars,SA),
             writeFmt('<font color=red>canonicalizer</font>: ~w "~w" (from ~w). \n',[SA,SS,SFrom]),!.
 
 /*
 
 sendNote_1(debug,From,Subj,Message,Vars):- %isMooOption(disp_notes_nonuser=on),!,
-            toMarkUp(kif,From,Vars,SFrom),
-            toMarkUp(kif,Subj,Vars,SS),
-            toMarkUp(kif,Message,Vars,SA),
+            toMarkUp(cycl,From,Vars,SFrom),
+            toMarkUp(cycl,Subj,Vars,SS),
+            toMarkUp(cycl,Message,Vars,SA),
             writeFmt('% debug: ~w "~w" (from ~w). \n',[SA,SS,SFrom]).
 sendNote_1(debug,From,Subj,Message,Vars):-!.
 */
 
 
 sendNote_1(To,From,Subj,Message,Vars):- isMooOption(client=consultation),  !, 
-            toMarkUp(kif,To,Vars,STo),
-            toMarkUp(kif,From,Vars,SFrom),
-            toMarkUp(kif,nv(Subj),Vars,S),
-            toMarkUp(kif,nv(Message),Vars,A),
+            toMarkUp(cycl,To,Vars,STo),
+            toMarkUp(cycl,From,Vars,SFrom),
+            toMarkUp(cycl,nv(Subj),Vars,S),
+            toMarkUp(cycl,nv(Message),Vars,A),
             fmtString(Output,'~w (~w from ~w) ',[A,S,SFrom]),
 	    sayn(Output),!.
 
 sendNote_1(To,From,'Rejected',Message,Vars):- isMooOption(client=automata),  !.
 
 sendNote_1(To,From,Subj,Message,Vars):- isMooOption(client=automata),  !, 
-            toMarkUp(kif,To,Vars,STo),
-            toMarkUp(kif,From,Vars,SFrom),
-            toMarkUp(kif,nv(Subj),Vars,S),
-            toMarkUp(kif,nv(Message),Vars,A),
+            toMarkUp(cycl,To,Vars,STo),
+            toMarkUp(cycl,From,Vars,SFrom),
+            toMarkUp(cycl,nv(Subj),Vars,S),
+            toMarkUp(cycl,nv(Message),Vars,A),
             writeFmt(user_error,'% ~w (~w from ~w) ',[A,S,SFrom]).
 
 sendNote_1(To,From,Subj,Message,Vars):- isMooOption(client=html),  !, %  In Html
-            toMarkUp(kif,To,Vars,STo),
-            toMarkUp(kif,From,Vars,SFrom),
-            toMarkUp(kif,nv(Subj),Vars,S),
+            toMarkUp(cycl,To,Vars,STo),
+            toMarkUp(cycl,From,Vars,SFrom),
+            toMarkUp(cycl,nv(Subj),Vars,S),
             toMarkUp(html,nv(Message),Vars,A),
             writeFmt('<hr><B>To=<font color=green>~w</font> From=<font color=green>~w</font> Subj=<font color=green>~w</font></B><BR>~w\n',[To,From,S,A]),!.
 
 sendNote_1(To,From,Subj,Message,Vars):- isMooOption(client=console),!, % In KIF
-            toMarkUp(kif,To,Vars,STo),
-            toMarkUp(kif,From,Vars,SFrom),
-            toMarkUp(kif,nv(Subj),Vars,SS),
-            toMarkUp(kif,nv(Message),Vars,SA),
+            toMarkUp(cycl,To,Vars,STo),
+            toMarkUp(cycl,From,Vars,SFrom),
+            toMarkUp(cycl,nv(Subj),Vars,SS),
+            toMarkUp(cycl,nv(Message),Vars,SA),
             writeFmt(user_error,'; ~w: ~w "~w" (from ~w). \n',[STo,SA,SS,SFrom]),!.
   
 sendNote_1(To,From,Subj,Message,Vars):-  % In KIF
-            toMarkUp(kif,To,Vars,STo),
-            toMarkUp(kif,From,Vars,SFrom),
-            toMarkUp(kif,nv(Subj),Vars,SS),
-            toMarkUp(kif,nv(Message),Vars,SA),
+            toMarkUp(cycl,To,Vars,STo),
+            toMarkUp(cycl,From,Vars,SFrom),
+            toMarkUp(cycl,nv(Subj),Vars,SS),
+            toMarkUp(cycl,nv(Message),Vars,SA),
             writeFmt(user_error,'; ~w: ~w "~w" (from ~w). \n',[STo,SA,SS,SFrom]),!.
 
 sendNote(To,From,Subj,Message,Vars):-!.
@@ -1168,16 +1168,16 @@ writeObject(OBJ,Vars):- isMooOption(client=html),!,
 		((toMarkUp(html,OBJ,Vars,Chars),write(Chars))),!.
 		
 writeObject(OBJ,Vars):- isMooOption(client=atomata),!,
-		((toMarkUp(kif,OBJ,Vars,Chars),write(Chars))),!.
+		((toMarkUp(cycl,OBJ,Vars,Chars),write(Chars))),!.
 
 writeObject(OBJ,Vars):- isMooOption(client=console),!,
-		((toMarkUp(kif,OBJ,Vars,Chars),write(Chars))),!.
+		((toMarkUp(cycl,OBJ,Vars,Chars),write(Chars))),!.
 
 writeObject(OBJ,Vars):- isMooOption(client=consultation),!,
 		(say(OBJ,Vars)),!.
 
 writeObject(OBJ,Vars):- !,
-		((toMarkUp(kif,OBJ,Vars,Chars),write(Chars))),!.
+		((toMarkUp(cycl,OBJ,Vars,Chars),write(Chars))),!.
 
 
 writeObject_conj(A,Vars):-isSlot(A),!,
@@ -1282,7 +1282,7 @@ opt_timeout=[seconds] Default=60
 opt_readonly=[true|false] Default is False
 opt_deduce_assert=[true|false] Defualt is True
 opt_language=[pnx_nf|getNegationForm|hylog|prolog|sigmese]   Default is Sigmese
-opt_format=[kif|prolog]  Default is KIF
+opt_format=[cycl|prolog]  Default is KIF
 opt_compiled=[true|false]  Default is false
 
 3 Callbacks
@@ -1322,7 +1322,7 @@ writeUAEvent(request_end,(Result,Normal,Elapsed,Num,Bindings),Vars):-!,
                      ));
                        writeFmt('\n%%  ~w solutions="~d" bindings="~d" cpu="~f"\n',[Result,Num,Bindings,Elapsed])).
 
-writeUAEvent(Class,Message,Vars):-not(isMooOption(client=html)),!, toMarkUp(kif,[Class,Message],Vars,Chars),write(Chars),nl.
+writeUAEvent(Class,Message,Vars):-not(isMooOption(client=html)),!, toMarkUp(cycl,[Class,Message],Vars,Chars),write(Chars),nl.
 writeUAEvent(Class,Message,Vars):-isMooOption(client=html),!, event_to_chars(leml,Class,_Message,Vars,Chars),write(Chars),nl.
 writeUAEvent(cb_consultation, assertion([PredicateI|ConsultTemplate],_Context_atom,_SN), continue):- 
                agentConsultation(_Context_atom,[PredicateI|ConsultTemplate], _ListOfGafsAsserted).
@@ -1332,7 +1332,7 @@ writeUAEvent(_,_,_):-!.
 /*toMarkUp(Sterm,VS,Chars):-
            once(( isMooOption(client=html) -> 
             toMarkUp(leml,Sterm,VS,Chars);
-            toMarkUp(kif,Sterm,VS,Chars))).
+            toMarkUp(cycl,Sterm,VS,Chars))).
   */
 
 /*
@@ -1571,13 +1571,13 @@ setMooOptionDefaults:-
              setMooOption(cb_result_each='off'),
 
 % User Agent Defaults for Blank Variables
-             setMooOption(opt_cxt_request='GlobalContext'),
-             setMooOption(opt_ctx_assert='GlobalContext'),
+             setMooOption(opt_cxt_request='#$BaseKB'),
+             setMooOption(opt_ctx_assert='#$BaseKB'),
              setMooOption(opt_tracking_number='generate'),
              setMooOption(opt_agent='ua_parse'),
              setMooOption(opt_precompiled='off'),
              getMooOption(opt_theory,Context),setMooOption(opt_theory=Context),
-             setMooOption(opt_notation='kif'),
+             setMooOption(opt_notation='cycl'),
              setMooOption(opt_timeout=2),
              setMooOption(opt_readonly='off'),
              setMooOption(opt_debug='off'),
@@ -1723,5 +1723,4 @@ mutex_call(Goal,Id):-
                         mutex_unlock_all.
 
 
-
-
+ :-[opencyc_chatterbot].

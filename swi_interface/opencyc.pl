@@ -22,6 +22,7 @@
 	 toCycApiExpression/3,
 	 cycQuery/1,
 	 cycQuery/2,
+	 toMarkUp/4,
 	 cycAssert/1,
 	 cycAssert/2,
 	 cycRetract/1,
@@ -34,6 +35,7 @@
 	 ensureMt/1,
 	 readCycL/2,
 	 cyclify/2,
+	 getCycLTokens/2,
 	 cyclifyNew/2,
 	 unnumbervars/2,
 	 defaultAssertMt/1,
@@ -225,15 +227,21 @@ readUntil(Char,C,InStream,[C|Out]):-get_code(InStream,Next),
 % ===================================================================
 %  conversion toCycApiExpression
 % ===================================================================
+toMarkUp(_,Term,Vars,Out):-
+   toCycApiExpression(Term,Vars,Out),!.
+
 
 toCycApiExpression(Prolog,CycLStr):-toCycApiExpression(Prolog,[],CycLStr).
 
 toCycApiExpression(Prolog,Vars,Chars):-var(Prolog),!,toCycVar(Prolog,Vars,Chars).
 toCycApiExpression(Prolog,Vars,Prolog):-(atom(Prolog);number(Prolog)),!.
 toCycApiExpression(Prolog,Vars,Chars):-is_string(Prolog),!,sformat(Chars,'"~s"',[Prolog]).
+toCycApiExpression(Prolog,Vars,Chars):-string(Prolog),!,sformat(Chars,'"~s"',[Prolog]).
 toCycApiExpression([P|List],Vars,Chars):-
 			toCycApiExpression_l([P|List],Vars,Term),
 			sformat(Chars,'\'(~w)',[Term]).
+toCycApiExpression(nv(List),Vars,Chars):-toCycApiExpression_l(List,Vars,Chars),!.
+toCycApiExpression([nv|List],Vars,Chars):-toCycApiExpression_l(List,Vars,Chars),!.
 toCycApiExpression(string(List),Vars,Chars):-
 			toCycApiExpression(List,Vars,Term),
 			sformat(Chars,'"~w"',[Term]).
@@ -295,7 +303,7 @@ is_string([A,B|_]):-integer(A),integer(B).
 
 % Uncomment this next line to see Cyc debug messages
 
-%isDebug.
+isDebug.
 
 isDebug(Call):- isDebug -> Call ; true.
 
@@ -482,7 +490,7 @@ balanceBindingS([A|L],[AA|LL]):-balanceBinding(A,AA),balanceBindingS(L,LL).
 %
 % ===================================================================
 
-cyclify(Same,Same):-var(Same);number(Same).
+cyclify(Same,Same):- (var(Same);number(Same);string(Same)),!.
 cyclify([],[]).
 cyclify([H|T],Term):-integer(H) -> Term=[H|T]; cyclify_l([H|T],Term).
 cyclify(Before,After):-atom(Before),

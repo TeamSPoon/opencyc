@@ -2,7 +2,7 @@ package org.opencyc.cycobject;
 
 import java.io.Serializable;
 import org.apache.oro.util.*;
-//import org.opencyc.xml.XMLPrintWriter;
+import org.opencyc.xml.*;
 
 /**
  * Provides the behavior and attributes of an OpenCyc Constant.
@@ -32,13 +32,24 @@ import org.apache.oro.util.*;
 public class CycConstant extends CycFort implements Comparable {
 
     /**
-     * These XML tag names are expected to be
-     * identical to those emitted by Cyc's EL-XML serialization protocol
-     * as implemented in the SubL module el-xml-serialization.lisp
+     * Field for storing the name of the XML tag for CycConstant objects
      */
-    public static String constant_xml_tag = "constant";
-    public static String name_xml_tag = "name";
-    public static String guid_xml_tag = "guid";
+    public static final String constantXMLTag = "constant";
+
+    /**
+     * Field for storing the name of the XML tag for the name of CycConstant objects
+     */
+    public static final String nameXMLTag = "name";
+
+    /**
+     * Field for storing the name of the XML tag for the GUID of CycConstant objects
+     */
+    public static final String guidXMLTag = "guid";
+
+    /**
+     * The default indentation for printing CycConstant objects to XML
+     */
+    public static int indentLength = 2;
 
     /**
      * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
@@ -121,41 +132,23 @@ public class CycConstant extends CycFort implements Comparable {
     }
 
     /**
-     * Prints the XML representation of the <tt>CycConstant<tt> to an <tt>XMLPrintWriter</tt>
-     * It is supposed to look like this:
+     * Prints the XML representation of the CycConstant to an <code>XMLWriter</code>
      *
-     * <constant>
-     *  <guid>
-     *   c10af8ae-9c29-11b1-9dad-c379636f7270
-     *  </guid>
-     *  <name>
-     *   HandGrenade
-     *  </name>
-     * </constant>
-     *
-     * The parameter [int indent] specifies by how many spaces the XML
-     * output should be indented.
-     *
-     * The parameter [boolean relative] specifies whether the
-     * indentation should be absolute -- indentation with respect to
-     * the beginning of a new line, relative = false -- or relative
-     * to the indentation currently specified in the indent_string field
-     * of the xml_writer object, relative = true.
-     *
+     * @param xmlWriter a com.cyc.xml.XMLWriter
+     * @param indent an int that specifies by how many spaces to indent
+     * @param relative a boolean; if true indentation is relative, otherwise absolute
      */
-
-/*
-    public void toXML (XMLPrintWriter xml_writer, int indent, boolean relative) {
-        xml_writer.printXMLStartTag(constant_xml_tag, indent, relative);
-        xml_writer.printXMLStartTag(guid_xml_tag, indent_length, true);
-        xml_writer.indentPrintln(this.guid, indent_length, true);
-        xml_writer.printXMLEndTag(guid_xml_tag, -indent_length, true);
-        xml_writer.printXMLStartTag(name_xml_tag, 0, true);
-        xml_writer.indentPrintln(this.name, indent_length, true);
-        xml_writer.printXMLEndTag(name_xml_tag, -indent_length, true);
-        xml_writer.printXMLEndTag(constant_xml_tag, -indent_length, true);
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
+        throws java.io.IOException {
+        xmlWriter.printXMLStartTag(constantXMLTag, indent, relative, true);
+        xmlWriter.printXMLStartTag(guidXMLTag, indentLength, true, false);
+        xmlWriter.print(this.guid.toString());
+        xmlWriter.printXMLEndTag(guidXMLTag);
+        xmlWriter.printXMLStartTag(nameXMLTag, 0, true, false);
+        xmlWriter.print(this.name);
+        xmlWriter.printXMLEndTag(nameXMLTag);
+        xmlWriter.printXMLEndTag(constantXMLTag, -indentLength, true);
     }
-*/
 
     /**
      * Provides the hash code appropriate for the <tt>CycConstant</tt>.

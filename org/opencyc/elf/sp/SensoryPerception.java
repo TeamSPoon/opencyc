@@ -54,7 +54,7 @@ public class SensoryPerception extends NodeComponent {
 
   /** 
    * Creates a new instance of SensoryPerception with the given
-   * input message channel.
+   * input and output message channels.
    *
    * @param sensoryProcessingChannel the takable channel from which messages are input
    * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output

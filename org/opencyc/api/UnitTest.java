@@ -53,8 +53,8 @@ public class UnitTest extends TestCase {
      */
     public static final int REMOTE_CYC_CONNECTION = 2;
 
-    public static int connectionMode = REMOTE_CYC_CONNECTION;
-    //public static int connectionMode = LOCAL_CYC_CONNECTION;
+    //public static int connectionMode = REMOTE_CYC_CONNECTION;
+    public static int connectionMode = LOCAL_CYC_CONNECTION;
 
     /**
      * Indicates whether unit tests should be performed only in binary api mode.

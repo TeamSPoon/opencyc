@@ -138,9 +138,11 @@ public class CycProxy extends GenericAgent {
         CycSymbol agentCommunity =
             (CycSymbol) envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":X-agent-community"));
         if (agentCommunity.equals(CycObjectFactory.makeCycSymbol(":COABS")))
-            cycAgentProxy = new CycAgentProxy(cycAgentName, AgentCommunityAdapter.COABS_AGENT_COMMUNITY, verbosity);
+            cycAgentProxy = new CycAgentProxy(cycAgentName,
+                                AgentCommunityAdapter.COABS_AGENT_COMMUNITY, verbosity);
         else if (agentCommunity.equals(CycObjectFactory.makeCycSymbol(":FIPA-OS")))
-            cycAgentProxy = new CycAgentProxy(cycAgentName, AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY, verbosity);
+            cycAgentProxy = new CycAgentProxy(cycAgentName,
+                                              AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY, verbosity);
         else {
             if (agentCommunity == null) {
                 Log.current.println("agent community is missing");
@@ -174,7 +176,7 @@ public class CycProxy extends GenericAgent {
      * Processes a cyc api request from another agent.
      *
      * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
-     * @param processApiRequest the echo request Agent Communication Language message
+     * @param apiRequestAcl the api request Agent Communication Language message
      */
     public void processApiRequest (int remoteAgentCommunity, ACL apiRequestAcl) {
         CycList apiRequest = null;

@@ -833,7 +833,7 @@ public class UnitTest extends TestCase {
                 "    <constant>\n" +
                 "      <guid>bd58daa0-9c29-11b1-9dad-c379636f7270</guid>\n" +
                 "      <name>Dog</name>\n" +
-                "      <id>2054</id>\n" +
+                "      <id>2053</id>\n" +
                 "    </constant>\n" +
                 "  </dotted-element>\n" +
                 "</list>\n";

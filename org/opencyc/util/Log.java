@@ -185,6 +185,20 @@ public class Log {
     }
 
     /**
+     * Writes a newline to the log.
+     */
+    public void println() {
+        if (ignore)
+            return;
+        if (writeToOut)
+            System.out.print("\n");
+        if (writeToFile) {
+            printWriter.print("\n");
+            printWriter.flush();
+        }
+    }
+
+    /**
      * Writes the String message to the log.
      *
      * @param message the String message to be logged.

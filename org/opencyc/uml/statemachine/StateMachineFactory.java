@@ -1,6 +1,7 @@
 package org.opencyc.uml.statemachine;
 
 import java.util.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.action.*;
@@ -91,7 +92,7 @@ public class StateMachineFactory {
     public Procedure makeProcedure (String name,
                                     String commentString,
                                     String language,
-                                    String body,
+                                    Object body,
                                     boolean isList) {
         Procedure procedure = new Procedure();
         setNamespaceNameComment(procedure,
@@ -206,7 +207,7 @@ public class StateMachineFactory {
     public ChangeEvent makeChangeEvent (String name,
                                         String commentString,
                                         String language,
-                                        String body) {
+                                        Object body) {
         ChangeEvent changeEvent = new ChangeEvent();
         setNamespaceNameComment(changeEvent,
                                 name,
@@ -270,7 +271,7 @@ public class StateMachineFactory {
     public TimeEvent makeTimeEvent (String name,
                                     String commentString,
                                     String language,
-                                    String body) {
+                                    Object body) {
         TimeEvent timeEvent = new TimeEvent();
         setNamespaceNameComment(timeEvent,
                                 name,
@@ -548,7 +549,7 @@ public class StateMachineFactory {
     public Transition makeTransition (String name,
                                       String commentString,
                                       String guardExpressionLanguage,
-                                      String guardExpressionBody,
+                                      Object guardExpressionBody,
                                       Procedure effect,
                                       Event trigger,
                                       StateVertex source,

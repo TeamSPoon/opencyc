@@ -271,13 +271,16 @@ public class ExportHtml {
         ExportHtml exportHtml = new ExportHtml();
         exportHtml.verbosity = 3;
         try {
-
-            exportHtml.port = 3620;
-            exportHtml.cycAccess =
-                new CycAccess(exportHtml.hostname,
-                              exportHtml.port,
-                              CycConnection.DEFAULT_COMMUNICATION_MODE,
-                              CycAccess.DEFAULT_CONNECTION);
+            String localHostName = InetAddress.getLocalHost().getHostName();
+            if (localHostName.equals("crapgame.cyc.com")) {
+                exportHtml.cycAccess = new CycAccess("localhost",
+                                          3620,
+                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          CycAccess.DEFAULT_CONNECTION);
+            }
+            else {
+                exportHtml.cycAccess = new CycAccess();
+            }
         }
         catch (Exception e) {
             Log.current.errorPrintln(e.getMessage());
@@ -285,6 +288,8 @@ public class ExportHtml {
         }
         exportHtml.produceHierarchyPages = false;
         exportHtml.includeUpwardClosure = true;
+
+        // Hard coded for the most often requested EELD program
         String choice = "eeld";
         if (args.length > 0)
             choice = args[0];
@@ -403,13 +408,13 @@ public class ExportHtml {
     protected void setup () throws UnknownHostException, IOException, CycApiException {
 
 
-        if (exportCommand == ExportDaml.EXPORT_KB_SUBSET) {
+        if (exportCommand == ExportHtml.EXPORT_KB_SUBSET) {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             includeUpwardClosure = false;
             if (verbosity > 1)
                 Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify());
         }
-        else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE) {
+        else if (exportCommand == ExportHtml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE) {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
             includeUpwardClosure = true;
@@ -417,7 +422,7 @@ public class ExportHtml {
                 Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify() + "\n  plus upward closure to #$Thing filtered by "
                         + cycKbSubsetFilter.cyclify());
         }
-        else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM) {
+        else if (exportCommand == ExportHtml.EXPORT_KB_SUBSET_BELOW_TERM) {
             rootTerm = cycAccess.getKnownConstantByGuid(rootTermGuid);
             cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
             cycKbSubsetCollection = cycKbSubsetFilter;
@@ -1626,6 +1631,7 @@ public class ExportHtml {
      */
     protected void addAllCategories ()
         throws CycApiException, IOException , UnknownHostException {
+        addEeldFY03CoreOntology();
         addAllIETRef();
         addAllSyracuseRef();
         addAllSraRef();
@@ -2026,6 +2032,20 @@ public class ExportHtml {
             "(#$and\n" +
             " (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             " (#$isa ?TERM #$ProposedOrPublicConstant))\n";
+        category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
+    }
+
+    /**
+     * Categorizes the FY03 EELD 'core' ontology.
+     */
+    protected void addEeldFY03CoreOntology ()
+        throws CycApiException, IOException , UnknownHostException {
+        Category category = new Category();
+        categories.add(category);
+        category.title = "FY03 EELD Core Ontology";
+        category.outputPath = "all-fy03-core.html";
+        category.queryString =
+            "(#$isa ?TERM #$EELD-FY03CoreOntologyConstant)";
         category.mt = cycAccess.getKnownConstantByName("#$EELDOntologyAlignmentSpindleCollectorMt");
     }
 

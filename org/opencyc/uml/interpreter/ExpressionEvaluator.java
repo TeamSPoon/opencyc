@@ -1,9 +1,8 @@
 package org.opencyc.uml.interpreter;
 
 import java.util.*;
-import java.io.*;
-import koala.dynamicjava.interpreter.*;
-import koala.dynamicjava.parser.wrapper.*;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.uml.commonbehavior.*;
 
 /**
@@ -33,20 +32,28 @@ import org.opencyc.uml.commonbehavior.*;
 
 public class ExpressionEvaluator {
 
-
     /**
-     * the tree interpreter which interprets java statements
+     * the reference to the parent CycAccess object which provides Cyc api
+     * services
      */
-    TreeInterpreter treeInterpreter;
+    protected CycAccess cycAccess;
 
     /**
-     * Constructs a new ExpressionEvaluator object given the tree
-     * interpreter which interprets java statements
+     * the expression evaluation state context
+     */
+    protected CycFort stateMt;
+
+    /**
+     * Constructs a new ExpressionEvaluator object.
      *
-     * @param treeInterpreter the given tree interpreter
+     * @param cycAccess the reference to the parent CycAccess object which provides Cyc api
+     * services
+     *
+     * @param stateMt the expression evaluation state context
      */
-    public ExpressionEvaluator(TreeInterpreter treeInterpreter) {
-        this.treeInterpreter = treeInterpreter;
+    public ExpressionEvaluator(CycAccess cycAccess, CycFort stateMt) {
+        this.cycAccess = cycAccess;
+        this.stateMt = stateMt;
     }
 
     /**
@@ -56,14 +63,8 @@ public class ExpressionEvaluator {
      * @return the result of evaluating the given boolean java expression
      */
     public boolean evaluateBoolean (BooleanExpression booleanExpression) {
-
-        StringReader stringReader = new StringReader(booleanExpression.getBody());
-        Object result = treeInterpreter.interpret(stringReader, "boolean expression");
-        if (result instanceof Boolean)
-            return ((Boolean) result).booleanValue();
-        else
-            throw new RuntimeException("Result of evaluating " + booleanExpression.getBody() +
-                                       "\nis not a Boolean " + result.toString());
+        //TODO
+        return true;
     }
 
     /**
@@ -72,7 +73,6 @@ public class ExpressionEvaluator {
      * @param expression the given java expression
      */
     public void evaluate (Expression expression) {
-        StringReader stringReader = new StringReader(expression.getBody());
-        treeInterpreter.interpret(stringReader, "boolean expression");
+        //TODO
     }
 }

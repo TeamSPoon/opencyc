@@ -74,7 +74,7 @@ public class StateInterpreter extends Thread {
         this.interpreter = interpreter;
         verbosity = interpreter.getVerbosity();
         this.state = state;
-        procedureInterpreter = new ProcedureInterpreter(interpreter.getTreeInterpreter(), verbosity);
+        procedureInterpreter = new ProcedureInterpreter(verbosity);
     }
 
     /**

@@ -1,6 +1,7 @@
 package org.opencyc.uml.core;
 
 import java.util.*;
+import org.opencyc.cycobject.*;
 
 /**
  * Procedure from the UML Core package.
@@ -37,7 +38,7 @@ public class Procedure extends ModelElement {
     /**
      * the text of the procedure written in the given language
      */
-    protected String body;
+    protected Object body;
 
     /**
      * Determines whether the arguments to the procedure are passed as
@@ -88,7 +89,7 @@ public class Procedure extends ModelElement {
      *
      * @return the text of the procedure written in the given language
      */
-    public String getBody () {
+    public Object getBody () {
         return body;
     }
 
@@ -97,7 +98,7 @@ public class Procedure extends ModelElement {
      *
      * @param body the text of the procedure written in the given language
      */
-    public void setBody (String body) {
+    public void setBody (Object body) {
         this.body = body;
     }
 

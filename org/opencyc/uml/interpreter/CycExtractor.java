@@ -218,10 +218,10 @@ public class CycExtractor {
                 (String) cycAccess.getArg2("umlLanguage",
                                            procedureTerm,
                                            mtTerm).toString();
-            String body =
-                (String) cycAccess.getArg2("umlBody",
-                                           procedureTerm,
-                                           mtTerm);
+            Object body =
+                cycAccess.getArg2("umlBody",
+                                  procedureTerm,
+                                  mtTerm);
             boolean isList =
                 cycAccess.isa(procedureTerm, "UMLProcedure-IsList");
             Procedure procedure =
@@ -613,7 +613,7 @@ public class CycExtractor {
                                                 transitionTerm,
                                                 mtTerm);
             String guardExpressionLanguage = null;
-            String guardExpressionBody = null;
+            Object guardExpressionBody = null;
             if (guardTerm != null) {
                 CycConstant booleanExpressionTerm =
                     (CycConstant) cycAccess.getArg2("umlExpressionLink",
@@ -624,9 +624,9 @@ public class CycExtractor {
                                                booleanExpressionTerm,
                                                mtTerm).toString();
                 guardExpressionBody =
-                    (String) cycAccess.getArg2("umlBody",
-                                               booleanExpressionTerm,
-                                               mtTerm);
+                    cycAccess.getArg2("umlBody",
+                                      booleanExpressionTerm,
+                                      mtTerm);
             }
             Procedure effect = null;
             CycConstant effectTerm =

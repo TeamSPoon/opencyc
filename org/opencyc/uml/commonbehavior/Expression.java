@@ -1,5 +1,6 @@
 package org.opencyc.uml.commonbehavior;
 
+import org.opencyc.cycobject.*;
 import org.opencyc.uml.interpreter.*;
 
 /**
@@ -37,7 +38,7 @@ public class Expression {
     /**
      * the body of this expression
      */
-    protected String body;
+    protected Object body;
 
     /**
      * Constructs a new Expression object.
@@ -68,7 +69,7 @@ public class Expression {
      *
      * @return the body of this expression
      */
-    public String getBody () {
+    public Object getBody () {
         return body;
     }
 
@@ -77,7 +78,7 @@ public class Expression {
      *
      * @param body the body of this expression
      */
-    public void setBody (String body) {
+    public void setBody (Object body) {
         this.body = body;
     }
 }

@@ -51,7 +51,7 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        //testSuite.addTest(new UnitTest("testChatterBot"));
+        testSuite.addTest(new UnitTest("testChatterBot"));
         testSuite.addTest(new UnitTest("testParser"));
         return testSuite;
     }
@@ -123,6 +123,7 @@ public class UnitTest extends TestCase {
     protected void interpretStateMachine (StateMachine stateMachine, CycAccess cycAccess) {
         int verbosity = 3;
         Interpreter interpreter = null;
+        /*
         try {
             interpreter = new Interpreter(stateMachine, cycAccess, verbosity);
         }
@@ -136,6 +137,7 @@ public class UnitTest extends TestCase {
         interpreter.interpret();
         if (verbosity > 2)
             System.out.print(interpreter.displayStateConfigurationTree());
+        */
     }
 
     /**

@@ -3,10 +3,9 @@ package org.opencyc.uml.interpreter;
 import java.io.*;
 import java.util.*;
 import javax.swing.tree.*;
-import koala.dynamicjava.interpreter.*;
-import koala.dynamicjava.parser.wrapper.*;
 import org.apache.commons.collections.*;
 import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.statemachine.*;
 import org.opencyc.util.*;
@@ -101,11 +100,6 @@ public class Interpreter {
     protected ArrayList selectedTransitions;
 
     /**
-     * TreeInterpreter that interprets java source code statements.
-     */
-    protected TreeInterpreter treeInterpreter;
-
-    /**
      * an expression evaluator
      */
     protected ExpressionEvaluator expressionEvaluator;
@@ -114,6 +108,11 @@ public class Interpreter {
      * the cyc access instance
      */
     protected CycAccess cycAccess;
+
+    /**
+     * the expression evaluation state context
+     */
+    protected CycFort stateMt;
 
     /**
      * the state machine factory used to create and destroy events
@@ -138,10 +137,16 @@ public class Interpreter {
      *
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
+     * @param stateMt the expression evaluation state context
      */
-    public Interpreter(StateMachine stateMachine, CycAccess cycAccess)
+    public Interpreter(StateMachine stateMachine,
+                       CycAccess cycAccess,
+                       CycFort stateMt)
         throws IOException {
-        this(stateMachine, cycAccess, Interpreter.DEFAULT_VERBOSITY);
+        this(stateMachine,
+             cycAccess,
+             stateMt,
+             Interpreter.DEFAULT_VERBOSITY);
     }
 
     /**
@@ -150,13 +155,18 @@ public class Interpreter {
      *
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
+     * @param stateMt the expression evaluation state context
      * @param verbosity indicates the verbosity of the interpreter's
      * diagnostic output - 9 = maximum, 0 = quiet
      */
-    public Interpreter(StateMachine stateMachine, CycAccess cycAccess, int verbosity)
+    public Interpreter(StateMachine stateMachine,
+                       CycAccess cycAccess,
+                       CycFort stateMt,
+                       int verbosity)
         throws IOException {
         this.stateMachine = stateMachine;
         this.cycAccess = cycAccess;
+        this.stateMt = stateMt;
         this.verbosity = verbosity;
         initialize();
         if (verbosity > 2)
@@ -168,27 +178,7 @@ public class Interpreter {
      */
     protected void initialize () throws IOException {
         Log.makeLog("state-machine-interpreter.log");
-        treeInterpreter = new TreeInterpreter(new JavaCCParserFactory());
-        StringReader stringReader = new StringReader("import org.opencyc.api.*;");
-        treeInterpreter.interpret(stringReader, "");
-        stringReader = new StringReader("import org.opencyc.util.*;");
-        treeInterpreter.interpret(stringReader, "");
-        stringReader = new StringReader("import org.opencyc.cycobject.*;");
-        treeInterpreter.interpret(stringReader, "");
-        stringReader = new StringReader("import java.io.*;");
-        treeInterpreter.interpret(stringReader, "");
-        treeInterpreter.defineVariable("cycAccess", cycAccess);
-        String javaStatements =
-                "BufferedReader consoleReader = null; " +
-                "try { " +
-                "    consoleReader = new BufferedReader(new InputStreamReader(System.in)); " +
-                "} " +
-                "catch (IOException e) { " +
-                "    Log.current.println(e.getMessage()); " +
-                "} ";
-        stringReader = new StringReader(javaStatements);
-        treeInterpreter.interpret(stringReader, "");
-        expressionEvaluator = new ExpressionEvaluator(treeInterpreter);
+        expressionEvaluator = new ExpressionEvaluator(cycAccess, stateMt);
         stateMachineFactory = new StateMachineFactory();
         stateMachineFactory.setStateMachine(stateMachine);
         stateMachineFactory.setNamespace(stateMachine.getNamespace());
@@ -550,15 +540,6 @@ public class Interpreter {
      */
     public DefaultMutableTreeNode getActiveStateConfigurationTreeNode (State state) {
         return (DefaultMutableTreeNode) activeStates.get(state);
-    }
-
-    /**
-     * Gets the tree interpreter which interprets java statements
-     *
-     * @return the tree interpreter which interprets java statements
-     */
-    public TreeInterpreter getTreeInterpreter () {
-        return treeInterpreter;
     }
 
     /**

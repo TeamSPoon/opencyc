@@ -34,12 +34,25 @@ import org.opencyc.api.*;
  * @see UnitTest#testConstraintProblem
  */
 public class ProblemParser {
-
-
     /**
      * Reference to the parent <tt>ConstraintProblem</tt> object.
      */
     protected ConstraintProblem constraintProblem;
+
+    /**
+     * Reference to the parent list of simplified constraint rules.
+     */
+    ArrayList simplifiedRules;
+
+    /**
+     * Reference to the parent list of domain populating constraint rules.
+     */
+    ArrayList domainPopulationRules;
+
+    /**
+     * Reference to the parent list of constraint rules.
+     */
+    ArrayList constraintRules;
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -55,9 +68,10 @@ public class ProblemParser {
      */
     public ProblemParser(ConstraintProblem constraintProblem) {
         this.constraintProblem = constraintProblem;
+        simplifiedRules = constraintProblem.simplifiedRules;
+        domainPopulationRules = constraintProblem.domainPopulationRules;
+        constraintRules = constraintProblem.constraintRules;
     }
-
-
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -73,22 +87,81 @@ public class ProblemParser {
      * Simplifies the input problem into its constituent <tt>Rule</tt> objects,
      * then divides the input rules into those which populate the variable
      * domains, and those which subsequently constrain the search for
-     * one or more solutions.
+     * one or more solutions.  Obtains additional argument type constraints for the constraint
+     * rules.
      */
     public void extractRulesAndDomains() throws IOException {
-        constraintProblem.simplifiedRules = Rule.simplifyRuleExpression(constraintProblem.problem);
-        for (int i = 0; i < constraintProblem.simplifiedRules.size(); i++) {
-            Rule rule = (Rule) constraintProblem.simplifiedRules.get(i);
+        simplifiedRules = Rule.simplifyRuleExpression(constraintProblem.problem);
+        for (int i = 0; i < simplifiedRules.size(); i++) {
+            Rule rule = (Rule) simplifiedRules.get(i);
             if (rule.isVariableDomainPopulatingRule())
-                constraintProblem.domainPopulationRules.add(rule);
+                domainPopulationRules.add(rule);
             else {
-                constraintProblem.constraintRules.add(rule);
-                ArrayList argConstraints = constraintProblem.argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(rule);
-                constraintProblem.domainPopulationRules.addAll(argConstraints);
+                constraintRules.add(rule);
+                ArrayList argConstraints =
+                    constraintProblem.argumentTypeConstrainer.retrieveArgumentTypeConstraintRules(rule);
+                placeDomainPopulatingRules(argConstraints);
             }
         }
         if (verbosity > 1)
             constraintProblem.displayConstraintRules();
+    }
+
+    /**
+     * Places the best domain populating rules into the the set of domainPopulationRules and puts
+     * any other non-subsumed candidate domain populating rule into the set of problem constraint
+     * rules.  The priority for determining the best domain populating rule is, from best to worst:
+     * #$elementOf (accept all), #$genls (choose least cardinality), #$isa (choose least cardinality).
+     *
+     * @param candidateRules a list of candidate domain population rules
+     */
+    protected void placeDomainPopulatingRules(ArrayList candidateRules) throws IOException {
+        for (int i = 0; i < candidateRules.size(); i++)
+            placeDomainPopulatingRule((Rule) candidateRules.get(i));
+    }
+
+    /**
+     * Places the best domain populating rule into the the set of domainPopulationRules and puts
+     * any other non-subsumed candidate domain populating rule into the set of problem constraint
+     * rules.
+     *
+     * @param candidateRule the given candidate domain population rules
+     */
+    protected void placeDomainPopulatingRule(Rule candidateRule) throws IOException {
+        if (verbosity > 3)
+            System.out.println("Considering \n" + candidateRule.cyclify() +
+                               " as candidate domain populating rule");
+        if (candidateRule.getArity() != 1)
+            throw new RuntimeException("candidateRule does not have arity=1 " + candidateRule.cyclify());
+        CycVariable variable = (CycVariable) candidateRule.getVariables().get(0);
+        for (int i = 0; i < domainPopulationRules.size(); i++) {
+            Rule domainPopulationRule = (Rule) domainPopulationRules.get(i);
+            CycVariable domainPopulationVariable = (CycVariable) domainPopulationRule.getVariables().get(0);
+            if (domainPopulationVariable.equals(variable)) {
+                if (verbosity > 3)
+                    System.out.println("Comparing to \n" + domainPopulationRule.cyclify());
+                CycConstant domainPopulationPredicate = domainPopulationRule.getPredicate();
+                CycConstant candidatePredicate = candidateRule.getPredicate();
+                CycConstant elementOf = CycAccess.current().getConstantByName("elementOf");
+                if (domainPopulationPredicate.equals(elementOf)) {
+                    if (candidatePredicate.equals(elementOf)) {
+                        if (verbosity > 3)
+                            System.out.println("  placed \n" + candidateRule.cyclify() +
+                                               " as domain populating rule");
+                    }
+                    else {
+                    }
+                }
+                else {
+                }
+
+                return;
+            }
+        }
+        domainPopulationRules.add(candidateRule);
+        if (verbosity > 3)
+            System.out.println("  placed \n" + candidateRule.cyclify() +
+                               " as domain populating rule");
     }
 
     /**

@@ -400,6 +400,20 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(argNIsas);
         Assert.assertEquals("(Event)", argNIsas.toString());
 
+        // getArgNGenls.
+        List argGenls = null;
+        try {
+            argGenls = cycAccess.getArgNGenls(cycAccess.getConstantByName("#$superTaxons"), 2);
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(argGenls);
+        Assert.assertEquals("(Organism-Whole)", argGenls.toString());
+
         // isCollection.
         boolean answer = false;
         try {

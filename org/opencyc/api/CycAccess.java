@@ -856,6 +856,14 @@ public class CycAccess {
     }
 
     /**
+     * Gets a list of the argNGenls for a CycConstant predicate.
+     */
+    public CycList getArgNGenls (CycConstant predicate, int argPosition)  throws IOException, UnknownHostException {
+        return converseList("(remove-duplicates (with-all-mts (argn-genl " + predicate.cycName() +
+                            " " + argPosition + ")))");
+    }
+
+    /**
      * Gets a list of the arg1Formats for a CycConstant predicate.
      */
     public CycList getArg1Formats (CycConstant predicate)  throws IOException, UnknownHostException {

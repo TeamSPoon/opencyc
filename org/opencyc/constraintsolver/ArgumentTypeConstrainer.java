@@ -2,6 +2,7 @@ package org.opencyc.constraintsolver;
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 
@@ -88,7 +89,6 @@ public class ArgumentTypeConstrainer {
             if (rule.getVariables().contains(argument)) {
                 CycVariable cycVariable = (CycVariable) argument;
                 int argPosition = i + 1;
-                System.out.println("rule=" + rule.cyclify() + " variable=" + cycVariable + " argPosition=" + argPosition);
                 result.addAll(retrieveArgumentTypeConstraintRules(predicate,
                                                                   argPosition,
                                                                   cycVariable));
@@ -112,7 +112,7 @@ public class ArgumentTypeConstrainer {
                                                             CycVariable cycVariable) throws IOException {
         ArrayList result = new ArrayList();
         result.addAll(retrieveArgNIsas(predicate, argPosition, cycVariable));
-        //result.addAll(retrieveArgNGenls(predicate, argPosition, cycVariable));
+        result.addAll(retrieveArgGenls(predicate, argPosition, cycVariable));
         return result;
     }
 
@@ -134,25 +134,19 @@ public class ArgumentTypeConstrainer {
         CycList isas = CycAccess.current().getArgNIsas(predicate, argPosition);
         for (int i = 0; i < isas.size(); i++) {
             CycConstant collection = (CycConstant) isas.get(i);
-            if (collection.equals(CycAccess.current().getConstantByName("Thing"))) {
-                if (verbosity > 3)
-                    System.out.println("ignoring " + predicate.cyclify() + " arg type #$isa #$Thing at arg position " + argPosition);
-            }
-            else {
-                String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
-                Rule rule = new Rule(ruleString);
-                result.add(rule);
-                if (verbosity > 3)
-                    System.out.println(predicate.cyclify() +
-                                       " has #$argNIsa constraint at arg position " + argPosition +
-                                       "  \n" + rule.cyclify());
-            }
+            String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
+            Rule rule = new Rule(ruleString);
+            result.add(rule);
+            if (verbosity > 3)
+                System.out.println(predicate.cyclify() +
+                                   " has #$argNIsa constraint at arg position " + argPosition +
+                                   "  \n" + rule.cyclify());
         }
         return result;
     }
 
     /**
-     * Retrieves the #$argNGenls constraint rules for the given predicate at the given
+     * Retrieves the #$argGenl constraint rules for the given predicate at the given
      * argument position, indexed base 1.
      *
      * @param predicate the <tt>CycConstant</tt> which is the predicate of a simple rule
@@ -162,18 +156,22 @@ public class ArgumentTypeConstrainer {
      * @return the #$argNGenls constraint rules for the given predicate at the given
      * argument position, indexed base 1
      */
-    public ArrayList retrieveArgNGenls(CycConstant predicate,
-                                          int argPosition,
-                                          CycVariable cycVariable) {
+    public ArrayList retrieveArgGenls(CycConstant predicate,
+                                      int argPosition,
+                                      CycVariable cycVariable)
+        throws IOException, UnknownHostException{
         ArrayList result = new ArrayList();
-
-        //TODO retrieve argNGenls constraints
-        Rule rule = null;
-        if (verbosity > 3)
-            System.out.println(predicate +
-                               " has #$argNGenls constraint at arg position " + argPosition +
-                               "  \n" + rule);
-
+        CycList genls = CycAccess.current().getArgNGenls(predicate, argPosition);
+        for (int i = 0; i < genls.size(); i++) {
+            CycConstant collection = (CycConstant) genls.get(i);
+            String ruleString = "(#$isa " + cycVariable + " " + collection.cyclify() + ")";
+            Rule rule = new Rule(ruleString);
+            result.add(rule);
+            if (verbosity > 3)
+                System.out.println(predicate.cyclify() +
+                                   " has #$argNGenl constraint at arg position " + argPosition +
+                                   "  \n" + rule.cyclify());
+        }
         return result;
     }
 

@@ -84,6 +84,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
+        */
         testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
@@ -94,9 +95,8 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
-        */
         testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
-        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
 
@@ -1016,7 +1016,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        //cycAccess.traceOnDetailed();
+cycAccess.traceOn();
         doTestCycAccess3(cycAccess);
 
         cycAccess.close();

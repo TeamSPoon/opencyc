@@ -606,7 +606,7 @@ public class CycAccess {
      */
     public Guid getConstantGuid (String constantName)
         throws IOException, UnknownHostException, CycApiException {
-        String command = "(guid-to-string (constant-guid (find-constant \"" +
+        String command = "(guid-to-string (constant-external-id (find-constant \"" +
                          constantName + "\")))";
         return CycObjectFactory.makeGuid(converseString(command));
     }
@@ -624,7 +624,7 @@ public class CycAccess {
         command.add(CycObjectFactory.makeCycSymbol("guid-to-string"));
         CycList command1 = new CycList();
         command.add(command1);
-        command1.add(CycObjectFactory.makeCycSymbol("constant-guid"));
+        command1.add(CycObjectFactory.makeCycSymbol("constant-external-id"));
         CycList command2 = new CycList();
         command1.add(command2);
         command2.add(CycObjectFactory.makeCycSymbol("find-constant-by-internal-id"));

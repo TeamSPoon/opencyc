@@ -551,7 +551,6 @@ public class ImportDaml implements StatementHandler {
         }
     }
 
-
     /**
      * Imports the rdf:type triple.
      *
@@ -568,7 +567,6 @@ public class ImportDaml implements StatementHandler {
                                 term.cyclify() + " #$SingleEntryFormat)\n");
             return;
         }
-
         CycFort collection = importTerm(objectTermInfo);
         if (! cycAccess.isCollection(collection)) {
             cycAccess.assertIsaCollection(collection);
@@ -576,6 +574,10 @@ public class ImportDaml implements StatementHandler {
         }
         cycAccess.assertIsa(term,
                             collection);
+        cycAccess.assertGaf(importMt,
+                            cycAccess.getKnownConstantByName("damlOntology"),
+                            term,
+                            damlOntologyDefiningURL);
         Log.current.println("(#$isa " +
                             term.cyclify() + " " +
                             collection.cyclify() + ")\n");
@@ -834,15 +836,6 @@ public class ImportDaml implements StatementHandler {
             cycAccess.assertIsa(cycFort,
                                 kbSubsetCollection,
                                 bookkeepingMt);
-
-
-            // TODO be more selective about the defining assertion:
-            // use rdf:type (#$isa)
-
-            cycAccess.assertGaf(importMt,
-                                cycAccess.getKnownConstantByName("damlOntology"),
-                                cycFort,
-                                damlOntologyDefiningURL);
         }
         damlTermInfo.cycFort = cycFort;
         previousDamlTermInfo = damlTermInfo;

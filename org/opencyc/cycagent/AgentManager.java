@@ -76,6 +76,7 @@ public class AgentManager {
      * Provides the main method.
      */
     public static void main(String[] args) {
+        Log.makeLog();
         String localHostName = null;
         try {
             localHostName = InetAddress.getLocalHost().getHostName();
@@ -86,7 +87,7 @@ public class AgentManager {
         }
         agentManager = new AgentManager();
         if (agentManager.verbosity > 1)
-            Log.current.print("Agent manager started at " + localHostName);
+            Log.current.println("Agent manager started at " + localHostName);
         agentManager.listenForCycServers();
     }
 

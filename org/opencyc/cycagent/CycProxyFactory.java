@@ -89,11 +89,11 @@ class CycProxyFactory implements Runnable {
         }
         CycList cycToAgentManagerInitMessage = null;
         try {
-            Object[] response = cycConnection.receiveBinary();
-            cycToAgentManagerInitMessage = (CycList) response[1];
+            //cycConnection.traceOnDetailed();
+            cycToAgentManagerInitMessage = cycConnection.receiveBinaryApiRequest();
         }
         catch (Exception e) {
-            Log.current.println("Exception reading CycConnection: " + e.getMessage());
+            Log.current.println("Exception with CycConnection: " + e.getMessage());
             return;
         }
         if (! cycToAgentManagerInitMessage.first().equals(CycObjectFactory.makeCycSymbol("cyc-to-agent-manager-init"))) {
@@ -102,22 +102,12 @@ class CycProxyFactory implements Runnable {
         }
         String cycImageId = (String) cycToAgentManagerInitMessage.second();
         int basePort = ((Integer) cycToAgentManagerInitMessage.third()).intValue();
-        CycList acknowledgement = new CycList();
-        acknowledgement.add(CycObjectFactory.t);
-        acknowledgement.add(CycObjectFactory.t);
-
-        try {
-            cycConnection.sendBinary(acknowledgement);
-        }
-        catch (Exception e) {
-            Log.current.println("Exception sending acknowledgement: " + e.getMessage());
-            return;
-        }
         String myAgentName = "cyc-api-service-" + cycImageId;
         CycProxy cycProxy = new CycProxy(myAgentName, verbosity);
         cycProxy.agentsCycConnection = cycConnection;
         CycAgentInfo cycAgentInfo = new CycAgentInfo(basePort, cycImageId, cycProxy);
         AgentManager.cycAgents.put(myAgentName, cycAgentInfo);
+        cycProxy.initializeAgentCommunity();
         cycProxy.handleMessagesFromCyc();
     }
 

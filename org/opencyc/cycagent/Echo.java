@@ -42,11 +42,6 @@ public class Echo extends GenericAgent {
     public String echoMessageText = "default echo message";
 
     /**
-     * the interface to either the CoABS or FIPA-OS agent community
-     */
-    protected AgentCommunityAdapter agentCommunityAdapter;
-
-    /**
      * Constructs a new Echo agent object.
      */
     public Echo() {
@@ -77,10 +72,6 @@ public class Echo extends GenericAgent {
         echo.myAgentName = "EchoAgent";
         echo.setVerbosity(AgentCommunityAdapter.QUIET_VERBOSITY);
         echo.initializeAgentCommunity();
-        if (echo.remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
-            echo.agentCommunityAdapter = echo.coAbsCommunityAdapter;
-        else
-            echo.agentCommunityAdapter = echo.fipaOsCommunityAdapter;
         echo.doEcho();
         echo.agentCommunityAdapter.deregister();
         System.exit(0);

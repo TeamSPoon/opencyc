@@ -91,7 +91,7 @@ public class UnitTest extends TestCase {
                 "        (register-agent\n" +
                 "          (:CoABS-agent-description\n" +
                 "            (:name Agent1)\n" +
-                "            (:serviceID fc2f14ee-303e-4f58-a6f4-cb0bc2ad5546)\n" +
+                "            (:serviceID \"fc2f14ee-303e-4f58-a6f4-cb0bc2ad5546\")\n" +
                 "            (:acls )\n" +
                 "            (:contentLanguages )\n" +
                 "            (:ontologies ))\n" +
@@ -113,7 +113,7 @@ public class UnitTest extends TestCase {
                                 "(register-agent " +
                                 "(:CoABS-agent-description " +
                                 "(:name Agent1 ) " +
-                                "(:serviceID fc2f14ee-303e-4f58-a6f4-cb0bc2ad5546 ) " +
+                                "(:serviceID \"fc2f14ee-303e-4f58-a6f4-cb0bc2ad5546\" ) " +
                                 "(:acls ) " +
                                 "(:contentLanguages ) " +
                                 "(:ontologies ) ) " +

@@ -79,6 +79,13 @@ public class GenericAgent implements MessageReceiver {
     protected FipaOsCommunityAdapter fipaOsCommunityAdapter;
 
     /**
+     * The interface to either the CoABS or FIPA-OS agent community.  This reference
+     * is provided for the convenience of agents which use only one of the agent
+     * communities, and is null when both are specified in the constructor method.
+     */
+    protected AgentCommunityAdapter agentCommunityAdapter;
+
+    /**
      * Indicates whether this class consumed the received message.
      */
     protected boolean messageConsumed = false;
@@ -103,6 +110,9 @@ public class GenericAgent implements MessageReceiver {
         this.remoteAgentCommunity = AgentCommunityAdapter.FIPA_OS_AND_COABS_AGENT_COMMUNITIES;
         this.verbosity = verbosity;
         Log.makeLog();
+        if (verbosity > 0)
+            Log.current.println("Created CycProxy for " + myAgentName +
+                                "\nfor both CoABS and FIPA-OS agent communities");
     }
 
     /**
@@ -118,6 +128,9 @@ public class GenericAgent implements MessageReceiver {
         this.remoteAgentCommunity = remoteAgentCommunity;
         this.verbosity = verbosity;
         Log.makeLog();
+        if (verbosity > 0)
+            Log.current.println("Created CycProxy for " + myAgentName +
+                                "\nfor the " + this.agentCommunityName() + " agent community");
     }
 
     /**
@@ -144,6 +157,12 @@ public class GenericAgent implements MessageReceiver {
             fipaOsCommunityAdapter = new FipaOsCommunityAdapter(this, verbosity);
         else
             throw new RuntimeException("Invalid remote agent community " + remoteAgentCommunity);
+        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY)
+            agentCommunityAdapter = coAbsCommunityAdapter;
+        else if (remoteAgentCommunity == AgentCommunityAdapter.FIPA_OS_AGENT_COMMUNITY)
+            agentCommunityAdapter = fipaOsCommunityAdapter;
+        else
+            agentCommunityAdapter = null;
     }
 
     /**

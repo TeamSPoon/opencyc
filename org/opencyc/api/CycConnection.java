@@ -532,6 +532,43 @@ public class CycConnection implements CycConnectionInterface {
     }
 
     /**
+     * Receives a binary (cfasl) api request from a cyc server.  Unlike the api response handled
+     * by the receiveBinary method, this method does not expect an input status object.
+     *
+     * @return the api request expression.
+     */
+    public CycList receiveBinaryApiRequest () throws IOException, CycApiException {
+        CycList apiRequest = (CycList) cfaslInputStream.readObject();
+        if (trace > API_TRACE_NONE) {
+            System.out.println("cyc --> (api-request) " + apiRequest.safeToString());
+        }
+        return apiRequest;
+    }
+
+    /**
+     * Sends a binary (cfasl) api response to a cyc server.  This method prepends a status
+     * object (the symbol T) to the message.
+     *
+     * @param the api response object
+     */
+    public void sendBinaryApiResponse (Object message) throws IOException, CycApiException {
+        if (trace > API_TRACE_NONE) {
+            String messageString = null;
+            if (message instanceof CycList)
+                messageString = ((CycList) message).safeToString();
+            else if (message instanceof CycFort)
+                messageString = ((CycFort) message).safeToString();
+            else
+                messageString = message.toString();
+            System.out.println("(" + CycObjectFactory.t + ") " + messageString + " --> cyc");
+        }
+        CycList apiResponse = new CycList();
+        apiResponse.add(CycObjectFactory.t);
+        apiResponse.add(message);
+        cfaslOutputStream.writeObject(apiResponse);
+    }
+
+    /**
      * Send a message to Cyc and return the Boolean response as the first
      * element of an object array, and the cyc response Symbolic Expression as
      * the second element, spending no less time than the specified timer allows

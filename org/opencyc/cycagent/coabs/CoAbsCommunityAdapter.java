@@ -176,7 +176,8 @@ public class CoAbsCommunityAdapter
     }
 
     /**
-     * Fixes the :sender and :receiver parameter in the CoABS message to make them FIPA ACL compatible.
+     * Fixes the :sender and :receiver parameter in the CoABS message to make them FIPA ACL compatible.  Also
+     * encloses service id in string quotes.
      *
      * @param aclText the ACL expression in string form with :sender <sender-symbol> and
      * with :receiver <receiver-symbol>
@@ -237,7 +238,21 @@ public class CoAbsCommunityAdapter
         }
         correctedReceiverAclText.append("))");
         correctedReceiverAclText.append(tempText.substring(index));
-        return correctedReceiverAclText.toString();
+
+        tempText = correctedReceiverAclText.toString();
+        StringBuffer correctedServiceIdText = new StringBuffer();
+        index = tempText.indexOf("(:serviceID ");
+        if (index < 0)
+            return tempText;
+        index = index + 12;
+        correctedServiceIdText.append(tempText.substring(0, index));
+        correctedServiceIdText.append("\"");
+        int serviceIdStartIndex = index;
+        index = tempText.indexOf(")", index);
+        correctedServiceIdText.append(tempText.substring(serviceIdStartIndex, index));
+        correctedServiceIdText.append("\"");
+        correctedServiceIdText.append(tempText.substring(index));
+        return correctedServiceIdText.toString();
     }
 
     /**

@@ -2,41 +2,32 @@ package org.opencyc.elf;
 
 //// Internal Imports
 import org.opencyc.elf.bg.BehaviorGeneration;
-
 import org.opencyc.elf.bg.dictionary.*;
-import org.opencyc.elf.bg.expression.*;
+import org.opencyc.elf.bg.expression.Minus;
+import org.opencyc.elf.bg.expression.Plus;
 import org.opencyc.elf.bg.list.*;
-
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
-
 import org.opencyc.elf.bg.predicate.*;
-
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
-
 import org.opencyc.elf.message.DoTaskMsg;
-
 import org.opencyc.elf.sp.*;
 import org.opencyc.elf.vj.EntityEvaluator;
 import org.opencyc.elf.vj.PlanEvaluator;
 import org.opencyc.elf.vj.ValueJudgement;
-
 import org.opencyc.elf.wm.*;
 
 //// External Imports
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import EDU.oswego.cs.dl.util.concurrent.Puttable;
-
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 /** Provides a suite of JUnit test cases for the org.opencyc.elf package.

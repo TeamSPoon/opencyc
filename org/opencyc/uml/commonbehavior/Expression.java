@@ -1,5 +1,7 @@
 package org.opencyc.uml.commonbehavior;
 
+import org.opencyc.uml.interpreter.*;
+
 /**
  * Expression from the UML Common_Behavior package.
  *
@@ -36,6 +38,11 @@ public class Expression {
      * body of this expression
      */
     public String body;
+
+    /**
+     * (Extension) evaluatable expression
+     */
+    public EvaluatableExpression evaluatableExpression;
 
     /**
      * Constructs a new Expression object.

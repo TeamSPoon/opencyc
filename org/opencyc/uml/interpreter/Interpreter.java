@@ -1,9 +1,7 @@
-package org.opencyc.uml.core;e
-
-import org.opencyc.uml.statemachine.*;
+package org.opencyc.uml.interpreter;
 
 /**
- * Operation from the UML Core package.
+ * Interprets a UML StateMachine.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -27,55 +25,20 @@ import org.opencyc.uml.statemachine.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Operation extends BehavioralFeature {
+public class Interpreter {
 
     /**
-     * kind of concurrency
+     * Constructs a new Interpreter object.
      */
-    public int concurrency;
-
-    public static final int CCK_SEQUENTIAL = 1;
-    public static final int CCK_GUARDED = 2;
-    public static final int CCK_CONCURRENT = 3;
+    public Interpreter() {
+    }
 
     /**
-     * indicates whether this operation is root
+     * Executes the Interpreter application.
+     *
+     * @param args ignored
      */
-    public boolean isRoot;
-
-    /**
-     * indicates whether this operation is a leaf
-     */
-    public boolean isLeaf;
-
-    /**
-     * indicates whether this operation is abstract
-     */
-    public boolean isAbstract;
-
-    /**
-     * specification for this operation
-     */
-    public String specification;
-
-    /**
-     * (Extension) the state machine implementing this Operation
-     */
-    public StateMachine stateMachine;
-
-    /**
-     * (Extension) the state machine implementing this Operation
-     */
-    public StateMachine stateMachine;
-
-    /**
-     * (Extension) evaluatable expression implementing this Operation
-     */
-    public EvaluatableExpression evaluatableExpression;
-
-    /**
-     * Constructs a new Operation object.
-     */
-    public Operation() {
+    public static void main(String[] args) {
+        Interpreter interpreter1 = new Interpreter();
     }
 }

@@ -102,6 +102,7 @@ public class Performer {
      * @param action the action object.
      */
     protected void doTermQuery (State currentState, Action action) {
+
     }
 
     /**

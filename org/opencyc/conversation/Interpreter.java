@@ -153,6 +153,7 @@ public class Interpreter {
      */
     public void initialize () {
         templateFactory = new TemplateFactory();
+        templateFactory.makeAllTemplates();
         templateParser = new TemplateParser();
         templateParser.initialize();
         performer = new Performer(this);

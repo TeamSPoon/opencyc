@@ -154,9 +154,9 @@ public class TemplateParser {
                 if (! stringTokenizer.hasMoreTokens()) {
                     String lastCharacter = word.substring(word.length() - 1);
                     if (Strings.isLetterOrDigit(lastCharacter))
-                        inputWords.add(word);
+                        inputWords.add(new String(word.getBytes()));
                     else {
-                        inputWords.add(word.substring(0, word.length() - 1));
+                        inputWords.add(new String((word.substring(0, word.length() - 1).getBytes())));
                         terminalPunctuation = lastCharacter;
                     }
                     break;

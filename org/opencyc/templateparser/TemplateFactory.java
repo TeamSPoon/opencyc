@@ -148,7 +148,6 @@ public class TemplateFactory {
     public Template makeTermQueryTemplate () {
         CycList templateExpression = new CycList();
         templateExpression.add("what");
-        templateExpression.add("what");
         templateExpression.add("do");
         templateExpression.add("you");
         templateExpression.add("know");

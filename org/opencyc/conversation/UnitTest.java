@@ -226,11 +226,14 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testInterpreter ****");
 
         Interpreter interpreter = new Interpreter();
+        interpreter.initialize();
         Assert.assertNotNull(interpreter);
         ConversationFactory.reset();
         ConversationFactory conversationFactory = new ConversationFactory();
         conversationFactory.initialize();
+
         Conversation chat = conversationFactory.makeChat();
+
         interpreter.setCurrentState(chat.getInitialState());
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         String chatMessage = "xxxx";
@@ -240,11 +243,34 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("not-understand", performative.getPerformativeName());
         Arc arc = interpreter.lookupArc(performative);
         interpreter.transitionState(arc);
+        Assert.assertEquals("ready", interpreter.currentState.getStateId());
 
+        interpreter.setCurrentState(chat.getInitialState());
+        Assert.assertEquals("ready", interpreter.currentState.getStateId());
+        chatMessage = "quit";
+        parseResults = interpreter.templateParser.parse(chatMessage);
+        Assert.assertTrue(parseResults.isCompleteParse);
+        performative = parseResults.getPerformative();
+        Assert.assertEquals("quit", performative.getPerformativeName());
+        arc = interpreter.lookupArc(performative);
+        interpreter.transitionState(arc);
+        Assert.assertEquals("final", interpreter.currentState.getStateId());
 
-
-
-
+        interpreter.setCurrentState(chat.getInitialState());
+        Assert.assertEquals("ready", interpreter.currentState.getStateId());
+        chatMessage = "what do you know about penguins?";
+        parseResults = interpreter.templateParser.parse(chatMessage);
+        Assert.assertTrue(parseResults.isCompleteParse);
+        performative = parseResults.getPerformative();
+        Assert.assertEquals("term-query", performative.getPerformativeName());
+        arc = interpreter.lookupArc(performative);
+        interpreter.transitionState(arc);
+        Assert.assertEquals("ready", interpreter.currentState.getStateId());
+        ArrayList expectedTextBinding = new ArrayList();
+        expectedTextBinding.add("penguins");
+        ArrayList actualTextBinding =
+            parseResults.getTextBinding(CycObjectFactory.makeCycVariable("term"));
+        Assert.assertEquals(expectedTextBinding, actualTextBinding);
 
         System.out.println("**** testInterpreter OK ****");
     }

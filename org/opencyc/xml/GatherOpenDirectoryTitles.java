@@ -86,6 +86,13 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
     protected CycFort damlOntologyDefiningURL;
 
     /**
+     * Dictionary of category identifiers and Open Directory
+     * topic strings.  The topic strings are not valid XML names
+     * and will be imported into Cyc as functionally wrapped strings.
+     */
+    public HashMap odpTitles = new HashMap();
+
+    /**
      * Constructs a new GatherOpenDirectoryTitles object.
      *
      * @param cycAccess the CycAccess instance which manages the connection
@@ -160,11 +167,11 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
             DamlTermInfo subjectTermInfo = resource(subject, null);
             DamlTermInfo predicateTermInfo = resource(predicate, null);
             DamlTermInfo objectTermInfo = resource(object, predicateTermInfo);
-            /*
-            displayTriple(subjectTermInfo,
-                          predicateTermInfo,
-                          objectTermInfo);
-            */
+            if (verbosity > 3)
+                displayTriple(subjectTermInfo,
+                              predicateTermInfo,
+                              objectTermInfo);
+
             examineTriple(subjectTermInfo,
                           predicateTermInfo,
                           objectTermInfo);
@@ -188,11 +195,12 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
                 DamlTermInfo subjectTermInfo = resource(subject, null);
                 DamlTermInfo predicateTermInfo = resource(predicate, null);
                 DamlTermInfo literalTermInfo = literal(literal);
-                /*
-                displayTriple(subjectTermInfo,
-                              predicateTermInfo,
-                              literalTermInfo);
-                */
+
+                if (verbosity > 3)
+                    displayTriple(subjectTermInfo,
+                                  predicateTermInfo,
+                                  literalTermInfo);
+
                 examineTriple(subjectTermInfo,
                              predicateTermInfo,
                              literalTermInfo);
@@ -221,7 +229,11 @@ public class GatherOpenDirectoryTitles implements StatementHandler {
         if (damlPredicate.equals("rdfs:label")) {
             String dmozId = subjectTermInfo.toString();
             String topic = objLitTermInfo.toOriginalString();
-            Log.current.println(dmozId + " --> " + topic);
+            topic = Strings.stripLeading(topic, '"');
+            topic = Strings.stripTrailing(topic, '"');
+            odpTitles.put(dmozId, topic);
+            if (verbosity > 2)
+                Log.current.println(dmozId + " --> " + topic);
         }
     }
 

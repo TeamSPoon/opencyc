@@ -3947,9 +3947,15 @@ public class CycAccess {
      */
     public void assertWithTranscript (String sentence, CycFort mt)
         throws IOException, UnknownHostException, CycApiException {
+        String projectName = "nil";
+        if (project != null)
+            projectName = project.stringApiValue();
+        String cyclistName = "nil";
+        if (cyclist != null)
+            cyclistName = cyclist.stringApiValue();
         String command =
-            "(clet ((*the-cyclist* " + cyclist.cyclify() + ")\n" +
-            "       (*ke-purpose* " + project.cyclify() + "))\n" +
+            "(clet ((*the-cyclist* " + cyclistName + ")\n" +
+            "       (*ke-purpose* " + projectName + "))\n" +
             "  (ke-assert-now\n" +
             "    '" + sentence + "\n" +
             "    " + mt.cyclify() + "))";
@@ -6565,6 +6571,48 @@ public class CycAccess {
         query.add(informationSource);
         query.add(externalConceptVar);
         return askWithVariables(query, variables, mt);
+    }
+
+    /**
+     * Asserts a preferred name string for the given term using lexical singular count noun
+     * assumptions.
+     *
+     * @param cycTerm the Cyc term
+     * @param phrase the preferred phrase for this term
+     */
+    public void assertGenPhraseCountNounSingular (CycFort cycTerm, String phrase)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList gaf = new CycList();
+        // (#$genPhrase <term> #$CountNoun #$singular <phrase>) in
+        // #$EnglishParaphaseMt
+        gaf.add(getKnownConstantByGuid("bd5fb28e-9c29-11b1-9dad-c379636f7270"));
+        gaf.add(cycTerm);
+        gaf.add(getKnownConstantByGuid("bd588078-9c29-11b1-9dad-c379636f7270"));
+        gaf.add(getKnownConstantByGuid("bd6757b8-9c29-11b1-9dad-c379636f7270"));
+        gaf.add(phrase);
+        CycFort mt = getKnownConstantByGuid("bda16220-9c29-11b1-9dad-c379636f7270");
+        assertGaf(gaf, mt);
+    }
+
+    /**
+     * Asserts a preferred name string for the given term using lexical singular count noun
+     * assumptions.
+     *
+     * @param cycTerm the Cyc term
+     * @param phrase the preferred phrase for this term
+     */
+    public void assertGenPhraseCountNounPlural (CycFort cycTerm, String phrase)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList gaf = new CycList();
+        // (#$genPhrase <term> #$CountNoun #$plural <phrase>) in
+        // #$EnglishParaphaseMt
+        gaf.add(getKnownConstantByGuid("bd5fb28e-9c29-11b1-9dad-c379636f7270"));
+        gaf.add(cycTerm);
+        gaf.add(getKnownConstantByGuid("bd588078-9c29-11b1-9dad-c379636f7270"));
+        gaf.add(getKnownConstantByGuid("bd5a6853-9c29-11b1-9dad-c379636f7270"));
+        gaf.add(phrase);
+        CycFort mt = getKnownConstantByGuid("bda16220-9c29-11b1-9dad-c379636f7270");
+        assertGaf(gaf, mt);
     }
 
 

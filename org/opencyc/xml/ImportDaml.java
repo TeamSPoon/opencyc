@@ -146,11 +146,6 @@ public abstract class ImportDaml implements StatementHandler {
 
     /**
      * Initializes the ImportDaml object.
-     *
-     * @param ontologyNicknames the dictionary associating each ontology uri with
-     * the nickname used for the Cyc namespace qualifier
-     * @param kbSubsetCollectionName the name of the Cyc KbSubsetCollection
-     * which identifies each of the imported terms
      */
     public void initialize ()
         throws IOException, UnknownHostException, CycApiException {
@@ -569,12 +564,6 @@ public abstract class ImportDaml implements StatementHandler {
             cycAccess.assertIsaCollection(collection);
             Log.current.println("*** forward reference to collection " + collection.cyclify());
         }
-        if (subjectTermInfo.constantName.startsWith("dmoz:DMOZ-"))
-            term = new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
-                               term);
-        if (objectTermInfo.constantName.startsWith("dmoz:DMOZ-"))
-            collection = new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
-                                     collection);
         cycAccess.assertGenls(term,
                               collection);
         Log.current.println("(#$genls " +
@@ -786,13 +775,13 @@ public abstract class ImportDaml implements StatementHandler {
         if (damlTermInfo.isURI) {
             cycFort = new CycNart(cycAccess.getKnownConstantByName("URLFn"),
                                   damlTermInfo.toString());
+            damlTermInfo.cycFort = cycFort;
+            previousDamlTermInfo = damlTermInfo;
+            return cycFort;
         }
         else if (damlTermInfo.constantName != null &&
-                 damlTermInfo.constantName.startsWith("dmoz:DMOZ-")) {
-            //TODO generalize
-            cycFort = new CycNart(cycAccess.getKnownConstantByName("OpenDirectoryTopicFn"),
-                                  damlTermInfo.toString());
-        }
+                 damlTermInfoWrapperTest(damlTermInfo.constantName))
+            cycFort = damlTermInfoWrapper(damlTermInfo.constantName);
         else {
             String term = damlTermInfo.toString();
             try {
@@ -813,18 +802,56 @@ public abstract class ImportDaml implements StatementHandler {
                 previousDamlTermInfo = damlTermInfo;
                 return cycFort;
             }
-            //Log.current.println("importing term: " + term);
-            cycAccess.assertIsa(cycFort,
-                                kbSubsetCollection,
-                                bookkeepingMt);
-            if (damlTermInfo.isAnonymous)
-                cycAccess.assertIsa(cycFort,
-                                    cycAccess.getKnownConstantByName("DamlAnonymousClass"),
-                                    importMt);
         }
+        if (verbosity > 1)
+            Log.current.println("(#$isa  " + cycFort.cyclify() + " " +
+                                kbSubsetCollection.cyclify() + ")");
+        cycAccess.assertIsa(cycFort,
+                            kbSubsetCollection,
+                            bookkeepingMt);
+        if (damlTermInfo.isAnonymous) {
+            if (verbosity > 1)
+                Log.current.println("(#$isa  " + cycFort.cyclify() + " #$DamlAnonymousClass)");
+            cycAccess.assertIsa(cycFort,
+                                cycAccess.getKnownConstantByName("DamlAnonymousClass"),
+                                importMt);
+        }
+        additionalLexicalAssertions(cycFort);
         damlTermInfo.cycFort = cycFort;
         previousDamlTermInfo = damlTermInfo;
         return cycFort;
+    }
+
+    /**
+     * Determines if the imported term should be wrapped with a functional
+     * expression and imported as a NART.  Subclasses may override for desired
+     * behavior.
+     * @param termName the daml term to be substituted and wrapped
+     */
+    protected boolean damlTermInfoWrapperTest (String termName) {
+        return false;
+    }
+
+    /**
+     * Wraps the impored term with the appropriate functional expression
+     * so that it can be imported as a NART.  Subclasses may override for desired
+     * behavior.
+     * @param termName the daml term to be substituted and wrapped
+     */
+    protected CycNart damlTermInfoWrapper (String termName)
+        throws IOException, CycApiException {
+        return null;
+    }
+
+    /**
+     * Asserts additional lexical assertions about the given term which are specific to
+     * the import of Open Directory terms. Subclasses may override for desired
+     * behavior.
+     *
+     * @param term the imported Open Directory (wrapped) term
+     */
+    protected void additionalLexicalAssertions (CycFort term)
+        throws IOException, CycApiException {
     }
 
     /**
@@ -837,6 +864,8 @@ public abstract class ImportDaml implements StatementHandler {
     protected void displayTriple (DamlTermInfo subjectTermInfo,
                                   DamlTermInfo predicateTermInfo,
                                   DamlTermInfo objLitTermInfo) {
+        if (verbosity < 1)
+            return;
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(subjectTermInfo.toOriginalString());
         stringBuffer.append(" ");
@@ -1567,6 +1596,32 @@ public abstract class ImportDaml implements StatementHandler {
                                           String damlOntology,
                                           String damlURI,
                                           String cycBinaryPredicateName,
+                                          String argumentMappingList)
+        throws IOException, UnknownHostException, CycApiException {
+            assertArgumentMapping (damlPropertyName,
+                                   damlOntology,
+                                   damlURI,
+                                   cycBinaryPredicateName,
+                                   argumentMappingList,
+                                   "UniversalVocabularyMt");
+    }
+
+    /**
+     * Asserts that the given DAML/RDFS/RDF property is mapped to the
+     * given Cyc predicate with the arguments reversed.
+     *
+     * @param damlPropertyName the given DAML/RDFS/RDF property
+     * @param damlOntology the Uniform Resource Locator in which the definition of
+     * the daml term is found
+     * @param damlURI the Uniform Resource Locator which uniquely identifies the daml term
+     * @param cycBinaryPredicateName the given Cyc binary predicate
+     * @argumentMappingList a list of argument positions
+     * @param mappingMt the microtheory in which the assertions are placed
+     */
+    protected void assertArgumentMapping (String damlPropertyName,
+                                          String damlOntology,
+                                          String damlURI,
+                                          String cycBinaryPredicateName,
                                           String argumentMappingList,
                                           String mappingMt)
         throws IOException, UnknownHostException, CycApiException {
@@ -1646,13 +1701,29 @@ public abstract class ImportDaml implements StatementHandler {
             cycAccess.setCyclist("SteveReed");
             cycAccess.setKePurpose("DAMLProject");
         }
-        // DamlConstant
-        String term = "DamlConstant";
+        // #$DamlFort
+        String term = "DamlFort";
         String comment = "The KB subset collection of DAML terms.";
         cycAccess.findOrCreate(term);
         cycAccess.assertComment(term, comment, "BaseKB");
         cycAccess.assertIsa(term, "VariableOrderCollection");
-        cycAccess.assertGenls(term, "CycLConstant");
+        cycAccess.assertGenls(term, "CycLReifiableDenotationalTerm");
+
+        // DamlConstant
+        term = "DamlConstant";
+        comment = "The KB subset collection of DAML terms.";
+        cycAccess.findOrCreate(term);
+        cycAccess.assertComment(term, comment, "BaseKB");
+        cycAccess.assertIsa(term, "VariableOrderCollection");
+        cycAccess.assertGenls(term, "DamlFort");
+
+        // #$DamlNart
+        term = "DamlNart";
+        comment = "The KB subset collection of DAML refified functional terms.";
+        cycAccess.findOrCreate(term);
+        cycAccess.assertComment(term, comment, "BaseKB");
+        cycAccess.assertIsa(term, "VariableOrderCollection");
+        cycAccess.assertGenls(term, "DamlFort");
 
         // #$DamlDatatypeProperty
         cycAccess.createCollection(
@@ -1713,7 +1784,7 @@ public abstract class ImportDaml implements StatementHandler {
             "Agent Markup Language) concept with its source" +
             "URL document.",
             // arg1Isa
-            "DamlConstant",
+            "CycLReifiableDenotationalTerm",
             // arg2Isa
             "UniformResourceLocator",
             // arg1Format
@@ -1736,7 +1807,7 @@ public abstract class ImportDaml implements StatementHandler {
             "Agent Markup Language) concept with its source" +
             "Uniform Resource Identifier.",
             // arg1Isa
-            "DamlConstant",
+            "CycLReifiableDenotationalTerm",
             // arg2Isa
             "UniformResourceLocator",
             // arg1Format

@@ -11,16 +11,11 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.message.ExecutorStatusMsg;
 import org.opencyc.elf.message.GenericMsg;
-import org.opencyc.elf.message.PredictedInputMsg;
-import org.opencyc.elf.message.PredictionRequestMsg;
 import org.opencyc.elf.message.ReplanMsg;
 import org.opencyc.elf.message.ScheduleConsistencyEvaluationMsg;
 import org.opencyc.elf.message.ScheduleConsistencyRequestMsg;
-import org.opencyc.elf.message.ScheduleEvaluationResultMsg;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
-import org.opencyc.elf.message.SimulateScheduleMsg;
-import org.opencyc.elf.message.SimulationFailureNotificationMsg;
 
 //// External Imports
 
@@ -73,19 +68,12 @@ public class Scheduler extends NodeComponent {
    * @param schedulerChannel the takable channel from which messages are input
    * @param jobAssignerChannel the puttable channel to which messages are output to the
    * job assigner
-   * @param planSimulatorChannel the puttable channel to which messages are output to the
-   * plan simulator
-   * @param predictorChannel the puttable channel to which messages are output to the predictor
    */
   public Scheduler (Takable schedulerChannel,
-                    Puttable jobAssignerChannel,
-                    Puttable planSimulatorChannel,
-                    Puttable predictorChannel) {
+                    Puttable jobAssignerChannel) {
     this.schedulerChannel = schedulerChannel;           
     consumer = new Consumer(schedulerChannel,
                             jobAssignerChannel,
-                            planSimulatorChannel,
-                            predictorChannel,
                             this);
     consumerExecutor = new ThreadedExecutor();
     try {
@@ -173,17 +161,6 @@ public class Scheduler extends NodeComponent {
     protected final Puttable jobAssignerChannel;
     
     /**
-     * the puttable channel to which messages are output to the
-     * plan simulator
-     */
-    protected final Puttable planSimulatorChannel;
-    
-    /**
-     * the puttable channel to which messages are output to the predictor
-     */
-    protected final Puttable predictorChannel;
-    
-    /**
      * the parent node component
      */
     protected NodeComponent nodeComponent;
@@ -209,20 +186,13 @@ public class Scheduler extends NodeComponent {
      * @param schedulerChannel the takable channel from which messages are input
      * @param jobAssignerChannel the puttable channel to which messages are output to the
      * job assigner
-     * @param planSimulatorChannel the puttable channel to which messages are output to the
-     * plan simulator
-     * @param predictorChannel the puttable channel to which messages are output to the predictor
      * @param nodeComponent the parent node component
      */
     protected Consumer (Takable schedulerChannel,
                         Puttable jobAssignerChannel,
-                        Puttable planSimulatorChannel,
-                        Puttable predictorChannel,
                         NodeComponent nodeComponent) { 
       this.schedulerChannel = schedulerChannel;
       this.jobAssignerChannel = jobAssignerChannel;
-      this.planSimulatorChannel = planSimulatorChannel;
-      this.predictorChannel = predictorChannel;
       this.nodeComponent = nodeComponent;
     }
 
@@ -248,10 +218,6 @@ public class Scheduler extends NodeComponent {
     void dispatchMsg (GenericMsg genericMsg) {
       if (genericMsg instanceof ScheduleJobMsg)
         processScheduleJobMsg((ScheduleJobMsg) genericMsg);
-      else if (genericMsg instanceof PredictedInputMsg)
-        processPredictedInputMsg((PredictedInputMsg) genericMsg);
-      else if (genericMsg instanceof ScheduleEvaluationResultMsg)
-        processScheduleEvaluationResultMsg((ScheduleEvaluationResultMsg) genericMsg);
       else if (genericMsg instanceof ReplanMsg)
         processReplanMsg((ReplanMsg) genericMsg);
       else if (genericMsg instanceof ExecutorStatusMsg)
@@ -269,28 +235,7 @@ public class Scheduler extends NodeComponent {
       taskCommand = scheduleJobMsg.getTaskCommand();
       //TODO
     }
-        
-    /**
-     * Processes the predicted input message.
-     *
-     * @param predictedInputMsg the predicted input message
-     */
-    protected void processPredictedInputMsg (PredictedInputMsg predictedInputMsg) {
-      Object obj = predictedInputMsg.getObj();
-      Object data = predictedInputMsg.getData();
-      //TODO
-    }
-        
-    /**
-     * Processes the schedule evaluation result message.
-     *
-     * @param scheduleEvaluationResult the schedule evaluation result message
-     */
-    protected void processScheduleEvaluationResultMsg (ScheduleEvaluationResultMsg scheduleEvaluationResultMsg) {
-      //TODO
-      Result result = scheduleEvaluationResultMsg.getResult();
-    }
-        
+                
     /**
      * Processes the replan message.
      *
@@ -335,33 +280,6 @@ public class Scheduler extends NodeComponent {
       nodeComponent.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
     }
     
-    /**
-     * Requests a predicted value for the given object.
-     *
-     * @param obj the given object whose predicted value is requested from
-     * the predictor
-     */
-    protected void sendPredictionRequestMsg (Object obj) {
-      PredictionRequestMsg predictionRequestMsg = new PredictionRequestMsg();
-      predictionRequestMsg.setSender(nodeComponent);
-      predictionRequestMsg.setReplyToChannel((Puttable) schedulerChannel);
-      predictionRequestMsg.setObj(obj);
-      nodeComponent.sendMsgToRecipient(predictorChannel, predictionRequestMsg);
-    }    
-
-    /**
-     * Sends a schedule simulation request message to the plan simulator.
-     */
-    protected void sendSimulateScheduleMsg () {
-      SimulateScheduleMsg simulateScheduleMsg = new SimulateScheduleMsg();
-      simulateScheduleMsg.setSender(nodeComponent);
-      simulateScheduleMsg.setReplyToChannel((Puttable) schedulerChannel);
-      simulateScheduleMsg.setControlledResources(controlledResources);
-      simulateScheduleMsg.setTaskCommand(taskCommand);
-      simulateScheduleMsg.setSchedule(schedule);
-      nodeComponent.sendMsgToRecipient(planSimulatorChannel, simulateScheduleMsg);
-    }    
-
     /**
      * Sends a schedule consistency request to a peer scheduler.
      *

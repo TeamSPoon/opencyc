@@ -38,9 +38,19 @@ public class ScheduleLibrary {
   
   /** Creates a new instance of ScheduleLibrary. */
   public ScheduleLibrary() {
+    scheduleLibrary = this;
   }
   
   //// Public Area
+  
+  /**
+   * Gets the singleton schedule library instance.
+   *
+   * @return the singleton schedule library instance
+   */
+  public static ScheduleLibrary getInstance () {
+    return scheduleLibrary;
+  }
   
   /**
    * Initializes the schedule library.

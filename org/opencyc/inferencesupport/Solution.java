@@ -112,6 +112,24 @@ public class Solution {
     }
 
     /**
+     * Sets the number of solutions found.
+     *
+     * @param nbrSolutionsFound the new value for the number of solutions found
+     */
+    public void setNbrSolutionsFound(int nbrSolutionsFound) {
+        this.nbrSolutionsFound = nbrSolutionsFound;
+    }
+
+    /**
+     * Returns the number of solutions found.
+     *
+     * @return the number of solutions found
+     */
+    public int getNbrSolutionsFound() {
+        return this.nbrSolutionsFound;
+    }
+
+    /**
      * Returns all solutions.
      *
      * @return the <tt>ArrayList</tt> of solutions, each solution is an <tt>ArrayList</tt>

@@ -67,17 +67,17 @@ public class Backchainer {
     /**
      * The microtheory in which inferences are performed.
      */
-    protected CycFort mt;
+    public CycFort mt;
 
     /**
      * current depth of backchaining from an input constraint rule.
      */
-    protected int backchainDepth = 0;
+    public int backchainDepth = 0;
 
     /**
      * Maximum depth of backchaining from an input constraint rule.
      */
-    protected int maxBackchainDepth = 0;
+    public int maxBackchainDepth = 0;
 
     /**
      * Indicates whether to backchain on predicates #$isa and #$genl
@@ -94,71 +94,42 @@ public class Backchainer {
      * Constructs a new <tt>Backchainer</tt> object given the parent <tt>ConstraintProblem</tt>
      * object.
      *
-     * @param mt the microtheory in which inferences are performed
      */
-    public Backchainer(ArrayList variables, CycFort mt) {
-        this.variables = variables;
-        this.mt = mt;
+    public Backchainer() {
     }
 
     /**
-     * Solves a recursive constraint problem to obtain additional bindings for the variable in the given
-     * unary rule, via backchaining on the unary rule (which might be a partially instantiated form of
-     * a higher arity rule).
+     * Solves a problem by obtaining bindings for the given literal via backchaining.
      *
-     * @param rule the unary rule for which additional bindings are sought via backchaining
-     * @return the <tt>ArrayList</tt> of values found
+     * @param literal the literal for which bindings are sought via backchaining
+     * @param variables the variables used in the parent constraint problem or query.
+     * @param mt the microtheory in which inferences are performed
+     * @return an <tt>ArrayList</tt> of solutions or <tt>null</tt> if no solutions were
+     * found.  Each solution is an <tt>ArrayList</tt> of variable binding <tt>ArrayList</tt>
+     * objects, each binding having the form of an <tt>ArrayList</tt> where the first
+     * element is the <tt>CycVariable</tt> and the second element is the domain value
+     * <tt>Object</tt>.
      */
-    public ArrayList backchain(Literal rule) throws IOException {
+    public ArrayList backchain(Literal literal, ArrayList variables, CycFort mt) throws IOException {
+        this.variables = variables;
+        this.mt = mt;
         ArrayList values = new ArrayList();
-        if (rule.getVariables().size() != 1)
-            throw new RuntimeException("Attempt to backchain on non-unary rule " + rule);
-        CycVariable variable = (CycVariable) rule.getVariables().get(0);
+        CycVariable variable = (CycVariable) literal.getVariables().get(0);
         if (verbosity > 1)
-            System.out.println("Backchaining at depth " + backchainDepth + " on\n  " + rule +
-                               "\n  to get bindings for " + variable);
-
-        ArrayList backchainRules = getBackchainRules(rule);
-        for (int i = 0; i < backchainRules.size(); i++) {
-            Literal backchainRule = (Literal) backchainRules.get(i);
-            if (verbosity > 1)
-                System.out.println("\nRecursive constraint problem to solve\n  " + backchainRule);
-            // Reuse the existing <tt>CycAccess</tt> object for the new constraint problem.
-            ConstraintProblem backchainProblem =
-                new ConstraintProblem(constraintProblem.cycAccess);
-            backchainProblem.setVerbosity(verbosity);
-            //backchainProblem.setVerbosity(9);
-            // Request all solutions.
-            backchainProblem.nbrSolutionsRequested = null;
-            backchainProblem.mt = mt;
-            // Keep the same limit on maximum backchain depth
-            backchainProblem.setMaxBackchainDepth(this.maxBackchainDepth);
-            // Increment the depth of backchaining.
-            backchainProblem.backchainer.backchainDepth = this.backchainDepth + 1;
-            ArrayList solutions = backchainProblem.solve(backchainRule.formula);
-            boolean solutionFound = false;
-            for (int j = 0; j < solutions.size(); j++) {
-                ArrayList solutionBindings = (ArrayList) solutions.get(j);
-                if (verbosity > 3)
-                    System.out.println("  Found bindings " + solutionBindings +
-                                       "\n  for " + variable);
-                for (int k = 0; k < solutionBindings.size(); k++) {
-                    Binding binding = (Binding) solutionBindings.get(k);
-                    if (binding.getCycVariable().equals(variable)) {
-                        Object value = binding.getValue();
-                        if (verbosity > 1)
-                            System.out.println("  adding value " + value + " for " + variable);
-                        values.add(value);
-                        solutionFound = true;
-                    }
-                }
-            }
-            if (verbosity > 1) {
-                if (! solutionFound)
-                    System.out.println("  No bindings found for " + variable);
-            }
-        }
-        return values;
+            System.out.println("Backchaining at depth " + backchainDepth + " on\n  " + literal);
+        // Reuse the existing CycAccess object.
+        QueryProcessor queryProcessor =
+            new QueryProcessor(CycAccess.current());
+        queryProcessor.setVerbosity(verbosity);
+        //queryProcessor.setVerbosity(9);
+        // Request all solutions.
+        queryProcessor.nbrSolutionsRequested = null;
+        queryProcessor.mt = mt;
+        // Keep the same limit on maximum backchain depth
+        queryProcessor.setMaxBackchainDepth(this.maxBackchainDepth);
+        // Increment the depth of backchaining.
+        queryProcessor.setBackchainDepth(this.backchainDepth + 1);
+        return queryProcessor.ask(literal.formula);
     }
 
     /**
@@ -183,19 +154,19 @@ public class Backchainer {
      * @param rule a rule is to be proven via backchaining
      * @return the sets of conjunctive antecentant rules which can prove the given rule
      */
-    public ArrayList getBackchainRules(Literal rule) throws IOException {
+    public ArrayList getBackchainRules(Literal literal) throws IOException {
         ArrayList result = new ArrayList();
         if (verbosity > 3)
-            System.out.println("getting rules to conclude\n" + rule);
-        ArrayList candidateImplicationRules = gatherRulesConcluding(rule);
+            System.out.println("getting rules to conclude\n" + literal);
+        ArrayList candidateImplicationRules = gatherImplicationRulesConcluding(literal);
         int nbrAcceptedRules = 0;
         int nbrCandidateRules = candidateImplicationRules.size();
         for (int i = 0; i < nbrCandidateRules; i++) {
-            Literal candidateImplicationRule = (Literal) candidateImplicationRules.get(i);
+            CycList candidateImplicationRule = (CycList) candidateImplicationRules.get(i);
             if (verbosity > 4)
                 System.out.println("\nConsidering implication rule\n" + candidateImplicationRule.cyclify());
             HornClause hornClause = new HornClause(candidateImplicationRule);
-            ArrayList antecedants = unifier.semanticallyUnify(rule, hornClause);
+            ArrayList antecedants = unifier.semanticallyUnify(literal, hornClause);
             if (antecedants != null) {
                 if (verbosity > 4)
                     System.out.println("Unified antecedants\n" + antecedants);
@@ -206,7 +177,7 @@ public class Backchainer {
                     Literal antecedant = (Literal) antecedants.get(j);
                     conjunctiveAntecedantRule.add(antecedant.getFormula());
                 }
-                result.add(new Literal(conjunctiveAntecedantRule));
+                result.add(new QueryLiteral(conjunctiveAntecedantRule));
             }
         }
         if (verbosity > 1) {
@@ -222,26 +193,24 @@ public class Backchainer {
     /**
      * Gathers the implication rules which conclude the given rule.
      *
-     * @param rule the rule to be proven via backchaining
-     * @return the implication rules which conclude the given rule
+     * @param literal the literal to be proven via backchaining
+     * @return the list of implication rules as <tt>CycList</tt> formulae which conclude the given rule
      */
-    public ArrayList gatherRulesConcluding(Literal rule) throws IOException {
+    public ArrayList gatherImplicationRulesConcluding(Literal literal) throws IOException {
         ArrayList result = new ArrayList();
-        CycConstant predicate = rule.getPredicate();
+        CycConstant predicate = literal.getPredicate();
         if (! this.sbhlBackchain &&
             (predicate.equals(CycAccess.isa) || predicate.equals(CycAccess.genls))) {
             if (verbosity > 3)
                 System.out.println("backchain inference bypassed for predicate " + predicate);
             return result;
         }
-        if (CycAccess.current().isBackchainForbidden(predicate,
-                                                     constraintProblem.mt)) {
+        if (CycAccess.current().isBackchainForbidden(predicate, mt)) {
             if (verbosity > 3)
                 System.out.println("backchain inference forbidden for predicate " + predicate);
             return result;
         }
-        if (CycAccess.current().isBackchainDiscouraged(predicate,
-                                                       constraintProblem.mt)) {
+        if (CycAccess.current().isBackchainDiscouraged(predicate, mt)) {
             if (verbosity > 3)
                 System.out.println("backchain inference discouraged for predicate " + predicate);
             return result;
@@ -251,42 +220,26 @@ public class Backchainer {
                 System.out.println("backchain inference bypassed for evaluatable predicate " + predicate);
             return result;
         }
-        /*
-        ArrayList cachedResult = getCache(predicate);
-        if (cachedResult != null) {
-            if (verbosity > 1)
-                System.out.println("Using cached implication rule set concluding " + predicate);
-            return cachedResult;
-        }
-        */
-
-        CycList backchainRules = CycAccess.current().getBackchainRules(rule, mt);
-        for (int i = 0; i < backchainRules.size(); i++) {
-            CycList cycListRule = (CycList) backchainRules.get(i);
-            if (HornClause.isValidHornExpression(cycListRule)) {
-                Literal backchainRule = new Literal(cycListRule);
-                result.add(backchainRule);
-            }
+        CycList backchainImplicationRules = CycAccess.current().getBackchainImplicationRules(literal, mt);
+        for (int i = 0; i < backchainImplicationRules.size(); i++) {
+            CycList cycListRule = (CycList) backchainImplicationRules.get(i);
+            if (HornClause.isValidHornExpression(cycListRule))
+                result.add(cycListRule);
             else {
                 if (verbosity > 3)
                     System.out.println("dropped ill-formed (backward) rule " + cycListRule.cyclify());
             }
         }
-        CycList forwardChainRules = CycAccess.current().getForwardChainRules(rule, mt);
-        for (int i = 0; i < forwardChainRules.size(); i++) {
-            CycList cycListRule = (CycList) forwardChainRules.get(i);
-            if (HornClause.isValidHornExpression(cycListRule)) {
-                Literal forwardChainRule = new Literal(cycListRule);
-                result.add(forwardChainRule);
-            }
+        CycList forwardChainImplicationRules = CycAccess.current().getForwardChainRules(literal, mt);
+        for (int i = 0; i < forwardChainImplicationRules.size(); i++) {
+            CycList cycListRule = (CycList) forwardChainImplicationRules.get(i);
+            if (HornClause.isValidHornExpression(cycListRule))
+                result.add(cycListRule);
             else {
                 if (verbosity > 3)
                     System.out.println("dropped ill-formed (forward) rule " + cycListRule.cyclify());
             }
         }
-        /*
-        addCache(predicate, result);
-        */
         return result;
     }
 
@@ -299,17 +252,6 @@ public class Backchainer {
      */
     public void setSbhlBackchain(boolean sbhlBackchain) {
         this.sbhlBackchain = sbhlBackchain;
-    }
-
-    /**
-     * Sets the maximum depth of backchaining from an input constraint rule. A value of zero indicates
-     * no backchaining.
-     *
-     * @param maxBackchainDepth the maximum depth of backchaining, or zero if no backchaing on the input
-     * constraint rules
-     */
-    public void setMaxBackchainDepth(int maxBackchainDepth) {
-        this.maxBackchainDepth = maxBackchainDepth;
     }
 
     /**

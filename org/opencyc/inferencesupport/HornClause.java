@@ -170,7 +170,7 @@ public class HornClause {
     public void renameVariables(ArrayList otherVariables, int verbosity) throws IOException {
         if (verbosity > 3)
             System.out.println("ensuring that variables for \n" + this.cyclify() +
-                               "are different from " + otherVariables);
+                               "\n  are different from " + otherVariables);
         for (int i = 0; i < otherVariables.size(); i++) {
             CycVariable otherVariable = (CycVariable) otherVariables.get(i);
             if (variables.contains(otherVariable)) {

@@ -99,7 +99,7 @@ public class ConstraintRule extends Literal implements Comparable{
      * can be evaluated locally without asking OpenCyc.
      * @return the truth value of the fully instantiated constraint rule
      */
-    public static boolean evaluateConstraintConstraintRule(CycList instantiatedConstraintRule) throws IOException {
+    public static boolean evaluateConstraintRule(CycList instantiatedConstraintRule) throws IOException {
         CycConstant predicate = (CycConstant) instantiatedConstraintRule.first();
         if (predicate.equals(CycAccess.numericallyEqual)) {
             int value = numericallyEvaluateExpression(instantiatedConstraintRule.second());
@@ -113,7 +113,7 @@ public class ConstraintRule extends Literal implements Comparable{
             CycList args = instantiatedConstraintRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
-                if (evaluateConstraintConstraintRule(arg))
+                if (evaluateConstraintRule(arg))
                     return true;
             }
             return false;
@@ -122,7 +122,7 @@ public class ConstraintRule extends Literal implements Comparable{
             CycList args = instantiatedConstraintRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
-                if (! evaluateConstraintConstraintRule(arg))
+                if (! evaluateConstraintRule(arg))
                     return false;
             }
             return true;

@@ -159,7 +159,7 @@ public class Unifier {
         if (backchainer.backchainDepth < backchainer.maxBackchainDepth)
             return false;
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
-            ConstraintRule antecedantConjunct = (ConstraintRule) antecedantConjuncts.get(i);
+            Literal antecedantConjunct = (Literal) antecedantConjuncts.get(i);
             if (antecedantConjunct.isGround()) {
                 boolean isAntecedantConjunctTrue =
                     CycAccess.current().isQueryTrue(antecedantConjunct.getFormula(),
@@ -188,7 +188,7 @@ public class Unifier {
      */
     protected boolean anyFalseViaIrreflexsivity(ArrayList antecedantConjuncts) throws IOException {
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
-            ConstraintRule antecedantConjunct = (ConstraintRule) antecedantConjuncts.get(i);
+            Literal antecedantConjunct = (Literal) antecedantConjuncts.get(i);
             if (verbosity > 8) {
                 System.out.println("  Screening irreflexivity usage\n  " +
                                    antecedantConjunct);

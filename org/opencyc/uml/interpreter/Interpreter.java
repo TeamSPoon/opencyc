@@ -39,6 +39,6 @@ public class Interpreter {
      * @param args ignored
      */
     public static void main(String[] args) {
-        Interpreter interpreter1 = new Interpreter();
+        Interpreter interpreter = new Interpreter();
     }
 }

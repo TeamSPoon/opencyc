@@ -40,11 +40,6 @@ public class Expression {
     public String body;
 
     /**
-     * (Extension) evaluatable expression
-     */
-    public EvaluatableExpression evaluatableExpression;
-
-    /**
      * Constructs a new Expression object.
      */
     public Expression() {

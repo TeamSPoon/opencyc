@@ -81,10 +81,8 @@ public class UnitTest extends TestCase {
     Node node = NodeFactory.getInstance().makeNodeShell();
     Node parentNode = NodeFactory.getInstance().makeNodeShell();
     node.setParentNode(parentNode);
-    State parentState = new State(parentNode);
-    parentNode.getWorldModel().setState(parentState);
-    state = new State(node);
-    node.getWorldModel().setState(state);
+    State parentState = parentNode.getWorldModel().getState();
+    state = node.getWorldModel().getState();
     parentState.setStateValue(stateVariable1, "def");
     Assert.assertEquals("def", state.getStateValue(stateVariable1));
     Assert.assertEquals("def", parentState.getStateValue(stateVariable1));

@@ -21,15 +21,14 @@ import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.PlanSimulator;
 import org.opencyc.elf.wm.Predictor;
 import org.opencyc.elf.wm.WorldModel;
+import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
 import java.util.logging.Logger;
-
 import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
 import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
@@ -129,6 +128,8 @@ public class NodeFactory {
     predictor = new Predictor();
     worldModel.setPredictor(predictor);
     predictor.setNode(node);
+    state = new State(node);
+    worldModel.setState(state);
   }
   
   /** Makes a value judgement shell. */
@@ -221,6 +222,9 @@ public class NodeFactory {
   
   /** the hypothesis former node component */
   protected HypothesisFormer hypothesisFormer;
+  
+  /** the state node component */
+  protected State state;
   
   /** an actuator node component */
   protected Actuator actuator;

@@ -68,6 +68,11 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
     public static String platform_profile = "g:\\fipa-os\\profiles\\platform.profile";
 
     /**
+     * the FIPA-OS agent owner
+     */
+    public static final String OWNER = "OpenCyc";
+
+    /**
      * the FIPA-OS diagnostic level
      */
     protected int diagnosticLevel = DIAGNOSTICS.LEVEL_MAX;
@@ -89,7 +94,7 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
      * diagnostic input
      */
     public FipaOsCommunityAdapter(MessageReceiver messageReceiver, int verbosity) {
-        super(platform_profile, messageReceiver.getMyAgentName(), "OpenCyc", true);
+        super(platform_profile, messageReceiver.getMyAgentName(), FipaOsCommunityAdapter.OWNER, true);
         myAgentName = messageReceiver.getMyAgentName();
         this.verbosity = verbosity;
         if (verbosity == 0)

@@ -45,7 +45,9 @@ public class ConciseLoggingFormatter extends SimpleFormatter {
    * Formats the given log record.
    */
   public String format (LogRecord logRecord) {
-    return logRecord.getMessage();
+    StringBuffer stringBuffer = new StringBuffer(logRecord.getMessage());
+    stringBuffer.append('\n');
+    return stringBuffer.toString();
   }
   
   //// Protected Area

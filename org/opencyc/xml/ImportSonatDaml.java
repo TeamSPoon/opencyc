@@ -134,7 +134,7 @@ public class ImportSonatDaml {
                            equivalentDamlCycTerms,
                            kbSubsetCollectionName);
         //importDaml.actuallyImport = false;
-        for (int i = 33; i < damlDocInfos.size(); i++) {
+        for (int i = 33; i < 34; i++) {
         //for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
@@ -256,7 +256,13 @@ public class ImportSonatDaml {
         damlDocInfos.add(new DamlDocInfo("http://www.daml.org/2002/09/milservices/us",
                                          "DamlSonatUSMilitaryServicesInstancesMt"));
         // 33
-        damlDocInfos.add(new DamlDocInfo("file:///g:/Dmoz/structure.rdf.u8",
+        damlDocInfos.add(new DamlDocInfo("file:///home/reed/open-directory.daml",
+                                         "OpenDirectoryStructureMt"));
+        // 34
+        damlDocInfos.add(new DamlDocInfo("file:///home/reed/tmp/structure.example.txt",
+                                         "OpenDirectoryStructureMt"));
+        // 35
+        damlDocInfos.add(new DamlDocInfo("file:///home/reed/target-ont.daml",
                                          "OpenDirectoryStructureMt"));
     }
 
@@ -280,8 +286,19 @@ public class ImportSonatDaml {
         ontologyNicknames.put("http://www.w3.org/2001/08/rdfweb", "rdfweb");
         ontologyNicknames.put("http://purl.org/dc/elements/1.1", "dublincore");
         ontologyNicknames.put("http://purl.org/dc/elements/1.0/", "dublincore");
+
         ontologyNicknames.put("http://dmoz.org/rdf", "dmoz");
+        ontologyNicknames.put("http://dmoz.org/rdf/structure.example.txt", "dmoz");
         ontologyNicknames.put("file:///g:/Dmoz/structure.rdf.u8", "dmoz");
+        ontologyNicknames.put("file:///home/reed/tmp/structure.example.txt", "dmoz");
+
+        ontologyNicknames.put("file:///home/reed/open-directory.daml", "dmoz");
+        ontologyNicknames.put("file:///home/reed/open-directory", "dmoz");
+        ontologyNicknames.put("file:/home/reed/open-directory.daml", "dmoz");
+        ontologyNicknames.put("file:/home/reed/open-directory", "dmoz");
+        ontologyNicknames.put("http://opencyc.sourceforge.net/open-directory", "dmoz");
+
+
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/DC/3.2", "drc-dc");
         ontologyNicknames.put("http://orlando.drc.com/daml/ontology/VES/3.2", "ves");
         ontologyNicknames.put("http://orlando.drc.com/daml/Ontology/daml-extension/3.2/daml-ext-ont", "daml-ext");

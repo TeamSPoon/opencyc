@@ -69,10 +69,11 @@ public class ELFFactory {
   /**
    * Makes a shell ELF node.
    *
+   * @param name the node name
    * @return a shell ELF node
    */
-  public Node makeNodeShell () {
-    node = new Node();
+  public Node makeNodeShell (String name) {
+    node = new Node(name);
     assembleNode();
     return node;
   }
@@ -98,7 +99,6 @@ public class ELFFactory {
     jobAssignerChannel = new BoundedBuffer(CHANNEL_CAPACITY);
     sensoryPerceptionChannel = new BoundedBuffer(CHANNEL_CAPACITY);
     makeBehaviorGenerationShell();
-    node.setBehaviorGeneration(behaviorGeneration);
     makeWorldModelShell();
     node.setWorldModel(worldModel);
     makeValueJudgementShell();
@@ -121,11 +121,8 @@ public class ELFFactory {
    * Makes a behavior generation shell.
    */
   protected void makeBehaviorGenerationShell () {
-    behaviorGeneration = new BehaviorGeneration();
-    behaviorGeneration.setNode(node);
-    jobAssigner = new JobAssigner(jobAssignerChannel, null);
-    jobAssigner.setNode(node);
-    behaviorGeneration.setJobAssigner(jobAssigner);
+    behaviorGeneration = new BehaviorGeneration(node);
+    jobAssigner = new JobAssigner(node, jobAssignerChannel, null);
     planSelector = new PlanSelector();
     planSelector.setNode(node);
     behaviorGeneration.setPlanSelector(planSelector);

@@ -168,7 +168,7 @@ public class ConsoleInput extends NodeComponent implements Sensor {
   protected String name;
   
   /** the object for which data is sensed */
-  protected Object sensedObject = ResourcePool.getInstance().getResource(Resource.CONSOLE);
+  protected Object sensedObject;
   
   /** the thread which processes the input channel of messages */
   protected Producer producer;

@@ -41,6 +41,25 @@ public class Goal {
 
   //// Public Area
   
+
+  /**
+   * Gets the goal name
+   *
+   * @return the goal name
+   */
+  public String getGoalName () {
+    return goalName;
+  }
+
+  /**
+   * Sets the goal name
+   *
+   * @param goalName the goal name
+   */
+  public void setGoalName (String goalName) {
+    this.goalName = goalName;
+  }
+
   /**
    * Returns a string representation of this object.
    * 
@@ -116,10 +135,15 @@ public class Goal {
   //// Internal Rep
   
   /**
+   * the goal name
+   */
+  protected String goalName;
+  
+  /**
    * the predicate expression which when true, indicates that the goal
    * is achieved
    */
-  PredicateExpression predicateExpression;
+  protected PredicateExpression predicateExpression;
 
   /** 
    * the list of predicate expressions which if true, indicate goal failure 

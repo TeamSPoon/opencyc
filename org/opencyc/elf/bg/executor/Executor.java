@@ -1,6 +1,8 @@
 package org.opencyc.elf.bg.executor;
 
 //// Internal Imports
+import org.opencyc.elf.BufferedNodeComponent;
+import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.BehaviorGeneration;
@@ -11,7 +13,17 @@ import org.opencyc.elf.bg.planner.Scheduler;
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
+import org.opencyc.elf.message.ExecuteScheduleMsg;
+import org.opencyc.elf.message.ExecutorStatusMsg;
+import org.opencyc.elf.message.GenericMsg;
+
 //// External Imports
+import java.util.ArrayList;
+import java.util.List;
+
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
+import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /** Provides the Executor for ELF BehaviorGeneration.
  * 
@@ -35,16 +47,45 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Executor extends NodeComponent {
+public class Executor extends BufferedNodeComponent {
   
   //// Constructors
   
-  /** Constructs a new Executor object. */
-  public Executor() {
+  /** Creates a new instance of Executor with the given
+   * input and output channels.
+   *
+   * @param node the containing ELF node
+   * @param executorChannel the takable channel from which messages are input from the
+   * associated scheduler
+   */
+  public Executor (Node node,
+                   Takable executorChannel) {
+    setNode(node);
+    this.executorChannel = executorChannel;         
   }
 
   //// Public Area
 
+  /** Initializes this executor and begins consuming schedules.
+   *
+   * @param schedulerChannel the puttable channel to which messages are output to the
+   * associated scheduler
+   */
+  public void initialize(Puttable schedulerChannel) {
+    getLogger().info("Initializing Executor");
+    consumer = new Consumer(executorChannel,
+                            schedulerChannel,
+                            this);
+    consumerExecutor = new ThreadedExecutor();
+    try {
+      consumerExecutor.execute(consumer);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+ 
   /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
@@ -103,6 +144,79 @@ public class Executor extends NodeComponent {
 
   //// Protected Area
   
+  /** Thread which processes the input message channel. */
+  protected class Consumer implements Runnable {
+    
+    /** the takable channel from which messages are input */
+    protected final Takable executorChannel;
+    
+    /** the puttable channel to which messages are output to the scheduler */
+    protected final Puttable schedulerChannel;
+    
+    /** the reference to this node component as a message sender */
+    protected NodeComponent sender;
+          
+    /** the node's controlled resources */
+    protected List controlledResources;
+    
+    /** Creates a new instance of Consumer.
+     *
+     * @param executorChannel the takable channel from which messages are input
+     * @param schedulerChannel the puttable channel to which messages are output to the
+     * scheduler
+     * @param sender the reference to this node component as a message sender
+     */
+    protected Consumer (Takable executorChannel,
+                        Puttable schedulerChannel,
+                        NodeComponent sender) { 
+      getLogger().info("Creating Executor.Consumer");
+      this.executorChannel = executorChannel;
+      this.schedulerChannel = schedulerChannel;
+      this.sender = sender;
+    }
+
+    /** Reads messages from the input queue and processes them. */
+    public void run () {
+      try {
+        while (true) { 
+          dispatchMsg((GenericMsg) executorChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+     
+    /** Dispatches the given input channel message by type.
+     *
+     * @param genericMsg the given input channel message
+     */
+    void dispatchMsg (GenericMsg genericMsg) {
+      if (genericMsg instanceof ExecuteScheduleMsg)
+        processExecutorScheduleMsg((ExecuteScheduleMsg) genericMsg);
+      else
+        throw new RuntimeException("Unhandled message " + genericMsg);
+    }
+    
+    /** Processes the execute schedule message. 
+     * 
+     * @param executeSceduleMsg the execute schedule message
+     */
+    protected void processExecutorScheduleMsg(ExecuteScheduleMsg executeSceduleMsg) {
+    }
+  }
+  
+  /** Interruptable thread which executes the input schedule. */
+  protected class ScheduleExecutor implements Runnable {
+    
+    /** Constructs a new ScheduleExecutor object */
+    ScheduleExecutor() {
+    }
+    
+    /** Executes the input schedule. */
+    public void run() {
+    }
+    
+  }
+  
   /** Receives the update schedule message from ? */
   protected void receiveUpdateSchedule () {
     // TODO
@@ -142,9 +256,25 @@ public class Executor extends NodeComponent {
     // send receiveExecutorStatus(taskCommand, schedule, status) to (its) scheduler
   }
     
+  public Puttable getChannel() {
+    return (Puttable) executorChannel;
+  }
+  
   //// Private Area
   
   //// Internal Rep
+  
+  /** the takable channel from which messages are input */
+  protected Takable executorChannel;
+
+  /** the thread which processes the input channel of messages */
+  protected Consumer consumer;
+
+  /** the consumer thread executor */
+  protected EDU.oswego.cs.dl.util.concurrent.Executor consumerExecutor;
+  
+  /** the executor for this scheduler */
+  protected org.opencyc.elf.bg.executor.Executor executor;
   
   /** the schedule to execute */
   protected Schedule scheduleToExecute;

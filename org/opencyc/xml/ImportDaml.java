@@ -70,6 +70,12 @@ public class ImportDaml implements StatementHandler {
     protected HashMap ontologyNicknames = new HashMap();
 
     /**
+     * The current DAML Restriction object being constructed from sequential
+     * RDF triples.
+     */
+    DamlRestriction damlRestriction;
+
+    /**
      * Constructs a new ImportDaml object.
      */
     public ImportDaml() {
@@ -205,8 +211,8 @@ public class ImportDaml implements StatementHandler {
      */
     protected void importDaml (String damlPath) {
         if (verbosity > 0)
-            System.out.println("\nImporting " + damlPath);
-        System.out.println("\nStatements\n");
+            Log.current.println("\nImporting " + damlPath);
+        Log.current.println("\nStatements\n");
         InputStream in;
         URL url;
         try {
@@ -236,7 +242,7 @@ public class ImportDaml implements StatementHandler {
             System.err.println("Error: " + damlPath + ": " + ParseException.formatMessage(sax));
         }
         if (verbosity > 0)
-            System.out.println("\nDone importing " + damlPath + "\n");
+            Log.current.println("\nDone importing " + damlPath + "\n");
     }
 
     /**
@@ -250,7 +256,7 @@ public class ImportDaml implements StatementHandler {
         resource(subject);
         resource(predicate);
         resource(object);
-        System.out.println();
+        Log.current.println();
     }
 
     /**
@@ -264,15 +270,15 @@ public class ImportDaml implements StatementHandler {
         String lang = literal.getLang();
         String parseType = literal.getParseType();
         if (parseType != null) {
-            System.out.print("# ");
+            Log.current.print("# ");
             if (parseType != null)
-                System.out.print("'" + parseType + "'");
-            System.out.println();
+                Log.current.print("'" + parseType + "'");
+            Log.current.println();
         }
         resource(subject);
         resource(predicate);
         literal(literal);
-        System.out.println();
+        Log.current.println();
     }
 
     /**
@@ -283,21 +289,21 @@ public class ImportDaml implements StatementHandler {
     protected void resource(AResource aResource) {
         Resource resource = this.translate(aResource);
         if (aResource.isAnonymous())
-            System.out.print("anon-" + aResource.getAnonymousID() + " ");
+            Log.current.print("anon-" + aResource.getAnonymousID() + " ");
         else {
             String localName = resource.getLocalName();
             String nameSpace = resource.getNameSpace();
             if (localName == null ||
                 nameSpace == null) {
-                System.out.print(resource.toString() + " ");
+                Log.current.print(resource.toString() + " ");
             }
             else if (! hasUriNamespaceSyntax(aResource.getURI())) {
-                System.out.print(resource.toString() + " ");
+                Log.current.print(resource.toString() + " ");
             }
             else {
                 String nickname = getOntologyNickname(nameSpace, resource);
                 String constantName = nickname + ":" + localName;
-                System.out.print(constantName + " ");
+                Log.current.print(constantName + " ");
             }
         }
     }
@@ -309,14 +315,14 @@ public class ImportDaml implements StatementHandler {
      */
     static private void literal(ALiteral literal) {
         if (literal.isWellFormedXML())
-            System.out.print("xml");
-        System.out.print("\"");
-        System.out.print(literal.toString());
-        System.out.print("\"");
+            Log.current.print("xml");
+        Log.current.print("\"");
+        Log.current.print(literal.toString());
+        Log.current.print("\"");
         String lang = literal.getLang();
         if (lang != null && !lang.equals(""))
-            System.out.print("-" + lang);
-        System.out.print(" ");
+            Log.current.print("-" + lang);
+        Log.current.print(" ");
     }
 
     /**
@@ -379,5 +385,55 @@ public class ImportDaml implements StatementHandler {
         this.verbosity = verbosity;
     }
 
+    /**
+     * Records property use restrictions which get imported
+     * as Cyc interArgIsa1-2 assertions.
+     */
+    protected class DamlRestriction {
+
+        /**
+         * Identifies all the RDF triples which contribute to this DAML
+         * Restriction.
+         */
+        String anonymousId;
+
+        /**
+         * The domain (Cyc arg1) class whose intstances are the subject of the property.
+         */
+        String fromClass;
+
+        /**
+         * The property (Cyc predicate arg0) which relates the subject and predicate instances.
+         */
+        String property;
+
+        /**
+         * The range (Cyc arg2) classes whose instances may be objects of the property in the
+         * cases where subject is an instance of the given fromClass.
+         */
+        ArrayList toClasses;
+
+        /**
+         * Returns a string representation of this object.
+         *
+         * @return a string representation of this object
+         */
+        public String toString() {
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("anon-");
+            stringBuffer.append(anonymousId);
+            stringBuffer.append(": ");
+            stringBuffer.append(fromClass);
+            stringBuffer.append(" (");
+            stringBuffer.append(property);
+            for (int i = 0; i < toClasses.size(); i++) {
+                if (i > 0)
+                    stringBuffer.append(", ");
+                stringBuffer.append(toClasses.get(i).toString());
+            }
+            stringBuffer.append(")");
+            return stringBuffer.toString();
+        }
+    }
 
 }

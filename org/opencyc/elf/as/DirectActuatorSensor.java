@@ -1,9 +1,7 @@
-package org.opencyc.elf.a;
+package org.opencyc.elf.as;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
-
-import org.opencyc.elf.s.Sensor;
 
 //// External Imports
 import java.util.List;
@@ -39,13 +37,10 @@ import EDU.oswego.cs.dl.util.concurrent.Takable;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DirectActuatorSensor extends NodeComponent implements Actuator, Sensor {
+
+public abstract class DirectActuatorSensor extends NodeComponent implements ActuatorSensor {
   
   //// Constructors
-  
-  /** Creates a new instance of DirectActuatorSensor. */
-  public DirectActuatorSensor() {
-  }
   
   /** Creates a new instance of DirectActuatorSensor given its name and
    * required resources.

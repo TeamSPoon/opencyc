@@ -62,6 +62,24 @@ public class TaskFrameLibrary {
     return clonedTaskFrame;
   }
     
+  /**
+   * Gets the root task frame
+   *
+   * @return the root task frame
+   */
+  public TaskFrame getRootTaskFrame () {
+    return rootTaskFrame;
+  }
+
+  /**
+   * Sets the root task frame
+   *
+   * @param rootTaskFrame the root task frame
+   */
+  public void setRootTaskFrame (TaskFrame rootTaskFrame) {
+    this.rootTaskFrame = rootTaskFrame;
+  }
+
   //// Protected Area
   
   /**
@@ -78,10 +96,11 @@ public class TaskFrameLibrary {
   /** the task frame dictionary, task name --> task frame */
   protected HashMap taskFrameDictionary = new HashMap();
   
-  /**
-   * the task frame library singleton instance
-   */
+  /** the task frame library singleton instance */
   protected static TaskFrameLibrary taskFrameLibrary;
+  
+  /** the root task frame */
+  protected TaskFrame rootTaskFrame;
   
   //// Main
   

@@ -15,6 +15,7 @@ import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.goal.Goal;
 
 import org.opencyc.elf.s.ConsoleInput;
+import org.opencyc.elf.s.Sensation;
 import org.opencyc.elf.s.Sensor;
 
 import org.opencyc.elf.wm.ResourcePool;
@@ -81,8 +82,12 @@ public class TaskFrameFactory {
     Resource resource = ResourcePool.getInstance().getResource(Resource.CONSOLE);
     ArrayList resources = new ArrayList();
     resources.add(resource);
-    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources);
-    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources);
+    ArrayList actionCapabilities = new ArrayList();
+    actionCapabilities.add(Action.CONSOLE_PROMPTED_INPUT);
+    ConsoleOutput consoleOutput = new ConsoleOutput(Actuator.CONSOLE_OUTPUT, resources, actionCapabilities);
+    ArrayList sensationCapabilities = new ArrayList();
+    sensationCapabilities.add(Sensation.CONSOLE_INPUT);
+    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources, sensationCapabilities);
     taskFrame.addScheduleInfo(schedule, 
                               consoleOutput, 
                               consoleInput);

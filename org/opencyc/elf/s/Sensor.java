@@ -46,10 +46,10 @@ public class Sensor extends NodeComponent {
    * Creates a new instance of Senso with the given
    * output message channel.
    *
-   * @param sensorChannel the puttable channel to which messages are output
+   * @param sensoryPerceptionChannel the puttable channel to which messages are output
    */
-  public Sensor (Puttable sensorChannel) {
-    producer = new Producer(sensorChannel, this);
+  public Sensor (Puttable sensoryPerceptionChannel) {
+    producer = new Producer(sensoryPerceptionChannel, this);
   }
   //// Public Area
   
@@ -78,7 +78,7 @@ public class Sensor extends NodeComponent {
     /**
      * the puttable channel to which messages are output
      */
-    protected final Puttable sensorChannel;
+    protected final Puttable sensoryPerceptionChannel;
 
     /**
      * the parent node component
@@ -88,12 +88,12 @@ public class Sensor extends NodeComponent {
     /**
      * Creates a new instance of Consumer
      *
-     * @param sensorChannel the puttable channel to which messages are output
+     * @param sensoryPerceptionChannel the puttable channel to which messages are output
      * @nodeComponent the parent node component
      */
-    protected Producer (Puttable sensorChannel,
+    protected Producer (Puttable sensoryPerceptionChannel,
                         NodeComponent nodeComponent) { 
-      this.sensorChannel = sensorChannel; 
+      this.sensoryPerceptionChannel = sensoryPerceptionChannel; 
       this.nodeComponent = nodeComponent;
     }
 
@@ -121,7 +121,7 @@ public class Sensor extends NodeComponent {
       observedInputMsg.setSender(nodeComponent);
       observedInputMsg.setObj(obj);
       observedInputMsg.setData(data);
-      sendMsgToRecipient(sensorChannel, observedInputMsg);
+      sendMsgToRecipient(sensoryPerceptionChannel, observedInputMsg);
     }
       
     /**

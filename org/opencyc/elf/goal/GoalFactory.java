@@ -62,7 +62,7 @@ public class GoalFactory {
   public Goal makeConsolePromptedInput () {
     Goal goal = new Goal();
     goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
-                                                        StateVariable.PROMPT));
+                                                        StateVariable.CONSOLE_PROMPT));
     goal.setImportance(new Importance(Importance.NEUTRAL));
     return goal;
   }  

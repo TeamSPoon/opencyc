@@ -1,13 +1,14 @@
-package org.opencyc.xml;
+package  org.opencyc.xml;
 
-import org.w3c.dom.*;
-import org.apache.xerces.dom.*;
-import org.apache.xml.serialize.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.api.*;
+import  org.w3c.dom.*;
+import  org.apache.xerces.dom.*;
+import  org.apache.xml.serialize.*;
+import  java.io.*;
+import  java.net.*;
+import  java.util.*;
+import  org.opencyc.cycobject.*;
+import  org.opencyc.api.*;
+
 
 /**
  * DAML+OIL export for OpenCyc.
@@ -33,52 +34,41 @@ import org.opencyc.api.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 public class ExportDaml {
-
     /**
      * The default verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     protected static final int DEFAULT_VERBOSITY = 3;
-
     /**
      * Sets verbosity of the DAML export output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     public int verbosity = DEFAULT_VERBOSITY;
-
     /**
      * Indicates whether the upward closure of terms should be exported.  If so, the
      * upward closure terms are filtered by cycUpwardClosureGuid below.
      */
-    public boolean includeUpwardClosure = false;
-
+    public boolean includeUpwardClosure = true;
     /**
      * The CycKBSubsetCollection whose elements are exported to DAML.
      */
     public CycFort cycKbSubsetCollection = null;
-
     /**
      * The CycKBSubsetCollection whose elements are exported to DAML.
      * #$CounterTerrorismConstant (not in OpenCyc)
      */
-    public Guid cycKbSubsetCollectionGuid =
-        CycObjectFactory.makeGuid("bfe31c38-9c29-11b1-9dad-c379636f7270");
-
+    public Guid cycKbSubsetCollectionGuid = CycObjectFactory.makeGuid("bfe31c38-9c29-11b1-9dad-c379636f7270");
     /**
      * The CycKBSubsetCollection whose elements are exported to DAML if they
      * also generalizations of cycKbSubsetCollectionGuid collections or predicates above.
      * #$IKBConstant (not in OpenCyc)
      */
-    public Guid cycUpwardClosureGuid =
-        CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
-
+    public Guid cycUpwardClosureGuid = CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
     /**
      * The DAML export path and file name.
      */
     public String outputPath = "export.daml";
-
     private static final String rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String rdfsNamespace = "http://www.w3.org/2000/01/rdf-schema#";
     private static final String damlNamespace = "http://www.daml.org/2001/03/daml+oil#";
@@ -89,10 +79,8 @@ public class ExportDaml {
     private static final String damlClass = "http://www.daml.org/2001/03/daml+oil#Class";
     private static final String rdfsType = "http://www.w3.org/2000/01/rdf-schema#type";
     private static final String rdfsLiteral = "http://www.w3.org/2000/01/rdf-schema#Literal";
-    private static final String guidComment = "Permanent Global Unique ID for the associated concept " +
-        "-- which enables concept renaming.  " +
-        "Users should not depend upon the DAML ID nor label as fixed for all time.";
-
+    private static final String guidComment = "Permanent Global Unique ID for the associated concept "
+            + "-- which enables concept renaming.  " + "Users should not depend upon the DAML ID nor label as fixed for all time.";
     private CycAccess cycAccess;
     private Document document = new DocumentImpl();
     private String documentUrl = null;
@@ -118,19 +106,18 @@ public class ExportDaml {
     /**
      * Constructs a new ExportDaml object.
      */
-    public ExportDaml() {
+    public ExportDaml () {
     }
 
     /**
      * Provides the main method for a DAML export.
      * @parameter args the optional command line arguments
      */
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         ExportDaml exportDaml = new ExportDaml();
         try {
             exportDaml.export();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -139,15 +126,11 @@ public class ExportDaml {
     /**
      * Exports the desired KB content into DAML.
      */
-    public void export()
-        throws UnknownHostException, IOException, CycApiException {
+    public void export () throws UnknownHostException, IOException, CycApiException {
         createRdfNode();
         createDamlOntologyNode();
         createCycGuidNode();
-
         cycAccess = new CycAccess();
-
-
         if (verbosity > 2)
             System.out.println("Getting terms from Cyc");
         CycFort cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
@@ -164,7 +147,7 @@ public class ExportDaml {
                 System.out.println("All selected " + selectedCycForts.size() + " CycFort terms");
         }
         for (int i = 0; i < selectedCycForts.size(); i++) {
-            CycFort selectedCycFort = (CycFort) selectedCycForts.get(i);
+            CycFort selectedCycFort = (CycFort)selectedCycForts.get(i);
             if (selectedCycFort instanceof CycConstant)
                 selectedConstants.add(selectedCycFort);
         }
@@ -176,10 +159,10 @@ public class ExportDaml {
         if (verbosity > 2)
             System.out.println("Removing non-binary properties");
         for (int i = 0; i < selectedConstants.size(); i++) {
-            CycConstant cycConstant = (CycConstant) selectedConstants.get(i);
+            CycConstant cycConstant = (CycConstant)selectedConstants.get(i);
             if (verbosity > 2) {
-                if ((verbosity > 5) || (i % 20 == 0))
-                System.out.println("... " + cycConstant.cyclify());
+                if ((verbosity > 5) || (i%20 == 0))
+                    System.out.println("... " + cycConstant.cyclify());
             }
             if (cycAccess.isCollection(cycConstant))
                 damlSelectedConstants.add(cycConstant);
@@ -197,14 +180,12 @@ public class ExportDaml {
             else if (cycAccess.isIndividual(cycConstant))
                 damlSelectedConstants.add(cycConstant);
         }
-
         //createConstantNode("PhysicalDevice");
-
         if (verbosity > 2)
             System.out.println("Building DAML model");
         for (int i = 0; i < damlSelectedConstants.size(); i++) {
-        //for (int i = 0; i < 20; i++) {
-            CycConstant cycConstant = (CycConstant) damlSelectedConstants.elementAt(i);
+            //for (int i = 0; i < 20; i++) {
+            CycConstant cycConstant = (CycConstant)damlSelectedConstants.elementAt(i);
             if (verbosity > 2)
                 System.out.print(cycConstant + "  ");
             if (cycAccess.isCollection(cycConstant)) {
@@ -223,7 +204,7 @@ public class ExportDaml {
                     String individualType = "  (type unknown)";
                     if (isas != null)
                         for (int j = 0; j < isas.size(); j++)
-                            if (! isas.get(j).equals(cycKbSubsetCollection)) {
+                            if (!isas.get(j).equals(cycKbSubsetCollection)) {
                                 individualType = (" (a " + isas.get(j) + ")");
                                 break;
                             }
@@ -237,7 +218,6 @@ public class ExportDaml {
             }
             createConstantNode(cycConstant);
         }
-
         if (verbosity > 2)
             System.out.println("Writing DAML output to " + outputPath);
         OutputFormat outputFormat = new OutputFormat(document, "UTF-8", true);
@@ -253,7 +233,7 @@ public class ExportDaml {
     /**
      * Creates an RDF node.
      */
-    protected void createRdfNode() {
+    protected void createRdfNode () {
         rdf = document.createElementNS(rdfNamespace, "rdf:RDF");
         rdf.setAttribute("xmlns:rdf", rdfNamespace);
         rdf.setAttribute("xmlns:rdfs", rdfsNamespace);
@@ -281,8 +261,8 @@ public class ExportDaml {
      * Creates a DAML node for a single Cyc Constant.
      * @parameter cycConstant the CycConstant from which the DAML node is created
      */
-    protected void createConstantNode (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void createConstantNode (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         guid = cycConstant.getGuid();
         populateComment(cycConstant);
         populateIsas(cycConstant);
@@ -302,8 +282,8 @@ public class ExportDaml {
      * Creates a DAML class node for a single Cyc collection.
      * @parameter cycConstant the Cyc collection from which the DAML class node is created
      */
-    protected void createClassNode(CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void createClassNode (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         populateGenls(cycConstant);
         populateDisjointWiths(cycConstant);
         populateCoExtensionals(cycConstant);
@@ -344,30 +324,28 @@ public class ExportDaml {
             sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", damlClass);
             classNode.appendChild(sameClassAsNode);
         }
-
-
         if (isas != null)
             for (int i = 0; i < isas.size(); i++) {
                 Element typeNode = document.createElementNS(rdfNamespace, "rdf:type");
-                typeNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant) isas.get(i)));
+                typeNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)isas.get(i)));
                 classNode.appendChild(typeNode);
             }
         if (genls != null)
             for (int i = 0; i < genls.size(); i++) {
                 Element subClassNode = document.createElementNS(rdfsNamespace, "rdfs:subClassOf");
-                subClassNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant) genls.get(i)));
+                subClassNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)genls.get(i)));
                 classNode.appendChild(subClassNode);
             }
-         if (disjointWiths != null)
+        if (disjointWiths != null)
             for (int i = 0; i < disjointWiths.size(); i++) {
                 Element disjointWithNode = document.createElementNS(damlNamespace, "daml:disjointWith");
-                disjointWithNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant) disjointWiths.get(i)));
+                disjointWithNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)disjointWiths.get(i)));
                 classNode.appendChild(disjointWithNode);
             }
-       if (coExtensionals != null)
+        if (coExtensionals != null)
             for (int i = 0; i < coExtensionals.size(); i++) {
                 sameClassAsNode = document.createElementNS(damlNamespace, "daml:sameClassAs");
-                sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant) coExtensionals.get(i)));
+                sameClassAsNode.setAttributeNS(rdfNamespace, "rdf:resource", translateTerm((CycConstant)coExtensionals.get(i)));
                 classNode.appendChild(sameClassAsNode);
             }
     }
@@ -376,8 +354,8 @@ public class ExportDaml {
      * Creates a DAML individual node for a single Cyc individual.
      * @parameter cycConstant the Cyc individual from which the DAML individual node is created
      */
-    protected void createIndividualNode(CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void createIndividualNode (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         if (isas == null || isas.size() == 0)
             return;
         Element individualNode = document.createElement(isas.get(0).toString());
@@ -422,14 +400,13 @@ public class ExportDaml {
      * Creates a DAML property node for a single Cyc binary predicate.
      * @parameter cycConstant the Cyc binary predicate from which the DAML property node is created
      */
-    protected void createPropertyNode(CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void createPropertyNode (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         populateGenlPreds(cycConstant);
         populateArg1Isa(cycConstant);
         populateArg2Isa(cycConstant);
         populateArg1Format(cycConstant);
         populateArg2Format(cycConstant);
-
         Element propertyNode;
         if ((arg1Format != null) && arg1Format.equals("SingleEntry"))
             propertyNode = document.createElementNS(damlNamespace, "daml:UnambiguousProperty");
@@ -455,8 +432,7 @@ public class ExportDaml {
         if (genlPreds != null)
             for (int i = 0; i < genlPreds.size(); i++) {
                 Element subPropertyOfNode = document.createElementNS(damlNamespace, "daml:subPropertyOf");
-                subPropertyOfNode.setAttributeNS(rdfNamespace, "rdf:resource", "#" +
-                                                 genlPreds.get(i).toString());
+                subPropertyOfNode.setAttributeNS(rdfNamespace, "rdf:resource", "#" + genlPreds.get(i).toString());
                 propertyNode.appendChild(subPropertyOfNode);
             }
         if (arg1Isa != null) {
@@ -478,26 +454,26 @@ public class ExportDaml {
      * @return the kind of DAML node: DAML Thing, DAML class, DAML property or
      * DAML transitive property
      */
-    protected String translateTerm (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected String translateTerm (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         if (cycConstant.equals(cycAccess.thing))
-            return damlThing;
+            return  damlThing;
         else if (cycConstant.equals(cycAccess.collection))
-            return damlClass;
+            return  damlClass;
         else if (cycConstant.equals(cycAccess.binaryPredicate))
-            return damlProperty;
+            return  damlProperty;
         else if (cycConstant.equals(cycAccess.getKnownConstantByName("TransitiveBinaryPredicate")))
-            return damlTransitiveProperty;
+            return  damlTransitiveProperty;
         else
-            return "#" + cycConstant.toString();
+            return  "#" + cycConstant.toString();
     }
 
     /**
      * Populates the comment for a Cyc term.
      * @parameter cycConstant the Cyc term for which the comment is obtained.
      */
-    protected void populateComment (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateComment (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         comment = cycAccess.getComment(cycConstant);
     }
 
@@ -508,16 +484,16 @@ public class ExportDaml {
      */
     protected CycList filterSelectedConstants (CycList constants) {
         if (constants.size() == 0)
-            return constants;
+            return  constants;
         CycList result = new CycList();
-        for (int i = 0; i < constants.size(); i++ ) {
+        for (int i = 0; i < constants.size(); i++) {
             Object object = constants.get(i);
             if (isFilteredDamlSelectedConstant(object))
                 result.add(object);
             else if (verbosity > 4)
                 System.out.println(" dropping " + cycConstant);
         }
-        return result;
+        return  result;
     }
 
     /**
@@ -526,8 +502,8 @@ public class ExportDaml {
      * @parameter object the object under consideration as a selected constant
      * @return True iff the object is a selected constant
      */
-    protected boolean isFilteredDamlSelectedConstant(Object object) {
-        return damlSelectedConstants.contains(object);
+    protected boolean isFilteredDamlSelectedConstant (Object object) {
+        return  damlSelectedConstants.contains(object);
     }
 
     /**
@@ -535,20 +511,20 @@ public class ExportDaml {
      * @parameter object the object under consideration as an instance of the desired KB
      * subset collection
      */
-    protected boolean isFilteredSelectedConstant(Object object)
-        throws UnknownHostException, IOException, CycApiException {
-        if (! (object instanceof CycConstant))
-            return false;
+    protected boolean isFilteredSelectedConstant (Object object) throws UnknownHostException, IOException,
+            CycApiException {
+        if (!(object instanceof CycConstant))
+            return  false;
         else
-            return cycAccess.isa(cycConstant, cycKbSubsetCollection);
+            return  cycAccess.isa(cycConstant, cycKbSubsetCollection);
     }
 
     /**
      * Populates the isas for a Cyc term.
      * @parameter cycConstant the Cyc term for which the isas are obtained.
      */
-    protected void populateIsas (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateIsas (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         isas = cycAccess.getIsas(cycConstant);
         isas = filterSelectedConstants(isas);
     }
@@ -557,8 +533,8 @@ public class ExportDaml {
      * Populates the genls for a Cyc term.
      * @parameter cycConstant the Cyc term for which the genls are obtained.
      */
-    protected void populateGenls (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateGenls (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         genls = cycAccess.getGenls(cycConstant);
         genls = filterSelectedConstants(genls);
     }
@@ -567,8 +543,8 @@ public class ExportDaml {
      * Populates the genlPreds for a Cyc predicate.
      * @parameter cycConstant the Cyc predicate for which the genlPreds are obtained.
      */
-    protected void populateGenlPreds (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateGenlPreds (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         genlPreds = cycAccess.getGenlPreds(cycConstant);
         genlPreds = filterSelectedConstants(genlPreds);
     }
@@ -577,54 +553,54 @@ public class ExportDaml {
      * Populates the argument 1 type constaint for a Cyc predicate.
      * @parameter cycConstant the Cyc predicate for which the argument 1 type constaint is obtained.
      */
-    protected void populateArg1Isa (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateArg1Isa (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         CycList arg1Isas = cycAccess.getArg1Isas(cycConstant);
         arg1Isas = filterSelectedConstants(arg1Isas);
         if (arg1Isas.size() > 0)
-            arg1Isa = (CycConstant) arg1Isas.first();
+            arg1Isa = (CycConstant)arg1Isas.first();
     }
 
     /**
      * Populates the argument 2 type constaint for a Cyc predicate.
      * @parameter cycConstant the Cyc predicate for which the argument 2 type constaint is obtained.
      */
-    protected void populateArg2Isa (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateArg2Isa (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         CycList arg2Isas = cycAccess.getArg2Isas(cycConstant);
         arg2Isas = filterSelectedConstants(arg2Isas);
         if (arg2Isas.size() > 0)
-            arg2Isa = (CycConstant) arg2Isas.first();
+            arg2Isa = (CycConstant)arg2Isas.first();
     }
 
     /**
      * Populates the argument 1 format for a Cyc predicate.
      * @parameter cycConstant the Cyc predicate for which the argument 1 format is obtained.
      */
-    protected void populateArg1Format (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateArg1Format (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         CycList arg1Formats = cycAccess.getArg1Formats(cycConstant);
         if (arg1Formats.size() > 0)
-            arg1Format = (CycConstant) arg1Formats.first();
+            arg1Format = (CycConstant)arg1Formats.first();
     }
 
     /**
      * Populates the argument 2 format for a Cyc predicate.
      * @parameter cycConstant the Cyc predicate for which the argument 2 format is obtained.
      */
-    protected void populateArg2Format (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateArg2Format (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         CycList arg2Formats = cycAccess.getArg2Formats(cycConstant);
         if (arg2Formats.size() > 0)
-            arg2Format = (CycConstant) arg2Formats.first();
+            arg2Format = (CycConstant)arg2Formats.first();
     }
 
     /**
      * Populates the disjointWiths for a Cyc collection.
      * @parameter cycConstant the Cyc collection for which the disjointWiths are obtained.
      */
-    protected void populateDisjointWiths (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
+    protected void populateDisjointWiths (CycConstant cycConstant) throws UnknownHostException, IOException,
+            CycApiException {
         disjointWiths = cycAccess.getDisjointWiths(cycConstant);
         disjointWiths = filterSelectedConstants(disjointWiths);
     }
@@ -633,12 +609,16 @@ public class ExportDaml {
      * Populates the coExtensionals for a Cyc collection.
      * @parameter cycConstant the Cyc collection for which the coExtensionals are obtained.
      */
-    protected void populateCoExtensionals (CycConstant cycConstant)
-        throws UnknownHostException, IOException, CycApiException {
-        coExtensionals = cycAccess.getCoExtensionals(cycConstant);
+    protected void populateCoExtensionals (CycConstant cycConstant) throws UnknownHostException, IOException {
+        try {
+            coExtensionals = cycAccess.getCoExtensionals(cycConstant);
+        }
+        catch (CycApiException e) {
+            e.printStackTrace();
+            return;
+        }
         coExtensionals = filterSelectedConstants(coExtensionals);
     }
-
 
     /**
      * Gather the updward closure of the selected CycForts with regard to isas and genls
@@ -647,35 +627,39 @@ public class ExportDaml {
      * @return the updward closure of the selected CycForts with regard to genls
      * for collection terms, and with regard to genlPreds for predicate terms
      */
-    protected CycList gatherUpwardClosure(CycList selectedCycForts)
-        throws UnknownHostException, IOException, CycApiException {
+    protected CycList gatherUpwardClosure (CycList selectedCycForts) throws UnknownHostException, IOException,
+            CycApiException {
         CycList upwardClosure = new CycList();
         CycConstant upwardClosureConstant = cycAccess.getKnownConstantByGuid(cycUpwardClosureGuid);
         for (int i = 0; i < selectedCycForts.size(); i++) {
-            CycFort cycFort = (CycFort) selectedCycForts.get(i);
+            CycFort cycFort = (CycFort)selectedCycForts.get(i);
             if (cycAccess.isCollection(cycFort)) {
                 CycList genls = new CycList();
                 genls.addAllNew(cycAccess.getAllIsa(cycFort));
                 genls.addAllNew(cycAccess.getAllGenls(cycFort));
                 for (int j = 0; j < genls.size(); j++) {
-                    CycFort genl = (CycFort) genls.get(j);
-                    if ((! upwardClosure.contains(genl)) &&
-                        (! selectedCycForts.contains(genl)) &&
-                        cycAccess.isa(genl, upwardClosureConstant)) {
+                    CycFort genl = null;
+                    try {
+                        genl = (CycFort) genls.get(j);
+                    }
+                    catch (ClassCastException e) {
+                        System.out.println("***** Invalid genl: " + genls.get(j));
+                        continue;
+                    }
+                    if ((!upwardClosure.contains(genl)) && (!selectedCycForts.contains(genl)) && cycAccess.isa(genl,
+                            upwardClosureConstant)) {
                         if (verbosity > 2)
                             System.out.println("Upward closure genl " + genl);
                         upwardClosure.add(genl);
                     }
                 }
             }
-            else if ((cycFort instanceof CycConstant) &&
-                     (cycAccess.isBinaryPredicate((CycConstant) cycFort))) {
-                CycList genlPreds = cycAccess.getAllGenlPreds((CycConstant) cycFort);
+            else if ((cycFort instanceof CycConstant) && (cycAccess.isBinaryPredicate((CycConstant)cycFort))) {
+                CycList genlPreds = cycAccess.getAllGenlPreds((CycConstant)cycFort);
                 for (int j = 0; j < genlPreds.size(); j++) {
-                    CycFort genlPred = (CycFort) genlPreds.get(j);
-                    if ((! upwardClosure.contains(genlPred)) &&
-                        (! selectedCycForts.contains(genlPred)) &&
-                        cycAccess.isa(genlPred, upwardClosureConstant)) {
+                    CycFort genlPred = (CycFort)genlPreds.get(j);
+                    if ((!upwardClosure.contains(genlPred)) && (!selectedCycForts.contains(genlPred))
+                            && cycAccess.isa(genlPred, upwardClosureConstant)) {
                         if (verbosity > 2)
                             System.out.println("Upward closure genlPred " + genlPred);
                         upwardClosure.add(genlPred);
@@ -683,7 +667,9 @@ public class ExportDaml {
                 }
             }
         }
-        return upwardClosure;
+        return  upwardClosure;
     }
-
 }
+
+
+

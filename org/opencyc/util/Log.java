@@ -117,8 +117,8 @@ public class Log {
 
     /**
      * Constructs a new Log object given the path.  Display all messages.
-     * @param logFilePath specifies the path for the log file.
      *
+     * @param logFilePath specifies the path for the log file.
      */
     public Log(String logFilePath) {
         this(logFilePath, true, true, true, false);
@@ -126,6 +126,7 @@ public class Log {
 
     /**
      * Constructs a new Log object given all parameters.
+     *
      * @param logFilePath specifies the path for the log file.
      * @param writeToFile if true, write messages to the log file.
      * @param writeToErr if true, write error messages to System.err.
@@ -176,6 +177,7 @@ public class Log {
 
     /**
      * Writes the int message to the log.
+     *
      * @param message the int message to be logged.
      */
     public void println(int message) {
@@ -184,6 +186,23 @@ public class Log {
 
     /**
      * Writes the String message to the log.
+     *
+     * @param message the String message to be logged.
+     */
+    public void print(String message) {
+        if (ignore)
+            return;
+        if (writeToOut)
+            System.out.print(message);
+        if (writeToFile) {
+            printWriter.print(message);
+            printWriter.flush();
+        }
+    }
+
+    /**
+     * Writes the String message to the log.
+     *
      * @param message the String message to be logged.
      */
     public void println(String message) {
@@ -199,6 +218,7 @@ public class Log {
 
     /**
      * Writes the error message to the log.
+     *
      * @param errorMessage the error message to be logged.
      */
     public void errorPrintln(String errorMessage) {
@@ -212,6 +232,7 @@ public class Log {
 
     /**
      * Writes the exception stack trace to the log.
+     *
      * @param exception the exception to be reported.
      */
     public void printStackTrace(Exception exception) {
@@ -234,6 +255,7 @@ public class Log {
 
     /**
      * Sets the current log instance.
+     *
      * @param log a log object.
      */
     public static void setCurrent(Log log) {

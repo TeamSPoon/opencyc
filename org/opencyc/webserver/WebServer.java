@@ -411,7 +411,7 @@ public class WebServer extends Thread {
                 Log.current.printStackTrace(e);
             }
             byte[] byteArray = new byte[bytes.size()];
-            for (int i = 0; i < bytes.size(); i++) {
+            for (int i = 0; i < bytes.size() - 1; i++) {
                 Integer ich = (Integer) bytes.get(i);
                 byteArray[i] = ich.byteValue();
             }

@@ -60,7 +60,7 @@ public class CycAccess {
     /**
      * Default value indicating that the OpenCyc api should use one TCP socket for the entire session.
      */
-    public static final boolean DEFAULT_PERSISTENT_CONNECTION = PERSISTENT_CONNECTION;
+    public static final boolean DEFAULT_CONNECTION = PERSISTENT_CONNECTION;
 
     /**
      * Parameter indicating whether the OpenCyc binary api defers the completion of CycConstant attributes
@@ -191,22 +191,22 @@ public class CycAccess {
         this(CycConnection.DEFAULT_HOSTNAME,
              CycConnection.DEFAULT_BASE_PORT,
              CycConnection.DEFAULT_COMMUNICATION_MODE,
-             CycAccess.DEFAULT_PERSISTENT_CONNECTION);
+             CycAccess.DEFAULT_CONNECTION);
     }
     /**
      * Constructs a new CycAccess object given a host name, port, communication mode and persistence indicator.
      *
      * @param hostName the host name
-     * @param port the TCP socket port number
+     * @param basePort the base (HTML serving) TCP socket port number
      * @param communicationMode either ASCII_MODE or BINARY_MODE
      * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with
      * the OpenCyc server
      */
-    public CycAccess(String hostName, int port, int communicationMode, boolean persistentConnection)
+    public CycAccess(String hostName, int basePort, int communicationMode, boolean persistentConnection)
         throws IOException, UnknownHostException, CycApiException {
         cycAccessInstances.put(Thread.currentThread(), this);
         this.hostName = hostName;
-        this.port = port;
+        this.port = basePort;
         this.communicationMode = communicationMode;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)

@@ -5,7 +5,7 @@ package org.opencyc.elf.message;
 //// External Imports
 
 /**
- * Provides the container for the sensed object message, that
+ * Provides the container for the observed input message, that
  * is sent from a sensor to sensory processing.
  * 
  * @version $Id$
@@ -28,10 +28,10 @@ package org.opencyc.elf.message;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class SensedObjectMsg extends GenericMsg {
+public class ObservedInputMsg extends GenericMsg {
   
-  /** Creates a new instance of SensedObjectMsg */
-  public SensedObjectMsg() {
+  /** Creates a new instance of ObservedInputMsg*/
+  public ObservedInputMsg() {
   }
   
   //// Public Area

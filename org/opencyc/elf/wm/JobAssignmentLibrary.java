@@ -2,14 +2,8 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.bg.planner.JobAssignment;
-import org.opencyc.elf.bg.planner.Resource;
-
-import org.opencyc.elf.bg.taskframe.Action;
-
-import org.opencyc.elf.wm.ActionFactory;
 
 //// External Imports
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -47,7 +41,6 @@ public class JobAssignmentLibrary {
   
   //// Public Area
   
-
   /**
    * Gets the singleton job assignment library instance
    *
@@ -57,23 +50,6 @@ public class JobAssignmentLibrary {
     return jobAssignmentLibrary;
   }
 
-  /**
-   * Initializes the job library.
-   */
-  public void initialize() {
-    // converse with user
-    JobAssignment jobAssignment = new JobAssignment();
-    jobAssignment.setActionName(Action.CONVERSE_WITH_USER);
-    ArrayList requiredResources = new ArrayList();
-    requiredResources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    jobAssignment.setRequiredResources(requiredResources);
-    ActionFactory actionFactory = new ActionFactory();
-    Action action = actionFactory.makeConsolePromptedInput();
-    jobAssignment.setActionForScheduling(action);
-    setJobAssignment(Action.CONVERSE_WITH_USER, jobAssignment);
-    
-  }
- 
   /**
    * Gets the job assignment that accomplishes the given action name.
    *

@@ -8,7 +8,7 @@ import org.opencyc.templateparser.*;
 import org.opencyc.util.*;
 
 /**
- * Provides a unit test suite for the <tt>org.opencyc.conversation</tt> package<p>
+ * Provides a unit test suite for the <tt>org.opencyc.fsm</tt> package<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -51,7 +51,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testPerformative"));
         testSuite.addTest(new UnitTest("testState"));
         testSuite.addTest(new UnitTest("testArc"));
-        testSuite.addTest(new UnitTest("testConversationFactory"));
+        testSuite.addTest(new UnitTest("testFsmFactory"));
         testSuite.addTest(new UnitTest("testInterpreter"));
         testSuite.addTest(new UnitTest("testPerformer"));
         return testSuite;
@@ -228,21 +228,22 @@ public class UnitTest extends TestCase {
     }
 
     /**
-     * Tests the ConversationFactory object.
+     * Tests the FsmFactory object.
      */
-    public void testConversationFactory () {
-        System.out.println("\n**** testConversationFactory ****");
-        ConversationFactory.reset();
-        ConversationFactory conversationFactory = new ConversationFactory();
-        conversationFactory.makeAllConversations();
-        Iterator conversations = conversationFactory.conversationCache.values().iterator();
-        ArrayList conversationsList = new ArrayList();
-        while (conversations.hasNext())
-            conversationsList.add(conversations.next());
-        for (int j = 0; j < conversationsList.size(); j++) {
+    public void testFsmFactory () {
+        System.out.println("\n**** testFsmFactory ****");
+        FsmFactory.reset();
+        FsmFactory fsmFactory = new FsmFactory();
+        fsmFactory.makeAllFsmClasses();
+        fsmFactory.makeAllFsms();
+        Iterator fsmClasses = fsmFactory.fsmClassStore.values().iterator();
+        ArrayList fsmClassesList = new ArrayList();
+        while (fsmClasses.hasNext())
+            fsmClassesList.add(fsmClasses.next());
+        for (int j = 0; j < fsmClassesList.size(); j++) {
             ArrayList statesList = new ArrayList();
-            Conversation conversation = (Conversation) conversationsList.get(j);
-            Iterator states = conversation.conversationFsmStates.values().iterator();
+            FsmClass fsmClass = (FsmClass) fsmClassesList.get(j);
+            Iterator states = fsmClass.fsmStates.values().iterator();
             while (states.hasNext())
                 statesList.add(states.next());
             // all states have arcs from them.
@@ -252,24 +253,57 @@ public class UnitTest extends TestCase {
                 Iterator arcs = state.getArcs().iterator();
                 while (arcs.hasNext()) {
                     Arc arc = (Arc) arcs.next();
-                    // Each transitionFromState is a state in this conversation
+                    // Each transitionFromState is a state in this fsm
                     Assert.assertTrue(statesList.contains(arc.getTransitionFromState()));
-                    // Each transitionToState is a state in this conversation
+                    // Each transitionToState is a state in this fsm
                     Assert.assertTrue(statesList.contains(arc.getTransitionToState()));
-                    Conversation subConversation = arc.getSubConversation();
-                    // No arc has both an action and a subConversation.
+                    Fsm subFsm = arc.getSubFsm();
+                    // No arc has both an action and a subFsm.
                     Assert.assertTrue(arc.toString(),
                                       ! ((arc.getAction() != null) &&
-                                         (subConversation != null)));
-                    if (arc.getSubConversation() != null) {
-                        // When specified, the sub conversation is a valid conversation
-                        Assert.assertTrue(conversationsList.contains(subConversation));
+                                         (subFsm != null)));
+                    if (arc.getSubFsm() != null) {
+                        // When specified, the sub fsm is a valid fsm
+                        Assert.assertTrue(fsmClassesList.contains(subFsm));
+                    }
+                }
+            }
+        }
+        Iterator fsms = fsmFactory.fsmStore.values().iterator();
+        ArrayList fsmsList = new ArrayList();
+        while (fsms.hasNext())
+            fsmsList.add(fsms.next());
+        for (int j = 0; j < fsmsList.size(); j++) {
+            ArrayList statesList = new ArrayList();
+            Fsm fsm = (Fsm) fsmsList.get(j);
+            Iterator states = fsm.fsmStates.values().iterator();
+            while (states.hasNext())
+                statesList.add(states.next());
+            // all states have arcs from them.
+            Assert.assertTrue(statesList.size() > 0);
+            for (int i = 0; i < statesList.size(); i++) {
+                State state = (State) statesList.get(i);
+                Iterator arcs = state.getArcs().iterator();
+                while (arcs.hasNext()) {
+                    Arc arc = (Arc) arcs.next();
+                    // Each transitionFromState is a state in this fsm
+                    Assert.assertTrue(statesList.contains(arc.getTransitionFromState()));
+                    // Each transitionToState is a state in this fsm
+                    Assert.assertTrue(statesList.contains(arc.getTransitionToState()));
+                    Fsm subFsm = arc.getSubFsm();
+                    // No arc has both an action and a subFsm.
+                    Assert.assertTrue(arc.toString(),
+                                      ! ((arc.getAction() != null) &&
+                                         (subFsm != null)));
+                    if (arc.getSubFsm() != null) {
+                        // When specified, the sub fsm is a valid fsm
+                        Assert.assertTrue(fsmsList.contains(subFsm));
                     }
                 }
             }
         }
 
-        System.out.println("**** testConversationFactory OK ****");
+        System.out.println("**** testFsmFactory OK ****");
     }
 
     /**
@@ -278,24 +312,24 @@ public class UnitTest extends TestCase {
     public void testInterpreter () {
         System.out.println("\n**** testInterpreter ****");
 
-        ConversationFactory.reset();
-        ConversationFactory conversationFactory = new ConversationFactory();
-        conversationFactory.initialize();
-        Conversation chat = conversationFactory.makeChat();
+        FsmFactory.reset();
+        FsmFactory fsmFactory = new FsmFactory();
+        fsmFactory.initialize();
+        Fsm chat = fsmFactory.getFsm("chat");
         Interpreter interpreter = new Interpreter();
         interpreter.initialize("initial", chat);
         Assert.assertNotNull(interpreter);
-        Assert.assertNotNull(interpreter.conversationStacks);
-        Assert.assertNotNull(interpreter.conversationStacks.get("initial"));
-        Assert.assertTrue(interpreter.conversationStacks.get("initial") instanceof StackWithPointer);
-        StackWithPointer conversationStack =
-            (StackWithPointer) interpreter.conversationStacks.get("initial");
-        Assert.assertEquals(1, conversationStack.size());
-        Assert.assertTrue(conversationStack.peek() instanceof ConversationStateInfo);
-        ConversationStateInfo conversationStateInfo =
-            (ConversationStateInfo) conversationStack.peek();
-        Assert.assertEquals(chat, conversationStateInfo.getConversation());
-        Assert.assertNull(conversationStateInfo.getCurrentState());
+        Assert.assertNotNull(interpreter.fsmStacks);
+        Assert.assertNotNull(interpreter.fsmStacks.get("initial"));
+        Assert.assertTrue(interpreter.fsmStacks.get("initial") instanceof StackWithPointer);
+        StackWithPointer fsmStack =
+            (StackWithPointer) interpreter.fsmStacks.get("initial");
+        Assert.assertEquals(1, fsmStack.size());
+        Assert.assertTrue(fsmStack.peek() instanceof FsmStateInfo);
+        FsmStateInfo fsmStateInfo =
+            (FsmStateInfo) fsmStack.peek();
+        Assert.assertEquals(chat, fsmStateInfo.getFsm());
+        Assert.assertNull(fsmStateInfo.getCurrentState());
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         String chatMessage = "xxxx";
         ParseResults parseResults = interpreter.templateParser.parse(chatMessage);
@@ -318,13 +352,13 @@ public class UnitTest extends TestCase {
         Assert.assertEquals("final", interpreter.currentState.getStateId());
 
         interpreter.initialize("initial", chat);
-        conversationStack =
-            (StackWithPointer) interpreter.conversationStacks.get("initial");
-        Assert.assertEquals(1, conversationStack.size());
-        Assert.assertTrue(conversationStack.peek() instanceof ConversationStateInfo);
-        conversationStateInfo =
-            (ConversationStateInfo) conversationStack.peek();
-        Assert.assertEquals(chat, conversationStateInfo.getConversation());
+        fsmStack =
+            (StackWithPointer) interpreter.fsmStacks.get("initial");
+        Assert.assertEquals(1, fsmStack.size());
+        Assert.assertTrue(fsmStack.peek() instanceof FsmStateInfo);
+        fsmStateInfo =
+            (FsmStateInfo) fsmStack.peek();
+        Assert.assertEquals(chat, fsmStateInfo.getFsm());
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
         chatMessage = "what do you know about penguins?";
         parseResults = interpreter.templateParser.parse(chatMessage);
@@ -339,19 +373,19 @@ public class UnitTest extends TestCase {
         ArrayList actualTextBinding =
             parseResults.getTextBinding(CycObjectFactory.makeCycVariable("term"));
         Assert.assertEquals(expectedTextBinding, actualTextBinding);
-        Conversation disambiguatePhrase = conversationFactory.makeDisambiguatePhrase();
+        Fsm disambiguatePhrase = fsmFactory.getFsm("disambiguate-phrase");
         CycList disambiguationWords = new CycList();
         disambiguationWords.add("penguins");
         Object [] attributeValuePair = {"disambiguation words", disambiguationWords};
         ArrayList arguments = new ArrayList();
         arguments.add(attributeValuePair);
-        interpreter.setupSubConversation(disambiguatePhrase, arguments);
-        Assert.assertEquals("ready", conversationStateInfo.getCurrentState().getStateId());
-        Assert.assertEquals(2, conversationStack.size());
-        Assert.assertTrue(conversationStack.peek() instanceof ConversationStateInfo);
-        conversationStateInfo = (ConversationStateInfo) conversationStack.peek();
-        Assert.assertNull(conversationStateInfo.getCurrentState());
-        Assert.assertEquals(disambiguatePhrase, conversationStateInfo.getConversation());
+        interpreter.setupSubFsm(disambiguatePhrase, arguments);
+        Assert.assertEquals("ready", fsmStateInfo.getCurrentState().getStateId());
+        Assert.assertEquals(2, fsmStack.size());
+        Assert.assertTrue(fsmStack.peek() instanceof FsmStateInfo);
+        fsmStateInfo = (FsmStateInfo) fsmStack.peek();
+        Assert.assertNull(fsmStateInfo.getCurrentState());
+        Assert.assertEquals(disambiguatePhrase, fsmStateInfo.getFsm());
         Assert.assertNotNull(interpreter.nextPerformative);
 
         System.out.println("**** testInterpreter OK ****");

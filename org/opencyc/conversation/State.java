@@ -3,7 +3,7 @@ package org.opencyc.conversation;
 import java.util.*;
 
 /**
- * Contains the attributes and behavior of a chat conversation Finite
+ * Contains the attributes and behavior of a chat fsm Finite
  * State Machine State.<p>
  *
  * @version $Id$
@@ -30,7 +30,7 @@ import java.util.*;
 public class State implements Comparable {
 
     /**
-     * state identifier within the conversation
+     * state identifier within the fsm
      */
     protected String stateId;
 
@@ -42,7 +42,7 @@ public class State implements Comparable {
     /**
      * Constructs a new State object.
      *
-     * @param stateId unique state identifier within the conversation
+     * @param stateId unique state identifier within the fsm
      */
     public State(String stateId) {
         this.stateId = stateId;
@@ -51,27 +51,23 @@ public class State implements Comparable {
     /**
      * Constructs a new State object.
      *
-     * @param stateId unique state identifier within the conversation
-     * @param conversation the conversation containing this new state
+     * @param stateId unique state identifier within the fsm
+     * @param fsmClass the fsm class containing this new state
      */
-    public State(String stateId, Conversation conversation) {
+    public State(String stateId, FsmClass fsmClass) {
         this.stateId = stateId;
-        conversation.addState(this);
+        fsmClass.addState(this);
     }
 
     /**
      * Constructs a new State object.
      *
-     * @param stateId unique state identifier within the conversation
-     * @param conversation the conversation containing this new state
-     * @param isInitialState when true, this is the initial state of the
-     * conversation
+     * @param stateId unique state identifier within the fsm
+     * @param fsm the fsm containing this new state
      */
-    public State(String stateId, Conversation conversation, boolean isInitialState) {
+    public State(String stateId, Fsm fsm) {
         this.stateId = stateId;
-        conversation.addState(this);
-        if (isInitialState)
-            conversation.setInitialState(this);
+        fsm.addState(this);
     }
 
     /**
@@ -157,6 +153,15 @@ public class State implements Comparable {
      */
     public String toString() {
         return stateId;
+    }
+
+    /**
+     * Creates a clone of this object.
+     */
+    public Object clone () {
+        State state = new State(this.stateId);
+        state.arcs = (HashMap) this.arcs.clone();
+        return state;
     }
 
 }

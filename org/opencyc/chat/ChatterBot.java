@@ -11,9 +11,9 @@ import org.opencyc.conversation.*;
  *
  * The chat conversation is in the form of a text conversation using
  * asynchronous receiving and sending of messages.  This class intializes
- * the Cyc server connection, and initializes the conversation interpreter,
+ * the Cyc server connection, and initializes the fsm interpreter,
  * for each chat partner, then delegates the conversation understanding and
- * responses to the chat partner's conversation interpreter.
+ * responses to the chat partner's fsm interpreter.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -55,13 +55,13 @@ public class ChatterBot {
     protected CycAccess cycAccess;
 
     /**
-     * Makes Conversation objects for interpretation.
+     * Makes Fsm objects for interpretation.
      */
-    public ConversationFactory conversationFactory;
+    public FsmFactory fsmFactory;
 
     /**
-     * Dictionary of conversation finite state machine interpreters.
-     * chatPartner --> conversationFsmInterpreter
+     * Dictionary of fsm finite state machine interpreters.
+     * chatPartner --> fsmFsmInterpreter
      */
     protected HashMap interpreters = new HashMap();
 
@@ -84,24 +84,24 @@ public class ChatterBot {
                                     ChatException {
         chatSender.sendChatMessage("I am initializing");
         cycAccess = new CycAccess();
-        conversationFactory = new ConversationFactory();
-        conversationFactory.initialize();
+        fsmFactory = new FsmFactory();
+        fsmFactory.initialize();
         chatSender.sendChatMessage("I am ready to chat");
     }
 
     /**
-     * Makes a new conversation finite state machine interpreter object for
+     * Makes a new fsm finite state machine interpreter object for
      * a new chat partner, and stores it in the dictionary for later lookup.
      *
      * @param chatUserNickname the preferred name (possibly not unique) of the
      * chat partner
      * @param chatUserUniqueId the unique id assigned to the user by the chat
      * system
-     * @return the new conversation finite state machine interpreter
+     * @return the new fsm finite state machine interpreter
      */
     protected Interpreter makeInterpreter (String chatUserNickname,
                                            String chatUserUniqueId) {
-        Conversation chat = conversationFactory.makeChat();
+        Fsm chat = fsmFactory.getFsm("chat");
         Interpreter interpreter =
             new Interpreter(this,
                             chatUserNickname,
@@ -126,8 +126,8 @@ public class ChatterBot {
 
     /**
      * Receives the given chat message from the given chat partner.  Delegates
-     * the message understanding and conversational response to the
-     * conversationFsmInterpreter object.
+     * the message understanding and fsmal response to the
+     * fsmFsmInterpreter object.
      *
      * @param chatUserNickname the preferred name (possibly not unique) of the
      * chat partner

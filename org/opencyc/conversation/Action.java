@@ -1,7 +1,7 @@
 package org.opencyc.conversation;
 
 /**
- * Contains the attributes and behavior of a chat conversation Finite
+ * Contains the attributes and behavior of a Finite
  * State Machine Action.<p>
  *
  * @version $Id$

@@ -3,7 +3,7 @@ package org.opencyc.conversation;
 import java.util.*;
 
 /**
- * Contains the conversation and its state.<p>
+ * Contains the finite state machine and its state.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -27,12 +27,12 @@ import java.util.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ConversationStateInfo {
+public class FsmStateInfo {
 
     /**
-     * the conversation
+     * the fsm
      */
-    protected Conversation conversation;
+    protected Fsm fsm;
 
     /**
      * finite state machine current node
@@ -45,12 +45,12 @@ public class ConversationStateInfo {
     protected HashMap stateAttributes = new HashMap();
 
     /**
-     * Constructs a new ConversationStateInfo object given the conversation and
+     * Constructs a new FsmStateInfo object given the fsm and
      * state attributes.
      */
-    public ConversationStateInfo (Conversation conversation,
+    public FsmStateInfo (Fsm fsm,
                                   HashMap stateAttributes) {
-        this.conversation = conversation;
+        this.fsm = fsm;
         this.stateAttributes = stateAttributes;
     }
 
@@ -73,12 +73,12 @@ public class ConversationStateInfo {
     }
 
     /**
-     * Returns the conversation.
+     * Returns the fsm.
      *
-     * @return the conversation
+     * @return the fsm
      */
-    public Conversation getConversation () {
-        return conversation;
+    public Fsm getFsm () {
+        return fsm;
     }
 
     /**

@@ -11,9 +11,9 @@ import org.opencyc.templateparser.*;
 import org.opencyc.util.*;
 
 /**
- * Performs actions for the chat conversation interpreter.<p>
+ * Performs actions for the chat fsm interpreter.<p>
  *
- * The chat conversation is in the form of a text conversation using
+ * The chat fsm is in the form of a text fsm using
  * asynchronous receiving and sending of messages. This interpreter contains
  * all the possible finite state machine actions and interprets the
  * actions required for a state transition.
@@ -60,9 +60,9 @@ public class Performer {
     protected Interpreter interpreter;
 
     /**
-     * reference to the ConversationFactory object
+     * reference to the FsmFactory object
      */
-    protected ConversationFactory conversationFactory;
+    protected FsmFactory fsmFactory;
 
     /**
      * reference to the TemplateParser object
@@ -90,30 +90,30 @@ public class Performer {
         Log.makeLog();
         this.interpreter = interpreter;
         if (interpreter.chatterBot != null) {
-            this.conversationFactory = interpreter.chatterBot.conversationFactory;
+            this.fsmFactory = interpreter.chatterBot.fsmFactory;
         }
         else {
             // When unit testing, no ChatterBot is present.
-            conversationFactory = new ConversationFactory();
-            conversationFactory.initialize();
+            fsmFactory = new FsmFactory();
+            fsmFactory.initialize();
         }
         this.templateParser = interpreter.templateParser;
     }
 
     /**
-     * Performs the given sub conversation with the given current state.
+     * Performs the given sub fsm with the given current state.
      *
      * @param currentState the current state of the finite state machine
-     * @param subConversation the sub conversation to be performed.
+     * @param subFsm the sub fsm to be performed.
      */
-    protected void performArc (State currentState, Conversation subConversation)
+    protected void performArc (State currentState, Fsm subFsm)
         throws CycApiException,
                IOException,
                UnknownHostException,
                ChatException {
         ArrayList arguments =
-            (ArrayList) interpreter.getStateAttribute("subConversation arguments");
-        interpreter.setupSubConversation(subConversation, arguments);
+            (ArrayList) interpreter.getStateAttribute("subFsm arguments");
+        interpreter.setupSubFsm(subFsm, arguments);
     }
 
     /**
@@ -165,7 +165,7 @@ public class Performer {
     /**
      * Performs the do-not-understand action.
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action object.
      */
     protected void doNotUnderstand (State currentState, Action action)
@@ -186,7 +186,7 @@ public class Performer {
     /**
      * Performs the do-disambiguate-parse-term action.
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action object.
      */
     protected void doDisambiguateParseTermAction (State currentState, Action action)
@@ -263,7 +263,7 @@ public class Performer {
     /**
      * Performs the do-disambiguate-term-choice action.
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action object.
      */
     protected void doDisambiguateTermChoiceAction (State currentState, Action action)
@@ -307,7 +307,7 @@ public class Performer {
     /**
      * Performs the do-disambiguate-choice-is-number action
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action containing the numeric choice
      */
     protected void doDisambiguateChoiceIsNumberAction (State currentState, Action action) {
@@ -321,7 +321,7 @@ public class Performer {
     /**
      * Performs the do-disambiguate-choice-is-phrase action
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action containing the phrase choice
      */
     protected void doDisambiguateChoiceIsPhraseAction (State currentState, Action action) {
@@ -335,20 +335,20 @@ public class Performer {
     /**
      * Performs the do-disambiguate-term-done action
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      */
     protected void doDisambiguateTermDoneAction (State currentState) {
         CycFort disambiguatedTerm = (CycFort) interpreter.getStateAttribute("disambiguated term");
-        interpreter.popConversationStateInfo();
+        interpreter.popFsmStateInfo();
         interpreter.setStateAttribute("disambiguated term",
                                       disambiguatedTerm);
     }
 
     /**
      * Performs the do-disambiguate term-query action.  First performs a disambiguate-term
-     * subconversation to obtain the correct term for the query.
+     * subfsm to obtain the correct term for the query.
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action object.
      */
     protected void doDisambiguateTermQuery (State currentState, Action action)
@@ -358,18 +358,18 @@ public class Performer {
         ArrayList queryWords =
             parseResults.getTextBinding(CycObjectFactory.makeCycVariable("?term"));
         interpreter.setStateAttribute("query words", queryWords);
-        //Conversation disambiguateTerm = conversationFactory.makeDisambiguateTerm();
+        //Fsm disambiguateTerm = fsmFactory.makeDisambiguateTerm();
         Object [] attributeValuePair = {"disambiguation words", queryWords};
         ArrayList arguments = new ArrayList();
         arguments.add(attributeValuePair);
-        //interpreter.setupSubConversation(disambiguateTerm, arguments);
+        //interpreter.setupSubFsm(disambiguateTerm, arguments);
         //interpreter.setNextPerformative(disambiguateTerm.getDefaultPerformative());
     }
 
     /**
      * Performs the reply-with-first-fact action.
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action object.
      */
     protected void doReplyWithFirstFact (State currentState, Action action) {
@@ -378,7 +378,7 @@ public class Performer {
     /**
      * Performs the repy-with-next-fact action.
      *
-     * @param currentState the current conversation state
+     * @param currentState the current fsm state
      * @param action the action object.
      */
     protected void doReplyWithNextFact (State currentState, Action action) {

@@ -9,15 +9,15 @@ import org.opencyc.templateparser.*;
 import org.opencyc.util.*;
 
 /**
- * Contains the attributes and behavior of a chat conversation interpreter.<p>
+ * Contains the attributes and behavior of a chat fsm interpreter.<p>
  *
  * The chat conversation is in the form of a text conversation using
  * asynchronous receiving and sending of messages. This interpreter models the
- * chat interaction with nested conversations in a stack.  Mixed initiative is
- * supported by a dictionary of conversation stacks, one of which is active,
- * and the rest suspended.  Sub conversations are passed a list of attribute/value
- * pairs which form the initial state attributes.  When done, sub conversations
- * pass back result attribute/value pairs to the calling conversation's state
+ * chat interaction with nested fsms in a stack.  Mixed initiative is
+ * supported by a dictionary of fsm stacks, one of which is active,
+ * and the rest suspended.  Sub fsms are passed a list of attribute/value
+ * pairs which form the initial state attributes.  When done, sub fsms
+ * pass back result attribute/value pairs to the calling fsm's state
  * attributes.
  *
  * @version $Id$
@@ -56,23 +56,23 @@ public class Interpreter {
     protected ChatUserModel chatUserModel;
 
     /**
-     * dictionary of conversation stacks
-     * conversationStackId --> conversation stack
+     * dictionary of fsm stacks
+     * fsmStackId --> fsm stack
      */
-    protected HashMap conversationStacks;
+    protected HashMap fsmStacks;
 
     /**
-     * Reference to the current conversation stack, which is a stack of
-     * ConversationInfo elements.  Each of these elements contains
-     * the conversation and its state attributes.
+     * Reference to the current fsm stack, which is a stack of
+     * FsmInfo elements.  Each of these elements contains
+     * the fsm and its state attributes.
      *
      */
-    protected StackWithPointer conversationStack;
+    protected StackWithPointer fsmStack;
 
     /**
-     * reference to the active conversation
+     * reference to the active fsm
      */
-    protected Conversation conversation;
+    protected Fsm fsm;
 
     /**
      * finite state machine current node
@@ -100,7 +100,7 @@ public class Interpreter {
     protected TemplateParser templateParser;
 
     /**
-     * Performs conversation actions.
+     * Performs fsm actions.
      */
     protected Performer performer;
 
@@ -124,12 +124,12 @@ public class Interpreter {
     public Interpreter(ChatterBot chatterBot,
                        String chatUserNickname,
                        String chatUserUniqueId,
-                       String conversationStackId,
-                       Conversation conversation) {
+                       String fsmStackId,
+                       Fsm fsm) {
         Log.makeLog();
         this.chatterBot = chatterBot;
         chatUserModel = chatterBot.getChatUserModel(chatUserUniqueId);
-        initialize(conversationStackId, conversation);
+        initialize(fsmStackId, fsm);
     }
 
     /**
@@ -155,9 +155,9 @@ public class Interpreter {
             action.setContent(nextPerformative.getContent());
             nextPerformative = null;
             transitionState(arc);
-            Conversation subConversation = arc.getSubConversation();
-            if (subConversation != null)
-                performer.performArc(currentState, subConversation);
+            Fsm subFsm = arc.getSubFsm();
+            if (subFsm != null)
+                performer.performArc(currentState, subFsm);
             else
                 performer.performArc(currentState, action);
         }
@@ -172,12 +172,6 @@ public class Interpreter {
      * current state
      */
     protected Arc lookupArc (Performative performative) {
-        for (int i = 0; i < ConversationFactory.globalArcs.size(); i++) {
-            Arc arc =
-                (Arc) ConversationFactory.globalArcs.get(i);
-            if (performative.getPerformativeName().equals(arc.getPerformative().getPerformativeName()))
-                return arc;
-        }
         Iterator arcs = currentState.getArcs().iterator();
         while (arcs.hasNext()) {
             Arc arc = (Arc) arcs.next();
@@ -196,34 +190,33 @@ public class Interpreter {
      * @param arc the finite state machine arc
      */
     protected void transitionState (Arc arc) {
-        if (! (arc.getTransitionToState().equals(ConversationFactory.currentState)))
-            currentState = arc.getTransitionToState();
+        currentState = arc.getTransitionToState();
         State previousState = arc.getTransitionFromState();
     }
 
     /**
      * Initializes the fsm interpreter.
      *
-     * @param conversationStackId provides an id for the first
-     * conversation stack
-     * @param conversation the initial conversation, which is also the
-     * sole object on the conversation stack
+     * @param fsmStackId provides an id for the first
+     * fsm stack
+     * @param fsm the initial fsm, which is also the
+     * sole object on the fsm stack
      */
-    public void initialize (String conversationStackId,
-                            Conversation conversation) {
+    public void initialize (String fsmStackId,
+                            Fsm fsm) {
         templateFactory = new TemplateFactory();
         templateFactory.makeAllTemplates();
         templateParser = new TemplateParser();
         templateParser.initialize();
         performer = new Performer(this);
-        conversationStack = new StackWithPointer();
-        this.conversation = conversation;
-        ConversationStateInfo conversationStateInfo =
-            new ConversationStateInfo(conversation, stateAttributes);
-        pushConversationStateInfo(conversationStateInfo);
-        conversationStacks = new HashMap();
-        conversationStacks.put(conversationStackId, conversationStack);
-        currentState = conversation.getInitialState();
+        fsmStack = new StackWithPointer();
+        this.fsm = fsm;
+        FsmStateInfo fsmStateInfo =
+            new FsmStateInfo(fsm, stateAttributes);
+        pushFsmStateInfo(fsmStateInfo);
+        fsmStacks = new HashMap();
+        fsmStacks.put(fsmStackId, fsmStack);
+        currentState = fsm.getInitialState();
     }
 
     /**
@@ -265,62 +258,62 @@ public class Interpreter {
     }
 
     /**
-     * Sets up the given sub conversation and the input arguments as
+     * Sets up the given sub fsm and the input arguments as
      * a list of attribute/value pairs.
      *
-     * @param conversation the new conversation
+     * @param fsm the new fsm
      * @param arguments a list of Object arrays of length two, the first array element is the
      * attribute and the second array element is its value
      */
-    public void setupSubConversation (Conversation conversation,
+    public void setupSubFsm (Fsm fsm,
                                       ArrayList arguments) {
-        ConversationStateInfo conversationStateInfo =
-            new ConversationStateInfo(conversation,
+        FsmStateInfo fsmStateInfo =
+            new FsmStateInfo(fsm,
                                       new HashMap());
-        pushConversationStateInfo(conversationStateInfo);
-        currentState = conversation.getInitialState();
+        pushFsmStateInfo(fsmStateInfo);
+        currentState = fsm.getInitialState();
         for (int i = 0; i < arguments.size(); i++) {
             Object [] attributeValuePair = (Object []) arguments.get(i);
             String attribute = (String) attributeValuePair[0];
             Object value = attributeValuePair[1];
             setStateAttribute(attribute, value);
         }
-        nextPerformative = new Performative("start-new-conversation");
+        nextPerformative = new Performative("start-new-fsm");
     }
 
     /**
-     * Pushes the given conversation state onto the current
-     * conversation stack.
+     * Pushes the given fsm state onto the current
+     * fsm stack.
      *
-     * @param conversationStateInfo the new conversation and its state
+     * @param fsmStateInfo the new fsm and its state
      */
-    public void pushConversationStateInfo (ConversationStateInfo conversationStateInfo) {
-        if (conversationStack.size() > 0) {
-            ConversationStateInfo suspendedConversationStateInfo =
-                (ConversationStateInfo) conversationStack.peek();
-            suspendedConversationStateInfo.currentState = currentState;
+    public void pushFsmStateInfo (FsmStateInfo fsmStateInfo) {
+        if (fsmStack.size() > 0) {
+            FsmStateInfo suspendedFsmStateInfo =
+                (FsmStateInfo) fsmStack.peek();
+            suspendedFsmStateInfo.currentState = currentState;
         }
-        conversationStack.push(conversationStateInfo);
+        fsmStack.push(fsmStateInfo);
     }
 
     /**
-     * Pops the conversation state stack and restores the previous
-     * conversation state.
+     * Pops the fsm state stack and restores the previous
+     * fsm state.
      */
-    public void popConversationStateInfo () {
-        ArrayList results = (ArrayList) getStateAttribute("subConversation results");
-        ConversationStateInfo conversationStateInfo =
-            (ConversationStateInfo) conversationStack.pop();
-        this.conversation = conversationStateInfo.conversation;
-        this.currentState = conversationStateInfo.currentState;
-        this.stateAttributes = conversationStateInfo.stateAttributes;
+    public void popFsmStateInfo () {
+        ArrayList results = (ArrayList) getStateAttribute("subFsm results");
+        FsmStateInfo fsmStateInfo =
+            (FsmStateInfo) fsmStack.pop();
+        this.fsm = fsmStateInfo.fsm;
+        this.currentState = fsmStateInfo.currentState;
+        this.stateAttributes = fsmStateInfo.stateAttributes;
         for (int i = 0; i < results.size(); i++) {
             Object [] attributeValuePair = (Object []) results.get(i);
             String attribute = (String) attributeValuePair[0];
             Object value = attributeValuePair[1];
             setStateAttribute(attribute, value);
         }
-        nextPerformative = new Performative("resume-previous-conversation");
+        nextPerformative = new Performative("resume-previous-fsm");
     }
 
 }

@@ -1,7 +1,7 @@
 package org.opencyc.conversation;
 
 /**
- * Contains the attributes and behavior of a chat conversation Finite
+ * Contains the attributes and behavior of a Finite
  * State Machine Arc.<p>
  *
  * @version $Id$
@@ -44,9 +44,9 @@ public class Arc implements Comparable {
     protected State transitionToState;
 
     /**
-     * finite state machine state sub conversation
+     * finite state machine state sub fsm
      */
-    protected Conversation subConversation;
+    protected Fsm subFsm;
 
     /**
      * finite state machine state action
@@ -61,18 +61,18 @@ public class Arc implements Comparable {
      * @param transitionFromState the transition-from state
      * @param performative the transition trigger performative
      * @param transitionToState the transition-to state
-     * @param subConversation the sub conversation to perform (null if none)
+     * @param subFsm the sub fsm to perform (null if none)
      * @param action the action to take
      */
     public Arc (State transitionFromState,
                 Performative performative,
                 State transitionToState,
-                Conversation subConversation,
+                Fsm subFsm,
                 Action action) {
         this.transitionFromState = transitionFromState;
         this.performative = performative;
         this.transitionToState = transitionToState;
-        this.subConversation = subConversation;
+        this.subFsm = subFsm;
         this.action = action;
         transitionFromState.addArc(this);
     }
@@ -105,21 +105,21 @@ public class Arc implements Comparable {
     }
 
     /**
-     * Sets the finite state machine state sub conversation.
+     * Sets the finite state machine state sub fsm.
      *
-     * @param subConversation the finite state machine state sub conversation
+     * @param subFsm the finite state machine state sub fsm
      */
-    public void setSubConversation (Conversation subConversation) {
-        this.subConversation = subConversation;
+    public void setSubFsm (Fsm subFsm) {
+        this.subFsm = subFsm;
     }
 
     /**
-     * Returns the finite state machine state sub conversation.
+     * Returns the finite state machine state sub fsm.
      *
-     * @return the finite state machine state sub conversation
+     * @return the finite state machine state sub fsm
      */
-    public Conversation getSubConversation () {
-        return subConversation;
+    public Fsm getSubFsm () {
+        return subFsm;
     }
 
     /**
@@ -176,7 +176,7 @@ public class Arc implements Comparable {
         stringBuffer.append(", ");
         stringBuffer.append(performative);
         stringBuffer.append(", ");
-        stringBuffer.append(subConversation);
+        stringBuffer.append(subFsm);
         stringBuffer.append(", ");
         stringBuffer.append(action);
         stringBuffer.append(", ");

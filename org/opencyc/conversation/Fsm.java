@@ -4,10 +4,14 @@ import java.util.*;
 import org.opencyc.chat.*;
 
 /**
- * Contains the attributes and behavior of a chat conversation.<p>
+ * Contains the attributes and behavior of a finite state machine instance.<p>
  *
- * The chat conversation is in the form of a text conversation using
- * asynchronous receiving and sending of messages.
+ * Fsms have a class structure in which instances of a class have the
+ * same arcs and states, with the exception that instances may have
+ * differing actions and sub fsms on their arcs.<br>
+ *
+ * Subclass fsms inherit states and arcs from their superclass fsm.
+ * A subclass fsm may override arcs which would otherwise be inherited.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -30,15 +34,20 @@ import org.opencyc.chat.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Conversation {
+public class Fsm {
 
     /**
-     * name of the conversation
+     * name of the fsm instance
      */
     protected String name;
 
     /**
-     * inital conversation state
+     * class of the fsm instance
+     */
+    protected FsmClass fsmClass;
+
+    /**
+     * inital fsm state
      */
     protected State initialState;
 
@@ -48,41 +57,50 @@ public class Conversation {
     protected Performative defaultPerformative;
 
     /**
-     * dictionary of conversation states, stateName --> State
+     * dictionary of fsm states, stateName --> State
      */
-    protected HashMap conversationFsmStates = new HashMap();
+    protected HashMap fsmStates = new HashMap();
 
     /**
-     * Constructs a new Conversation object given the conversation name
+     * Constructs a new Fsm object given the fsm name
      *
-     * @param name the conversation name
+     * @param name the fsm name
      */
-    protected Conversation(String name) {
+    protected Fsm(String name) {
         this.name = name;
     }
 
     /**
-     * Returns the conversation name.
+     * Returns the fsm name.
      *
-     * @return the conversation name
+     * @return the fsm name
      */
     public String getName () {
         return name;
     }
 
     /**
-     * Sets the initial conversation state.
+     * Returns the fsm class.
      *
-     * @param  initialState the initial conversation state
+     * @return the fsm class
+     */
+    public FsmClass getFsmClass () {
+        return fsmClass;
+    }
+
+    /**
+     * Sets the initial fsm state.
+     *
+     * @param  initialState the initial fsm state
      */
     public void setInitialState (State initialState) {
         this.initialState = initialState;
     }
 
     /**
-     * Returns the initial conversation state.
+     * Returns the initial fsm state.
      *
-     * @return the initial conversation state
+     * @return the initial fsm state
      */
     public State getInitialState() {
         return initialState;
@@ -111,20 +129,46 @@ public class Conversation {
     /**
      * Records the stateId and associated State
      *
-     * @param conversationFsmState the FSM node identified by its stateId
+     * @param fsmFsmState the FSM node identified by its stateId
      */
-    public void addState (State conversationFsmState) {
-        addState(conversationFsmState.getStateId(), conversationFsmState);
+    public void addState (State fsmState) {
+        addState(fsmState.getStateId(), fsmState);
     }
 
      /**
      * Records the stateId and associated State
      *
      * @param stateId the given stateId
-     * @param conversationFsmState the FSM node identified by the stateId
+     * @param fsmState the FSM node identified by the stateId
      */
     public void addState (String stateId,
-                                  State conversationFsmState) {
-        conversationFsmStates.put(stateId, conversationFsmState);
+                          State fsmState) {
+        fsmStates.put(stateId, fsmState);
     }
+
+    /**
+     * Returns the state having the given id.
+     *
+     * @param stateId the state id
+     * @return the state having the given id
+     */
+    public State getState (String stateId) {
+        return (State) fsmStates.get(stateId);
+    }
+
+    /**
+     * Returns a string representation of this object.
+     *
+     * @return a string representation of this object
+     */
+    public String toString () {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("[fsm ");
+        stringBuffer.append(name);
+        stringBuffer.append(", class ");
+        stringBuffer.append(fsmClass.getName());
+        stringBuffer.append("]");
+        return stringBuffer.toString();
+    }
+
 }

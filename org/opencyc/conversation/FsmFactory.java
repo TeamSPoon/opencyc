@@ -5,10 +5,7 @@ import org.opencyc.chat.*;
 import org.opencyc.templateparser.*;
 
 /**
- * Makes chat conversations which can be interpreted by the Interpreter.<p>
- *
- * The chat conversation is in the form of a text conversation using
- * asynchronous receiving and sending of messages.
+ * Makes finite state machines which can be interpreted by the Interpreter.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -31,40 +28,38 @@ import org.opencyc.templateparser.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConversationFactory {
+public class FsmFactory {
 
     /**
-     * Caches conversation objects to keep from making them twice.
-     * name --> Conversation
+     * Stores fsm class objects by name.
+     * name --> FsmClass
      */
-    protected static HashMap conversationCache = new HashMap();
+    protected static HashMap fsmClassStore = new HashMap();
 
     /**
-     * Arcs which apply to every state.
+     * Stores fsm objects by name.
+     * name --> Fsm
      */
-    protected static ArrayList globalArcs = new ArrayList();
+    protected static HashMap fsmStore = new HashMap();
 
     /**
      * Template object factory
      */
     protected TemplateFactory templateFactory;
 
-    protected static final State currentState =
-        new State("currentState");
-
     /**
-     * Constructs a new ConversationFactory object.
+     * Constructs a new FsmFactory object.
      */
-    public ConversationFactory() {
+    public FsmFactory() {
         templateFactory = new TemplateFactory();
     }
 
     /**
-     * Resets the conversation caches.
+     * Resets the fsm stores.
      */
     public static void reset() {
-        globalArcs = new ArrayList();
-        conversationCache = new HashMap();
+        fsmClassStore = new HashMap();
+        fsmStore = new HashMap();
     }
 
     /**
@@ -72,54 +67,60 @@ public class ConversationFactory {
      */
     public void initialize () {
         templateFactory.makeAllTemplates();
-        makeAllGlobalArcs();
-        makeAllConversations();
+        makeAllFsmClasses();
+        makeAllFsms();
     }
 
     /**
-     * Initializes the global arcs
+     * Make all the fsm classes.  Make superclass before
+     * making the subclasses.
      */
-    protected void makeAllGlobalArcs () {
-        makeQuitArc();
-        makeDoNotUnderstoodArc();
+    protected void makeAllFsmClasses () {
+        makeRootFsmClass();
+        makeStartEndFsmClass();
+        makeChatFsmClass();
+        makeDisambiguateTermQueryFsmClass();
+        makeDisambiguatePhraseFsmClass();
+        makeTermQueryFsmClass();
     }
 
     /**
-     * Initialize all the conversations.
+     * Make all the fsms.
      */
-    protected void makeAllConversations () {
+    protected void makeAllFsms () {
         makeChat();
         makeDisambiguateTermQuery();
         makeDisambiguatePhrase();
         makeTermQuery();
-        fixupSubConversationForwardReferences();
+        fixupSubFsmForwardReferences();
     }
 
     /**
-     * Returns the Conversation having the given name;
+     * Returns the FsmClass having the given name;
      *
-     * @param name the conversation name
+     * @param name the fsmClass name
      */
-    public Conversation getConversation (String name) {
-        return (Conversation) conversationCache.get(name);
+    public FsmClass getFsmClass (String name) {
+        return (FsmClass) fsmClassStore.get(name);
     }
 
     /**
-     * Returns the list of arcs which apply to every state.
+     * Returns the Fsm having the given name;
      *
-     * @return the list of arcs which apply to every state
+     * @param name the fsm name
      */
-    public ArrayList getGlobalArcs () {
-        return this.getGlobalArcs();
+    public Fsm getFsm (String name) {
+        return (Fsm) fsmStore.get(name);
     }
 
     /**
-      * Makes a "do-not-understand" arc for every conversation state.
-      * Initial state is current-state.
+      * Makes a "do-not-understand" arc given the current state.
       * 1. If we are in the current-state state and get a not-understand performative,
-      * transition to the current-state state, and perform the do-not-understand action. <br>
+      * transition to the current-state state, and perform the do-not-understand action.
+      *
+      * @param currentState the current state
       */
-    public void makeDoNotUnderstoodArc () {
+    public void makeDoNotUnderstoodArc (State currentState) {
         Performative notUnderstandPerformative =
             new Performative("not-understand");
         Action doNotUnderstandAction =
@@ -130,16 +131,16 @@ public class ConversationFactory {
                     currentState,
                     null,
                     doNotUnderstandAction);
-        globalArcs.add(notUnderstandArc);
     }
 
     /**
-      * Makes a "quit" arc for every conversation state.
-      * Initial state is current-state.
+      * Makes a "quit" arc given the current state.
       * 1. If we are in the current-state state and get a quit performative,
       * transition to the final state, and perform the do-finalization action. <br>
+      *
+      * @param currentState the current state
       */
-    public void makeQuitArc () {
+    public void makeQuitArc (State currentState) {
         Performative quitPerformative =
             new Performative("quit");
         State finalState = new State("final");
@@ -150,120 +151,141 @@ public class ConversationFactory {
                              finalState,
                              null,
                              doFinalizationAction);
-
-        globalArcs.add(quitArc);
     }
 
     /**
-      * Makes a "chat" Conversation.
-      * Initial state is ready.
-      * 1. If we are in the ready state and get a disambiguate-term-query performative,
-      * transition to the ready state and perform the do-disambiguate-term-query action. <br>
-      */
-    public Conversation makeChat () {
-        Conversation chat = (Conversation) conversationCache.get("chat");
-        if (chat != null)
-            return chat;
-        chat = new Conversation("chat");
-        State readyState = new State("ready");
-        chat.setInitialState(readyState);
-        chat.addState(readyState);
+     * Makes a root fsm class object.
+     * The root class has a start state and a quit arc.
+     */
+    public void makeRootFsmClass () {
+        FsmClass fsmClass = new FsmClass("root", (FsmClass) null);
+        State startState = new State("start", fsmClass);
+        makeQuitArc(startState);
+        fsmClass.setInitialState(startState);
+        fsmClassStore.put(fsmClass.name, fsmClass);
+    }
+
+    /**
+     * Makes a start-end fsm class object.
+     * The start-end class inherits from root and has an end state.
+     */
+    public void makeStartEndFsmClass () {
+        FsmClass fsmClass = new FsmClass("start-end", "root");
+        State endState = new State("end", fsmClass);
+        makeQuitArc(endState);
+        fsmClassStore.put(fsmClass.name, fsmClass);
+    }
+
+    /**
+     * Makes a chat fsm class object.
+     *
+     * 1. If we are in the start state and get a disambiguate-term-query performative,
+     * transition to the start state and perform the do-disambiguate-term-query action. <br>
+     */
+    public void makeChatFsmClass () {
+        FsmClass fsmClass = FsmClass.makeSubClass("chat", "root");
 
         Performative disambiguateTermQueryPerformative =
             new Performative("disambiguate-term-query");
-        Conversation disambiguateTermQuery = new Conversation ("disambiguate-term-query");
+        Fsm disambiguateTermQuery = new Fsm ("disambiguate-term-query");
 
         /**
-          * 1. If we are in the ready state and get a disambiguate-term-query performative,
-          * transition to the ready state and perform the do-disambiguate-term-query action. <br>
+          * 1. If we are in the start state and get a disambiguate-term-query performative,
+          * transition to the start state and perform the do-disambiguate-term-query action.
          */
-        Arc arc1 = new Arc(readyState,
-                           disambiguateTermQueryPerformative,
-                           readyState,
-                           disambiguateTermQuery,
-                           null);
-        conversationCache.put(chat.name, chat);
-        return chat;
+        new Arc(fsmClass.getState("start"),
+                disambiguateTermQueryPerformative,
+                fsmClass.getState("start"),
+                disambiguateTermQuery,
+                null);
+        fsmClassStore.put(fsmClass.name, fsmClass);
     }
 
     /**
-     * Makes a "disambiguate-term-query" Sub Conversation.  <br>
+      * Makes a "chat" Fsm.
+      */
+    public void makeChat () {
+        Fsm fsm = FsmClass.makeInstance("chat", "chat");
+        fsmStore.put(fsm.name, fsm);
+    }
+
+    /**
+     * Makes a "disambiguate-term-query" Fsm class object.  <br>
      * Input "disambiguation words" --> ArrayList disambiguationWords <br>
      *
-     * Initial state is start. <br>
-     * 1. If we are in the start state and get a start-new-conversation performative,
+     * 1. If we are in the start state and get a start-new-fsm performative,
      * transition to the disambiguate-phrase state and perform the
-     * disambiguate-phrase sub conversation. <br>
+     * disambiguate-phrase sub fsm. <br>
      *
-     * 2. If we are in the disambiguate-phrase state and get a resume-previous-conversation
+     * 2. If we are in the disambiguate-phrase state and get a resume-previous-fsm
      * performative, transition to the term-query state and perform the
-     * term-query sub conversation. <br>
+     * term-query sub fsm. <br>
      *
-     * 3. If we are in the term-query state and get a resume-previous-conversation performative,
+     * 3. If we are in the term-query state and get a resume-previous-fsm performative,
      * transition to the end state and perform the
-     * end-sub-conversation action. <br>
+     * end-sub-fsm action. <br>
      */
-    public Conversation makeDisambiguateTermQuery () {
-        Conversation disambiguateTermQuery =
-            (Conversation) conversationCache.get("disambiguate-term-query");
-        if (disambiguateTermQuery != null)
-            return disambiguateTermQuery;
-        disambiguateTermQuery = new Conversation("disambiguate-term-query");
+    public void makeDisambiguateTermQueryFsmClass () {
+        FsmClass fsmClass = FsmClass.makeSubClass("disambiguate-term-query", "start-end");
 
-        State startState = new State("start", disambiguateTermQuery, true);
-        State disambiguatePhraseState = new State("disambiguate-phrase", disambiguateTermQuery);
-        State termQueryState = new State("term-query-phrase", disambiguateTermQuery);
-        State endState = new State("end", disambiguateTermQuery);
+        State disambiguatePhraseState = new State("disambiguate-phrase", fsmClass);
+        State termQueryState = new State("term-query-phrase", fsmClass);
 
         /**
-         * 1. If we are in the start state and get a start-new-conversation performative,
+         * 1. If we are in the start state and get a start-new-fsm performative,
          * transition to the disambiguate-phrase state and perform the
-         * disambiguate-phrase sub conversation.
+         * disambiguate-phrase sub fsm.
          */
-        new Arc(startState,
+        new Arc(fsmClass.getState("start"),
                 new Performative("start"),
                 disambiguatePhraseState,
-                new Conversation("disambiguate-phrase"),
+                new Fsm("disambiguate-phrase"),
                 null);
 
         /**
-         * 2. If we are in the disambiguate-phrase state and get a resume-previous-conversation
+         * 2. If we are in the disambiguate-phrase state and get a resume-previous-fsm
          * performative, transition to the term-query state and perform the
-         * term-query sub conversation.
+         * term-query sub fsm.
          */
         new Arc(disambiguatePhraseState,
-                new Performative("resume-previous-conversation"),
+                new Performative("resume-previous-fsm"),
                 termQueryState,
-                new Conversation("term-query"),
+                new Fsm("term-query"),
                 null);
 
         /**
-         * 3. If we are in the term-query state and get a resume-previous-conversation performative,
+         * 3. If we are in the term-query state and get a resume-previous-fsm performative,
          * transition to the end state and perform the
-         * end-sub-conversation action.
+         * end-sub-fsm action.
          */
         new Arc(termQueryState,
-                new Performative("resume-previous-conversation"),
-                endState,
-                new Conversation("end-sub-conversation"),
+                new Performative("resume-previous-fsm"),
+                fsmClass.getState("end"),
+                new Fsm("end-sub-fsm"),
                 null);
 
-        conversationCache.put(disambiguateTermQuery.name, disambiguateTermQuery);
-        return disambiguateTermQuery;
+        fsmClassStore.put(fsmClass.name, fsmClass);
     }
 
     /**
-     * Makes a "disambiguate-phrase" Sub Conversation.  <br>
+      * Makes a "disambiguate-term-query" Fsm.
+      */
+    public void makeDisambiguateTermQuery () {
+        Fsm fsm = FsmClass.makeInstance("disambiguate-term-query", "disambiguate-term-query");
+        fsmStore.put(fsm.name, fsm);
+    }
+
+    /**
+     * Makes a "disambiguate-phrase" Fsm class.  <br>
      * Input "disambiguation words" --> ArrayList disambiguationWords <br>
      * Output "disambiguated term" --> CycFort disambiguatedTerm <br>
      *
-     * Initial state is start. <br>
      * 1. If we are in the start state and get a start performative,
      * transition to the disambiguate-phrase state and perform the
      * do-disambiguate-parse-phase action. <br>
      *
      * 2. If we are in the disambiguate-phrase state and get a term-match performative,
-     * transition to the end state and perform the do-end-sub-conversation action. <br>
+     * transition to the end state and perform the do-end-sub-fsm action. <br>
      *
      * 3. If we are in the disambiguate-phrase state and get a term-choice performative,
      * transition to the term-choice state and perform the do-disambiguate-term-choice action. <br>
@@ -277,26 +299,20 @@ public class ConversationFactory {
      * do-disambiguate-choice-is-term action. <br>
      *
      * 6. If we are in the term-choice state and get an end performative,
-     * transition to the end state and perform the do-end-sub-conversation action. <br>
+     * transition to the end state and perform the do-end-sub-fsm action. <br>
      */
-    public Conversation makeDisambiguatePhrase () {
-        Conversation disambiguatePhrase =
-            (Conversation) conversationCache.get("disambiguate-phrase");
-        if (disambiguatePhrase != null)
-            return disambiguatePhrase;
-        disambiguatePhrase = new Conversation("disambiguate-phrase");
+    public void makeDisambiguatePhraseFsmClass () {
+        FsmClass fsmClass = FsmClass.makeSubClass("disambiguate-phrase", "start-end");
 
-        State startState = new State("start", disambiguatePhrase, true);
-        State disambiguatePhraseState = new State("disambiguate-phrase", disambiguatePhrase);
-        State termChoiceState = new State("term-choice", disambiguatePhrase);
-        State endState = new State("end", disambiguatePhrase);
+        State disambiguatePhraseState = new State("disambiguate-phrase", fsmClass);
+        State termChoiceState = new State("term-choice", fsmClass);
 
         /**
          * 1. If we are in the start state and get a start performative,
          * transition to the disambiguate-phrase state and perform the
          * do-disambiguate-parse-phrase action.
          */
-        new Arc(startState,
+        new Arc(fsmClass.getState("start"),
                 new Performative("start"),
                 disambiguatePhraseState,
                 null,
@@ -304,13 +320,13 @@ public class ConversationFactory {
 
         /**
          * 2. If we are in the disambiguate-phrase state and get a term-match performative,
-         * transition to the end state and perform the do-end-sub-conversation action.
+         * transition to the end state and perform the do-end-sub-fsm action.
          */
         new Arc(disambiguatePhraseState,
                 new Performative("term-match"),
-                endState,
+                fsmClass.getState("end"),
                 null,
-                new Action("do-end-sub-conversation"));
+                new Action("do-end-sub-fsm"));
 
         /**
          * 3. If we are in the disambiguate-phrase state and get a term-choice performative,
@@ -343,24 +359,29 @@ public class ConversationFactory {
                 new Action("do-disambiguate-choice-is-term"));
         /**
          * 6. If we are in the term-choice state and get an end performative,
-         * transition to the end state and perform the do-end-sub-conversation action.
+         * transition to the end state and perform the do-end-sub-fsm action.
          */
         new Arc(termChoiceState,
                 new Performative("end"),
-                endState,
+                fsmClass.getState("end"),
                 null,
-                new Action("do-end-sub-conversation"));
+                new Action("do-end-sub-fsm"));
 
-        conversationCache.put(disambiguatePhrase.name, disambiguatePhrase);
-        return disambiguatePhrase;
+        fsmClassStore.put(fsmClass.name, fsmClass);
     }
 
     /**
-     * Makes a "term-query" Conversation. <br>
+      * Makes a "disambiguate-phrase" Fsm.
+      */
+    public void makeDisambiguatePhrase () {
+        Fsm fsm = FsmClass.makeInstance("disambiguate-phrase", "disambiguate-phrase");
+        fsmStore.put(fsm.name, fsm);
+    }
+
+    /**
+     * Makes a "term-query" Fsm class. <br>
      *
      * input "disambiguated term" --> CycFort disambiguatedTerm <br>
-     *
-     * Initial state is start. <br>
      *
      * 1. If we are in the start state and get a term-query performative, transition to the
      * retrieve-first-fact state and perform the do-reply-with-first-fact action. <br>
@@ -369,24 +390,19 @@ public class ConversationFactory {
      * prompt-for-more state and perform the do-reply-with-next-fact action. <br>
      *
      * 3. If we are in the prompt-for-more state and get a done performative, transition to the end
-     * state and perform the do-end-sub-conversation action.
+     * state and perform the do-end-sub-fsm action.
      */
-    public Conversation makeTermQuery () {
-        Conversation termQuery = (Conversation) conversationCache.get("term-query");
-        if (termQuery != null)
-            return termQuery;
-        termQuery = new Conversation("term-query");
+    public void makeTermQueryFsmClass () {
+        FsmClass fsmClass = FsmClass.makeSubClass("term-query", "start-end");
 
-        State startState = new State("start", termQuery, true);
-        State retrieveFactState = new State("retrieve-fact", termQuery);
-        State promptForMoreState = new State("prompt-for-more", termQuery);
-        State endState = new State("end", termQuery);
+        State retrieveFactState = new State("retrieve-fact", fsmClass);
+        State promptForMoreState = new State("prompt-for-more", fsmClass);
 
         /**
          * 1. If we are in the start state and get a term-query performative, transition to the
          * retrieve-first-fact state and perform the do-reply-with-first-fact action.
          */
-        new Arc(startState,
+        new Arc(fsmClass.getState("start"),
                 new Performative("term-query"),
                 retrieveFactState,
                 null,
@@ -404,30 +420,37 @@ public class ConversationFactory {
                 new Action("do-reply-with-next-fact"));
         /**
          * 3. If we are in the prompt-for-more state and get a done performative, transition to the end
-         * state and perform the do-end-sub-conversation action.
+         * state and perform the do-end-sub-fsm action.
          */
         new Arc(promptForMoreState,
                 new Performative("done"),
-                endState,
+                fsmClass.getState("end"),
                 null,
-                new Action("do-end-sub-conversation"));
+                new Action("do-end-sub-fsm"));
 
-        conversationCache.put(termQuery.name, termQuery);
-        return termQuery;
+        fsmClassStore.put(fsmClass.name, fsmClass);
     }
 
     /**
-     * Fixes up the sub conversation forward references.
+      * Makes a "term-query" Fsm.
+      */
+    public void makeTermQuery () {
+        Fsm fsm = FsmClass.makeInstance("term-query", "term-query");
+        fsmStore.put(fsm.name, fsm);
+    }
+
+    /**
+     * Fixes up the sub fsm forward references.
      */
-    protected void fixupSubConversationForwardReferences () {
-        Iterator conversations = conversationCache.values().iterator();
-        ArrayList conversationsList = new ArrayList();
-        while (conversations.hasNext())
-            conversationsList.add(conversations.next());
-        for (int j = 0; j < conversationsList.size(); j++) {
+    protected void fixupSubFsmForwardReferences () {
+        Iterator fsms = fsmStore.values().iterator();
+        ArrayList fsmsList = new ArrayList();
+        while (fsms.hasNext())
+            fsmsList.add(fsms.next());
+        for (int j = 0; j < fsmsList.size(); j++) {
             ArrayList statesList = new ArrayList();
-            Conversation conversation = (Conversation) conversationsList.get(j);
-            Iterator states = conversation.conversationFsmStates.values().iterator();
+            Fsm fsm = (Fsm) fsmsList.get(j);
+            Iterator states = fsm.fsmStates.values().iterator();
             while (states.hasNext())
                 statesList.add(states.next());
             for (int i = 0; i < statesList.size(); i++) {
@@ -435,10 +458,10 @@ public class ConversationFactory {
                 Iterator arcs = state.getArcs().iterator();
                 while (arcs.hasNext()) {
                     Arc arc = (Arc) arcs.next();
-                    Conversation subConversation = arc.getSubConversation();
-                    if ((arc.getSubConversation() != null) &&
-                        (! conversationsList.contains(subConversation))) {
-                        arc.setSubConversation(this.getConversation(subConversation.getName()));
+                    Fsm subFsm = arc.getSubFsm();
+                    if ((arc.getSubFsm() != null) &&
+                        (! fsmsList.contains(subFsm))) {
+                        arc.setSubFsm(this.getFsm(subFsm.getName()));
                     }
                 }
             }

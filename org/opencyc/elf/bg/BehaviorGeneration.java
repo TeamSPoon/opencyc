@@ -2,6 +2,7 @@ package org.opencyc.elf.bg;
 
 import java.util.*;
 import org.opencyc.elf.*;
+import org.opencyc.elf.goal.*;
 
 
 /**
@@ -30,7 +31,12 @@ import org.opencyc.elf.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public abstract class BehaviorGeneration extends NodeComponent {
+public class BehaviorGeneration extends NodeComponent {
+
+    /**
+     * the commanded goal for generated behavior to achieve
+     */
+    protected Goal commandedGoal;
 
     /**
      * the parent node's BehaviorGeneration object.  The
@@ -59,6 +65,23 @@ public abstract class BehaviorGeneration extends NodeComponent {
         return "BehaviorGeneration for " + node.getName();
     }
 
+    /**
+     * Gets the goal for generated behavior to achieve
+     *
+     * @return the goal for generated behavior to achieve
+     */
+    public Goal getCommandedGoal () {
+        return commandedGoal;
+    }
+
+    /**
+     * Sets the goal for generated behavior to achieve
+     *
+     * @param commandedGoal the goal for generated behavior to achieve
+     */
+    public void setCommandedGoal (Goal commandedGoal) {
+        this.commandedGoal = commandedGoal;
+    }
     /**
      * Gets the parent node's BehaviorGeneration object
      *

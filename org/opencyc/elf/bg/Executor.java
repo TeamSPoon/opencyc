@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg;
 
 import org.opencyc.elf.*;
+import org.opencyc.uml.core.*;
 
 /**
  * Provides the Executor for ELF BehaviorGeneration.<br>
@@ -30,6 +31,11 @@ import org.opencyc.elf.*;
 public class Executor extends NodeComponent {
 
     /**
+     * the procedure to execute
+     */
+    protected Procedure procedure;
+
+    /**
      * the behavior generation instance which owns this executor
      */
     protected BehaviorGeneration behaviorGeneration;
@@ -43,6 +49,24 @@ public class Executor extends NodeComponent {
      * Constructs a new Executor object.
      */
     public Executor() {
+    }
+
+    /**
+     * Gets the procedure to execute
+     *
+     * @return the procedure to execute
+     */
+    public Procedure getProcedure () {
+        return procedure;
+    }
+
+    /**
+     * Sets the procedure to execute
+     *
+     * @param procedure the procedure to execute
+     */
+    public void setProcedure (Procedure procedure) {
+        this.procedure = procedure;
     }
 
     /**

@@ -9,8 +9,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 import java.util.ArrayList;
 
 /**
- * ActionFactory creates named instances of Action for subsequent elaboration
- * by behavior generation sub components.  There is a singleton instance.
+ * ActionFactory populates the action libary.  There is a singleton instance.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -58,48 +57,51 @@ public class ActionFactory {
   }
   
   /**
-   * Makes a new abort action having no arguments and having no return value.
+   * Populates the action library.
    */
-  public Action makeAbort () {
-    Action abortAction = new Action();
-    abortAction.setName(Action.ABORT);
-    abortAction.setParameterNames(new ArrayList());
-    abortAction.setParameterTypes(new ArrayList());
-    return abortAction;
-  }
-  
-  /**
-   * Makes a new console prompted input action having a prompt and having a string
-   * return value.
-   */
-  public Action makeConsolePromptedInput () {
-    Action consolePromptedInputAction = new Action();
-    consolePromptedInputAction.setName(Action.CONSOLE_PROMPTED_INPUT);
+  public void populateActionLibrary () {
+    // abort
+    Action action = new Action();
+    action.setName(Action.ABORT);
+    action.setParameterNames(new ArrayList());
+    action.setParameterTypes(new ArrayList());
+    ActionLibrary.getInstance().setAction(action.getName(), action);
+    
+    // console prompted input
+    action = new Action();
+    action.setName(Action.CONSOLE_PROMPTED_INPUT);
     ArrayList parameterNames = new ArrayList();
     parameterNames.add("prompt");
-    consolePromptedInputAction.setParameterNames(parameterNames);
+    action.setParameterNames(parameterNames);
     ArrayList parameterTypes = new ArrayList();
     parameterTypes.add(String.class);
-    consolePromptedInputAction.setParameterTypes(parameterTypes);
-    return consolePromptedInputAction;
-  }
-  
-  /**
-   * Makes a new converse with user action having a prompt and having a string
-   * return value.
-   */
-  public Action makeConverseWithUser () {
-    Action converseWithUserAction = new Action();
-    converseWithUserAction.setName(Action.CONVERSE_WITH_USER);
-    ArrayList parameterNames = new ArrayList();
+    action.setParameterTypes(parameterTypes);
+    
+    // converse with user
+    action = new Action();
+    action.setName(Action.CONVERSE_WITH_USER);
+    parameterNames = new ArrayList();
     parameterNames.add("prompt");
-    converseWithUserAction.setParameterNames(parameterNames);
-    ArrayList parameterTypes = new ArrayList();
+    action.setParameterNames(parameterNames);
+    parameterTypes = new ArrayList();
     parameterTypes.add(String.class);
-    converseWithUserAction.setParameterTypes(parameterTypes);
-    return converseWithUserAction;
+    action.setParameterTypes(parameterTypes);
+    
+    // emergency stop
+    action = new Action();
+    action.setName(Action.EMERGENCY_STOP);
+    action.setParameterNames(new ArrayList());
+    action.setParameterTypes(new ArrayList());
+    ActionLibrary.getInstance().setAction(action.getName(), action);
+    
+    // init
+    action = new Action();
+    action.setName(Action.INIT);
+    action.setParameterNames(new ArrayList());
+    action.setParameterTypes(new ArrayList());
+    ActionLibrary.getInstance().setAction(action.getName(), action);
   }
-  
+    
   /**
    * Makes a new emergency stop action having no arguments and having no return value.
    */

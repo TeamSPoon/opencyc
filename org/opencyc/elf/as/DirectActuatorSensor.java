@@ -76,6 +76,9 @@ public abstract class DirectActuatorSensor extends NodeComponent implements Actu
     return sensationCapabilities;
   }
   
+  /** the Cyc API actuator-sensor name */
+  public static final String CYC_API = "cyc api";
+  
   //// Protected Area
   
   //// Private Area

@@ -71,13 +71,16 @@ public abstract class Procedure {
   protected static HashMap executeMethodDictionary;
 
   /** the procedure name */
-  protected String name;
+  protected static String name;
 
   /** the procedure namespace */
   protected String namespace;
 
+  /** the parameter names each of which is a String */
+  protected static ArrayList parameterNames;
+
   /** the parameter types each of which is a Class */
-  protected ArrayList parameterTypes;
+  protected static ArrayList parameterTypes;
 
   /** the output type */
   protected Class outputType;

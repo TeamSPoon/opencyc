@@ -161,6 +161,7 @@ public class ConstraintProblem {
             System.out.println("Cannot access OpenCyc server " + e.getMessage());
             System.exit(1);
         }
+        ruleEvaluator.initialize();
     }
 
     /**

@@ -84,6 +84,13 @@ public class RuleEvaluator {
      */
     public RuleEvaluator(ConstraintProblem constraintProblem) {
         this.constraintProblem = constraintProblem;
+    }
+
+    /**
+     * Initializes this instance once the parent <tt>ConstraintProblem</tt> object creates a
+     * <tt>CycAccess</tt> object.
+     */
+    public void initialize() {
         try {
             numericallyEqual = constraintProblem.cycAccess.makeCycConstant("numericallyEqual");
             and = constraintProblem.cycAccess.makeCycConstant("and");
@@ -97,6 +104,7 @@ public class RuleEvaluator {
             System.out.println("Cannot access OpenCyc server " + e.getMessage());
         }
     }
+
 
     /**
      * Return <tt>true</tt> iff the instantiated constraint rule is proven true,
@@ -174,7 +182,7 @@ public class RuleEvaluator {
         }
         else
             //TODO ask OpenCyc
-            throw new RuntimeException("Cannot locally evaluate " + rule);
+            throw new RuntimeException("Cannot locally evaluate " + rule.cyclify());
 
     }
 

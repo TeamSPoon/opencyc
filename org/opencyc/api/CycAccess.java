@@ -53,7 +53,6 @@ public class CycAccess {
     private CycConstant cyclist = null;
     private CycConstant project = null;
 
-
     /**
      * Constructs a new CycAccess object.
      */

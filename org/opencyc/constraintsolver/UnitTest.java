@@ -41,6 +41,13 @@ public class UnitTest extends TestCase {
     }
 
     /**
+     * Main method in case tracing is prefered over running JUnit.
+     */
+    public static void main(String[] args) {
+        runTests();
+    }
+
+    /**
      * Runs the unit tests
      */
     public static void runTests() {
@@ -73,7 +80,7 @@ public class UnitTest extends TestCase {
 
         ConstraintProblem constraintProblem = new ConstraintProblem();
         CycAccess cycAccess = constraintProblem.cycAccess;
-        RuleEvaluator ruleEvaluator = new RuleEvaluator(constraintProblem);
+        RuleEvaluator ruleEvaluator = constraintProblem.ruleEvaluator;
         try {
             Assert.assertTrue(ruleEvaluator.ask(new Rule("(#$numericallyEqual 1 1)", cycAccess)));
             Assert.assertTrue(! ruleEvaluator.ask(new Rule("(#$numericallyEqual 2 1)", cycAccess)));
@@ -184,9 +191,10 @@ public class UnitTest extends TestCase {
         // instantiate
         Rule rule5 = null;
         try {
+            //cycAccess.traceOn();
             Rule rule4 = new Rule("(#$isa ?x #$Cathedral)", cycAccess);
             rule5 = rule4.instantiate(CycVariable.makeCycVariable("?x"),
-                                      cycAccess.makeCycConstant("#$NotreDame"));
+                                      cycAccess.makeCycConstant("NotreDame"));
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -359,31 +367,32 @@ public class UnitTest extends TestCase {
         // constructor
         HornClause hornClause1 = null;
         try {
+            //cycAccess.traceOn();
             String hornClauseString =
                 "(#$implies " +
-                "  (#$and " +
-                "    (#$isa ?boat #$Boat) " +
-                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-                "    (#$floatingOn ?boat ?bodyOfWater)) " +
-                "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+                " (#$and " +
+                "  (#$isa ?BOAT #$Watercraft-Surface) " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$objectFoundInLocation ?BOAT ?WATER)) " +
+                " (#$in-Floating ?BOAT ?WATER))";
             hornClause1 = new HornClause(hornClauseString, cycAccess);
-            Assert.assertEquals("(#$objectFoundInLocation ?boat ?bodyOfWater)",
+            Assert.assertEquals("(#$in-Floating ?BOAT ?WATER)",
                                 hornClause1.consequent.cyclify());
             Assert.assertEquals(3, hornClause1.getAntecedantConjuncts().size());
             Assert.assertEquals(2, hornClause1.getVariables().size());
             Assert.assertTrue(
-                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?boat")));
+                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?BOAT")));
             Assert.assertTrue(
-                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
-            Assert.assertTrue(
-                hornClause1.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa ?boat #$Boat)", cycAccess)));
+                hornClause1.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 hornClause1.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+                    new Rule("(#$isa ?BOAT #$Watercraft-Surface)", cycAccess)));
             Assert.assertTrue(
                 hornClause1.getAntecedantConjuncts().contains(
-                    new Rule("(#$floatingOn ?boat ?bodyOfWater)", cycAccess)));
+                    new Rule("(#$isa ?WATER #$BodyOfWater)", cycAccess)));
+            Assert.assertTrue(
+                hornClause1.getAntecedantConjuncts().contains(
+                    new Rule("(#$objectFoundInLocation ?BOAT ?WATER)", cycAccess)));
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -399,46 +408,46 @@ public class UnitTest extends TestCase {
         // substituteVariable
         HornClause hornClause3 = (HornClause) hornClause1.clone();
         hornClause3.substituteVariable(
-            CycVariable.makeCycVariable("?boat"),
+            CycVariable.makeCycVariable("?BOAT"),
             CycVariable.makeCycVariable("?waterCraft"));
         Assert.assertTrue(
-            ! (hornClause3.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
+            ! (hornClause3.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
         Assert.assertTrue(
             hornClause3.getVariables().contains(CycVariable.makeCycVariable("?waterCraft")));
         Assert.assertEquals(3, hornClause3.getAntecedantConjuncts().size());
         Assert.assertEquals(2, hornClause3.getVariables().size());
         Assert.assertTrue(
-            hornClause3.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+            hornClause3.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
         try {
             Assert.assertTrue(
                 hornClause3.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa ?waterCraft #$Boat)", cycAccess)));
+                    new Rule("(#$isa ?waterCraft #$Watercraft-Surface)", cycAccess)));
             Assert.assertTrue(
                 hornClause3.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+                    new Rule("(#$isa ?WATER #$BodyOfWater)", cycAccess)));
             Assert.assertTrue(
                 hornClause3.getAntecedantConjuncts().contains(
-                    new Rule("(#$floatingOn ?waterCraft ?bodyOfWater)", cycAccess)));
+                    new Rule("(#$objectFoundInLocation ?waterCraft ?WATER)", cycAccess)));
 
             HornClause hornClause4 = (HornClause) hornClause1.clone();
             hornClause4.substituteVariable(
-                CycVariable.makeCycVariable("?boat"),
-                cycAccess.makeCycConstant("#$MyWaterCraft"));
+                CycVariable.makeCycVariable("?BOAT"),
+                cycAccess.makeCycConstant("#$Motorboat"));
             Assert.assertTrue(
-                ! (hornClause4.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
+                ! (hornClause4.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
             Assert.assertEquals(3, hornClause4.getAntecedantConjuncts().size());
             Assert.assertEquals(1, hornClause4.getVariables().size());
             Assert.assertTrue(
-                hornClause4.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+                hornClause4.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
             Assert.assertTrue(
                 hornClause4.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa #$MyWaterCraft #$Boat)", cycAccess)));
+                    new Rule("(#$isa #$Motorboat #$Watercraft-Surface)", cycAccess)));
             Assert.assertTrue(
                 hornClause4.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+                    new Rule("(#$isa ?WATER #$BodyOfWater)", cycAccess)));
             Assert.assertTrue(
                 hornClause4.getAntecedantConjuncts().contains(
-                    new Rule("(#$floatingOn #$MyWaterCraft ?bodyOfWater)", cycAccess)));
+                    new Rule("(#$objectFoundInLocation #$Motorboat ?WATER)", cycAccess)));
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -455,26 +464,26 @@ public class UnitTest extends TestCase {
         hornClause5.renameVariables(otherVariables, 9);
         Assert.assertTrue(hornClause5.equals(hornClause1));
 
-        otherVariables.add(CycVariable.makeCycVariable("?boat"));
+        otherVariables.add(CycVariable.makeCycVariable("?BOAT"));
         hornClause5.renameVariables(otherVariables, 9);
-        Assert.assertEquals("(#$objectFoundInLocation ?boat_1 ?bodyOfWater)",
+        Assert.assertEquals("(#$in-Floating ?BOAT_1 ?WATER)",
                             hornClause5.consequent.cyclify());
         Assert.assertEquals(3, hornClause5.getAntecedantConjuncts().size());
         Assert.assertEquals(2, hornClause5.getVariables().size());
         Assert.assertTrue(
-            ! (hornClause5.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
+            ! (hornClause5.getVariables().contains(CycVariable.makeCycVariable("?BOAT"))));
         Assert.assertTrue(
-            hornClause5.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+            hornClause5.getVariables().contains(CycVariable.makeCycVariable("?WATER")));
         try {
             Assert.assertTrue(
                 ! (hornClause5.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa ?boat #$Boat)", cycAccess))));
+                    new Rule("(#$isa ?BOAT #$Watercraft-Surface)", cycAccess))));
             Assert.assertTrue(
                 hornClause5.getAntecedantConjuncts().contains(
-                    new Rule("(#$isa ?bodyOfWater #$BodyOfWater)", cycAccess)));
+                    new Rule("(#$isa ?WATER #$BodyOfWater)", cycAccess)));
             Assert.assertTrue(
                 ! (hornClause5.getAntecedantConjuncts().contains(
-                    new Rule("(#$floatingOn ?boat ?bodyOfWater)", cycAccess))));
+                    new Rule("(#$objectFoundInLocation ?BOAT ?WATER)", cycAccess))));
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -496,7 +505,14 @@ public class UnitTest extends TestCase {
     public void testUnifier() {
         System.out.println("** testUnifier **");
 
-        ConstraintProblem constraintProblem = new ConstraintProblem();
+        ConstraintProblem constraintProblem = null;
+        try {
+            constraintProblem = new ConstraintProblem();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
         CycAccess cycAccess = constraintProblem.cycAccess;
         Unifier unifier = constraintProblem.backchainer.unifier;
 
@@ -505,27 +521,25 @@ public class UnitTest extends TestCase {
             Rule rule1 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)", cycAccess);
             String hornClauseString =
                 "(#$implies " +
-                "  (#$and " +
-                "    (#$isa ?boat #$Boat) " +
-                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-                "    (#$floatingOn ?boat ?bodyOfWater)) " +
-                "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+                " (#$and " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$in-Floating ?OBJ ?WATER)) " +
+                " (#$objectFoundInLocation ?OBJ ?WATER))";
             HornClause hornClause1 = new HornClause(hornClauseString, cycAccess);
             ArrayList unifiedConjuncts = unifier.unify(rule1, hornClause1);
-            Assert.assertEquals(3, unifiedConjuncts.size());
-            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa #$CityOfAustinTX #$Boat)", cycAccess)));
+            Assert.assertEquals(2, unifiedConjuncts.size());
+            System.out.println("unified conjuncts: " + unifiedConjuncts);
+            Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$in-Floating #$CityOfAustinTX ?where)",
+                                                                 cycAccess)));
             Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa ?where #$BodyOfWater)", cycAccess)));
-            Assert.assertTrue(unifiedConjuncts.contains(
-                new Rule("(#$floatingOn #$CityOfAustinTX ?where)", cycAccess)));
 
             Rule rule2 = new Rule("(#$doneBy #$CityOfAustinTX ?what)", cycAccess);
             String hornClauseString2 =
                 "(#$implies " +
-                "  (#$and " +
-                "    (#$isa ?boat #$Boat) " +
-                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-                "    (#$floatingOn ?boat ?bodyOfWater)) " +
-                "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+                " (#$and " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$in-Floating ?OBJ ?WATER)) " +
+                " (#$objectFoundInLocation ?OBJ ?WATER))";
             HornClause hornClause2 = new HornClause(hornClauseString2, cycAccess);
             ArrayList unifiedConjuncts2 = unifier.unify(rule2, hornClause2);
             Assert.assertNull(unifiedConjuncts2);
@@ -533,11 +547,10 @@ public class UnitTest extends TestCase {
             Rule rule3 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)", cycAccess);
             String hornClauseString3 =
                 "(#$implies " +
-                "  (#$and " +
-                "    (#$isa ?boat #$Boat) " +
-                "    (#$isa ?bodyOfWater #$BodyOfWater) " +
-                "    (#$floatingOn ?boat ?bodyOfWater)) " +
-                "  (#$objectFoundInLocation #$CityOfHoustonTX ?bodyOfWater))";
+                " (#$and " +
+                "  (#$isa ?WATER #$BodyOfWater) " +
+                "  (#$in-Floating ?OBJ ?WATER)) " +
+                " (#$objectFoundInLocation #$CityOfHoustonTX ?WATER))";
             HornClause hornClause3 = new HornClause(hornClauseString3, cycAccess);
             ArrayList unifiedConjuncts3 = unifier.unify(rule3, hornClause3);
             Assert.assertNull(unifiedConjuncts2);
@@ -556,7 +569,14 @@ public class UnitTest extends TestCase {
         System.out.println("** testSolution **");
 
         // constructor
-        ConstraintProblem constraintProblem = new ConstraintProblem();
+        ConstraintProblem constraintProblem = null;
+        try {
+            constraintProblem = new ConstraintProblem();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
         Solution solution = new Solution(constraintProblem);
 
         // getCurrentSolution
@@ -672,10 +692,11 @@ public class UnitTest extends TestCase {
             "  (#$elementOf ?water (#$TheSet 1 2 3 4 5)) " +
             "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
             "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
-        CycList zebraPuzzleCycList = new CycList(zebraPuzzleString);
+        ConstraintProblem zebraProblem = new ConstraintProblem();
+        CycAccess cycAccess = zebraProblem.cycAccess;
+        CycList zebraPuzzleCycList = cycAccess.makeCycList(zebraPuzzleString);
         ArrayList zebraPuzzleRules = Rule.simplifyRuleExpression(zebraPuzzleCycList);
 
-        ConstraintProblem zebraProblem = new ConstraintProblem();
         zebraProblem.setVerbosity(1);
         ArrayList solutions = zebraProblem.solve(zebraPuzzleCycList);
         Assert.assertNotNull(solutions);

@@ -105,8 +105,7 @@ public class WebServer extends Thread {
     /**
      * Cyc HTML host.
      */
-    //protected String cycHost = "locahost";
-    protected String cycHost = "mccarthy";
+    protected String cycHost = "localhost";
 
     /**
      * Cyc HTML port.
@@ -400,9 +399,11 @@ public class WebServer extends Thread {
          */
         private void cycHtmlRequest(String cycPath) {
             String request = sock.getInetAddress().getHostName() + "&" + cycPath + "#";
+            System.out.println("request=" + request);
             ArrayList bytes = new ArrayList(10000);
             try {
                 cycHtmlSocket = new Socket(cycHost, cycPort);
+                System.out.println("cycHost=" + cycHost + " cycPort=" + cycPort);
                 BufferedReader cycIn = new BufferedReader(new InputStreamReader(cycHtmlSocket.getInputStream()));
                 PrintWriter cycOut = new PrintWriter(cycHtmlSocket.getOutputStream(), true);
                 cycOut.println(request);
@@ -425,7 +426,7 @@ public class WebServer extends Thread {
                 writeTextBytes(byteArray);
             }
             catch (Exception e) {
-                Log.current.printStackTrace(e);
+                Log.current.println(e.getMessage());
             }
         }
 

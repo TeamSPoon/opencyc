@@ -151,6 +151,7 @@ public class QueryProcessor {
         }
         literalAsker = new LiteralAsker();
         hashJoiner = new HashJoiner();
+        hashJoiner.literalAsker = literalAsker;
     }
 
     /**

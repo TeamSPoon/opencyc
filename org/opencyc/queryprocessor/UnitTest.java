@@ -255,19 +255,21 @@ public class UnitTest extends TestCase {
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         System.out.println(europeanCathedralsString);
         QueryProcessor europeanCathedralsQuery = new QueryProcessor();
-        europeanCathedralsQuery.setVerbosity(1);
+        europeanCathedralsQuery.setVerbosity(9);
         // Request two solutions.
         // europeanCathedralsQuery.nbrSolutionsRequested = new Integer(2);
         // Request all solutions.
         europeanCathedralsQuery.nbrSolutionsRequested = null;
+        ArrayList solutions = null;
         try {
             europeanCathedralsQuery.mt =
                 CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+            solutions = europeanCathedralsQuery.ask(CycAccess.current().makeCycList(europeanCathedralsString));
         }
-        catch (IOException e) {
+        catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
-        ArrayList solutions = europeanCathedralsQuery.ask(CycAccess.current().makeCycList(europeanCathedralsString));
         Assert.assertNotNull(solutions);
 
         System.out.println("** testQueryProcessor1 OK **");

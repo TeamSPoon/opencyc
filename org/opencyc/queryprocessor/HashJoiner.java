@@ -38,19 +38,14 @@ import org.opencyc.inferencesupport.*;
 public class HashJoiner {
 
     /**
+     * A reference to the parent's <tt>LiteralAsker</tt> object.
+     */
+    protected LiteralAsker literalAsker;
+
+    /**
      * The binding sets remaining to be joined.
      */
     ArrayList remainingBindingSets;
-
-    /**
-     * The build binding set from which a hash map is built.
-     */
-    BindingSet buildBindingSet;
-
-    /**
-     * The probe binding set which is iterated over against the hash map created from the build binding set.
-     */
-    BindingSet probeBindingSet;
 
     /**
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
@@ -121,11 +116,66 @@ public class HashJoiner {
         throws IOException {
         if (verbosity > 4)
             System.out.println("Joining (unordered)\n  " + bindingSet1 + "\n  " + bindingSet2);
-        if (bindingSet1.size() < bindingSet2.size())
-            return joinBuildProbe(bindingSet1, bindingSet2);
+        BindingSet smallerBindingSet;
+        BindingSet largerBindingSet;
+        if (bindingSet1.size() < bindingSet2.size()) {
+            smallerBindingSet = bindingSet1;
+            largerBindingSet = bindingSet2;
+        }
+        else {
+            smallerBindingSet = bindingSet2;
+            largerBindingSet = bindingSet1;
+        }
+        if (smallerBindingSet.isBindingPostponed())
+            literalAsker.ask(smallerBindingSet);
+        if (largerBindingSet.isBindingPostponed())
+            return joinSelection(smallerBindingSet, largerBindingSet);
         else
-            return joinBuildProbe(bindingSet2, bindingSet1);
+            return joinBuildProbe(smallerBindingSet, largerBindingSet);
     }
+
+    /**
+     * Joins a smaller instantiated binding set with a larger uninstantiated binding set, by
+     * asking individual partial instantiations of the joined literal.
+     *
+     * @param smallerBindingSet the smaller fully instantiated binding
+     * @param uninstantiatedBindingSet the uninstantiated binding set with larger estimated size
+     * @return the binding set which is the result of the join operation
+     */
+    public BindingSet joinSelection(BindingSet smallerBindingSet,
+                                    BindingSet uninstantiatedBindingSet) throws IOException {
+        if (verbosity > 4)
+            System.out.println("Joining (with smaller and uninstantiated identified)\n  smaller " +
+                               smallerBindingSet +
+                               "\n    with variables " + smallerBindingSet.getVariables() +
+                               "\n  uninstantiated " + uninstantiatedBindingSet +
+                               "\n    with variables " + uninstantiatedBindingSet.getVariables());
+
+        QueryLiteral joinedQueryLiteral = QueryLiteral.conjoin(smallerBindingSet.getQueryLiteral(),
+                                                               uninstantiatedBindingSet.getQueryLiteral());
+        if (verbosity > 4)
+            System.out.println("  joined query \n  " + joinedQueryLiteral.cyclify() +
+                               "\n    with variables " + joinedQueryLiteral.getVariables());
+        BindingSet joinedBindingSet = new BindingSet(joinedQueryLiteral, smallerBindingSet.getMt());
+        ArrayList bindingLists = null;
+        for (int i = 0; i < smallerBindingSet.size(); i++)
+            joinedBindingSet.addAll(literalAsker.ask(joinedQueryLiteral,
+                                            smallerBindingSet.getVariables(),
+                                            (ArrayList) smallerBindingSet.getBindingValues().get(i),
+                                            smallerBindingSet.getMt());
+        if (verbosity > 3) {
+            System.out.println();
+            joinedBindingSet.displayBindingSet();
+            System.out.println();
+        }
+        return joinedBindingSet;
+    }
+
+    protected ArrayList assembleBindingValueLists(ArrayList bindingLists,
+                                                  QueryLiteral entireQueryLiteral,
+                                                  QueryLiteral partiallyInstantiatedQueryLiteral) {
+   }
+
 
     /**
      * Joins a probe binding set with a build binding set.
@@ -136,8 +186,6 @@ public class HashJoiner {
      */
     public BindingSet joinBuildProbe(BindingSet buildBindingSet, BindingSet probeBindingSet)
         throws IOException {
-        this.buildBindingSet = buildBindingSet;
-        this.probeBindingSet = probeBindingSet;
         if (verbosity > 4)
             System.out.println("Joining (with build and probe identified)\n  build " + buildBindingSet +
                                 "\n    with variables " + buildBindingSet.getVariables() +

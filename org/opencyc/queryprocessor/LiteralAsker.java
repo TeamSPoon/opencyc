@@ -8,7 +8,8 @@ import org.opencyc.api.*;
 
 /**
  * <tt>LiteralAsker</tt> object to obtain bindings for query literals by asking the
- * KB.<p>
+ * KB.  Literals whose number of estimated instances exceed a user-controlled threshold,
+ * have a postponed query binding set.<p>
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -38,13 +39,25 @@ public class LiteralAsker {
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-
     public static final int DEFAULT_VERBOSITY = 3;
+
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
     protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
+     * The default value of the estimated number of instances beyond which the binding values are not
+     * all fetched from the KB.
+     */
+    public static final int DEFAULT_FORMULA_INSTANCES_THRESHOLD = 50;
+
+    /**
+     * The default value of the estimated number of instances beyond which the binding values are not
+     * all fetched from the KB.
+     */
+    public int formulaInstancesThreshold = DEFAULT_FORMULA_INSTANCES_THRESHOLD;
 
     /**
      * Constructs a new <tt>LiteralAsker</tt> object.
@@ -53,7 +66,8 @@ public class LiteralAsker {
     }
 
     /**
-     * Asks the KB about each of the given query literals.
+     * Asks the KB about each of the given query literals on the condition that their estimated
+     * number of instances do not exceed the user-controlled threshold.
      *
      * @param queryLiterals the query literals which are asked in the KB
      * @param mt the KB microtheory in which the query literals are asked
@@ -63,19 +77,111 @@ public class LiteralAsker {
         ArrayList result = new ArrayList();
         for (int i = 0; i < queryLiterals.size(); i++) {
             QueryLiteral queryLiteral = (QueryLiteral) queryLiterals.get(i);
-            if (verbosity > 3)
-                System.out.println("Asking " + queryLiteral.cyclify());
             BindingSet bindingSet = new BindingSet(queryLiteral, mt);
-            bindingSet.setBindingValues(CycAccess.current().askWithVariables(bindingSet.getQueryLiteral().getFormula(),
-                                                                             bindingSet.getVariables(),
-                                                                             bindingSet.getMt()));
+            if (bindingSet.getNbrInstances() < formulaInstancesThreshold) {
+                if (verbosity > 3)
+                    System.out.println("Asking " + queryLiteral.cyclify());
+                bindingSet.setBindingValues(CycAccess.current().askWithVariables(bindingSet.getQueryLiteral().getFormula(),
+                                                                                 bindingSet.getVariables(),
+                                                                                 bindingSet.getMt()));
+            }
+            else {
+                if (verbosity > 3)
+                    System.out.println("Postponed asking " + queryLiteral.cyclify());
+            }
             if (verbosity > 8)
                 bindingSet.displayBindingSet();
             result.add(bindingSet);
         }
-
-
         return result;
+    }
+
+    /**
+     * Asks the KB about the query literal contained in the given binding set.
+     *
+     * @param bindingSet the query literals which are asked in the KB
+     * @param mt the KB microtheory in which the query literals are asked
+     */
+    public void ask(BindingSet bindingSet) throws IOException {
+        QueryLiteral queryLiteral = bindingSet.getQueryLiteral();
+        CycFort mt = bindingSet.getMt();
+        if (verbosity > 3)
+            System.out.println("Asking " + queryLiteral.cyclify());
+        bindingSet.setBindingValues(CycAccess.current().askWithVariables(bindingSet.getQueryLiteral().getFormula(),
+                                                                         bindingSet.getVariables(),
+                                                                         bindingSet.getMt()));
+        if (verbosity > 8)
+            bindingSet.displayBindingSet();
+    }
+
+    /**
+     * Asks the KB about a partially instantiated query literal and if bindings are found, returns
+     * a list of value binding lists for all the variables in the given query literal, otherwise if
+     * no bindings are found, returns an empty list.
+     *
+     * @param queryLiteral the query literal to be asked
+     * @param variables the list of instaniated variables
+     * @param valueBindingList the list of values corresponding in position to the variables
+     * @return a list of value binding lists for all the variables in the given query literal, otherwise if
+     * no bindings are found, returns an empty list
+     */
+    public ArrayList ask(QueryLiteral queryLiteral,
+                         ArrayList variables,
+                         ArrayList bindingValues,
+                         QueryLiteral entireQueryLiteral,
+                         CycFort mt)  throws IOException {
+        if (verbosity > 3)
+            System.out.println("Asking about " + queryLiteral.cyclify() +
+                               "\n  with bound variables " + variables +
+                               "\n  with bound values " + bindingValues);
+        CycList partiallyInstantiatedFormula = (CycList) queryLiteral.getFormula().clone();
+        for (int i = 0; i < variables.size(); i++) {
+            partiallyInstantiatedFormula =
+                partiallyInstantiatedFormula.subst(bindingValues.get(i),
+                                                   variables.get(i));
+        }
+        QueryLiteral partiallyInstantiatedQueryLiteral = new QueryLiteral(partiallyInstantiatedFormula);
+        if (verbosity > 3)
+            System.out.println("  partially instantiated " + partiallyInstantiatedQueryLiteral.cyclify());
+        ArrayList bindingLists =
+            CycAccess.current().askWithVariables(partiallyInstantiatedFormula,
+                                                 partiallyInstantiatedQueryLiteral.getVariables(),
+                                                 mt);
+        if (verbosity > 3)
+            System.out.println("\n  --> " + bindingLists);
+        CycList result = new CycList();
+        for (int i = 0; i < bindingLists.size(); i++) {
+            CycList partiallyInstantiatedBindingValues = (CycList) bindingLists.get(i);
+            CycList entireBindingValueList = new CycList();
+            for (int j = 0; j < entireQueryLiteral.getVariables().size(); j++) {
+                CycVariable queryLiteralVariable = (CycVariable) entireQueryLiteral.getVariables().get(j);
+                boolean foundValue = false;
+                for (int k = 0; k < variables.size(); k++) {
+                    if (queryLiteralVariable.equals(variables.get(k))) {
+                        // found in the input variables
+                        foundValue = true;
+                        entireBindingValueList.add(bindingValues.get(k));
+                        break;
+                    }
+                }
+                if (! foundValue) {
+                    for (int k = 0; k < partiallyInstantiatedQueryLiteral.getVariables().size(); k++) {
+                        if (queryLiteralVariable.equals(partiallyInstantiatedQueryLiteral.getVariables().get(k))) {
+                            // found in the asked variables
+                            foundValue = true;
+                            entireBindingValueList.add(partiallyInstantiatedBindingValues.get(k));
+                            break;
+                        }
+                    }
+                }
+                if (! foundValue)
+                    throw new RuntimeException("Expected variable not found in " + queryLiteral.cyclify());
+            }
+            if (verbosity > 3)
+                System.out.println("  entire binding list " + entireBindingValueList);
+            result.add(entireBindingValueList);
+        }
+         return bindingLists;
     }
 
     /**

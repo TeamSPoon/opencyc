@@ -28,8 +28,7 @@ import org.opencyc.elf.wm.ResourcePool;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TaskFrameFactory populates the task frame library.  There is a singleton instance.
+/** TaskFrameFactory populates the task frame library.  There is a singleton instance.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -62,8 +61,7 @@ public class TaskFrameFactory {
   
   //// Public Area
   
-  /**
-   * Gets the task frame factory singleton instance.
+  /** Gets the task frame factory singleton instance.
    *
    * @return the task frame factory singleton instance
    */
@@ -71,8 +69,7 @@ public class TaskFrameFactory {
     return taskFrameFactory;
   }
   
-  /**
-   * Poplulates the task frame library.
+  /** Poplulates the task frame library.
    */
   public void populateTaskFrameLibrary () {
     // converse with user
@@ -91,7 +88,9 @@ public class TaskFrameFactory {
     List scheduleSet = new ArrayList();
     scheduleSet.add(schedule);
     ConditionalScheduleSet conditionalScheduleSet = new ConditionalScheduleSet(predicateExpression, scheduleSet);
-    taskFrame.addConditionalScheduleSet(conditionalScheduleSet);
+    List conditionalScheduleSets = new ArrayList();
+    conditionalScheduleSets.add(conditionalScheduleSet);
+    taskFrame.addScheduleAlternatives(conditionalScheduleSets);
     taskFrame.setTaskGoal(GoalLibrary.getInstance().getGoal(Goal.GET_USER_INPUT));   
     TaskFrameLibrary.getInstance().addTaskFrame(taskFrame);
   }

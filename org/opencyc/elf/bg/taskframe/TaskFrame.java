@@ -45,19 +45,18 @@ public class TaskFrame {
   //// Public Area
 
   /**
-   * Creates and returns a copy of this object.
+   * Creates and returns a copy of this object as initialized by the task frame factory
+   * when the task frame library is populated.  The remaining instance variables in the
+   * cloned task frame are set by the job assinger according to the commanded task.
    */
   public Object clone () {
     TaskFrame taskFrame = new TaskFrame();
     taskFrame.setTaskName(taskName);
     taskFrame.setActuators(actuators);
     taskFrame.setSchedules(schedules);
-    taskFrame.setTaskConstraints(taskConstraints);
-    taskFrame.setTaskGoal(taskGoal);
-    taskFrame.setTaskObjects(taskObjects);
-    taskFrame.setTaskParameters(taskParameters);
-    taskFrame.setTaskRequirements(taskRequirements);
-    
+    taskFrame.setTaskAction(taskAction);
+    taskFrame.setTaskGoal(taskGoal);    
+    return taskFrame;
   }
   
   /**

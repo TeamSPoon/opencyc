@@ -48,11 +48,11 @@ public class PlanSelector extends NodeComponent {
   //// Protected Area
   
   /**
-   * Receives the schedule evaluation from ?.
+   * Receives the schedule evaluation message from behavior generation.
    */
   protected void receiveScheduleEvaluation () {
     //TODO
-    // receive via channel from ?
+    // receive via channel from behavior generation
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
@@ -60,7 +60,7 @@ public class PlanSelector extends NodeComponent {
   }
   
   /**
-   * Sends the plan selector status to ?
+   * Sends the plan selector status message to ?
    */
   protected void sendPlanSelectorStatus () {
     //TODO
@@ -72,13 +72,17 @@ public class PlanSelector extends NodeComponent {
   }
   
   /**
-   * Posts the schedule.
+   * Sends the post schedule message to behavior generation, which in turn forwards
+   * the message to the world model.
    */
   protected void postSchedule () {
     //TODO
+    // send via channel to behavior generation
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // send forwardPostSchedule(controlledResources, taskCommand, schedule)
+    // to behaviorGeneration
   }
 
   /**

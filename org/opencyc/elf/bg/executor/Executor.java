@@ -135,7 +135,7 @@ public class Executor extends NodeComponent {
   }
   
   /**
-   * Sends the executor status to ?.
+   * Sends the executor status to its scheduler.
    */
   protected void sendExecutorStatus () {
     // TODO
@@ -144,6 +144,7 @@ public class Executor extends NodeComponent {
     // TaskCommnd taskCommand
     // Schedule schedule
     // Status status
+    // send receiveExecutorStatus(taskCommand, schedule, status) to (its) scheduler
   }
   
   //// Private Area

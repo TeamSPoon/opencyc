@@ -58,32 +58,35 @@ public class JobAssigner extends NodeComponent {
   }
   
   /**
-   * Receives the receive task frame message from ?
+   * Receives the receive task frame message from behavior generation
    */
   public void receiveTaskFrame () {
     //TODO
-    // received via channel from ?
+    // received via channel from behavior generation
     // TaskCommand taskCommand
     // TaskFrame taskFrame
   }
 
   /**
-   * receives the scheduler status message from ?
+   * Receives the scheduler status message from a scheduler
    */
   public void schedulerStatus () {
     //TODO
-    // received via channel from ?
+    // received via channel from a scheduler
     // ArrayList controlledResources
     // Status status
   }
   
   /**
-   * Receives the schedule job message from ?
+   * Receives the schedule job message from ?.  Subsequently the message is
+   * sent to the appropriate scheduler.
    */
   public void ScheduleJob (TaskCommand taskCommand) {
     //TODO
     // received via channel from ?
+    // send via channel to appropriate scheduler
     // TaskCommand taskCommand
+    // send receiveScheduleJob(taskCommand) to (appropriate) scheduler
   }
   
   /**
@@ -106,12 +109,13 @@ public class JobAssigner extends NodeComponent {
   }
   
   /**
-   * Sends the job assigner status message to ?
+   * Sends the job assigner status message to behavior generation
    */
   public void JobAssignerStatus () {
     //TODO
-    // send via channel to ?
+    // send via channel to behavior generation
     // Status status
+    // send behaviorGenerationStatus(status) to behaviorGeneration
   }
   
   /**

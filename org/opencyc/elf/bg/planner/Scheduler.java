@@ -76,105 +76,101 @@ public class Scheduler extends NodeComponent {
   //// Protected Area
   
   /**
-   * Receives the task command for scheduling.
-   *
-   * @param taskCommand the task command
+   * Receives schedule job message from the job assigner
    */
-  protected void receiveScheduleJob (TaskCommand taskCommand) {
+  protected void receiveScheduleJob () {
     //TODO
-    // receive via channel
+    // receive via channel from the job assigner
+    // TaskCommand taskCommand
   }
   
   /**
-   * Receives the status from the plan selector given the task command and
-   * schedule
+   * Receives the plan selector status message from ?
    *
    * @param taskCommand the task command
    * @param schedule the schedule
    * @param the plan selector status
    */
-  protected void receivePlanSelectorStatus (TaskCommand taskCommand,
-                                         Schedule schedule,
-                                         Status status) {
+  protected void receivePlanSelectorStatus () {
     //TODO
-    // receive via channel
+    // receive via channel from ?
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // Status status
   }
   
   /**
-   * Receives the status from the executor given the task command and
-   * schedule
-   *
-   * @param taskCommand the task command
-   * @param schedule the schedule
-   * @param the executor status
+   * Receives the executor status message from the executor associated with
+   * this scheduler.
    */
-  protected void receiveExecutorStatus (TaskCommand taskCommand,
-                                     Schedule schedule,
-                                     Status status) {
+  protected void receiveExecutorStatus () {
     //TODO
-    // receive via channel
+    // receive via channel from he executor associated with this scheduler
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // Status status
   }
   
   /**
-   * Receives the status from value judgement given the task command and
-   * schedule
-   *
-   * @param taskCommand the task command
-   * @param schedule the schedule
-   * @param the value judgement status
+   * Receives the value judgement status from behavior generation which forwarded it
+   * from value judgement.
    */
-  protected void receiveValueJudgementStatus (TaskCommand taskCommand,
-                                           Schedule schedule,
-                                           Status status) {
+  protected void receiveValueJudgementStatus () {
     //TODO
-    // receive via channel
+    // receive via channel from ?
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // Status status
   }
 
   /**
-   * Receives simulation failure notification from the simulator/predictor.
+   * Receives simulation failure notification message forwarded from behavior generation on
+   * behalf of world model.
    */
   protected void receiveSimulationFailureNotification () {
     // TODO
-    // receive via channel
+    // receive via channel from behavior generation
     // TaskCommand taskCommand
     // Schedule schedule
   }
   
   /**
-   * Receives the check schedule consistent information from ?.
+   * Receives the check schedule consistent message from ?.
    */
   protected void receiveCheckScheduleConsistent () {
     // TODO
-    // receive via channel
+    // receive via channel from ?
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
   }
 
   /**
-   * Receives the schedule consistency evaluation from ?.
+   * Receives the schedule consistency evaluation message from ?.
    */
   protected void receiveScheduleConsistencyEvaluation () {
     // TODO
-    // receive via channel
+    // receive via channel from 
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
   }
   
   /**
-   * Requests schedule simulation.
+   * Sends the request simulate schedule message to behavior generation
    */
   protected void requestSimulateSchedule () {
     // TODO
-    // send via channel?
+    // send via channel to ?
     // ArrayList controlledResources
     // TaskCommand taskCommand
     // Schedule schedule
+    // send forwardSimulateSchedule(controlledResources, taskCommand, schedule)
+    // to behaviorGeneration
   }
   
   /**
-   * Checks if the schedule is consistent.
+   * Sends the check if schedule consistent message to ?
    */
   protected void checkIfScheduleConsistent () {
     // TODO
@@ -185,7 +181,7 @@ public class Scheduler extends NodeComponent {
   }
   
   /**
-   * Sends the schedule consistency evaluation to ?
+   * Sends the schedule consistency evaluation message to ?
    */
   protected void sendScheduleConsistencyEvaluation () {
     // TODO
@@ -196,13 +192,14 @@ public class Scheduler extends NodeComponent {
   }
   
   /**
-   * Provides the scheduler status to ?.
+   * Sends the scheduler status message to job assigner.
    */
   protected void schedulerStatus () {
     // TODO
     // send via channel to ?
     // ArrayList controlledResources
     // Status status
+    // send schedulerStatus(controlledResources, status) to jobAssigner
   }
   
   //// Private Area

@@ -1,20 +1,19 @@
 package org.opencyc.elf;
 
 //// Internal Imports
-import org.opencyc.elf.bg.predicate.NotNull;
-
 import org.opencyc.elf.bg.state.StateVariable;
 
 import org.opencyc.elf.wm.ActuatorClassFactory;
 import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ExperienceLibrary;
 import org.opencyc.elf.wm.GoalFactory;
+import org.opencyc.elf.wm.JobAssignmentFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.PredicateClassFactory;
 import org.opencyc.elf.wm.ResourceFactory;
 import org.opencyc.elf.wm.ResourcePool;
-import org.opencyc.elf.wm.ScheduleLibrary;
+import org.opencyc.elf.wm.TaskFrameFactory;
 import org.opencyc.elf.wm.TaskFrameLibrary;
 
 //// External Imports
@@ -61,18 +60,18 @@ public class BehaviorEngine {
   public void initialize () {
     logger = Logger.getLogger("org.opencyc.elf");
     logger.info("Initializing BehaviorEngine");
-    new ActuatorClassFactory();
-    new PredicateClassFactory();
+    (new ActuatorClassFactory()).getInstance().generate();
+    (new PredicateClassFactory()).getInstance().generate();
     new KnowledgeBase();
     new ActionFactory();
     new GoalFactory();
-    new ResourceFactory();
-    (new ResourcePool()).getInstance().initialize();
+    new ResourcePool();
+    (new ResourceFactory()).getInstance().populateResourcePool();
     StateVariable.initialize();
-    (new JobAssignmentLibrary()).getInstance().initialize();
-    (new ScheduleLibrary()).getInstance().initialize();
+    new JobAssignmentLibrary();
+    (new JobAssignmentFactory()).getInstance().populateJobAssignmentLibrary();
     new TaskFrameLibrary();
-    new NotNull();
+    (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
     new ExperienceLibrary();
     
     //TODO

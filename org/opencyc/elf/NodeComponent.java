@@ -8,6 +8,8 @@ import org.opencyc.elf.message.GenericMsg;
 //// External Imports
 import java.util.ArrayList;
 
+import java.util.logging.Logger;
+
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
@@ -59,6 +61,15 @@ public abstract class NodeComponent extends ELFObject {
    */
   public void setNode(Node node) {
     this.node = node;
+  }
+  
+  /**
+   * Gets the logger for this node.
+   *
+   * @return the logger for this node
+   */
+  public Logger getLogger () {
+    return node.getLogger();
   }
   
   /**

@@ -2,6 +2,8 @@ package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
 
+import org.opencyc.elf.bg.state.State;
+
 //// External Imports
 
 /**
@@ -43,7 +45,31 @@ public class Action {
   
   //// Public Area
   
+
+  /**
+   * Gets the action state, including the procedure, parameters and action modifiers
+   *
+   * @return the action state, including the procedure, parameters and action modifiers
+   */
+  public State getState () {
+    return state;
+  }
+
+  /**
+   * Sets the action state, including the procedure, parameters and action modifiers
+   *
+   * @param state the action state, including the procedure, parameters and action modifiers
+   */
+  public void setState (State state) {
+    this.state = state;
+  }
+  
   //// Protected Area
+  
+  /**
+   * the action state, including the procedure, parameters and action modifiers
+   */
+  protected State state;
   
   //// Private Area
   

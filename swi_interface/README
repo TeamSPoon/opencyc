@@ -1,0 +1,68 @@
+This is an interface for interaction with SWI-Prolog:
+Assuming you have downloaded and installed SWI-Prolog >version 5.x from http://www.swi-prolog.org
+
+It supports Queries, Asserts, UnAsserts, SubL, Loading Files and natural language Parsing in Prolog.
+
+To INSTALL:
+
+
+run install.sh
+
+This will concatinate certain files together and copy them into $SWI_HOME/library
+
+from prolog:
+
+[root@titan swi_interface]# pl
+Welcome to SWI-Prolog (Version 5.0.6)
+Copyright (c) 1990-2002 University of Amsterdam.
+SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to redistribute it under certain conditions.
+Please visit http://www.swi-prolog.org for details.
+
+For help, use ?- help(Topic). or ?- apropos(Word).
+
+?- [opencyc].
+% opencyc compiled 0.01 sec, 50,980 bytes
+
+Yes
+?- cycQuery(isa(X,'Dog')).
+Connected to Cyc TCP Server {$stream(236966),$stream(236986)}
+
+X = ['GenericInstanceFn', 'Dog'] ;
+
+X = 'Buffy' ;
+
+No
+?- cycAssert(isa('Fido','Dog'),'JamudMt').
+T
+
+Yes
+?- cycQuery(isa(X,'Dog')).
+
+X = ['GenericInstanceFn', 'Dog'] ;
+
+X = 'Buffy' ;
+
+X = 'Fido' ;
+
+No
+?- cycRetract(isa('Fido','Dog')).
+T
+
+Yes
+?- cycQuery(isa('Fido','Dog')).
+
+No
+?- cycQuery(isa('Buffy','Dog')).
+
+Yes
+?- cycQuery(isa(X,'Dog')).
+
+X = ['GenericInstanceFn', 'Dog'] ;
+
+X = 'Buffy' ;
+
+No
+
+
+

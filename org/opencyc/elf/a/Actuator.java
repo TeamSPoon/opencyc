@@ -29,4 +29,7 @@ package org.opencyc.elf.a;
  */
 public interface Actuator {
   
+  /** the console output actuator name */
+  public static final String CONSOLE_OUTPUT = "console output";
+  
 }

@@ -1,9 +1,11 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.taskframe.Action;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * <P>
@@ -133,6 +135,25 @@ public class Schedule {
     return stringBuffer.toString();
   }
 
+  /**
+   * Creates and returns a copy of this object.
+   *
+   * @return a copy of this object
+   */
+  public Object clone () {
+    Schedule schedule = new Schedule();
+    ArrayList clonedPlannedActions = new ArrayList();
+    Iterator iter = plannedActions.iterator();
+    while (iter.hasNext()) {
+      Action action = (Action) iter.next();
+      clonedPlannedActions.add((Action) action.clone());
+    }
+    schedule.setPlannedActions(clonedPlannedActions);
+    schedule.setPlannedGoalTimeMilliseconds(plannedGoalTimeMilliseconds);
+    schedule.setPlannedGoals(plannedGoals);
+    return schedule;
+  }
+  
   //// Protected Area
 
   /**

@@ -1,9 +1,9 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * <P>
@@ -44,6 +44,65 @@ public class Schedule {
   //// Public Area
 
   /**
+   * Gets the list of planned actions
+   *
+   * @return the list of planned actions
+   */
+  public ArrayList getPlannedActions () {
+    return plannedActions;
+  }
+
+  /**
+   * Sets the list of planned actions
+   *
+   * @param plannedActions the list of planned actions
+   */
+  public void setPlannedActions (ArrayList plannedActions) {
+    this.plannedActions = plannedActions;
+  }
+
+  /**
+   * Gets the list of planned goals
+   *
+   * @return the list of planned goals
+   */
+  public ArrayList getPlannedGoals () {
+    return plannedGoals;
+  }
+
+  /**
+   * Sets the list of planned goals
+   *
+   * @param plannedGoals the list of planned goals
+   */
+  public void setPlannedGoals (ArrayList plannedGoals) {
+    this.plannedGoals = plannedGoals;
+  }
+
+  /**
+   * Gets the list of planned goal times, each of which is the planned duration of time in milliseconds to
+   * elapse from the time the plan commences exectution until the planned goal is achieved
+   *
+   * @return the list of planned goal times, each of which is the planned duration of time in milliseconds to
+   * elapse from the time the plan commences exectution until the planned goal is achieved
+   */
+  public ArrayList getPlannedGoalTimeMilliseconds () {
+    return plannedGoalTimeMilliseconds;
+  }
+
+  /**
+   * Sets the list of planned goal times, each of which is the planned duration of time in milliseconds to
+   * elapse from the time the plan commences exectution until the planned goal is achieved
+   *
+   * @param plannedGoalTimeMilliseconds the list of planned goal times, each of which is the planned duration 
+   * of time in milliseconds to elapse from the time the plan commences exectution until the planned goal is 
+   * achieved
+   */
+  public void setPlannedGoalTimeMilliseconds (ArrayList plannedGoalTimeMilliseconds) {
+    this.plannedGoalTimeMilliseconds = plannedGoalTimeMilliseconds;
+  }
+
+  /**
    * Returns true if the given object equals this object.
    * 
    * @param obj the given object
@@ -54,10 +113,11 @@ public class Schedule {
     if (!(obj instanceof Schedule)) {
       return false;
     }
-
-    Schedule thatSchedule = (Schedule) obj;
-
-    return getOutputTimeTrajectoryOfMotion().equals(thatSchedule.getOutputTimeTrajectoryOfMotion());
+    Schedule that = (Schedule) obj;
+    return 
+      this.plannedActions.equals(that.plannedActions) &&
+      this.plannedGoals.equals(that.plannedGoals) &&
+      this.plannedGoalTimeMilliseconds.equals(that.plannedGoalTimeMilliseconds);
   }
 
   /**
@@ -68,100 +128,27 @@ public class Schedule {
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[Schedule ");
-    stringBuffer.append(getOutputTimeTrajectoryOfMotion().toString());
+    stringBuffer.append(plannedActions.toString());
     stringBuffer.append("]");
-
     return stringBuffer.toString();
-  }
-
-  /**
-   * Gets the state of the schedule
-   * 
-   * @return the state of the schedule
-   */
-  public State getState() {
-    return state;
-  }
-
-  /**
-   * Sets the state of the schedule
-   * 
-   * @param state the state of the schedule
-   */
-  public void setState(State state) {
-    this.state = state;
-  }
-
-  /**
-   * Gets the value of the state variable for the output time-trajectory of
-   * motion which constists of a pair (Object[]) of ordered lists, the first
-   * being a list of vectors and the second a list of time instances
-   * 
-   * @return the output time-trajectory of motion
-   */
-  public Object[] getOutputTimeTrajectoryOfMotion() {
-    return (Object[]) state.getStateValue(State.OUTPUT_TIME_TRAJECTORY_OF_MOTION);
-  }
-
-  /**
-   * Sets the value of the state variable for the output time-trajectory of
-   * motion which constists of a pair (Object[]) of ordered lists, the first
-   * being a list of vectors and the second a list of time instances
-   * 
-   * @param outputTimeTrajectoryOfMotion the output time-trajectory of motion
-   */
-  public void setOutputTimeTrajectoryOfMotion(Object[] outputTimeTrajectoryOfMotion) {
-    state.setStateValue(State.OUTPUT_TIME_TRAJECTORY_OF_MOTION, outputTimeTrajectoryOfMotion);
-  }
-
-  /**
-   * Gets the value of the state variable for the trajectory of the action
-   * vector, which consists of a pair (Object[]) of ordered lists, the first
-   * being a list of vectors and the second a list of time instances
-   * 
-   * @return the trajectory of the action vector
-   */
-  public Object[] getActionVectorTrajectory() {
-    return (Object[]) state.getStateValue(State.ACTION_VECTOR_TRAJECTORY);
-  }
-
-  /**
-   * Sets the value of the state variable for the trajectory of the action
-   * vector, which constists of a pair (Object[]) of ordered lists, the first
-   * being a list of vectors and the second a list of time instances
-   * 
-   * @param actionVectorTrajectory the action vector trajectory
-   */
-  public void setActionVectorTrajectory(Object[] actionVectorTrajectory) {
-    state.setStateValue(State.OUTPUT_TIME_TRAJECTORY_OF_MOTION, actionVectorTrajectory);
-  }
-
-  /**
-   * Gets the value of the state variable for the trajectory of the input
-   * control vector, which consists of a pair (Object[]) of ordered lists, the
-   * first being a list of vectors and the second a list of time instances
-   * 
-   * @return the trajectory of the input control vector
-   */
-  public Object[] getInputContolVectorTrajectory() {
-    return (Object[]) state.getStateValue(State.INPUT_CONTROL_VECTOR_TIME_TRAJECTORY);
-  }
-
-  /**
-   * Sets the value of the state variable for the trajectory of the input
-   * control vector, which consists of a pair (Object[]) of ordered lists, the
-   * first being a list of vectors and the second a list of time instances
-   * 
-   * @param inputControlVectorTrajectory the trajectory of the input control
-   *        vector
-   */
-  public void setInputControlVectorTrajectory(Object[] inputControlVectorTrajectory) {
-    state.setStateValue(State.INPUT_CONTROL_VECTOR_TIME_TRAJECTORY, inputControlVectorTrajectory);
   }
 
   //// Protected Area
 
-  /** the state of the plan */
-  protected State state;
+  /**
+   * the list of planned actions
+   */
+  protected ArrayList plannedActions;
+  
+  /**
+   * the list of planned goals
+   */
+  protected ArrayList plannedGoals;
+  
+  /**
+   * the list of planned goal times, each of which is the planned duration of time in milliseconds to
+   * elapse from the time the plan commences exectution until the planned goal is achieved
+   */
+  protected ArrayList plannedGoalTimeMilliseconds;
 
 }

@@ -2,30 +2,31 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.a.Actuator;
-import org.opencyc.elf.a.ConsoleOutput;
-
-import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
+
+import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.taskframe.Action;
 
 import org.opencyc.elf.goal.Goal;
 
-import org.opencyc.elf.s.ConsoleInput;
 import org.opencyc.elf.s.Sensor;
 
 import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
-import java.util.*;
-
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
-import junit.framework.*;
+import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 
-import org.doomdark.uuid.UUID;
 
 /** Provides a suite of JUnit test cases for the org.opencyc.elf.wm package.
  * 
@@ -252,7 +253,7 @@ public class UnitTest extends TestCase {
    * @param args the command line arguments (unused)
    */
   public static void main(String[] args) {
-    junit.textui.TestRunner.run(suite());
+    TestRunner.run(suite());
   }
 
 }

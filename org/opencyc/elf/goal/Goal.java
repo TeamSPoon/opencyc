@@ -128,6 +128,12 @@ public class Goal {
     this.importance = importance;
   }
   
+  /** goal name for get user input */
+  public static final String GET_USER_INPUT = "get user input"; 
+  
+  /** goal name for console prompted input */
+  public static final String GET_CONSOLE_PROMPTED_INPUT = "get console prompted input";   
+  
   //// Protected Area
   
   //// Private Area

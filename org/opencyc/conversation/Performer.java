@@ -152,8 +152,11 @@ public class Performer {
     protected CycList parseTermsString (ArrayList words)
         throws CycApiException, IOException, UnknownHostException {
         StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < words.size(); i++)
+        for (int i = 0; i < words.size(); i++) {
+            if (i > 0)
+                stringBuffer.append(" ");
             stringBuffer.append(words.get(i));
+        }
         return parseTermsString(stringBuffer.toString());
     }
 

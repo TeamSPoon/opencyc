@@ -730,13 +730,13 @@ public class CycAccess {
      */
     public CycConstant getConstantByGuid (Guid guid)
         throws IOException, UnknownHostException, CycApiException {
-        String command = "(boolean (find-constant-by-guid (string-to-guid \"" + guid + "\")))";
+        String command = "(boolean (find-constant-by-external-id (string-to-guid \"" + guid + "\")))";
         boolean constantExists = converseBoolean(command);
         if (! constantExists)
             return null;
-        command = "(constant-name (find-constant-by-guid (string-to-guid \"" + guid + "\")))";
+        command = "(constant-name (find-constant-by-external-id (string-to-guid \"" + guid + "\")))";
         String constantName = this.converseString(command);
-        return this.getConstantByName(constantName);
+        return getConstantByName(constantName);
     }
 
     /**

@@ -10,7 +10,7 @@ import org.opencyc.elf.message.ObservedInputMsg;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
- * Provides Sensors for the Elementary Loop Functioning (ELF).
+ * Sensor is the abstract class of ELF sensors that particular sensors extend.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -32,7 +32,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Sensor extends NodeComponent {
+public abstract class Sensor extends NodeComponent {
   
   //// Constructors
   

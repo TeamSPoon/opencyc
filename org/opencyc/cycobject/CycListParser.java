@@ -3,6 +3,7 @@ package org.opencyc.cycobject;
 
 import java.util.*;
 import java.io.*;
+import ViolinStrings.*;
 import org.opencyc.util.*;
 import org.opencyc.api.*;
 

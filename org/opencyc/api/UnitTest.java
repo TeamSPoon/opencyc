@@ -56,10 +56,12 @@ public class UnitTest extends TestCase {
         //testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
-        testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
         //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -184,7 +186,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests the fundamental aspects of the binary (cfasl) api connection to the OpenCyc server.
      */
-    public void xtestBinaryCycConnection () {
+    public void testBinaryCycConnection () {
         System.out.println("**** testBinaryCycConnection ****");
         CycAccess cycAccess = null;
         CycConnection cycConnection = null;
@@ -284,7 +286,7 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Invalid API Request: NIL is not a valid API function symbol\")",
+        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Invalid API Request: Operator NIL is not defined in the API\")",
                             response[1].toString());
 
         cycConnection.close();
@@ -321,7 +323,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
-    public void xtestBinaryCycAccess1 () {
+    public void testBinaryCycAccess1 () {
         System.out.println("**** testBinaryCycAccess 1 ****");
         CycAccess cycAccess = null;
         try {
@@ -475,7 +477,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
-    public void xtestBinaryCycAccess2 () {
+    public void testBinaryCycAccess2 () {
         System.out.println("**** testBinaryCycAccess 2 ****");
         CycAccess cycAccess = null;
         try {
@@ -830,7 +832,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
-    public void xtestBinaryCycAccess3 () {
+    public void testBinaryCycAccess3 () {
         System.out.println("**** testBinaryCycAccess 3 ****");
         CycAccess cycAccess = null;
         try {
@@ -1158,6 +1160,7 @@ public class UnitTest extends TestCase {
         try {
             CycConstant singlePurposeDevice = cycAccess.getKnownConstantByGuid("bd5897aa-9c29-11b1-9dad-c379636f7270");
             CycConstant physicalDevice = cycAccess.getKnownConstantByGuid("bd58c72f-9c29-11b1-9dad-c379636f7270");
+            cycAccess.traceOn();
             answer = cycAccess.areTacitCoextensional(singlePurposeDevice, physicalDevice);
         }
         catch (UnknownHostException e) {
@@ -1253,7 +1256,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
-    public void xtestBinaryCycAccess4 () {
+    public void testBinaryCycAccess4 () {
         System.out.println("**** testBinaryCycAccess 4 ****");
         CycAccess cycAccess = null;
         try {
@@ -1302,8 +1305,8 @@ public class UnitTest extends TestCase {
         try {
             CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
             Assert.assertEquals(dog, whyGenlFirst);
-            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
-            Assert.assertEquals(animal, whyGenlLast);
+            CycConstant collection = cycAccess.getKnownConstantByGuid("bd5880cc-9c29-11b1-9dad-c379636f7270");
+            Assert.assertEquals(collection, whyGenlLast);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1555,7 +1558,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
-    public void xtestBinaryCycAccess5 () {
+    public void testBinaryCycAccess5 () {
         System.out.println("**** testBinaryCycAccess 5 ****");
         CycAccess cycAccess = null;
         try {
@@ -1886,7 +1889,7 @@ public class UnitTest extends TestCase {
     /**
      * Tests a portion of the CycAccess methods using the binary api connection.
      */
-    public void xtestBinaryCycAccess6 () {
+    public void testBinaryCycAccess6 () {
         System.out.println("**** testBinaryCycAccess 6 ****");
         CycAccess cycAccess = null;
         try {
@@ -1957,7 +1960,7 @@ public class UnitTest extends TestCase {
 
         // Test getBackchainRules.
         try {
-            //cycAccess.traceOn();
+
             CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
             CycConstant humanActivitiesMt = cycAccess.getKnownConstantByGuid("bd58fe73-9c29-11b1-9dad-c379636f7270");
             CycList backchainRules =
@@ -1990,6 +1993,7 @@ public class UnitTest extends TestCase {
 
         // setSymbolValue, getSymbolValue
         try {
+            cycAccess.traceOn();
             CycSymbol a = CycObjectFactory.makeCycSymbol("a");
             cycAccess.setSymbolValue(a, new Integer(1));
             Assert.assertEquals(new Integer(1), cycAccess.getSymbolValue(a));
@@ -2138,6 +2142,205 @@ public class UnitTest extends TestCase {
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
+
+    /**
+     * Tests a portion of the CycAccess methods using the ascii api connection.
+     */
+    public void testAsciiCycAccess7 () {
+        System.out.println("**** testAsciiCycAccess 7 ****");
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.ASCII_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+
+        doTestCycAccess7(cycAccess);
+
+        try {
+            cycAccess.close();
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        System.out.println("**** testAsciiCycAccess 7 OK ****");
+    }
+
+
+    /**
+     * Tests a portion of the CycAccess methods using the binary api connection.
+     */
+    public void testBinaryCycAccess7 () {
+        System.out.println("**** testBinaryCycAccess 7 ****");
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.BINARY_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        doTestCycAccess7(cycAccess);
+
+        try {
+            cycAccess.close();
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        System.out.println("**** testBinaryCycAccess 7 OK ****");
+    }
+
+    /**
+     * Tests a portion of the CycAccess methods using the given api connection.
+     */
+    protected void doTestCycAccess7 (CycAccess cycAccess) {
+        long startMilliseconds = System.currentTimeMillis();
+        CycObjectFactory.resetCycConstantCaches();
+
+        // SubL scripts
+        try {
+            cycAccess.traceOn();
+            // Assignment
+            String script = "(csetq a '(1 #$Dog #$Plant))";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'a)";
+            CycList responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
+
+            script = "(cpush 4 a)";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'a)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(4 1 #$Dog #$Plant)"), responseList);
+
+            script = "(cpop a)";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'a)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1 #$Dog #$Plant)"), responseList);
+
+            // sequence
+            script = "(progn (csetq a nil) (csetq a (list a)) (csetq a (list a)))";
+            cycAccess.converseVoid(script);
+            script = "(symbol-value 'a)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("((nil))"), responseList);
+
+            // sequence with variable bindings
+            script = "(clet (a b) " +
+                     "  (csetq a 1) " +
+                     "  (csetq b (+ a 3)) " +
+                     "  b)";
+            Object responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(4), responseObject);
+
+            script = "(clet ((a nil)) " +
+                     "  (cpush 1 a) " +
+                     "  a)";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("(1)"), responseList);
+
+            script = "(clet (a b) " +
+                     "  (csetq a '(1 2 3)) " +
+                     "  (csetq b (cpop a)) " +
+                     "  (list a b))";
+            responseList = cycAccess.converseList(script);
+            Assert.assertEquals(cycAccess.makeCycList("((2 3) (2 3))"), responseList);
+
+            script = "(clet ((a 1) " +
+                     "       (b (add1 a)) " +
+                     "       (c (sub1 b))) " +
+                     "  c)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(new Integer(1), responseObject);
+
+            // boolean expressions
+            script = "(cand t nil t)";
+            boolean responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(! responseBoolean);
+
+            script = "(cand t t t)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            script = "(cand t)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            script = "(cand nil)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(! responseBoolean);
+
+            script = "(cand t #$Dog)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.t, responseObject);
+
+            script = "(cor t nil t)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            script = "(cor nil nil nil)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(! responseBoolean);
+
+            script = "(cor t)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            script = "(cor nil)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(! responseBoolean);
+
+            script = "(cor nil #$Plant)";
+            responseObject = cycAccess.converseObject(script);
+            Assert.assertEquals(CycObjectFactory.t, responseObject);
+
+            script = "(cnot nil)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            script = "(cnot t)";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(! responseBoolean);
+
+            script = "(cnot (cand t nil))";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            script = "(cand (cnot nil) (cor t nil))";
+            responseBoolean = cycAccess.converseBoolean(script);
+            Assert.assertTrue(responseBoolean);
+
+            // conditional sequencing
+
+            // iteration
+
+            // definition
+
+            // misc
+
+
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
+        long endMilliseconds = System.currentTimeMillis();
+        System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+    }
+
 }
 
 

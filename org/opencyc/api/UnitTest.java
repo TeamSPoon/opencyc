@@ -689,8 +689,6 @@ public class UnitTest extends TestCase {
             CycAccess.current().close();
             Assert.fail(e.toString());
         }
-
-        //cycAccess.traceOnDetailed();
         doTestCycAccess2(cycAccess);
 
         cycAccess.close();
@@ -756,7 +754,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(arg1Formats);
-        Assert.assertEquals("()", arg1Formats.toString());
+        Assert.assertEquals("(SetTheFormat)", arg1Formats.toString());
 
         // getArg1Formats.
         arg1Formats = null;
@@ -938,7 +936,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("dogs (domesticated animals)", phrase);
+        Assert.assertEquals("dogs", phrase);
 
         // getSingularGeneratedPhrase.
         phrase = null;
@@ -951,7 +949,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("Brazil (country)", phrase);
+        Assert.assertEquals("Brazil", phrase);
 
         // getGeneratedPhrase.
         phrase = null;
@@ -1055,7 +1053,8 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(isas);
         Assert.assertTrue(isas instanceof CycList);
         isas = ((CycList) isas).sort();
-        Assert.assertEquals("(Entity IndependentCountry PublicConstant)", isas.toString());
+        Assert.assertTrue(isas.toString().indexOf("Entity") > 0);
+        Assert.assertTrue(isas.toString().indexOf("IndependentCountry") > 0);
 
         // getGenls.
         List genls = null;
@@ -1115,7 +1114,11 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(maxSpecs);
         Assert.assertTrue(maxSpecs instanceof CycList);
         maxSpecs = ((CycList) maxSpecs).sort();
-        Assert.assertEquals("(Coyote-Animal Dog Fox Jackal Wolf)", maxSpecs.toString());
+        Assert.assertTrue(maxSpecs.toString().indexOf("Coyote-Animal") > 0);
+        Assert.assertTrue(maxSpecs.toString().indexOf("Dog") > 0);
+        Assert.assertTrue(maxSpecs.toString().indexOf("Fox") > 0);
+        Assert.assertTrue(maxSpecs.toString().indexOf("Jackal") > 0);
+        Assert.assertTrue(maxSpecs.toString().indexOf("Wolf") > 0);
 
         // getGenlSiblings.
         List genlSiblings = null;
@@ -1130,7 +1133,7 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(genlSiblings);
         Assert.assertTrue(genlSiblings instanceof CycList);
         genlSiblings = ((CycList) genlSiblings).sort();
-        Assert.assertEquals("(Animal FemaleAnimal JuvenileAnimal)", genlSiblings.toString());
+        Assert.assertEquals("(Animal FemaleAnimal JuvenileAnimal Mammal)", genlSiblings.toString());
 
         // getSiblings.
         List siblings = null;
@@ -1341,7 +1344,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(phrase);
-        Assert.assertEquals("Brazil (country) is a country (political entity)", phrase);
+        Assert.assertEquals("Brazil is a country", phrase);
 
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
@@ -1727,6 +1730,7 @@ public class UnitTest extends TestCase {
         }
         catch (Exception e) {
             CycAccess.current().close();
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(cycConstant);

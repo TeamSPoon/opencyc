@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import org.doomdark.uuid.UUID;
 
 /**
- * TaskFrame specifies the materials, tools, and procedures to accomplish a task.
+ * TaskFrame specifies the materials, tools, and procedures to accomplish a task.  Generaic task
+ * frames are strored in the task frame library and from the library cloned instances are
+ * provided to the job assigner when decomposing task commands.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -37,12 +39,27 @@ public class TaskFrame {
   /**
    * Creates a new instance of TaskFrame and gives it a unique ID.
    */
-  public TaskFrame() {
-    this.taskId = new UUID();
+  public TaskFrame () {
   }
 
   //// Public Area
 
+  /**
+   * Creates and returns a copy of this object.
+   */
+  public Object clone () {
+    TaskFrame taskFrame = new TaskFrame();
+    taskFrame.setTaskName(taskName);
+    taskFrame.setActuators(actuators);
+    taskFrame.setSchedules(schedules);
+    taskFrame.setTaskConstraints(taskConstraints);
+    taskFrame.setTaskGoal(taskGoal);
+    taskFrame.setTaskObjects(taskObjects);
+    taskFrame.setTaskParameters(taskParameters);
+    taskFrame.setTaskRequirements(taskRequirements);
+    
+  }
+  
   /**
    * Returns true if the given object equals this object.
    * 
@@ -63,7 +80,7 @@ public class TaskFrame {
    * 
    * @return a string representation of this object
    */
-  public String toString() {
+  public String toString () {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[");
     stringBuffer.append(taskName);
@@ -75,41 +92,66 @@ public class TaskFrame {
   }
 
   /**
-   * Gets the task name.
+   * Gets the task name which is either an action name or a goal name.
    * 
-   * @return taskName the task name
+   * @return the task name which is either an action name or a goal name
    */
-  public String getTaskName() {
+  public String getTaskName () {
     return taskName;
   }
 
   /**
-   * Sets the task name.
+   * Sets the task name which is either an action name or a goal name.
    * 
-   * @param taskName the task name from
+   * @param taskName the task name which is either an action name or a goal name
    */
-  public void setTaskName(String taskName) {
+  public void setTaskName (String taskName) {
     this.taskName = taskName;
   }
 
   /**
+   * Generates a unique identifier for this task frame.
+   */
+  public void generateTaskId () {
+    taskId = new UUID();
+  }
+  
+  /**
    * Gets the task identifier consisting of a unique id for each task
    * commanded.
    * 
-   * @return taskId the task identifier consisting of a unique id for each task
+   * @return the task identifier consisting of a unique id for each task
    *         commanded
    */
-  public UUID getTaskId() {
+  public UUID getTaskId () {
     return taskId;
+  }
+
+  /**
+   * Gets the action to be accomplished by this task
+   *
+   * @return the action to be accomplished by this task
+   */
+  public Action getTaskAction () {
+    return taskAction;
+  }
+
+  /**
+   * Sets the action to be accomplished by this task
+   *
+   * @param taskAction the action to be accomplished by this task
+   */
+  public void setTaskAction (Action taskAction) {
+    this.taskAction = taskAction;
   }
 
   /**
    * Gets the desired state to be acheived or maintained by this task
    * 
-   * @return taskGoal the desired state to be acheived or maintained by this
+   * @return the desired state to be acheived or maintained by this
    *         task
    */
-  public Goal getTaskGoal() {
+  public Goal getTaskGoal () {
     return taskGoal;
   }
 
@@ -119,7 +161,7 @@ public class TaskFrame {
    * @param taskGoal the desired state to be acheived or maintained by this
    *        task
    */
-  public void setTaskGoal(Goal taskGoal) {
+  public void setTaskGoal (Goal taskGoal) {
     this.taskGoal = taskGoal;
   }
 
@@ -128,7 +170,7 @@ public class TaskFrame {
    * 
    * @return taskObjects the objects upon which the desired task is performed
    */
-  public ArrayList getTaskObjects() {
+  public ArrayList getTaskObjects () {
     return taskObjects;
   }
 
@@ -137,7 +179,7 @@ public class TaskFrame {
    * 
    * @param taskObjects the objects upon which the desired task is performed
    */
-  public void setTaskObjects(ArrayList taskObjects) {
+  public void setTaskObjects (ArrayList taskObjects) {
     this.taskObjects = taskObjects;
   }
 
@@ -145,10 +187,10 @@ public class TaskFrame {
    * Gets the parameters that specify or modulate how the task should be
    * performed
    * 
-   * @return taskParameters the parameters that specify or modulate how the
+   * @return the parameters that specify or modulate how the
    *         task should be performed
    */
-  public ArrayList getTaskParameters() {
+  public ArrayList getTaskParameters () {
     return taskParameters;
   }
 
@@ -159,17 +201,17 @@ public class TaskFrame {
    * @param taskParameters the parameters that specify or modulate how the task
    *        should be performed
    */
-  public void setTaskParameters(ArrayList taskParameters) {
+  public void setTaskParameters (ArrayList taskParameters) {
     this.taskParameters = taskParameters;
   }
 
   /**
    * Gets the actuators that are responsible for carrying out the task
    * 
-   * @return actuators the actuators that are responsible for carrying
+   * @return the actuators that are responsible for carrying
    *         out the task
    */
-  public ArrayList getActuators() {
+  public ArrayList getActuators () {
     return actuators;
   }
 
@@ -179,7 +221,7 @@ public class TaskFrame {
    * @param actuators the actuators that are responsible for carrying out
    *        the task
    */
-  public void setActuators(ArrayList actuators) {
+  public void setActuators (ArrayList actuators) {
     this.actuators = actuators;
   }
 
@@ -189,7 +231,7 @@ public class TaskFrame {
    * 
    * @return taskRequirements
    */
-  public ArrayList getTaskRequirements() {
+  public ArrayList getTaskRequirements () {
     return taskRequirements;
   }
 
@@ -201,16 +243,16 @@ public class TaskFrame {
    *        information, aside from task objects, which are required to
    *        execute the task
    */
-  public void setTaskRequirements(ArrayList taskRequirements) {
+  public void setTaskRequirements (ArrayList taskRequirements) {
     this.taskRequirements = taskRequirements;
   }
 
   /**
    * Gets the constraints upon the performance of the task
    * 
-   * @return taskConstraints the constraints upon the performance of the task
+   * @return the constraints upon the performance of the task
    */
-  public ArrayList getTaskConstraints() {
+  public ArrayList getTaskConstraints () {
     return taskConstraints;
   }
 
@@ -219,7 +261,7 @@ public class TaskFrame {
    * 
    * @param taskConstraints the constraints upon the performance of the task
    */
-  public void setTaskConstraints(ArrayList taskConstraints) {
+  public void setTaskConstraints (ArrayList taskConstraints) {
     this.taskConstraints = taskConstraints;
   }
 
@@ -228,11 +270,11 @@ public class TaskFrame {
    * plans, organized as a dictionary of execeptional states and associated
    * procedures for handling them
    * 
-   * @return schedules the plans for accomplishing the task, or procedures
+   * @return the plans for accomplishing the task, or procedures
    *         for generating plans, organized as a dictionary of execeptional
    *         states and associated procedures for handling them
    */
-  public ArrayList getSchedules() {
+  public ArrayList getSchedules () {
     return schedules;
   }
 
@@ -245,7 +287,7 @@ public class TaskFrame {
    *        for generating plans, organized as a dictionary of execeptional
    *        states and associated procedures for handling them
    */
-  public void setSchedules(ArrayList schedules) {
+  public void setSchedules (ArrayList schedules) {
     this.schedules = schedules;
   }
 
@@ -255,22 +297,23 @@ public class TaskFrame {
   
   //// Internal Rep
   
-  /** the task name */
+  /** the task name which is either an action name or a goal name */
   protected String taskName;
 
-  /**
-   * the task identifier consisting of a unique id for each task commanded
-   */
+  /** the task identifier consisting of a unique id for each task commanded */
   protected UUID taskId;
 
+  /** the action to be accomplished by this task */
+  protected Action taskAction;
+  
   /** the desired state to be acheived or maintained by this task */
   protected Goal taskGoal;
 
   /** the objects upon which the desired task is performed */
-  protected ArrayList taskObjects;
+  protected ArrayList taskObjects = new ArrayList();
 
   /** the parameters that specify or modulate how the task should be performed */
-  protected ArrayList taskParameters;
+  protected ArrayList taskParameters = new ArrayList();
 
   /** the actuators (actuators) that are responsible for carrying out the task */
   protected ArrayList actuators = new ArrayList();
@@ -279,16 +322,16 @@ public class TaskFrame {
    * the tools, resources, conditions and state information, aside from task
    * objects, which are required to execute the task
    */
-  protected ArrayList taskRequirements;
+  protected ArrayList taskRequirements = new ArrayList();
 
   /** the constraints upon the performance of the task */
-  protected ArrayList taskConstraints;
+  protected ArrayList taskConstraints = new ArrayList();
 
   /**
    * the plans for accomplishing the task, or procedures for generating plans,
    * organized as a dictionary of execeptional states and associated
    * procedures for handling them
    */
-  protected ArrayList schedules;
+  protected ArrayList schedules = new ArrayList();
 
 }

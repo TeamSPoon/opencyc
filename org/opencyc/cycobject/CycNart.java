@@ -284,6 +284,8 @@ public class CycNart extends CycFort implements Comparable {
                 cyclifiedObject = ((CycConstant) object).cyclify();
             else if (object instanceof CycNart)
                 cyclifiedObject = ((CycNart) object).cyclify();
+            else if (object instanceof CycList)
+                cyclifiedObject = ((CycList) object).cyclify();
             else
                 cyclifiedObject = object.toString();
             result .append(" ");

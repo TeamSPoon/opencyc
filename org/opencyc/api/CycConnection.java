@@ -43,8 +43,8 @@ public class CycConnection {
     /**
      * Default base tcp port for the OpenCyc server.
      */
-    //public static final int DEFAULT_BASE_PORT = 3600;
-    public static final int DEFAULT_BASE_PORT = 3640;
+    public static final int DEFAULT_BASE_PORT = 3600;
+    //public static final int DEFAULT_BASE_PORT = 3640;
 
     /**
      * HTTP port offset for the OpenCyc server.
@@ -200,6 +200,7 @@ public class CycConnection {
         if ((communicationMode != ASCII_MODE) && (communicationMode != BINARY_MODE))
             throw  new RuntimeException("Invalid communication mode " + communicationMode);
         initializeApiConnections();
+        //if (trace >= API_TRACE_NONE) {
         if (trace > API_TRACE_NONE) {
             if (communicationMode == ASCII_MODE)
                 System.out.println("Ascii connection " + asciiSocket);
@@ -303,7 +304,7 @@ public class CycConnection {
    * connected.
    */
   public String getHostName() {return this.hostName;}
-  
+
   /**
    * Return the base port to which the CycConnection is established.
    * @return the port to which this <tt>CycConnection</tt> is
@@ -523,11 +524,20 @@ public class CycConnection {
                 // Return the symbol.
                 return response;
             }
+
+            try {
+                double doubleAnswer = Double.parseDouble(answer);
+                response[1] = new Double(doubleAnswer);
+                // Return the double.
+                return response;
+            }
+            catch (NumberFormatException e) {
+            }
             if (answer.endsWith("d0") &&
                 (ViolinStrings.Strings.indexOfAnyOf(answer.substring(0, answer.length() - 2), "0123456789") > -1)) {
                 String floatPart = answer.substring(0, answer.length() - 2);
                 response[1] = new Double(floatPart);
-                // Return the symbol.
+                // Return the double.
                 return response;
             }
             throw new RuntimeException("Ascii api response not understood " + answer);

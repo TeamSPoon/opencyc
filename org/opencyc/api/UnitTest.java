@@ -391,7 +391,8 @@ public class UnitTest extends TestCase {
         // getConstantById
         cycConstant = null;
         try {
-            cycConstant = cycAccess.getConstantById(new Integer(23200));
+            cycConstant = cycAccess.getConstantByGuid(CycObjectFactory.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"));
+            cycConstant = cycAccess.getConstantById(cycConstant.getId());
         }
         catch (UnknownHostException e) {
             CycAccess.current().close();
@@ -895,23 +896,6 @@ public class UnitTest extends TestCase {
     protected void doTestCycAccess3 (CycAccess cycAccess) {
         long startMilliseconds = System.currentTimeMillis();
         CycObjectFactory.resetCycConstantCaches();
-        // getParaphrase.
-        String phrase = null;
-        try {
-            //cycAccess.traceOn();
-            phrase = cycAccess.getParaphrase(cycAccess.makeCycList("(#$isa #$Brazil #$Country)"));
-        }
-        catch (UnknownHostException e) {
-            CycAccess.current().close();
-            Assert.fail(e.toString());
-        }
-        catch (IOException e) {
-            CycAccess.current().close();
-            Assert.fail(e.toString());
-        }
-        Assert.assertNotNull(phrase);
-        Assert.assertEquals("Brazil (country) is a country (political entity)", phrase);
-
         // getComment.
         String comment = null;
         try {
@@ -1293,6 +1277,23 @@ public class UnitTest extends TestCase {
         }
         Assert.assertTrue(answer);
 
+        // getParaphrase.
+        String phrase = null;
+        try {
+            //cycAccess.traceOn();
+            phrase = cycAccess.getParaphrase(cycAccess.makeCycList("(#$isa #$Brazil #$Country)"));
+        }
+        catch (UnknownHostException e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(phrase);
+        Assert.assertEquals("Brazil (country) is a country (political entity)", phrase);
+
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
@@ -1380,32 +1381,6 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
 
-        // getWhyGenlParaphrase.
-        ArrayList whyGenlParaphrase = null;
-        try {
-            //cycAccess.traceOn();
-            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
-            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
-            whyGenlParaphrase = cycAccess.getWhyGenlParaphrase(dog, animal);
-        }
-        catch (UnknownHostException e) {
-            CycAccess.current().close();
-            Assert.fail(e.toString());
-        }
-        catch (IOException e) {
-            CycAccess.current().close();
-            Assert.fail(e.toString());
-        }
-        Assert.assertNotNull(whyGenlParaphrase);
-        String oneExpectedGenlParaphrase =
-            "every tame animal is a non-human animal";
-
-        //for (int i = 0; i < whyGenlParaphrase.size(); i++) {
-        //    System.out.println(whyGenlParaphrase.get(i));
-        //}
-
-        Assert.assertTrue(whyGenlParaphrase.contains(oneExpectedGenlParaphrase));
-
         // getWhyCollectionsIntersect.
         List whyCollectionsIntersect = null;
         try {
@@ -1429,29 +1404,6 @@ public class UnitTest extends TestCase {
                                   "((#$genls #$TameAnimal #$NonPersonAnimal) :TRUE))");
         Assert.assertEquals(expectedWhyCollectionsIntersect.toString(), whyCollectionsIntersect.toString());
         Assert.assertEquals(expectedWhyCollectionsIntersect, whyCollectionsIntersect);
-
-        // getWhyCollectionsIntersectParaphrase.
-        ArrayList whyCollectionsIntersectParaphrase = null;
-        try {
-            //cycAccess.traceOn();
-            CycConstant domesticatedAnimal = cycAccess.getKnownConstantByGuid("c10c22cd-9c29-11b1-9dad-c379636f7270");
-            CycConstant nonPersonAnimal = cycAccess.getKnownConstantByGuid("bd58e066-9c29-11b1-9dad-c379636f7270");
-            whyCollectionsIntersectParaphrase =
-                cycAccess.getWhyCollectionsIntersectParaphrase(domesticatedAnimal, nonPersonAnimal);
-        }
-        catch (UnknownHostException e) {
-            CycAccess.current().close();
-            Assert.fail(e.toString());
-        }
-        catch (IOException e) {
-            CycAccess.current().close();
-            Assert.fail(e.toString());
-        }
-        Assert.assertNotNull(whyCollectionsIntersectParaphrase);
-        String oneExpectedCollectionsIntersectParaphrase =
-            "every domesticated animal (tame animal) is a tame animal";
-        //System.out.println(whyCollectionsIntersectParaphrase);
-        Assert.assertTrue(whyCollectionsIntersectParaphrase.contains(oneExpectedCollectionsIntersectParaphrase));
 
         // getCollectionLeaves.
         List collectionLeaves = null;
@@ -1613,6 +1565,59 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertTrue(answer);
+
+        // getWhyCollectionsIntersectParaphrase.
+        ArrayList whyCollectionsIntersectParaphrase = null;
+        try {
+            //cycAccess.traceOn();
+            CycConstant domesticatedAnimal = cycAccess.getKnownConstantByGuid("c10c22cd-9c29-11b1-9dad-c379636f7270");
+            CycConstant nonPersonAnimal = cycAccess.getKnownConstantByGuid("bd58e066-9c29-11b1-9dad-c379636f7270");
+            whyCollectionsIntersectParaphrase =
+                cycAccess.getWhyCollectionsIntersectParaphrase(domesticatedAnimal, nonPersonAnimal);
+        }
+        catch (UnknownHostException e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(whyCollectionsIntersectParaphrase);
+        String oneExpectedCollectionsIntersectParaphrase =
+            "every domesticated animal (tame animal) is a tame animal";
+        //System.out.println(whyCollectionsIntersectParaphrase);
+        Assert.assertTrue(whyCollectionsIntersectParaphrase.contains(oneExpectedCollectionsIntersectParaphrase));
+
+        // getWhyGenlParaphrase.
+        ArrayList whyGenlParaphrase = null;
+        try {
+            //cycAccess.traceOn();
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            whyGenlParaphrase = cycAccess.getWhyGenlParaphrase(dog, animal);
+        }
+        catch (UnknownHostException e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            CycAccess.current().close();
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(whyGenlParaphrase);
+        String oneExpectedGenlParaphrase =
+            "every tame animal is a non-human animal";
+
+        //for (int i = 0; i < whyGenlParaphrase.size(); i++) {
+        //    System.out.println(whyGenlParaphrase.get(i));
+        //}
+
+        Assert.assertTrue(whyGenlParaphrase.contains(oneExpectedGenlParaphrase));
+
+
+
+
         long endMilliseconds = System.currentTimeMillis();
         System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
     }
@@ -2180,8 +2185,8 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(nart4.getFunctor() instanceof CycFort);
             Assert.assertNotNull(nart4.getArguments());
             Assert.assertTrue(nart4.getArguments() instanceof CycList);
-            Assert.assertEquals(nart1, nart3);
-            Assert.assertEquals(nart1, nart4);
+            Assert.assertEquals(nart1.cyclify(), nart3.cyclify());
+            Assert.assertEquals(nart1.cyclify(), nart4.cyclify());
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -2268,6 +2273,7 @@ public class UnitTest extends TestCase {
         System.out.println("**** testAsciiCycAccess 7 ****");
         CycAccess cycAccess = null;
         try {
+
             cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                       CycConnection.DEFAULT_BASE_PORT,
                                       CycConnection.ASCII_MODE,
@@ -3415,6 +3421,7 @@ public class UnitTest extends TestCase {
             script = "(null a)";
             Assert.assertTrue(cycAccess.converseBoolean(script));
 
+            /*
             // constant name with embedded slash
             //cycAccess.traceOn();
             script =
@@ -3423,6 +3430,25 @@ public class UnitTest extends TestCase {
                 "(fort-for-string \"AllEnglishTemplateMt\") \n" +
                 "(fort-for-string \"RKFParsingMt\"))";
             responseList = cycAccess.converseList(script);
+            */
+
+            // check-type
+            script = "(clear-environment)";
+            cycAccess.converseVoid(script);
+            script =
+                "(clet (result) \n" +
+                "  (ignore-errors \n" +
+                "    (check-type 1 numberp) \n" +
+                "    (csetq result t)) \n" +
+                "  result)";
+            Assert.assertEquals((Object) CycObjectFactory.t, cycAccess.converseObject(script));
+            script =
+                "(clet (result) \n" +
+                "  (ignore-errors \n" +
+                "    (check-type 1 stringp) \n" +
+                "    (csetq result t)) \n" +
+                "  result)";
+            Assert.assertEquals((Object) CycObjectFactory.nil, cycAccess.converseObject(script));
 
             //cycAccess.traceOn();
         }

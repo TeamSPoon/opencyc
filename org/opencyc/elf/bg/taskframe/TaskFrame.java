@@ -17,7 +17,7 @@ import java.util.Iterator;
 import org.doomdark.uuid.UUID;
 
 /**
- * TaskFrame specifies the materials, tools, and procedures to accomplish a task.  Generaic task
+ * TaskFrame specifies the materials, tools, and procedures to accomplish a task.  Generic task
  * frames are strored in the task frame library and from the library cloned instances are
  * provided to the job assigner when decomposing task commands.
  * 
@@ -122,16 +122,13 @@ public class TaskFrame {
     this.taskName = taskName;
   }
 
-  /**
-   * Generates a unique identifier for this task frame.
-   */
+  /** Generates a unique identifier for this task frame. */
   public void generateTaskId () {
     taskId = new UUID();
   }
   
   /**
-   * Gets the task identifier consisting of a unique id for each task
-   * commanded.
+   * Gets the task identifier consisting of a unique id for each task commanded.
    * 
    * @return the task identifier consisting of a unique id for each task
    *         commanded

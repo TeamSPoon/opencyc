@@ -55,14 +55,15 @@ public class SensoryPerception extends NodeComponent {
    * Creates a new instance of SensoryPerception with the given
    * input and output message channels.
    *
-   * @param sensoryProcessingChannel the takable channel from which messages are input
-   * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
+   * @param sensoryPerceptionChannel the takable channel from which messages are input
+   * @param nextHigherLevelSensoryPerceptionChannel the puttable channel to which messages are output
    * entity evaluator node component in value judgement
    */
-  public SensoryPerception(Takable sensoryProcessingChannel,
-                           Puttable nextHigherLevelSensoryProcessingChannel) {
-    consumer = new Consumer(sensoryProcessingChannel,
-                            nextHigherLevelSensoryProcessingChannel,
+  public SensoryPerception(Takable sensoryPerceptionChannel,
+                           Puttable nextHigherLevelSensoryPerceptionChannel) {
+    this.sensoryPerceptionChannel = sensoryPerceptionChannel;
+    consumer = new Consumer(sensoryPerceptionChannel,
+                            nextHigherLevelSensoryPerceptionChannel,
                             this);
     executor = new ThreadedExecutor();
     try {
@@ -76,6 +77,18 @@ public class SensoryPerception extends NodeComponent {
 
   //// Public Area
   
+  /** 
+   * Gets the puttable channel for this node component to which other node
+   * components can send messages.
+   *
+   * @return the puttable channel for this node component to which other node
+   * components can send messages
+   *
+   */
+  public Puttable getChannel() {
+    return (Puttable) sensoryPerceptionChannel;
+  }  
+
   /**
    * Returns a string representation of this object.
    * 
@@ -205,13 +218,13 @@ public class SensoryPerception extends NodeComponent {
     /**
      * the takable channel from which messages are input
      */
-    protected final Takable sensoryProcessingChannel;
+    protected final Takable sensoryPerceptionChannel;
     
     /**
      * the puttable channel to which sensory processing messages are output for the next
      * higher level
      */
-    protected final Puttable nextHigherLevelSensoryProcessingChannel;
+    protected final Puttable nextHigherLevelSensoryPerceptionChannel;
 
     /**
      * the parent node component
@@ -221,15 +234,15 @@ public class SensoryPerception extends NodeComponent {
     /**
      * Creates a new instance of Consumer.
      *
-     * @param sensoryProcessingChannel the takable channel from which messages are input
-     * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
+     * @param sensoryPerceptionChannel the takable channel from which messages are input
+     * @param nextHigherLevelSensoryPerceptionChannel the puttable channel to which messages are output
      * @param nodeComponent the parent node component
      */
-    protected Consumer (Takable sensoryProcessingChannel,
-                        Puttable nextHigherLevelSensoryProcessingChannel,
+    protected Consumer (Takable sensoryPerceptionChannel,
+                        Puttable nextHigherLevelSensoryPerceptionChannel,
                         NodeComponent nodeComponent) { 
-      this.sensoryProcessingChannel = sensoryProcessingChannel;
-      this.nextHigherLevelSensoryProcessingChannel = nextHigherLevelSensoryProcessingChannel;
+      this.sensoryPerceptionChannel = sensoryPerceptionChannel;
+      this.nextHigherLevelSensoryPerceptionChannel = nextHigherLevelSensoryPerceptionChannel;
       this.nodeComponent = nodeComponent;
     }
 
@@ -239,7 +252,7 @@ public class SensoryPerception extends NodeComponent {
     public void run () {
       try {
         while (true) { 
-          dispatchMsg((GenericMsg) sensoryProcessingChannel.take()); 
+          dispatchMsg((GenericMsg) sensoryPerceptionChannel.take()); 
         }
       }
       catch (InterruptedException ex) {}
@@ -290,7 +303,7 @@ public class SensoryPerception extends NodeComponent {
       perceivedSensoryInputMsg.setSender(nodeComponent);
       perceivedSensoryInputMsg.setObj(obj);
       perceivedSensoryInputMsg.setData(data);
-      sendMsgToRecipient(nextHigherLevelSensoryProcessingChannel, perceivedSensoryInputMsg);
+      sendMsgToRecipient(nextHigherLevelSensoryPerceptionChannel, perceivedSensoryInputMsg);
     }
   }
   
@@ -328,6 +341,11 @@ public class SensoryPerception extends NodeComponent {
    */
   protected ArrayList childrenSensoryPerception;
   
+  /**
+   * the takable channel from which messages are input
+   */
+  protected Takable sensoryPerceptionChannel;
+    
   /**
    * the thread which processes the input channel of messages
    */

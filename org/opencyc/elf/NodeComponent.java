@@ -1,13 +1,20 @@
 package org.opencyc.elf;
 
-import java.util.ArrayList;
-
+//// Internal Imports
 import org.opencyc.elf.bg.procedure.Procedure;
 
+import org.opencyc.elf.message.GenericMsg;
+
+//// External Imports
+import java.util.ArrayList;
+
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
 /**
  * Provides common attributes and behavior for Elementary Loop Functioning
  * (ELF) node components.<br>
+ * Each node component is a separate process that communicates with other node components
+ * by sending asychronous messages.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -29,80 +36,64 @@ import org.opencyc.elf.bg.procedure.Procedure;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class NodeComponent extends ELFObject {
+public abstract class NodeComponent extends ELFObject implements Runnable {
+
+  //// Constructors
+
+
+  //// Public Area
+  
   /**
-   * The default verbosity of this object's output.  0 --> quiet ... 9 ->
-   * maximum diagnostic input.
+   * Provides the method to be executed when the thread is started.
    */
-  public static final int DEFAULT_VERBOSITY = 3;
-
+  public abstract void run ();
+  
   /**
-   * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
-   * diagnostic input.
-   */
-  protected int verbosity = DEFAULT_VERBOSITY;
-
-  /** Reference to the ELF Node which contains this object. */
-  protected Node node;
-
-  /** indicates a pending interruption */
-  protected boolean pendingInterruption = false;
-
-  /** the interruption procedure to execute */
-  protected Procedure interruptionRequest;
-
-  /**
-   * Gets the ELF Node which contains this object.
+   * Gets the ELF Node that contains this object.
    * 
-   * @return the ELF Node which contains this object
+   * @return the ELF Node that contains this object
    */
   public Node getNode() {
     return node;
   }
 
   /**
-   * Requests an interruption of the current processing of this node component
-   * to execute the given procedure and to return the the output value.
+   * Sets the ELF Node that contains this object.
    * 
-   * @param interruptionRequest the given interruption procedure to execute
-   * 
-   * @return the output value
-   */
-  public Object interrupt(Procedure interruptionRequest) {
-    this.interruptionRequest = interruptionRequest;
-    pendingInterruption = true;
-
-    try {
-      while (true) {
-        Thread.sleep(100);
-
-        if (!pendingInterruption) {
-          break;
-        }
-      }
-    }
-     catch (InterruptedException e) {
-    }
-
-    return interruptionRequest.execute(new ArrayList());
-  }
-
-  /**
-   * Sets the ELF Node which contains this object.
-   * 
-   * @param node the ELF Node which contains this object
+   * @param node the ELF Node thatcontains this object
    */
   public void setNode(Node node) {
     this.node = node;
   }
 
+  //// Protected Area
+  
   /**
-   * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
-   * diagnostic input.
-   * 
-   * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+   * Sends the given message through the given channel to the recipient.
+   *
+   * @param channel the communication channel
+   * @param genericMsg the message to be sent to the recipient
    */
-  public void setVerbosity(int verbosity) {
-    this.verbosity = verbosity;
+  protected void sendMsgToRecipient(Puttable channel, 
+                                    GenericMsg genericMsg) {
+    try {
+      channel.put(genericMsg);
+    }
+    catch (InterruptedException e) {
+    }
   }
+  
+  
+  
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /**
+   * the ELF node that contains this object
+   */
+  protected Node node;
+
+  //// Main
 }

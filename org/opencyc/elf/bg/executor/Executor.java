@@ -39,7 +39,9 @@ import java.util.ArrayList;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Executor extends NodeComponent {
+  
   //// Constructors
+  
   /**
    * Constructs a new Executor object.
    */
@@ -157,10 +159,7 @@ public class Executor extends NodeComponent {
     // Status status
     // send receiveExecutorStatus(taskCommand, schedule, status) to (its) scheduler
   }
-  
-  public void run() {
-  }
-  
+    
   //// Private Area
   
   //// Internal Rep

@@ -254,6 +254,15 @@ public class BindingSet implements Comparable {
     }
 
     /**
+     * Returns <tt>true</tt> iff this is a formula having one variable.
+     *
+     * @return <tt>true</tt> iff this is a formula having one variable
+     */
+    public boolean isUnary() {
+        return queryLiteral.isUnary();
+    }
+
+    /**
      * Returns <tt>true</tt> iff the binding set has the form of an uninstantiated cartesian
      * product.
      *

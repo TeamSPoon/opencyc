@@ -381,33 +381,33 @@ public class CycAccess {
      */
     private void initializeConstants()    throws IOException, UnknownHostException {
         if (baseKB == null)
-            baseKB = getKnownConstantByName("BaseKB");
+            baseKB = getKnownConstantByGuid("bd588111-9c29-11b1-9dad-c379636f7270");
         if (isa == null)
-            isa = getKnownConstantByName("isa");
+            isa = getKnownConstantByGuid("bd588104-9c29-11b1-9dad-c379636f7270");
         if (genls == null)
-            genls = getKnownConstantByName("genls");
+            genls = getKnownConstantByGuid("bd58810e-9c29-11b1-9dad-c379636f7270");
         if (genlMt == null)
-            genlMt = getKnownConstantByName("genlMt");
+            genlMt = getKnownConstantByGuid("bd5880e5-9c29-11b1-9dad-c379636f7270");
         if (comment == null)
-            comment = getKnownConstantByName("comment");
+            comment = getKnownConstantByGuid("bd588109-9c29-11b1-9dad-c379636f7270");
         if (collection == null)
-            collection = getKnownConstantByName("Collection");
+            collection = getKnownConstantByGuid("bd5880cc-9c29-11b1-9dad-c379636f7270");
         if (binaryPredicate == null)
-            binaryPredicate = getKnownConstantByName("BinaryPredicate");
+            binaryPredicate = getKnownConstantByGuid("bd588102-9c29-11b1-9dad-c379636f7270");
         if (elementOf == null)
-            elementOf = getKnownConstantByName("elementOf");
+            elementOf = getKnownConstantByGuid("c0659a2b-9c29-11b1-9dad-c379636f7270");
         if (and == null)
-            and = getKnownConstantByName("and");
+            and = getKnownConstantByGuid("bd5880f9-9c29-11b1-9dad-c379636f7270");
         if (or == null)
-            or = getKnownConstantByName("or");
+            or = getKnownConstantByGuid("bd5880fa-9c29-11b1-9dad-c379636f7270");
         if (numericallyEqual == null)
-            numericallyEqual = getKnownConstantByName("numericallyEqual");
+            numericallyEqual = getKnownConstantByGuid("bd589d90-9c29-11b1-9dad-c379636f7270");
         if (plusFn == null)
-            plusFn = getKnownConstantByName("PlusFn");
+            plusFn = getKnownConstantByGuid("bd5880ae-9c29-11b1-9dad-c379636f7270");
         if (different == null)
-            different = getKnownConstantByName("different");
+            different = getKnownConstantByGuid("bd63f343-9c29-11b1-9dad-c379636f7270");
         if (thing == null)
-            thing = getKnownConstantByName("Thing");
+            thing = getKnownConstantByGuid("bd5880f4-9c29-11b1-9dad-c379636f7270");
     }
 
     /**
@@ -587,7 +587,37 @@ public class CycAccess {
     }
 
     /**
+     * Gets a known CycConstant by using its GUID string.
+     *
+     * @param guid the globally unique ID string of the constant to be instantiated
+     * @return the complete <tt>CycConstant</tt> if found, otherwise throw an exception
+     */
+    public CycConstant getKnownConstantByGuid (String guidString)
+        throws IOException, UnknownHostException {
+        Guid guid = Guid.makeGuid(guidString);
+        return getKnownConstantByGuid(guid);
+    }
+
+    /**
+     * Gets a known CycConstant by using its GUID.
+     *
+     * @param guid the globally unique ID of the constant to be instantiated
+     * @return the complete <tt>CycConstant</tt> if found, otherwise throw an exception
+     */
+    public CycConstant getKnownConstantByGuid (Guid guid)
+        throws IOException, UnknownHostException {
+        CycConstant cycConstant = getConstantByGuid(guid);
+        if (cycConstant == null)
+            throw new RuntimeException("Expected constant not found " + guid);
+        return cycConstant;
+    }
+
+    /**
      * Gets a CycConstant by using its GUID.
+     *
+     * @param guid the GUID from which to find the constant
+     * @return the complete <tt>CycConstant</tt> if found, otherwise return <tt>null</tt>
+     *
      */
     public CycConstant getConstantByGuid (Guid guid)  throws IOException, UnknownHostException {
         String command = "(boolean (find-constant-by-guid (string-to-guid \"" + guid + "\")))";
@@ -979,9 +1009,10 @@ public class CycAccess {
      * Returns true if CycFort COLLECION1 and CycFort COLLECTION2 are asserted coextensional.
      */
     public boolean areAssertedCoextensional (CycFort collection1, CycFort collection2)  throws IOException, UnknownHostException {
-        if (predicateRelates(getKnownConstantByName("coExtensional"), collection1, collection2))
+        CycConstant coExtensional = this.getKnownConstantByGuid("bd59083a-9c29-11b1-9dad-c379636f7270");
+        if (predicateRelates(coExtensional, collection1, collection2))
             return true;
-        else if (predicateRelates(getKnownConstantByName("coExtensional"), collection2, collection1))
+        else if (predicateRelates(coExtensional, collection2, collection1))
             return true;
         else
             return false;
@@ -1519,7 +1550,7 @@ public class CycAccess {
     public void assertComment (CycConstant cycConstant,
                                String comment,
                                CycFort mt)   throws IOException, UnknownHostException {
-        assertGaf(mt, getKnownConstantByName("comment"), cycConstant, comment);
+        assertGaf(mt, CycAccess.comment, cycConstant, comment);
     }
 
     /**
@@ -1564,21 +1595,25 @@ public class CycAccess {
         String vocabMtComment = "The #$VocabularyMicrotheory for #$"+ theoryMtName;
         String dataMtName = mtRootName + "DataMt";
         String dataMtComment = "The #$DataMicrotheory for #$"+ theoryMtName;
-        CycConstant worldLikeOursMt = this.getKnownConstantByName("WorldLikeOursCollectorMt");
-        CycConstant currentWorldDataMt = this.getKnownConstantByName("CurrentWorldDataCollectorMt");
-        CycConstant genlMt_Vocabulary = this.getKnownConstantByName("genlMt-Vocabulary");
+        CycConstant worldLikeOursMt = getKnownConstantByGuid("bf4c781d-9c29-11b1-9dad-c379636f7270");
+        CycConstant currentWorldDataMt = getKnownConstantByGuid("bf192b1e-9c29-11b1-9dad-c379636f7270");
+        CycConstant genlMt_Vocabulary = getKnownConstantByGuid("c054a49e-9c29-11b1-9dad-c379636f7270");
 
+        CycConstant theoryMicrotheory = getKnownConstantByGuid("be5275a8-9c29-11b1-9dad-c379636f7270");
         CycConstant theoryMt = createMicrotheory(theoryMtName,
                                                  comment,
-                                                 getKnownConstantByName("TheoryMicrotheory"),
+                                                 theoryMicrotheory,
                                                  genlMts);
+        CycConstant vocabularyMicrotheory =
+            getKnownConstantByGuid("bda19dfd-9c29-11b1-9dad-c379636f7270");
         CycConstant vocabMt = createMicrotheory(vocabMtName,
                                                 vocabMtComment,
-                                                getKnownConstantByName("VocabularyMicrotheory"),
+                                                vocabularyMicrotheory,
                                                 new ArrayList());
+        CycConstant dataMicrotheory = getKnownConstantByGuid("be5275a8-9c29-11b1-9dad-c379636f7270");
         CycConstant dataMt = createMicrotheory(dataMtName,
                                                dataMtComment,
-                                               getKnownConstantByName("DataMicrotheory"),
+                                               dataMicrotheory,
                                                new ArrayList());
         assertGaf(baseKB, genlMt_Vocabulary, theoryMt, vocabMt);
         assertGaf(baseKB, genlMt, dataMt, theoryMt);
@@ -1794,8 +1829,10 @@ public class CycAccess {
     public CycList getBackchainImplicationRules (CycConstant predicate, CycList formula, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
-        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
-            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+        CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        if (mt.equals(inferencePsc) ||
+            mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules formula) ");
             command.append("  (with-all-mts ");
             command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
@@ -1832,8 +1869,10 @@ public class CycAccess {
     public CycList getForwardChainRules (CycConstant predicate, CycList formula, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
-        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
-            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+        CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        if (mt.equals(inferencePsc) ||
+            mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules formula) ");
             command.append("  (with-all-mts ");
             command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
@@ -1868,8 +1907,10 @@ public class CycAccess {
     public CycList getBackchainRules (CycConstant predicate, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
-        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
-            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+        CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        if (mt.equals(inferencePsc) ||
+            mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules) ");
             command.append("  (with-all-mts ");
             command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
@@ -1899,8 +1940,10 @@ public class CycAccess {
     public CycList getForwardChainRules (CycConstant predicate, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
-        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
-            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+        CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        if (mt.equals(inferencePsc) ||
+            mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules) ");
             command.append("  (with-all-mts ");
             command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
@@ -1970,7 +2013,9 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is required
      */
     public boolean isBackchainRequired(CycConstant predicate, CycFort mt) throws IOException {
-        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainRequired"),
+        CycConstant backchainRequired =
+            getKnownConstantByGuid("beaa3d29-9c29-11b1-9dad-c379636f7270");
+        return hasSomePredicateUsingTerm(backchainRequired,
                                          predicate,
                                          new Integer(1),
                                          mt);
@@ -1984,7 +2029,9 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is encouraged
      */
     public boolean isBackchainEncouraged(CycConstant predicate, CycFort mt) throws IOException {
-        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainEncouraged"),
+        CycConstant backchainEncouraged =
+            getKnownConstantByGuid("c09d1cea-9c29-11b1-9dad-c379636f7270");
+        return hasSomePredicateUsingTerm(backchainEncouraged,
                                          predicate,
                                          new Integer(1),
                                          mt);
@@ -1998,7 +2045,9 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is discouraged
      */
     public boolean isBackchainDiscouraged(CycConstant predicate, CycFort mt) throws IOException {
-        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainDiscouraged"),
+        CycConstant backchainDiscouraged =
+            getKnownConstantByGuid("bfcbce14-9c29-11b1-9dad-c379636f7270");
+        return hasSomePredicateUsingTerm(backchainDiscouraged,
                                          predicate,
                                          new Integer(1),
                                          mt);
@@ -2012,9 +2061,9 @@ public class CycAccess {
      * @return <tt>true</tt> iff backchain inference on the given predicate is forbidden
      */
     public boolean isBackchainForbidden(CycConstant predicate, CycFort mt) throws IOException {
-        if (predicate.equals(getKnownConstantByName("objectFoundInLocation")))
-            return false;
-        return hasSomePredicateUsingTerm(getKnownConstantByName("backchainForbidden"),
+        CycConstant backchainForbidden =
+            getKnownConstantByGuid("bfa4e9d2-9c29-11b1-9dad-c379636f7270");
+        return hasSomePredicateUsingTerm(backchainForbidden,
                                          predicate,
                                          new Integer(1),
                                          mt);
@@ -2030,7 +2079,9 @@ public class CycAccess {
      * (#$isa ?PRED #$IrreflexsiveBinaryPredicate)
      */
     public boolean isIrreflexivePredicate(CycConstant predicate, CycFort mt) throws IOException {
-        return this.isa(predicate, getKnownConstantByName("IrreflexiveBinaryPredicate"), mt);
+        CycConstant irreflexiveBinaryPredicate =
+            getKnownConstantByGuid("bd654be7-9c29-11b1-9dad-c379636f7270");
+        return this.isa(predicate, irreflexiveBinaryPredicate, mt);
     }
     /**
      * Returns <tt>true</tt> iff any ground formula instances exist having the given predicate,
@@ -2048,8 +2099,10 @@ public class CycAccess {
                                              Integer argumentPosition,
                                              CycFort mt) throws IOException {
         CycList command = new CycList();
-        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
-            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+        CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        if (mt.equals(inferencePsc) ||
+            mt.equals(everythingPsc)) {
             command.add(CycSymbol.makeCycSymbol("some-pred-value-in-any-mt"));
             command.add(term.cycListApiValue());
             command.add(predicate.cycListApiValue());
@@ -2077,8 +2130,10 @@ public class CycAccess {
      */
     public int countUsingBestIndex(CycList formula, CycFort mt) throws IOException {
         CycList command = new CycList();
-        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
-            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+        CycConstant inferencePsc = this.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        CycConstant everythingPsc = this.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        if (mt.equals(inferencePsc) ||
+            mt.equals(everythingPsc)) {
             command.add(CycSymbol.makeCycSymbol("with-all-mts"));
         }
         else {

@@ -60,7 +60,7 @@ public class UnitTest extends TestCase {
         else {
             testSuite = new TestSuite();
             //testSuite.addTest(new UnitTest("testQueryParser"));
-            //testSuite.addTest(new UnitTest("testLiteralAsker"));
+            //testSuite.addTest(new UnitTest("testLiteralAsker1"));
             //testSuite.addTest(new UnitTest("testHashJoiner"));
             //testSuite.addTest(new UnitTest("testQueryProcessor1"));
             //testSuite.addTest(new UnitTest("testQueryProcessor3"));
@@ -70,7 +70,6 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testQueryProcessor7"));
             //testSuite.addTest(new UnitTest("testQueryProcessor8"));
             //testSuite.addTest(new UnitTest("testQueryProcessor9"));
-            //testSuite.addTest(new UnitTest("testQueryProcessor10"));
             testSuite.addTest(new UnitTest("testQueryProcessor11"));
             //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
@@ -136,8 +135,8 @@ public class UnitTest extends TestCase {
     /**
      * Tests the <tt>LiteralAsker</tt> class.
      */
-    public void testLiteralAsker() {
-        System.out.println("** testLiteralAsker **");
+    public void testLiteralAsker1() {
+        System.out.println("** testLiteralAsker1 **");
         CycAccess cycAccess = null;
         try {
             cycAccess = new CycAccess();
@@ -155,7 +154,9 @@ public class UnitTest extends TestCase {
             queryLiteral2 = new QueryLiteral("(#$isa ?cathedral #$Cathedral)");
             queryLiteral3 = new QueryLiteral("(#$countryOfCity ?country ?city)");
             queryLiteral4 = new QueryLiteral("(#$objectFoundInLocation ?cathedral ?city)");
-            mt = CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+            CycConstant tourAndVacationPackageItinerariesMt =
+                cycAccess.getKnownConstantByGuid("bfc7800e-9c29-11b1-9dad-c379636f7270");
+            mt = tourAndVacationPackageItinerariesMt;
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -184,7 +185,7 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
-        System.out.println("** testLiteralAsker OK **");
+        System.out.println("** testLiteralAsker1 OK **");
     }
 
     /**
@@ -210,7 +211,9 @@ public class UnitTest extends TestCase {
             queryLiteral2 = new QueryLiteral("(#$isa ?cathedral #$Cathedral)");
             queryLiteral3 = new QueryLiteral("(#$countryOfCity ?country ?city)");
             queryLiteral4 = new QueryLiteral("(#$objectFoundInLocation ?cathedral ?city)");
-            mt = CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+            CycConstant tourAndVacationPackageItinerariesMt =
+                cycAccess.getKnownConstantByGuid("bfc7800e-9c29-11b1-9dad-c379636f7270");
+            mt = tourAndVacationPackageItinerariesMt;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -270,15 +273,16 @@ public class UnitTest extends TestCase {
             "  (#$countryOfCity ?country ?city) " +
             "  (#$objectFoundInLocation ?cathedral ?city)) ";
         QueryProcessor europeanCathedralsQuery = new QueryProcessor();
-        europeanCathedralsQuery.setVerbosity(3);
+        europeanCathedralsQuery.setVerbosity(5);
         // Request two solutions.
         // europeanCathedralsQuery.nbrSolutionsRequested = new Integer(2);
         // Request all solutions.
         europeanCathedralsQuery.nbrSolutionsRequested = null;
         ArrayList solutions = null;
         try {
-            europeanCathedralsQuery.mt =
-                CycAccess.current().getConstantByName("TourAndVacationPackageItinerariesMt");
+            CycConstant tourAndVacationPackageItinerariesMt =
+                CycAccess.current().getKnownConstantByGuid("bfc7800e-9c29-11b1-9dad-c379636f7270");
+            europeanCathedralsQuery.mt = tourAndVacationPackageItinerariesMt;
             solutions = europeanCathedralsQuery.ask(CycAccess.current().makeCycList(europeanCathedralsString));
         }
         catch (Exception e) {
@@ -308,8 +312,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         whatIsInAustinProblem2.nbrSolutionsRequested = null;
         try {
-            whatIsInAustinProblem2.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            whatIsInAustinProblem2.mt = inferencePSC;
             ArrayList solutions = whatIsInAustinProblem2.ask(whatIsInAustinString);
         Assert.assertNotNull(solutions);
         }
@@ -337,8 +342,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         oneVariableQueryProblem.nbrSolutionsRequested = null;
         try {
-            oneVariableQueryProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            oneVariableQueryProblem.mt = inferencePSC;
             ArrayList solutions = oneVariableQueryProblem.ask(oneVariableQueryString);
         Assert.assertNotNull(solutions);
         }
@@ -367,8 +373,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         oneVariableQueryProblem.nbrSolutionsRequested = null;
         try {
-            oneVariableQueryProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            oneVariableQueryProblem.mt = inferencePSC;
             ArrayList solutions = oneVariableQueryProblem.ask(oneVariableQueryString);
         Assert.assertNotNull(solutions);
         }
@@ -396,8 +403,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         nartProblem.nbrSolutionsRequested = null;
         try {
-            nartProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            nartProblem.mt = inferencePSC;
             ArrayList solutions = nartProblem.ask(nartQueryString);
         Assert.assertNotNull(solutions);
         }
@@ -426,8 +434,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         nFnProblem.nbrSolutionsRequested = null;
         try {
-            nFnProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            nFnProblem.mt = inferencePSC;
             ArrayList solutions = nFnProblem.ask(nFnString);
         Assert.assertNotNull(solutions);
         }
@@ -459,8 +468,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         isaDomainProblem.nbrSolutionsRequested = null;
         try {
-            isaDomainProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            isaDomainProblem.mt = inferencePSC;
             ArrayList solutions = isaDomainProblem.ask(isaDomainString);
         Assert.assertNotNull(solutions);
         }
@@ -491,8 +501,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         problem.nbrSolutionsRequested = null;
         try {
-            problem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            problem.mt = inferencePSC;
             ArrayList solutions = problem.ask(problemString);
         Assert.assertNotNull(solutions);
         }
@@ -503,85 +514,6 @@ public class UnitTest extends TestCase {
         }
 
         System.out.println("** testQueryProcessor9 OK **");
-    }
-
-    /**
-     * Tests the <tt>QueryProcessor</tt> class.
-     */
-    public void testQueryProcessor10() {
-        System.out.println("** testQueryProcessor10 **");
-
-        // zebra constraint problem.
-        String problemString =
-            "(#$and " +
-            "  (#$or " +
-            "    (#$numericallyEqual ?norwegian (#$PlusFn ?blue 1)) " +
-            "    (#$numericallyEqual ?blue (#$PlusFn ?norwegian 1))) " +
-            "  (#$numericallyEqual ?japanese ?volkswagen) " +
-            "  (#$numericallyEqual ?mercedes-benz ?orange-juice) " +
-            "  (#$or " +
-            "    (#$numericallyEqual ?ford (#$PlusFn ?horse 1)) " +
-            "    (#$numericallyEqual ?horse (#$PlusFn ?ford 1))) " +
-            "  (#$or " +
-            "    (#$numericallyEqual ?chevrolet (#$PlusFn ?fox 1)) " +
-            "    (#$numericallyEqual ?fox (#$PlusFn ?chevrolet 1))) " +
-            "  (#$numericallyEqual ?norwegian 1) " +
-            "  (#$numericallyEqual ?milk 3) " +
-            "  (#$numericallyEqual ?ford ?yellow) " +
-            "  (#$numericallyEqual ?oldsmobile ?snails) " +
-            "  (#$numericallyEqual ?green (#$PlusFn ?ivory 1)) " +
-            "  (#$numericallyEqual ?ukranian ?eggnog) " +
-            "  (#$numericallyEqual ?cocoa ?green) " +
-            "  (#$numericallyEqual ?spaniard ?dog) " +
-            "  (#$numericallyEqual ?english ?red) " +
-            "  (#$different ?ford ?chevrolet ?oldsmobile ?mercedes-benz ?volkswagen) " +
-            "  (#$different ?orange-juice ?cocoa ?eggnog ?milk ?water) " +
-            "  (#$different ?dog ?snails ?horse ?fox ?zebra) " +
-            "  (#$different ?english ?spaniard ?norwegian ?japanese ?ukranian) " +
-            "  (#$different ?blue ?red ?green ?yellow ?ivory) " +
-            "  (#$elementOf ?blue (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?chevrolet (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?cocoa (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?dog (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?eggnog (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?english (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?ford (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?fox (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?green (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?horse (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?ivory (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?japanese (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?mercedes-benz (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?milk (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?norwegian (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?oldsmobile (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?orange-juice (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?red (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?snails (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?spaniard (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?ukranian (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?volkswagen (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?water (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
-            "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
-        System.out.println(problemString);
-        QueryProcessor problem = new QueryProcessor();
-        problem.setVerbosity(9);
-        // Request all solutions.
-        problem.nbrSolutionsRequested = null;
-        try {
-            problem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
-            ArrayList solutions = problem.ask(problemString);
-        Assert.assertNotNull(solutions);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-
-        System.out.println("** testQueryProcessor10 OK **");
     }
 
     /**
@@ -609,8 +541,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         problem.nbrSolutionsRequested = null;
         try {
-            problem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            problem.mt = inferencePSC;
             ArrayList solutions = problem.ask(problemString);
         Assert.assertNotNull(solutions);
         }
@@ -651,8 +584,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         whatIsInAustinProblem.nbrSolutionsRequested = null;
         try {
-            whatIsInAustinProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            whatIsInAustinProblem.mt = inferencePSC;
             whatIsInAustinProblem.query = CycAccess.current().makeCycList(whatIsInAustinString);
             whatIsInAustinProblem.queryParser.extractQueryLiterals();
             whatIsInAustinProblem.backchainer.mt = whatIsInAustinProblem.mt;
@@ -685,8 +619,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         whatIsInAustinProblem.nbrSolutionsRequested = null;
         try {
-            whatIsInAustinProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            whatIsInAustinProblem.mt = inferencePSC;
             ArrayList solutions = whatIsInAustinProblem.ask(whatIsInAustinString);
             for (int i = 0; i < solutions.size(); i++)
                 System.out.println(solutions.get(i));
@@ -716,8 +651,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         whatIsInAustinProblem.nbrSolutionsRequested = null;
         try {
-            whatIsInAustinProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            whatIsInAustinProblem.mt = inferencePSC;
             ArrayList solutions = whatIsInAustinProblem.ask(whatIsInAustinString);
             for (int i = 0; i < solutions.size(); i++)
                 System.out.println(solutions.get(i));
@@ -747,8 +683,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
         try {
-            whatIsACarvedArtworkProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            whatIsACarvedArtworkProblem.mt = inferencePSC;
             ArrayList solutions = whatIsACarvedArtworkProblem.ask(whatIsACarvedArtworkString);
             for (int i = 0; i < solutions.size(); i++)
                 System.out.println(solutions.get(i));
@@ -777,8 +714,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         whatIsACarvedArtworkProblem.nbrSolutionsRequested = null;
         try {
-            whatIsACarvedArtworkProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            whatIsACarvedArtworkProblem.mt = inferencePSC;
             ArrayList solutions = whatIsACarvedArtworkProblem.ask(whatIsACarvedArtworkString);
             for (int i = 0; i < solutions.size(); i++)
                 System.out.println(solutions.get(i));
@@ -811,8 +749,9 @@ public class UnitTest extends TestCase {
         // Request all solutions.
         austinIsaHarborProblem.nbrSolutionsRequested = null;
         try {
-            austinIsaHarborProblem.mt =
-                CycAccess.current().getConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            austinIsaHarborProblem.mt = inferencePSC;
             ArrayList solutions = austinIsaHarborProblem.ask(austinIsaHarborString);
         Assert.assertNotNull(solutions);
         }

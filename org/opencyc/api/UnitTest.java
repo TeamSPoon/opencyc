@@ -397,7 +397,8 @@ public class UnitTest extends TestCase {
         // getComment.
         String comment = null;
         try {
-            comment = cycAccess.getComment(cycAccess.getConstantByName("#$Raindrop"));
+            CycConstant raindrop = cycAccess.getKnownConstantByGuid("bd58bec6-9c29-11b1-9dad-c379636f7270");
+            comment = cycAccess.getComment(raindrop);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -412,7 +413,8 @@ public class UnitTest extends TestCase {
         // getIsas.
         List isas = null;
         try {
-            isas = cycAccess.getIsas(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            isas = cycAccess.getIsas(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -424,7 +426,9 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(isas instanceof CycList);
         isas = ((CycList) isas).sort();
         try {
-            Assert.assertTrue(isas.contains(cycAccess.getConstantByName("OrganismClassificationType")));
+            CycConstant organismClassificationType =
+                cycAccess.getKnownConstantByGuid("bd58dfe4-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(isas.contains(organismClassificationType));
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -500,7 +504,8 @@ public class UnitTest extends TestCase {
         // getGenls.
         List genls = null;
         try {
-            genls = cycAccess.getGenls(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            genls = cycAccess.getGenls(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -516,7 +521,8 @@ public class UnitTest extends TestCase {
         // getGenlPreds.
         List genlPreds = null;
         try {
-            genlPreds = cycAccess.getGenlPreds(cycAccess.getConstantByName("#$target"));
+            CycConstant target = cycAccess.getKnownConstantByGuid("c10afaed-9c29-11b1-9dad-c379636f7270");
+            genlPreds = cycAccess.getGenlPreds(target);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -531,7 +537,8 @@ public class UnitTest extends TestCase {
         // getArg1Formats.
         List arg1Formats = null;
         try {
-            arg1Formats = cycAccess.getArg1Formats(cycAccess.getConstantByName("#$target"));
+            CycConstant target = cycAccess.getKnownConstantByGuid("c10afaed-9c29-11b1-9dad-c379636f7270");
+            arg1Formats = cycAccess.getArg1Formats(target);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -545,7 +552,8 @@ public class UnitTest extends TestCase {
         // getArg1Formats.
         arg1Formats = null;
         try {
-            arg1Formats = cycAccess.getArg1Formats(cycAccess.getConstantByName("#$constantName"));
+            CycConstant constantName = cycAccess.getKnownConstantByGuid("bd7183b0-9c29-11b1-9dad-c379636f7270");
+            arg1Formats = cycAccess.getArg1Formats(constantName);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -560,7 +568,8 @@ public class UnitTest extends TestCase {
         // getArg2Formats.
         List arg2Formats = null;
         try {
-            arg2Formats = cycAccess.getArg2Formats(cycAccess.getConstantByName("#$internalParts"));
+            CycConstant internalParts = cycAccess.getKnownConstantByGuid("bd58cf63-9c29-11b1-9dad-c379636f7270");
+            arg2Formats = cycAccess.getArg2Formats(internalParts);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -574,7 +583,8 @@ public class UnitTest extends TestCase {
         // getDisjointWiths.
         List disjointWiths = null;
         try {
-            disjointWiths = cycAccess.getDisjointWiths(cycAccess.getConstantByName("#$Plant"));
+            CycConstant plant = cycAccess.getKnownConstantByGuid("bd58c6e1-9c29-11b1-9dad-c379636f7270");
+            disjointWiths = cycAccess.getDisjointWiths(plant);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -589,7 +599,8 @@ public class UnitTest extends TestCase {
         List coExtensionals = null;
         try {
             //cycAccess.traceOn();
-            coExtensionals = cycAccess.getCoExtensionals(cycAccess.getConstantByName("#$CycLTerm"));
+            CycConstant cycLTerm = cycAccess.getKnownConstantByGuid("c107fffb-9c29-11b1-9dad-c379636f7270");
+            coExtensionals = cycAccess.getCoExtensionals(cycLTerm);
             //cycAccess.traceOff();
         }
         catch (UnknownHostException e) {
@@ -605,7 +616,8 @@ public class UnitTest extends TestCase {
         // getCoExtensionals.
         coExtensionals = null;
         try {
-            coExtensionals = cycAccess.getCoExtensionals(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            coExtensionals = cycAccess.getCoExtensionals(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -619,7 +631,8 @@ public class UnitTest extends TestCase {
         // getArg1Isas.
         List arg1Isas = null;
         try {
-            arg1Isas = cycAccess.getArg1Isas(cycAccess.getConstantByName("#$doneBy"));
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            arg1Isas = cycAccess.getArg1Isas(doneBy);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -633,7 +646,8 @@ public class UnitTest extends TestCase {
         // getArg2Isas.
         List arg2Isas = null;
         try {
-            arg2Isas = cycAccess.getArg2Isas(cycAccess.getConstantByName("#$doneBy"));
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            arg2Isas = cycAccess.getArg2Isas(doneBy);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -647,7 +661,8 @@ public class UnitTest extends TestCase {
         // getArgNIsas.
         List argNIsas = null;
         try {
-            argNIsas = cycAccess.getArgNIsas(cycAccess.getConstantByName("#$doneBy"), 1);
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            argNIsas = cycAccess.getArgNIsas(doneBy, 1);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -661,7 +676,8 @@ public class UnitTest extends TestCase {
         // getArgNGenls.
         List argGenls = null;
         try {
-            argGenls = cycAccess.getArgNGenls(cycAccess.getConstantByName("#$superTaxons"), 2);
+            CycConstant superTaxons = cycAccess.getKnownConstantByGuid("bd58e36e-9c29-11b1-9dad-c379636f7270");
+            argGenls = cycAccess.getArgNGenls(superTaxons, 2);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -675,7 +691,8 @@ public class UnitTest extends TestCase {
         // isCollection.
         boolean answer = false;
         try {
-            answer = cycAccess.isCollection(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.isCollection(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -688,7 +705,8 @@ public class UnitTest extends TestCase {
         // isCollection.
         answer = true;
         try {
-            answer = cycAccess.isCollection(cycAccess.getConstantByName("#$doneBy"));
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.isCollection(doneBy);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -701,7 +719,8 @@ public class UnitTest extends TestCase {
         // isBinaryPredicate.
         answer = false;
         try {
-            answer = cycAccess.isBinaryPredicate(cycAccess.getConstantByName("#$doneBy"));
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.isBinaryPredicate(doneBy);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -714,7 +733,8 @@ public class UnitTest extends TestCase {
         // isBinaryPredicate.
         answer = true;
         try {
-            answer = cycAccess.isBinaryPredicate(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.isBinaryPredicate(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -727,7 +747,8 @@ public class UnitTest extends TestCase {
         // getPluralGeneratedPhrase.
         String phrase = null;
         try {
-            phrase = cycAccess.getPluralGeneratedPhrase(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            phrase = cycAccess.getPluralGeneratedPhrase(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -741,7 +762,8 @@ public class UnitTest extends TestCase {
         // getSingularGeneratedPhrase.
         phrase = null;
         try {
-            phrase = cycAccess.getSingularGeneratedPhrase(cycAccess.getConstantByName("#$Brazil"));
+            CycConstant brazil = cycAccess.getKnownConstantByGuid("bd588f01-9c29-11b1-9dad-c379636f7270");
+            phrase = cycAccess.getSingularGeneratedPhrase(brazil);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -755,7 +777,8 @@ public class UnitTest extends TestCase {
         // getGeneratedPhrase.
         phrase = null;
         try {
-            phrase = cycAccess.getGeneratedPhrase(cycAccess.getConstantByName("#$doneBy"));
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            phrase = cycAccess.getGeneratedPhrase(doneBy);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -851,7 +874,8 @@ public class UnitTest extends TestCase {
         // getComment.
         String comment = null;
         try {
-            comment = cycAccess.getComment(cycAccess.getConstantByName("#$MonaLisa-Painting"));
+            CycConstant monaLisaPainting = cycAccess.getKnownConstantByGuid("bf9ef7a9-9c29-11b1-9dad-c379636f7270");
+            comment = cycAccess.getComment(monaLisaPainting);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -865,7 +889,8 @@ public class UnitTest extends TestCase {
         // getIsas.
         List isas = null;
         try {
-            isas = cycAccess.getIsas(cycAccess.getConstantByName("#$Brazil"));
+            CycConstant brazil = cycAccess.getKnownConstantByGuid("bd588f01-9c29-11b1-9dad-c379636f7270");
+            isas = cycAccess.getIsas(brazil);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -881,7 +906,8 @@ public class UnitTest extends TestCase {
         // getGenls.
         List genls = null;
         try {
-            genls = cycAccess.getGenls(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            genls = cycAccess.getGenls(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -897,7 +923,8 @@ public class UnitTest extends TestCase {
         // getMinGenls.
         List minGenls = null;
         try {
-            minGenls = cycAccess.getMinGenls(cycAccess.getConstantByName("#$Lion"));
+            CycConstant lion = cycAccess.getKnownConstantByGuid("bd58c467-9c29-11b1-9dad-c379636f7270");
+            minGenls = cycAccess.getMinGenls(lion);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -913,7 +940,8 @@ public class UnitTest extends TestCase {
         // getSpecs.
         List specs = null;
         try {
-            specs = cycAccess.getSpecs(cycAccess.getConstantByName("#$CanineAnimal"));
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            specs = cycAccess.getSpecs(canineAnimal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -929,7 +957,8 @@ public class UnitTest extends TestCase {
         // getMaxSpecs.
         List maxSpecs = null;
         try {
-            maxSpecs = cycAccess.getMaxSpecs(cycAccess.getConstantByName("#$CanineAnimal"));
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            maxSpecs = cycAccess.getMaxSpecs(canineAnimal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -945,7 +974,8 @@ public class UnitTest extends TestCase {
         // getGenlSiblings.
         List genlSiblings = null;
         try {
-            genlSiblings = cycAccess.getGenlSiblings(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            genlSiblings = cycAccess.getGenlSiblings(dog);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -961,11 +991,14 @@ public class UnitTest extends TestCase {
         // getSiblings.
         List siblings = null;
         try {
-            siblings = cycAccess.getSiblings(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            siblings = cycAccess.getSiblings(dog);
             Assert.assertNotNull(siblings);
             Assert.assertTrue(siblings instanceof CycList);
-            Assert.assertTrue(siblings.contains(cycAccess.getConstantByName("Goose-Domestic")));
-            Assert.assertTrue(siblings.contains(cycAccess.getConstantByName("Goat-Domestic")));
+            CycConstant gooseDomestic = cycAccess.getKnownConstantByGuid("bd5ca864-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(siblings.contains(gooseDomestic));
+            CycConstant goatDomestic = cycAccess.getKnownConstantByGuid("bd58e278-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(siblings.contains(goatDomestic));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -977,11 +1010,14 @@ public class UnitTest extends TestCase {
         // getSpecSiblings.
         List specSiblings = null;
         try {
-            specSiblings = cycAccess.getSpecSiblings(cycAccess.getConstantByName("#$Dog"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            specSiblings = cycAccess.getSpecSiblings(dog);
             Assert.assertNotNull(specSiblings);
             Assert.assertTrue(specSiblings instanceof CycList);
-            Assert.assertTrue(specSiblings.contains(cycAccess.getConstantByName("Goose-Domestic")));
-            Assert.assertTrue(specSiblings.contains(cycAccess.getConstantByName("Goat-Domestic")));
+            CycConstant gooseDomestic = cycAccess.getKnownConstantByGuid("bd5ca864-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(specSiblings.contains(gooseDomestic));
+            CycConstant goatDomestic = cycAccess.getKnownConstantByGuid("bd58e278-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(specSiblings.contains(goatDomestic));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -993,11 +1029,13 @@ public class UnitTest extends TestCase {
         // getAllGenls.
         List allGenls = null;
         try {
-            allGenls = cycAccess.getAllGenls(cycAccess.getConstantByName("#$ExistingObjectType"));
+            CycConstant existingObjectType = cycAccess.getKnownConstantByGuid("bd65d880-9c29-11b1-9dad-c379636f7270");
+            allGenls = cycAccess.getAllGenls(existingObjectType);
             Assert.assertNotNull(allGenls);
             Assert.assertTrue(allGenls instanceof CycList);
-            Assert.assertTrue(allGenls.contains(cycAccess.getConstantByName("ObjectType")));
-            Assert.assertTrue(allGenls.contains(cycAccess.getConstantByName("Thing")));
+            CycConstant objectType = cycAccess.getKnownConstantByGuid("bd58ab9d-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allGenls.contains(objectType));
+            Assert.assertTrue(allGenls.contains(CycAccess.thing));
             }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1009,11 +1047,14 @@ public class UnitTest extends TestCase {
         // getAllSpecs.
         List allSpecs = null;
         try {
-            allSpecs = cycAccess.getAllSpecs(cycAccess.getConstantByName("#$CanineAnimal"));
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            allSpecs = cycAccess.getAllSpecs(canineAnimal);
             Assert.assertNotNull(allSpecs);
             Assert.assertTrue(allSpecs instanceof CycList);
-            Assert.assertTrue(allSpecs.contains(cycAccess.getConstantByName("Jackal")));
-            Assert.assertTrue(allSpecs.contains(cycAccess.getConstantByName("Retriever-Dog")));
+            CycConstant jackal = cycAccess.getKnownConstantByGuid("bd58c2de-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allSpecs.contains(jackal));
+            CycConstant retrieverDog = cycAccess.getKnownConstantByGuid("bd58e24b-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allSpecs.contains(retrieverDog));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1025,12 +1066,15 @@ public class UnitTest extends TestCase {
         // getAllGenlsWrt.
         List allGenlsWrt = null;
         try {
-            allGenlsWrt = cycAccess.getAllGenlsWrt(cycAccess.getConstantByName("Dog"),
-                                                   cycAccess.getConstantByName("#$Animal"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            allGenlsWrt = cycAccess.getAllGenlsWrt(dog, animal);
             Assert.assertNotNull(allGenlsWrt);
             Assert.assertTrue(allGenlsWrt instanceof CycList);
-            Assert.assertTrue(allGenlsWrt.contains(cycAccess.getConstantByName("TameAnimal")));
-            Assert.assertTrue(allGenlsWrt.contains(cycAccess.getConstantByName("AirBreathingVertebrate")));
+            CycConstant tameAnimal = cycAccess.getKnownConstantByGuid("c0fcd4a1-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allGenlsWrt.contains(tameAnimal));
+            CycConstant airBreathingVertebrate = cycAccess.getKnownConstantByGuid("bef7c9c1-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allGenlsWrt.contains(airBreathingVertebrate));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1042,11 +1086,14 @@ public class UnitTest extends TestCase {
         // getAllDependentSpecs.
         List allDependentSpecs = null;
         try {
-            allDependentSpecs = cycAccess.getAllDependentSpecs(cycAccess.getConstantByName("CanineAnimal"));
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            allDependentSpecs = cycAccess.getAllDependentSpecs(canineAnimal);
             Assert.assertNotNull(allDependentSpecs);
+            CycConstant wolfGray = cycAccess.getKnownConstantByGuid("becf2f96-9c29-11b1-9dad-c379636f7270");
             Assert.assertTrue(allDependentSpecs instanceof CycList);
-            Assert.assertTrue(allDependentSpecs.contains(cycAccess.getConstantByName("Wolf-Gray")));
-            Assert.assertTrue(allDependentSpecs.contains(cycAccess.getConstantByName("Wolf")));
+            Assert.assertTrue(allDependentSpecs.contains(wolfGray));
+            CycConstant wolf = cycAccess.getKnownConstantByGuid("bd58c31f-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allDependentSpecs.contains(wolf));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1058,7 +1105,8 @@ public class UnitTest extends TestCase {
         // getSampleLeafSpecs.
         List sampleLeafSpecs = null;
         try {
-            sampleLeafSpecs = cycAccess.getSampleLeafSpecs(cycAccess.getConstantByName("CanineAnimal"), 3);
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            sampleLeafSpecs = cycAccess.getSampleLeafSpecs(canineAnimal, 3);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1074,8 +1122,9 @@ public class UnitTest extends TestCase {
         // isSpecOf.
         boolean answer = true;
         try {
-            answer = cycAccess.isSpecOf(cycAccess.getConstantByName("#$Dog"),
-                                        cycAccess.getConstantByName("Animal"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.isSpecOf(dog, animal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1088,8 +1137,9 @@ public class UnitTest extends TestCase {
         // isGenlOf.
         answer = true;
         try {
-            answer = cycAccess.isGenlOf(cycAccess.getConstantByName("CanineAnimal"),
-                                        cycAccess.getConstantByName("Wolf"));
+            CycConstant wolf = cycAccess.getKnownConstantByGuid("bd58c31f-9c29-11b1-9dad-c379636f7270");
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.isGenlOf(canineAnimal, wolf);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1102,8 +1152,9 @@ public class UnitTest extends TestCase {
         // areTacitCoextensional.
         answer = true;
         try {
-            answer = cycAccess.areTacitCoextensional(cycAccess.getConstantByName("SinglePurposeDevice"),
-                                                     cycAccess.getConstantByName("PhysicalDevice"));
+            CycConstant singlePurposeDevice = cycAccess.getKnownConstantByGuid("bd5897aa-9c29-11b1-9dad-c379636f7270");
+            CycConstant physicalDevice = cycAccess.getKnownConstantByGuid("bd58c72f-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.areTacitCoextensional(singlePurposeDevice, physicalDevice);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1116,8 +1167,9 @@ public class UnitTest extends TestCase {
         // areAssertedCoextensional.
         answer = true;
         try {
-            answer = cycAccess.areAssertedCoextensional(cycAccess.getConstantByName("SinglePurposeDevice"),
-                                                        cycAccess.getConstantByName("PhysicalDevice"));
+            CycConstant singlePurposeDevice = cycAccess.getKnownConstantByGuid("bd5897aa-9c29-11b1-9dad-c379636f7270");
+            CycConstant physicalDevice = cycAccess.getKnownConstantByGuid("bd58c72f-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.areAssertedCoextensional(singlePurposeDevice, physicalDevice);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1131,8 +1183,9 @@ public class UnitTest extends TestCase {
         answer = true;
         //cycAccess.traceOn();
         try {
-            answer = cycAccess.areIntersecting(cycAccess.getConstantByName("DomesticatedAnimal"),
-                                               cycAccess.getConstantByName("TameAnimal"));
+            CycConstant domesticatedAnimal = cycAccess.getKnownConstantByGuid("c10c22cd-9c29-11b1-9dad-c379636f7270");
+            CycConstant tameAnimal = cycAccess.getKnownConstantByGuid("c0fcd4a1-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.areIntersecting(domesticatedAnimal, tameAnimal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1146,8 +1199,9 @@ public class UnitTest extends TestCase {
         // areHierarchical.
         answer = true;
         try {
-            answer = cycAccess.areHierarchical(cycAccess.getConstantByName("CanineAnimal"),
-                                               cycAccess.getConstantByName("Wolf"));
+            CycConstant wolf = cycAccess.getKnownConstantByGuid("bd58c31f-9c29-11b1-9dad-c379636f7270");
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.areHierarchical(canineAnimal, wolf);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1228,8 +1282,9 @@ public class UnitTest extends TestCase {
         // getWhyGenl.
         CycList whyGenl = null;
         try {
-            whyGenl = cycAccess.getWhyGenl(cycAccess.getConstantByName("Dog"),
-                                           cycAccess.getConstantByName("Animal"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            whyGenl = cycAccess.getWhyGenl(dog, animal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1241,8 +1296,10 @@ public class UnitTest extends TestCase {
         CycConstant whyGenlFirst = (CycConstant) ((CycList) ((CycList) whyGenl.first()).first()).second();
         CycConstant whyGenlLast = (CycConstant) ((CycList) ((CycList) whyGenl.last()).first()).third();
         try {
-            Assert.assertEquals(cycAccess.getConstantByName("Dog"), whyGenlFirst);
-            Assert.assertEquals(cycAccess.getConstantByName("Animal"), whyGenlLast);
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            Assert.assertEquals(dog, whyGenlFirst);
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            Assert.assertEquals(animal, whyGenlLast);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1252,8 +1309,9 @@ public class UnitTest extends TestCase {
         ArrayList whyGenlParaphrase = null;
         try {
             //cycAccess.traceOn();
-            whyGenlParaphrase = cycAccess.getWhyGenlParaphrase(cycAccess.getConstantByName("Dog"),
-                                                               cycAccess.getConstantByName("Animal"));
+            CycConstant dog = cycAccess.getKnownConstantByGuid("bd58daa0-9c29-11b1-9dad-c379636f7270");
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            whyGenlParaphrase = cycAccess.getWhyGenlParaphrase(dog, animal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1273,9 +1331,10 @@ public class UnitTest extends TestCase {
         // getWhyCollectionsIntersect.
         List whyCollectionsIntersect = null;
         try {
+            CycConstant domesticatedAnimal = cycAccess.getKnownConstantByGuid("c10c22cd-9c29-11b1-9dad-c379636f7270");
+            CycConstant nonPersonAnimal = cycAccess.getKnownConstantByGuid("bd58e066-9c29-11b1-9dad-c379636f7270");
             whyCollectionsIntersect =
-                cycAccess.getWhyCollectionsIntersect(cycAccess.getConstantByName("DomesticatedAnimal"),
-                                                     cycAccess.getConstantByName("NonPersonAnimal"));
+                cycAccess.getWhyCollectionsIntersect(domesticatedAnimal, nonPersonAnimal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1295,9 +1354,10 @@ public class UnitTest extends TestCase {
         ArrayList whyCollectionsIntersectParaphrase = null;
         try {
             //cycAccess.traceOn();
+            CycConstant domesticatedAnimal = cycAccess.getKnownConstantByGuid("c10c22cd-9c29-11b1-9dad-c379636f7270");
+            CycConstant nonPersonAnimal = cycAccess.getKnownConstantByGuid("bd58e066-9c29-11b1-9dad-c379636f7270");
             whyCollectionsIntersectParaphrase =
-                cycAccess.getWhyCollectionsIntersectParaphrase(cycAccess.getConstantByName("DomesticatedAnimal"),
-                                                               cycAccess.getConstantByName("NonPersonAnimal"));
+                cycAccess.getWhyCollectionsIntersectParaphrase(domesticatedAnimal, nonPersonAnimal);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1314,11 +1374,14 @@ public class UnitTest extends TestCase {
         // getCollectionLeaves.
         List collectionLeaves = null;
         try {
-            collectionLeaves = cycAccess.getCollectionLeaves(cycAccess.getConstantByName("CanineAnimal"));
+            CycConstant canineAnimal = cycAccess.getKnownConstantByGuid("bd58d044-9c29-11b1-9dad-c379636f7270");
+            collectionLeaves = cycAccess.getCollectionLeaves(canineAnimal);
             Assert.assertNotNull(collectionLeaves);
             Assert.assertTrue(collectionLeaves instanceof CycList);
-            Assert.assertTrue(collectionLeaves.contains(cycAccess.getConstantByName("RedWolf")));
-            Assert.assertTrue(collectionLeaves.contains(cycAccess.getConstantByName("SanJoaquinKitFox")));
+            CycConstant redWolf = cycAccess.getKnownConstantByGuid("c015e730-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(collectionLeaves.contains(redWolf));
+            CycConstant sanJoaquinKitFox = cycAccess.getKnownConstantByGuid("bfa2b8e5-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(collectionLeaves.contains(sanJoaquinKitFox));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1330,7 +1393,8 @@ public class UnitTest extends TestCase {
         // getLocalDisjointWith.
         List localDisjointWiths = null;
         try {
-            localDisjointWiths = cycAccess.getLocalDisjointWith(cycAccess.getConstantByName("Plant"));
+            CycConstant plant = cycAccess.getKnownConstantByGuid("bd58c6e1-9c29-11b1-9dad-c379636f7270");
+            localDisjointWiths = cycAccess.getLocalDisjointWith(plant);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1343,8 +1407,9 @@ public class UnitTest extends TestCase {
         // areDisjoint.
         boolean answer = true;
         try {
-            answer = cycAccess.areDisjoint(cycAccess.getConstantByName("Animal"),
-                                           cycAccess.getConstantByName("Plant"));
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            CycConstant plant = cycAccess.getKnownConstantByGuid("bd58c6e1-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.areDisjoint(animal, plant);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1357,8 +1422,10 @@ public class UnitTest extends TestCase {
         // getMinIsas.
         List minIsas = null;
         try {
-            minIsas = cycAccess.getMinIsas(cycAccess.getConstantByName("Wolf"));
-            Assert.assertTrue(minIsas.contains(cycAccess.getConstantByName("OrganismClassificationType")));
+            CycConstant wolf = cycAccess.getKnownConstantByGuid("bd58c31f-9c29-11b1-9dad-c379636f7270");
+            minIsas = cycAccess.getMinIsas(wolf);
+            CycConstant organismClassificationType = cycAccess.getKnownConstantByGuid("bd58dfe4-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(minIsas.contains(organismClassificationType));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1370,9 +1437,11 @@ public class UnitTest extends TestCase {
         // getInstances.
         List instances = null;
         try {
-            instances = cycAccess.getInstances(cycAccess.getConstantByName("Animal"));
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            instances = cycAccess.getInstances(animal);
             Assert.assertTrue(instances instanceof CycList);
-            Assert.assertTrue(((CycList) instances).contains(cycAccess.getConstantByName("Bigfoot")));
+            CycConstant bigfoot = cycAccess.getKnownConstantByGuid("bdc6bd06-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(((CycList) instances).contains(bigfoot));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1384,8 +1453,10 @@ public class UnitTest extends TestCase {
         // getInstanceSiblings.
         List instanceSiblings = null;
         try {
-            instanceSiblings = cycAccess.getInstanceSiblings(cycAccess.getConstantByName("Bigfoot"));
-            Assert.assertTrue(instanceSiblings.contains(cycAccess.getConstantByName("Oceanus-TheTitan")));
+            CycConstant bigfoot = cycAccess.getKnownConstantByGuid("bdc6bd06-9c29-11b1-9dad-c379636f7270");
+            instanceSiblings = cycAccess.getInstanceSiblings(bigfoot);
+            CycConstant oceanusTheTitan = cycAccess.getKnownConstantByGuid("c0ff583a-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(instanceSiblings.contains(oceanusTheTitan));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1398,9 +1469,11 @@ public class UnitTest extends TestCase {
         List allIsas = null;
         try {
             //cycAccess.traceOn();
-            allIsas = cycAccess.getAllIsa(cycAccess.getConstantByName("Animal"));
+            CycConstant animal = cycAccess.getKnownConstantByGuid("bd58b031-9c29-11b1-9dad-c379636f7270");
+            allIsas = cycAccess.getAllIsa(animal);
             //System.out.println(allIsas);
-            Assert.assertTrue(allIsas.contains(cycAccess.getConstantByName("#$OrganismClassificationType")));
+            CycConstant organismClassificationType = cycAccess.getKnownConstantByGuid("bd58dfe4-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allIsas.contains(organismClassificationType));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1412,9 +1485,12 @@ public class UnitTest extends TestCase {
         // getAllInstances.
         List allInstances = null;
         try {
-            allInstances = cycAccess.getAllInstances(cycAccess.getConstantByName("Plant"));
-            Assert.assertTrue(allInstances.contains(cycAccess.getConstantByName("TreatyOak")));
-            Assert.assertTrue(allInstances.contains(cycAccess.getConstantByName("BurningBushOldTestament")));
+            CycConstant plant = cycAccess.getKnownConstantByGuid("bd58c6e1-9c29-11b1-9dad-c379636f7270");
+            allInstances = cycAccess.getAllInstances(plant);
+            CycConstant treatyOak = cycAccess.getKnownConstantByGuid("bfc0aa80-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allInstances.contains(treatyOak));
+            CycConstant burningBushOldTestament = cycAccess.getKnownConstantByGuid("be846866-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(allInstances.contains(burningBushOldTestament));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1426,8 +1502,9 @@ public class UnitTest extends TestCase {
         // isa.
         answer = true;
         try {
-            answer = cycAccess.isa(cycAccess.getConstantByName("TreatyOak"),
-                                   cycAccess.getConstantByName("Plant"));
+            CycConstant plant = cycAccess.getKnownConstantByGuid("bd58c6e1-9c29-11b1-9dad-c379636f7270");
+            CycConstant treatyOak = cycAccess.getKnownConstantByGuid("bfc0aa80-9c29-11b1-9dad-c379636f7270");
+            answer = cycAccess.isa(treatyOak, plant);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -1638,10 +1715,12 @@ public class UnitTest extends TestCase {
         CycConstant mt = null;
         ArrayList genlMts = new ArrayList();
         try {
-            genlMts.add(cycAccess.getConstantByName("ModernMilitaryMt"));
+            CycConstant modernMilitaryMt = cycAccess.getKnownConstantByGuid("c040a2f0-9c29-11b1-9dad-c379636f7270");
+            CycConstant microtheory = cycAccess.getKnownConstantByGuid("bd5880d5-9c29-11b1-9dad-c379636f7270");
+            genlMts.add(modernMilitaryMt);
             mt = cycAccess.createMicrotheory("CycAccessTestMt",
                                              "a unit test comment for the CycAccessTestMt microtheory.",
-                                             cycAccess.getConstantByName("Microtheory"),
+                                             microtheory,
                                              genlMts);
         }
         catch (UnknownHostException e) {
@@ -1674,7 +1753,8 @@ public class UnitTest extends TestCase {
         CycConstant[] mts = {null, null, null};
         genlMts = new ArrayList();
         try {
-            genlMts.add(cycAccess.getConstantByName("ModernMilitaryMt"));
+            CycConstant modernMilitaryMt = cycAccess.getKnownConstantByGuid("c040a2f0-9c29-11b1-9dad-c379636f7270");
+            genlMts.add(modernMilitaryMt);
             mts = cycAccess.createMicrotheorySystem("CycAccessTest",
                                                     "a unit test comment for the CycAccessTestMt microtheory.",
                                                     genlMts);
@@ -1715,7 +1795,8 @@ public class UnitTest extends TestCase {
         try {
             CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)");
             CycVariable variable = CycVariable.makeCycVariable("?WHAT");
-            mt = CycAccess.current().getConstantByName("EverythingPSC");
+            CycConstant everythingPSC = CycAccess.current().getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+            mt = everythingPSC;
             CycList response = CycAccess.current().askWithVariable(query, variable, mt);
             Assert.assertNotNull(response);
             Assert.assertTrue(response.contains(CycAccess.current().getConstantByName("#$UniversityOfTexasAtAustin")));
@@ -1730,8 +1811,8 @@ public class UnitTest extends TestCase {
             ArrayList variables = new ArrayList();
             variables.add(CycVariable.makeCycVariable("?WHAT"));
             variables.add(CycVariable.makeCycVariable("?WHERE"));
-            mt = CycAccess.current().getKnownConstantByName("UniverseDataMt");
-            CycList response = CycAccess.current().askWithVariables(query, variables, mt);
+            CycConstant universeDataMt = CycAccess.current().getKnownConstantByGuid("bd58d0f3-9c29-11b1-9dad-c379636f7270");
+            CycList response = CycAccess.current().askWithVariables(query, variables, universeDataMt);
             Assert.assertNotNull(response);
         }
         catch (Exception e) {
@@ -1742,7 +1823,8 @@ public class UnitTest extends TestCase {
         try {
             //cycAccess.traceOn();
             CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfAustinTX)");
-            mt = CycAccess.current().getConstantByName("EverythingPSC");
+            CycConstant everythingPSC = CycAccess.current().getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+            mt = everythingPSC;
             Assert.assertTrue(CycAccess.current().isQueryTrue(query, mt));
             query = CycAccess.current().makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfHoustonTX)");
             Assert.assertTrue(! CycAccess.current().isQueryTrue(query, mt));
@@ -1755,8 +1837,9 @@ public class UnitTest extends TestCase {
         // countAllInstances
         try {
             cycAccess = CycAccess.current();
-            Assert.assertTrue(cycAccess.countAllInstances(cycAccess.getConstantByName("Country"),
-                                                          cycAccess.getConstantByName("WorldGeographyMt")) > 0);
+            CycConstant country = cycAccess.getKnownConstantByGuid("bd588879-9c29-11b1-9dad-c379636f7270");
+            CycConstant worldGeographyMt = cycAccess.getKnownConstantByGuid("bfaac020-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(cycAccess.countAllInstances(country, worldGeographyMt) > 0);
         }
         catch (Exception e) {
             Assert.fail(e.toString());
@@ -1850,23 +1933,17 @@ public class UnitTest extends TestCase {
 
         // Test isBackchainRequired, isBackchainEncouraged, isBackchainDiscouraged, isBackchainForbidden
         try {
-            Assert.assertTrue(cycAccess.isBackchainRequired(cycAccess.getConstantByName("#$notAssertible"),
-                                                            cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainEncouraged(cycAccess.getConstantByName("#$notAssertible"),
-                                                                cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(cycAccess.getConstantByName("#$notAssertible"),
-                                                                 cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainForbidden(cycAccess.getConstantByName("#$notAssertible"),
-                                                               cycAccess.baseKB));
+            CycConstant notAssertible = cycAccess.getKnownConstantByGuid("bf660e73-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(cycAccess.isBackchainRequired(notAssertible, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainEncouraged(notAssertible, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(notAssertible, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainForbidden(notAssertible, cycAccess.baseKB));
 
-            Assert.assertTrue(! cycAccess.isBackchainRequired(cycAccess.getConstantByName("#$nearestIsa"),
-                                                            cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainEncouraged(cycAccess.getConstantByName("#$nearestIsa"),
-                                                                cycAccess.baseKB));
-            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(cycAccess.getConstantByName("#$nearestIsa"),
-                                                                 cycAccess.baseKB));
-            Assert.assertTrue(cycAccess.isBackchainForbidden(cycAccess.getConstantByName("#$nearestIsa"),
-                                                               cycAccess.baseKB));
+            CycConstant nearestIsa = cycAccess.getKnownConstantByGuid("bf411eed-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(! cycAccess.isBackchainRequired(nearestIsa, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainEncouraged(nearestIsa, cycAccess.baseKB));
+            Assert.assertTrue(! cycAccess.isBackchainDiscouraged(nearestIsa, cycAccess.baseKB));
+            Assert.assertTrue(cycAccess.isBackchainForbidden(nearestIsa, cycAccess.baseKB));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -1877,9 +1954,10 @@ public class UnitTest extends TestCase {
         // Test getBackchainRules.
         try {
             //cycAccess.traceOn();
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            CycConstant humanActivitiesMt = cycAccess.getKnownConstantByGuid("bd58fe73-9c29-11b1-9dad-c379636f7270");
             CycList backchainRules =
-                cycAccess.getBackchainRules(cycAccess.getConstantByName("#$doneBy"),
-                                            cycAccess.getConstantByName("HumanActivitiesMt"));
+                cycAccess.getBackchainRules(doneBy, humanActivitiesMt);
             Assert.assertNotNull(backchainRules);
             //for (int i = 0; i < backchainRules.size(); i++)
             //    System.out.println(((CycList) backchainRules.get(i)).cyclify());
@@ -1892,9 +1970,10 @@ public class UnitTest extends TestCase {
         // Test getForwardChainRules.
         try {
             //cycAccess.traceOn();
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            CycConstant humanActivitiesMt = cycAccess.getKnownConstantByGuid("bd58fe73-9c29-11b1-9dad-c379636f7270");
             CycList forwardChainRules =
-                cycAccess.getForwardChainRules(cycAccess.getConstantByName("#$doneBy"),
-                                            cycAccess.getConstantByName("HumanActivitiesMt"));
+                cycAccess.getForwardChainRules(doneBy,humanActivitiesMt);
             Assert.assertNotNull(forwardChainRules);
             /*
             for (int i = 0; i < forwardChainRules.size(); i++)
@@ -2004,8 +2083,9 @@ public class UnitTest extends TestCase {
 
         // isEvaluatablePredicate
         try {
-            Assert.assertTrue(cycAccess.isEvaluatablePredicate(cycAccess.getKnownConstantByName("#$different")));
-            Assert.assertTrue(! cycAccess.isEvaluatablePredicate(cycAccess.getKnownConstantByName("#$doneBy")));
+            Assert.assertTrue(cycAccess.isEvaluatablePredicate(CycAccess.different));
+            CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(! cycAccess.isEvaluatablePredicate(doneBy));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -2014,19 +2094,25 @@ public class UnitTest extends TestCase {
 
         // hasSomePredicateUsingTerm
         try {
-            Assert.assertTrue(cycAccess.hasSomePredicateUsingTerm(cycAccess.getKnownConstantByName("#$percentOfRegionIs"),
-                                                                  cycAccess.getKnownConstantByName("#$Algeria"),
-                                                                  new Integer(1),
-                                                                  cycAccess.getKnownConstantByName("CIAWorldFactbook1995Mt")));
+            CycConstant algeria = cycAccess.getKnownConstantByGuid("bd588c92-9c29-11b1-9dad-c379636f7270");
+            CycConstant percentOfRegionIs = cycAccess.getKnownConstantByGuid("bfb0c6e5-9c29-11b1-9dad-c379636f7270");
+            CycConstant ciaWorldFactbook1995Mt = cycAccess.getKnownConstantByGuid("c0a41a91-9c29-11b1-9dad-c379636f7270");
+            CycConstant InferencePSC = cycAccess.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
 
-            Assert.assertTrue(cycAccess.hasSomePredicateUsingTerm(cycAccess.getKnownConstantByName("#$percentOfRegionIs"),
-                                                                  cycAccess.getKnownConstantByName("#$Algeria"),
+
+            Assert.assertTrue(cycAccess.hasSomePredicateUsingTerm(percentOfRegionIs,
+                                                                  algeria,
                                                                   new Integer(1),
-                                                                  cycAccess.getKnownConstantByName("#$InferencePSC")));
-            Assert.assertTrue(! cycAccess.hasSomePredicateUsingTerm(cycAccess.getKnownConstantByName("#$percentOfRegionIs"),
-                                                                    cycAccess.getKnownConstantByName("#$Algeria"),
+                                                                  ciaWorldFactbook1995Mt));
+
+            Assert.assertTrue(cycAccess.hasSomePredicateUsingTerm(percentOfRegionIs,
+                                                                  algeria,
+                                                                  new Integer(1),
+                                                                  InferencePSC));
+            Assert.assertTrue(! cycAccess.hasSomePredicateUsingTerm(percentOfRegionIs,
+                                                                    algeria,
                                                                     new Integer(2),
-                                                                    cycAccess.getKnownConstantByName("CIAWorldFactbook1995Mt")));
+                                                                    ciaWorldFactbook1995Mt));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -2036,7 +2122,8 @@ public class UnitTest extends TestCase {
         // countUsingBestIndex
         try {
             CycList formula1 = cycAccess.makeCycList("(#$objectFoundInLocation ?X ?Y)");
-            CycFort mt = cycAccess.getKnownConstantByName("WorldGeographyMt");
+            // WorldGeographyMt
+            CycFort mt = cycAccess.getKnownConstantByGuid("bfaac020-9c29-11b1-9dad-c379636f7270");
             Assert.assertTrue(cycAccess.countUsingBestIndex(formula1, mt) > 0);
             Assert.assertTrue(cycAccess.countUsingBestIndex(formula1, CycAccess.baseKB) == 0);
         }

@@ -66,6 +66,12 @@ public class CycConstant extends CycFort implements Comparable {
     protected static Cache cacheById = new CacheLRU(500);
 
     /**
+     * Least Recently Used Cache of CycConstants, so that a reference to an existing <tt>CycConstant</tt>
+     * is returned instead of constructing a duplicate.  Indexed via the guid.
+     */
+    protected static Cache cacheByGuid = new CacheLRU(500);
+
+    /**
      * The GUID (Globally Unique IDentifier) of the <tt>CycConstant<tt> object.
      * A string such as "c10af8ae-9c29-11b1-9dad-c379636f7270"
      */
@@ -98,6 +104,7 @@ public class CycConstant extends CycFort implements Comparable {
         setId(id);
         addCacheById(this);
         addCacheByName(this);
+        addCacheByGuid(this);
     }
 
     /**
@@ -288,6 +295,7 @@ public class CycConstant extends CycFort implements Comparable {
     public static void resetCaches() {
         cacheById = new CacheLRU(500);
         cacheByName = new CacheLRU(500);
+        cacheByGuid = new CacheLRU(500);
     }
 
     /**
@@ -309,6 +317,15 @@ public class CycConstant extends CycFort implements Comparable {
     }
 
     /**
+     * Adds the <tt>CycConstant<tt> to the cache by guid.
+     */
+    public static void addCacheByGuid(CycConstant cycConstant) {
+        if (cycConstant.guid == null)
+            throw new RuntimeException("Invalid constant for caching " + cycConstant);
+        cacheByGuid.addElement(cycConstant.getGuid(), cycConstant);
+    }
+
+    /**
      * Retrieves the <tt>CycConstant<tt> with id, returning null if not found in the cache.
      */
     public static CycConstant getCacheById(Integer id) {
@@ -320,6 +337,13 @@ public class CycConstant extends CycFort implements Comparable {
      */
     public static CycConstant getCacheByName(String name) {
         return (CycConstant) cacheByName.getElement(name);
+    }
+
+    /**
+     * Retrieves the <tt>CycConstant<tt> with guid, returning null if not found in the cache.
+     */
+    public static CycConstant getCacheByGuid(Guid guid) {
+        return (CycConstant) cacheByGuid.getElement(guid);
     }
 
     /**
@@ -335,6 +359,11 @@ public class CycConstant extends CycFort implements Comparable {
             Object element = cacheById.getElement(cycConstant.getId());
             if (element != null)
                 cacheById.addElement(cycConstant.getId(), null);
+        }
+        if (cycConstant.guid != null) {
+            Object element = cacheByGuid.getElement(cycConstant.guid);
+            if (element != null)
+                cacheByGuid.addElement(cycConstant.guid, null);
         }
     }
 

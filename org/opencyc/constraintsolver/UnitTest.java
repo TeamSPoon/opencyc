@@ -381,7 +381,7 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(domainValueMarks.get(new Integer(1)));
 
         // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
-        Assert.assertEquals(20, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
+        Assert.assertEquals(2, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?milk")));
         Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycVariable.makeCycVariable("?norwegian")));
         Assert.assertEquals(5, zebraProblem.nodeConsistencyAchiever.allDifferentRules.size());

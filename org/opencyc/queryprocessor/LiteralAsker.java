@@ -78,8 +78,9 @@ public class LiteralAsker {
         for (int i = 0; i < queryLiterals.size(); i++) {
             QueryLiteral queryLiteral = (QueryLiteral) queryLiterals.get(i);
             BindingSet bindingSet = new BindingSet(queryLiteral, mt);
-            if (bindingSet.getNbrInstances() < formulaInstancesThreshold ||
-                neverPostponeAskingForPredicate(queryLiteral.getPredicate())) {
+            if (bindingSet.isUnary() &&
+                (bindingSet.getNbrInstances() < formulaInstancesThreshold ||
+                neverPostponeAskingForPredicate(queryLiteral.getPredicate()))) {
                 if (verbosity > 3)
                     System.out.println("Asking " + queryLiteral.cyclify());
                 bindingSet.setBindingValues(CycAccess.current().askWithVariables(bindingSet.getQueryLiteral().getFormula(),

@@ -832,7 +832,9 @@ public class UnitTest extends TestCase {
         }
         Backchainer backchainer = new Backchainer();
         try {
-            backchainer.mt = cycAccess.current().getKnownConstantByName("InferencePSC");
+            CycConstant inferencePSC =
+                cycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            backchainer.mt = inferencePSC;
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -253,9 +253,19 @@ public class ImportDaml implements StatementHandler {
      * @param object the RDF Triple Object
      */
     public void statement(AResource subject, AResource predicate, AResource object) {
-        resource(subject);
-        resource(predicate);
-        resource(object);
+        if (subject.isAnonymous())
+            processRestrictionSubject(subject, predicate, object);
+        else if (object.isAnonymous())
+            processRestrictionObject(subject, predicate, object);
+        else {
+            DamlTermInfo subjectTermInfo = resource(subject);
+            DamlTermInfo predicateTermInfo = resource(predicate);
+            DamlTermInfo objectTermInfo = resource(object);
+
+            displayTriple(subjectTermInfo,
+                          predicateTermInfo,
+                          objectTermInfo);
+        }
         Log.current.println();
     }
 
@@ -264,65 +274,148 @@ public class ImportDaml implements StatementHandler {
      *
      * @param subject the RDF Triple Subject
      * @param predicate the RDF Triple Predicate
-     * @param object the RDF Triple Object
+     * @param literal the RDF Triple Literal
      */
     public void statement(AResource subject, AResource predicate, ALiteral literal) {
-        String lang = literal.getLang();
-        String parseType = literal.getParseType();
-        if (parseType != null) {
-            Log.current.print("# ");
-            if (parseType != null)
-                Log.current.print("'" + parseType + "'");
-            Log.current.println();
+        if (subject.isAnonymous())
+            processRestrictionSubject(subject, predicate, literal);
+        else {
+            DamlTermInfo subjectTermInfo = resource(subject);
+            DamlTermInfo predicateTermInfo = resource(predicate);
+            DamlTermInfo literalTermInfo = literal(literal);
+
+            displayTriple(subjectTermInfo,
+                          predicateTermInfo,
+                          literalTermInfo);
         }
-        resource(subject);
-        resource(predicate);
-        literal(literal);
         Log.current.println();
     }
 
     /**
-     * Displays the given RDF resource.
+     * Displays the RDF triple.
      *
-     * @param aResource the RDF resource to be displayed
+     * @param subjectTermInfo the subject DamlTermInfo object
+     * @param predicateTermInfo the predicate DamlTermInfo object
+     * @param objLitTermInfo the object or literal DamlTermInfo object
      */
-    protected void resource(AResource aResource) {
-        Resource resource = this.translate(aResource);
-        if (aResource.isAnonymous())
-            Log.current.print("anon-" + aResource.getAnonymousID() + " ");
-        else {
-            String localName = resource.getLocalName();
-            String nameSpace = resource.getNameSpace();
-            if (localName == null ||
-                nameSpace == null) {
-                Log.current.print(resource.toString() + " ");
-            }
-            else if (! hasUriNamespaceSyntax(aResource.getURI())) {
-                Log.current.print(resource.toString() + " ");
-            }
-            else {
-                String nickname = getOntologyNickname(nameSpace, resource);
-                String constantName = nickname + ":" + localName;
-                Log.current.print(constantName + " ");
-            }
-        }
+    protected void displayTriple (DamlTermInfo subjectTermInfo,
+                                  DamlTermInfo predicateTermInfo,
+                                  DamlTermInfo objLitTermInfo) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(subjectTermInfo.toString());
+        stringBuffer.append(" ");
+        stringBuffer.append(predicateTermInfo.toString());
+        stringBuffer.append(" ");
+        stringBuffer.append(objLitTermInfo.toString());
+        Log.current.print(stringBuffer.toString());
     }
 
     /**
-     * Displays the given RDF literal.
+     * Returns the DamlTerm info of the given RDF resource.
      *
-     * @param literal the RDF literal to be displayed
+     * @param aResource the RDF resource
+     * @return the DamlTerm info of the given RDF resource
      */
-    static private void literal(ALiteral literal) {
-        if (literal.isWellFormedXML())
-            Log.current.print("xml");
-        Log.current.print("\"");
-        Log.current.print(literal.toString());
-        Log.current.print("\"");
-        String lang = literal.getLang();
-        if (lang != null && !lang.equals(""))
-            Log.current.print("-" + lang);
-        Log.current.print(" ");
+    protected DamlTermInfo resource(AResource aResource) {
+        DamlTermInfo damlTermInfo = new DamlTermInfo();
+        Resource resource = translateResource(aResource);
+        if (aResource.isAnonymous()) {
+            damlTermInfo.isAnonymous = true;
+            damlTermInfo.anonymousId = aResource.getAnonymousID();
+        }
+        else if (! hasUriNamespaceSyntax(aResource.getURI())) {
+            damlTermInfo.isURI = true;
+            damlTermInfo.uri = resource.toString();
+        }
+        else {
+            String localName = resource.getLocalName();
+            damlTermInfo.localName = localName;
+            String nameSpace = resource.getNameSpace();
+            damlTermInfo.nameSpace = nameSpace;
+            if (localName == null ||
+                nameSpace == null)
+                throw new RuntimeException("Invalid nameSpace " + nameSpace +
+                                           " localName " + localName +
+                                           " for resource " + resource.toString());
+            String ontologyNickname = getOntologyNickname(nameSpace, resource);
+            damlTermInfo.ontologyNickname = ontologyNickname;
+            String constantName = ontologyNickname + ":" + localName;
+            damlTermInfo.constantName = constantName;
+        }
+        return damlTermInfo;
+    }
+
+    /**
+     * Returns the DamlTerm info of the given RDF literal.
+     *
+     * @param literal the RDF literal
+     * @return the DamlTerm info of the given RDF literal
+     */
+    protected DamlTermInfo literal(ALiteral literal) {
+        DamlTermInfo damlTermInfo = new DamlTermInfo();
+        damlTermInfo.isLiteral = true;
+        damlTermInfo.literal = literal.toString();
+        return damlTermInfo;
+    }
+
+    /**
+     * Records the components of a DAML Restriction.
+     *
+     *
+     * @param subject the RDF Triple anonymous Subject
+     * @param predicate the RDF Triple Predicate
+     * @param object the RDF Triple Object
+     */
+    protected void processRestrictionSubject(AResource subject,
+                                             AResource predicate,
+                                             AResource object) {
+        DamlTermInfo subjectTermInfo = resource(subject);
+        DamlTermInfo predicateTermInfo = resource(predicate);
+        DamlTermInfo objectTermInfo = resource(object);
+
+        displayTriple(subjectTermInfo,
+                      predicateTermInfo,
+                      objectTermInfo);
+    }
+
+    /**
+     * Records the components of a DAML Restriction.
+     *
+     *
+     * @param subject the RDF Triple anonymous Subject
+     * @param predicate the RDF Triple Predicate
+     * @param literal the RDF Triple Literal
+     */
+    protected void processRestrictionSubject(AResource subject,
+                                            AResource predicate,
+                                            ALiteral literal) {
+        DamlTermInfo subjectTermInfo = resource(subject);
+        DamlTermInfo predicateTermInfo = resource(predicate);
+        DamlTermInfo literalTermInfo = literal(literal);
+
+        displayTriple(subjectTermInfo,
+                      predicateTermInfo,
+                      literalTermInfo);
+    }
+
+    /**
+     * Records the components of a DAML Restriction.
+     *
+     *
+     * @param subject the RDF Triple anonymous Subject
+     * @param predicate the RDF Triple Predicate
+     * @param object the RDF Triple Object
+     */
+    protected void processRestrictionObject(AResource subject,
+                                            AResource predicate,
+                                            AResource object) {
+        DamlTermInfo subjectTermInfo = resource(subject);
+        DamlTermInfo predicateTermInfo = resource(predicate);
+        DamlTermInfo objectTermInfo = resource(object);
+
+        displayTriple(subjectTermInfo,
+                      predicateTermInfo,
+                      objectTermInfo);
     }
 
     /**
@@ -362,7 +455,7 @@ public class ImportDaml implements StatementHandler {
      * @param aResource The ARP resource.
      * @return The Jena resource.
      */
-    static public Resource translate(AResource aResource) {
+    static public Resource translateResource(AResource aResource) {
         if (aResource.isAnonymous()) {
             String id = aResource.getAnonymousID();
             Resource rr = (Resource) aResource.getUserData();
@@ -371,7 +464,8 @@ public class ImportDaml implements StatementHandler {
                 aResource.setUserData(rr);
             }
             return rr;
-        } else
+        }
+        else
             return new ResourceImpl(aResource.getURI());
     }
 
@@ -384,6 +478,46 @@ public class ImportDaml implements StatementHandler {
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
+
+
+    /**
+     * Records the DAML term information for Cyc import.
+     */
+    protected class DamlTermInfo {
+        boolean isAnonymous = false;
+        boolean isURI = false;
+        boolean isLiteral = false;
+        String anonymousId;
+        String nameSpace;
+        String ontologyNickname;
+        String localName;
+        String constantName;
+        String uri;
+        String literal;
+
+        /**
+         * Constructs a new DamlTermInfo object.
+         */
+        public DamlTermInfo() {
+        }
+
+        /**
+         * Returns a string representation of this object.
+         *
+         * @return a string representation of this object
+         */
+        public String toString() {
+            if (isAnonymous)
+                return "anon-" + anonymousId;
+            else if (isURI)
+                return uri;
+            else if (isLiteral)
+                return "\"" + literal + "\"";
+            else
+                return constantName;
+        }
+    }
+
 
     /**
      * Records property use restrictions which get imported

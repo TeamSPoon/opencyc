@@ -1,6 +1,7 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.BehaviorEngineException;
 import org.opencyc.elf.BufferedNodeComponent;
 import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
@@ -9,8 +10,11 @@ import org.opencyc.elf.Status;
 
 import org.opencyc.elf.a.DirectActuator;
 
+import org.opencyc.elf.bg.predicate.PredicateExpression;
+
 import org.opencyc.elf.bg.taskframe.Command;
 
+import org.opencyc.elf.message.ExecuteScheduleMsg;
 import org.opencyc.elf.message.ExecutorStatusMsg;
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.ReplanMsg;
@@ -22,9 +26,11 @@ import org.opencyc.elf.message.ScheduleJobMsg;
 import org.opencyc.elf.s.DirectSensor;
 
 import org.opencyc.elf.wm.NodeFactory;
+import org.opencyc.elf.wm.ScheduleLibrary;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
@@ -34,7 +40,14 @@ import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /** Scheduler performs temporal task decomposition for a given assigned agent
- * and its allocated resources.
+ * and its allocated resources.  The given job is used to retreive schedule sets from
+ * the schedule library.  Each schedule set is an alternative set of sequential commands for
+ * accomplishing the job.  The alternative schedule sets are ranked according to desirability,
+ * then the scheduler finds the first set containing an eligible schedule, which is sent
+ * to the executor for execution.  The remaining schedules in the schedule set are retained and
+ * retried for eligibility as the executor completes its current schedule.  When no schedules
+ * are eligible, then the job assigned to the schedule is deemed complete and a status message
+ * to that effect is sent back to the job assigner.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -215,24 +228,47 @@ public class Scheduler extends BufferedNodeComponent {
     protected void processScheduleJobMsg (ScheduleJobMsg scheduleJobMsg) {
       getLogger().info("Scheduler proccessing " + scheduleJobMsg);
       job = scheduleJobMsg.getJob();
-      
-      // get the schedule sets corresponding to the job
-      
-      // evaluate the schedule sets and choose the best one
-      
-      
-      
-      
-      
-      
+      Command command = job.getCommand();
+      List scheduleSets = ScheduleLibrary.getInstance().getScheduleSets(command.getName());
+      List schedules = determineBestScheduleSet(scheduleSets);
+      Schedule schedule = determineEligibleSchedule(schedules);
       if (executor == null)
         createExecutor(schedule);
-      
-      // send the schedule to the executor
+      getLogger().info("Scheduler sending to executor " + schedule);
+      controlledResources = new ArrayList();
+      //TODO populate controlledResources
+      ExecuteScheduleMsg executeScheduleMsg = new ExecuteScheduleMsg(sender, schedule, controlledResources);
+      sender.sendMsgToRecipient(executor.getChannel(), executeScheduleMsg);
       
     }
                 
-    /** Creates a new scheduler for the given schedule.
+    /** Returns the first schedule from the schedules whose predicate expression is null.  
+     *
+     * @param schedules the given schedule
+     * @return the first schedule from the schedules whose predicate expression is null
+     */
+    protected Schedule determineEligibleSchedule(List schedules) {
+      getLogger().info("Considering schedules " + schedules);
+      Iterator scheduleIterator = schedules.iterator();
+      while (scheduleIterator.hasNext()) {
+        Schedule schedule = (Schedule) scheduleIterator.next();
+        if (schedule.getPredicateExpression() == null) 
+          return schedule;
+      }
+      throw new BehaviorEngineException("No schedule to send to executor among " + schedules);
+    }
+    
+    /** Determines the best of the alternative schedule sets.
+     *
+     * @param scheduleSets the alternative schedule sets
+     * @return the the best of the alternative schedule sets 
+     */
+    protected List determineBestScheduleSet(List scheduleSets) {
+      //TODO for now just return the first one
+      return (List) scheduleSets.get(0);
+    }
+    
+    /** Creates a new executor for the given schedule.
      *
      * @param schedule the given schedule
      */
@@ -256,10 +292,41 @@ public class Scheduler extends BufferedNodeComponent {
      * @param executorStatusMsg the executor status message
      */
     protected void processExecutorStatusMsg (ExecutorStatusMsg executorStatusMsg) {
-      //TODO
       Status status = executorStatusMsg.getStatus();
+      if (status.isTrue(Status.SCHEDULE_FINISHED)) {
+        status = new Status();
+        status.setTrue(Status.SCHEDULE_FINISHED);
+        SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(sender, status);
+        sender.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
+      }
+      else if (status.isTrue(Status.EXECUTION_EXCEPTION)) 
+        handleExecutorException(status);
+      else
+        throw new BehaviorEngineException("Executor status not handled " + status); 
     }
     
+    /** Handles an executor exception by finding the first schedule whose predicate expression evaluates true
+     * in the current exceptional state and sending it to the executor.  If no predicate expression 
+     * evaluates true, then the exception status is sent to the parent job assigner for this scheduler.
+     *
+     * @param status the exception status from the executor
+     */
+    protected void handleExecutorException(Status status) {
+      Iterator scheduleIterator = conditionalSchedules.iterator();
+      while (scheduleIterator.hasNext()) {
+        Schedule schedule = (Schedule) scheduleIterator.next();
+        PredicateExpression predicateExpression = schedule.getPredicateExpression();
+        if (predicateExpression != null &&
+            predicateExpression.evaluate(sender.getNode().getWorldModel().getState())) {
+          ExecuteScheduleMsg executeScheduleMsg = new ExecuteScheduleMsg(sender, schedule, controlledResources);
+          sender.sendMsgToRecipient(executor.getChannel(), executeScheduleMsg);
+          return;
+        }
+      }
+      SchedulerStatusMsg schedulerStatusMsg = new SchedulerStatusMsg(sender, status);
+      sender.sendMsgToRecipient(jobAssignerChannel, schedulerStatusMsg);
+    }
+  
     /** Processes the schedule consistency message.
      *
      * @param scheduleConsistencyRequestMsg the schedule consistency request message

@@ -66,7 +66,7 @@ public class StateMachineReport {
         Log.current.println("StateMachine name: " + stateMachine.getName());
         topState = stateMachine.getTop();
         Log.current.println("StateMachine top state: " + topState.getName());
-        Log.current.println("StateMachine top context: " + stateMachine.getContext().getClass().toString());
+        Log.current.println("StateMachine top context: " + stateMachine.getContext().toString());
     }
 
     /**

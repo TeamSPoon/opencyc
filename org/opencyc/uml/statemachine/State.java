@@ -1,6 +1,7 @@
 package org.opencyc.uml.statemachine;
 
 import java.util.*;
+import org.opencyc.uml.action.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 import org.opencyc.uml.interpreter.*;
@@ -38,19 +39,49 @@ public abstract class State extends StateVertex {
     protected Procedure entry;
 
     /**
+     * the input pin bindings for the state entry procedure
+     */
+    protected ArrayList entryInputBindings;
+
+    /**
+     * the output pin bindings for the state entry procedure
+     */
+    protected ArrayList entryOutputBindings;
+
+    /**
      * the exit procedure for this state
      */
     protected Procedure exit;
 
     /**
-     * the deferrable events for this state
+     * the input pin bindings for the state exit procedure
      */
-    protected ArrayList deferrableEvent = new ArrayList();
+    protected ArrayList exitInputBindings;
+
+    /**
+     * the output pin bindings for the state exit procedure
+     */
+    protected ArrayList exitOutputBindings;
 
     /**
      * the do activity for this state
      */
     protected Procedure doActivity;
+
+    /**
+     * the input pin bindings for the state do activity procedure
+     */
+    protected ArrayList doActivityInputBindings;
+
+    /**
+     * the output pin bindings for the state do activity procedure
+     */
+    protected ArrayList doActivityOutputBindings;
+
+    /**
+     * the deferrable events for this state
+     */
+    protected ArrayList deferrableEvent = new ArrayList();
 
     /**
      * the internal transitions for this state
@@ -105,6 +136,72 @@ public abstract class State extends StateVertex {
     }
 
     /**
+     * Gets the input pin bindings for the state entry procedure
+     *
+     * @return the input pin bindings for the state entry procedure
+     */
+    public ArrayList getEntryInputBindings () {
+        return entryInputBindings;
+    }
+
+    /**
+     * Adds an input pin binding for the state entry procedure
+     *
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the state entry procedure
+     */
+    public void addEntryInputBinding (InputPin inputPin, Object boundObject) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(inputPin, boundObject);
+        if (entryInputBindings == null)
+            entryInputBindings = new ArrayList();
+        entryInputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the input pin bindings for the state entry procedure
+     *
+     * @param effectInputBindings the input pin bindings for the state entry procedure
+     */
+    public void setEntryInputBindings (ArrayList effectInputBindings) {
+        this.entryInputBindings = entryInputBindings;
+    }
+
+    /**
+     * Gets the output pin bindings for the state entry procedure
+     *
+     * @return the output pin bindings for the state entry procedure
+     */
+    public ArrayList getEntryOutputBindings () {
+        return entryOutputBindings;
+    }
+
+    /**
+     * Adds an output pin binding for the state entry procedure
+     *
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the state entry procedure
+     */
+    public void addEntryOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(outputPin, stateVariable);
+        if (entryOutputBindings == null)
+            entryOutputBindings = new ArrayList();
+        entryOutputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the output pin bindings for the state entry procedure
+     *
+     * @param effectOutputBindings the output pin bindings for the state entry procedure
+     */
+    public void setEntryOutputBindings (ArrayList effectOutputBindings) {
+        this.entryOutputBindings = entryOutputBindings;
+    }
+
+    /**
      * Gets the exit procedure for this state.
      *
      * @return the exit procedure for this state
@@ -120,6 +217,72 @@ public abstract class State extends StateVertex {
      */
     public void setExit (Procedure exit) {
         this.exit = exit;
+    }
+
+    /**
+     * Gets the input pin bindings for the state exit procedure
+     *
+     * @return the input pin bindings for the state exit procedure
+     */
+    public ArrayList getExitInputBindings () {
+        return exitInputBindings;
+    }
+
+    /**
+     * Adds an input pin binding for the state exit procedure
+     *
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the state exit procedure
+     */
+    public void addExitInputBinding (InputPin inputPin, Object boundObject) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(inputPin, boundObject);
+        if (exitInputBindings == null)
+            exitInputBindings = new ArrayList();
+        exitInputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the input pin bindings for the state exit procedure
+     *
+     * @param effectInputBindings the input pin bindings for the state exit procedure
+     */
+    public void setExitInputBindings (ArrayList effectInputBindings) {
+        this.exitInputBindings = exitInputBindings;
+    }
+
+    /**
+     * Gets the output pin bindings for the state exit procedure
+     *
+     * @return the output pin bindings for the state exit procedure
+     */
+    public ArrayList getExitOutputBindings () {
+        return exitOutputBindings;
+    }
+
+    /**
+     * Adds an output pin binding for the state exit procedure
+     *
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the state exit procedure
+     */
+    public void addExitOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(outputPin, stateVariable);
+        if (exitOutputBindings == null)
+            exitOutputBindings = new ArrayList();
+        exitOutputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the output pin bindings for the state exit procedure
+     *
+     * @param effectOutputBindings the output pin bindings for the state exit procedure
+     */
+    public void setExitOutputBindings (ArrayList effectOutputBindings) {
+        this.exitOutputBindings = exitOutputBindings;
     }
 
     /**
@@ -199,7 +362,6 @@ public abstract class State extends StateVertex {
         this.isActive = isActive;
     }
 
-
     /**
      * Gets the do activity thread for this state.
      *
@@ -216,6 +378,72 @@ public abstract class State extends StateVertex {
      */
     public void setDoActivityThread (DoActivity doActivityThread) {
         this.doActivityThread = doActivityThread;
+    }
+
+    /**
+     * Gets the input pin bindings for the state doActivity procedure
+     *
+     * @return the input pin bindings for the state doActivity procedure
+     */
+    public ArrayList getDoActivityInputBindings () {
+        return doActivityInputBindings;
+    }
+
+    /**
+     * Adds an input pin binding for the state doActivity procedure
+     *
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the state doActivity procedure
+     */
+    public void addDoActivityInputBinding (InputPin inputPin, Object boundObject) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(inputPin, boundObject);
+        if (doActivityInputBindings == null)
+            doActivityInputBindings = new ArrayList();
+        doActivityInputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the input pin bindings for the state doActivity procedure
+     *
+     * @param effectInputBindings the input pin bindings for the state doActivity procedure
+     */
+    public void setDoActivityInputBindings (ArrayList effectInputBindings) {
+        this.doActivityInputBindings = doActivityInputBindings;
+    }
+
+    /**
+     * Gets the output pin bindings for the state doActivity procedure
+     *
+     * @return the output pin bindings for the state doActivity procedure
+     */
+    public ArrayList getDoActivityOutputBindings () {
+        return doActivityOutputBindings;
+    }
+
+    /**
+     * Adds an output pin binding for the state doActivity procedure
+     *
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the state doActivity procedure
+     */
+    public void addDoActivityOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(outputPin, stateVariable);
+        if (doActivityOutputBindings == null)
+            doActivityOutputBindings = new ArrayList();
+        doActivityOutputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the output pin bindings for the state doActivity procedure
+     *
+     * @param effectOutputBindings the output pin bindings for the state doActivity procedure
+     */
+    public void setDoActivityOutputBindings (ArrayList effectOutputBindings) {
+        this.doActivityOutputBindings = doActivityOutputBindings;
     }
 
     /**
@@ -252,5 +480,6 @@ public abstract class State extends StateVertex {
     public void setStateInterpreter (StateInterpreter stateInterpreter) {
         this.stateInterpreter = stateInterpreter;
     }
+
 
 }

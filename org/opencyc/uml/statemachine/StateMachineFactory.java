@@ -605,4 +605,117 @@ public class StateMachineFactory {
     public void setNamespace (Namespace namespace) {
         this.namespace = namespace;
     }
+
+    /**
+     * Adds an input pin binding for the transition effect
+     *
+     * @param transition the given transition
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the transition effect
+     */
+    public void addEffectInputBinding (Transition transition,
+                                       InputPin inputPin,
+                                       Object boundObject) {
+        transition.addEffectInputBinding(inputPin, boundObject);
+    }
+
+    /**
+     * Adds an output pin binding for the transition effect
+     *
+     * @param transition the given transition
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the transition effect
+     */
+    public void addEffectOutputBinding (Transition transition,
+                                       OutputPin outputPin,
+                                       StateVariable stateVariable) {
+        transition.addEffectOutputBinding(outputPin, stateVariable);
+    }
+
+    /**
+     * Adds an input pin binding for the state entry procedure
+     *
+     * @param state the given state
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the state entry procedure
+     */
+    public void addEntryInputBinding (State state,
+                                      InputPin inputPin,
+                                      Object boundObject) {
+        state.addEntryInputBinding(inputPin, boundObject);
+    }
+
+    /**
+     * Adds an output pin binding for the state entry procedure
+     *
+     * @param state the given state
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the state entry procedure
+     */
+    public void addEntryOutputBinding (State state,
+                                       OutputPin outputPin,
+                                       StateVariable stateVariable) {
+        state.addEntryOutputBinding(outputPin, stateVariable);
+    }
+
+    /**
+     * Adds an input pin binding for the state exit procedure
+     *
+     * @param state the given state
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the state exit procedure
+     */
+    public void addExitInputBinding (State state,
+                                     InputPin inputPin,
+                                     Object boundObject) {
+        state.addExitInputBinding(inputPin, boundObject);
+    }
+
+    /**
+     * Adds an output pin binding for the state exit procedure
+     *
+     * @param state the given state
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the state exit procedure
+     */
+    public void addExitOutputBinding (State state,
+                                      OutputPin outputPin,
+                                      StateVariable stateVariable) {
+        state.addExitOutputBinding(outputPin, stateVariable);
+    }
+
+    /**
+     * Adds an input pin binding for the state doActivity procedure
+     *
+     * @param state the given state
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the state doActivity procedure
+     */
+    public void addDoActivityInputBinding (State state,
+                                           InputPin inputPin,
+                                           Object boundObject) {
+        state.addDoActivityInputBinding(inputPin, boundObject);
+    }
+
+    /**
+     * Adds an output pin binding for the state doActivity procedure
+     *
+     * @param state the given state
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the state doActivity procedure
+     */
+    public void addDoActivityOutputBinding (State state,
+                                            OutputPin outputPin,
+                                            StateVariable stateVariable) {
+        state.addDoActivityOutputBinding(outputPin, stateVariable);
+    }
+
 }

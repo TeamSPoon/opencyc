@@ -219,6 +219,12 @@ public class ProcedureInterpreter {
         query.add(query2);
         CycList queryResult =
             cycAccess.askWithVariable(query, cycVariable, stateMachineDefinitionMt);
+        if (queryResult.isEmpty())
+            throw new CycApiException("umlProcedureBinding-Procedure " + procedure.toString() +
+                                      " or \numlProcedureBinding-CalledByTransition not found for " +
+                                      transition.toString() +
+                                      " with mt " + stateMachineDefinitionMt.cyclify() +
+                                      "\n in query \n" + query.toPrettyString(""));
         procedureBinding = (CycFort) queryResult.first();
         contextFrame =
             contextStackPool.allocateProcedureContextFrame(parentContextFrame,

@@ -84,7 +84,7 @@ public class CycSOAPClient {
      */
     protected void remoteSubLInteractor ()
         throws ServiceException, MalformedURLException, RemoteException {
-        String endpointURL = "http://localhost:9080/axis/CycSOAPService.jws";
+        String endpointURL = "http://localhost:8080/axis/CycSOAPService.jws";
         String methodName = "subLInteractor";
         Service service = new Service();
         Call call = (Call) service.createCall();

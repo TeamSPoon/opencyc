@@ -56,14 +56,15 @@ public class CycExtractor {
     protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
-     * the name of the relevant inference microtheory
+     * #$UMLStateMachineSpindleCollectorMt
      */
-    public static final String mtName = "UMLStateMachineSpindleCollectorMt";
+    public static final String umlStateMachineSpindleCollectorMtName =
+            "UMLStateMachineSpindleCollectorMt";
 
     /**
      * the relevant inference microtheory
      */
-    protected CycFort mtTerm;
+    protected CycFort stateMachineDefinitionMtTerm;
 
     /**
      * the CycAccess object which manages the Cyc server connection
@@ -194,8 +195,22 @@ public class CycExtractor {
      */
     public StateMachine extract (String stateMachineName)
         throws IOException, CycApiException, ClassNotFoundException {
-        mtTerm = cycAccess.getKnownConstantByName(mtName);
         this.stateMachineName = stateMachineName;
+        stateMachineTerm = cycAccess.getConstantByName(stateMachineName);
+        if (stateMachineTerm == null)
+            throw new CycApiException("Expected state machine term not found for " +
+                                      stateMachineName);
+        stateMachineDefinitionMtTerm =
+            (CycConstant) cycAccess.getArg2("umlStateMachineDefinition",
+                                            stateMachineName,
+                                            umlStateMachineSpindleCollectorMtName);
+        if (stateMachineDefinitionMtTerm == null)
+            throw new CycApiException("Expected umlStateMachineDefinition not found for\n  " +
+                                      stateMachineTerm.cyclify() + " in " +
+                                      umlStateMachineSpindleCollectorMtName);
+        if (verbosity > 2)
+            Log.current.println(stateMachineTerm.cyclify() + " is defined in " +
+                                stateMachineDefinitionMtTerm.cyclify());
         stateMachine = extractStateMachine();
         extractProcedures();
         extractStates();
@@ -208,14 +223,17 @@ public class CycExtractor {
      */
     protected StateMachine extractStateMachine ()
             throws IOException, CycApiException, ClassNotFoundException {
-        stateMachineTerm = cycAccess.getConstantByName(stateMachineName);
         CycConstant namespaceTerm =
             (CycConstant) cycAccess.getArg2("umlNamespaceLink",
-                                            stateMachineName,
-                                            mtName);
+                                            stateMachineTerm,
+                                            stateMachineDefinitionMtTerm);
+        if (namespaceTerm == null)
+            throw new CycApiException("Expected umlNamespaceLink not found for \n  " +
+                                      stateMachineName + " in " +
+                                      stateMachineDefinitionMtTerm.cyclify());
         String namespaceName = namespaceTerm.toString();
         String commentString = cycAccess.getComment(stateMachineTerm);
-        Object context = this;
+        Object context = stateMachineDefinitionMtTerm;
         return stateMachineFactory.makeStateMachine(namespaceName,
                                                     stateMachineName,
                                                     commentString,
@@ -236,16 +254,31 @@ public class CycExtractor {
             CycFort procedureDefinitionMt =
                 (CycFort) cycAccess.getArg2("umlProcedureDefinition",
                                             procedureTerm,
-                                            mtTerm);
+                                            stateMachineDefinitionMtTerm);
+            if (procedureDefinitionMt == null)
+                throw new CycApiException("Expected umlProcedureDefinition not found for \n  " +
+                                          procedureTerm.cyclify() + " in " +
+                                          stateMachineDefinitionMtTerm.cyclify());
             String commentString = cycAccess.getComment(procedureTerm);
+            if (commentString == null)
+                throw new CycApiException("Expected comment not found for \n  " +
+                                          procedureTerm.cyclify());
             String language =
                 (String) cycAccess.getArg2("umlLanguage",
                                            procedureTerm,
                                            procedureDefinitionMt).toString();
+            if (language == null)
+                throw new CycApiException("Expected umlLanguage not found for \n  " +
+                                          procedureTerm.cyclify() + " in " +
+                                          procedureDefinitionMt.cyclify());
             Object body =
                 cycAccess.getArg2("umlBody",
                                   procedureTerm,
                                   procedureDefinitionMt);
+            if (body == null)
+                throw new CycApiException("Expected umlBody not found for \n  " +
+                                          procedureTerm.cyclify() + " in " +
+                                          procedureDefinitionMt.cyclify());
             boolean isList =
                 cycAccess.isa(procedureTerm, "UMLProcedure-IsList");
             Procedure procedure =
@@ -259,15 +292,27 @@ public class CycExtractor {
             Iterator iter2 = argumentTerms.iterator();
             while (iter2.hasNext()) {
                 CycConstant argumentTerm = (CycConstant) iter2.next();
-                String name =
-                    (String) cycAccess.getArg2("umlName",
+                Object object = cycAccess.getArg2("umlName",
                                                argumentTerm,
-                                               mtTerm);
+                                               procedureDefinitionMt);
+                if (object == null ||
+                    ! (object instanceof String))
+                    throw new CycApiException("Expected umlName not found for \n  " +
+                                              argumentTerm.cyclify() + " in " +
+                                              procedureDefinitionMt.cyclify());
+                String name = (String) object;
                 commentString = cycAccess.getComment(argumentTerm);
+                if (commentString == null)
+                    throw new CycApiException("Expected comment not found for \n  " +
+                                              argumentTerm.cyclify());
                 CycConstant typeTerm =
                     (CycConstant) cycAccess.getArg2("umlType",
                                                     argumentTerm,
-                                                    mtTerm);
+                                                    procedureDefinitionMt);
+                if (typeTerm == null)
+                    throw new CycApiException("Expected umlType not found for \n  " +
+                                              argumentTerm.cyclify() + " in " +
+                                              procedureDefinitionMt.cyclify());
                 Class type = translateType(typeTerm);
                 stateMachineFactory.addInputPinToProcedure(name,
                                                            commentString,
@@ -277,15 +322,28 @@ public class CycExtractor {
             iter2 = resultTerms.iterator();
             while (iter2.hasNext()) {
                 CycConstant resultTerm = (CycConstant) iter2.next();
-                String name =
-                    (String) cycAccess.getArg2("umlName",
-                                               resultTerm,
-                                               mtTerm);
+                Object object =
+                    cycAccess.getArg2("umlName",
+                                      resultTerm,
+                                      procedureDefinitionMt);
+                if (object == null ||
+                    ! (object instanceof String))
+                    throw new CycApiException("Expected umlName not found for \n  " +
+                                              resultTerm.cyclify() + " in " +
+                                              procedureDefinitionMt.cyclify());
+                String name = (String) object;
                 commentString = cycAccess.getComment(resultTerm);
+                if (commentString == null)
+                    throw new CycApiException("Expected comment not found for \n  " +
+                                              resultTerm.cyclify());
                 CycConstant typeTerm =
                     (CycConstant) cycAccess.getArg2("umlType",
                                                     resultTerm,
-                                                    mtTerm);
+                                                    procedureDefinitionMt);
+                if (typeTerm == null)
+                    throw new CycApiException("Expected umlType not found for \n  " +
+                                              resultTerm.cyclify() + " in " +
+                                              procedureDefinitionMt.cyclify());
                 Class type = translateType(typeTerm);
                 stateMachineFactory.addOutputPinToProcedure(name,
                                                             commentString,
@@ -317,6 +375,8 @@ public class CycExtractor {
             return Class.forName("org.opencyc.uml.statemachine.PrimitiveLong");
         if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLString")))
             return Class.forName("java.lang.String");
+        if (typeTerm.equals(cycAccess.getKnownConstantByName("UMLCycLExpression")))
+            return Class.forName("org.opencyc.cycobject.CycList");
         //TODO add other types as required
         throw new RuntimeException("Unhandled typeTerm " + typeTerm.cyclify());
     }
@@ -363,6 +423,13 @@ public class CycExtractor {
      */
     protected void extractStates ()
             throws IOException, CycApiException, ClassNotFoundException {
+        CycConstant topStateTerm =
+            (CycConstant) cycAccess.getArg2("umlTop",
+                                            stateMachineTerm,
+                                            stateMachineDefinitionMtTerm);
+        if (topStateTerm == null)
+            throw new CycApiException("Expected umlTop not found for \n  " +
+                                      stateMachineTerm.cyclify() + " in " + stateMachineDefinitionMtTerm.cyclify());
         Iterator iter = stateVertexTerms.iterator();
         while (iter.hasNext()) {
             CycConstant stateVertexTerm = (CycConstant) iter.next();
@@ -372,7 +439,11 @@ public class CycExtractor {
             CycConstant containerTerm =
                 (CycConstant) cycAccess.getArg2("umlContainer",
                                                 stateVertexTerm,
-                                                mtTerm);
+                                                stateMachineDefinitionMtTerm);
+            if (containerTerm == null &&
+                (! (stateVertexTerm.equals(topStateTerm))))
+                throw new CycApiException("Expected umlContainer not found for \n  " +
+                                          stateVertexTerm.cyclify() + " in " + stateMachineDefinitionMtTerm.cyclify());
             container = (CompositeState) stateVertexDictionary.get(containerTerm);
             if (cycAccess.isa(stateVertexTerm, "UMLPseudoState")) {
                 extractPseudoState(stateVertexTerm);
@@ -389,9 +460,11 @@ public class CycExtractor {
                 throw new RuntimeException("Unhandled stateVertexTerm " +
                                            stateVertexTerm.cyclify());
         }
-        CycConstant topStateTerm =
-            (CycConstant) cycAccess.getArg2("umlTop", stateMachineTerm, mtTerm);
-        stateMachine.setTop((State) stateVertexDictionary.get(topStateTerm));
+        State topState = (State) stateVertexDictionary.get(topStateTerm);
+        if (topState == null)
+            throw new CycApiException("Expected top state not found for \n  " +
+                                      stateMachineTerm.cyclify() + " in " + stateMachineDefinitionMtTerm.cyclify());
+        stateMachine.setTop(topState);
     }
 
     /**
@@ -498,7 +571,10 @@ public class CycExtractor {
         CycConstant topStateTerm =
             (CycConstant) cycAccess.getArg2("umlTop",
                                             stateMachineTerm,
-                                            mtTerm);
+                                            stateMachineDefinitionMtTerm);
+        if (topStateTerm == null)
+            throw new CycApiException("Expected umlTop not found for \n  " +
+                                      stateMachineTerm.cyclify() + " in " + stateMachineDefinitionMtTerm.cyclify());
         Stack stateTermStack = new Stack();
         stateTermStack.push(topStateTerm);
         while (! stateTermStack.isEmpty()) {
@@ -510,7 +586,7 @@ public class CycExtractor {
                 CycList subStates =
                     cycAccess.getArg1s(cycAccess.getKnownConstantByName("umlContainer"),
                                        stateVertexTerm,
-                                       mtTerm);
+                                       stateMachineDefinitionMtTerm);
                 Iterator iter = subStates.iterator();
                 while (iter.hasNext()) {
                     Object object = iter.next();
@@ -531,19 +607,19 @@ public class CycExtractor {
         CycConstant entryProcedureTerm =
             (CycConstant) cycAccess.getArg2("umlEntry",
                                             stateTerm,
-                                            mtTerm);
+                                            stateMachineDefinitionMtTerm);
         entryProcedure = (Procedure) procedureDictionary.get(entryProcedureTerm);
 
         CycConstant exitProcedureTerm =
             (CycConstant) cycAccess.getArg2("umlExit",
                                             stateTerm,
-                                            mtTerm);
+                                            stateMachineDefinitionMtTerm);
         exitProcedure = (Procedure) procedureDictionary.get(exitProcedureTerm);
 
         CycConstant doActivityProcedureTerm =
             (CycConstant) cycAccess.getArg2("umlDoActivity",
                                             stateTerm,
-                                            mtTerm);
+                                            stateMachineDefinitionMtTerm);
         doActivityProcedure = (Procedure) procedureDictionary.get(doActivityProcedureTerm);
     }
 
@@ -555,7 +631,7 @@ public class CycExtractor {
         CycList stateMachineReferents =
             cycAccess.getArg1s(cycAccess.getKnownConstantByName("umlStateMachineLink"),
                                stateMachineTerm,
-                               mtTerm);
+                               stateMachineDefinitionMtTerm);
         transitionTerms = new CycList();
         Iterator iter = stateMachineReferents.iterator();
         while(iter.hasNext()) {
@@ -581,7 +657,7 @@ public class CycExtractor {
                 CycConstant entryProcedureTerm =
                     (CycConstant) cycAccess.getArg2("umlEntry",
                                                     stateVertexTerm,
-                                                    mtTerm);
+                                                    stateMachineDefinitionMtTerm);
                 if (entryProcedureTerm != null) {
                     procedureTerms.add(entryProcedureTerm);
                     if (verbosity > 2)
@@ -590,7 +666,7 @@ public class CycExtractor {
                 CycConstant exitProcedureTerm =
                     (CycConstant) cycAccess.getArg2("umlExit",
                                                     stateVertexTerm,
-                                                    mtTerm);
+                                                    stateMachineDefinitionMtTerm);
                 if (exitProcedureTerm != null) {
                     procedureTerms.add(exitProcedureTerm);
                     if (verbosity > 2)
@@ -599,7 +675,7 @@ public class CycExtractor {
                 CycConstant doActivityProcedureTerm =
                     (CycConstant) cycAccess.getArg2("umlDoActivity",
                                                     stateVertexTerm,
-                                                    mtTerm);
+                                                    stateMachineDefinitionMtTerm);
                 if (doActivityProcedureTerm != null) {
                     procedureTerms.add(doActivityProcedureTerm);
                     if (verbosity > 2)
@@ -613,11 +689,26 @@ public class CycExtractor {
             CycConstant effectProcedureTerm =
                 (CycConstant) cycAccess.getArg2("umlEffect",
                                                 transitionTerm,
-                                                mtTerm);
+                                                stateMachineDefinitionMtTerm);
             if (effectProcedureTerm != null) {
                 procedureTerms.add(effectProcedureTerm);
                 if (verbosity > 2)
                     Log.current.println("Extracted procedure " + effectProcedureTerm.cyclify());
+                CycList gatherArgs = new CycList();
+                gatherArgs.add(new Integer(2));
+                gatherArgs.add(new Integer(3));
+                CycList inputBindingTuples =
+                    cycAccess.getPredicateValueTuplesInMt(transitionTerm,
+                                                          cycAccess.getKnownConstantByName("umlEffectInputBinding"),
+                                                          1,
+                                                          gatherArgs,
+                                                          stateMachineDefinitionMtTerm);
+                Iterator inputBindingTuplesIter = inputBindingTuples.iterator();
+                while (inputBindingTuplesIter.hasNext()) {
+                    CycList inputBindingTuple = (CycList) inputBindingTuplesIter.next();
+
+                }
+
             }
         }
     }
@@ -637,28 +728,37 @@ public class CycExtractor {
             CycConstant guardTerm =
                 (CycConstant) cycAccess.getArg2("umlGuardLink",
                                                 transitionTerm,
-                                                mtTerm);
+                                                stateMachineDefinitionMtTerm);
             String guardExpressionLanguage = null;
             Object guardExpressionBody = null;
             if (guardTerm != null) {
                 CycConstant booleanExpressionTerm =
                     (CycConstant) cycAccess.getArg2("umlExpressionLink",
                                                     guardTerm,
-                                                    mtTerm);
+                                                    stateMachineDefinitionMtTerm);
+                if (booleanExpressionTerm == null)
+                    throw new CycApiException("Expected umlExpressionLink not found for \n  " +
+                                              guardTerm.cyclify() + " in " + stateMachineDefinitionMtTerm.cyclify());
                 guardExpressionLanguage =
                     (String) cycAccess.getArg2("umlLanguage",
                                                booleanExpressionTerm,
-                                               mtTerm).toString();
+                                               stateMachineDefinitionMtTerm).toString();
+                if (guardExpressionLanguage == null)
+                    throw new CycApiException("Expected umlLanguage not found for \n  " +
+                                              booleanExpressionTerm.cyclify() + " in " + stateMachineDefinitionMtTerm.cyclify());
                 guardExpressionBody =
                     cycAccess.getArg2("umlBody",
                                       booleanExpressionTerm,
-                                      mtTerm);
+                                      stateMachineDefinitionMtTerm);
+                if (guardExpressionBody == null)
+                    throw new CycApiException("Expected umlBody not found for \n  " +
+                                              booleanExpressionTerm.cyclify() + " in " + stateMachineDefinitionMtTerm.cyclify());
             }
             Procedure effect = null;
             CycConstant effectTerm =
                 (CycConstant) cycAccess.getArg2("umlEffect",
                                                 transitionTerm,
-                                                mtTerm);
+                                                stateMachineDefinitionMtTerm);
             if (effectTerm != null)
                 effect = (Procedure) procedureDictionary.get(effectTerm);
 
@@ -666,7 +766,7 @@ public class CycExtractor {
             CycConstant triggerTerm =
                 (CycConstant) cycAccess.getArg2("umlTrigger",
                                                 transitionTerm,
-                                                mtTerm);
+                                                stateMachineDefinitionMtTerm);
             if (triggerTerm != null)
                 trigger = translateTermToEvent(triggerTerm);
 
@@ -674,7 +774,7 @@ public class CycExtractor {
             CycConstant sourceTerm =
                 (CycConstant) cycAccess.getArg2("umlSource",
                                                 transitionTerm,
-                                                mtTerm);
+                                                stateMachineDefinitionMtTerm);
             if (sourceTerm != null)
                 source = (StateVertex) stateVertexDictionary.get(sourceTerm);
 
@@ -682,7 +782,7 @@ public class CycExtractor {
             CycConstant targetTerm =
                 (CycConstant) cycAccess.getArg2("umlTarget",
                                                 transitionTerm,
-                                                mtTerm);
+                                                stateMachineDefinitionMtTerm);
             if (targetTerm != null)
                 target = (StateVertex) stateVertexDictionary.get(targetTerm);
 

@@ -33,8 +33,7 @@ public class StateMachine extends ModelElement {
     /**
      * The context Classifier of this state machine, which contains the
      * variables that distinguish the state, and the operations which
-     * can be performed upon state transitions.  Note that java Object
-     * directly represents UML Classifier for ease of interpretation.
+     * can be performed upon state transitions.
      */
     protected Object context;
 

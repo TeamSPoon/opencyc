@@ -1,5 +1,7 @@
 package org.opencyc.uml.statemachine;
 
+import java.util.ArrayList;
+import org.opencyc.uml.action.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
 
@@ -42,6 +44,16 @@ public class Transition extends ModelElement {
      * the effect of this transition
      */
     protected Procedure effect;
+
+    /**
+     * the input pin bindings for the transition effect
+     */
+    protected ArrayList effectInputBindings;
+
+    /**
+     * the output pin bindings for the transition effect
+     */
+    protected ArrayList effectOutputBindings;
 
     /**
      * the event which triggered this transition
@@ -103,6 +115,72 @@ public class Transition extends ModelElement {
      */
     public void setEffect (Procedure effect) {
         this.effect = effect;
+    }
+
+    /**
+     * Gets the input pin bindings for the transition effect
+     *
+     * @return the input pin bindings for the transition effect
+     */
+    public ArrayList getEffectInputBindings () {
+        return effectInputBindings;
+    }
+
+    /**
+     * Adds an input pin binding for the transition effect
+     *
+     * @param inputPin the given input pin
+     * @param boundObject the object bound to the given input pin
+     * @return the input pin bindings for the transition effect
+     */
+    public void addEffectInputBinding (InputPin inputPin, Object boundObject) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(inputPin, boundObject);
+        if (effectInputBindings == null)
+            effectInputBindings = new ArrayList();
+        effectInputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the input pin bindings for the transition effect
+     *
+     * @param effectInputBindings the input pin bindings for the transition effect
+     */
+    public void setEffectInputBindings (ArrayList effectInputBindings) {
+        this.effectInputBindings = effectInputBindings;
+    }
+
+    /**
+     * Gets the output pin bindings for the transition effect
+     *
+     * @return the output pin bindings for the transition effect
+     */
+    public ArrayList getEffectOutputBindings () {
+        return effectOutputBindings;
+    }
+
+    /**
+     * Adds an output pin binding for the transition effect
+     *
+     * @param outputPin the given output pin
+     * @param stateVariable the state variable bound to the given output pin
+     * @return the output pin bindings for the transition effect
+     */
+    public void addEffectOutputBinding (OutputPin outputPin, StateVariable stateVariable) {
+        ProcedureArgumentBinding procedureArgumentBinding =
+            new ProcedureArgumentBinding(outputPin, stateVariable);
+        if (effectOutputBindings == null)
+            effectOutputBindings = new ArrayList();
+        effectOutputBindings.add(procedureArgumentBinding);
+    }
+
+    /**
+     * Sets the output pin bindings for the transition effect
+     *
+     * @param effectOutputBindings the output pin bindings for the transition effect
+     */
+    public void setEffectOutputBindings (ArrayList effectOutputBindings) {
+        this.effectOutputBindings = effectOutputBindings;
     }
 
     /**

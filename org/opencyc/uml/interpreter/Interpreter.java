@@ -118,7 +118,7 @@ public class Interpreter {
     /**
      * the state machine definition microtheory
      */
-    protected CycFort definitionMt;
+    protected CycFort stateMachineDefinitionMt;
 
     /**
      * the expression evaluation state context
@@ -157,17 +157,14 @@ public class Interpreter {
      *
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
-     * @param definitionMt the state machine definition microtheory
      * @param contextStatePool the context state pool
      */
     public Interpreter(StateMachine stateMachine,
                        CycAccess cycAccess,
-                       CycFort definitionMt,
                        ContextStackPool contextStackPool)
         throws IOException, CycApiException, ExpressionEvaluationException {
         this(stateMachine,
              cycAccess,
-             definitionMt,
              contextStackPool,
              Interpreter.DEFAULT_VERBOSITY);
     }
@@ -178,20 +175,17 @@ public class Interpreter {
      *
      * @param stateMachine the state machine to interpret
      * @param cycAccess the Cyc access instance
-     * @param definitionMt the state machine definition microtheory
      * @param contextStatePool the context state pool
      * @param verbosity indicates the verbosity of the interpreter's
      * diagnostic output - 9 = maximum, 0 = quiet
      */
     public Interpreter(StateMachine stateMachine,
                        CycAccess cycAccess,
-                       CycFort definitionMt,
                        ContextStackPool contextStackPool,
                        int verbosity)
         throws IOException, CycApiException, ExpressionEvaluationException {
         this.stateMachine = stateMachine;
         this.cycAccess = cycAccess;
-        this.definitionMt = definitionMt;
         this.contextStackPool = contextStackPool;
         this.verbosity = verbosity;
         initialize();
@@ -212,7 +206,7 @@ public class Interpreter {
         stateMachineFactory.setNamespace(stateMachine.getNamespace());
         CycFort stateMachineTerm = cycAccess.getKnownConstantByName(stateMachine.getName());
         stateMt = contextStackPool.allocateStateMachineContextFrame(null,
-                                                                    definitionMt,
+                                                                    stateMachineDefinitionMt,
                                                                     stateMachineTerm);
         cycAccess.unassertMtContentsWithoutTranscript(stateMt);
     }
@@ -566,21 +560,21 @@ public class Interpreter {
     }
 
     /**
-     * Gets the expression evaluation state context
+     * Gets the state machine definition microtheory
      *
-     * @return the expression evaluation state context
+     * @return the state machine definition microtheory
      */
-    public CycFort getDefinitionMt () {
-        return definitionMt;
+    public CycFort getStateMachineDefinitionMt () {
+        return stateMachineDefinitionMt;
     }
 
     /**
-     * Sets the expression evaluation state context
+     * Sets the state machine definition microtheory
      *
-     * @param definitionMt the expression evaluation state context
+     * @param stateMachineDefinitionMt the state machine definition microtheory
      */
-    public void setDefinitionMt (CycFort definitionMt) {
-        this.definitionMt = definitionMt;
+    public void setStateMachineDefinitionMt (CycFort stateMachineDefinitionMt) {
+        this.stateMachineDefinitionMt = stateMachineDefinitionMt;
     }
 
     /**

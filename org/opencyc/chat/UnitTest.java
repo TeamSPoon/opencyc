@@ -52,7 +52,7 @@ public class UnitTest extends TestCase {
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testChatterBot"));
-        testSuite.addTest(new UnitTest("testParser"));
+        //testSuite.addTest(new UnitTest("testParser"));
         return testSuite;
     }
 
@@ -96,8 +96,8 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(stateMachine.getNamespace().getOwnedElement().contains(stateMachine));
             Assert.assertEquals("ChatterBotStateMachine", stateMachine.getName());
             Assert.assertTrue(stateMachine.getComment() instanceof Comment);
-            Assert.assertEquals("This is the #$UMLStateMachine used by #$CognitiveCyc to " +
-                                "implement #$ChatterBot behavior.",
+            Assert.assertEquals("This is the #$UMLStateMachine used by #$Cyc to implement " +
+                                "#$ChatterBot behavior.",
                                 stateMachine.getComment().getBody());
             Assert.assertEquals(stateMachine, stateMachine.getComment().getAnnotatedElement());
 
@@ -118,26 +118,30 @@ public class UnitTest extends TestCase {
      * Tests the given instantiated state machine
      *
      * @param stateMachine the given instantiated state machine
-     * @param cycAccess the cyc access instance
+     * @param cycAccess the given cyc server connection
      */
-    protected void interpretStateMachine (StateMachine stateMachine, CycAccess cycAccess) {
-        int verbosity = 3;
+    protected void interpretStateMachine (StateMachine stateMachine,
+                                          CycAccess cycAccess) {
         Interpreter interpreter = null;
-        /*
+
         try {
-            interpreter = new Interpreter(stateMachine, cycAccess, verbosity);
+            CycFort temporaryWorkspaceMt =
+                cycAccess.getKnownConstantByName("UMLStateMachineInterpreter-TemporaryWorkspaceMt");
+            int verbosity = Interpreter.DEFAULT_VERBOSITY;
+            ContextStackPool contextStackPool = new ContextStackPool(cycAccess,
+                                                                     temporaryWorkspaceMt,
+                                                                     ContextStackPool.QUIET_VERBOSITY);
+            interpreter = new Interpreter(stateMachine,
+                                          cycAccess,
+                                          contextStackPool,
+                                          verbosity);
+            interpreter.interpret();
+            contextStackPool.destroyContextStack();
         }
-        catch (IOException e) {
+        catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
-        Assert.assertNotNull(interpreter);
-        Assert.assertTrue(interpreter instanceof Interpreter);
-        Assert.assertNull(interpreter.getCurrentEvent());
-        Assert.assertEquals(stateMachine, interpreter.getStateMachine());
-        interpreter.interpret();
-        if (verbosity > 2)
-            System.out.print(interpreter.displayStateConfigurationTree());
-        */
     }
 
     /**

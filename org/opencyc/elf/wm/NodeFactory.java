@@ -1,7 +1,6 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
-import org.opencyc.elf.LowestLevelNode;
 import org.opencyc.elf.Node;
 
 import org.opencyc.elf.a.Actuator;
@@ -90,6 +89,8 @@ public class NodeFactory {
     
     
     //TODO
+    // consider working from a set of task frames and building a node to process those
+    // task frames.
   }
 
   /**
@@ -103,19 +104,7 @@ public class NodeFactory {
     assembleNode();
     return node;
   }
-  
-  /**
-   * Makes a shell lowest level ELF node.
-   *
-   * @return a shell lowest level ELF node
-   */
-  public LowestLevelNode makeLowestLevelShellNode() {
-    node = new LowestLevelNode();
-    assembleNode();
-    assembleLowestLevelNode();
-    return (LowestLevelNode) node;
-  }
-  
+   
   //// Protected Area
   
   /**
@@ -134,21 +123,12 @@ public class NodeFactory {
   }
   
   /**
-   * Completes the assembly of the given lowest level node.
-   */
-  protected void assembleLowestLevelNode() {
-    makeActuatorShell();
-    ((LowestLevelNode) node).setActuator(actuator);
-    makeSensorShell();
-    ((LowestLevelNode) node).setSensor(sensor);
-  }
-  
-  /**
    * Makes a behavior generation shell.
    */
   protected void makeBehaviorGenerationShell () {
     behaviorGeneration = new BehaviorGeneration(node);
-    jobAssigner = new JobAssigner(node, jobAssignerChannel, null);
+    //TODO
+    //jobAssigner = new JobAssigner(node, jobAssignerChannel, null);
     planSelector = new PlanSelector();
     planSelector.setNode(node);
     behaviorGeneration.setPlanSelector(planSelector);
@@ -189,7 +169,8 @@ public class NodeFactory {
    * Makes a sensory perception shell.
    */
   protected void makeSensoryPerceptionShell () {
-    sensoryPerception = new SensoryPerception(sensoryPerceptionChannel, null);
+    //TODO
+    //sensoryPerception = new SensoryPerception(sensoryPerceptionChannel, null);
     sensoryPerception.setNode(node);
     estimator = new Estimator();
     sensoryPerception.setEstimator(estimator);
@@ -203,24 +184,6 @@ public class NodeFactory {
     hypothesisFormer = new HypothesisFormer();
     sensoryPerception.setHypothesisFormer(hypothesisFormer);
     hypothesisFormer.setNode(node);
-  }
-  
-  /**
-   * Makes an actuator shell.
-   */
-  protected void makeActuatorShell () {
-    //TODO
-    //actuator = new Actuator();
-    //actuator.setNode(node);
-  }
-  
-  /**
-   * Makes a sensor shell.
-   */
-  protected void makeSensorShell () {
-    //TODO
-    //sensor = new Sensor();
-    //sensor.setNode(node);
   }
   
   //// Private Area

@@ -8,6 +8,7 @@ import org.opencyc.elf.bg.predicate.NotNull;
 
 import org.opencyc.elf.bg.state.StateVariable;
 
+import org.opencyc.elf.bg.planner.ConditionalScheduleSet;
 import org.opencyc.elf.bg.planner.JobAssignment;
 import org.opencyc.elf.bg.planner.Resource;
 
@@ -243,28 +244,26 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(taskFrame);
     Assert.assertEquals("[TaskFrame task: converse with user goal: (not-null userInput)]", 
                         taskFrame.toString());
-    List actuators = taskFrame.getActuators();
-    Assert.assertNotNull(actuators);
-    Assert.assertEquals(1, actuators.size());
-    Assert.assertEquals("[ConsoleOutput resources: [[Resource: console]]]", actuators.get(0).toString());
-    List sensors = taskFrame.getSensors();
-    Assert.assertNotNull(sensors);
-    Assert.assertEquals(1, sensors.size());
-    Assert.assertEquals("[ConsoleInput resources: [[Resource: console]]]", sensors.get(0).toString());
+    List actuatorNames = taskFrame.getActuatorNames();
+    Assert.assertNotNull(actuatorNames);
+    Assert.assertEquals(1, actuatorNames.size());
+    Assert.assertEquals("", actuatorNames.get(0));
+    List sensorNames = taskFrame.getSensorNames();
+    Assert.assertNotNull(sensorNames);
+    Assert.assertEquals(1, sensorNames.size());
+    Assert.assertEquals("", sensorNames.get(0));
     Assert.assertNotNull(taskFrame.getTaskId());
     Assert.assertTrue(taskFrame.getTaskId() instanceof UUID);
     Assert.assertNotNull(taskFrame.getTaskName());
     Assert.assertEquals("converse with user", taskFrame.getTaskName());
     Assert.assertNotNull(taskFrame.getTaskAction());
     Assert.assertEquals("[Action: converse with user( prompt: null)]", taskFrame.getTaskAction().toString());
-    List scheduleInfos = taskFrame.getScheduleInfos();
-    Assert.assertNotNull(scheduleInfos);
-    Assert.assertEquals(1, scheduleInfos.size());
-    TaskFrame.ScheduleInfo scheduleInfo = (TaskFrame.ScheduleInfo) scheduleInfos.get(0);
-    Assert.assertEquals("[ScheduleInfo schedule: [Schedule []] " +
-                        "actuator: [ConsoleOutput resources: [[Resource: console]]] " + 
-                        "sensor: [ConsoleInput resources: [[Resource: console]]]]", 
-                        scheduleInfo.toString());
+    List conditionalScheduleSets = taskFrame.getConditionalScheduleSets();
+    Assert.assertNotNull(conditionalScheduleSets);
+    Assert.assertEquals(1, conditionalScheduleSets.size());
+    ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) conditionalScheduleSets.get(0);
+    Assert.assertEquals("", 
+                        conditionalScheduleSet.toString());
     
     System.out.println("*** testTaskFrameLibrary OK ***");
   }

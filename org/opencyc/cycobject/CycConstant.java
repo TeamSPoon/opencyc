@@ -301,7 +301,7 @@ public class CycConstant extends CycFort implements Comparable {
         CycConstantXmlDataBindingImpl cycConstantXmlDataBindingImpl = new CycConstantXmlDataBindingImpl();
         cycConstantXmlDataBindingImpl.setId(this.getId());
         cycConstantXmlDataBindingImpl.setName(name);
-        cycConstantXmlDataBindingImpl.setGuid(guid);
+        cycConstantXmlDataBindingImpl.setGuidXmlDataBindingImpl(guid.toGuidXmlDataBindingImpl());
         return cycConstantXmlDataBindingImpl;
     }
 }

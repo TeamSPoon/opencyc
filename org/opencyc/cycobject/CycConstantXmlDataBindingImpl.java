@@ -30,17 +30,17 @@ import java.util.*;
 
 public class CycConstantXmlDataBindingImpl extends CycFortXmlDataBindingImpl {
 
-    private Guid guid;
+    private GuidXmlDataBindingImpl guidXmlDataBindingImpl;
     private String name;
 
     public CycConstantXmlDataBindingImpl() {
     }
 
-    public Guid getGuid() {
-        return guid;
+    public GuidXmlDataBindingImpl getGuidXmlDataBindingImpl() {
+        return guidXmlDataBindingImpl;
     }
-    public void setGuid (Guid guid) {
-        this.guid = guid;
+    public void setGuidXmlDataBindingImpl (GuidXmlDataBindingImpl guidXmlDataBindingImpl) {
+        this.guidXmlDataBindingImpl = guidXmlDataBindingImpl;
     }
     public String getName () {
         return name;

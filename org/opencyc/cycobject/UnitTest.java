@@ -278,7 +278,6 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(cycConstant4, cycConstant5);
         String cycConstantXml = null;
         try {
-            Assert.assertTrue(cycConstantXmlDataBindingImpl instanceof CycConstantXmlDataBindingImpl);
             cycConstantXml = XMLDataBinding.marshall(cycConstantXmlDataBindingImpl);
         }
         catch (IOException e) {

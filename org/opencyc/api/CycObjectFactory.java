@@ -179,12 +179,13 @@ public class CycObjectFactory {
      * @pararm cycConstantXmlDataBindingImpl the xml databinding object
      */
     public static CycConstant makeCycConstant (CycConstantXmlDataBindingImpl cycConstantXmlDataBindingImpl) {
+        Guid guid = makeGuid(cycConstantXmlDataBindingImpl.getGuidXmlDataBindingImpl().getGuidString());
         CycConstant cycConstant =
-            getCycConstantCacheByGuid(cycConstantXmlDataBindingImpl.getGuid());
+            getCycConstantCacheByGuid(guid);
         if (cycConstant != null)
             return cycConstant;
         cycConstant = new CycConstant(cycConstantXmlDataBindingImpl.getName(),
-                                      cycConstantXmlDataBindingImpl.getGuid(),
+                                      guid,
                                       cycConstantXmlDataBindingImpl.getId());
         addCycConstantCacheByName(cycConstant);
         addCycConstantCacheByGuid(cycConstant);

@@ -52,8 +52,8 @@ public class CycAccess {
      * When true performs tracing of binary mode messages with constant names displayed,
      * which involves recursive api requests.
      */
-    //public boolean traceWithNames = false;
-    public boolean traceWithNames = true;
+    public boolean traceWithNames = false;
+    //public boolean traceWithNames = true;
 
     /**
      * Stack to prevent tracing of recursive api calls whose sole purpose is to obtain
@@ -499,7 +499,7 @@ public class CycAccess {
                 commandCyclist = (CycList) command;
 
             if (commandCyclist.first().equals(CycObjectFactory.makeCycSymbol("constant-name")))
-                bypassConstantNameRequest = true;
+                traceWithNamesInfo.bypassConstantNameRequest = true;
             else
                 Log.current.println(commandCyclist.cyclify() + " --> cyc");
             traceWithNames = false;

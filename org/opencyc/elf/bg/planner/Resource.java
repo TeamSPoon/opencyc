@@ -1,8 +1,6 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
-import org.opencyc.elf.bg.state.State;
-
 
 //// External Imports
 
@@ -69,10 +67,7 @@ public class Resource {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[");
     stringBuffer.append(resourceName);
-    stringBuffer.append("\n");
-    stringBuffer.append(state.toString());
     stringBuffer.append("]");
-
     return stringBuffer.toString();
   }
 
@@ -95,24 +90,6 @@ public class Resource {
   }
 
   /**
-   * Gets the state of the resource
-   * 
-   * @return the state of the resource
-   */
-  public State getState() {
-    return state;
-  }
-
-  /**
-   * Sets the state of the resource
-   * 
-   * @param state the state of the resource
-   */
-  public void setState(State state) {
-    this.state = state;
-  }
-
-  /**
    * the name of the console resource
    */
   public static final String CONSOLE = "console"; 
@@ -122,9 +99,7 @@ public class Resource {
   /** the resource name */
   protected String resourceName;
 
-  /** the state of the resource */
-  protected State state;
-
   //// Private Area
+  
   //// Internal Rep
 }

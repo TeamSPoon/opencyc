@@ -8,6 +8,7 @@ import  java.net.*;
 import  java.util.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.api.*;
+import  org.opencyc.util.*;
 
 /**
  * DAML+OIL export for OpenCyc.
@@ -175,6 +176,7 @@ public class ExportDaml {
      * Constructs a new ExportDaml object.
      */
     public ExportDaml () {
+        Log.makeLog();
     }
 
     /**
@@ -203,7 +205,7 @@ public class ExportDaml {
         this.exportCommand = exportCommand;
         setup();
         if (verbosity > 2)
-            System.out.println("Getting terms from Cyc");
+            Log.current.println("Getting terms from Cyc");
         CycList selectedConstants = new CycList();
         CycList selectedCycForts = null;
         if ((exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
@@ -216,14 +218,14 @@ public class ExportDaml {
             selectedCycForts.add(rootTerm);
         }
         if (verbosity > 2)
-            System.out.println("Selected " + selectedCycForts.size() + " CycFort terms");
+            Log.current.println("Selected " + selectedCycForts.size() + " CycFort terms");
         if (includeUpwardClosure) {
             CycList upwardClosureCycForts = gatherUpwardClosure(selectedCycForts);
             if (verbosity > 2)
-                System.out.println("Upward closure added " + upwardClosureCycForts.size() + " CycFort terms");
+                Log.current.println("Upward closure added " + upwardClosureCycForts.size() + " CycFort terms");
             selectedCycForts.addAll(upwardClosureCycForts);
             if (verbosity > 2)
-                System.out.println("All selected " + selectedCycForts.size() + " CycFort terms");
+                Log.current.println("All selected " + selectedCycForts.size() + " CycFort terms");
         }
         for (int i = 0; i < selectedCycForts.size(); i++) {
             CycFort selectedCycFort = (CycFort)selectedCycForts.get(i);
@@ -231,17 +233,17 @@ public class ExportDaml {
                 selectedConstants.add(selectedCycFort);
         }
         if (verbosity > 2)
-            System.out.println("Sorting " + selectedConstants.size() + " CycConstant terms");
+            Log.current.println("Sorting " + selectedConstants.size() + " CycConstant terms");
         Collections.sort(selectedConstants);
         if ((exportCommand == ExportDaml.EXPORT_KB_SUBSET) ||
             (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
             if (verbosity > 2)
-                System.out.println("Removing non-binary properties");
+                Log.current.println("Removing non-binary properties");
             for (int i = 0; i < selectedConstants.size(); i++) {
                 CycConstant cycConstant = (CycConstant)selectedConstants.get(i);
                 if (verbosity > 2) {
                     if ((verbosity > 5) || (i % 20 == 0))
-                        System.out.println("... " + cycConstant.cyclify());
+                        Log.current.println("... " + cycConstant.cyclify());
                 }
                 if (cycAccess.isCollection(cycConstant))
                     damlSelectedConstants.add(cycConstant);
@@ -264,28 +266,28 @@ public class ExportDaml {
             // EXPORT_KB_SUBSET_BELOW_TERM
             damlSelectedConstants = applyCycKbSubsetFilter(selectedConstants);
             if (verbosity > 2)
-                System.out.println("Filtered " + damlSelectedConstants.size() + " CycConstant terms");
+                Log.current.println("Filtered " + damlSelectedConstants.size() + " CycConstant terms");
         }
 
         //createConstantNode("PhysicalDevice");
         if (verbosity > 2)
-            System.out.println("Building DAML model");
+            Log.current.println("Building DAML model");
         for (int i = 0; i < damlSelectedConstants.size(); i++) {
             //for (int i = 0; i < 20; i++) {
             CycConstant cycConstant = (CycConstant)damlSelectedConstants.get(i);
             if (verbosity > 2)
-                System.out.print(cycConstant + "  ");
+                Log.current.print(cycConstant + "  ");
             if (cycAccess.isCollection(cycConstant)) {
                 if (verbosity > 2)
-                    System.out.println("Collection");
+                    Log.current.println("Collection");
             }
             else if (cycAccess.isBinaryPredicate(cycConstant)) {
                 if (verbosity > 2)
-                    System.out.println("BinaryPredicate");
+                    Log.current.println("BinaryPredicate");
             }
             else if (cycAccess.isIndividual(cycConstant)) {
                 if (verbosity > 2)
-                    System.out.print("Individual");
+                    Log.current.print("Individual");
                 populateIsas(cycConstant);
                 if (verbosity > 2) {
                     String individualType = "  (type unknown)";
@@ -295,18 +297,18 @@ public class ExportDaml {
                                 individualType = (" (a " + isas.get(j) + ")");
                                 break;
                             }
-                    System.out.println(individualType);
+                    Log.current.println(individualType);
                 }
             }
             else {
                 if (verbosity > 2)
-                    System.out.println("other");
+                    Log.current.println("other");
                 continue;
             }
             createConstantNode(cycConstant);
         }
         if (verbosity > 2)
-            System.out.println("Writing DAML output to " + outputPath);
+            Log.current.println("Writing DAML output to " + outputPath);
         OutputFormat outputFormat = new OutputFormat(document, "UTF-8", true);
         BufferedWriter damlOut = new BufferedWriter(new FileWriter(outputPath));
         XMLSerializer xmlSerializer = new XMLSerializer(damlOut, outputFormat);
@@ -314,7 +316,7 @@ public class ExportDaml {
         xmlSerializer.serialize(document);
         damlOut.close();
         if (verbosity > 2)
-            System.out.println("DAML export completed");
+            Log.current.println("DAML export completed");
     }
 
     /**
@@ -329,14 +331,14 @@ public class ExportDaml {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             includeUpwardClosure = false;
             if (verbosity > 1)
-                System.out.println("Exporting KB subset " + cycKbSubsetCollection.cyclify());
+                Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify());
         }
         else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE) {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
             includeUpwardClosure = true;
             if (verbosity > 1)
-                System.out.println("Exporting KB subset " + cycKbSubsetCollection.cyclify() +
+                Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify() +
                                    "\n  plus upward closure to #$Thing filtered by " + cycKbSubsetFilter.cyclify());
         }
         else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM) {
@@ -345,7 +347,7 @@ public class ExportDaml {
             cycKbSubsetCollection = cycKbSubsetFilter;
             includeUpwardClosure = false;
             if (verbosity > 1)
-                System.out.println("Exporting KB collections below root term " + rootTerm.cyclify() +
+                Log.current.println("Exporting KB collections below root term " + rootTerm.cyclify() +
                                    "\n  filtered by " + cycKbSubsetFilter.cyclify());
         }
         else {
@@ -399,7 +401,7 @@ public class ExportDaml {
             createIndividualNode(cycConstant);
         else {
             if (verbosity > 0)
-                System.out.println("Unhandled constant: " + cycConstant.toString());
+                Log.current.println("Unhandled constant: " + cycConstant.toString());
         }
     }
 
@@ -419,7 +421,7 @@ public class ExportDaml {
         String label = null;
         label = cycAccess.getPluralGeneratedPhrase(cycConstant);
         if (verbosity > 2)
-            System.out.println("  " + label);
+            Log.current.println("  " + label);
         labelNode.appendChild(document.createTextNode(label));
         classNode.appendChild(labelNode);
         Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
@@ -490,7 +492,7 @@ public class ExportDaml {
         Element labelNode = document.createElementNS(rdfsNamespace, "rdfs:label");
         String label = cycAccess.getSingularGeneratedPhrase(cycConstant);
         if (verbosity > 2)
-            System.out.println("  " + label);
+            Log.current.println("  " + label);
         labelNode.appendChild(document.createTextNode(label));
         individualNode.appendChild(labelNode);
         Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
@@ -547,7 +549,7 @@ public class ExportDaml {
         String label = null;
         label = cycAccess.getGeneratedPhrase(cycConstant);
         if (verbosity > 2)
-            System.out.println("  " + label);
+            Log.current.println("  " + label);
         labelNode.appendChild(document.createTextNode(label));
         propertyNode.appendChild(labelNode);
         Element commentNode = document.createElementNS(rdfsNamespace, "rdfs:comment");
@@ -615,7 +617,7 @@ public class ExportDaml {
     protected ArrayList applyCycKbSubsetFilter (CycList constants)
         throws UnknownHostException, IOException, CycApiException{
         if (verbosity > 2)
-            System.out.println("Applying " + cycKbSubsetFilter.cyclify() + " filter");
+            Log.current.println("Applying " + cycKbSubsetFilter.cyclify() + " filter");
         if (constants.size() == 0)
             return  constants;
         ArrayList result = new ArrayList();
@@ -625,7 +627,7 @@ public class ExportDaml {
                 cycAccess.isa((CycConstant) object, cycKbSubsetFilter))
                     result.add(object);
             else if (verbosity > 4)
-                System.out.println(" dropping " + cycConstant);
+                Log.current.println(" dropping " + cycConstant);
         }
         return  result;
     }
@@ -645,7 +647,7 @@ public class ExportDaml {
             if (isFilteredDamlSelectedConstant(object))
                 result.add(object);
             else if (verbosity > 4)
-                System.out.println(" dropping " + cycConstant);
+                Log.current.println(" dropping " + cycConstant);
         }
         return  result;
     }
@@ -808,13 +810,13 @@ public class ExportDaml {
                         genl = (CycFort) genls.get(j);
                     }
                     catch (ClassCastException e) {
-                        System.out.println("***** Invalid genl: " + genls.get(j));
+                        Log.current.println("***** Invalid genl: " + genls.get(j));
                         continue;
                     }
                     if ((!upwardClosure.contains(genl)) && (!selectedCycForts.contains(genl)) && cycAccess.isa(genl,
                             cycKbSubsetFilter)) {
                         if (verbosity > 2)
-                            System.out.println("Upward closure genl " + genl);
+                            Log.current.println("Upward closure genl " + genl);
                         upwardClosure.add(genl);
                     }
                 }
@@ -826,7 +828,7 @@ public class ExportDaml {
                     if ((!upwardClosure.contains(genlPred)) && (!selectedCycForts.contains(genlPred))
                             && cycAccess.isa(genlPred, cycKbSubsetFilter)) {
                         if (verbosity > 2)
-                            System.out.println("Upward closure genlPred " + genlPred);
+                            Log.current.println("Upward closure genlPred " + genlPred);
                         upwardClosure.add(genlPred);
                     }
                 }

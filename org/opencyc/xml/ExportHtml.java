@@ -9,6 +9,7 @@ import  org.apache.html.dom.*;
 import  org.apache.xml.serialize.*;
 import  org.opencyc.cycobject.*;
 import  org.opencyc.api.*;
+import  org.opencyc.util.*;
 
 /**
  * HTML ontology export for OpenCyc.
@@ -135,9 +136,14 @@ public class ExportHtml {
     public CycFort rootTerm = null;
 
     /**
-     * The HTML export path and file name.
+     * The HTML exported vocabulary path and file name.
      */
-    public String outputPath = "export.html";
+    public String exportedVocabularyOutputPath = "exported-vocabulary.html";
+
+    /**
+     * The HTML exported hierarchy path and file name.
+     */
+    public String exportedHierarchyOutputPath = "exported-hierarchy.html";
 
     /**
      * the html document
@@ -165,9 +171,15 @@ public class ExportHtml {
     protected boolean hasComment = false;
 
     /**
+     * indicates which terms have been previously expanded in the hierarchy page
+     */
+    protected HashSet previouslyExpandedTerms;
+
+    /**
      * Constructs a new ExportHtml object.
      */
     public ExportHtml() {
+        Log.makeLog();
     }
 
     /**
@@ -180,6 +192,8 @@ public class ExportHtml {
         try {
             exportHtml.cycKbSubsetCollectionGuid = ExportHtml.counterTerrorismConstantGuid;
             exportHtml.cycKbSubsetFilterGuid = ExportHtml.ikbConstantGuid;
+            exportHtml.exportedVocabularyOutputPath = "counter-terrorism-vocabulary.html";
+            exportHtml.exportedHierarchyOutputPath = "counter-terrorism-hierarchy.html";
             exportHtml.export(ExportHtml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE);
         }
         catch (Exception e) {
@@ -195,7 +209,7 @@ public class ExportHtml {
         this.exportCommand = exportCommand;
         setup();
         if (verbosity > 2)
-            System.out.println("Getting terms from Cyc");
+            Log.current.println("Getting terms from Cyc");
         if ((exportCommand == ExportHtml.EXPORT_KB_SUBSET) ||
             (exportCommand == ExportHtml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
             selectedCycForts = cycAccess.getAllInstances(cycKbSubsetCollection);
@@ -206,56 +220,29 @@ public class ExportHtml {
             selectedCycForts.add(rootTerm);
         }
         if (verbosity > 2)
-            System.out.println("Selected " + selectedCycForts.size() + " CycFort terms");
+            Log.current.println("Selected " + selectedCycForts.size() + " CycFort terms");
         if (includeUpwardClosure) {
             CycList upwardClosureCycForts = gatherUpwardClosure(selectedCycForts);
             if (verbosity > 2)
-                System.out.println("Upward closure added " + upwardClosureCycForts.size() + " CycFort terms");
+                Log.current.println("Upward closure added " + upwardClosureCycForts.size() + " CycFort terms");
             selectedCycForts.addAll(upwardClosureCycForts);
             if (verbosity > 2)
-                System.out.println("All selected " + selectedCycForts.size() + " CycFort terms");
+                Log.current.println("All selected " + selectedCycForts.size() + " CycFort terms");
         }
         if (verbosity > 2)
-            System.out.println("Sorting " + selectedCycForts.size() + " CycFort terms");
+            Log.current.println("Sorting " + selectedCycForts.size() + " CycFort terms");
 
         Collections.sort(selectedCycForts);
 
-        if (verbosity > 2)
-            System.out.println("Building HTML model");
-
-        for (int i = 0; i < selectedCycForts.size(); i++) {
-        //for (int i = 0; i < 20; i++) {
-
-            CycFort cycFort = (CycFort) selectedCycForts.get(i);
-            if (verbosity > 2)
-                System.out.print(cycFort + "  ");
-            if (cycAccess.isCollection(cycFort)) {
-                if (verbosity > 2)
-                    System.out.println("Collection");
-            }
-            else if (cycAccess.isPredicate(cycFort)) {
-                if (verbosity > 2)
-                    System.out.println("Predicate");
-            }
-            else if (cycAccess.isIndividual(cycFort)) {
-                if (verbosity > 2)
-                    System.out.print("Individual");
-                if (verbosity > 2) {
-                    String individualType = "  (type unknown)";
-                    System.out.println(individualType);
-                }
-            }
-            else {
-                if (verbosity > 2)
-                    System.out.println("other");
-                continue;
-            }
-            if (cycFort instanceof CycConstant)
-                createCycConstantNode((CycConstant) cycFort);
-            else
-                createCycNartNode((CycNart) cycFort);
-        }
-        serialize();
+        createVocabularyPage();
+        if (rootTerm != null)
+            createHierarchyPage(rootTerm);
+        else if (includeUpwardClosure)
+            createHierarchyPage(CycAccess.thing);
+        else if (verbosity > 0)
+            Log.current.println("Ommiting ontology hierarchy export page");
+        if (verbosity > 0)
+            Log.current.println("HTML export completed");
     }
 
     /**
@@ -267,14 +254,14 @@ public class ExportHtml {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             includeUpwardClosure = false;
             if (verbosity > 1)
-                System.out.println("Exporting KB subset " + cycKbSubsetCollection.cyclify());
+                Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify());
         }
         else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE) {
             cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
             cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
             includeUpwardClosure = true;
             if (verbosity > 1)
-                System.out.println("Exporting KB subset " + cycKbSubsetCollection.cyclify() +
+                Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify() +
                                    "\n  plus upward closure to #$Thing filtered by " + cycKbSubsetFilter.cyclify());
         }
         else if (exportCommand == ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM) {
@@ -283,34 +270,64 @@ public class ExportHtml {
             cycKbSubsetCollection = cycKbSubsetFilter;
             includeUpwardClosure = false;
             if (verbosity > 1)
-                System.out.println("Exporting KB collections below root term " + rootTerm.cyclify() +
+                Log.current.println("Exporting KB collections below root term " + rootTerm.cyclify() +
                                    "\n  filtered by " + cycKbSubsetFilter.cyclify());
         }
         else {
             System.err.println("Invalid export comand " + exportCommand);
             System.exit(1);
         }
-        htmlDocument = new HTMLDocumentImpl();
-        htmlDocument.setTitle("Cyc ontology for " + cycKbSubsetCollection.cyclify());
-        Node htmlNode = htmlDocument.getChildNodes().item(0);
-        htmlBodyElement = htmlDocument.createElement("body");
-        htmlNode.appendChild(htmlBodyElement);
     }
 
     /**
-     * Serializes the HTML document.
+     * Creates vocabulary HTML page.
      */
-    protected void serialize () throws IOException {
+    protected void createVocabularyPage () throws UnknownHostException, IOException, CycApiException {
         if (verbosity > 2)
-            System.out.println("Writing HTML output to " + outputPath);
-        OutputFormat outputFormat = new OutputFormat(htmlDocument, "UTF-8", true);
-        BufferedWriter htmlOut = new BufferedWriter(new FileWriter(outputPath));
-        XHTMLSerializer xhtmlSerializer = new XHTMLSerializer(htmlOut, outputFormat);
-        xhtmlSerializer.asDOMSerializer();
-        xhtmlSerializer.serialize(htmlDocument);
-        htmlOut.close();
-        if (verbosity > 2)
-            System.out.println("HTML export completed");
+            Log.current.println("Building HTML model for vocabulary page");
+        htmlDocument = new HTMLDocumentImpl();
+        String title = "Cyc ontology vocabulary for " + cycKbSubsetCollection.cyclify();
+        htmlDocument.setTitle(title);
+        Node htmlNode = htmlDocument.getChildNodes().item(0);
+        htmlBodyElement = htmlDocument.createElement("body");
+        htmlNode.appendChild(htmlBodyElement);
+        Element headingElement = htmlDocument.createElement("h1");
+        htmlBodyElement.appendChild(headingElement);
+        Node headingTextNode = htmlDocument.createTextNode(title);
+        headingElement.appendChild(headingTextNode);
+        for (int i = 0; i < selectedCycForts.size(); i++) {
+        //for (int i = 0; i < 20; i++) {
+
+            CycFort cycFort = (CycFort) selectedCycForts.get(i);
+            if (verbosity > 2)
+                Log.current.print(cycFort + "  ");
+            if (cycAccess.isCollection(cycFort)) {
+                if (verbosity > 2)
+                    Log.current.println("Collection");
+            }
+            else if (cycAccess.isPredicate(cycFort)) {
+                if (verbosity > 2)
+                    Log.current.println("Predicate");
+            }
+            else if (cycAccess.isIndividual(cycFort)) {
+                if (verbosity > 2)
+                    Log.current.print("Individual");
+                if (verbosity > 2) {
+                    String individualType = "  (type unknown)";
+                    Log.current.println(individualType);
+                }
+            }
+            else {
+                if (verbosity > 2)
+                    Log.current.println("other");
+                continue;
+            }
+            if (cycFort instanceof CycConstant)
+                createCycConstantNode((CycConstant) cycFort);
+            else
+                createCycNartNode((CycNart) cycFort);
+        }
+        serialize(htmlDocument, exportedVocabularyOutputPath);
     }
 
     /**
@@ -379,7 +396,7 @@ public class ExportHtml {
             createIndividualNode(cycConstant, blockquoteElement);
         else {
             if (verbosity > 0)
-                System.out.println("Unhandled constant: " + cycConstant.toString());
+                Log.current.println("Unhandled constant: " + cycConstant.toString());
         }
     }
 
@@ -507,7 +524,8 @@ public class ExportHtml {
     protected void createIsaNodes (CycFort cycFort, Element parentElement)
         throws IOException, CycApiException {
         CycList isas = filterSelectedConstants(cycAccess.getIsas(cycFort));
-        System.out.println("isas " + isas);
+        if (verbosity > 4)
+            Log.current.println("isas " + isas);
         lineBreak(parentElement);
         Element bElement = htmlDocument.createElement("b");
         parentElement.appendChild(bElement);
@@ -537,7 +555,8 @@ public class ExportHtml {
     protected void createGenlNodes (CycFort cycFort, Element parentElement)
         throws IOException, CycApiException {
         CycList genls = filterSelectedConstants(cycAccess.getGenls(cycFort));
-        System.out.println("genls " + genls);
+        if (verbosity > 4)
+            Log.current.println("genls " + genls);
         lineBreak(parentElement);
         Element bElement = htmlDocument.createElement("b");
         parentElement.appendChild(bElement);
@@ -552,9 +571,19 @@ public class ExportHtml {
                 parentElement.appendChild(genlAnchorElement);
                 Node genlTextNode = htmlDocument.createTextNode(genl.cyclify());
                 genlAnchorElement.appendChild(genlTextNode);
-                Node spacesTextNode = htmlDocument.createTextNode("  ");
+                Node spacesTextNode = htmlDocument.createTextNode("&nbsp;&nbsp;");
                 parentElement.appendChild(spacesTextNode);
             }
+        }
+        if (genls.size() > 0) {
+            Node spacesTextNode = htmlDocument.createTextNode("&nbsp;&nbsp;");
+            parentElement.appendChild(spacesTextNode);
+            HTMLAnchorElement hierarchyAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+            hierarchyAnchorElement.setHref("./" + exportedHierarchyOutputPath + "#" + cycFort.cyclify());
+            parentElement.appendChild(hierarchyAnchorElement);
+            Node hierarchyTextNode = htmlDocument.createTextNode("hierarchy");
+            hierarchyAnchorElement.appendChild(hierarchyTextNode);
         }
     }
 
@@ -567,7 +596,8 @@ public class ExportHtml {
     protected void createGenlPredsNodes (CycConstant cycConstant, Element parentElement)
         throws IOException, CycApiException {
         CycList genlPreds = filterSelectedConstants(cycAccess.getGenlPreds(cycConstant));
-        System.out.println("genlPreds " + genlPreds);
+        if (verbosity > 4)
+            Log.current.println("genlPreds " + genlPreds);
         lineBreak(parentElement);
         Element bElement = htmlDocument.createElement("b");
         parentElement.appendChild(bElement);
@@ -626,6 +656,103 @@ public class ExportHtml {
     }
 
     /**
+     * Creates hierarchy HTML page.
+     *
+     * @param rootTerm the root term of the hierarchy tree
+     */
+    protected void createHierarchyPage (CycFort rootTerm) throws UnknownHostException, IOException, CycApiException {
+        if (verbosity > 2)
+            Log.current.println("Building HTML model for hierarchy page");
+        htmlDocument = new HTMLDocumentImpl();
+        String title = "Cyc ontology hierarchy for " + cycKbSubsetCollection.cyclify();
+        htmlDocument.setTitle(title);
+        Node htmlNode = htmlDocument.getChildNodes().item(0);
+        htmlBodyElement = htmlDocument.createElement("body");
+        htmlNode.appendChild(htmlBodyElement);
+        Element headingElement = htmlDocument.createElement("h1");
+        htmlBodyElement.appendChild(headingElement);
+        Node headingTextNode = htmlDocument.createTextNode(title);
+        headingElement.appendChild(headingTextNode);
+        previouslyExpandedTerms = new HashSet();
+        createHierarchyNodes(rootTerm, 0);
+        serialize(htmlDocument, exportedHierarchyOutputPath);
+    }
+
+    /**
+     * Recursively creates hierarchy nodes for the given term and its spec collection terms.
+     *
+     * @param cycFort the given term for which hierarchy nodes will be created
+     * @param indent the current indent level
+     */
+    protected void createHierarchyNodes(CycFort cycFort, int indent)
+        throws IOException, CycApiException {
+        if (indent > 0) {
+            StringBuffer spaces = new StringBuffer(indent);
+            StringBuffer nonBreakingSpaces = new StringBuffer(indent);
+            for (int i = 0; i < indent; i++) {
+                spaces.append(' ');
+                nonBreakingSpaces.append("&nbsp;");
+            }
+            Node spacesText = htmlDocument.createTextNode(nonBreakingSpaces.toString());
+            htmlBodyElement.appendChild(spacesText);
+            if (verbosity > 2)
+                Log.current.println(spaces.toString() + cycFort);
+        }
+        else {
+            if (verbosity > 2)
+                Log.current.println(cycFort.toString());
+        }
+        HTMLAnchorElement vocabularyAnchorElement =
+            new HTMLAnchorElementImpl((HTMLDocumentImpl) htmlDocument, "a");
+        vocabularyAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + cycFort.cyclify());
+        htmlBodyElement.appendChild(vocabularyAnchorElement);
+        Node hierarchyTermTextNode = htmlDocument.createTextNode(cycFort.cyclify());
+        vocabularyAnchorElement.appendChild(hierarchyTermTextNode);
+        String generatedPhrase = cycAccess.getPluralGeneratedPhrase(cycFort);
+        if (generatedPhrase.endsWith("(unclassified term)"))
+            generatedPhrase = generatedPhrase.substring(0, generatedPhrase.length() - 20);
+        Node generatedPhraseTextNode =
+            htmlDocument.createTextNode("&nbsp;&nbsp;" + generatedPhrase + "");
+        htmlBodyElement.appendChild(generatedPhraseTextNode);
+        CycList specs = CycAccess.current().getSpecs(cycFort);
+        specs = filterSelectedConstants(specs);
+        if (specs.size() == 0) {
+            vocabularyAnchorElement.setName(cycFort.cyclify());
+            lineBreak(htmlBodyElement);
+        }
+        else if (previouslyExpandedTerms.contains(cycFort)) {
+            Node previouslyExpandedTextNode =
+                htmlDocument.createTextNode("&nbsp;&nbsp;... see above");
+            htmlBodyElement.appendChild(previouslyExpandedTextNode);
+            lineBreak(htmlBodyElement);
+        }
+        else {
+            previouslyExpandedTerms.add(cycFort);
+            vocabularyAnchorElement.setName(cycFort.cyclify());
+            lineBreak(htmlBodyElement);
+            for (int i = 0; i < specs.size(); i++)
+                createHierarchyNodes((CycFort) specs.get(i), indent + 2);
+        }
+    }
+
+    /**
+     * Serializes the given HTML document to the given path.
+     *
+     * @param htmlDocument the HTML document model for serialization
+     * @param outputPath the file name of the serialized HTML document
+     */
+    protected void serialize (HTMLDocument htmlDocument, String outputPath) throws IOException {
+        if (verbosity > 2)
+            Log.current.println("Writing HTML output to " + outputPath);
+        OutputFormat outputFormat = new OutputFormat(htmlDocument, "UTF-8", true);
+        BufferedWriter htmlOut = new BufferedWriter(new FileWriter(outputPath));
+        XHTMLSerializer xhtmlSerializer = new XHTMLSerializer(htmlOut, outputFormat);
+        xhtmlSerializer.asDOMSerializer();
+        xhtmlSerializer.serialize(htmlDocument);
+        htmlOut.close();
+    }
+
+    /**
      * Removes unselected terms from the given list.
      *
      * @parameter constants the given list of constants which is to be filtered
@@ -639,15 +766,15 @@ public class ExportHtml {
             Object object = constants.get(i);
             if (selectedCycForts.contains(object))
                 result.add(object);
-            else if (verbosity > 2)
-                System.out.println(" dropping " + object);
+            else if (verbosity > 4)
+                Log.current.println(" dropping " + object);
         }
         return  result;
     }
 
     /**
      * Gather the updward closure of the selected CycForts with regard to isas and genls
-     * for collection terms, and with regard to genlPreds for predicate terms.
+     * for collection terms, and with regard to isas and genlPreds for predicate terms.
      *
      * @parameter the selected CycForts
      * @return the updward closure of the selected CycForts with regard to genls
@@ -655,40 +782,53 @@ public class ExportHtml {
      */
     protected CycList gatherUpwardClosure (CycList selectedCycForts) throws UnknownHostException, IOException,
             CycApiException {
+        if (verbosity > 2) {
+            Log.current.println("Sorting " + selectedCycForts.size() + " CycFort terms");
+            Collections.sort(selectedCycForts);
+        }
         CycList upwardClosure = new CycList();
+        // Redundant HashSets for efficient contains() method below.
+        HashSet selectedCycFortsSet = new HashSet(selectedCycForts);
+        HashSet upwardClosureSet = new HashSet(selectedCycForts.size());
         cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
         for (int i = 0; i < selectedCycForts.size(); i++) {
             CycFort cycFort = (CycFort)selectedCycForts.get(i);
             if (cycAccess.isCollection(cycFort)) {
-                CycList genls = new CycList();
-                genls.addAllNew(cycAccess.getAllIsa(cycFort));
-                genls.addAllNew(cycAccess.getAllGenls(cycFort));
-                for (int j = 0; j < genls.size(); j++) {
-                    CycFort genl = null;
+                CycList isasGenls = new CycList();
+                isasGenls.addAllNew(cycAccess.getAllIsa(cycFort));
+                isasGenls.addAllNew(cycAccess.getAllGenls(cycFort));
+                for (int j = 0; j < isasGenls.size(); j++) {
+                    CycFort isaGenl = null;
                     try {
-                        genl = (CycFort) genls.get(j);
+                        isaGenl = (CycFort) isasGenls.get(j);
                     }
                     catch (ClassCastException e) {
-                        System.out.println("***** Invalid genl: " + genls.get(j));
+                        Log.current.println("***** Invalid term: " + isasGenls.get(j));
                         continue;
                     }
-                    if ((!upwardClosure.contains(genl)) && (!selectedCycForts.contains(genl)) && cycAccess.isa(genl,
-                            cycKbSubsetFilter)) {
+                    if ((!upwardClosureSet.contains(isaGenl)) &&
+                        (!selectedCycFortsSet.contains(isaGenl)) &&
+                        cycAccess.isa(isaGenl, cycKbSubsetFilter)) {
                         if (verbosity > 2)
-                            System.out.println("Upward closure genl " + genl);
-                        upwardClosure.add(genl);
+                            Log.current.println(cycFort + " upward closure isa/genl " + isaGenl);
+                        upwardClosure.add(isaGenl);
+                        upwardClosureSet.add(isaGenl);
                     }
                 }
             }
-            else if ((cycFort instanceof CycConstant) && (cycAccess.isBinaryPredicate((CycConstant)cycFort))) {
-                CycList genlPreds = cycAccess.getAllGenlPreds((CycConstant)cycFort);
-                for (int j = 0; j < genlPreds.size(); j++) {
-                    CycFort genlPred = (CycFort)genlPreds.get(j);
-                    if ((!upwardClosure.contains(genlPred)) && (!selectedCycForts.contains(genlPred))
-                            && cycAccess.isa(genlPred, cycKbSubsetFilter)) {
+            else if ((cycFort instanceof CycConstant) && (cycAccess.isPredicate((CycConstant)cycFort))) {
+                CycList isasGenlPreds = new CycList();
+                isasGenlPreds.addAllNew(cycAccess.getAllIsa(cycFort));
+                isasGenlPreds.addAllNew(cycAccess.getAllGenlPreds((CycConstant) cycFort));
+                for (int j = 0; j < isasGenlPreds.size(); j++) {
+                    CycFort isaGenlPred = (CycFort) isasGenlPreds.get(j);
+                    if ((!upwardClosureSet.contains(isaGenlPred)) &&
+                        (!selectedCycFortsSet.contains(isaGenlPred)) &&
+                        cycAccess.isa(isaGenlPred, cycKbSubsetFilter)) {
                         if (verbosity > 2)
-                            System.out.println("Upward closure genlPred " + genlPred);
-                        upwardClosure.add(genlPred);
+                            Log.current.println(cycFort + " upward closure isa/genlPred " + isaGenlPred);
+                        upwardClosure.add(isaGenlPred);
+                        upwardClosureSet.add(isaGenlPred);
                     }
                 }
             }

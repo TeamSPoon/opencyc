@@ -3,6 +3,7 @@ package org.opencyc.elf.bg.planner;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Result;
+import org.opencyc.elf.Status;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
@@ -56,6 +57,48 @@ public class PlanSelector extends NodeComponent {
     // TaskCommand taskCommand
     // Schedule schedule
     // Result result
+  }
+  
+  /**
+   * Sends the plan selector status to ?
+   */
+  protected void sendPlanSelectorStatus () {
+    //TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+    // Status status
+  }
+  
+  /**
+   * Posts the schedule.
+   */
+  protected void postSchedule () {
+    //TODO
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+
+  /**
+   * Sends the update schedule message to ?
+   */
+  protected void sendUdpateSchedule () {
+    //TODO
+    // send via channel to ?
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Sends the execute schedule message to ?
+   */
+  protected void sendExecuteSchedule () {
+    //TODO
+    // send via channel to ?
+    // TaskCommand taskCommand
+    // Schedule schedule
   }
   
   //// Private Area

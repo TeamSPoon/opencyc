@@ -126,7 +126,7 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
         if (Log.current == null)
             Log.makeLog();
         try {
-            CoAbsCycProxy coAbsCycProxy = new CoAbsCycProxy("BalrogCycApi3600");
+            CoAbsCycProxy coAbsCycProxy = new CoAbsCycProxy("BalrogCycApiService-3600");
         }
         catch (IOException e) {
             Log.current.errorPrintln(e.getMessage());

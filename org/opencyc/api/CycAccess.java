@@ -63,7 +63,6 @@ public class CycAccess {
      */
     public boolean persistentConnection;
 
-    private boolean trace = false;
     private String hostName;
     private int port;
     private int communicationMode;
@@ -214,14 +213,21 @@ public class CycAccess {
      * Turns on the diagnostic trace of socket messages.
      */
     public void traceOn() {
-        cycConnection.trace = true;
+        cycConnection.trace = CycConnection.API_TRACE_MESSAGES;
+    }
+
+    /**
+     * Turns on the detailed diagnostic trace of socket messages.
+     */
+    public void traceOnDetailed() {
+        cycConnection.trace = CycConnection.API_TRACE_DETAILED;
     }
 
     /**
      * Turns off the diagnostic trace of socket messages.
      */
     public void traceOff() {
-        cycConnection.trace = false;
+        cycConnection.trace = CycConnection.API_TRACE_NONE;
     }
 
     /**
@@ -2024,5 +2030,39 @@ public class CycAccess {
         //this.traceOn();
         return converseBoolean(command);
     }
+
+    /**
+     * Returns the count of the assertions indexed according to the given pattern,
+     * using the best index (from among the predicate and argument indices).  The formula
+     * can contain variables.
+     *
+     * @param formula the formula whose indexed instances are counted
+     * @param mt microtheory (including its genlMts) in which the count is determined
+     * @return the count of the assertions indexed according to the given pattern,
+     * using the best index (from among the predicate and argument indices)
+     */
+    public int countUsingBestIndex(CycList formula, CycFort mt) throws IOException {
+        CycList command = new CycList();
+        if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
+            mt.equals(this.getKnownConstantByName("EverythingPSC"))) {
+            command.add(CycSymbol.makeCycSymbol("with-all-mts"));
+        }
+        else {
+            command.add(CycSymbol.makeCycSymbol("with-mt"));
+            command.add(mt.cycListApiValue());
+        }
+        CycList command1 = new CycList();
+        command.add(command1);
+        command1.add(CycSymbol.makeCycSymbol("best-index-count"));
+        CycList command2 = new CycList();
+        command1.add(command2);
+        command2.add(CycSymbol.quote);
+        command2.add(formula.cycListApiValue());
+        command1.add(CycSymbol.t);
+        command1.add(CycSymbol.t);
+        //this.traceOn();
+        return converseInt(command);
+    }
+
 
 }

@@ -34,6 +34,12 @@ import java.io.IOException;
 public class Rule  implements Comparable{
 
     /**
+     * The number of instances matching this constraint rule formula in the KB. Value of -1
+     * indicates the variable is not yet set.
+     */
+    public int nbrFormulaInstances = -1;
+
+    /**
      * The constraint rule formula as an OpenCyc query.
      */
     protected CycList formula;
@@ -45,14 +51,6 @@ public class Rule  implements Comparable{
      * constraint problem's solution.
      */
     protected ArrayList variables;
-
-    /**
-     * The depth of backchaining when this rule was introduced.  For rules that originate
-     * from the input constraint problem, this value is 0.  When this value equals the
-     * maximum depth of backchain limit, then this rule cannot be the subject of a further
-     * backchain inference step.
-     */
-    protected int backchainDepth = 0;
 
     /**
      * Value which indicates that a given rule subsumes another given rule.
@@ -96,25 +94,6 @@ public class Rule  implements Comparable{
      */
     public Rule(CycList formula) {
         this.formula = formula;
-        gatherVariables();
-    }
-
-    /**
-     * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> at the given
-     * backchain depth.<p>
-     *
-     * <pre>
-     *  String ruleAsString = "(#$isa ?x #$Cathedral)";
-     *  Rule rule1 = new Rule (new CycList(ruleAsString), 2);
-     * </pre>
-     *
-     * @param formula the rule's formula, which must be a well formed OpenCyc
-     * query represented by a <tt>CycList</tt>.
-     * @param backchainDepth the depth of backchaining when this rule is introduced
-     */
-    public Rule(CycList formula, int backchainDepth) {
-        this.formula = formula;
-        this.backchainDepth = backchainDepth;
         gatherVariables();
     }
 
@@ -185,15 +164,6 @@ public class Rule  implements Comparable{
      */
     public int getArity() {
         return variables.size();
-    }
-
-    /**
-     * Returns the backchain depth when this rule was introduced.
-     *
-     * @return the backchain depth when this rule was introduced
-     */
-    public int getBackchainDepth() {
-        return this.backchainDepth;
     }
 
     /**
@@ -363,17 +333,6 @@ public class Rule  implements Comparable{
         if (newObject instanceof CycVariable)
             variables.add(newObject);
         formula = formula.subst(newObject, variable);
-    }
-
-    /**
-     * Returns <tt>true</tt> if this is a variable domain populating <tt>Rule</tt>.
-     *
-     * @return <tt>boolean</tt> indicating if this is a variable domain populating
-     * <tt>Rule</tt>.
-     */
-    public boolean isVariableDomainPopulatingRule() throws IOException {
-        return isIntensionalVariableDomainPopulatingRule() ||
-               isExtensionalVariableDomainPopulatingRule();
     }
 
     /**
@@ -557,17 +516,6 @@ public class Rule  implements Comparable{
      */
     public boolean isIrreflexive(CycFort mt) throws IOException {
         return CycAccess.current().isIrreflexivePredicate(this.getPredicate(), mt);
-    }
-
-    /**
-     * Returns <tt>true</tt> if this is an intensional variable domain populating <tt>Rule</tt>.
-     * An extensional rule is one in which values are queried from the OpenCyc KB.
-     *
-     * @return <tt>boolean</tt> indicating if this is an intensional variable domain populating
-     * <tt>Rule</tt>.
-     */
-    public boolean isIntensionalVariableDomainPopulatingRule() throws IOException {
-        return this.getArity() == 1;
     }
 
     /**

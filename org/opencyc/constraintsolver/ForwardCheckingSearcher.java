@@ -200,7 +200,7 @@ public class ForwardCheckingSearcher {
                     System.out.println("Populating high cardinality variable " + variable +
                                        "\n  with rule\n" + rule.cyclify());
                 ArrayList permittedValues = askWithVariable(rule.getFormula(), variable);
-                for (int j = 0; i < permittedValues.size(); j++) {
+                for (int j = 0; j < permittedValues.size(); j++) {
                     Object value = permittedValues.get(j);
                     Binding binding = new Binding(variable, value);
                     if (verbosity > 2)

@@ -67,16 +67,17 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
             //testSuite.addTest(new UnitTest("testProblemParser"));
             //testSuite.addTest(new UnitTest("testConstraintProblem1"));
-            //testSuite.addTest(new UnitTest("testConstraintProblem2"));
+            testSuite.addTest(new UnitTest("testConstraintProblem2"));
             //testSuite.addTest(new UnitTest("testConstraintProblem3"));
             //testSuite.addTest(new UnitTest("testConstraintProblem4"));
             //testSuite.addTest(new UnitTest("testConstraintProblem5"));
             //testSuite.addTest(new UnitTest("testConstraintProblem6"));
             //testSuite.addTest(new UnitTest("testConstraintProblem7"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem8"));
             //testSuite.addTest(new UnitTest("testBackchainer1"));
             //testSuite.addTest(new UnitTest("testBackchainer2"));
 
-            testSuite.addTest(new UnitTest("testBackchainer3"));
+            //testSuite.addTest(new UnitTest("testBackchainer3"));
 
             //testSuite.addTest(new UnitTest("testBackchainer4"));
             //testSuite.addTest(new UnitTest("testBackchainer5"));
@@ -1198,8 +1199,39 @@ public class UnitTest extends TestCase {
         System.out.println("** testConstraintProblem7 OK **");
     }
 
+    /**
+     * Tests the <tt>ConstraintProblem</tt> class.
+     */
+    public void testConstraintProblem8() {
+        System.out.println("** testConstraintProblem8 **");
 
-    // (and (isa (GovernmentFn ?STATE) Organization) (physicalExtent (GovernmentFn ?STATE) ?PLACE) (physicalParts ?PLACE ?CAP) (isa ?CAP ConstructionArtifact))
+        // domain population rules are mostly high cardinality isa rules.
+        String isaDomainString =
+            "(#$and " +
+            "  (#$isa (#$GovernmentFn ?STATE) #$Organization) " +
+            "  (#$physicalExtent (#$GovernmentFn ?STATE) ?PLACE) " +
+            "  (#$physicalParts ?PLACE ?CAP) " +
+            "  (#$isa ?CAP #$ConstructionArtifact))";
+        System.out.println(isaDomainString);
+        ConstraintProblem isaDomainProblem = new ConstraintProblem();
+        isaDomainProblem.setVerbosity(9);
+        // Request all solutions.
+        isaDomainProblem.nbrSolutionsRequested = null;
+        try {
+            isaDomainProblem.mt =
+                CycAccess.current().getConstantByName("InferencePSC");
+            ArrayList solutions = isaDomainProblem.solve(isaDomainString);
+        Assert.assertNotNull(solutions);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+
+        System.out.println("** testConstraintProblem8 OK **");
+    }
+
 
 
     /**

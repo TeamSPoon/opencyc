@@ -1995,6 +1995,18 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.toString());
         }
+
+        // countUsingBestIndex
+        try {
+            CycList formula1 = cycAccess.makeCycList("(#$objectFoundInLocation ?X ?Y)");
+            CycFort mt = cycAccess.getKnownConstantByName("WorldGeographyMt");
+            Assert.assertTrue(cycAccess.countUsingBestIndex(formula1, mt) > 0);
+            Assert.assertTrue(cycAccess.countUsingBestIndex(formula1, CycAccess.baseKB) == 0);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
     }
 }
 

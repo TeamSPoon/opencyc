@@ -42,32 +42,38 @@ public class ProblemParser {
     /**
      * Reference to the parent list of simplified constraint rules.
      */
-    ArrayList simplifiedRules;
+    protected ArrayList simplifiedRules;
 
     /**
      * Reference to the parent list of domain populating constraint rules.
      */
-    ArrayList domainPopulationRules;
+    protected ArrayList domainPopulationRules;
 
     /**
      * Reference to the parent list of constraint rules.
      */
-    ArrayList constraintRules;
+    protected ArrayList constraintRules;
 
     /**
      * Reference to the constraint problem's ValueDomains object.
      */
-    ValueDomains valueDomains;
+    protected ValueDomains valueDomains;
 
     /**
      * Reference to the constraint problem's ArgumentTypeConstrainer object.
      */
-    ArgumentTypeConstrainer argumentTypeConstrainer;
+    protected ArgumentTypeConstrainer argumentTypeConstrainer;
 
     /**
      * Reference to the constraint problem's HighCardinalityDomains object.
      */
-    HighCardinalityDomains highCardinalityDomains;
+    protected HighCardinalityDomains highCardinalityDomains;
+
+    /**
+     * List of <tt>VariablePopulation</tt> objects used to determine the best domain population rule
+     * for each variable.
+     */
+    protected ArrayList variablePopulations = new ArrayList();
 
     /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
@@ -114,7 +120,7 @@ public class ProblemParser {
      */
     public boolean extractRulesAndDomains() throws IOException {
         simplifiedRules.addAll(Rule.simplifyRuleExpression(constraintProblem.problem));
-        // Sort by ascending arity to find ground facts first.
+        // Sort by ascending arity to find likely unsatisfiable facts first.
         Collections.sort(simplifiedRules);
         for (int i = 0; i < simplifiedRules.size(); i++) {
             Rule rule = (Rule) simplifiedRules.get(i);
@@ -122,20 +128,28 @@ public class ProblemParser {
                  constraintProblem.backchainer.maxBackchainDepth) &&
                 (! isRuleSatisfiable(rule)))
                 return false;
-            if (rule.isVariableDomainPopulatingRule())
-                placeDomainPopulatingRule(rule);
-            else
-                placeConstraintRule(rule);
+            for (int j = 0; j < rule.getVariables().size(); j++) {
+                VariablePopulation variablePopulation =
+                    new VariablePopulation((CycVariable) rule.getVariables().get(j),
+                                            rule);
+                variablePopulations.add(variablePopulation);
+            }
         }
-        for (int i = 0; i < constraintRules.size(); i++) {
-            Rule rule = (Rule) constraintRules.get(i);
 
-            //TODO add backchaining on constraint rules during search.
-            //     then add backchain limit check here
+        Collections.sort(variablePopulations);
+        //TODO having rethought the benefit of argument type constraint additions, -- they are
+        //unary constraints disposed of before the constraint search begins.  Not useful for
+        //domain population because any non-isa/genls rule will be lower cardinality and thus
+        //a better domain population alternative.
 
-            if (! isRuleSatisfiable(rule))
-                return false;
-        }
+        //Simple get all the VariablePopulation objects and rank the rules and populate any variables
+        //below the high cardinality theshold.
+
+
+
+
+
+
         if (verbosity > 1)
             constraintProblem.displayConstraintRules();
         return true;
@@ -210,9 +224,14 @@ public class ProblemParser {
         if (verbosity > 3)
             System.out.println("\nConsidering \n" + candidateRule.cyclify() +
                                " as candidate domain populating rule");
-        if (candidateRule.getArity() != 1)
-            throw new RuntimeException("candidateRule does not have arity=1 " +
-                                       candidateRule.cyclify());
+        candidateRule.nbrFormulaInstances =
+            CycAccess.current().countUsingBestIndex(candidateRule.formula, constraintProblem.mt);
+
+        // TODO loop for variables, handle no variable case.
+        // Each rule can populate contained varables, if the number of instances is lower
+        // than the previous rule for that variable.
+
+
         CycVariable variable = (CycVariable) candidateRule.getVariables().get(0);
         ArrayList tempDomainPopulationRules = (ArrayList) domainPopulationRules.clone();
         for (int i = 0; i < tempDomainPopulationRules.size(); i++) {
@@ -451,7 +470,7 @@ public class ProblemParser {
                 ArrayList domainValues = new ArrayList(theSet.rest());
                 valueDomains.varsDictionary.put(cycVariable, domainValues);
             }
-            else if (rule.isIntensionalVariableDomainPopulatingRule()) {
+            else {
                 CycVariable cycVariable = (CycVariable) rule.getVariables().get(0);
                 if (rule.getPredicate().equals(CycAccess.isa) ||
                     rule.getPredicate().equals(CycAccess.genls)) {
@@ -482,10 +501,6 @@ public class ProblemParser {
                 }
                 else
                     populateDomainViaQuery(rule, cycVariable);
-            }
-            else {
-                if (verbosity > 1)
-                    System.out.println("Unhandled domain population rule:\n" + rule);
             }
         }
         if (verbosity > 1)

@@ -61,9 +61,24 @@ public class CycConnection {
     public static final int CFASL_PORT_OFFSET = 14;
 
     /**
+     * No api trace.
+     */
+    public static final int API_TRACE_NONE = 0;
+
+    /**
+     * Message-level api trace.
+     */
+    public static final int API_TRACE_MESSAGES = 1;
+
+    /**
+     * Detailed api trace.
+     */
+    public static final int API_TRACE_DETAILED = 2;
+
+    /**
      * Parameter that, when true, causes a trace of the messages to and from the server.
      */
-    public boolean trace = false;
+    public int trace = API_TRACE_NONE;
 
     /**
      * Ascii mode connnection to the OpenCyc server.
@@ -184,7 +199,7 @@ public class CycConnection {
         if ((communicationMode != ASCII_MODE) && (communicationMode != BINARY_MODE))
             throw  new RuntimeException("Invalid communication mode " + communicationMode);
         initializeApiConnections();
-        if (trace) {
+        if (trace > API_TRACE_NONE) {
             if (communicationMode == ASCII_MODE)
                 System.out.println("Ascii connection " + asciiSocket);
             else
@@ -359,8 +374,8 @@ public class CycConnection {
      * @param message the api command
      */
     private void sendBinary (Object message) throws IOException {
-        if (trace)
-            System.out.println("send = " + message);
+        if (trace > API_TRACE_NONE)
+            System.out.println(message + " --> cyc");
         cfaslOutputStream.writeObject(message);
         cfaslOutputStream.flush();
     }
@@ -381,14 +396,14 @@ public class CycConnection {
             status.equals(CycSymbol.nil)) {
             answer[0] = Boolean.FALSE;
             answer[1] = response;
-            if (trace)
+            if (trace > API_TRACE_NONE)
                 System.out.println("received error = (" + status + ") " + response);
             return answer;
         }
         answer[0] = Boolean.TRUE;
         answer[1] = cycAccess.completeObject(response);
-        if (trace)
-            System.out.println("receive = (" + answer[0] + ") " + answer[1]);
+        if (trace > API_TRACE_NONE)
+            System.out.println("cyc --> (" + answer[0] + ") " + answer[1]);
         return  answer;
     }
 
@@ -460,16 +475,16 @@ public class CycConnection {
      * element.
      */
     protected Object[] converseUsingAsciiStrings (String message, Timer timeout) throws IOException, TimeOutException {
-        if (trace)
+        if (trace > API_TRACE_NONE)
             System.out.println(message + " --> cyc");
         out.write(message);
         if (!message.endsWith("\n"))
             out.newLine();
         out.flush();
-        if (trace)
+        if (trace > API_TRACE_NONE)
             System.out.print("cyc --> ");
         Object[] answer = readAsciiCycResponse(timeout);
-        if (trace)
+        if (trace > API_TRACE_NONE)
             System.out.println();
         return  answer;
     }
@@ -486,7 +501,7 @@ public class CycConnection {
         while (true) {
             timeout.checkForTimeOut();
             int ch = in.read();
-            if (trace)
+            if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
             if (ch == ' ')
                 break;
@@ -510,7 +525,7 @@ public class CycConnection {
             answer[1] = readAtom();
         // Read the terminating newline.
         ch = in.read();
-        if (trace)
+        if (trace > API_TRACE_NONE)
             System.out.print((char)ch);
         return  answer;
     }
@@ -525,13 +540,13 @@ public class CycConnection {
         boolean isQuotedString = false;
         StringBuffer result = new StringBuffer();
         int ch = in.read();
-        if (trace)
+        if (trace > API_TRACE_NONE)
             System.out.print((char)ch);
         parenLevel++;
         result.append((char)ch);
         while (parenLevel != 0) {
             ch = in.read();
-            if (trace)
+            if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
             if (ch == '"')
                 if (isQuotedString)
@@ -557,11 +572,11 @@ public class CycConnection {
     private String readQuotedString () throws IOException {
         StringBuffer result = new StringBuffer();
         int ch = in.read();
-        if (trace)
+        if (trace > API_TRACE_NONE)
             System.out.print((char)ch);
         while (true) {
             ch = in.read();
-            if (trace)
+            if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
             if (ch == '"')
                 return  "\"" + result.toString() + "\"";
@@ -579,7 +594,7 @@ public class CycConnection {
         while (true) {
             in.mark(1);
             int ch = in.read();
-            if (trace)
+            if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
             if (ch == '\n')
                 break;

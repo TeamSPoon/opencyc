@@ -304,16 +304,28 @@ public class ConstraintProblem {
     public void displayConstraintRules() {
         if (domainPopulationRules.size() > 0) {
             System.out.println("Domain Population Rules");
-            for (int i = 0; i < domainPopulationRules.size(); i++)
-                System.out.println("  " + domainPopulationRules.get(i));
+            for (int i = 0; i < domainPopulationRules.size(); i++) {
+                Rule rule = (Rule) domainPopulationRules.get(i);
+                if (rule.nbrFormulaInstances == -1)
+                    System.out.println("  " + rule.cyclify());
+                else
+                    System.out.println("  " + rule.cyclify() + "  " +
+                                       rule.nbrFormulaInstances + " instances");
+            }
         }
         else
             System.out.println("No domain population rules");
 
         if (constraintRules.size() > 0) {
             System.out.println("Constraint Rules");
-            for (int i = 0; i < constraintRules.size(); i++)
-                System.out.println("  " + constraintRules.get(i));
+            for (int i = 0; i < constraintRules.size(); i++) {
+                Rule rule = (Rule) constraintRules.get(i);
+                if (rule.nbrFormulaInstances == -1)
+                    System.out.println("  " + rule.cyclify());
+                else
+                    System.out.println("  " + rule.cyclify() + "  " +
+                                       rule.nbrFormulaInstances + " instances");
+            }
         }
         else
             System.out.println("No Constraint rules");

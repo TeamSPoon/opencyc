@@ -51,14 +51,17 @@ public class ResourceFactory {
     return resourceFactory;
   }
   
-  /**
-   * Populates the resource pool.
-   */
+  /** Populates the resource pool. */
   public static void populateResourcePool () {
     ResourcePool resourcePool = ResourcePool.getInstance();
+    // console
     Resource resource = new Resource();
     resource.setResourceName(Resource.CONSOLE);
     resourcePool.setResource(Resource.CONSOLE, resource);
+    // user
+    resource = new Resource();
+    resource.setResourceName(Resource.USER);
+    resourcePool.setResource(Resource.USER, resource);
     
     //TODO
   }

@@ -50,11 +50,14 @@ public class BehaviorEngine {
    * Initializes the behavior engine.
    */
   public void initialize () {
+    logger = Logger.getLogger("org.opencyc.elf");
     logger.info("Initializing BehaviorEngine");
     (new ResourcePool()).getInstance().initialize();
     (new JobAssignmentLibrary()).getInstance().initialize();
     (new ScheduleLibrary()).getInstance().initialize();
+    StateVariable.initialize();
     new NotNull();
+    
     //TODO
   }
   
@@ -76,11 +79,8 @@ public class BehaviorEngine {
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {
-    logger = Logger.getLogger("org.opencyc.elf");
-    logger.info("Creating BehaviorEngine");
     BehaviorEngine behaviorEngine = new BehaviorEngine();
     behaviorEngine.initialize();
-    StateVariable.initialize();
     //TODO
     
     System.exit(0);

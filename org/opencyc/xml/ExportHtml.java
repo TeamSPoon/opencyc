@@ -459,7 +459,8 @@ public class ExportHtml {
     protected void createCycNartNode (CycNart cycNart)
         throws UnknownHostException, IOException, CycApiException {
         horizontalRule();
-        HTMLFontElement htmlFontElement = new HTMLFontElementImpl((HTMLDocumentImpl)htmlDocument, "font");
+        HTMLFontElement htmlFontElement =
+            new HTMLFontElementImpl((HTMLDocumentImpl)htmlDocument, "font");
         htmlFontElement.setSize("+1");
         htmlBodyElement.appendChild(htmlFontElement);
         HTMLAnchorElement htmlAnchorElement =
@@ -472,7 +473,8 @@ public class ExportHtml {
         Node collectionTextNode = htmlDocument.createTextNode(cycNart.cyclify());
         htmlAnchorElement.appendChild(collectionTextNode);
         Element italicsGeneratedPhraseElement = italics(htmlAnchorElement);
-        Node generatedPhraseNode = htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
+        Node generatedPhraseNode =
+            htmlDocument.createTextNode("&nbsp;&nbsp;&nbsp;" + generatedPhrase);
         italicsGeneratedPhraseElement.appendChild(generatedPhraseNode);
         Element blockquoteElement = htmlDocument.createElement("blockquote");
         htmlBodyElement.appendChild(blockquoteElement);
@@ -576,19 +578,41 @@ public class ExportHtml {
                                      "\n " + cycForts.get(0) + "\nis not a CycFort\n");
             return false;
         }
-        CycFort cycFort = (CycFort) cycForts.get(0);
+        if (! (cycForts.get(0) instanceof CycNart))
+            return false;
+        CycNart cycNart = (CycNart) cycForts.get(0);
+
         Node rewriteOfTextNode = htmlDocument.createTextNode("  is the atomic form of ");
         parentElement.appendChild(rewriteOfTextNode);
-        Node cycFortTextNode = htmlDocument.createTextNode(cycFort.cyclify());
-        if (selectedCycForts.contains(cycFort)) {
+        Node leftParenTextNode = htmlDocument.createTextNode("( ");
+        if (selectedCycForts.contains(cycNart)) {
             HTMLAnchorElement cycFortAnchorElement =
                 new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-            cycFortAnchorElement.setHref("#" + cycFort.cyclify());
+            cycFortAnchorElement.setHref("#" + cycNart.cyclify());
             parentElement.appendChild(cycFortAnchorElement);
-            cycFortAnchorElement.appendChild(cycFortTextNode);
+            cycFortAnchorElement.appendChild(leftParenTextNode);
         }
         else
-            parentElement.appendChild(cycFortTextNode);
+            parentElement.appendChild(leftParenTextNode);
+        CycFort functor = cycNart.getFunctor();
+        if (selectedCycForts.contains(functor)) {
+            HTMLAnchorElement functorAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            functorAnchorElement.setHref("#" + functor.cyclify());
+            parentElement.appendChild(functorAnchorElement);
+            functorAnchorElement.appendChild(htmlDocument.createTextNode(functor.cyclify()));
+        }
+        for (int i = 0; i < cycNart.getArguments().size(); i++) {
+            CycFort argument = (CycFort) cycNart.getArguments().get(i);
+            parentElement.appendChild(htmlDocument.createTextNode(" "));
+            HTMLAnchorElement argumentAnchorElement =
+                new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+            argumentAnchorElement.setHref("#" + argument.cyclify());
+            parentElement.appendChild(argumentAnchorElement);
+            argumentAnchorElement.appendChild(htmlDocument.createTextNode(argument.cyclify()));
+        }
+        Node rightParenTextNode = htmlDocument.createTextNode(")");
+        parentElement.appendChild(rightParenTextNode);
         return true;
     }
 

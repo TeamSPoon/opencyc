@@ -94,30 +94,6 @@ public class ExportDaml {
     public CycFort cycKbSubsetCollection = null;
 
     /**
-     * The #$CounterTerrorismConstant guid.
-     */
-    public static final Guid counterTerrorismConstantGuid =
-        CycObjectFactory.makeGuid("bfe31c38-9c29-11b1-9dad-c379636f7270");
-
-    /**
-     * The #$EELDSharedOntologyCoreConstant guid.
-     */
-    public static final Guid eeldSharedOntologyCoreConstantGuid =
-        CycObjectFactory.makeGuid("c12e44bd-9c29-11b1-9dad-c379636f7270");
-
-    /**
-     * The #$EELDSharedOntologyConstant guid.
-     */
-    public static final Guid eeldSharedOntologyConstantGuid =
-        CycObjectFactory.makeGuid("c06e4624-9c29-11b1-9dad-c379636f7270");
-
-    /**
-     * The #$IKBConstant guid.
-     */
-    public static final Guid ikbConstantGuid =
-        CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
-
-    /**
      * The CycKBSubsetCollection whose elements are exported to DAML.
      */
     public Guid cycKbSubsetCollectionGuid = null;
@@ -135,6 +111,12 @@ public class ExportDaml {
      * #$IKBConstant (not in OpenCyc)
      */
     protected CycFort cycKbSubsetFilter = null;
+
+    /**
+     * List of applicable binary predicates.
+     */
+    public CycList applicableBinaryPredicates = new CycList();
+
 
     /**
      * Used in the export command EXPORT_KB_SUBSET_BELOW_TERM.
@@ -196,62 +178,13 @@ public class ExportDaml {
     private CycList coExtensionals;
 
     /**
-     * Constructs a new ExportDaml object.
-     */
-    public ExportDaml () {
-        Log.makeLog();
-    }
-
-    /**
-     * Provides the main method for a DAML export.
+     * Constructs a new ExportDaml object given the CycAccess object.
      *
-     * @parameter args the optional command line arguments
+     * @param cycAccess the CycAccess object which manages the api connection
      */
-    public static void main (String[] args) {
-        ExportDaml exportDaml = new ExportDaml();
-        exportDaml.verbosity = ExportDaml.DEFAULT_VERBOSITY;
-
-        String choice = "eeld-core";
-        if (args.length > 0)
-            choice = args[0];
-        try {
-            Log.current.println("Choosing KB selection: " + choice);
-            // These require the Cycorp IKB or full KB to work as setup below.
-            if (choice.equals("all")) {
-                exportDaml.includeUpwardClosure = false;
-                exportDaml.title = "Open Cyc Ontology";
-                exportDaml.outputPath = "open-cyc.daml";
-                exportDaml.export(ExportDaml.EXPORT_ENTIRE_KB);
-            }
-            if (choice.equals("eeld-core")) {
-                exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
-                exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
-                exportDaml.title = "EELD Shared Core Ontology";
-                exportDaml.outputPath = "eeld-shared-core-ontology.daml";
-                exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
-            }
-            else if (choice.equals("eeld")) {
-                exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
-                exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
-                exportDaml.title = "EELD Shared Ontology";
-                exportDaml.outputPath = "eeld-shared-ontology.daml";
-                exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
-            }
-            else if (choice.equals("transportation-device")) {
-                Guid transportationDeviceGuid =
-                    CycObjectFactory.makeGuid("bd58d540-9c29-11b1-9dad-c379636f7270");
-                exportDaml.rootTermGuid = transportationDeviceGuid;
-                exportDaml.cycKbSubsetFilterGuid = counterTerrorismConstantGuid;
-                exportDaml.export(ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM);
-            }
-            else {
-                System.out.println("specified choice not found - " + choice);
-                System.exit(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    public ExportDaml (CycAccess cycAccess) {
+        Log.makeLog();
+        this.cycAccess = cycAccess;
     }
 
     /**
@@ -385,17 +318,6 @@ public class ExportDaml {
         createRdfNode();
         createDamlOntologyNode();
         createCycGuidNode();
-        cycAccess =
-            /*
-            new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                          CycConnection.DEFAULT_BASE_PORT,
-                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                          CycAccess.DEFAULT_CONNECTION);
-            */
-            new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                          3620,
-                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                          CycAccess.DEFAULT_CONNECTION);
 
         if (exportCommand == ExportDaml.EXPORT_ENTIRE_KB) {
             includeUpwardClosure = false;

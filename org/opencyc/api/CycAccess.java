@@ -5730,4 +5730,28 @@ public class CycAccess {
             return null;
     }
 
+    /**
+     * Returns the list of applicable binary predicates which are elements of any
+     * of the given list of KBSubsetCollections.
+     *
+     * @param kbSubSetCollections the list of KBSubsetCollections
+     * @return the list of applicable binary predicates which are elements of any
+     * of the given list of KBSubsetCollections
+     */
+    public CycList getApplicableBinaryPredicates (CycList kbSubsetCollections)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList result = new CycList();
+        for (int i = 0; i < kbSubsetCollections.size(); i++) {
+            CycFort kbSubsetCollection = (CycFort) kbSubsetCollections.get(i);
+            String query =
+                "(and \n" +
+                "  (#$isa ?binary-predicate " + kbSubsetCollection.cyclify() + ") \n" +
+                "  (#$isa ?binary-predicate #$BinaryPredicate))";
+            result.addAllNew(askWithVariable(makeCycList(query),
+                                             CycObjectFactory.makeCycVariable("?binary-predicate"),
+                                             inferencePSC));
+        }
+        return result;
+    }
+
 }

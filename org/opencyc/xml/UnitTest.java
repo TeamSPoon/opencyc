@@ -65,8 +65,8 @@ public class UnitTest extends TestCase {
      */
     public void xtestExportDaml1() {
         System.out.println("\n*** testExportDaml1 ***");
-        ExportDaml exportDaml = new ExportDaml();
         try {
+            ExportDaml exportDaml = new ExportDaml(new CycAccess());
             exportDaml.verbosity = 3;
             // Export #$PublicConstant terms to DAML.
             exportDaml.cycKbSubsetCollectionGuid =
@@ -85,8 +85,8 @@ public class UnitTest extends TestCase {
      */
     public void testExportDaml2() {
         System.out.println("\n*** testExportDaml2 ***");
-        ExportDaml exportDaml = new ExportDaml();
         try {
+            ExportDaml exportDaml = new ExportDaml(new CycAccess());
             exportDaml.verbosity = 3;
             // Export #$IKBConstant terms to DAML.
             exportDaml.cycKbSubsetCollectionGuid =

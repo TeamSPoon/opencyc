@@ -284,33 +284,39 @@ public class CycListParser  {
      * @param the input <tt>StreamTokenizer</tt> from which to get the numerical value.
      */
     private void scanNumber(StreamTokenizer st, boolean positive) {
-        Double d;
-        Integer i;
-        Object n = null;
+        Double doubleNumber;
+        Integer integerNumber;
+        Long longNumber;
+        Object number = null;
 
         if (verbosity > 5)
             System.out.println(st.nval );
-        // Try representing the scanned number as both java double and integer.
+        // Try representing the scanned number as both java double and long.
         if (positive) {
-            d = new Double (st.nval);
-            i = new Integer(d.intValue());
+            doubleNumber = new Double (st.nval);
+            integerNumber = new Integer(doubleNumber.intValue());
+            longNumber = new Long(doubleNumber.longValue());
         }
         else {
-            d = new Double (- st.nval);
-            i = new Integer(- d.intValue());
+            doubleNumber = new Double (- st.nval);
+            integerNumber = new Integer(- doubleNumber.intValue());
+            longNumber = new Long(- doubleNumber.longValue());
         }
 
-        // Choose integer if no loss of accuracy.
-        if ( i.doubleValue() == d.doubleValue() )
-            n = i;
+
+        if (integerNumber.doubleValue() == doubleNumber.doubleValue())
+            // Choose integer if no loss of accuracy.
+            number = integerNumber;
+        else if (longNumber.doubleValue() == doubleNumber.doubleValue())
+            number = longNumber;
         else
-            n = d;
+            number = doubleNumber;
 
         if (( parenLevel > 0 ) && ( parenLevel != readStack.sp ))
             // Within a list.
             readStack.push( consMarkerSymbol );
 
-        readStack.push( n );
+        readStack.push(number);
         checkQuotes();
     }
 

@@ -871,9 +871,84 @@ public class UnitTest extends TestCase {
             CycList cycList49 = cycAccess.makeCycList("(QUOTE (A . B))");
             Assert.assertEquals(cycList49, object);
 
-            // treeContains
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        // treeContains
+        try {
             CycList cycList50 = cycAccess.makeCycList("(DEFMACRO-IN-API MY-MACRO (A B C) (RET ` (LIST , A , B , C)))");
             Assert.assertTrue(cycList50.treeContains(CycObjectFactory.backquote));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+        // getValueForKeyword
+        try {
+            CycList cycList50 = cycAccess.makeCycList(
+                "(fipa-transport-message\n" +
+                "  (envelope\n" +
+                "    :to my-remote-agent\n" +
+                "    :from my-cyc-agent\n" +
+                "    :date 3215361678\n" +
+                "    :X-agent-community :coabs\n" +
+                "    :X-cyc-image-id \"balrog-200111112091457-939\"\n" +
+                "    :X-base-tcp-port 3600)\n" +
+                "  (payload\n" +
+                "    (inform\n" +
+                "      :sender my-cyc-agent\n" +
+                "      :receiver my-remote-agent\n" +
+                "      :reply-to message1\n" +
+                "      :content \"Hello from my-cyc-agent\"\n" +
+                "      :language :cycl\n" +
+                "      :reply-with \"my cookie\"\n" +
+                "      :ontology cyc-api\n" +
+                "      :protocol :fipa-request)))");
+            Assert.assertEquals(cycList50.size(), 3);
+            Assert.assertEquals(cycList50.first(), CycObjectFactory.makeCycSymbol("fipa-transport-message"));
+            Assert.assertTrue(cycList50.second() instanceof CycList);
+            CycList envelope = (CycList) cycList50.second();
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-remote-agent"),
+                                envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":to")));
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-cyc-agent"),
+                                envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":from")));
+            System.out.println("class=" +
+                               envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":date")).getClass());
+            Assert.assertEquals(new Long("3215361678"),
+                                envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":date")));
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol(":coabs"),
+                                envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":X-agent-community")));
+            Assert.assertEquals("balrog-200111112091457-939",
+                                envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":X-cyc-image-id")));
+            Assert.assertEquals(new Integer(3600),
+                                envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":X-base-tcp-port")));
+            Assert.assertNull(envelope.getValueForKeyword(CycObjectFactory.makeCycSymbol(":not-there")));
+            Assert.assertTrue(cycList50.third() instanceof CycList);
+            Assert.assertTrue(cycList50.third() instanceof CycList);
+            CycList payload = (CycList) cycList50.third();
+            Assert.assertTrue(payload.second() instanceof CycList);
+            CycList aclList = (CycList) payload.second();
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-cyc-agent"),
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":sender")));
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("my-remote-agent"),
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":receiver")));
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("message1"),
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":reply-to")));
+            Assert.assertEquals("Hello from my-cyc-agent",
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":content")));
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol(":cycl"),
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":language")));
+            Assert.assertEquals("my cookie",
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":reply-with")));
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol("cyc-api"),
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":ontology")));
+            Assert.assertEquals(CycObjectFactory.makeCycSymbol(":fipa-request"),
+                                aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":protocol")));
+            Assert.assertNull(aclList.getValueForKeyword(CycObjectFactory.makeCycSymbol(":not-there")));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -1001,7 +1076,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAssertion2, cycAssertion);
             CycList cycList = new CycList();
             cycList.add(cycAssertion);
-            System.out.println(cycList.toXMLString());
+            //System.out.println(cycList.toXMLString());
 
         }
         catch (Exception e) {

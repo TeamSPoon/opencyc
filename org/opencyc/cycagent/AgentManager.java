@@ -1,5 +1,11 @@
 package  org.opencyc.cycagent;
 
+import java.net.*;
+import java.util.*;
+import fipaos.ont.fipa.*;
+import org.opencyc.api.*;
+import org.opencyc.util.*;
+
 /**
  * Provides a FIPA-OS agent proxy and a Grid proxy for an OpenCyc server.<p>
  *
@@ -25,25 +31,12 @@ package  org.opencyc.cycagent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import  java.net.*;
-import  java.util.*;
-import  fipaos.ont.fipa.*;
-import  org.opencyc.util.*;
-import  org.opencyc.api.CycApiException;
-import  org.opencyc.cycobject.*;
-
-public class AgentManager  {
-    /**
-     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
-     * diagnostic input.
-     */
-    public static final int DEFAULT_VERBOSITY = 3;
+public class AgentManager extends GenericAgent {
 
     /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
-     * diagnostic input.
+     * singleton instance of AgentManager
      */
-    protected int verbosity = DEFAULT_VERBOSITY;
+    public static AgentManager agentManager;
 
     /**
      * One to one ssociation of local cyc agents with their CycAgentInfo object.
@@ -52,15 +45,10 @@ public class AgentManager  {
     public static Hashtable cycAgents;
 
     /**
-     * Singleton thread to listen for requests from Cyc.
+     * Singleton thread which listens for requests from Cyc.
      */
     protected static CycListener cycListener;
     protected static Thread cycListenerThread;
-
-    /**
-     * Sington instance of AgentManager.
-     */
-    public static AgentManager agentManager;
 
     /**
      * Provides the main method.
@@ -98,24 +86,15 @@ public class AgentManager  {
     }
 
     /**
-     * Forwards a message from a cyc agent to the receipient agent.
+     * Notifies my agent that an Agent Communication Language message has been received.
      *
-     * @param acl the representation of an ACL communication within an Agent.
+     * @param acl the Agent Communication Language message which has been received for my agent
      */
-    public void forward (ACL acl) {
-    }
+    public void messageReceived (ACL acl) {
+        super.messageReceived(acl);
+        if (messageConsumed)
+            return;
 
-
-    /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
-     * diagnostic input.
-     *
-     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
-     */
-    public void setVerbosity(int verbosity) {
-        this.verbosity = verbosity;
-        if (cycListener != null)
-            cycListener.setVerbosity(verbosity);
     }
 }
 

@@ -791,4 +791,17 @@ public class CycList extends ArrayList {
                                        " for object " + object);
     }
 
+    /**
+     * Gets the value following the given keyword symbol.
+     *
+     * @param keyword the keyword symbol
+     * @return the value following the given keyword symbol, or null if not found
+     */
+    public Object getValueForKeyword (CycSymbol keyword) {
+        for (int i = 0; i < this.size() - 1; i++) {
+            if (this.get(i).equals(keyword))
+                return this.get(i + 1);
+        }
+        return null;
+    }
 }

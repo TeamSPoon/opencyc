@@ -1,5 +1,15 @@
 package  org.opencyc.cycagent;
 
+import  java.net.Socket;
+import  java.io.PrintWriter;
+import  java.io.*;
+import  java.util.Collection;
+import  fipaos.ont.fipa.*;
+import  fipaos.parser.*;
+import  org.opencyc.api.*;
+import  org.opencyc.cycobject.*;
+import  org.opencyc.util.*;
+
 /**
  * Provides a handler to read cyc image input and write message to the agent
  * message queue.  The handler closes its socket without reply after the message
@@ -26,18 +36,9 @@ package  org.opencyc.cycagent;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import  java.net.Socket;
-import  java.io.PrintWriter;
-import  java.io.*;
-import  java.util.Collection;
-import  fipaos.ont.fipa.*;
-import  fipaos.parser.*;
-import  org.opencyc.api.*;
-import  org.opencyc.cycobject.*;
-import  org.opencyc.util.*;
-
 
 class CycInputHandler implements Runnable {
+
     /**
      * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
@@ -118,44 +119,60 @@ class CycInputHandler implements Runnable {
             Log.current.println("Exception creating socket i/o: " + e);
             throw new RuntimeException("Exception creating socket i/o: " + e);
         }
-        Object cycRequestObject = null;
+        Object fipaTransportMessage = null;
         try {
-            cycRequestObject = cfaslInputStream.readObject();
-            if (! (cycRequestObject instanceof CycList)) {
-                Log.current.println(cycRequestObject + " is not a CycList");
-                throw new RuntimeException(cycRequestObject + " is not a CycList");
-            }
-            CycList cycRequest = (CycList) cycRequestObject;
+            fipaTransportMessage = cfaslInputStream.readObject();
         }
         catch (Exception e) {
             Log.current.println("Exception reading socket i/o: " + e);
             return;
         }
+        if (! (fipaTransportMessage instanceof CycList)) {
+            Log.current.println(fipaTransportMessage + "\nis not a CycList");
+            throw new RuntimeException(fipaTransportMessage + "\nis not a CycList");
+        }
+        if (((CycList) fipaTransportMessage).size() != 3) {
+            Log.current.println(fipaTransportMessage + "\nhas invalid length of " +
+                                ((CycList) fipaTransportMessage).size());
+            throw new RuntimeException(fipaTransportMessage + "\nhas invalid length of " +
+                                ((CycList) fipaTransportMessage).size());
+        }
+        if (! (((CycList) fipaTransportMessage).first().equals(CycObjectFactory.makeCycSymbol("FIPA-ENVELOPE")))) {
+            Log.current.println("Invalid cyc message directive " + fipaTransportMessage);
+            throw new RuntimeException("Invalid cyc message directive " + fipaTransportMessage);
+        }
 
-        CycList cycRequest = (CycList) cycRequestObject;
-        if (! (cycRequest.first() instanceof CycSymbol)) {
-            Log.current.println("Invalid cyc message directive " + cycRequestObject);
-            throw new RuntimeException("Invalid cyc message directive " + cycRequestObject);
+        Object envelope = ((CycList) fipaTransportMessage).second();
+        if (! (envelope instanceof CycList)) {
+            Log.current.println(envelope + "\nis not a CycList");
+            throw new RuntimeException(envelope + "\nis not a CycList");
         }
-        CycSymbol cycMessageDirective = (CycSymbol) cycRequest.first();
-        if (cycMessageDirective.equals(CycObjectFactory.makeCycSymbol("FIPA-ENVELOPE"))) {
+        Object payload = ((CycList) fipaTransportMessage).third();
+        if (! (envelope instanceof CycList)) {
+            Log.current.println(envelope + "\nis not a CycList");
+            throw new RuntimeException(envelope + "\nis not a CycList");
+        }
+
+
+
+/*
+        if (verbosity > 0)
             Log.current.println("Processing the message without waiting for the reply");
-            String aclString = ((CycList) cycRequest.second()).cyclify();
-            Log.current.println("aclString: " + aclString);
-            ACL acl = null;
-            try {
-                acl = new ACL(aclString);
-            }
-            catch (ParserException e) {
-                Log.current.println("Cannot parse message " + aclString + e.getMessage());
-            }
-            AgentManager.agentManager.forward(acl);
+        String aclString = ((CycList) cycRequest.second()).cyclify();
+        Log.current.println("aclString: " + aclString);
+        ACL acl = null;
+        try {
+            acl = new ACL(aclString);
+            AgentManager.agentManager.getAgentCommunityAdapter().converseMessage(acl, new Timer());
         }
-        else {
-            Log.current.println("Invalid cyc message directive " + cycRequestObject);
-            throw new RuntimeException("Invalid cyc message directive " + cycRequestObject);
+        catch (ParserException e) {
+            Log.current.println("Cannot parse message " + aclString + e.getMessage());
+        }
+        catch (Exception e) {
+            Log.current.println("Exception when sending\n" + acl + "\n" + e.getMessage());
         }
         close();
+        */
     }
 
     /**

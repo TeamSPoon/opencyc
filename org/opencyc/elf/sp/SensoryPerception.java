@@ -7,6 +7,7 @@ import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.ObservedInputMsg;
 import org.opencyc.elf.message.PerceivedSensoryInputMsg;
 
+import org.opencyc.elf.s.Sensation;
 import org.opencyc.elf.s.Sensor;
 
 //// External Imports
@@ -45,21 +46,30 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   //// Constructors
   
   /**
-   * Constructs a new SensoryPerception object.
+   * Creates a new instance of SensoryPerception with the given name and
+   * the names of sensations that this virtual sensor can sense.
+   *
+   * @param name the sensory perception name
+   * @param sensationCapabilities the names of sensations that this virtual sensor can sense
    */
-  public SensoryPerception() {
+  public SensoryPerception(String name, ArrayList sensationCapabilities) {
+    this.name = name;
+    this.sensationCapabilities = sensationCapabilities;
+    node.setSensoryPerception(this);
   }
-
+  
+  //// Public Area
+  
   /** 
-   * Creates a new instance of SensoryPerception with the given
-   * input and output message channels.
+   * Initializes with the given input and output message channels, and starts the message 
+   * consumer process.
    *
    * @param sensoryPerceptionChannel the takable channel from which messages are input
    * @param nextHigherLevelSensoryPerceptionChannel the puttable channel to which messages are output
    * entity evaluator node component in value judgement
    */
-  public SensoryPerception(Takable sensoryPerceptionChannel,
-                           Puttable nextHigherLevelSensoryPerceptionChannel) {
+  public void initialize(Takable sensoryPerceptionChannel,
+                         Puttable nextHigherLevelSensoryPerceptionChannel) {
     this.sensoryPerceptionChannel = sensoryPerceptionChannel;
     consumer = new Consumer(sensoryPerceptionChannel,
                             nextHigherLevelSensoryPerceptionChannel,
@@ -74,8 +84,6 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     }
   }
 
-  //// Public Area
-  
   /** 
    * Gets the puttable channel for this node component to which other node
    * components can send messages.
@@ -213,7 +221,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
    * @return the name of the virtual sensor
    */
   public String getName() {
-    return getNode().getName();
+    return name;
   }
   
   /**
@@ -225,6 +233,15 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     ArrayList resources = new ArrayList();
     //TODO
     return resources;
+  }
+  
+  /**
+   * Gets the names of sensations that this virtual sensor can sense.
+   *
+   * @return the names of sensations that this virtual sensor can sense
+   */
+  public ArrayList getSensationCapabilities() {
+    return sensationCapabilities;
   }
   
   //// Protected Area
@@ -293,8 +310,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
      * Processes the observed input message.
      */
     protected void processObservedInputMsg(ObservedInputMsg observedInputMsg) {
-      Object obj = observedInputMsg.getObj();
-      Object data = observedInputMsg.getData();
+      Sensation sensation = observedInputMsg.getSensation();
       //TODO
     }
     
@@ -329,6 +345,12 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   //// Private Area
   
   //// Internal Rep
+  
+  /** the sensory perception name */
+  protected String name;
+  
+  /** tthe names of sensations that this virtual sensor can sense */
+  protected ArrayList sensationCapabilities;
   
   /**
    * the estimator node component

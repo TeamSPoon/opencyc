@@ -135,12 +135,13 @@ public class Performer {
      */
     protected void doTermQuery (State currentState, Action action)
         throws CycApiException, IOException, UnknownHostException {
-        ParseResults parseResults = (ParseResults) currentState.get("parse results");
+        ParseResults parseResults =
+            (ParseResults) interpreter.getStateAttribute("parse results");
         ArrayList queryWords =
             parseResults.getTextBinding(CycObjectFactory.makeCycVariable("?term"));
-        currentState.set("query words", queryWords);
+        interpreter.setStateAttribute("query words", queryWords);
         CycList parsedTerms = parseTermsString(queryWords);
-        currentState.set("parsed terms", parsedTerms);
+        interpreter.setStateAttribute("parsed terms", parsedTerms);
     }
 
     /**

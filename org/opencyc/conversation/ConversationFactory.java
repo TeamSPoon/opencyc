@@ -227,7 +227,7 @@ public class ConversationFactory {
         Performative morePerformative = new Performative("more");
         Performative donePerformative = new Performative("done");
         /**
-         * 1. If we are in the disambiguate-terms state and get a term-query performative, transition
+         * 1. If we are in the disambiguate-terms state and get a , transition
          * to the prompt-for-more state and perform the reply-with-first-fact action.
          */
 

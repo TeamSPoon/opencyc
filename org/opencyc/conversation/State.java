@@ -40,11 +40,6 @@ public class State implements Comparable {
     protected HashMap arcs = new HashMap();
 
     /**
-     * Dictionary of attribute and object values.
-     */
-    protected HashMap attributes = new HashMap();
-
-    /**
      * Constructs a new State object.
      */
     public State(String stateId) {
@@ -99,25 +94,6 @@ public class State implements Comparable {
         return (Arc) arcs.get(performative);
     }
 
-    /**
-     * Sets the value for the given attribute.
-     *
-     * @param attribute the key object
-     * @param value the value object
-     */
-    public void set (String attribute, Object value) {
-        attributes.put(attribute, value);
-    }
-
-    /**
-     * Returns the value for the given attribute.
-     *
-     * @param attribute the key object
-     * @retrun the value for the given attribute
-     */
-    public Object get (Object attribute) {
-        return attributes.get(attribute);
-    }
     /**
      * Compares this object with the specified object for order.
      * Returns a negative integer, zero, or a positive integer as this

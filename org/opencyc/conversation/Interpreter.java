@@ -57,6 +57,11 @@ public class Interpreter {
     protected State currentState;
 
     /**
+     * Dictionary of state attribute and object values.
+     */
+    protected HashMap stateAttributes = new HashMap();
+
+    /**
      * Makes Template objects for the TemplateParser.
      */
     protected TemplateFactory templateFactory;
@@ -111,7 +116,7 @@ public class Interpreter {
         Performative performative = parseResults.getPerformative();
         Arc arc = lookupArc(performative);
         transitionState(arc);
-        currentState.set("parse results", parseResults);
+        this.setStateAttribute("parse results", parseResults);
         performer.performArc(currentState, arc.getAction());
     }
 
@@ -182,5 +187,25 @@ public class Interpreter {
      */
     public void sendChatMessage (String chatMessage) throws ChatException {
         chatterBot.sendChatMessage(chatMessage);
+    }
+
+    /**
+     * Sets the value for the given state attribute.
+     *
+     * @param attribute the key object
+     * @param value the value object
+     */
+    public void setStateAttribute (String attribute, Object value) {
+        stateAttributes.put(attribute, value);
+    }
+
+    /**
+     * Returns the value for the given state attribute.
+     *
+     * @param attribute the key object
+     * @retrun the value for the given attribute
+     */
+    public Object getStateAttribute (Object attribute) {
+        return stateAttributes.get(attribute);
     }
 }

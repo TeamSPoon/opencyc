@@ -79,6 +79,10 @@ public class ExportHtml {
      */
     public boolean includeUpwardClosure = false;
     /**
+     * Indicates whether hierarchy pages are produced.
+     */
+    public boolean produceHierarchyPages = false;
+    /**
      * Upward closure filtering kb subset collections guids.  These constrain the selected
      * upward closure collection terms to be members of any of these kb subset
      * collections.
@@ -259,6 +263,9 @@ public class ExportHtml {
      */
     public static void main (String[] args) {
         ExportHtml exportHtml = new ExportHtml();
+        exportHtml.verbosity = 3;
+        exportHtml.produceHierarchyPages = false;
+        exportHtml.includeUpwardClosure = true;
         String choice = "eeld";
         if (args.length > 0)
             choice = args[0];
@@ -354,9 +361,11 @@ public class ExportHtml {
             Log.current.println("Sorting " + selectedCycForts.size() + " CycFort terms");
         Collections.sort(selectedCycForts);
         createVocabularyPage();
-        if (rootTerm != null)
+        if (rootTerm != null &&
+            produceHierarchyPages)
             createHierarchyPage(rootTerm);
-        else if (includeUpwardClosure)
+        else if (includeUpwardClosure &&
+                 produceHierarchyPages)
             createHierarchyPage(CycAccess.thing);
         else if (verbosity > 0)
             Log.current.println("Ommiting ontology hierarchy export page");
@@ -814,7 +823,7 @@ public class ExportHtml {
      * @param parentElement the parent HTML DOM element
      */
     protected void createIsaNodes (CycFort cycFort, Element parentElement) throws IOException, CycApiException {
-        //if (cycFort.toString().equals("AntiSymmetricBinaryPredicate"))
+        //if (cycFort.toString().equals("BiochemicallyHarmfulSubstance"))
         //    verbosity = 9;
         CycList isas = cycAccess.getIsas(cycFort);
         if (verbosity > 3)
@@ -851,7 +860,7 @@ public class ExportHtml {
         }
         createdIsas = specificCollections(createdIsas);
         // filter out any specified terms.
-        createdIsas.removeAll(this.filterFromDirectInstances);
+        createdIsas.removeAll(filterFromDirectInstances);
         for (int i = 0; i < createdIsas.size(); i++) {
             CycFort isa = (CycFort)createdIsas.get(i);
             HTMLAnchorElement isaAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
@@ -918,8 +927,23 @@ public class ExportHtml {
         CycList genls = cycAccess.getGenls(cycFort);
         if (verbosity > 3)
             Log.current.println("  starting genls: " + genls.cyclify());
-        genls = filterSelectedConstants(genls);
-        genls = specificCollections(genls);
+        CycList tempList = filterSelectedConstants(genls);
+        if (tempList.size() == 0) {
+            for (int i = 0; i < genls.size(); i++) {
+                CycFort genl = (CycFort) genls.get(i);
+                CycFort tempGenl = findSelectedGenls(genl);
+                if (tempGenl != null) {
+                    tempList.add(tempGenl);
+                    if (verbosity > 2)
+                        Log.current.println("  replaced " + genl.cyclify() +
+                                            " with " + tempGenl.cyclify());
+                }
+                else if (verbosity > 2)
+                    Log.current.println("  cannot replace " + genl.cyclify() +
+                                        " with a valid genl");
+            }
+        }
+        genls = specificCollections(tempList);
         lineBreak(parentElement);
         Element bElement = htmlDocument.createElement("b");
         parentElement.appendChild(bElement);
@@ -941,7 +965,7 @@ public class ExportHtml {
                 parentElement.appendChild(spacesTextNode);
             }
         }
-        if (genls.size() > 0) {
+        if ((genls.size() > 0) && produceHierarchyPages) {
             Node spacesTextNode = htmlDocument.createTextNode("&nbsp;&nbsp;");
             parentElement.appendChild(spacesTextNode);
             HTMLAnchorElement hierarchyAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
@@ -1034,10 +1058,12 @@ public class ExportHtml {
      * @param parentElement the parent HTML DOM element
      */
     protected void createIndividualNode (CycConstant cycConstant, Element parentElement) throws UnknownHostException, IOException, CycApiException {
-        Element bElement = htmlDocument.createElement("b");
-        parentElement.appendChild(bElement);
-        Node individualLabelTextNode = htmlDocument.createTextNode("Individual");
-        bElement.appendChild(individualLabelTextNode);
+        HTMLAnchorElement individualAnchorElement =
+            new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+        individualAnchorElement.setHref("##$Individual");
+        parentElement.appendChild(individualAnchorElement);
+        Node individualTextNode = htmlDocument.createTextNode("#$Individual");
+        individualAnchorElement.appendChild(individualTextNode);
     }
 
     /**

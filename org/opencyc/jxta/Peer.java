@@ -19,6 +19,7 @@ import  org.opencyc.cycobject.*;
 import  org.opencyc.cycagent.*;
 import  org.opencyc.xml.*;
 import  org.opencyc.util.*;
+import  org.opencyc.chat.*;
 
 /**
  * Provides generic jxta peer capablilities for cyc agents.<p>
@@ -324,6 +325,7 @@ public class Peer implements QueryHandler {
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
+
 }
 
 

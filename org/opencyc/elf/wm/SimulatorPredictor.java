@@ -1,6 +1,13 @@
 package org.opencyc.elf.wm;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
+
+import org.opencyc.elf.bg.planner.Schedule;
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
+//// External Imports
+import java.util.ArrayList;
 
 /**
  * Provides the simulator-predictor for the ELF WorldModel.<br>
@@ -27,15 +34,17 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class SimulatorPredictor extends NodeComponent {
-  /** the world model which owns this simulator-predictor */
-  protected WorldModel worldModel;
-
+  
+  //// Constructors
+  
   /**
    * Constructs a new SimulatorPredictor object.
    */
   public SimulatorPredictor() {
   }
 
+  //// Public Area
+  
   /**
    * Gets the world model which owns this simulator-predictor
    * 
@@ -53,4 +62,61 @@ public class SimulatorPredictor extends NodeComponent {
   public void setWorldModel(WorldModel worldModel) {
     this.worldModel = worldModel;
   }
+  
+  //// Protected Area
+  
+  /**
+   * Sends the request evaluate schedule message to ?.
+   */
+  protected void requestEvaluateSchedule () {
+    //TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Receives the simulate schedule message from ?.
+   */
+  protected void receiveSimulateSchedule () {
+    //TODO
+    // receive via channel from ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Sends the simulation failure notification message to ?.
+   */
+  protected void sendSimulationFailureNotification () {
+    //TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Sends the predicted input message to ?.
+   */
+  protected void sendPredictedInput () {
+    //TODO
+    // send via channel to ?
+    // Object obj
+  }
+  
+  
+  
+  
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the world model which owns this simulator-predictor */
+  protected WorldModel worldModel;
+
+  //// Main
 }

@@ -1161,10 +1161,49 @@ public class CycAccess {
 
     /**
      * Gets a list of all of the direct and indirect specs for a CycFort collection.
+     *
+     * @param cycFort the collection
+     * @return the list of all of the direct and indirect specs for the given collection
      */
     public CycList getAllSpecs (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(remove-duplicates (with-all-mts (all-specs " + cycFort.stringApiValue() + ")))");
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect specs for the given collection
+     * in the given microtheory.
+     *
+     * @param cycFort the collection
+     * @return the list of all of the direct and indirect specs for the given collection
+     */
+    public CycList getAllSpecs (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-specs " + cycFort.stringApiValue() +
+                            " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets a hashset of all of the direct and indirect specs for a CycFort collection.
+     *
+     * @param cycFort the collection
+     * @return the hashset of all of the direct and indirect specs for the given collection
+     */
+    public HashSet getAllSpecsHashSet (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllSpecs(cycFort));
+    }
+
+    /**
+     * Gets the hashset of all of the direct and indirect specs for the given collection
+     * in the given microtheory.
+     *
+     * @param cycFort the collection
+     * @return the hashset of all of the direct and indirect specs for the given collection
+     */
+    public HashSet getAllSpecsHashSet (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllSpecs(cycFort, mt));
     }
 
     /**
@@ -1238,6 +1277,94 @@ public class CycAccess {
         answer = isGenlOf(genl, spec);
         isGenlOfCache.addElement(args, new Boolean(answer));
         return answer;
+    }
+
+    /**
+     * Returns true if CycFort GENL is a genl of CycFort SPEC in MT.
+     *
+     * @param genl the collection for genl determination
+     * @param spec the collection for spec determination
+     * @param mt the microtheory for spec determination
+     * @return <tt>true</tt> if CycFort GENL is a genl of CycFort SPEC in MT
+     */
+    public boolean isGenlOf (CycFort genl, CycFort spec, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(genl? " + spec.stringApiValue() +
+                               " " + genl.stringApiValue() +
+                               " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Returns true if CycFort GENLPRED is a genl-pred of CycFort SPECPRED in MT.
+     *
+     * @param genlPred the predicate for genl-pred determination
+     * @param specPred the predicate for spec-pred determination
+     * @param mt the microtheory for subsumption determination
+     * @return <tt>true</tt> if CycFort GENLPRED is a genl-pred of CycFort SPECPRED in MT
+     */
+    public boolean isGenlPredOf (CycFort genlPred, CycFort specPred, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(genl-pred? " + specPred.stringApiValue() +
+                               " " + genlPred.stringApiValue() +
+                               " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Returns true if CycFort GENLPRED is a genl-pred of CycFort SPECPRED in any MT.
+     *
+     * @param genlPred the predicate for genl-pred determination
+     * @param specPred the predicate for spec-pred determination
+     * @return <tt>true</tt> if CycFort GENLPRED is a genl-pred of CycFort SPECPRED
+     * in any MT
+     */
+    public boolean isGenlPredOf (CycFort genlPred, CycFort specPred)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(genl-pred-in-any-mt? " + specPred.stringApiValue() +
+                               " " + genlPred.stringApiValue() + ")");
+    }
+
+    /**
+     * Returns true if CycFort GENLPRED is a genl-inverse of CycFort SPECPRED in MT.
+     *
+     * @param genlPred the predicate for genl-inverse determination
+     * @param specPred the predicate for spec-inverse determination
+     * @param mt the microtheory for inverse subsumption determination
+     * @return <tt>true</tt> if CycFort GENLPRED is a genl-inverse of CycFort SPECPRED in MT
+     */
+    public boolean isGenlInverseOf (CycFort genlPred, CycFort specPred, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(genl-inverse? " + specPred.stringApiValue() +
+                               " " + genlPred.stringApiValue() +
+                               " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Returns true if CycFort GENLPRED is a genl-inverse of CycFort SPECPRED in any MT.
+     *
+     * @param genlPred the predicate for genl-inverse determination
+     * @param specPred the predicate for spec-inverse determination
+     * @return <tt>true</tt> if CycFort GENLPRED is a genl-inverse of CycFort SPECPRED
+     * in any MT
+     */
+    public boolean isGenlInverseOf (CycFort genlPred, CycFort specPred)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(genl-inverse-in-any-mt? " + specPred.stringApiValue() +
+                               " " + genlPred.stringApiValue() + ")");
+    }
+
+    /**
+     * Returns true if CycFort GENLMT is a genl-mt of CycFort SPECPRED in *mt-mt*
+     * (currently #$UniversalVocabularyMt).
+     *
+     * @param genlMt the microtheory for genl-mt determination
+     * @param specMt the microtheory for spec-mt determination
+     * @return <tt>true</tt> if CycFort GENLMT is a genl-mt of CycFort SPECPRED in *mt-mt*
+     * (currently #$UniversalVocabularyMt)
+     */
+    public boolean isGenlMtOf (CycFort genlMt, CycFort specMt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseBoolean("(genl-mt? " + specMt.stringApiValue() +
+                               " " + genlMt.stringApiValue() + ")");
     }
 
     /**
@@ -1408,11 +1535,61 @@ public class CycAccess {
     }
 
     /**
-     * Gets a list of all the direct and indirect instances (individuals) for a CycFort collection.
+     * Gets a list of all the direct and indirect instances (individuals) for a CycFort
+     * collection.
+     *
+     * @param cycFort the collection for which all the direct and indirect instances
+     * (individuals) are sought
+     * @return the list of all the direct and indirect instances (individuals) for the
+     * given collection
      */
     public CycList getAllInstances (CycFort cycFort)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(all-instances-in-all-mts " + cycFort.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets a list of all the direct and indirect instances (individuals) for a CycFort
+     * collection in the given microtheory.
+     *
+     * @param cycFort the collection for which all the direct and indirect instances
+     * (individuals) are sought
+     * @return the list of all the direct and indirect instances (individuals) for the
+     * given collection
+    */
+    public CycList getAllInstances (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-instances " + cycFort.stringApiValue()
+                            + " " + mt.stringApiValue()+ ")");
+    }
+
+    /**
+     * Gets a hashset of all the direct and indirect instances (individuals) for a CycFort
+     * collection in the given microtheory.
+     *
+     * @param cycFort the collection for which all the direct and indirect instances
+     * (individuals) are sought
+     * @param mt the microtheory in which the inference is performed
+     * @return the list of all the direct and indirect instances (individuals) for the
+     * given collection
+    */
+    public HashSet getAllInstancesHashSet (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllInstances(cycFort, mt));
+    }
+
+    /**
+     * Gets a hashset of all the direct and indirect instances (individuals) for a CycFort
+     * collection in the given microtheory.
+     *
+     * @param cycFort the collection for which all the direct and indirect instances
+     * (individuals) are sought
+     * @return the list of all the direct and indirect instances (individuals) for the
+     * given collection
+    */
+    public HashSet getAllInstancesHashSet (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllInstances(cycFort));
     }
 
     /**
@@ -1490,12 +1667,147 @@ public class CycAccess {
 
     /**
      * Gets a list of all of the genlPreds for a CycConstant predicate, using an upward closure.
+     *
      * @parameter predicate the predicate for which all the genlPreds are obtained
      * @return a list of all of the genlPreds for a CycConstant predicate, using an upward closure
      */
     public CycList getAllGenlPreds (CycConstant predicate)
         throws IOException, UnknownHostException, CycApiException {
         return converseList("(remove-duplicates (with-all-mts (all-genl-predicates " + predicate.stringApiValue() + ")))");
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect specs-preds for the given predicate
+     * in the given microtheory.
+     *
+     * @param cycFort the predicate
+     * @param mt the microtheory
+     * @return the list of all of the direct and indirect spec-preds for the given predicate
+     */
+    public CycList getAllSpecPreds (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-spec-preds " + cycFort.stringApiValue() +
+                            " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect specs-preds for the given predicate
+     * in all microtheories.
+     *
+     * @param cycFort the predicate
+     * @return the list of all of the direct and indirect spec-preds for the given predicate
+     * in all microtheories.
+     */
+    public CycList getAllSpecPreds (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(remove-duplicates (with-all-mts (all-spec-preds " +
+                            cycFort.stringApiValue() + ")))");
+    }
+
+    /**
+     * Gets the hashset of all of the direct and indirect specs-preds for the given predicate
+     * in the given microtheory.
+     *
+     * @param cycFort the predicate
+     * @param mt the microtheory
+     * @return the hashset of all of the direct and indirect spec-preds for the given predicate
+     */
+    public HashSet getAllSpecPredsHashSet (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllSpecPreds(cycFort, mt));
+    }
+
+    /**
+     * Gets the hashset of all of the direct and indirect specs-preds for the given predicate
+     * in all microtheories.
+     *
+     * @param cycFort the predicate
+     * @return the hashset of all of the direct and indirect spec-preds for the given predicate
+     * in all microtheories.
+     */
+    public HashSet getAllSpecPredsHashSet (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllSpecPreds(cycFort));
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect specs-inverses for the given predicate
+     * in the given microtheory.
+     *
+     * @param cycFort the predicate
+     * @param mt the microtheory
+     * @return the list of all of the direct and indirect spec-inverses for the given predicate
+     */
+    public CycList getAllSpecInverses (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-spec-inverses " + cycFort.stringApiValue() +
+                            " " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect specs-inverses for the given predicate
+     * in all microtheories.
+     *
+     * @param cycFort the predicate
+     * @return the list of all of the direct and indirect spec-inverses for the given predicate
+     * in all microtheories.
+     */
+    public CycList getAllSpecInverses (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(remove-duplicates (with-all-mts (all-spec-inverses " +
+                            cycFort.stringApiValue() + ")))");
+    }
+
+    /**
+     * Gets the hashset of all of the direct and indirect specs-inverses for the given predicate
+     * in the given microtheory.
+     *
+     * @param cycFort the predicate
+     * @param mt the microtheory
+     * @return the hashset of all of the direct and indirect spec-inverses for the given predicate
+     */
+    public HashSet getAllSpecInversesHashSet (CycFort cycFort, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllSpecInverses(cycFort, mt));
+    }
+
+    /**
+     * Gets the hashset of all of the direct and indirect specs-inverses for the given predicate
+     * in all microtheories.
+     *
+     * @param cycFort the predicate
+     * @return the hashset of all of the direct and indirect spec-inverses for the given predicate
+     * in all microtheories.
+     */
+    public HashSet getAllSpecInversesHashSet (CycFort cycFort)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllSpecInverses(cycFort));
+    }
+
+    /**
+     * Gets the list of all of the direct and indirect specs-mts for the given microtheory
+     * in *mt-mt* (currently #$UniversalVocabularyMt).
+     *
+     * @param mt the microtheory
+     * @return the list of all of the direct and indirect specs-mts for the given microtheory
+     * in *mt-mt* (currently #$UniversalVocabularyMt)
+     */
+    public CycList getAllSpecMts (CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return converseList("(all-spec-mts " + mt.stringApiValue() + ")");
+    }
+
+    /**
+     * Gets the hashset of all of the direct and indirect specs-mts for the given microtheory
+     * in *mt-mt* (currently #$UniversalVocabularyMt).
+     *
+     * @param mt the microtheory
+     * @return the hashset of all of the direct and indirect specs-mts for the given microtheory
+     * in *mt-mt* (currently #$UniversalVocabularyMt)
+     */
+    public HashSet getAllSpecMtsHashSet (CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return new HashSet(getAllSpecMts(mt));
     }
 
     /**

@@ -44,9 +44,27 @@ public class UnitTest extends TestCase {
      * Main method in case tracing is prefered over running JUnit GUI.
      */
     public static void main(String[] args) {
-        boolean allTests = false;
-        //boolean allTests = true;
+        //boolean allTests = false;
+        boolean allTests = true;
         runTests(allTests);
+    }
+
+    /**
+     * Returns the test suite.
+     *
+     * @return the test suite
+     */
+    public static Test suite() {
+        TestSuite testSuite = new TestSuite();
+        testSuite.addTest(new UnitTest("testBinding"));
+        testSuite.addTest(new UnitTest("testBindingSet"));
+        testSuite.addTest(new UnitTest("testConstraintRule"));
+        testSuite.addTest(new UnitTest("testQueryLiteral"));
+        testSuite.addTest(new UnitTest("testHornClause"));
+        testSuite.addTest(new UnitTest("testSolution"));
+        testSuite.addTest(new UnitTest("testUnifier"));
+        testSuite.addTest(new UnitTest("testBackchainer"));
+        return testSuite;
     }
 
     /**
@@ -54,21 +72,22 @@ public class UnitTest extends TestCase {
      */
     public static void runTests(boolean allTests) {
         TestSuite testSuite;
-        if (allTests)
-            testSuite = new TestSuite(UnitTest.class);
+        if (allTests) {
+            junit.textui.TestRunner.run(suite());
+        }
         else {
             testSuite = new TestSuite();
-            //testSuite.addTest(new UnitTest("testBinding"));
-            //testSuite.addTest(new UnitTest("testBindingSet"));
-            //testSuite.addTest(new UnitTest("testConstraintRule"));
+            testSuite.addTest(new UnitTest("testBinding"));
+            testSuite.addTest(new UnitTest("testBindingSet"));
+            testSuite.addTest(new UnitTest("testConstraintRule"));
             testSuite.addTest(new UnitTest("testQueryLiteral"));
-            //testSuite.addTest(new UnitTest("testHornClause"));
-            //testSuite.addTest(new UnitTest("testSolution"));
-            //testSuite.addTest(new UnitTest("testUnifier"));
-            //testSuite.addTest(new UnitTest("testBackchainer"));
+            testSuite.addTest(new UnitTest("testHornClause"));
+            testSuite.addTest(new UnitTest("testSolution"));
+            testSuite.addTest(new UnitTest("testUnifier"));
+            testSuite.addTest(new UnitTest("testBackchainer"));
+            TestResult testResult = new TestResult();
+            testSuite.run(testResult);
         }
-        TestResult testResult = new TestResult();
-        testSuite.run(testResult);
     }
 
     /**
@@ -117,6 +136,7 @@ public class UnitTest extends TestCase {
             bindingSet2 = new BindingSet(queryLiteral1, mt);
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
         Assert.assertEquals(bindingSet1, bindingSet2);

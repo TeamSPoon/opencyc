@@ -47,8 +47,8 @@ public class NotNull extends Predicate {
    * @param state the given state
    * @return true if the first argument is not null
    */
-   public boolean evaluate (List arguments, State state) {
-    return evaluateArgument(arguments.get(0), state) != null;
+   public Boolean evaluate(List arguments, State state) {
+    return new Boolean(evaluateArgument(arguments.get(0), state) != null);
   }
   
   /** Returns a string representation of this predicate given
@@ -64,16 +64,7 @@ public class NotNull extends Predicate {
     stringBuffer.append(")");
     return stringBuffer.toString();
   }
-  
- /** Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    return obj instanceof NotNull;
-  }
-  
+    
   //// Protected Area
   
   //// Private Area

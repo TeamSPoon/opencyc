@@ -47,8 +47,8 @@ public class True extends Predicate {
    * @param state the given state
    * @return always true
    */
-  public boolean evaluate(List arguments, State state) {
-    return true;
+  public Boolean evaluate(List arguments, State state) {
+    return Boolean.TRUE;
   }
   
   /** Returns a string representation of this predicate given

@@ -100,7 +100,7 @@ public class PredicateExpression {
    *
    * @return the result of evaluating the predicate and arguments within the given state
    */
-  public boolean evaluate(State state) {
+  public Boolean evaluate(State state) {
     return predicate.evaluate(arguments, state);
   }
   

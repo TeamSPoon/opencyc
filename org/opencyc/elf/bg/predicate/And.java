@@ -48,14 +48,14 @@ public class And extends Predicate {
    * @param state the given state
    * @return the result of evaluating the given predicate expressions
    */
-  public boolean evaluate(List arguments, State state) {
+  public Boolean evaluate(List arguments, State state) {
     Iterator iter = arguments.iterator();
     while (iter.hasNext()) {
       PredicateExpression predicateExpression = (PredicateExpression) iter.next();
-      if (! predicateExpression.evaluate(state))
-        return false;
+      if (predicateExpression.evaluate(state).equals(Boolean.FALSE))
+        return Boolean.FALSE;
     }
-    return true;
+    return Boolean.TRUE;
   }
   
   /** Returns a string representation of this predicate given

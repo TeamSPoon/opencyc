@@ -57,7 +57,7 @@ public abstract class Predicate {
    * @param arguments the given arguments to evaluate
    * @param state the given state
    */
-  public abstract boolean evaluate (List arguments, State state);
+  public abstract Boolean evaluate (List arguments, State state);
   
   /** Returns a string representation of this predicate given
    * the arguments.

@@ -50,15 +50,15 @@ public class Different extends Predicate {
    * @param state the given state
    * @return true if the first and second are not equal to each other
    */
-   public boolean evaluate (List arguments, State state) {
+   public Boolean evaluate(List arguments, State state) {
      Object argument1 = evaluateArgument(arguments.get(0), state);
      Object argument2 = evaluateArgument(arguments.get(1), state);
-     if (argument1 == null)
-       return argument2 != null;
+     if (argument1 == null) 
+       return new Boolean(argument2 != null);
      else if (argument2 == null)
-       return argument1 != null;
+       return new Boolean(argument1 != null);
      else
-       return ! argument1.equals(argument2);
+       return new Boolean(! argument1.equals(argument2));
   }
   
   /**

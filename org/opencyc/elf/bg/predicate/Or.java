@@ -48,14 +48,14 @@ public class Or extends Predicate {
    * @param state the given state
    * @return the result of evaluating the given predicate expressions
    */
-  public boolean evaluate(List arguments, State state) {
+  public Boolean evaluate(List arguments, State state) {
     Iterator iter = arguments.iterator();
     while (iter.hasNext()) {
       PredicateExpression predicateExpression = (PredicateExpression) iter.next();
-      if (predicateExpression.evaluate(state))
-        return true;
+      if (predicateExpression.evaluate(state).equals(Boolean.TRUE))
+        return Boolean.TRUE;
     }
-    return false;
+    return Boolean.FALSE;
   }
   
   /** Returns a string representation of this predicate given
@@ -76,15 +76,6 @@ public class Or extends Predicate {
     }
     stringBuffer.append(")");
     return stringBuffer.toString();
-  }
-  
- /** Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    return obj instanceof Or;
   }
   
   //// Protected Area

@@ -48,9 +48,12 @@ public class Not extends Predicate {
    * @param state the given state
    * @return the result of evaluating the given predicate expressions
    */
-  public boolean evaluate(List arguments, State state) {
+  public Boolean evaluate(List arguments, State state) {
     PredicateExpression predicateExpression = (PredicateExpression) arguments.get(0);
-    return ! predicateExpression.evaluate(state);
+    if (predicateExpression.evaluate(state).equals(Boolean.TRUE))
+      return Boolean.FALSE;
+    else
+      return Boolean.TRUE;
   }
   
   /** Returns a string representation of this predicate given

@@ -35,7 +35,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DirectSensor extends NodeComponent  implements Sensor {
+public abstract class DirectSensor extends NodeComponent  implements Sensor {
   
   //// Constructors
   
@@ -54,6 +54,13 @@ public class DirectSensor extends NodeComponent  implements Sensor {
 
   
   //// Public Area
+  
+  /** Initializes this direct sensor instance with the given
+   * output message channel.
+   *
+   * @param sensoryPerceptionChannel the puttable channel to which messages are output
+   */
+  public abstract void initialize (Puttable sensoryPerceptionChannel);
   
   /** Returns a string representation of this object.
    * 

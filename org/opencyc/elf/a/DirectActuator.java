@@ -54,6 +54,13 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
   
   //// Public Area
   
+  /** Initializes this direct actuator with the given input message channel and
+   * starts the message consumer.
+   *
+   * @param actuatorChannel the takable channel from which messages are input
+   */
+  public abstract void initialize(Takable actuatorChannel);
+
   /** Returns a string representation of this object.
    * 
    * @return a string representation of this object

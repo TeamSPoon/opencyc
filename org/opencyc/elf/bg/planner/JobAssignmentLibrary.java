@@ -11,7 +11,7 @@ import java.util.HashMap;
 /**
  * <P>
  * JobAssignmentLibrary provides a library of non-temporal (e.g. spatial) task decompositions
- * among agents and resources.
+ * among agents and resources.  There is a singleton instance.
  * </p>
  * 
  * @version $Id$
@@ -44,6 +44,16 @@ public class JobAssignmentLibrary {
   
   //// Public Area
   
+
+  /**
+   * Gets the singleton job assignment library instance
+   *
+   * @return the singleton job assignment library instance
+   */
+  public JobAssignmentLibrary getJobAssignmentLibrary () {
+    return jobAssignmentLibrary;
+  }
+
   /**
    * Initializes the job library.
    */
@@ -52,7 +62,7 @@ public class JobAssignmentLibrary {
     JobAssignment jobAssignment = new JobAssignment();
     jobAssignment.setActionName(Action.CONVERSE_WITH_USER);
     ArrayList requiredResources = new ArrayList();
-    requiredResources.add(ResourceFactory.getResource(Resource.CONSOLE));
+    requiredResources.add(ResourcePool.getResource(Resource.CONSOLE));
     jobAssignment.setRequiredResources(requiredResources);
     ActionFactory actionFactory = new ActionFactory();
     Action action = actionFactory.makeConsolePromptedInput();
@@ -74,6 +84,11 @@ public class JobAssignmentLibrary {
   //// Private Area
   
   //// Internal Rep
+  
+  /**
+   * the singleton job assignment library instance
+   */
+  protected static JobAssignmentLibrary jobAssignmentLibrary;
   
   /**
    * the dictionary that associates a given action name with the list of schedules that

@@ -1,3 +1,4 @@
+
 package org.opencyc.chat;
 
 import java.lang.*;
@@ -313,9 +314,9 @@ public class IrcChat extends Thread  implements ChatSender {
 	if ( ViolinStrings.Strings.contains(message,"\n") || ViolinStrings.Strings.contains(message,"\r") )
 	    return sendMessage(destination,new BufferedReader(new StringReader(message)));
 
-	if ( message.length() > 120 ) {
-	    int justify = message.substring(121).indexOf(' ') + 120;
-	    ircSend("privmsg " + destination + " :" + message.substring(0,justify));
+	if ( message.length() > 200 ) {
+	    int justify = message.substring(190).indexOf(' ')+190;
+	    ircSend("privmsg " + destination + " :" + message.substring(0,justify-1));
 	    return sendMessage(destination,message.substring(justify));
 	}
 
@@ -536,6 +537,15 @@ public class IrcChat extends Thread  implements ChatSender {
 	    serviceQuery(from,returnpath, params);
 	    return true;
 	}
+	if ( token.equals("mt") ) {
+	    try {
+		CycConstant mt = cycAccess.makeCycConstant(params);
+		cycAccess.assertIsa(mt,cycAccess.makeCycConstant("#$Microtheory"),cycAccess.baseKB);
+		mtUser.put(from,mt);
+	    } catch ( Exception e ) {
+	    }
+	    return true;
+	}
 	if ( token.equals("prove") ) {
 	    serviceProve(from,returnpath, params);
 	    return true;
@@ -571,7 +581,7 @@ public class IrcChat extends Thread  implements ChatSender {
     public boolean servicePlugin(String from, String hostmask, String returnpath,String token,String params) {
 	return false;
     }
-    
+
     public void startPlugins() {
 	return;
     }
@@ -697,17 +707,25 @@ public class IrcChat extends Thread  implements ChatSender {
     }
 
 
+    public HashMap mtUser = new HashMap();
+
     /**
      * Returns a Mt for a user
      */
     public CycFort mtForUser(String cyclist) {
-	try {
-	    CycConstant mt = cycAccess.makeCycConstant("#$"+cyclist+"ChatMt");
-	    cycAccess.assertIsa(mt,cycAccess.makeCycConstant("Microthery"),cycAccess.baseKB);
-	    return(CycFort)mt;
-	} catch ( Exception e ) {
-	    return cycAccess.baseKB; 
+
+	CycConstant mt = (CycConstant) mtUser.get(cyclist);
+	if ( mt==null ) {
+	    try {
+		mt = cycAccess.makeCycConstant("#$"+cyclist+"ChatMt");
+		cycAccess.assertIsa(mt,cycAccess.makeCycConstant("#$Microtheory"),cycAccess.baseKB);
+	    } catch ( Exception e ) {
+		mt = cycAccess.baseKB; 
+	    }
+	    sendMessage(ircDestination,"Using microtheory" + mt.cyclify() + " for assertions until " + cyclist + " types \"mt <something>\"");
+	    mtUser.put(cyclist,mt);
 	}
+	return(CycFort)mt;
     }
 
 
@@ -741,12 +759,25 @@ public class IrcChat extends Thread  implements ChatSender {
 
     }
 
+    public static CycSymbol SYMBOL_NIL = new CycSymbol("NIL");
+
     /**
      * Sends the Answer message from Cyc to returnpath
      */
     public void sendAnswers(String returnpath, Object results) {
+	if ( results instanceof CycSymbol ) {
+	    if (results.equals(SYMBOL_NIL)) {
+		sendMessage(returnpath,"no answers found");
+		return;
+	    }
+	}
 	if ( results instanceof CycList ) {
 	    CycList answers = (CycList) results;
+	    if ( answers.size()==1 && answers.first().equals(IrcChat.SYMBOL_NIL)) {
+		sendMessage(returnpath,"true sentence");
+		return;
+	    }
+	    
 	    if ( answers.toString().length()>120 ) {
 		if ( answers.size()>50 ) {
 		    sendMessage(returnpath,"Your question returned " + answers.size() + " answers .. please refine. (here are the first five)");
@@ -876,6 +907,7 @@ public class IrcChat extends Thread  implements ChatSender {
 
 
 }
+
 
 
 

@@ -43,7 +43,8 @@ public class CycConnection {
     /**
      * Default base tcp port for the OpenCyc server.
      */
-    public static final int DEFAULT_BASE_PORT = 3600;
+    //public static final int DEFAULT_BASE_PORT = 3600;
+    public static final int DEFAULT_BASE_PORT = 3640;
 
     /**
      * HTTP port offset for the OpenCyc server.

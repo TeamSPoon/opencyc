@@ -42,6 +42,12 @@ public class CycAccess {
     static HashMap cycAccessInstances = new HashMap();
 
     /**
+     * Shared CycAccess instance when thread synchronization is entirely handled by the application. Use of
+     * the CycAccess.current() method returns this reference if the lookup by process thread fails.
+     */
+    static CycAccess sharedCycAccessInstance = null;
+
+    /**
      * Value indicating that the OpenCyc api socket is created and then closed for each api call.
      */
     public static final boolean TRANSIENT_CONNECTION = false;
@@ -72,6 +78,13 @@ public class CycAccess {
     private int port;
     private int communicationMode;
     private static final Integer OK_RESPONSE_CODE = new Integer(200);
+
+    /**
+     * Parameter that, when true, causes a trace of the messages to and from the server. This
+     * variable preserves the value of the CycConnection trace between instantiations when the
+     * connection is transient.
+     */
+    protected int saveTrace = CycConnection.API_TRACE_NONE;
 
     /**
      * Convenient reference to #$BaseKb.
@@ -208,9 +221,22 @@ public class CycAccess {
      */
     public static CycAccess current() {
         CycAccess cycAccess = (CycAccess) cycAccessInstances.get(Thread.currentThread());
-        if (cycAccess == null)
-            throw new RuntimeException("No CycAccess object for this thread");
+        if (cycAccess == null) {
+            if (sharedCycAccessInstance != null)
+                return sharedCycAccessInstance;
+            else
+                throw new RuntimeException("No CycAccess object for this thread");
+            }
         return cycAccess;
+    }
+
+    /**
+     * Sets the shared <tt>CycAccess</tt> instance.
+     *
+     * @param the shared <tt>CycAccess</tt> instance
+     */
+    public static void setSharedCycAccessInstance (CycAccess sharedCycAccessInstance) {
+        CycAccess.sharedCycAccessInstance = sharedCycAccessInstance;
     }
 
 
@@ -219,6 +245,7 @@ public class CycAccess {
      */
     public void traceOn() {
         cycConnection.trace = CycConnection.API_TRACE_MESSAGES;
+        saveTrace = cycConnection.trace;
     }
 
     /**
@@ -226,6 +253,7 @@ public class CycAccess {
      */
     public void traceOnDetailed() {
         cycConnection.trace = CycConnection.API_TRACE_DETAILED;
+        saveTrace = cycConnection.trace;
     }
 
     /**
@@ -233,6 +261,7 @@ public class CycAccess {
      */
     public void traceOff() {
         cycConnection.trace = CycConnection.API_TRACE_NONE;
+        saveTrace = cycConnection.trace;
     }
 
     /**
@@ -261,11 +290,15 @@ public class CycAccess {
      */
     private Object [] converse(Object command)  throws IOException, UnknownHostException {
         Object [] response = {null, null};
-        if (! persistentConnection)
+        if (! persistentConnection) {
             cycConnection = new CycConnection(hostName, port, communicationMode, this);
+            cycConnection.trace = saveTrace;
+        }
         response = cycConnection.converse(command);
-        if (! persistentConnection)
+        if (! persistentConnection) {
+            saveTrace = cycConnection.trace;
             cycConnection.close();
+        }
         return response;
     }
 
@@ -1837,7 +1870,7 @@ public class CycAccess {
             mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules formula) ");
             command.append("  (with-all-mts ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
             command.append("       (csetq formula (assertion-el-formula rule)) ");
             command.append("       (pwhen (cand (eq (first formula) #$implies) ");
             command.append("                    (unify-el-possible '" + formula.stringApiValue() + " ");
@@ -1848,7 +1881,7 @@ public class CycAccess {
         else {
             command.append("(clet (backchain-rules formula) ");
             command.append("  (with-mt " + mt.stringApiValue() + " ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
             command.append("       (csetq formula (assertion-el-formula rule)) ");
             command.append("       (pwhen (cand (eq (first formula) #$implies) ");
             command.append("                    (unify-el-possible '" + formula.stringApiValue() + " ");
@@ -1877,7 +1910,7 @@ public class CycAccess {
             mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules formula) ");
             command.append("  (with-all-mts ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
             command.append("       (csetq formula (assertion-el-formula rule)) ");
             command.append("       (pwhen (cand (eq (first formula) #$implies) ");
             command.append("                    (unify-el-possible '" + formula.stringApiValue() + " ");
@@ -1888,7 +1921,7 @@ public class CycAccess {
         else {
             command.append("(clet (backchain-rules formula) ");
             command.append("  (with-mt " + mt.stringApiValue() + " ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
             command.append("       (csetq formula (assertion-el-formula rule)) ");
             command.append("       (pwhen (cand (eq (first formula) #$implies) ");
             command.append("                    (unify-el-possible '" + formula.stringApiValue() + " ");
@@ -1915,7 +1948,10 @@ public class CycAccess {
             mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules) ");
             command.append("  (with-all-mts ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " ");
+            command.append("                                :sense :pos ");
+            command.append("                                :done nil ");
+            command.append("                                :direction :backward) ");
             command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
             command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
             command.append("   backchain-rules)");
@@ -1923,7 +1959,10 @@ public class CycAccess {
         else {
             command.append("(clet (backchain-rules) ");
             command.append("  (with-mt " + mt.stringApiValue() + " ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :backward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " ");
+            command.append("                                :sense :pos ");
+            command.append("                                :done nil ");
+            command.append("                                :direction :backward) ");
             command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
             command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
             command.append("   backchain-rules)");
@@ -1948,7 +1987,10 @@ public class CycAccess {
             mt.equals(everythingPsc)) {
             command.append("(clet (backchain-rules) ");
             command.append("  (with-all-mts ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " ");
+            command.append("                                :sense :pos ");
+            command.append("                                :done nil ");
+            command.append("                                :direction :forward) ");
             command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
             command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
             command.append("   backchain-rules)");
@@ -1956,7 +1998,10 @@ public class CycAccess {
         else {
             command.append("(clet (backchain-rules) ");
             command.append("  (with-mt " + mt.stringApiValue() + " ");
-            command.append("    (do-rule-index (rule " + predicate.stringApiValue() + " :pos nil :forward) ");
+            command.append("    (do-predicate-rule-index (rule " + predicate.stringApiValue() + " ");
+            command.append("                                :sense :pos ");
+            command.append("                                :done nil ");
+            command.append("                                :direction :forward) ");
             command.append("       (pwhen (eq (first (assertion-el-formula rule)) #$implies) ");
             command.append("         (cpush (assertion-el-formula rule) backchain-rules)))) ");
             command.append("   backchain-rules)");

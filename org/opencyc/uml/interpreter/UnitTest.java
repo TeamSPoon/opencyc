@@ -5,6 +5,8 @@ import java.io.*;
 import junit.framework.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.parser.wrapper.*;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.action.*;
 import org.opencyc.uml.commonbehavior.*;
@@ -53,6 +55,7 @@ public class UnitTest extends TestCase {
         TestSuite testSuite = new TestSuite();
         testSuite.addTest(new UnitTest("testExpressionEvaluation"));
         testSuite.addTest(new UnitTest("testSimpleStateMachine"));
+        testSuite.addTest(new UnitTest("testCycExtractor"));
         return testSuite;
     }
 
@@ -544,6 +547,25 @@ public class UnitTest extends TestCase {
             System.out.print(interpreter.displayStateConfigurationTree());
 
         System.out.println("\n**** testSimpleStateMachine ****");
+    }
+
+    /**
+     * Tests simple state machine extraction from Cyc.
+     */
+    public void testCycExtractor () {
+        System.out.println("\n**** testCycExtractor ****");
+
+        try {
+            CycAccess cycAccess = new CycAccess();
+            CycExtractor cycExtractor = new CycExtractor(cycAccess);
+            StateMachine stateMachine = cycExtractor.extract("UMLStateMachine-Test01");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+
+        System.out.println("\n**** testCycExtractor ****");
     }
 
 

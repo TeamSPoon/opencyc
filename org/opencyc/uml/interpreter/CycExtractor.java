@@ -35,6 +35,16 @@ import org.opencyc.uml.statemachine.*;
 public class CycExtractor {
 
     /**
+     * the name of the relevant inference microtheory
+     */
+    public static final String mtName = "UMLStateMachineSpindleCollectorMt";
+
+    /**
+     * the relevant inference microtheory
+     */
+    protected CycFort mt;
+
+    /**
      * the CycAccess object which manages the Cyc server connection
      */
     protected CycAccess cycAccess;
@@ -43,12 +53,6 @@ public class CycExtractor {
      * the state machine factory
      */
     protected StateMachineFactory stateMachineFactory;
-
-    /**
-     * the relevant inference microtheory
-     */
-    protected CycFort mt;
-
 
     /**
      * the state machine term
@@ -74,7 +78,7 @@ public class CycExtractor {
      */
     public StateMachine extract (String name)
         throws IOException, CycApiException {
-        mt = cycAccess.getKnownConstantByName("UMLStateMachineSpindleCollectorMt");
+        mt = cycAccess.getKnownConstantByName(mtName);
         StateMachine stateMachine = extractStateMachine(name);
 
         return stateMachine;
@@ -83,19 +87,23 @@ public class CycExtractor {
     /**
      * Extracts the state machine from Cyc.
      *
-     * @param name the name of the state machine to be extracted from Cyc
+     * @param stateMachineName the name of the state machine to be extracted from Cyc
      */
-    protected StateMachine extractStateMachine (String name)
+    protected StateMachine extractStateMachine (String stateMachineName)
             throws IOException, CycApiException {
-        stateMachineTerm = cycAccess.getConstantByName(name);
-        String namespaceName = "";
-
-        String commentString = "";
-
-        Object context = "";
-
+        stateMachineTerm = cycAccess.getConstantByName(stateMachineName);
+        CycConstant namespaceTerm =
+            (CycConstant) cycAccess.getArg2ForPredArg1("umlNamespaceLink",
+                                                       stateMachineName,
+                                                       mtName);
+        String namespaceName =
+            (String) cycAccess.getArg2ForPredArg1(cycAccess.getKnownConstantByName("umlName"),
+                                                  namespaceTerm,
+                                                  mt);
+        String commentString = cycAccess.getComment(stateMachineTerm);
+        Object context = this;
         return stateMachineFactory.makeStateMachine(namespaceName,
-                                                    name,
+                                                    stateMachineName,
                                                     commentString,
                                                     context);
     }

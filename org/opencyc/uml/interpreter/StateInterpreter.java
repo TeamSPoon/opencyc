@@ -118,7 +118,7 @@ public class StateInterpreter extends Thread {
     protected void enterState (State stateToEnter) {
         stateToEnter.setIsActive(true);
         if (stateToEnter.getEntry() != null)
-            new ActionInterpreter(stateToEnter.getEntry());
+            new ProcedureInterpreter(stateToEnter.getEntry());
         if (stateToEnter.getDoActivity() != null)
             new DoActivity(stateToEnter);
     }
@@ -157,7 +157,7 @@ public class StateInterpreter extends Thread {
         DoActivity doActivityThread = stateToExit.getDoActivityThread();
         doActivityThread.terminate();
         if (stateToExit.getExit() != null)
-            new ActionInterpreter(state.getExit());
+            new ProcedureInterpreter(state.getExit());
         CompletionEvent completionEvent = new CompletionEvent(stateToExit);
         interpreter.enqueueEvent(completionEvent);
     }

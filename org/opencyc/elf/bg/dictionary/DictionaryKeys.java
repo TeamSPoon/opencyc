@@ -40,10 +40,14 @@ import java.util.List;
  */
 public class DictionaryKeys extends Operator {
   
+  //// Constructors
+  
   /** Creates a new instance of DictionaryKeys */
   public DictionaryKeys() {
     super();
   }
+  
+  //// Public Area
   
   /** Returns the list of keys contained in the given dictionary.
    *
@@ -74,5 +78,13 @@ public class DictionaryKeys extends Operator {
     stringBuffer.append(")");
     return stringBuffer.toString();
   }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
   
 }

@@ -1,4 +1,5 @@
 package org.opencyc.elf.bg.dictionary;
+
 //// Internal Imports
 import org.opencyc.cycobject.CycList;
 
@@ -33,13 +34,16 @@ import java.util.List;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 public class TheEmptyDictionary extends Operator {
+  
+  //// Constructors
   
   /** Creates a new instance of TheEmptyDictionary */
   public TheEmptyDictionary() {
     super();
   }
+  
+  //// Public Area
   
   /** Returns the empty dictionary.
    *
@@ -60,5 +64,12 @@ public class TheEmptyDictionary extends Operator {
     return "(the-empty-dictionary)";
   }
   
+  //// Protected Area
   
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
+    
 }

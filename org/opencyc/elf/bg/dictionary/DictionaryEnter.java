@@ -14,8 +14,8 @@ import java.util.Hashtable;
 import java.util.List;
 
 /** DictionaryEnter is an arity three operator.  The first argument is the key object, the
- * second argument is the value object, and the third argument is the dictionary object which
- * is returned as the result of this operation.
+ * second argument is the value object, and the third argument is the dictionary object. The
+ * evaluated key is returned.
  *
  * @version $Id$
  * @author  reed
@@ -40,15 +40,21 @@ import java.util.List;
  */
 public class DictionaryEnter extends Operator {
   
+  //// Constructors
+  
   /** Creates a new instance of DictionaryEnter */
   public DictionaryEnter() {
+    super();
   }
   
-  /** Evaluates the given arguments within the given state and returns the dictionary
-   * after adding the key/value pair.
+  //// Public Area
+  
+  /** Evaluates the given arguments within the given state and adds the key/value pair
+   * to the dictionary.  The evaluated key is returned.
    *
    * @param arguments the given arguments to evaluate (key, value, dictionary)
    * @param state the given state
+   * @return the evaluated key
    */
   public Object evaluate(List arguments, State state) {
     if (arguments.size() != 3)
@@ -57,7 +63,7 @@ public class DictionaryEnter extends Operator {
     Object value = evaluateArgument(arguments.get(1), state);
     Hashtable dictionary = (Hashtable) evaluateArgument(arguments.get(2), state);
     dictionary.put(key, value);
-    return dictionary;
+    return key;
   }
   
   /** Returns a string representation of this operator given
@@ -75,7 +81,7 @@ public class DictionaryEnter extends Operator {
       stringBuffer.append(obj);
       stringBuffer.append('"');
     }
-    if (obj instanceof CycList)
+    else if (obj instanceof CycList)
       stringBuffer.append(((CycList)obj).cyclify());
     else
       stringBuffer.append(obj.toString());
@@ -86,7 +92,7 @@ public class DictionaryEnter extends Operator {
       stringBuffer.append(obj);
       stringBuffer.append('"');
     }
-    if (obj instanceof CycList)
+    else if (obj instanceof CycList)
       stringBuffer.append(((CycList)obj).cyclify());
     else
       stringBuffer.append(obj.toString());
@@ -95,5 +101,13 @@ public class DictionaryEnter extends Operator {
     stringBuffer.append(")");
     return stringBuffer.toString();
   }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
   
 }

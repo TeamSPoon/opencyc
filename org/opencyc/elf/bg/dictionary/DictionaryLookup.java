@@ -40,15 +40,20 @@ import java.util.List;
  */
 public class DictionaryLookup extends Operator {
   
+  //// Constructors
+  
   /** Creates a new instance of DictionaryLookup */
   public DictionaryLookup() {
     super();
   }
   
+  //// Public Area
+  
   /** Returns the value associated with the given key in the given dictionary.
    *
    * @param arguments the given arguments to evaluate (key, dictionary)
    * @param state the given state
+   * @return the value associated with the given key in the given dictionary
    */
   public Object evaluate(List arguments, State state) {
     if (arguments.size() != 2)
@@ -58,8 +63,7 @@ public class DictionaryLookup extends Operator {
     return dictionary.get(key);
   }
   
-  /** Returns a string representation of this operator given
-   * the arguments.
+  /** Returns a string representation of this operator given the arguments.
    *
    * @param arguments the given arguments to evaluate
    * @return a string representation of this object
@@ -82,5 +86,13 @@ public class DictionaryLookup extends Operator {
     stringBuffer.append(")");
     return stringBuffer.toString();
   }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
   
 }

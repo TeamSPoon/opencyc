@@ -40,10 +40,14 @@ import java.util.List;
  */
 public class DictionaryRemove extends Operator {
   
+  //// Constructors
+  
   /** Creates a new instance of DictionaryRemove */
   public DictionaryRemove() {
     super();
   }
+  
+  //// Public Area
   
   /** Evaluates the given arguments within the given state and returns the dictionary
    * after adding the key/value pair.
@@ -84,5 +88,13 @@ public class DictionaryRemove extends Operator {
     stringBuffer.append(")");
     return stringBuffer.toString();
   }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  //// Main
   
 }

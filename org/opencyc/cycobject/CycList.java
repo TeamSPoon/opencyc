@@ -11,7 +11,7 @@ import org.opencyc.util.*;
  * @version $0.1$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>

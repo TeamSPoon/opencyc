@@ -11,7 +11,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -63,7 +63,7 @@ public class ProblemParser {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 
@@ -73,7 +73,7 @@ public class ProblemParser {
      * domains, and those which subsequently constrain the search for
      * one or more solutions.
      */
-    protected void extractRulesAndDomains() {
+    public void extractRulesAndDomains() {
         constraintProblem.simplifiedRules = Rule.simplifyRuleExpression(constraintProblem.problem);
         for (int i = 0; i < constraintProblem.simplifiedRules.size(); i++) {
             Rule rule = (Rule) constraintProblem.simplifiedRules.get(i);
@@ -90,7 +90,7 @@ public class ProblemParser {
     /**
      * Gathers the unique variables used in this constraint problem.
      */
-    protected void gatherVariables() {
+    public void gatherVariables() {
         HashSet uniqueVariables = new HashSet();
         for (int i = 0; i < constraintProblem.simplifiedRules.size(); i++) {
             Rule rule = (Rule) constraintProblem.simplifiedRules.get(i);
@@ -102,7 +102,7 @@ public class ProblemParser {
     /**
      * Initializes the value domains for each variable.
      */
-    protected void initializeDomains() {
+    public void initializeDomains() {
         for (int i = 0; i < constraintProblem.domainPopulationRules.size(); i++) {
             Rule rule = (Rule) constraintProblem.domainPopulationRules.get(i);
             //TODO handle high cardinality domains.

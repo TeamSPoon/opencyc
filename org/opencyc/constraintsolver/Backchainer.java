@@ -17,7 +17,7 @@ import org.opencyc.cycobject.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -49,9 +49,14 @@ public class Backchainer {
     protected ConstraintProblem constraintProblem;
 
     /**
+     * <tt>Unifier</tt> for this <tt>Backchainer</tt>.
+     */
+    protected Unifier unifier = new Unifier(this);
+
+    /**
      * Maximum depth of backchaining from an input constraint rule.
      */
-    int maxBackchainDepth = 6;
+    protected int maxBackchainDepth = 6;
 
     /**
      * Constructs a new <tt>Backchainer</tt> object given the parent <tt>ConstraintProblem</tt>
@@ -64,11 +69,60 @@ public class Backchainer {
     }
 
     /**
+     * Performs backchaining inference to augment the input constraint domain-populating
+     * constraint rule set.
      *
+     * @param domainPopulationRules collection of the rules which populate variable domains
+     * @return the augmented input constraint domain-populating constraint rule set
      */
+    public ArrayList backchain(ArrayList domainPopulationRules) {
+        ArrayList result = new ArrayList();
+        for (int i = 0; i < domainPopulationRules.size(); i++) {
+            Rule domainPopulationRule = (Rule) domainPopulationRules.get(i);
+            result.addAll(backchain(domainPopulationRule));
+        }
+        return result;
+    }
+
+    /**
+     * Returns the implication rules which can prove the given rule.
+     *
+     * @param rule a rule is to be proven via backchaining
+     * @return the implication rules which can prove the given rule
+     */
+    public ArrayList backchain(Rule rule) {
+        ArrayList result = new ArrayList();
+        int backchainDepth = rule.getBackchainDepth();
+        if (backchainDepth >= this.maxBackchainDepth) {
+            if (verbosity > 3)
+                System.out.println("backchaining limit reached for\n" + rule);
+            return result;
+        }
+        int newBackchainDepth = backchainDepth + 1;
+        if (verbosity > 3)
+            System.out.println("backchaining on\n" + rule);
+
+        ArrayList candidateImplicationRules = gatherRulesConcluding(rule);
+
+        // TODO implement rule filtering
 
 
+        return result;
+    }
 
+    /**
+     * Gathers the implication rules which conclude the given rule.
+     *
+     * @param rule the rule to be proven via backchaining
+     * @return the implication rules which coonclde the given rule
+     */
+    public ArrayList gatherRulesConcluding(Rule rule) {
+        ArrayList result = new ArrayList();
+
+        //TODO implement
+
+        return result;
+    }
 
 
 
@@ -82,7 +136,8 @@ public class Backchainer {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
+        unifier.setVerbosity(verbosity);
     }
 }

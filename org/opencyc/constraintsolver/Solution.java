@@ -10,7 +10,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -73,7 +73,7 @@ public class Solution {
      *
      * @param binding the variable / value binding to be added
      */
-    protected void addBindingToCurrentSolution(Binding binding) {
+    public void addBindingToCurrentSolution(Binding binding) {
         getCurrentSolution().add(binding);
     }
 
@@ -82,7 +82,7 @@ public class Solution {
      *
      * @param binding the variable / value binding to be removed
      */
-    protected void removeBindingFromCurrentSolution(Binding binding) {
+    public void removeBindingFromCurrentSolution(Binding binding) {
         getCurrentSolution().remove(binding);
     }
 
@@ -93,7 +93,7 @@ public class Solution {
      * @param the new solution <tt>ArrayList</tt> of <tt>Binding</tt> objects
      * to be added to the solution set
      */
-    protected void addSolution(ArrayList solution) {
+    public void addSolution(ArrayList solution) {
         solutions.add(solution);
     }
 
@@ -102,7 +102,7 @@ public class Solution {
      *
      * @return the current solution
      */
-    protected ArrayList getCurrentSolution() {
+    public ArrayList getCurrentSolution() {
         return (ArrayList) solutions.get(solutions.size() - 1);
     }
 
@@ -112,7 +112,7 @@ public class Solution {
      * @return the <tt>ArrayList</tt> of solutions, each solution is an <tt>ArrayList</tt>
      * of <tt>Binding</tt> objects
      */
-    protected ArrayList getSolutions() {
+    public ArrayList getSolutions() {
         return solutions;
     }
 
@@ -124,7 +124,7 @@ public class Solution {
      * @param binding the variable / value binding, which is not to be included in the
      * new partial solution
      */
-    protected void recordNewSolution(Binding binding) {
+    public void recordNewSolution(Binding binding) {
         ArrayList currentSolution = getCurrentSolution();
         ArrayList partialSolution = new ArrayList();
         for (int i = 0; i < currentSolution.size(); i++) {
@@ -138,7 +138,7 @@ public class Solution {
     /**
      * Displays the bindings in a given solution to the constraint problem.
      */
-    protected void displaySolution(ArrayList solution) {
+    public void displaySolution(ArrayList solution) {
         System.out.println("Variables and solution value:");
         ArrayList orderedSolution = (ArrayList) solution.clone();
         Collections.sort(orderedSolution);
@@ -149,7 +149,7 @@ public class Solution {
     /**
      * Displays the bindings in all solutions to the constraint problem.
      */
-    protected void displaySolutions() {
+    public void displaySolutions() {
         for (int i = 0; i < solutions.size(); i++) {
             displaySolution((ArrayList) solutions.get(i));
             System.out.println();
@@ -160,7 +160,7 @@ public class Solution {
      * Removes the current empty solution in the special case where all solutions
      * were requested and where all solutions were found.
      */
-    protected void finalizeAllSolutions() {
+    public void finalizeAllSolutions() {
         if (this.constraintProblem.nbrSolutionsRequested == null &&
             this.nbrSolutionsFound > 0)
             solutions.remove(solutions.size() - 1);
@@ -172,7 +172,7 @@ public class Solution {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 

@@ -9,7 +9,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -207,6 +207,19 @@ public class UnitTest extends TestCase {
         variables.add(CycVariable.makeCycVariable("?x"));
         Collections.sort(variables);
         Assert.assertEquals("[X, Y, Z, x, y, z]", variables.toString());
+
+        // makeUniqueCycVariable
+        CycVariable x = CycVariable.makeCycVariable("x");
+        CycVariable x1 = CycVariable.makeUniqueCycVariable(x);
+        CycVariable x2 = CycVariable.makeUniqueCycVariable(x);
+        CycVariable x3 = CycVariable.makeUniqueCycVariable(x);
+        Assert.assertTrue(! (x.equals(x1)));
+        Assert.assertTrue(! (x.equals(x2)));
+        Assert.assertTrue(! (x.equals(x3)));
+        Assert.assertTrue(! (x1.equals(x2)));
+        Assert.assertTrue(x.cyclify().equals("?x"));
+        Assert.assertTrue(x1.cyclify().startsWith("?x_"));
+        Assert.assertTrue(x3.cyclify().startsWith("?x_"));
 
         System.out.println("** testCycVariable OK **");
     }

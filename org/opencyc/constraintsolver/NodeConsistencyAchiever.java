@@ -12,7 +12,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -85,7 +85,7 @@ public class NodeConsistencyAchiever {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 
@@ -93,7 +93,7 @@ public class NodeConsistencyAchiever {
      * Apply the unary constraint rules to restrict domain values and subsequently
      * propagate the effects through any #$different constraint rules.
      */
-    protected void applyUnaryRulesAndPropagate() {
+    public void applyUnaryRulesAndPropagate() {
         CycVariable affectedVariable;
         ArrayList inputDomainValues;
         ArrayList outputDomainValues;

@@ -12,7 +12,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -63,7 +63,7 @@ public class HighCardinalityDomains {
     /**
      * Constructs a new <tt>HighCardinalityDomains</tt> object.
      */
-    protected HighCardinalityDomains() {
+    public HighCardinalityDomains() {
     }
 
     /**
@@ -73,7 +73,7 @@ public class HighCardinalityDomains {
      *
      * @param cycVariable the variable under consideration
      */
-    protected void initialize(CycVariable cycVariable) {
+    public void initialize(CycVariable cycVariable) {
         Object[] item = {null, null};
         highCardinalityDomains.put(cycVariable, item);
     }
@@ -89,7 +89,7 @@ public class HighCardinalityDomains {
      * domain population rule, and this variables domain is too large for efficient
      * processing
      */
-    protected boolean contains(CycVariable cycVariable) {
+    public boolean contains(CycVariable cycVariable) {
         boolean answer = highCardinalityDomains.containsKey(cycVariable);
         if (verbosity > 8)
             System.out.println("\nhigh cardinality domain for " + cycVariable + " --> " + answer);
@@ -102,7 +102,7 @@ public class HighCardinalityDomains {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 
@@ -115,7 +115,7 @@ public class HighCardinalityDomains {
      * @return <tt>true</tt> iff the given <tt>Rule</tt> was used to populate the domain
      * of the given high cardinality variable
      */
-    protected boolean isPopulatingRule(Rule rule, CycVariable cycVariable) {
+    public boolean isPopulatingRule(Rule rule, CycVariable cycVariable) {
         return rule.equals(getPopulatingRule(cycVariable));
     }
 
@@ -125,7 +125,7 @@ public class HighCardinalityDomains {
      * @param cycVariable the high cardinality variable under consideration
      * @param size the new domain size of the high cardinality variable
      */
-    protected void setDomainSize(CycVariable cycVariable, Integer size) {
+    public void setDomainSize(CycVariable cycVariable, Integer size) {
         if (! contains(cycVariable))
             this.initialize(cycVariable);
         Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
@@ -141,7 +141,7 @@ public class HighCardinalityDomains {
      * @param cycVariable the variable under consideration
      * @return <tt>int</tt> the domain size of the high cardinality variable
      */
-    protected int getDomainSize(CycVariable cycVariable) {
+    public int getDomainSize(CycVariable cycVariable) {
         Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
         return ((Integer) item[0]).intValue();
     }
@@ -152,7 +152,7 @@ public class HighCardinalityDomains {
      * @param cycVariable the high-cardinality variable under consideration
      * @parma rule the domain-populating rule
      */
-    protected void setPopulatingRule(CycVariable cycVariable, Rule rule) {
+    public void setPopulatingRule(CycVariable cycVariable, Rule rule) {
         if (! contains(cycVariable))
             this.initialize(cycVariable);
         Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
@@ -168,7 +168,7 @@ public class HighCardinalityDomains {
      * @param cycVariable the variable under consideration
      * @return the domain-populating <tt>Rule</tt> of the high cardinality variable
      */
-    protected Rule getPopulatingRule(CycVariable cycVariable) {
+    public Rule getPopulatingRule(CycVariable cycVariable) {
         Object[] item = (Object[]) highCardinalityDomains.get(cycVariable);
         return (Rule) item[1];
     }

@@ -12,7 +12,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -78,6 +78,11 @@ public class ForwardCheckingSearcher {
     protected static final int ASK_ALL_OR_INDIV_THRESHOLD = 10;
 
     /**
+     * Number of search steps performed during the search for solution(s).
+     */
+    protected int nbrSteps = 0;
+
+    /**
      * Constructs a new <tt>FowardCheckingSearcher</tt> object.
      *
      * @param constraintProblem the parent constraint problem
@@ -93,18 +98,12 @@ public class ForwardCheckingSearcher {
     }
 
     /**
-     * Number of search steps performed during the search for solution(s).
-     */
-    protected int nbrSteps = 0;
-
-
-    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 
@@ -116,7 +115,7 @@ public class ForwardCheckingSearcher {
      * @param level is the current depth of the search
      * @return <tt>true</tt> when done with the search
      */
-    protected boolean search(ArrayList variables, int level) {
+    public boolean search(ArrayList variables, int level) {
         CycVariable selectedVariable = selectVariable(variables);
         ArrayList remainingDomain = valueDomains.getUnmarkedDomainValues(selectedVariable);
         ArrayList remainingVariables = (ArrayList) variables.clone();

@@ -11,7 +11,7 @@ import org.opencyc.cycobject.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -46,6 +46,7 @@ public class UnitTest extends TestCase {
         TestSuite testSuite = new TestSuite(UnitTest.class);
         //testSuite.addTest(new UnitTest("testHelloWorld"));
         //testSuite.addTest(new UnitTest("testRule"));
+        //testSuite.addTest(new UnitTest("testHornClause"));
         //testSuite.addTest(new UnitTest("testBinding"));
         //testSuite.addTest(new UnitTest("testSolution"));
         //testSuite.addTest(new UnitTest("testRuleEvaluator"));
@@ -189,6 +190,16 @@ public class UnitTest extends TestCase {
                                         "       (#$numericallyEqual 4 (#$PlusFn 7)))");
         Assert.assertTrue(! Rule.evaluateConstraintRule(cycList21));
 
+        // substituteVariable
+        Rule rule22 = new Rule("(#$isa ?x #$Cathedral)");
+        rule22.substituteVariable(CycVariable.makeCycVariable("?x"),
+                                  CycVariable.makeCycVariable("?cathedral"));
+        Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", rule22.cyclify());
+        Rule rule23 = new Rule("(#$isa ?x #$Cathedral)");
+        rule23.substituteVariable(CycVariable.makeCycVariable("?x"),
+                                  CycConstant.makeCycConstant("NotreDameCathedral"));
+        Assert.assertEquals("(#$isa #$NotreDameCathedral #$Cathedral)", rule23.cyclify());
+
         //Zebra Puzzle rules
         String zebraPuzzleString =
             "(#$and " +
@@ -258,6 +269,177 @@ public class UnitTest extends TestCase {
         }
         printWriter.close();
         System.out.println("** Rule OK **");
+    }
+
+    /**
+     * Tests the <tt>HornClause</tt> class.
+     */
+    public void testHornClause() {
+        System.out.println("** testHornClause **");
+
+        // constructor
+        String hornClauseString =
+            "(#$implies " +
+            "  (#$and " +
+            "    (#$isa ?boat #$Boat) " +
+            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+            "    (#$floatingOn ?boat ?bodyOfWater)) " +
+            "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+        HornClause hornClause1 = new HornClause(hornClauseString);
+        Assert.assertEquals("(#$objectFoundInLocation ?boat ?bodyOfWater)",
+                            hornClause1.consequent.cyclify());
+        Assert.assertEquals(3, hornClause1.getAntecedantConjuncts().size());
+        Assert.assertEquals(2, hornClause1.getVariables().size());
+        Assert.assertTrue(
+            hornClause1.getVariables().contains(CycVariable.makeCycVariable("?boat")));
+        Assert.assertTrue(
+            hornClause1.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+        Assert.assertTrue(
+            hornClause1.getAntecedantConjuncts().contains(
+                new Rule("(#$isa ?boat #$Boat)")));
+        Assert.assertTrue(
+            hornClause1.getAntecedantConjuncts().contains(
+                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
+        Assert.assertTrue(
+            hornClause1.getAntecedantConjuncts().contains(
+                new Rule("(#$floatingOn ?boat ?bodyOfWater)")));
+
+        // clone()
+        HornClause hornClause2 = (HornClause) hornClause1.clone();
+        Assert.assertEquals(hornClause1.toString(), hornClause2.toString());
+        Assert.assertEquals(hornClause1.cyclify(), hornClause2.cyclify());
+        Assert.assertEquals(hornClause1, hornClause2);
+        Assert.assertTrue(hornClause1 != hornClause2);
+
+        // substituteVariable
+        HornClause hornClause3 = (HornClause) hornClause1.clone();
+        hornClause3.substituteVariable(
+            CycVariable.makeCycVariable("?boat"),
+            CycVariable.makeCycVariable("?waterCraft"));
+        Assert.assertTrue(
+            ! (hornClause3.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
+        Assert.assertTrue(
+            hornClause3.getVariables().contains(CycVariable.makeCycVariable("?waterCraft")));
+        Assert.assertEquals(3, hornClause3.getAntecedantConjuncts().size());
+        Assert.assertEquals(2, hornClause3.getVariables().size());
+        Assert.assertTrue(
+            hornClause3.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+        Assert.assertTrue(
+            hornClause3.getAntecedantConjuncts().contains(
+                new Rule("(#$isa ?waterCraft #$Boat)")));
+        Assert.assertTrue(
+            hornClause3.getAntecedantConjuncts().contains(
+                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
+        Assert.assertTrue(
+            hornClause3.getAntecedantConjuncts().contains(
+                new Rule("(#$floatingOn ?waterCraft ?bodyOfWater)")));
+
+        HornClause hornClause4 = (HornClause) hornClause1.clone();
+        hornClause4.substituteVariable(
+            CycVariable.makeCycVariable("?boat"),
+            CycConstant.makeCycConstant("#$MyWaterCraft"));
+        Assert.assertTrue(
+            ! (hornClause4.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
+        Assert.assertEquals(3, hornClause4.getAntecedantConjuncts().size());
+        Assert.assertEquals(1, hornClause4.getVariables().size());
+        Assert.assertTrue(
+            hornClause4.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+        Assert.assertTrue(
+            hornClause4.getAntecedantConjuncts().contains(
+                new Rule("(#$isa #$MyWaterCraft #$Boat)")));
+        Assert.assertTrue(
+            hornClause4.getAntecedantConjuncts().contains(
+                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
+        Assert.assertTrue(
+            hornClause4.getAntecedantConjuncts().contains(
+                new Rule("(#$floatingOn #$MyWaterCraft ?bodyOfWater)")));
+
+
+        // renameVariables
+        HornClause hornClause5 = (HornClause) hornClause1.clone();
+        ArrayList otherVariables = new ArrayList();
+        Assert.assertTrue(hornClause5.equals(hornClause1));
+        hornClause5.renameVariables(otherVariables, 9);
+        Assert.assertTrue(hornClause5.equals(hornClause1));
+
+        otherVariables.add(CycVariable.makeCycVariable("?animal"));
+        hornClause5.renameVariables(otherVariables, 9);
+        Assert.assertTrue(hornClause5.equals(hornClause1));
+
+        otherVariables.add(CycVariable.makeCycVariable("?boat"));
+        hornClause5.renameVariables(otherVariables, 9);
+        Assert.assertEquals("(#$objectFoundInLocation ?boat_1 ?bodyOfWater)",
+                            hornClause5.consequent.cyclify());
+        Assert.assertEquals(3, hornClause5.getAntecedantConjuncts().size());
+        Assert.assertEquals(2, hornClause5.getVariables().size());
+        Assert.assertTrue(
+            ! (hornClause5.getVariables().contains(CycVariable.makeCycVariable("?boat"))));
+        Assert.assertTrue(
+            hornClause5.getVariables().contains(CycVariable.makeCycVariable("?bodyOfWater")));
+        Assert.assertTrue(
+            ! (hornClause5.getAntecedantConjuncts().contains(
+                new Rule("(#$isa ?boat #$Boat)"))));
+        Assert.assertTrue(
+            hornClause5.getAntecedantConjuncts().contains(
+                new Rule("(#$isa ?bodyOfWater #$BodyOfWater)")));
+        Assert.assertTrue(
+            ! (hornClause5.getAntecedantConjuncts().contains(
+                new Rule("(#$floatingOn ?boat ?bodyOfWater)"))));
+
+        System.out.println("** testHornClause OK **");
+    }
+
+    /**
+     * Tests the <tt>Unifier</tt> class.
+     */
+    public void testUnifier() {
+        System.out.println("** testUnifier **");
+
+        ConstraintProblem constraintProblem = new ConstraintProblem();
+        Unifier unifier = constraintProblem.backchainer.unifier;
+
+        // unify
+        Rule rule1 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)");
+        String hornClauseString =
+            "(#$implies " +
+            "  (#$and " +
+            "    (#$isa ?boat #$Boat) " +
+            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+            "    (#$floatingOn ?boat ?bodyOfWater)) " +
+            "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+        HornClause hornClause1 = new HornClause(hornClauseString);
+        ArrayList unifiedConjuncts = unifier.unify(rule1, hornClause1);
+        Assert.assertEquals(3, unifiedConjuncts.size());
+        Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa #$CityOfAustinTX #$Boat)")));
+        Assert.assertTrue(unifiedConjuncts.contains(new Rule("(#$isa ?where #$BodyOfWater)")));
+        Assert.assertTrue(unifiedConjuncts.contains(
+            new Rule("(#$floatingOn #$CityOfAustinTX ?where)")));
+
+        Rule rule2 = new Rule("(#$doneBy #$CityOfAustinTX ?what)");
+        String hornClauseString2 =
+            "(#$implies " +
+            "  (#$and " +
+            "    (#$isa ?boat #$Boat) " +
+            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+            "    (#$floatingOn ?boat ?bodyOfWater)) " +
+            "  (#$objectFoundInLocation ?boat ?bodyOfWater))";
+        HornClause hornClause2 = new HornClause(hornClauseString2);
+        ArrayList unifiedConjuncts2 = unifier.unify(rule2, hornClause2);
+        Assert.assertNull(unifiedConjuncts2);
+
+        Rule rule3 = new Rule("(#$objectFoundInLocation #$CityOfAustinTX ?where)");
+        String hornClauseString3 =
+            "(#$implies " +
+            "  (#$and " +
+            "    (#$isa ?boat #$Boat) " +
+            "    (#$isa ?bodyOfWater #$BodyOfWater) " +
+            "    (#$floatingOn ?boat ?bodyOfWater)) " +
+            "  (#$objectFoundInLocation #$CityOfHoustonTX ?bodyOfWater))";
+        HornClause hornClause3 = new HornClause(hornClauseString3);
+        ArrayList unifiedConjuncts3 = unifier.unify(rule3, hornClause3);
+        Assert.assertNull(unifiedConjuncts2);
+
+        System.out.println("** testUnifier OK **");
     }
 
     /**

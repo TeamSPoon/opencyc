@@ -9,7 +9,7 @@ import org.apache.oro.util.*;
  * @version $0.1$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -41,11 +41,31 @@ public class CycVariable implements Comparable {
     protected String variableName;
 
     /**
+     * A variable name suffix used to make unique names.
+     */
+    protected static int suffix = 1;
+
+    /**
      * Constructs a new <tt>CycVariable</tt> object using the variable name.
      *
      * @param variableName a <tt>String</tt> name.
      */
     public static CycVariable makeCycVariable(String variableName) {
+        CycVariable cycVariable = (CycVariable) cache.getElement(variableName);
+        if (cycVariable == null) {
+            cycVariable = new CycVariable(variableName);
+            cache.addElement(variableName, cycVariable);
+        }
+        return cycVariable;
+    }
+
+    /**
+     * Constructs a new <tt>CycVariable</tt> object by suffixing the given variable.
+     *
+     * @param modelCycVariable a <tt>CycVariable</tt> to suffix
+     */
+    public static CycVariable makeUniqueCycVariable(CycVariable modelCycVariable) {
+        String variableName = modelCycVariable.toString() + "_" + suffix++;
         CycVariable cycVariable = (CycVariable) cache.getElement(variableName);
         if (cycVariable == null) {
             cycVariable = new CycVariable(variableName);

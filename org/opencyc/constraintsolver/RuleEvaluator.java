@@ -12,7 +12,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -93,7 +93,7 @@ public class RuleEvaluator {
      * @return <tt>true</tt> iff the instantiated constraint rule is proven true,
      * otherwise return <tt>false</tt>
      */
-    protected boolean ask(Rule rule) {
+    public boolean ask(Rule rule) {
         Object predicate = rule.getPredicate();
         if (predicate.equals(and)) {
             CycList arguments = rule.getRule().rest();
@@ -171,7 +171,7 @@ public class RuleEvaluator {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 

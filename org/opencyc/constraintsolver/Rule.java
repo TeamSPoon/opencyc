@@ -9,7 +9,7 @@ import org.opencyc.cycobject.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -59,7 +59,7 @@ public class Rule {
      * @param ruleString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    protected Rule (String ruleString) {
+    public Rule (String ruleString) {
         rule = new CycList(ruleString);
         gatherVariables();
     }
@@ -75,7 +75,7 @@ public class Rule {
      * @param rule the rule's formula, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    protected Rule(CycList rule) {
+    public Rule(CycList rule) {
         this.rule = rule;
         gatherVariables();
     }
@@ -93,7 +93,7 @@ public class Rule {
      * query represented by a <tt>CycList</tt>.
      * @param backchainDepth the depth of backchaining when this rule is introduced
      */
-    protected Rule(CycList rule, int backchainDepth) {
+    public Rule(CycList rule, int backchainDepth) {
         this.rule = rule;
         this.backchainDepth = backchainDepth;
         gatherVariables();
@@ -107,7 +107,7 @@ public class Rule {
      * @return an <tt>ArrayList</tt> of <tt>Rule</tt> objects.
      * @see UnitTest#testRule
      */
-    protected static ArrayList simplifyRuleExpression(CycList cycList) {
+    public static ArrayList simplifyRuleExpression(CycList cycList) {
         ArrayList rules = new ArrayList();
         if (cycList.size() < 2)
             throw new RuntimeException("Invalid rule: " + cycList);
@@ -142,7 +142,7 @@ public class Rule {
      *
      * @return a <tt>CycList</tt> which is the rule's formula.
      */
-    protected CycList getRule() {
+    public CycList getRule() {
         return rule;
     }
 
@@ -152,7 +152,7 @@ public class Rule {
      * @return the <tt>ArrayList</tt> which lists the unique <tt>CycVariables</tt> that are
      * used in the rule's formula.
      */
-    protected ArrayList getVariables() {
+    public ArrayList getVariables() {
         return variables;
     }
 
@@ -163,7 +163,7 @@ public class Rule {
      * @return rule's arity which is defined to be the number of variables, not
      * necessarily equalling the arity of the rule's first predicate
      */
-    protected int getArity() {
+    public int getArity() {
         return variables.size();
     }
 
@@ -172,7 +172,7 @@ public class Rule {
      *
      * @return the backchain depth when this rule was introduced
      */
-    protected int getBackchainDepth() {
+    public int getBackchainDepth() {
         return this.backchainDepth;
     }
 
@@ -185,8 +185,17 @@ public class Rule {
     public boolean equals(Object object) {
         if (! (object instanceof Rule))
             return false;
-        Rule  thatRule = (Rule) object;
+        Rule thatRule = (Rule) object;
         return this.rule.equals(thatRule.getRule());
+    }
+
+    /**
+     * Creates and returns a copy of this <tt>Rule</tt>.
+     *
+     * @return a clone of this instance
+     */
+    public Object clone() {
+        return new Rule((CycList) this.rule.clone());
     }
 
     /**
@@ -195,7 +204,7 @@ public class Rule {
      * @return the predicate <tt>CycConstant</tt> or <tt>CycSymbol</tt>
      * of this <tt>Rule</tt> object
      */
-    protected CycConstant getPredicate() {
+    public CycConstant getPredicate() {
         return (CycConstant) rule.first();
     }
 
@@ -204,8 +213,23 @@ public class Rule {
      *
      * @return the arguments of this <tt>Rule</tt> object
      */
-    protected CycList getArguments() {
+    public CycList getArguments() {
         return (CycList) rule.rest();
+    }
+
+    /**
+     * Substitutes an object for a variable.
+     *
+     * @param oldVariable the variable to replaced
+     * @parma newObject the <tt>Object</tt> to be substituted for the variable
+     */
+    public void substituteVariable(CycVariable variable, Object newObject) {
+        if (! (variables.contains(variable)))
+            throw new RuntimeException(variable + " is not a variable of " + this);
+        variables.remove(variable);
+        if (newObject instanceof CycVariable)
+            variables.add(newObject);
+        rule = rule.subst(newObject, variable);
     }
 
     /**
@@ -214,7 +238,7 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this is a variable domain populating
      * <tt>Rule</tt>.
      */
-    protected boolean isVariableDomainPopulatingRule() {
+    public boolean isVariableDomainPopulatingRule() {
         return isIntensionalVariableDomainPopulatingRule() ||
                isExtensionalVariableDomainPopulatingRule();
     }
@@ -225,7 +249,7 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this <tt>Rule</tt> is a #$different
      * constraint rule
      */
-    protected boolean isAllDifferent() {
+    public boolean isAllDifferent() {
         if (this.getArity() < 2)
             return false;
         //TODO make right
@@ -244,7 +268,7 @@ public class Rule {
      * @return <tt>true</tt> if this <tt>Rule</tt> is a simple evaluatable constraint rule,
      * which can be answered without KB lookup
      */
-    protected boolean isEvaluatable() {
+    public boolean isEvaluatable() {
         if (this.getArguments().size() < 2)
             return false;
         if (this.getPredicate().toString().equals("numericallyEqual"))
@@ -270,7 +294,7 @@ public class Rule {
      *
      * @return <tt>true</tt> if this <tt>Rule</tt> has simple evaluatable numerical arguments
      */
-    protected boolean hasEvaluatableNumericalArgs() {
+    public boolean hasEvaluatableNumericalArgs() {
         CycList args = this.getRule().rest();
         for (int i = 0; i < args.size(); i++) {
             Object arg = args.get(i);
@@ -311,7 +335,7 @@ public class Rule {
      * can be evaluated locally without asking OpenCyc.
      * @return the truth value of the fully instantiated constraint rule
      */
-    protected static boolean evaluateConstraintRule(CycList instantiatedRule) {
+    public static boolean evaluateConstraintRule(CycList instantiatedRule) {
         CycConstant predicate = (CycConstant) instantiatedRule.first();
         if (predicate.toString().equals("numericallyEqual")) {
             long value = numericallyEvaluateExpression(instantiatedRule.second());
@@ -350,7 +374,7 @@ public class Rule {
      * or a <tt>CycList</tt>
      * @return the numerical value of the expression
      */
-    protected static long numericallyEvaluateExpression(Object expression) {
+    public static long numericallyEvaluateExpression(Object expression) {
         if (expression instanceof Long)
             return ((Long) expression).longValue();
         else if (expression instanceof CycNart) {
@@ -380,7 +404,7 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this is an intensional variable domain populating
      * <tt>Rule</tt>.
      */
-    protected boolean isIntensionalVariableDomainPopulatingRule() {
+    public boolean isIntensionalVariableDomainPopulatingRule() {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
@@ -398,7 +422,7 @@ public class Rule {
      * @return <tt>boolean</tt> indicating if this is an extensional variable domain populating
      * <tt>Rule</tt>.
      */
-    protected boolean isExtensionalVariableDomainPopulatingRule() {
+    public boolean isExtensionalVariableDomainPopulatingRule() {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
@@ -425,7 +449,7 @@ public class Rule {
      *
      * @return a cyclified <tt>String</tt>.
      */
-    protected String cyclify() {
+    public String cyclify() {
         return rule.cyclify();
     }
 
@@ -438,7 +462,7 @@ public class Rule {
      * @return a new <tt>Rule</tt> which is the result of substituting the given
      * <tt>Object</tt> value for the given <tt>CycVariable</tt>
      */
-    protected Rule instantiate(CycVariable cycVariable, Object value) {
+    public Rule instantiate(CycVariable cycVariable, Object value) {
         if (! variables.contains(cycVariable))
             throw new RuntimeException("Cannot instantiate " + cycVariable +
                                        " in rule " + this);

@@ -22,7 +22,7 @@ import org.opencyc.cycobject.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -78,7 +78,7 @@ public class ArgumentTypeConstrainer {
      * @param cycVariable the variable used to construct the returned rules
      * @return the argument type constraint rules for the given rule
      */
-    protected ArrayList retrieveArgumentTypeConstraintRules(Rule rule) {
+    public ArrayList retrieveArgumentTypeConstraintRules(Rule rule) {
         ArrayList result = new ArrayList();
         CycConstant predicate = rule.getPredicate();
         for (int i = 0; i < rule.getArguments().size(); i++) {
@@ -104,7 +104,7 @@ public class ArgumentTypeConstrainer {
      * @param cycVariable the variable used to construct the returned rules
      * @return the argument type constraint rules for the predicate
      */
-    protected ArrayList retrieveArgumentTypeConstraintRules(CycConstant predicate,
+    public ArrayList retrieveArgumentTypeConstraintRules(CycConstant predicate,
                                                             int argPosition,
                                                             CycVariable cycVariable) {
         ArrayList result = new ArrayList();
@@ -124,7 +124,7 @@ public class ArgumentTypeConstrainer {
      * @return the #$argNIsa constraint rules for the given predicate at the given
      * argument position, indexed base 1
      */
-    protected ArrayList retrieveArgNIsas(CycConstant predicate,
+    public ArrayList retrieveArgNIsas(CycConstant predicate,
                                          int argPosition,
                                          CycVariable cycVariable) {
         ArrayList result = new ArrayList();
@@ -150,7 +150,7 @@ public class ArgumentTypeConstrainer {
      * @return the #$argNGenls constraint rules for the given predicate at the given
      * argument position, indexed base 1
      */
-    protected ArrayList retrieveArgNGenls(CycConstant predicate,
+    public ArrayList retrieveArgNGenls(CycConstant predicate,
                                           int argPosition,
                                           CycVariable cycVariable) {
         ArrayList result = new ArrayList();
@@ -182,7 +182,7 @@ public class ArgumentTypeConstrainer {
      * @return <tt>true</tt> iff the given unary constraint rule is consistent with
      * the previously accepted unary constraints on the given variable
      */
-    protected boolean isUnaryRuleConsistent(Rule unaryRule, CycVariable cycVariable) {
+    public boolean isUnaryRuleConsistent(Rule unaryRule, CycVariable cycVariable) {
         // Find the associated collections for the unary constraint rule under consideration.
         CycConstant consideringIsaCollection = null;
         CycConstant consideringGenlsCollection = null;
@@ -252,7 +252,7 @@ public class ArgumentTypeConstrainer {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 

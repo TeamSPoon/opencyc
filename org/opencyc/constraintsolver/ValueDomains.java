@@ -11,7 +11,7 @@ import java.util.*;
  * @version $Id$
  * @author Stephen L. Reed
  *
- * <p>Copyright 2001 OpenCyc.org, license is open source GNU LGPL.
+ * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
  * <p><a href="http://www.opencyc.org">www.opencyc.org</a>
  * <p><a href="http://www.sourceforge.net/projects/opencyc">OpenCyc at SourceForge</a>
@@ -72,7 +72,7 @@ public class ValueDomains {
     /**
      * Displays the variables and their value domains.
      */
-    protected void displayVariablesAndDomains() {
+    public void displayVariablesAndDomains() {
         System.out.println("\nVariables and value domains\n");
         CycList orderedVariables = new CycList(constraintProblem.variables);
         orderedVariables = orderedVariables.sort();
@@ -85,7 +85,7 @@ public class ValueDomains {
     /**
      * Initializes the domain value marking structure.
      */
-    protected void initializeDomainValueMarking() {
+    public void initializeDomainValueMarking() {
         int nbrOfVariables = constraintProblem.variables.size();
         domains = new HashMap(nbrOfVariables);
         for (int i = 0; i < nbrOfVariables; i++) {
@@ -105,7 +105,7 @@ public class ValueDomains {
      * @param cycVariable the variable for domain values are sought
      * @return the <tt>ArrayList</tt> of domain values for a variable
      */
-    protected ArrayList getDomainValues(CycVariable cycVariable) {
+    public ArrayList getDomainValues(CycVariable cycVariable) {
         return (ArrayList) varsDictionary.get(cycVariable);
     }
 
@@ -115,7 +115,7 @@ public class ValueDomains {
      * @param cycVariable the variable
      * @param domainValues the <tt>ArrayList</tt> of domain values for the variable
      */
-    protected void setDomainValues(CycVariable cycVariable, ArrayList domainValues) {
+    public void setDomainValues(CycVariable cycVariable, ArrayList domainValues) {
         varsDictionary.put(cycVariable, domainValues);
     }
 
@@ -125,7 +125,7 @@ public class ValueDomains {
      * @param cycVariable the variable
      * @param value the <tt>Object</tt> value which is added to the domain for the variable
      */
-    protected void addDomainValue(CycVariable cycVariable, Object value) {
+    public void addDomainValue(CycVariable cycVariable, Object value) {
         ArrayList domainValues = this.getDomainValues(cycVariable);
         domainValues.add(value);
         setDomainValues(cycVariable, domainValues);
@@ -138,7 +138,7 @@ public class ValueDomains {
      * @param value the value for comparison with the variable's value domain.
      * @return <tt>true</tt> if the variable has value in its domain.
      */
-    protected boolean domainHasValue(CycVariable cycVariable, Object value) {
+    public boolean domainHasValue(CycVariable cycVariable, Object value) {
         ArrayList domainValues = (ArrayList) varsDictionary.get(cycVariable);
         return domainValues.contains(value);
     }
@@ -149,7 +149,7 @@ public class ValueDomains {
      * @param cycVariable the variable under consideration
      * @param value the <tt>Object</tt> to be removed from the variable's value domain
      */
-    protected void removeFromValue(CycVariable cycVariable, Object value) {
+    public void removeFromValue(CycVariable cycVariable, Object value) {
         ArrayList domainValues = (ArrayList) varsDictionary.get(cycVariable);
         domainValues.remove(value);
     }
@@ -157,7 +157,7 @@ public class ValueDomains {
      /**
      * Resets the entry for the variable / domain value marking.
      */
-    protected void unmarkDomain(CycVariable cycVariable, Object value) {
+    public void unmarkDomain(CycVariable cycVariable, Object value) {
         markDomain(cycVariable, value, null);
     }
 
@@ -165,7 +165,7 @@ public class ValueDomains {
      * Marks the entry for the variable / domain value with an <tt>Integer</tt> level number,
      * or a <tt>Boolean</tt> <tt>True</tt>, or <tt>null</tt>.
      */
-    protected void markDomain(CycVariable cycVariable, Object value, Object level) {
+    public void markDomain(CycVariable cycVariable, Object value, Object level) {
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
         domainValueMarks.put(value, level);
     }
@@ -174,7 +174,7 @@ public class ValueDomains {
      * Returns the number of unmarked (eligible for the solution) domain values
      * for the given variable.
      */
-    protected int getUnmarkedDomainSize(CycVariable cycVariable) {
+    public int getUnmarkedDomainSize(CycVariable cycVariable) {
         int unmarkedDomainSize = 0;
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
         Iterator levels = domainValueMarks.values().iterator();
@@ -198,7 +198,7 @@ public class ValueDomains {
      * Returns the <tt>ArrayList</tt> of unmarked (eligible for the solution) domain
      * values for the given variable.
      */
-    protected ArrayList getUnmarkedDomainValues(CycVariable cycVariable) {
+    public ArrayList getUnmarkedDomainValues(CycVariable cycVariable) {
         ArrayList unmarkedDomainValues = new ArrayList();
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
         Iterator values = domainValueMarks.keySet().iterator();
@@ -221,7 +221,7 @@ public class ValueDomains {
      * @param newLevel the new search level for the variable's domain
      * @param selectedBinding a variable binding for optional diagnostic display
      */
-    protected void complementDomainValues(CycVariable cycVariable,
+    public void complementDomainValues(CycVariable cycVariable,
                                           Integer newLevel,
                                           Binding selectedBinding) {
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
@@ -250,7 +250,7 @@ public class ValueDomains {
      * @return <tt>true</tt> if and only if all the domain values of the variable have been marked
      * and thus eliminated from consideration as a solution
      */
-    protected boolean isDomainWipedOut(CycVariable cycVariable) {
+    public boolean isDomainWipedOut(CycVariable cycVariable) {
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
         Iterator values = domainValueMarks.keySet().iterator();
         while (true) {
@@ -269,7 +269,7 @@ public class ValueDomains {
      * @return <tt>true</tt> iff the variable / value combination is marked
      * with aany level number
      */
-    protected boolean isDomainMarked(CycVariable cycVariable, Object value) {
+    public boolean isDomainMarked(CycVariable cycVariable, Object value) {
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
         return (domainValueMarks.get(value)) instanceof Integer;
     }
@@ -281,7 +281,7 @@ public class ValueDomains {
      * @return <tt>true</tt> iff the variable / value combination is marked
      * with a given level number
      */
-    protected boolean isDomainMarkedAtLevel(CycVariable cycVariable,
+    public boolean isDomainMarkedAtLevel(CycVariable cycVariable,
                                             Object value,
                                             Integer level) {
         HashMap domainValueMarks = (HashMap) domains.get(cycVariable);
@@ -298,7 +298,7 @@ public class ValueDomains {
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
      */
-    protected void setVerbosity(int verbosity) {
+    public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 

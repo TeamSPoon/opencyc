@@ -50,6 +50,16 @@ public class KnowledgeBase extends NodeComponent {
   public KnowledgeBase() {
   }
   
+  /** 
+   * Creates a new instance of KnowledgeBase with the given
+   * input message channel.
+   *
+   * @param knowledgeBaseChannel the takable channel from which messages are input
+   */
+  public KnowledgeBase(Takable knowledgeBaseChannel) {
+    consumer = new Consumer(knowledgeBaseChannel);
+  }
+  
   //// Public Area
   
   /**
@@ -134,6 +144,11 @@ public class KnowledgeBase extends NodeComponent {
    */
   protected Hashtable kbCache = new Hashtable();
     
+  /**
+   * the thread which processes the input channel of messages
+   */
+  Consumer consumer;
+  
   //// Main
   
 }

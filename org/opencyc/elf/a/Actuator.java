@@ -45,7 +45,15 @@ public interface Actuator {
    */
   public ArrayList getResources();
   
+  /**
+   * Gets the actions that this actuator can accomplish.
+   *
+   * @return the actions that this actuator can accomplish
+   */
+  public ArrayList getActionCapabilities();
+  
   /** the console output actuator name */
   public static final String CONSOLE_OUTPUT = "console output";
+  
   
 }

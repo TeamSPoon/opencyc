@@ -203,36 +203,37 @@ public class ExportDaml {
      */
     public static void main (String[] args) {
         ExportDaml exportDaml = new ExportDaml();
+        String choice = "eeld-core";
+        if (args.length > 0)
+            choice = args[0];
         try {
-            /**
-             * Export a kb subset collection filtered by the given
-             * kb subset collection.
-             */
-            exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
-            exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
-            exportDaml.title = "EELD Shared Core Ontology";
-            exportDaml.outputPath = "eeld-shared-core-ontology.daml";
-            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
-
-            /**
-             * Export a kb subset collection filtered by the given
-             * kb subset collection.
-             */
-            //exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
-            //exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
-            //exportDaml.title = "EELD Shared Ontology";
-            //exportDaml.outputPath = "eeld-shared-ontology.daml";
-            //exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
-
-            /**
-             * Export a kb subset below the given term filtered by the given
-             * kb subset collection.
-             */
-            //Guid transportationDeviceGuid =
-            //    CycObjectFactory.makeGuid("bd58d540-9c29-11b1-9dad-c379636f7270");
-            //exportDaml.rootTermGuid = transportationDeviceGuid;
-            //exportDaml.cycKbSubsetFilterGuid = counterTerrorismConstantGuid;
-            //exportDaml.export(ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM);
+            Log.current.println("Choosing KB selection: " + choice);
+            // These require the Cycorp IKB or full KB to work as setup below.
+            if (choice.equals("eeld-core")) {
+                exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
+                exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
+                exportDaml.title = "EELD Shared Core Ontology";
+                exportDaml.outputPath = "eeld-shared-core-ontology.daml";
+                exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
+            }
+            else if (choice.equals("eeld")) {
+                exportDaml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
+                exportDaml.cycKbSubsetFilterGuid = ikbConstantGuid;
+                exportDaml.title = "EELD Shared Ontology";
+                exportDaml.outputPath = "eeld-shared-ontology.daml";
+                exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
+            }
+            else if (choice.equals("transportation-device")) {
+                Guid transportationDeviceGuid =
+                    CycObjectFactory.makeGuid("bd58d540-9c29-11b1-9dad-c379636f7270");
+                exportDaml.rootTermGuid = transportationDeviceGuid;
+                exportDaml.cycKbSubsetFilterGuid = counterTerrorismConstantGuid;
+                exportDaml.export(ExportDaml.EXPORT_KB_SUBSET_BELOW_TERM);
+            }
+            else {
+                System.out.println("specified choice not found - " + choice);
+                System.exit(1);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

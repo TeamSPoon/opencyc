@@ -70,7 +70,8 @@ public class UnitTest extends TestCase {
     System.out.println("\n*** testEntityFrame ***");
 
     EntityFrame entityFrame1 = new EntityFrame();
-    StateVariable stateVariable1 = new StateVariable("stateVariable1", 
+    StateVariable stateVariable1 = new StateVariable(String.class, 
+                                                     "stateVariable1", 
                                                      "test state variable stateVariable1");
     Object attribute1 = new Object();
     Assert.assertNull(entityFrame1.getState().getStateValue(stateVariable1));
@@ -80,7 +81,8 @@ public class UnitTest extends TestCase {
     EntityFrame entityFrame2 = new EntityFrame(entityFrame1);
     Assert.assertEquals(entityFrame1, entityFrame2);
 
-    StateVariable stateVariable2 = new StateVariable("stateVariable2", 
+    StateVariable stateVariable2 = new StateVariable(String.class, 
+                                                     "stateVariable2", 
                                                      "test state variable stateVariable2");
     entityFrame2.getState().setStateValue(stateVariable2, "def");
     Assert.assertTrue(!entityFrame1.equals(entityFrame2));

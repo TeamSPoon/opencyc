@@ -6,6 +6,10 @@ import org.opencyc.elf.Node;
 import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Status;
 
+import org.opencyc.elf.a.Actuator;
+
+import org.opencyc.elf.bg.planner.Resource;
+
 import org.opencyc.elf.bg.taskframe.TaskFrame;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
@@ -17,6 +21,8 @@ import org.opencyc.elf.message.ScheduleJobMsg;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
+
 import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Executor;
@@ -48,7 +54,7 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class JobAssigner extends BufferedNodeComponent {
+public class JobAssigner extends BufferedNodeComponent implements Actuator {
   //// Constructors
 
   /**
@@ -145,6 +151,36 @@ public class JobAssigner extends BufferedNodeComponent {
     this.schedulers = schedulers;
   }
 
+  /** 
+   * Gets the name of the virtual actuator.
+   *
+   * @return the name of the virtual actuator
+   */
+  public String getName() {
+    return getNode().getName();
+  }
+  
+  /**
+   * Gets the resources required by this virtual actuator by iterating over the 
+   * resources required by the contained schedulers.
+   *
+   * @return the resources required by this virtual actuator
+   */
+  public ArrayList getResources() {
+    ArrayList resources = new ArrayList();
+    Iterator schedulerIterator = schedulers.iterator();
+    while (schedulerIterator.hasNext()) {
+      Scheduler scheduler = (Scheduler) schedulerIterator.next();
+      Iterator resourceIterator = scheduler.getResources().iterator();
+      while (resourceIterator.hasNext()) {
+        Resource resource = (Resource) resourceIterator.next();
+        if (! resources.contains(resource))
+          resources.add(resource);
+      }
+    }
+    return resources;
+  }
+  
   //// Protected Area
 
   /**

@@ -39,36 +39,36 @@ public class ObservedInputMsg extends GenericMsg {
   //// Protected Area
   
   /**
-   * Gets the object for which data is sensed.
+   * Gets the object for which data is predicted.
    *
-   * @return the object for which data is sensed
+   * @return the object for which data is predicted
    */
   public Object getObj () {
     return obj;
   }
 
   /**
-   * Sets the object for which data is sensed.
+   * Sets the object for which data is predicted.
    *
-   * @param obj the object for which data is sensed
+   * @param obj the object for which data is predicted
    */
   public void setObj (Object obj) {
     this.obj = obj;
   }
 
   /**
-   * Gets the sensed data associated with the object
+   * Gets the predicted data associated with the object
    *
-   * @return the sensed data associated with the object
+   * @return the predicted data associated with the object
    */
   public Object getData () {
     return data;
   }
 
   /**
-   * Sets the sensed data associated with the object
+   * Sets the predicted data associated with the object
    *
-   * @param sensed data the data associated with the object
+   * @param predicted data the data associated with the object
    */
   public void setData (Object data) {
     this.data = data;
@@ -81,12 +81,12 @@ public class ObservedInputMsg extends GenericMsg {
   //// Internal Rep
   
   /**
-   * the object for which data is sensed
+   * the object for which data is predicted
    */  
   protected Object obj;
   
   /**
-   * the sensed data associated with the object
+   * the predicted data associated with the object
    */  
   protected Object data;
   

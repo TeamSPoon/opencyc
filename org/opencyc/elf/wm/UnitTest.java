@@ -29,8 +29,7 @@ import junit.framework.*;
 
 import org.doomdark.uuid.UUID;
 
-/**
- * Provides a suite of JUnit test cases for the org.opencyc.elf.wm package.
+/** Provides a suite of JUnit test cases for the org.opencyc.elf.wm package.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -67,8 +66,7 @@ public class UnitTest extends TestCase {
 
   //// Public Area
   
-  /**
-   * Runs the unit tests
+  /** Runs the unit tests
    *
    * @return the unit test suite
    */
@@ -241,29 +239,24 @@ public class UnitTest extends TestCase {
     (new TaskFrameFactory()).getInstance().populateTaskFrameLibrary();
     Assert.assertNotNull(TaskFrameLibrary.getInstance());
     TaskFrame taskFrame = TaskFrameLibrary.getInstance().getTaskFrame(Action.CONVERSE_WITH_USER);
+    Assert.assertEquals(1, TaskFrameLibrary.getInstance().taskFrameDictionary.entrySet().size());
     Assert.assertNotNull(taskFrame);
     Assert.assertEquals("[TaskFrame task: converse with user goal: (not-null userInput)]", 
                         taskFrame.toString());
-    List actuatorNames = taskFrame.getActuatorNames();
-    Assert.assertNotNull(actuatorNames);
-    Assert.assertEquals(1, actuatorNames.size());
-    Assert.assertEquals("", actuatorNames.get(0));
-    List sensorNames = taskFrame.getSensorNames();
-    Assert.assertNotNull(sensorNames);
-    Assert.assertEquals(1, sensorNames.size());
-    Assert.assertEquals("", sensorNames.get(0));
     Assert.assertNotNull(taskFrame.getTaskId());
     Assert.assertTrue(taskFrame.getTaskId() instanceof UUID);
     Assert.assertNotNull(taskFrame.getTaskName());
     Assert.assertEquals("converse with user", taskFrame.getTaskName());
     Assert.assertNotNull(taskFrame.getTaskAction());
     Assert.assertEquals("[Action: converse with user( prompt: null)]", taskFrame.getTaskAction().toString());
-    List conditionalScheduleSets = taskFrame.getConditionalScheduleSets();
+    List scheduleAlternatives = taskFrame.getScheduleAlternatives();
+    Assert.assertNotNull(scheduleAlternatives);
+    Assert.assertEquals(1, scheduleAlternatives.size());
+    List conditionalScheduleSets = (List) scheduleAlternatives.get(0);
     Assert.assertNotNull(conditionalScheduleSets);
     Assert.assertEquals(1, conditionalScheduleSets.size());
     ConditionalScheduleSet conditionalScheduleSet = (ConditionalScheduleSet) conditionalScheduleSets.get(0);
-    Assert.assertEquals("", 
-                        conditionalScheduleSet.toString());
+    Assert.assertEquals("[ConditionalScheduleSet condition: TRUE scheduleSet: [[Schedule [] actuator:  sensor: ]]]",  conditionalScheduleSet.toString());
     
     System.out.println("*** testTaskFrameLibrary OK ***");
   }
@@ -285,7 +278,7 @@ public class UnitTest extends TestCase {
     new SensorPool();
     (new SensorFactory()).getInstance().populateSensorPool();
     Assert.assertNotNull(SensorPool.getInstance().getSensor(Sensor.CONSOLE_INPUT));
-    Assert.assertEquals("[ConsoleInput resources: [[Resource: console]]]", 
+    Assert.assertEquals("[DirectSensor resources: [[Resource: console]]]", 
                         SensorPool.getInstance().getSensor(Sensor.CONSOLE_INPUT).toString());
     System.out.println("*** testSensorPool OK ***");
   }
@@ -296,15 +289,13 @@ public class UnitTest extends TestCase {
   
   //// Internal Rep
   
-  /**
-   * the logger
-   */
+  /** the logger */
   protected static Logger logger;
 
   //// Main
   
-  /**
-   * Main method in case tracing is prefered over running JUnit.
+  /** Main method in case tracing is prefered over running JUnit.
+   *
    * @param args the command line arguments (unused)
    */
   public static void main(String[] args) {

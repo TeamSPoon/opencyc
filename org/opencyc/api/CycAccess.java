@@ -243,6 +243,15 @@ public class CycAccess {
     }
 
     /**
+     * Returns a string representation of this object.
+     *
+     * @return a string representation of this object
+     */
+    public String toString() {
+        return cycConnection.connectionInfo();
+    }
+
+    /**
      * Returns the <tt>CycAccess</tt> object for this thread.
      *
      * @return the <tt>CycAccess</tt> object for this thread
@@ -2395,24 +2404,6 @@ public class CycAccess {
         command1.add(CycObjectFactory.t);
         //this.traceOn();
         return converseInt(command);
-    }
-
-    /**
-     * Imports a MUC (Message Understanding Conference) formatted symbolic expression into
-     * cyc via the function which parses the expression and creates assertions for the
-     * contained concepts and relations between them, using a default new microtheory
-     * created by Cyc's import function.
-     *
-     * @param mucExpression the MUC (Message Understanding Conference) formatted symbolic
-     * expression
-     * @return the number of assertions imported from the input MUC expression
-     */
-    public int importMucExpression(CycList mucExpression) throws IOException, CycApiException {
-        CycList command = new CycList();
-        command.add(CycObjectFactory.makeCycSymbol("convert-netowl-sexpr-to-cycl-assertions"));
-        command.add(mucExpression.cycListApiValue());
-        //this.traceOn();
-        return this.converseInt(command);
     }
 
     /**

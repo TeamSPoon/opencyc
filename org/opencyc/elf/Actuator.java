@@ -1,5 +1,8 @@
 package org.opencyc.elf;
 
+import org.opencyc.uml.core.*;
+import org.opencyc.uml.interpreter.*;
+
 /**
  * Provides Actuators for the Elementary Loop Functioning (ELF).<br>
  *
@@ -28,6 +31,16 @@ package org.opencyc.elf;
 
 public class Actuator extends NodeComponent {
 
+    /**
+     * the commanded action
+     */
+    protected Procedure commandedAction;
+
+    /**
+     * the procedure interpreter
+     */
+    protected ProcedureInterpreter procedureInterpreter;
+
    /**
      * Constructs a new Actuator object.
      */
@@ -43,4 +56,39 @@ public class Actuator extends NodeComponent {
         return "Actuator for " + node.name;
     }
 
+    /**
+     * Gets the commanded action
+     *
+     * @return the commanded action
+     */
+    public Procedure getCommandedAction () {
+        return commandedAction;
+    }
+
+    /**
+     * Sets the commanded action
+     *
+     * @param commandedAction the commanded action
+     */
+    public void setCommandedAction (Procedure commandedAction) {
+        this.commandedAction = commandedAction;
+    }
+
+    /**
+     * Gets the procedure interpreter
+     *
+     * @return the procedure interpreter
+     */
+    public ProcedureInterpreter getProcedureInterpreter () {
+        return procedureInterpreter;
+    }
+
+    /**
+     * Sets the procedure interpreter
+     *
+     * @param procedureInterpreter the procedure interpreter
+     */
+    public void setProcedureInterpreter (ProcedureInterpreter procedureInterpreter) {
+        this.procedureInterpreter = procedureInterpreter;
+    }
 }

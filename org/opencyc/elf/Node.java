@@ -2,7 +2,6 @@ package org.opencyc.elf;
 
 import java.util.*;
 
-
 /**
  * Provides the Node container for the Elementary Loop Functioning (ELF).<br>
  *
@@ -30,7 +29,6 @@ import java.util.*;
 
 public class Node extends ELFObject {
 
-
     /**
      * the dictionary of nodes by name
      * name --> Node
@@ -56,16 +54,6 @@ public class Node extends ELFObject {
      * the BehaviorGeneration for this node
      */
     protected BehaviorGeneration behaviorGeneration;
-
-    /**
-     * the Actuator for this node
-     */
-    protected Actuator actuator;
-
-    /**
-     * the Sensor for this node
-     */
-    protected Sensor sensor;
 
     /**
      * the SensoryPerception
@@ -211,42 +199,6 @@ public class Node extends ELFObject {
      */
     public void setBehaviorGeneration (BehaviorGeneration behaviorGeneration) {
         this.behaviorGeneration = behaviorGeneration;
-    }
-
-    /**
-     * Gets the Actuator for this node
-     *
-     * @return the Actuator for this node
-     */
-    public Actuator getActuator () {
-        return actuator;
-    }
-
-    /**
-     * Sets the Actuator for this node
-     *
-     * @param actuator the Actuator for this node
-     */
-    public void setActuator (Actuator actuator) {
-        this.actuator = actuator;
-    }
-
-    /**
-     * Gets the Sensor for this node
-     *
-     * @return the Sensor for this node
-     */
-    public Sensor getSensor () {
-        return sensor;
-    }
-
-    /**
-     * Sets the Sensor for this node
-     *
-     * @param sensor the Sensor for this node
-     */
-    public void setSensor (Sensor sensor) {
-        this.sensor = sensor;
     }
 
     /**

@@ -1,5 +1,7 @@
 package org.opencyc.elf;
 
+import org.opencyc.util.*;
+
 /**
  * Provides common attributes and behavior for Elementary Loop
  * Functioning (ELF) node components.<br>
@@ -30,6 +32,18 @@ package org.opencyc.elf;
 public abstract class NodeComponent extends ELFObject {
 
     /**
+     * The default verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
      * Reference to the ELF Node which contains this object.
      */
     protected Node node;
@@ -51,4 +65,15 @@ public abstract class NodeComponent extends ELFObject {
     public void setNode (Node node) {
         this.node = node;
     }
+
+    /**
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+    }
+
 }

@@ -10,6 +10,8 @@ import org.opencyc.elf.message.ActuateMsg;
 import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
+import java.util.ArrayList;
+
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
@@ -43,14 +45,15 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   //// Constructors
 
   /** 
-   * Creates a new instance of ConsoleOutput given its name. 
+   * Creates a new instance of ConsoleOutput given its name and
+   * required resources.
    *
    * @param name the actuator name
-   * @param actuatedObject the object which is acted upon
+   * @param actuatedObject the resources requried by this actuator
    */
-  public ConsoleOutput(String name, Resource actuatedObject) {
+  public ConsoleOutput(String name, ArrayList resources) {
     this.name = name;
-    this.actuatedObject = actuatedObject;
+    this.resources = resources;
   }
   
   //// Public Area
@@ -105,12 +108,12 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   }
   
   /**
-   * Gets the object acted upon by this actuator.
+   * Gets the resources requried by this actuator.
    *
-   * @return the object acted upon by this actuator
+   * @return the resources requried by this actuator
    */
-  public Resource getActuatedObject() {
-    return actuatedObject;
+  public ArrayList getResources() {
+    return resources;
   }
   
   //// Protected Area
@@ -160,6 +163,7 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
      * @param actuateMsg the given input channel message
      */
     protected void doAction (ActuateMsg actuateMsg) {
+      Object obj = actuateMsg.getObj();
       Object data = actuateMsg.getData();
       System.out.println(data);
       System.out.flush();
@@ -173,8 +177,8 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
   /** the name of the actuator */
   protected String name;
   
-  /** the object which is acted upon */
-  protected Resource actuatedObject;
+  /** the resources requried by this actuator */
+  protected ArrayList resources;
   
   /** the takable channel from which messages are input */
   protected Takable actuatorChannel = null;

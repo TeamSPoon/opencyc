@@ -4,6 +4,7 @@ package org.opencyc.elf.a;
 import org.opencyc.elf.bg.planner.Resource;
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * Actuator defines the actuator interface for the Elementary Loop Functioning (ELF).
@@ -38,11 +39,11 @@ public interface Actuator {
   public String getName();
   
   /**
-   * Gets the object acted upon by this actuator.
+   * Gets the resources requried by this actuator.
    *
-   * @return the object acted upon by this actuator
+   * @return the resources requried by this actuator
    */
-  public Resource getActuatedObject();
+  public ArrayList getResources();
   
   /** the console output actuator name */
   public static final String CONSOLE_OUTPUT = "console output";

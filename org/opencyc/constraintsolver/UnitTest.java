@@ -324,69 +324,64 @@ public class UnitTest extends TestCase {
             "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
         ConstraintProblem zebraProblem = new ConstraintProblem();
         CycAccess cycAccess = zebraProblem.cycAccess;
-        CycList zebraPuzzleCycList = cycAccess.makeCycList(zebraPuzzleString);
         try {
+            CycList zebraPuzzleCycList = cycAccess.makeCycList(zebraPuzzleString);
             ArrayList zebraPuzzleRules = ConstraintRule.simplifyConstraintRuleExpression(zebraPuzzleCycList);
-        }
-        catch (IOException e) {
-            Assert.fail(e.getMessage());
-        }
 
-        zebraProblem.setVerbosity(1);
-        ArrayList solutions = null;
-        try {
+            zebraProblem.setVerbosity(1);
+            ArrayList solutions = null;
             solutions = zebraProblem.solve(zebraPuzzleCycList);
+            Assert.assertNotNull(solutions);
+
+            // test extractRulesAndDomains()
+            zebraProblem.displayConstraintRules();
+            Assert.assertEquals(17, zebraProblem.getNbrConstraintRules());
+            Assert.assertEquals(25, zebraProblem.getNbrDomainPopulationRules());
+
+            // test gatherVariables()
+            Assert.assertEquals(25, zebraProblem.getNbrVariables());
+
+            // test ValueDomains.initializeDomains()
+            Assert.assertEquals(25, zebraProblem.valueDomains.domains.size());
+            Assert.assertEquals(25, zebraProblem.valueDomains.varsDictionary.size());
+            CycVariable blue = CycObjectFactory.makeCycVariable("?blue");
+            Assert.assertNotNull(zebraProblem.valueDomains.varsDictionary.get(blue));
+            Assert.assertTrue(zebraProblem.valueDomains.varsDictionary.get(blue) instanceof ArrayList);
+            ArrayList domainValues = (ArrayList) zebraProblem.valueDomains.varsDictionary.get(blue);
+            Assert.assertEquals(5, domainValues.size());
+            Assert.assertTrue(domainValues.contains(new Integer(1)));
+            Assert.assertTrue(domainValues.contains(new Integer(2)));
+            Assert.assertTrue(domainValues.contains(new Integer(3)));
+            Assert.assertTrue(domainValues.contains(new Integer(4)));
+            Assert.assertTrue(domainValues.contains(new Integer(5)));
+
+            // test ValueDomains.domainHasValue(CycVariable cycVariable, Object value)
+            Assert.assertTrue(zebraProblem.valueDomains.domainHasValue(blue, new Integer(1)));
+            Assert.assertTrue(! (zebraProblem.valueDomains.domainHasValue(blue, new Integer(6))));
+
+            // test ValueDomains.getDomainValues(CycVariable cycVariable)
+            ArrayList domainValues2 = zebraProblem.valueDomains.getDomainValues(blue);
+            Assert.assertEquals(domainValues, domainValues2);
+
+            // test ValueDomains.initializeDomainValueMarking()
+            Assert.assertNotNull(zebraProblem.valueDomains.domains.get(blue));
+            Assert.assertTrue((zebraProblem.valueDomains.domains.get(blue)) instanceof HashMap);
+            HashMap domainValueMarks = (HashMap) zebraProblem.valueDomains.domains.get(blue);
+            Assert.assertTrue(domainValueMarks.containsKey(new Integer(1)));
+            Assert.assertNotNull(domainValueMarks.get(new Integer(1)));
+
+            // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
+            Assert.assertEquals(2, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
+            Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycObjectFactory.makeCycVariable("?milk")));
+            Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycObjectFactory.makeCycVariable("?norwegian")));
+            Assert.assertEquals(5, zebraProblem.nodeConsistencyAchiever.allDifferentRules.size());
+            Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycObjectFactory.makeCycVariable("milk")));
+            Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycObjectFactory.makeCycVariable("norwegian")));
         }
         catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
-        Assert.assertNotNull(solutions);
-
-        // test extractRulesAndDomains()
-        zebraProblem.displayConstraintRules();
-        Assert.assertEquals(17, zebraProblem.getNbrConstraintRules());
-        Assert.assertEquals(25, zebraProblem.getNbrDomainPopulationRules());
-
-        // test gatherVariables()
-        Assert.assertEquals(25, zebraProblem.getNbrVariables());
-
-        // test ValueDomains.initializeDomains()
-        Assert.assertEquals(25, zebraProblem.valueDomains.domains.size());
-        Assert.assertEquals(25, zebraProblem.valueDomains.varsDictionary.size());
-        CycVariable blue = CycObjectFactory.makeCycVariable("?blue");
-        Assert.assertNotNull(zebraProblem.valueDomains.varsDictionary.get(blue));
-        Assert.assertTrue(zebraProblem.valueDomains.varsDictionary.get(blue) instanceof ArrayList);
-        ArrayList domainValues = (ArrayList) zebraProblem.valueDomains.varsDictionary.get(blue);
-        Assert.assertEquals(5, domainValues.size());
-        Assert.assertTrue(domainValues.contains(new Integer(1)));
-        Assert.assertTrue(domainValues.contains(new Integer(2)));
-        Assert.assertTrue(domainValues.contains(new Integer(3)));
-        Assert.assertTrue(domainValues.contains(new Integer(4)));
-        Assert.assertTrue(domainValues.contains(new Integer(5)));
-
-        // test ValueDomains.domainHasValue(CycVariable cycVariable, Object value)
-        Assert.assertTrue(zebraProblem.valueDomains.domainHasValue(blue, new Integer(1)));
-        Assert.assertTrue(! (zebraProblem.valueDomains.domainHasValue(blue, new Integer(6))));
-
-        // test ValueDomains.getDomainValues(CycVariable cycVariable)
-        ArrayList domainValues2 = zebraProblem.valueDomains.getDomainValues(blue);
-        Assert.assertEquals(domainValues, domainValues2);
-
-        // test ValueDomains.initializeDomainValueMarking()
-        Assert.assertNotNull(zebraProblem.valueDomains.domains.get(blue));
-        Assert.assertTrue((zebraProblem.valueDomains.domains.get(blue)) instanceof HashMap);
-        HashMap domainValueMarks = (HashMap) zebraProblem.valueDomains.domains.get(blue);
-        Assert.assertTrue(domainValueMarks.containsKey(new Integer(1)));
-        Assert.assertNotNull(domainValueMarks.get(new Integer(1)));
-
-        // test NodeConsistencyAchiever.applyUnaryRulesAndPropagate()
-        Assert.assertEquals(2, zebraProblem.nodeConsistencyAchiever.unaryConstraintRules.size());
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycObjectFactory.makeCycVariable("?milk")));
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.affectedVariables.contains(CycObjectFactory.makeCycVariable("?norwegian")));
-        Assert.assertEquals(5, zebraProblem.nodeConsistencyAchiever.allDifferentRules.size());
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycObjectFactory.makeCycVariable("milk")));
-        Assert.assertTrue(zebraProblem.nodeConsistencyAchiever.singletons.contains(CycObjectFactory.makeCycVariable("norwegian")));
 
         System.out.println("** testConstraintProblem1 OK **");
     }

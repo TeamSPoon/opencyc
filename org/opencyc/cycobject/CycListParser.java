@@ -72,7 +72,7 @@ public class CycListParser  {
      * <tt>CycList</tt> string representation.
      * @return the corresponding <tt>CycList</tt>
      */
-    public CycList read (String string) {
+    public CycList read (String string) throws CycApiException {
         StringReader stringReader = new StringReader(string);
         StreamTokenizer st = new StreamTokenizer(stringReader);
         st.commentChar( ';' );
@@ -108,7 +108,7 @@ public class CycListParser  {
      * <tt>CycList</tt> string representation.
      * @return the corresponding <tt>CycList</tt>
      */
-    public CycList read (StreamTokenizer st) {
+    public CycList read (StreamTokenizer st) throws CycApiException {
         int tok;
         endQuote = false;
 
@@ -377,7 +377,7 @@ public class CycListParser  {
      * @param the input <tt>StreamTokenizer</tt> from which to get the word value.
      */
     private void scanWord(StreamTokenizer st)
-        throws IOException {
+        throws IOException, CycApiException {
 
         if (verbosity > 5)
             System.out.println(st.sval);

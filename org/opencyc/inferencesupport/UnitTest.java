@@ -211,7 +211,7 @@ public class UnitTest extends TestCase {
             ConstraintRule rule7 = new ConstraintRule("(#$different ?x ?y)");
             Assert.assertTrue(rule7.isAllDifferent());
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
@@ -228,7 +228,7 @@ public class UnitTest extends TestCase {
             ConstraintRule rule12 = new ConstraintRule("(#$or (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))");
             Assert.assertTrue(rule11.isEvaluatable());
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
@@ -262,19 +262,19 @@ public class UnitTest extends TestCase {
         }
 
         // substituteVariable
-        ConstraintRule rule22 = new ConstraintRule("(#$isa ?x #$Cathedral)");
-        rule22.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
-                                  CycObjectFactory.makeCycVariable("?cathedral"));
-        Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", rule22.cyclify());
-        ConstraintRule rule23 = new ConstraintRule("(#$isa ?x #$Cathedral)");
         try {
+            ConstraintRule rule22 = new ConstraintRule("(#$isa ?x #$Cathedral)");
+            rule22.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
+                                      CycObjectFactory.makeCycVariable("?cathedral"));
+            Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", rule22.cyclify());
+            ConstraintRule rule23 = new ConstraintRule("(#$isa ?x #$Cathedral)");
             rule23.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
                                       cycAccess.makeCycConstant("NotreDameCathedral"));
+            Assert.assertEquals("(#$isa #$NotreDameCathedral #$Cathedral)", rule23.cyclify());
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
-        Assert.assertEquals("(#$isa #$NotreDameCathedral #$Cathedral)", rule23.cyclify());
 
         //Zebra Puzzle rules
         String zebraPuzzleString =
@@ -340,14 +340,14 @@ public class UnitTest extends TestCase {
         try {
             zebraPuzzleRules = ConstraintRule.simplifyConstraintRuleExpression(zebraPuzzleCycList);
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         FileWriter fileWriter = null;
         try {
             fileWriter = new FileWriter("unit-test-output.txt");
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         PrintWriter printWriter = new PrintWriter(fileWriter);
@@ -496,7 +496,7 @@ public class UnitTest extends TestCase {
             QueryLiteral queryLiteral7 = new QueryLiteral("(#$different ?x ?y)");
             Assert.assertTrue(queryLiteral7.isAllDifferent());
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
@@ -513,24 +513,24 @@ public class UnitTest extends TestCase {
             QueryLiteral queryLiteral12 = new QueryLiteral("(#$or (#$numericallyEqual 1 (#$PlusFn ?x)) (#$numericallyEqual ?x 2))");
             Assert.assertTrue(queryLiteral11.isEvaluatable());
         }
-        catch (IOException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
         // substituteVariable
-        QueryLiteral queryLiteral22 = new QueryLiteral("(#$isa ?x #$Cathedral)");
-        queryLiteral22.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
-                                  CycObjectFactory.makeCycVariable("?cathedral"));
-        Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", queryLiteral22.cyclify());
-        QueryLiteral queryLiteral23 = new QueryLiteral("(#$isa ?x #$Cathedral)");
         try {
+            QueryLiteral queryLiteral22 = new QueryLiteral("(#$isa ?x #$Cathedral)");
+            queryLiteral22.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
+                                      CycObjectFactory.makeCycVariable("?cathedral"));
+            Assert.assertEquals("(#$isa ?cathedral #$Cathedral)", queryLiteral22.cyclify());
+            QueryLiteral queryLiteral23 = new QueryLiteral("(#$isa ?x #$Cathedral)");
             queryLiteral23.substituteVariable(CycObjectFactory.makeCycVariable("?x"),
                                       cycAccess.makeCycConstant("NotreDameCathedral"));
+            Assert.assertEquals("(#$isa #$NotreDameCathedral #$Cathedral)", queryLiteral23.cyclify());
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
-        Assert.assertEquals("(#$isa #$NotreDameCathedral #$Cathedral)", queryLiteral23.cyclify());
 
         // subsumes
         QueryLiteral queryLiteral31 = null;

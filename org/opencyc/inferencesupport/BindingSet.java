@@ -59,7 +59,7 @@ public class BindingSet implements Comparable {
      * @param queryLiteral the literal for which bindings are obtained
      * @param mt the microtheory in which the variable bindings are obtained
      */
-    public BindingSet(QueryLiteral queryLiteral, CycFort mt) throws IOException {
+    public BindingSet(QueryLiteral queryLiteral, CycFort mt) throws IOException, CycApiException {
         this.queryLiteral = queryLiteral;
         this.mt = mt;
         if (queryLiteral.nbrFormulaInstances == -1) {

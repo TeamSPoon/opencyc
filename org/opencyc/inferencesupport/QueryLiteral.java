@@ -40,7 +40,7 @@ public class QueryLiteral extends Literal implements Comparable{
      * @param formulaString the query literal's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public QueryLiteral (String formulaString) {
+    public QueryLiteral (String formulaString) throws CycApiException {
         formula = CycAccess.current().makeCycList(formulaString);
         gatherVariables();
     }

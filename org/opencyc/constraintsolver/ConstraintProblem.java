@@ -209,7 +209,8 @@ public class ConstraintProblem {
      */
     public ArrayList solveUsingPartialSolution(Solution solution,
                                                ArrayList variables,
-                                               ArrayList constraintRules) throws IOException {
+                                               ArrayList constraintRules)
+        throws IOException, CycApiException {
         CycList problem = new CycList();
         problem.add(buildDomainPopulationRules(solution, variables));
         problem.add(buildSolutionConstraint(solution));
@@ -229,7 +230,7 @@ public class ConstraintProblem {
      * @return solution constraint built from the given partial solution object
      */
     protected ArrayList buildDomainPopulationRules(Solution solution, ArrayList variables)
-        throws IOException {
+        throws IOException, CycApiException {
         ArrayList domainPopulationRules = new ArrayList();
         ArrayList partialSolution = null;
         for (int i = 0; i < variables.size(); i++) {
@@ -263,7 +264,8 @@ public class ConstraintProblem {
      * @param solution a partial solution
      * @return solution constraint built from the given partial solution object
      */
-    protected CycList buildSolutionConstraint(Solution solution) throws IOException {
+    protected CycList buildSolutionConstraint(Solution solution)
+        throws IOException, CycApiException {
         CycList solutionConstraint = new CycList();
         solutionConstraint.add(CycAccess.or);
         ArrayList partialSolutions = solution.getSolutions();
@@ -302,7 +304,7 @@ public class ConstraintProblem {
      * element is the <tt>CycVariable</tt> and the second element is the domain value
      * <tt>Object</tt>.
      */
-    public ArrayList solve(String problemString) {
+    public ArrayList solve(String problemString) throws CycApiException{
         return solve(cycAccess.makeCycList(problemString));
     }
 
@@ -339,7 +341,7 @@ public class ConstraintProblem {
             forwardCheckingSearcher  = new ForwardCheckingSearcher(this);
             forwardCheckingSearcher.search(variables, 1);
         }
-        catch (IOException e) {
+        catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error accessing OpenCyc " + e.getMessage());
             System.exit(1);

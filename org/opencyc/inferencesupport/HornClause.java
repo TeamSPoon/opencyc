@@ -86,7 +86,7 @@ public class HornClause {
      *
      * @param hornClauseString the cyclified string representation of the horn clause
      */
-    public HornClause(String hornClauseString) {
+    public HornClause(String hornClauseString) throws CycApiException{
         this(CycAccess.current().makeCycList(hornClauseString));
     }
 
@@ -167,7 +167,8 @@ public class HornClause {
      * variables in common
      * @param verbosity a verbosity indicator, 0 = quiet ... 9 = most diagnostic output
      */
-    public void renameVariables(ArrayList otherVariables, int verbosity) throws IOException {
+    public void renameVariables(ArrayList otherVariables, int verbosity)
+        throws IOException, CycApiException {
         if (verbosity > 3)
             System.out.println("ensuring that variables for \n" + this.cyclify() +
                                "\n  are different from " + otherVariables);
@@ -197,7 +198,7 @@ public class HornClause {
      * conflict is found
      */
     public boolean substituteVariable(CycVariable variable, Object newObject, int verbosity)
-        throws IOException {
+        throws IOException, CycApiException {
         if (! (variables.contains(variable))) {
             throw new RuntimeException(variable + " is not a variable of \n" + this.cyclify());
         }
@@ -315,7 +316,7 @@ public class HornClause {
      * @return <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
      * horn clause
      */
-    public static boolean isValidHornExpression(String string) throws IOException {
+    public static boolean isValidHornExpression(String string) throws IOException, CycApiException {
         return isValidHornExpression(CycAccess.current().makeCycList(string));
     }
 
@@ -328,7 +329,7 @@ public class HornClause {
      * @return <tt>true</tt> iff the given <tt>CycList</tt> is a valid representation of a constraint
      * horn clause
      */
-    public static boolean isValidHornExpression(CycList cycList) throws IOException {
+    public static boolean isValidHornExpression(CycList cycList) throws IOException, CycApiException {
         if (cycList.size() != 3)
             return false;
         Object implies = cycList.first();

@@ -108,7 +108,7 @@ public class CycAssertion {
             try {
                 cycAssertion = CycAccess.current().completeCycAssertion(this);
             }
-            catch (IOException e) {
+            catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
             }
             formula = cycAssertion.formula;

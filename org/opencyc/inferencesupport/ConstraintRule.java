@@ -39,7 +39,7 @@ public class ConstraintRule extends Literal implements Comparable{
      * @param formulaString the rule's formula <tt>String</tt>, which must be a well formed OpenCyc
      * query represented by a <tt>CycList</tt>.
      */
-    public ConstraintRule (String formulaString) {
+    public ConstraintRule (String formulaString) throws CycApiException {
         formula = CycAccess.current().makeCycList(formulaString);
         gatherVariables();
     }
@@ -166,7 +166,7 @@ public class ConstraintRule extends Literal implements Comparable{
      * @return <tt>boolean</tt> indicating if this is a variable domain populating
      * <tt>Rule</tt>.
      */
-    public boolean isVariableDomainPopulatingRule() throws IOException {
+    public boolean isVariableDomainPopulatingRule() throws IOException, CycApiException {
         return isExtensionalVariableDomainPopulatingConstraintRule();
     }
 
@@ -177,7 +177,8 @@ public class ConstraintRule extends Literal implements Comparable{
      * @return <tt>boolean</tt> indicating if this is an extensional variable domain populating
      * <tt>ConstraintRule</tt>.
      */
-    public boolean isExtensionalVariableDomainPopulatingConstraintRule() throws IOException {
+    public boolean isExtensionalVariableDomainPopulatingConstraintRule()
+        throws IOException, CycApiException {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;

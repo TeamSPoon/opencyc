@@ -96,7 +96,7 @@ public class ProblemParser {
      * domains, and those which subsequently constrain the search for
      * one or more solutions.
      */
-    protected void extractRulesAndDomains() throws IOException {
+    protected void extractRulesAndDomains() throws IOException, CycApiException {
         constraintProblem.simplifiedRules =
             ConstraintRule.simplifyConstraintRuleExpression(constraintProblem.problem);
         constraintProblem.domainPopulationRules = new ArrayList();
@@ -115,7 +115,7 @@ public class ProblemParser {
     /**
      * Initializes the value domains for each variable.
      */
-    protected void initializeDomains() throws IOException {
+    protected void initializeDomains() throws IOException, CycApiException {
         for (int i = 0; i < constraintProblem.domainPopulationRules.size(); i++) {
             ConstraintRule rule = (ConstraintRule) constraintProblem.domainPopulationRules.get(i);
             if (rule.isExtensionalVariableDomainPopulatingConstraintRule()) {

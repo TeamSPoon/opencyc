@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.IOException;
 import org.opencyc.cycobject.*;
 import org.opencyc.inferencesupport.*;
+import org.opencyc.api.*;
 
 /**
  * The <tt>NodeConsistencyAchiever</tt> object achieves node consistency
@@ -95,7 +96,7 @@ public class NodeConsistencyAchiever {
      * Apply the unary constraint rules to restrict domain values and subsequently
      * propagate the effects through any #$different constraint rules.
      */
-    public void applyUnaryRulesAndPropagate() throws IOException {
+    public void applyUnaryRulesAndPropagate() throws IOException, CycApiException {
         CycVariable affectedVariable;
         ArrayList inputDomainValues;
         ArrayList outputDomainValues;

@@ -177,7 +177,8 @@ public class CycConnection {
      * Constructs a new CycConnection object using the default host name, default base port number and
      * binary communication mode.
      */
-    public CycConnection (CycAccess cycAccess) throws IOException, UnknownHostException {
+    public CycConnection (CycAccess cycAccess)
+    throws IOException, UnknownHostException, CycApiException {
         this(DEFAULT_HOSTNAME, DEFAULT_BASE_PORT, DEFAULT_COMMUNICATION_MODE, cycAccess);
     }
 
@@ -190,7 +191,7 @@ public class CycConnection {
      * @param communicationMode either ASCII_MODE or BINARY_MODE
      */
     public CycConnection (String hostName, int basePort, int communicationMode, CycAccess cycAccess)
-        throws IOException, UnknownHostException {
+        throws IOException, UnknownHostException, CycApiException {
         this.hostName = hostName;
         this.basePort = basePort;
         asciiPort = basePort + ASCII_PORT_OFFSET;
@@ -198,7 +199,7 @@ public class CycConnection {
         this.communicationMode = communicationMode;
         this.cycAccess = cycAccess;
         if ((communicationMode != ASCII_MODE) && (communicationMode != BINARY_MODE))
-            throw  new RuntimeException("Invalid communication mode " + communicationMode);
+            throw  new CycApiException("Invalid communication mode " + communicationMode);
         initializeApiConnections();
         //if (trace >= API_TRACE_NONE) {
         if (trace > API_TRACE_NONE) {
@@ -336,7 +337,7 @@ public class CycConnection {
      * @return an array of two objects, the first is an Integer response code, and the second is the
      * response object or error string.
      */
-    public synchronized Object[] converse (Object message) throws IOException {
+    public synchronized Object[] converse (Object message) throws IOException, CycApiException {
         return  converse(message, notimeout);
     }
 
@@ -354,7 +355,7 @@ public class CycConnection {
      * response object or error string.
      */
     public synchronized Object[] converse (Object message, Timer timeout)
-        throws IOException, TimeOutException {
+        throws IOException, TimeOutException, CycApiException {
         if (communicationMode == CycConnection.ASCII_MODE) {
             String messageString;
             if (message instanceof String)
@@ -362,7 +363,7 @@ public class CycConnection {
             else if (message instanceof CycList)
                 messageString = ((CycList) message).cyclify();
             else
-                throw new RuntimeException("Invalid class for message " + message);
+                throw new CycApiException("Invalid class for message " + message);
             return  converseAscii(messageString, timeout);
         }
         else {
@@ -372,7 +373,7 @@ public class CycConnection {
             else if (message instanceof String)
                 messageCycList = this.cycAccess.makeCycList((String) message);
             else
-                throw new RuntimeException("Invalid class for message " + message);
+                throw new CycApiException("Invalid class for message " + message);
             messageCycList = substituteForBackquote(messageCycList);
             return  converseBinary(messageCycList, timeout);
         }
@@ -388,7 +389,8 @@ public class CycConnection {
      * @return the expression with a READ-FROM-STRING expression substituted for
      * expressions directly containing a backquote symbol
      */
-    protected CycList substituteForBackquote(CycList messageCycList) throws IOException {
+    protected CycList substituteForBackquote(CycList messageCycList)
+        throws IOException, CycApiException {
         if (messageCycList.contains(CycObjectFactory.makeCycSymbol("`"))) {
             CycList substituteCycList = new CycList();
             substituteCycList.add(CycObjectFactory.makeCycSymbol("read-from-string"));
@@ -419,7 +421,7 @@ public class CycConnection {
      * response object or error string.
      */
     synchronized protected Object[] converseBinary (Object message, Timer timeout)
-        throws IOException, TimeOutException {
+        throws IOException, TimeOutException, CycApiException {
         sendBinary(message);
         return  receiveBinary();
     }
@@ -444,7 +446,7 @@ public class CycConnection {
      * @return an array of two objects, the first is a Boolean response, and the second is the
      * response object or error string.
      */
-    private Object[] receiveBinary () throws IOException {
+    private Object[] receiveBinary () throws IOException, CycApiException {
         Object[] answer =  {
             null, null
         };
@@ -482,8 +484,8 @@ public class CycConnection {
      * @return an array of two objects, the first is an Integer response code, and the second is the
      * response object or error string.
      */
-    synchronized protected Object[] converseAscii (String message, Timer timeout) throws IOException,
-            TimeOutException {
+    synchronized protected Object[] converseAscii (String message, Timer timeout)
+    throws IOException, TimeOutException, CycApiException {
         isSymbolicExpression = false;
         Object[] response = converseUsingAsciiStrings(message, timeout);
         if (response[0].equals(Boolean.TRUE)) {
@@ -540,7 +542,7 @@ public class CycConnection {
                 // Return the double.
                 return response;
             }
-            throw new RuntimeException("Ascii api response not understood " + answer);
+            throw new CycApiException("Ascii api response not understood " + answer);
         }
         else
             return response;

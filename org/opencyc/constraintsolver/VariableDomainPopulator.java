@@ -113,7 +113,7 @@ public class VariableDomainPopulator {
      * Determines the best domain population rule to populate each constraint problem variable, and populates
      * those which do not exceed the domain size threshold.
      */
-    public void populateDomains() throws IOException {
+    public void populateDomains() throws IOException, CycApiException {
         Collections.sort(candidateVariablePopulators);
         for (int i = 0; i < candidateVariablePopulators.size(); i++) {
             VariablePopulationItem variablePopulationItem =
@@ -261,7 +261,8 @@ public class VariableDomainPopulator {
      * @param cycVariable the variable whose value domain is to be populated by the results of the query
      *
      */
-    protected void populateDomainViaQuery(ConstraintRule rule, CycVariable cycVariable) throws IOException {
+    protected void populateDomainViaQuery(ConstraintRule rule, CycVariable cycVariable)
+        throws IOException, CycApiException {
         CycList domainValuesCycList =
             CycAccess.current().askWithVariable (rule.getFormula(),
                                                  cycVariable,
@@ -277,7 +278,8 @@ public class VariableDomainPopulator {
      * @param variablePopulationItem the <tt>VariablePopulationItem</tt> object which contains the variable
      * and its domain populating rule
      */
-    public void initializeDomain(VariablePopulationItem variablePopulationItem) throws IOException {
+    public void initializeDomain(VariablePopulationItem variablePopulationItem)
+        throws IOException, CycApiException {
         CycVariable cycVariable = variablePopulationItem.cycVariable;
         ConstraintRule rule = variablePopulationItem.rule;
         if (valueDomains.domains.containsKey(cycVariable))
@@ -319,7 +321,8 @@ public class VariableDomainPopulator {
      *
      * @param variable the variable whose value domain is to be populated
      */
-    protected void populatePostponedDomain (CycVariable variable) throws IOException {
+    protected void populatePostponedDomain (CycVariable variable)
+        throws IOException, CycApiException {
         VariablePopulationItem variablePopulationItem =
             (VariablePopulationItem) variableDomainPopulators.get(variable);
         ConstraintRule rule = variablePopulationItem.rule;

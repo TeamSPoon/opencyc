@@ -111,7 +111,8 @@ public class ForwardCheckingSearcher {
      * @param level is the current depth of the search
      * @return <tt>true</tt> when done with the search
      */
-    public boolean search(ArrayList variables, int level) throws IOException {
+    public boolean search(ArrayList variables, int level)
+        throws IOException, CycApiException {
         CycVariable selectedVariable = selectVariable(variables);
         ArrayList remainingDomain = valueDomains.getUnmarkedDomainValues(selectedVariable);
         ArrayList remainingVariables = (ArrayList) variables.clone();
@@ -217,7 +218,8 @@ public class ForwardCheckingSearcher {
      */
     protected boolean checkForwardRules(ArrayList remainingVariables,
                                         int level,
-                                        Binding currentBinding) throws IOException {
+                                        Binding currentBinding)
+        throws IOException, CycApiException {
         if (verbosity > 8)
             System.out.println("check forward rules applicable to binding " + currentBinding);
         for (int i = 0; i < constraintRules.size(); i++) {
@@ -268,7 +270,8 @@ public class ForwardCheckingSearcher {
     protected boolean checkForwardRule(ConstraintRule rule,
                                        ArrayList remainingRuleVariables,
                                        int level,
-                                       Binding currentBinding) throws IOException {
+                                       Binding currentBinding)
+        throws IOException, CycApiException {
         CycList instantiatedRule = rule.getFormula().subst(currentBinding.getValue(),
                                                         currentBinding.getCycVariable());
         if (verbosity > 2) {
@@ -319,7 +322,7 @@ public class ForwardCheckingSearcher {
     protected boolean checkForwardNonEvaluatableRule(ConstraintRule rule,
                                                      int level,
                                                      Binding currentBinding)
-        throws IOException {
+        throws IOException, CycApiException {
         // Order the remaining variables by ascending domain size.
         ArrayList remainingRuleVariables = (ArrayList) rule.getVariables().clone();
         remainingRuleVariables.remove(currentBinding.getCycVariable());
@@ -359,7 +362,8 @@ public class ForwardCheckingSearcher {
                                                   ArrayList remainingVariables,
                                                   ArrayList bindings,
                                                   Binding currentBinding,
-                                                  ConstraintRule currentRule) throws IOException {
+                                                  ConstraintRule currentRule)
+        throws IOException, CycApiException {
         CycVariable selectedVariable = currentBinding.getCycVariable();
         if (remainingVariables.size() == 0) {
             // This is the terminating recursion case, with no more variables left to instantiate.
@@ -453,7 +457,7 @@ public class ForwardCheckingSearcher {
      * @return a <tt>ArrayList</tt> of bindings for single unbound variable left in the rule
      */
     protected ArrayList askWithVariable(CycList instantiatedRule, CycVariable variable)
-        throws IOException {
+        throws IOException, CycApiException {
         ArrayList result = new ArrayList();
         CycList kbValues = constraintProblem.cycAccess.askWithVariable(instantiatedRule,
                                                                        variable,

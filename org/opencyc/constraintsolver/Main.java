@@ -97,17 +97,17 @@ public class Main {
             "  (#$elementOf ?yellow (#$TheSet 1 2 3 4 5)) " +
             "  (#$elementOf ?zebra (#$TheSet 1 2 3 4 5))) ";
         ConstraintProblem zebraProblem = new ConstraintProblem();
-        CycList zebraPuzzleCycList = zebraProblem.cycAccess.makeCycList(zebraPuzzleString);
-        ArrayList zebraPuzzleRules = null;
         try {
+            CycList zebraPuzzleCycList = zebraProblem.cycAccess.makeCycList(zebraPuzzleString);
+            ArrayList zebraPuzzleRules = null;
             zebraPuzzleRules = ConstraintRule.simplifyConstraintRuleExpression(zebraPuzzleCycList);
+            zebraProblem.setVerbosity(1);
+            zebraProblem.solve(zebraPuzzleCycList);
         }
-        catch (IOException e) {
+        catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error accessing OpenCyc " + e.getMessage());
             System.exit(1);
         }
-        zebraProblem.setVerbosity(1);
-        zebraProblem.solve(zebraPuzzleCycList);
     }
 }

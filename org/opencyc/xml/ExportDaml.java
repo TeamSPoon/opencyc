@@ -140,7 +140,7 @@ public class ExportDaml {
      * Exports the desired KB content into DAML.
      */
     public void export()
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         createRdfNode();
         createDamlOntologyNode();
         createCycGuidNode();
@@ -282,7 +282,7 @@ public class ExportDaml {
      * @parameter cycConstant the CycConstant from which the DAML node is created
      */
     protected void createConstantNode (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         guid = cycConstant.getGuid();
         populateComment(cycConstant);
         populateIsas(cycConstant);
@@ -303,7 +303,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc collection from which the DAML class node is created
      */
     protected void createClassNode(CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         populateGenls(cycConstant);
         populateDisjointWiths(cycConstant);
         populateCoExtensionals(cycConstant);
@@ -377,7 +377,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc individual from which the DAML individual node is created
      */
     protected void createIndividualNode(CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         if (isas == null || isas.size() == 0)
             return;
         Element individualNode = document.createElement(isas.get(0).toString());
@@ -423,7 +423,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc binary predicate from which the DAML property node is created
      */
     protected void createPropertyNode(CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         populateGenlPreds(cycConstant);
         populateArg1Isa(cycConstant);
         populateArg2Isa(cycConstant);
@@ -479,7 +479,7 @@ public class ExportDaml {
      * DAML transitive property
      */
     protected String translateTerm (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         if (cycConstant.equals(cycAccess.thing))
             return damlThing;
         else if (cycConstant.equals(cycAccess.collection))
@@ -497,7 +497,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc term for which the comment is obtained.
      */
     protected void populateComment (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         comment = cycAccess.getComment(cycConstant);
     }
 
@@ -536,7 +536,7 @@ public class ExportDaml {
      * subset collection
      */
     protected boolean isFilteredSelectedConstant(Object object)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         if (! (object instanceof CycConstant))
             return false;
         else
@@ -548,7 +548,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc term for which the isas are obtained.
      */
     protected void populateIsas (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         isas = cycAccess.getIsas(cycConstant);
         isas = filterSelectedConstants(isas);
     }
@@ -558,7 +558,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc term for which the genls are obtained.
      */
     protected void populateGenls (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         genls = cycAccess.getGenls(cycConstant);
         genls = filterSelectedConstants(genls);
     }
@@ -568,7 +568,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc predicate for which the genlPreds are obtained.
      */
     protected void populateGenlPreds (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         genlPreds = cycAccess.getGenlPreds(cycConstant);
         genlPreds = filterSelectedConstants(genlPreds);
     }
@@ -578,7 +578,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc predicate for which the argument 1 type constaint is obtained.
      */
     protected void populateArg1Isa (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         CycList arg1Isas = cycAccess.getArg1Isas(cycConstant);
         arg1Isas = filterSelectedConstants(arg1Isas);
         if (arg1Isas.size() > 0)
@@ -590,7 +590,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc predicate for which the argument 2 type constaint is obtained.
      */
     protected void populateArg2Isa (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         CycList arg2Isas = cycAccess.getArg2Isas(cycConstant);
         arg2Isas = filterSelectedConstants(arg2Isas);
         if (arg2Isas.size() > 0)
@@ -602,7 +602,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc predicate for which the argument 1 format is obtained.
      */
     protected void populateArg1Format (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         CycList arg1Formats = cycAccess.getArg1Formats(cycConstant);
         if (arg1Formats.size() > 0)
             arg1Format = (CycConstant) arg1Formats.first();
@@ -613,7 +613,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc predicate for which the argument 2 format is obtained.
      */
     protected void populateArg2Format (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         CycList arg2Formats = cycAccess.getArg2Formats(cycConstant);
         if (arg2Formats.size() > 0)
             arg2Format = (CycConstant) arg2Formats.first();
@@ -624,7 +624,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc collection for which the disjointWiths are obtained.
      */
     protected void populateDisjointWiths (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         disjointWiths = cycAccess.getDisjointWiths(cycConstant);
         disjointWiths = filterSelectedConstants(disjointWiths);
     }
@@ -634,7 +634,7 @@ public class ExportDaml {
      * @parameter cycConstant the Cyc collection for which the coExtensionals are obtained.
      */
     protected void populateCoExtensionals (CycConstant cycConstant)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         coExtensionals = cycAccess.getCoExtensionals(cycConstant);
         coExtensionals = filterSelectedConstants(coExtensionals);
     }
@@ -648,7 +648,7 @@ public class ExportDaml {
      * for collection terms, and with regard to genlPreds for predicate terms
      */
     protected CycList gatherUpwardClosure(CycList selectedCycForts)
-        throws UnknownHostException, IOException {
+        throws UnknownHostException, IOException, CycApiException {
         CycList upwardClosure = new CycList();
         CycConstant upwardClosureConstant = cycAccess.getKnownConstantByGuid(cycUpwardClosureGuid);
         for (int i = 0; i < selectedCycForts.size(); i++) {

@@ -665,8 +665,13 @@ public class UnitTest extends TestCase {
         }
 
         // last
-        CycList cycList46 = cycAccess.makeCycList("(8 7 6)");
-        Assert.assertEquals(new Integer(6), cycList46.last());
+        try {
+            CycList cycList46 = cycAccess.makeCycList("(8 7 6)");
+            Assert.assertEquals(new Integer(6), cycList46.last());
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
 
         try {
             cycAccess.close();

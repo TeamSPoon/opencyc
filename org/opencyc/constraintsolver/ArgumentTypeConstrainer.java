@@ -82,7 +82,8 @@ public class ArgumentTypeConstrainer {
      * @param cycVariable the variable used to construct the returned rules
      * @return the argument type constraint rules for the given rule
      */
-    public ArrayList retrieveArgumentTypeConstraintRules(ConstraintRule rule) throws IOException {
+    public ArrayList retrieveArgumentTypeConstraintRules(ConstraintRule rule)
+        throws IOException, CycApiException {
         if (verbosity > 3)
             System.out.println("Gathering type constraints for\n" + rule.cyclify());
         return gatherPredicateVariableArgConstaints(rule.getFormula());
@@ -95,7 +96,7 @@ public class ArgumentTypeConstrainer {
      * @return the argument type constraint rules for the variables within the given expression
      */
     protected ArrayList gatherPredicateVariableArgConstaints(CycList expression)
-        throws IOException {
+        throws IOException, CycApiException {
         ArrayList result = new ArrayList();
         Object arg0 = expression.get(0);
         if (! (arg0 instanceof CycConstant))
@@ -130,7 +131,8 @@ public class ArgumentTypeConstrainer {
      */
     public ArrayList retrieveArgumentTypeConstraintRules(CycConstant predicate,
                                                             int argPosition,
-                                                            CycVariable cycVariable) throws IOException {
+                                                            CycVariable cycVariable)
+        throws IOException, CycApiException {
         ArrayList result = new ArrayList();
         result.addAll(retrieveArgNIsas(predicate, argPosition, cycVariable));
         result.addAll(retrieveArgGenls(predicate, argPosition, cycVariable));
@@ -150,7 +152,8 @@ public class ArgumentTypeConstrainer {
      */
     public ArrayList retrieveArgNIsas(CycConstant predicate,
                                          int argPosition,
-                                         CycVariable cycVariable) throws IOException {
+                                         CycVariable cycVariable)
+        throws IOException, CycApiException {
         ArrayList result = new ArrayList();
         CycList isas = CycAccess.current().getArgNIsas(predicate, argPosition);
         for (int i = 0; i < isas.size(); i++) {
@@ -180,7 +183,7 @@ public class ArgumentTypeConstrainer {
     public ArrayList retrieveArgGenls(CycConstant predicate,
                                       int argPosition,
                                       CycVariable cycVariable)
-        throws IOException, UnknownHostException{
+        throws IOException, UnknownHostException, CycApiException {
         ArrayList result = new ArrayList();
         CycList genls = CycAccess.current().getArgNGenls(predicate, argPosition);
         for (int i = 0; i < genls.size(); i++) {
@@ -213,7 +216,8 @@ public class ArgumentTypeConstrainer {
      * @return <tt>true</tt> iff the given unary constraint rule is consistent with
      * the previously accepted unary constraints on the given variable
      */
-    public boolean isUnaryRuleConsistent(ConstraintRule unaryRule, CycVariable cycVariable) throws IOException {
+    public boolean isUnaryRuleConsistent(ConstraintRule unaryRule, CycVariable cycVariable)
+        throws IOException, CycApiException {
         // Find the associated collections for the unary constraint rule under consideration.
         CycFort consideringIsaCollection = null;
         CycFort consideringGenlsCollection = null;

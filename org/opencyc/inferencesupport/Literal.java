@@ -160,7 +160,7 @@ public class Literal  implements Comparable{
      * <tt>Literal.NO_SUBSUMPTION</tt> if this literal is neither subsumed by the given literal, nor
      * subsumes the given literal
      */
-    public int determineSubsumption(Literal literal) throws IOException {
+    public int determineSubsumption(Literal literal) throws IOException, CycApiException {
         if (this.equals(literal))
             return SUBSUMES;
         if (! (this.getPredicate().equals(literal.getPredicate())))
@@ -230,7 +230,7 @@ public class Literal  implements Comparable{
      * @param literal the given literal for subsumption determination.
      * @return <tt>true</tt> iff this literal is subsumed by the given <tt>Literal</tt> object.
      */
-    public boolean isSubsumedBy(Literal literal) throws IOException {
+    public boolean isSubsumedBy(Literal literal) throws IOException, CycApiException {
         if (this.equals(literal))
             return true;
         else
@@ -243,7 +243,7 @@ public class Literal  implements Comparable{
      * @param literal the given literal for subsumption determination.
      * @return <tt>true</tt> iff this literal subsumes the given <tt>Literal</tt> object.
      */
-    public boolean subsumes(Literal literal) throws IOException {
+    public boolean subsumes(Literal literal) throws IOException, CycApiException {
         return this.determineSubsumption(literal) == Literal.SUBSUMES;
     }
 
@@ -394,7 +394,7 @@ public class Literal  implements Comparable{
      * @return <tt>true</tt> iff the predicate has the irreflexive property:
      * (#$isa ?PRED #$IrreflexsiveBinaryPredicate)
      */
-    public boolean isIrreflexive(CycFort mt) throws IOException {
+    public boolean isIrreflexive(CycFort mt) throws IOException, CycApiException {
         return CycAccess.current().isIrreflexivePredicate(this.getPredicate(), mt);
     }
 

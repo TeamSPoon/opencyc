@@ -116,7 +116,7 @@ public class RuleEvaluator {
      * @return <tt>true</tt> iff the instantiated constraint rule is proven true,
      * otherwise return <tt>false</tt>
      */
-    public boolean ask(ConstraintRule rule) throws IOException {
+    public boolean ask(ConstraintRule rule) throws IOException, CycApiException {
         Object predicate = rule.getPredicate();
         if (predicate.equals(and)) {
             CycList arguments = rule.getFormula().rest();

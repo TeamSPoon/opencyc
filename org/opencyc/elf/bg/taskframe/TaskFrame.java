@@ -58,8 +58,14 @@ public class TaskFrame {
   public Object clone () {
     TaskFrame taskFrame = new TaskFrame();
     taskFrame.setTaskName(taskName);
-    taskFrame.setScheduleInfos(scheduleInfos);
-    taskFrame.setTaskAction(taskAction);
+    ArrayList clonedScheduleInfos = new ArrayList();
+    Iterator iter = scheduleInfos.iterator();
+    while (iter.hasNext()) {
+      ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
+      clonedScheduleInfos.add((ScheduleInfo) scheduleInfo.clone());
+    }
+    taskFrame.setScheduleInfos(clonedScheduleInfos);
+    taskFrame.setTaskAction((Action) taskAction.clone());
     taskFrame.setTaskGoal(taskGoal);    
     return taskFrame;
   }
@@ -308,6 +314,15 @@ public class TaskFrame {
       this.actuators = actuators;
     }
     
+    /**
+     * Creates and returns a copy of this object.
+     */
+    public Object clone () {
+      return new ScheduleInfo((Schedule) schedule.clone(),
+                              resources,
+                              actuators);
+    }
+  
     /**
      * Gets the schedule of actions
      *

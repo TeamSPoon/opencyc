@@ -55,10 +55,11 @@ public class ActionLibrary {
    * Gets the action associated with the given action name.
    *
    * @param name the given action name
-   * @return the action associated with the given action name
+   * @return the cloned action associated with the given action name
    */
   public Action getAction (String name) {
-    return (Action) actionDictionary.get(name);
+    Action action = (Action)  actionDictionary.get(name);
+    return (Action) action.clone();
   }
 
   /**

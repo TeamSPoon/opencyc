@@ -6,9 +6,6 @@ import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.planner.Schedule;
 
-import org.opencyc.elf.bg.taskframe.TaskCommand;
-import org.opencyc.elf.bg.taskframe.TaskFrame;
-
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.KBObjectPutMsg;
 import org.opencyc.elf.message.KBObjectRequestMsg;

@@ -7,6 +7,8 @@ import org.opencyc.elf.bg.planner.Schedule;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.bg.taskframe.TaskFrame;
 
+import org.opencyc.elf.wm.state.State;
+
 //// External Imports
 import java.util.ArrayList;
 
@@ -55,6 +57,23 @@ public class WorldModel extends NodeComponent {
     return "WorldModel for " + node.getName();
   }
   
+  /**
+   * Gets the state.
+   *
+   * @return the state 
+   */
+  public State getState () {
+    return state;
+  }
+
+  /**
+   * Sets the state.
+   *
+   * @param state the state 
+   */
+  public void setState (State state) {
+    this.state = state;
+  }
 
   /**
    * Gets the knowledge base node component
@@ -133,6 +152,9 @@ public class WorldModel extends NodeComponent {
   //// Private Area
   
   //// Internal Rep
+  
+  /** the state */
+  protected State state;
   
   /**
    * the knowledge base node component

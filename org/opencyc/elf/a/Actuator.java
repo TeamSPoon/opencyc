@@ -39,9 +39,9 @@ public interface Actuator {
   public String getName();
   
   /**
-   * Gets the resources requried by this actuator.
+   * Gets the resources required by this actuator.
    *
-   * @return the resources requried by this actuator
+   * @return the resources required by this actuator
    */
   public ArrayList getResources();
   

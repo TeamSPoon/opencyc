@@ -242,22 +242,36 @@ public class ExportHtml {
      */
     public static void main (String[] args) {
         ExportHtml exportHtml = new ExportHtml();
+        String choice = "eeld";
+        if (args.length > 0)
+            choice = args[0];
         try {
-            //exportHtml.cycKbSubsetCollectionGuid = counterTerrorismConstantGuid;
-            //exportHtml.exportedVocabularyOutputPath = "counter-terrorism-vocabulary.html";
-            //exportHtml.exportedHierarchyOutputPath = "counter-terrorism-hierarchy.html";
-
-            //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
-            //exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
-            //exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
-
-            exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
-            exportHtml.exportedVocabularyOutputPath = "eeld-shared-vocabulary.html";
-            exportHtml.exportedHierarchyOutputPath = "eeld-shared-hierarchy.html";
-
-            //exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCandidateConstantGuid;
-            //exportHtml.exportedVocabularyOutputPath = "eeld-shared-candidate-vocabulary.html";
-            //exportHtml.exportedHierarchyOutputPath = "eeld-shared-candidate-hierarchy.html";
+            Log.current.println("Choosing KB selection: " + choice);
+            // These require the Cycorp IKB or full KB to work as setup below.
+            if (choice.equals("counter-terrorism")) {
+                exportHtml.cycKbSubsetCollectionGuid = counterTerrorismConstantGuid;
+                exportHtml.exportedVocabularyOutputPath = "counter-terrorism-vocabulary.html";
+                exportHtml.exportedHierarchyOutputPath = "counter-terrorism-hierarchy.html";
+            }
+            else if (choice.equals("eeld-core")) {
+                exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCoreConstantGuid;
+                exportHtml.exportedVocabularyOutputPath = "eeld-shared-core-vocabulary.html";
+                exportHtml.exportedHierarchyOutputPath = "eeld-shared-core-hierarchy.html";
+            }
+            else if (choice.equals("eeld")) {
+                exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyConstantGuid;
+                exportHtml.exportedVocabularyOutputPath = "eeld-shared-vocabulary.html";
+                exportHtml.exportedHierarchyOutputPath = "eeld-shared-hierarchy.html";
+            }
+            else if (choice.equals("eeld-candidate")) {
+                exportHtml.cycKbSubsetCollectionGuid = eeldSharedOntologyCandidateConstantGuid;
+                exportHtml.exportedVocabularyOutputPath = "eeld-shared-candidate-vocabulary.html";
+                exportHtml.exportedHierarchyOutputPath = "eeld-shared-candidate-hierarchy.html";
+            }
+            else {
+                System.out.println("specified choice not found - " + choice);
+                System.exit(1);
+            }
 
             exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCandidateConstantGuid);
             exportHtml.filterFromDirectInstanceGuids.add(eeldSharedOntologyCoreConstantGuid);

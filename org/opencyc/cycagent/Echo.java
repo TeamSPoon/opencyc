@@ -55,7 +55,8 @@ public class Echo extends GenericAgent {
      */
     public static void main(String[] args) {
         if (args.length < 3) {
-            System.err.println("invalid args, usage: remote-agent-name remote-agent-community message-string");
+            System.err.println("invalid args, usage: remote-agent-name remote-agent-community" +
+                               "message-string");
             System.exit(1);
         }
         Echo echo = new Echo();
@@ -70,7 +71,7 @@ public class Echo extends GenericAgent {
         }
         echo.echoMessageText = args[2];
         echo.myAgentName = "EchoAgent";
-        echo.setVerbosity(AgentCommunityAdapter.QUIET_VERBOSITY);
+        echo.setVerbosity(AgentCommunityAdapter.MAX_VERBOSITY);
         echo.initializeAgentCommunity();
         echo.doEcho();
         echo.agentCommunityAdapter.deregister();
@@ -83,8 +84,7 @@ public class Echo extends GenericAgent {
     public void doEcho () {
         ACL acl = new ACL();
         acl.setPerformative(FIPACONSTANTS.REQUEST);
-        AgentID senderAid = new AgentID();
-        senderAid.setName(myAgentName);
+        AgentID senderAid = getAID(remoteAgentCommunity);
         acl.setSenderAID(senderAid);
         AgentID receiverAid = new AgentID();
         receiverAid.setName(remoteAgentName);
@@ -103,7 +103,7 @@ public class Echo extends GenericAgent {
         ACL replyAcl = null;
         try {
             //Timer timer = new Timer(this.oneMinuteDuration);
-            Timer timer = new Timer();
+            Timer timer = new Timer(10000);
             replyAcl = agentCommunityAdapter.converseMessage(acl, timer);
         }
         catch (TimeLimitExceededException e) {

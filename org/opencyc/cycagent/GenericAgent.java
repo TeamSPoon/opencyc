@@ -71,7 +71,7 @@ public class GenericAgent implements MessageReceiver {
     /**
      * type of the local agent
      */
-    protected String myAgentType = "OpenCyc-agent";
+    protected String myAgentType = "fipaos";
 
     /**
      * the interface for interacting with the CoABS agent community
@@ -116,7 +116,7 @@ public class GenericAgent implements MessageReceiver {
         this.verbosity = verbosity;
         Log.makeLog();
         if (verbosity > 0)
-            Log.current.println("Created CycProxy for " + myAgentName +
+            Log.current.println("Created " + this.getClass() + " for " + myAgentName +
                                 "\nfor both CoABS and FIPA-OS agent communities");
     }
 
@@ -134,7 +134,7 @@ public class GenericAgent implements MessageReceiver {
         this.verbosity = verbosity;
         Log.makeLog();
         if (verbosity > 0)
-            Log.current.println("Created CycProxy for " + myAgentName +
+            Log.current.println("Created " + this.getClass() + " for " + myAgentName +
                                 "\nfor the " + this.agentCommunityName() + " agent community");
     }
 
@@ -177,6 +177,8 @@ public class GenericAgent implements MessageReceiver {
      * @param acl the Agent Communication Language message which has been received for my agent
      */
     public void messageReceived (int remoteAgentCommunity, ACL acl) {
+        if (verbosity > 0)
+            Log.current.println("FipaOsCommunityAdapter received\n" + acl);
         messageConsumed = false;
         if (acl.getOntology().equals(AgentCommunityAdapter.CYC_ECHO_ONTOLOGY)) {
             processEchoRequest(remoteAgentCommunity, acl);
@@ -191,6 +193,8 @@ public class GenericAgent implements MessageReceiver {
      * @param echoRequestAcl the echo request Agent Communication Language message
      */
     public void processEchoRequest (int remoteAgentCommunity, ACL echoRequestAcl) {
+        if (verbosity > 0)
+            Log.current.println("Processing echo request\n" + echoRequestAcl);
         ACL echoReplyAcl = (ACL) echoRequestAcl.clone();
         echoReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
         echoReplyAcl.setSenderAID(echoRequestAcl.getReceiverAID());
@@ -273,6 +277,21 @@ public class GenericAgent implements MessageReceiver {
     }
 
     /**
+     * Gets the AgentID of this Agent
+     *
+     * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community
+     */
+    public AgentID getAID (int remoteAgentCommunity) {
+        if (remoteAgentCommunity == AgentCommunityAdapter.COABS_AGENT_COMMUNITY) {
+            AgentID agentID = new AgentID();
+            agentID.setName(myAgentName);
+            return agentID;
+        }
+        else
+            return this.fipaOsCommunityAdapter.getAID();
+    }
+
+    /**
      * Returns the CycList FIPA-2001 representation of the given ACL without using CycAccess.
      *
      * @param acl the Agent Communication Lanaguage message object.
@@ -324,6 +343,14 @@ public class GenericAgent implements MessageReceiver {
         return aclList;
     }
 
+    /**
+     * Returns a string representation of this object.
+     *
+     * @return a string representation of this object
+     */
+    public String toString() {
+        return "[" + this.getClass() + " named " + myAgentName + "]";
+    }
 
     /**
      * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum

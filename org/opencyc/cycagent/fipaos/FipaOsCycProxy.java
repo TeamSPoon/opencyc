@@ -57,12 +57,13 @@ public class FipaOsCycProxy {
      * Provides the main method.
      */
     public static void main(String[] args) {
-        if( args == null || args.length < 2 ) {
-            System.out.println( "Usage: java org.opencyc.cycagent.fipaos.FipaOsCycProxy <platform.profile> <name>" );
+        if(args == null || args.length < 2) {
+            System.out.println("Usage: java org.opencyc.cycagent.fipaos.FipaOsCycProxy <platform.profile> <name>" );
             return;
         }
         FipaOsCommunityAdapter.platform_profile = args[0];
-        FipaOsCycProxy fipaOsCycProxy = new FipaOsCycProxy(args[1], AgentCommunityAdapter.MAX_VERBOSITY);
+        FipaOsCycProxy fipaOsCycProxy = new FipaOsCycProxy(args[1],
+                                                           AgentCommunityAdapter.MAX_VERBOSITY);
         fipaOsCycProxy.cycProxy.initializeAgentCommunity();
         while (true)
             // Keep root thread running with minimal resource consumption, while awaiting

@@ -65,7 +65,7 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
     /**
      * the platform profile location
      */
-    public static String platform_profile = "g:\\fipa-os\\profiles\\platform.profile";
+    public static String platform_profile = "e:\\fipa-os\\profiles\\platform.profile";
 
     /**
      * the FIPA-OS agent owner
@@ -95,6 +95,11 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
      */
     public FipaOsCommunityAdapter(MessageReceiver messageReceiver, int verbosity) {
         super(platform_profile, messageReceiver.getMyAgentName(), FipaOsCommunityAdapter.OWNER, true);
+        this.messageReceiver = messageReceiver;
+        if (Log.current == null)
+            Log.makeLog();
+        if (verbosity > 2)
+            Log.current.println("messageReceiver " + messageReceiver);
         myAgentName = messageReceiver.getMyAgentName();
         this.verbosity = verbosity;
         if (verbosity == 0)
@@ -107,9 +112,9 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
             diagnosticLevel = DIAGNOSTICS.LEVEL_4;
         else
             diagnosticLevel = DIAGNOSTICS.LEVEL_MAX;
-        if (Log.current == null)
-            Log.makeLog();
         register();
+        if (verbosity > 2)
+            Log.current.println("My agent ID\n  " + this.getAID());
     }
 
     /**
@@ -131,8 +136,12 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
                 shutdown();
                 return;
             }
+            DIAGNOSTICS.println("Already registered with AMS", this, diagnosticLevel);
         }
         try {
+            if (verbosity > 2)
+                Log.current.print("Registering with DF for type " +
+                                  messageReceiver.getAgentType());
             registerWithDF(messageReceiver.getAgentType());
             DIAGNOSTICS.println("Registered with DF", this, diagnosticLevel);
         }
@@ -183,11 +192,15 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
         throws TimeLimitExceededException, IOException {
         ACL replyAcl = null;
         Object result = null;
+        if (verbosity > 2)
+            Log.current.println("converseMessage sending\n" + acl);
         try {
             result =
-                (ACL) SynchronousTask.executeTask(_tm,
-                                                  new RequestTask(acl),
-                                                  timer.getRemainingMilliSeconds());
+                SynchronousTask.executeTask(_tm,
+                                            new RequestTask(acl),
+                                            timer.getRemainingMilliSeconds());
+            if (verbosity > 2)
+                Log.current.println("result:\n" + result);
 
         }
         catch( Throwable t) {
@@ -261,6 +274,15 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
     }
 
     /**
+     * Returns a string representation of this object.
+     *
+     * @param a string representation of this object
+     */
+    public String toString() {
+        return "[" + this.getClass() + " named " + this.myAgentName + "]";
+    }
+
+    /**
      * Provides an idle task which handles incomming messages which are not
      * otherwise associated with an in-progress conversation.
      */
@@ -291,6 +313,13 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
             else
                 DIAGNOSTICS.println( "Ignored request", diagnosticLevel);
         }
+
+        /**
+         * Handles completion of an AgreePerform task.
+         */
+        public void doneFipaOsCommunityAdapter_AgreeInformTask(Task task) {
+            DIAGNOSTICS.println("Completed AgreeInform task\n" + task, diagnosticLevel);
+        }
     }
 
     /**
@@ -316,6 +345,8 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
          */
         public RequestTask (ACL requestAcl) {
             this.requestAcl = requestAcl;
+            if (verbosity > 2)
+                Log.current.print("\nconstructed RequestTask for\n" + requestAcl);
         }
 
         /**
@@ -324,9 +355,20 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
          * fipa-request conversation to track it.
          */
         protected void startTask() {
+            if (verbosity > 2)
+                Log.current.print("\nstarting RequestTask and sending\n" + requestAcl);
             forward(requestAcl);
             DIAGNOSTICS.println("Sent request to " + requestAcl.getReceiverAID().getName(),
                                 diagnosticLevel);
+        }
+
+        /**
+         * Handle the request message which is part of the fipa-request conversation by doing
+         * nothing.
+         */
+        public void handleRequest(Conversation fipaRequest) {
+            if (verbosity > 2)
+                Log.current.println("\nhandling Request " + fipaRequest);
         }
 
         /**
@@ -334,14 +376,18 @@ public class FipaOsCommunityAdapter extends FIPAOSAgent implements AgentCommunit
          * nothing.
          */
         public void handleAgree(Conversation fipaRequest) {
+            if (verbosity > 2)
+                Log.current.println("\nhandling Agree " + fipaRequest);
         }
 
         /**
-         * Handle the inform message which is part of the RequestInformProtocol.  The replyAcl
+         * Handle the inform message which is part of the RequestProtocol.  The replyAcl
          * is returned via the done method.
          */
-        public void handleInform(Conversation requestInformProtocol) {
-            replyAcl = requestInformProtocol.getACL(requestInformProtocol.getLatestMessageIndex());
+        public void handleInform(Conversation fipaRequest) {
+            if (verbosity > 2)
+                Log.current.println("\nhandling Inform " + fipaRequest);
+            replyAcl = fipaRequest.getACL(fipaRequest.getLatestMessageIndex());
             done(replyAcl);
         }
     }

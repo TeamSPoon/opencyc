@@ -150,6 +150,7 @@ public class ImportDaml implements StatementHandler {
             equivalentDamlCycTerms.put("daml:DatatypeProperty", "DamlDatatypeProperty");
             equivalentDamlCycTerms.put("daml:ObjectProperty", "DamlObjectProperty");
             equivalentDamlCycTerms.put("rdf:Property", "BinaryPredicate");
+            equivalentDamlCycTerms.put("xsd:string", "CharacterString");
         }
         kbSubsetCollection = cycAccess.getKnownConstantByName(kbSubsetCollectionName);
         bookkeepingMt = cycAccess.getKnownConstantByName("BookkeepingMt");
@@ -710,12 +711,21 @@ public class ImportDaml implements StatementHandler {
         DamlTermInfo subjectTermInfo = resource(subject, null);
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo objectTermInfo = resource(object, null);
-
-        /*
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       objectTermInfo);
-                      */
+        if (predicateTermInfo.toString().equals("rdf:type") &&
+            objectTermInfo.toString().equals("daml:Restriction")) {
+            damlRestriction = new DamlRestriction(this);
+            damlRestriction.anonymousId = subject.getAnonymousID();
+        }
+        else if (predicateTermInfo.toString().equals("daml:onProperty"))
+            damlRestriction.property = objectTermInfo.toString();
+        else if (predicateTermInfo.toString().equals("daml:toClass"))
+            damlRestriction.toClasses.add(objectTermInfo.toString());
+        else
+            throw new RuntimeException("Unexpected restriction property " +
+                                       predicateTermInfo.toString());
     }
 
     /**
@@ -732,11 +742,14 @@ public class ImportDaml implements StatementHandler {
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo literalTermInfo = literal(literal);
 
-        /*
+
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       literalTermInfo);
-                      */
+        throw new RuntimeException("Unexpected restriction triple \n" +
+                                   subjectTermInfo.toString() + " " +
+                                   predicateTermInfo.toString() + " " +
+                                   literalTermInfo.toString());
     }
 
     /**
@@ -752,12 +765,22 @@ public class ImportDaml implements StatementHandler {
         DamlTermInfo subjectTermInfo = resource(subject, null);
         DamlTermInfo predicateTermInfo = resource(predicate, null);
         DamlTermInfo objectTermInfo = resource(object, null);
-
-        /*
         displayTriple(subjectTermInfo,
                       predicateTermInfo,
                       objectTermInfo);
-                      */
+        if (predicateTermInfo.toString().equals("daml:subClassOf"))
+            damlRestriction.fromClass = subjectTermInfo.toString();
+        else
+            throw new RuntimeException("Unexpected restriction property " +
+                                       predicateTermInfo.toString());
+        try {
+            damlRestriction.formInterArgIsaConstraint();
+        }
+        catch (Exception e) {
+            Log.current.printStackTrace(e);
+            System.exit(1);
+        }
+        Log.current.println("\n   DamlRestriction: " + damlRestriction.toString());
     }
 
     /**
@@ -932,26 +955,59 @@ public class ImportDaml implements StatementHandler {
     protected class DamlRestriction {
 
         /**
+         * the parent ImportDaml object
+         */
+        ImportDaml importDaml;
+
+        /**
          * Identifies all the RDF triples which contribute to this DAML
          * Restriction.
          */
-        String anonymousId;
+        public String anonymousId;
 
         /**
          * The domain (Cyc arg1) class whose intstances are the subject of the property.
          */
-        String fromClass;
+        public String fromClass;
 
         /**
          * The property (Cyc predicate arg0) which relates the subject and predicate instances.
          */
-        String property;
+        public String property;
 
         /**
          * The range (Cyc arg2) classes whose instances may be objects of the property in the
          * cases where subject is an instance of the given fromClass.
          */
-        ArrayList toClasses;
+        public ArrayList toClasses = new ArrayList();
+
+        /**
+         * The interArgIsa1-2 constraint sentence.
+         */
+        public CycList interArgIsaConstraint;
+
+        /**
+         * Constructs a new DamlRestriction object.
+         */
+        public DamlRestriction (ImportDaml importDaml) {
+            this.importDaml = importDaml;
+        }
+
+        public CycList formInterArgIsaConstraint()
+            throws IOException, UnknownHostException, CycApiException {
+            if (toClasses.size() == 1) {
+                String interArgIsaConstraintString =
+                    "(#$interArgIsa1-2 #$" + property +
+                    " #$" + fromClass +
+                    " #$" + toClasses.get(0) + ")";
+                interArgIsaConstraint = cycAccess.makeCycList(interArgIsaConstraintString);
+            }
+            else
+                //TODO
+                throw new RuntimeException("Unhandled restriction case: " +
+                                           toClasses.toString());
+            return interArgIsaConstraint;
+        }
 
         /**
          * Returns a string representation of this object.
@@ -964,14 +1020,17 @@ public class ImportDaml implements StatementHandler {
             stringBuffer.append(anonymousId);
             stringBuffer.append(": ");
             stringBuffer.append(fromClass);
-            stringBuffer.append(" (");
+            stringBuffer.append(" ");
             stringBuffer.append(property);
+            stringBuffer.append(" (");
             for (int i = 0; i < toClasses.size(); i++) {
                 if (i > 0)
                     stringBuffer.append(", ");
                 stringBuffer.append(toClasses.get(i).toString());
             }
-            stringBuffer.append(")");
+            stringBuffer.append(") ");
+            if (interArgIsaConstraint != null)
+                stringBuffer.append(interArgIsaConstraint.cyclify());
             return stringBuffer.toString();
         }
     }

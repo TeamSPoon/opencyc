@@ -102,8 +102,8 @@ public class ImportSonatDaml {
             new ImportDaml(cycAccess,
                            ontologyNicknames,
                            kbSubsetCollectionName);
-        //for (int i = 16; i < 17; i++) {
-        for (int i = 0; i < damlDocInfos.size(); i++) {
+        for (int i = 10; i < 11; i++) {
+        //for (int i = 0; i < damlDocInfos.size(); i++) {
         //for (int i = 0; i < 1; i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();

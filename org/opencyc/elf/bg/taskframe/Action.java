@@ -219,17 +219,17 @@ public class Action {
   /** the abort action name */
   public static final String ABORT = "abort";
   
-  /** the converse with user action name */
-  public static final String CONVERSE_WITH_USER = "converse with user";
-  
   /** the console prompted input action name */
   public static final String CONSOLE_PROMPTED_INPUT = "console prompted input";
   
-  /** the init action name */
-  public static final String INIT = "init";
+  /** the converse with user action name */
+  public static final String CONVERSE_WITH_USER = "converse with user";
   
   /** the emergency stop action name */
   public static final String EMERGENCY_STOP = "emergency stop";
+  
+  /** the init action name */
+  public static final String INIT = "init";
   
   //// Private Area
   

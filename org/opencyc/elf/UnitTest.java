@@ -3,9 +3,15 @@ package org.opencyc.elf;
 //// Internal Imports
 import org.opencyc.elf.bg.BehaviorGeneration;
 
+import org.opencyc.elf.bg.dictionary.*;
+import org.opencyc.elf.bg.expression.*;
+import org.opencyc.elf.bg.list.*;
+
 import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
+
+import org.opencyc.elf.bg.predicate.*;
 
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
@@ -187,6 +193,28 @@ public class UnitTest extends TestCase {
     new KnowledgeBase();
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
+    new DictionaryEnter();
+    new DictionaryKeys();
+    new DictionaryLookup();
+    new DictionaryRemove();
+    new DictionaryValues();
+    new TheEmptyDictionary();
+    new Minus();
+    new Plus();
+    new FirstInList();
+    new JoinLists();
+    new LengthOfList();
+    new RestOfList();
+    new TheEmptyList();
+    new TheList();
+    new And();
+    new Different();
+    new Equals();
+    new LessThan();
+    new Not();
+    new NotNull();
+    new Or();
+    new True();
     new ActionLibrary();
     (new ActionFactory()).getInstance().populateActionLibrary();
     new GoalLibrary();

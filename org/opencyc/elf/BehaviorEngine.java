@@ -1,21 +1,32 @@
 package org.opencyc.elf;
 
-import EDU.oswego.cs.dl.util.concurrent.Puttable;
-
-//// External Imports
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
 //// Internal Imports
+import org.opencyc.elf.bg.dictionary.DictionaryEnter;
+import org.opencyc.elf.bg.dictionary.DictionaryKeys;
+import org.opencyc.elf.bg.dictionary.DictionaryLookup;
+import org.opencyc.elf.bg.dictionary.DictionaryRemove;
+import org.opencyc.elf.bg.dictionary.DictionaryValues;
+import org.opencyc.elf.bg.dictionary.TheEmptyDictionary;
+import org.opencyc.elf.bg.expression.Minus;
+import org.opencyc.elf.bg.expression.Plus;
+import org.opencyc.elf.bg.list.FirstInList;
+import org.opencyc.elf.bg.list.JoinLists;
+import org.opencyc.elf.bg.list.LengthOfList;
+import org.opencyc.elf.bg.list.RestOfList;
+import org.opencyc.elf.bg.list.TheEmptyList;
+import org.opencyc.elf.bg.list.TheList;
+import org.opencyc.elf.bg.predicate.And;
+import org.opencyc.elf.bg.predicate.Different;
+import org.opencyc.elf.bg.predicate.Equals;
+import org.opencyc.elf.bg.predicate.LessThan;
+import org.opencyc.elf.bg.predicate.Not;
 import org.opencyc.elf.bg.predicate.NotNull;
-
+import org.opencyc.elf.bg.predicate.Or;
+import org.opencyc.elf.bg.predicate.True;
 import org.opencyc.elf.bg.taskframe.Action;
 import org.opencyc.elf.bg.taskframe.Command;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
-
 import org.opencyc.elf.message.DoTaskMsg;
-
 import org.opencyc.elf.wm.ActionFactory;
 import org.opencyc.elf.wm.ActionLibrary;
 import org.opencyc.elf.wm.ActuatorClassFactory;
@@ -36,8 +47,10 @@ import org.opencyc.elf.wm.SensorPool;
 import org.opencyc.elf.wm.StateVariableFactory;
 import org.opencyc.elf.wm.StateVariableLibrary;
 import org.opencyc.elf.wm.state.State;
-import org.opencyc.elf.wm.state.StateVariable;
 
+//// External Imports
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import java.util.logging.Logger;
 
 /** BehaviorEngine provides the main method for the behavior engine that consists of a hierarchy of
  * Elementary Loop Functioning (ELF) nodes.  There is a singleton instance of behavior engine.
@@ -100,7 +113,7 @@ public class BehaviorEngine {
     new KnowledgeBase();
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
-    createPredicateSingletonInstances();
+    createOperatorSingletonInstances();
     new ActionLibrary();
     (new ActionFactory()).getInstance().populateActionLibrary();
     new GoalLibrary();
@@ -117,10 +130,31 @@ public class BehaviorEngine {
     new NodeFactory();
   }
 
-  /** Creates the predicate singleton instances.
+  /** Creates the operator singleton instances.
    */
-  protected void createPredicateSingletonInstances() {
+  protected void createOperatorSingletonInstances() {
+    new DictionaryEnter();
+    new DictionaryKeys();
+    new DictionaryLookup();
+    new DictionaryRemove();
+    new DictionaryValues();
+    new TheEmptyDictionary();
+    new Minus();
+    new Plus();
+    new FirstInList();
+    new JoinLists();
+    new LengthOfList();
+    new RestOfList();
+    new TheEmptyList();
+    new TheList();
+    new And();
+    new Different();
+    new Equals();
+    new LessThan();
+    new Not();
     new NotNull();
+    new Or();
+    new True();
   }
 
   //// Private Area

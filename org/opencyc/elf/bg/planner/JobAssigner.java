@@ -245,7 +245,7 @@ public class JobAssigner extends BufferedNodeComponent {
       taskCommand = doTaskMsg.getTaskCommand();
       getLogger().info("Do task: " + taskCommand);
       
-      //TOTO
+      //TODO
     }
                 
     /**

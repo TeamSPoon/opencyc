@@ -65,6 +65,9 @@ public class ScheduleFactory {
     List plannedCommands = new ArrayList();
     // perform ConsolePromptedInput using ">"
     Action action = ActionLibrary.getInstance().getAction(Action.CONSOLE_PROMPTED_INPUT);
+    List inputParameterValues = new ArrayList();
+    inputParameterValues.add(">");
+    action.setInputParameterValues(inputParameterValues);
     // achieve GetUserInput using 
     plannedCommands.add(action);
     plannedCommands.add(GoalLibrary.getInstance().getGoal(Goal.PERCEIVE_SENSATION));

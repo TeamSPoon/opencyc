@@ -221,9 +221,9 @@ public class Scheduler extends BufferedNodeComponent {
     protected void processScheduleJobMsg (ScheduleJobMsg scheduleJobMsg) {
       getLogger().info("Scheduler proccessing " + scheduleJobMsg);
       job = scheduleJobMsg.getJob();
-      Command command = job.getCommand();
-      List scheduleSets = ScheduleLibrary.getInstance().getScheduleSets(command.getName());
-      getLogger().info("schedule sets for " + command.getName() + " are " + scheduleSets);
+      String commandName = job.getCommandName();
+      List scheduleSets = ScheduleLibrary.getInstance().getScheduleSets(commandName);
+      getLogger().info("schedule sets for " + commandName + " are " + scheduleSets);
       List schedules = determineBestScheduleSet(scheduleSets);
       getLogger().info("schedules " + schedules);
       Schedule schedule = determineEligibleSchedule(schedules);
@@ -330,7 +330,7 @@ public class Scheduler extends BufferedNodeComponent {
      */
     protected void processScheduleConsistencyRequestMsg (ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg) {
       List peerControlledResources = scheduleConsistencyRequestMsg.getControlledResources();
-      Command peerCommand = scheduleConsistencyRequestMsg.getCommand();
+      String peerCommandName = scheduleConsistencyRequestMsg.getCommandName();
       Schedule peerSchedule = scheduleConsistencyRequestMsg.getSchedule();
       //TODO
     }
@@ -352,7 +352,7 @@ public class Scheduler extends BufferedNodeComponent {
       ScheduleConsistencyRequestMsg scheduleConsistencyRequestMsg = 
         new ScheduleConsistencyRequestMsg(thisScheduler,
                                           controlledResources,
-                                          job.getCommand(),
+                                          job.getCommandName(),
                                           schedule);
       scheduleConsistencyRequestMsg.setReplyToChannel((Puttable) schedulerChannel);
       thisScheduler.sendMsgToRecipient(peerScheduler.getChannel(), 

@@ -168,8 +168,8 @@ public class UnitTest extends TestCase {
     Assert.assertNotNull(job);
     Assert.assertEquals("[JobAssignment for [Action: converse with user( prompt: null)] using: [[Resource: console]]]", 
                         job.toString());
-    Assert.assertNotNull(job.getCommand());
-    Assert.assertEquals("[Action: converse with user( prompt: null)]", job.getCommand().toString());
+    Assert.assertNotNull(job.getCommandName());
+    Assert.assertEquals("", job.getCommandName());
     List requiredResources = job.getRequiredResources();
     Assert.assertNotNull(requiredResources);
     Assert.assertEquals(1, requiredResources.size());

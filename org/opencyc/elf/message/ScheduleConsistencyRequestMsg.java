@@ -2,7 +2,6 @@ package org.opencyc.elf.message;
 
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
-import org.opencyc.elf.bg.command.Command;
 import org.opencyc.elf.bg.planner.Schedule;
 
 //// External Imports
@@ -40,17 +39,17 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
    *
    * @param sender the sender of the message
    * @param controlledResources the resources controlled by this node
-   * @param command the requesting scheduler's command
+   * @param commandName the requesting scheduler's command name
    * @param schedule the requesting scheduler's proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    */
   public ScheduleConsistencyRequestMsg(NodeComponent sender,
                                        List controlledResources,
-                                       Command command,
+                                       String commandName,
                                        Schedule schedule) {
     this.sender = sender;
     this.controlledResources = controlledResources;
-    this.command = command;
+    this.commandName = commandName;
     this.schedule = schedule;
   }
   
@@ -65,7 +64,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     stringBuffer.append("[ScheduleConsistencyRequestMsg: ");
     stringBuffer.append(controlledResources.toString());
     stringBuffer.append(" command: ");
-    stringBuffer.append(command.toString());
+    stringBuffer.append(commandName);
     stringBuffer.append(" schedule: ");
     stringBuffer.append(schedule.toString());
     stringBuffer.append("]");
@@ -80,12 +79,12 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return controlledResources;
   }
 
-  /** Gets the requesting scheduler's command
+  /** Gets the requesting scheduler's command name.
    *
-   * @return the requesting scheduler's command
+   * @return the requesting scheduler's command name
    */
-  public Command getCommand () {
-    return command;
+  public String getCommandName () {
+    return commandName;
   }
 
   /** Gets the requesting scheduler's proposed schedule of actions to carry out the commanded task using
@@ -107,8 +106,8 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
   /** the resources controlled by this node */
   protected List controlledResources;
   
-  /** the requesting scheduler's command */
-  protected Command command;
+  /** the requesting scheduler's command name */
+  protected String commandName;
   
   /** the requesting scheduler's proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources

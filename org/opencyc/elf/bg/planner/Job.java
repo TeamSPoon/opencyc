@@ -1,7 +1,6 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
-import org.opencyc.elf.bg.command.Command;
 
 //// External Imports
 import java.util.List;
@@ -38,17 +37,17 @@ public class Job {
   
   /** Creates a new instance of JobAssignment for the given job.
    *
-   * @param command the command to be temporally decomposed into subtasks/subgoals and scheduled
+   * @param commandName the name of the command to be temporally decomposed into subtasks/subgoals and scheduled
    * @param requiredResources the resources required to schedule the subtasks/subgoals that accomplish the assigned job
    * @param directActuatorName the name of the direct actuator that achieves or accomplishes the assigned job
    * @param directSensorName the name of the direct sensor that senses the achievements or accomplishments of 
    * the assigned job
    */
-  public Job(Command command,
+  public Job(String commandName,
              List requiredResources, 
              String directActuatorName, 
              String directSensorName) {
-    this.command = command;
+    this.commandName = commandName;
     this.requiredResources = requiredResources;
     this.directActuatorName = directActuatorName;
     this.directSensorName = directSensorName;
@@ -65,19 +64,19 @@ public class Job {
   public String toString() {
     StringBuffer stringBuffer = new StringBuffer();
     stringBuffer.append("[JobAssignment for ");
-    stringBuffer.append(command.toString());
+    stringBuffer.append(commandName);
     stringBuffer.append(" using: ");
     stringBuffer.append(requiredResources.toString());
     stringBuffer.append("]");
     return stringBuffer.toString();
   }
   
-  /** the command to be temporally decomposed into subtasks/subgoals and scheduled.
+  /** the name of the command to be temporally decomposed into subtasks/subgoals and scheduled.
    *
-   * @return the command to be temporally decomposed into subtasks/subgoals and scheduled
+   * @return the name of the command to be temporally decomposed into subtasks/subgoals and scheduled
    */
-  public Command getCommand () {
-    return command;
+  public String getCommandName () {
+    return commandName;
   }
 
   /** Gets the resources required to schedule the subtasks/subgoals that accomplish the assigned job.
@@ -110,8 +109,8 @@ public class Job {
   
   //// Internal Rep
   
-  /** the command to be temporally decomposed into subtasks/subgoals and scheduled */
-  protected Command command;
+  /** the name of the command to be temporally decomposed into subtasks/subgoals and scheduled */
+  protected String commandName;
   
   /** the resources required to schedule the subtasks/subgoals that accomplish the assigned job */
   protected List requiredResources;

@@ -2,8 +2,6 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.a.DirectActuator;
-import org.opencyc.elf.bg.command.Command;
-import org.opencyc.elf.bg.command.Parameter;
 import org.opencyc.elf.bg.planner.Job;
 import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.taskframe.Action;
@@ -57,12 +55,11 @@ public class JobFactory {
   /** Poplulates the job library. */
   public void populateJobLibrary () {
     // converse with user
-    Command command = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
     List requiredResources = new ArrayList();
     requiredResources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
     String directActuatorName = DirectActuator.CONSOLE_OUTPUT;
     String directSensorName = DirectSensor.CONSOLE_INPUT;
-    Job job = new Job(command, requiredResources, directActuatorName, directSensorName);
+    Job job = new Job(Action.CONVERSE_WITH_USER, requiredResources, directActuatorName, directSensorName);
     List jobSet = new ArrayList();
     jobSet.add(job);
     JobLibrary.getInstance().addJobSet(Action.CONVERSE_WITH_USER, jobSet);

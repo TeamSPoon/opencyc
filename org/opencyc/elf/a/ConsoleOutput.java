@@ -3,8 +3,11 @@ package org.opencyc.elf.a;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
-import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.bg.planner.Resource;
+
 import org.opencyc.elf.message.ActuateMsg;
+
+import org.opencyc.elf.wm.ResourcePool;
 
 //// External Imports
 import EDU.oswego.cs.dl.util.concurrent.Executor;
@@ -43,9 +46,11 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    * Creates a new instance of ConsoleOutput given its name. 
    *
    * @param name the actuator name
+   * @param actuatedObject the object which is acted upon
    */
-  public ConsoleOutput(String name) {
+  public ConsoleOutput(String name, Resource actuatedObject) {
     this.name = name;
+    this.actuatedObject = actuatedObject;
   }
   
   //// Public Area
@@ -159,6 +164,9 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
 
   /** the name of the actuator */
   protected String name;
+  
+  /** the object which is acted upon */
+  protected Object actuatedObject;
   
   /** the takable channel from which messages are input */
   protected Takable actuatorChannel = null;

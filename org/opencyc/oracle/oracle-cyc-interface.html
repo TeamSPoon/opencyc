@@ -21,9 +21,9 @@ Oracle:
 <h2>Prerequisites</h2>
 You need the following installed on a linux server :
 <ul>
-<li><a href="www.opencyc.org">OpenCyc</a></li>
-<li><a href="otn.oracle.com">Oracle 9i</a></li>
-<li><a href="www.blackdown.org">J2SDK</a></li>
+<li><a href="http://www.opencyc.org">OpenCyc</a></li>
+<li><a href="http://otn.oracle.com">Oracle 9i</a></li>
+<li><a href="http://www.blackdown.org">J2SDK</a></li>
 </ul>
 <h2>Getting the files</h2>
 <h3>Third party jars</h3>
@@ -59,7 +59,7 @@ The PL/SQL CYC package specification.</td></tr>
 The PL/SQL CYC package body, contains call specifications for the Java Stored Procedures
 in CycJsprocs.java.</td></tr>
 </table>
-<p>You can get these files with CVS from Sourgeforge. They're in the org/opencyc/oracle directory.</p>
+<p>You can get these files with CVS from <a href="http://sourceforge.net/projects/opencyc/">Sourceforge</a>. They're in the org/opencyc/oracle directory.</p>
 
 <h2>Loading the stuff in Oracle</h2>
 <h3>Prepare Oracle</h3>
@@ -185,7 +185,7 @@ If this fails, check the user_errors again.
 <h3>Load the CYC package</h3>
 <p>
 Once <tt>CycJsproc.java</tt> is loaded and resolved, you can load the CYC PL/SQL package. First load
-the package specification:
+the package specification. Note that this file also creates the type <tt>cyclist_type</tt>:
 <pre>
 bash$ sqlplus cyctest/cyctest @cyc.pks
 </pre>

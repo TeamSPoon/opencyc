@@ -4138,10 +4138,56 @@ public class CycAccess {
                            int arg2)
         throws IOException, UnknownHostException, CycApiException {
         // (predicate <CycFort> <int>)
+        assertGaf(mt, predicate, arg1, new Integer(arg2));
+    }
+
+    /**
+     * Asserts a ground atomic formula (gaf) in the specified microtheory.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param mt the microtheory in which the assertion is made
+     * @param predicate the binary predicate of the assertion
+     * @param arg1 the first argument of the predicate
+     * @param arg2 the second argument of the predicate, which is an Integer
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGaf (CycFort mt,
+                           CycFort predicate,
+                           CycFort arg1,
+                           Integer arg2)
+        throws IOException, UnknownHostException, CycApiException {
+        // (predicate <CycFort> <int>)
         String sentence =
             "(" + predicate.cyclify() + " " +
             arg1.cyclify() + " " +
-            Integer.toString(arg2) + ")";
+            arg2.toString() + ")";
+        assertWithTranscriptAndBookkeeping(sentence, mt);
+    }
+
+    /**
+     * Asserts a ground atomic formula (gaf) in the specified microtheory.  The operation
+     * will be added to the KB transcript for replication and archive.
+     *
+     * @param mt the microtheory in which the assertion is made
+     * @param predicate the binary predicate of the assertion
+     * @param arg1 the first argument of the predicate
+     * @param arg2 the second argument of the predicate, which is a Double
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertGaf (CycFort mt,
+                           CycFort predicate,
+                           CycFort arg1,
+                           Double arg2)
+        throws IOException, UnknownHostException, CycApiException {
+        // (predicate <CycFort> <int>)
+        String sentence =
+            "(" + predicate.cyclify() + " " +
+            arg1.cyclify() + " " +
+            arg2.toString() + ")";
         assertWithTranscriptAndBookkeeping(sentence, mt);
     }
 
@@ -6086,6 +6132,27 @@ public class CycAccess {
             gafs.add(gaf);
         }
         return gafs;
+    }
+
+    /**
+     * Assert an argument contraint for the given relation and argument position.
+     * The operation will be added to the KB transcript for replication and archive.
+     *
+     * @param relation the given relation
+     * @param argPosition the given argument position
+     * @param argNIsa the argument constraint
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertArg1FormatSingleEntry (CycFort relation)
+        throws IOException, UnknownHostException, CycApiException {
+        // (#$arg1Format relation SingleEntry)
+        CycList sentence = new CycList();
+        sentence.add(getKnownConstantByGuid("bd61886b-9c29-11b1-9dad-c379636f7270"));
+        sentence.add(relation);
+        sentence.add(getKnownConstantByGuid("bd5880eb-9c29-11b1-9dad-c379636f7270"));
+        assertGaf(sentence, universalVocabularyMt);
     }
 
 

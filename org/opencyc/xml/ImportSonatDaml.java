@@ -73,18 +73,23 @@ public class ImportSonatDaml {
      */
     public ImportSonatDaml()
         throws IOException, UnknownHostException, CycApiException {
-        Log.current.println("Connecting to Cyc server.");
-        //cycAccess = new CycAccess();
-        /*
-        cycAccess = new CycAccess("localhost",
-                                  3620,
-                                  CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                  true);
-                                  */
-        cycAccess = new CycAccess("MCCARTHY",
-                                  4600,
-                                  CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                  true);
+        String localHostName = InetAddress.getLocalHost().getHostName();
+        Log.current.println("Connecting to Cyc server from " + localHostName);
+        if (localHostName.equals("crapgame.cyc.com")) {
+            cycAccess = new CycAccess("localhost",
+                                      3620,
+                                      CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                      true);
+        }
+        else if (localHostName.equals("thinker")) {
+            cycAccess = new CycAccess("MCCARTHY",
+                                      4600,
+                                      CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                      true);
+        }
+        else {
+            cycAccess = new CycAccess();
+        }
 
         initializeDamlVocabulary();
     }
@@ -120,15 +125,18 @@ public class ImportSonatDaml {
             new ImportDaml(cycAccess,
                            ontologyNicknames,
                            kbSubsetCollectionName);
-        for (int i = 27; i < damlDocInfos.size(); i++) {
-        //for (int i = 0; i < damlDocInfos.size(); i++) {
+        //importDaml.actuallyImport = false;
+        //for (int i = 16; i < damlDocInfos.size(); i++) {
+        for (int i = 0; i < damlDocInfos.size(); i++) {
             DamlDocInfo damlDocInfo = (DamlDocInfo) damlDocInfos.get(i);
             String damlPath = damlDocInfo.getDamlPath();
             String importMt = damlDocInfo.getImportMt();
-            initializeDamlOntologyMt(importMt);
-            if (! cycAccess.isOpenCyc()) {
-                cycAccess.assertGenlMt(importMt, damlSonatSpindleHeadMt);
-                cycAccess.assertGenlMt(damlSonatSpindleCollectorMt, importMt);
+            if(importDaml.actuallyImport) {
+                initializeDamlOntologyMt(importMt);
+                if (! cycAccess.isOpenCyc()) {
+                    cycAccess.assertGenlMt(importMt, damlSonatSpindleHeadMt);
+                    cycAccess.assertGenlMt(damlSonatSpindleCollectorMt, importMt);
+                }
             }
             importDaml.initialize();
             importDaml.importDaml(damlPath, importMt);

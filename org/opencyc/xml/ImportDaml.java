@@ -2,6 +2,7 @@ package org.opencyc.xml;
 
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import org.xml.sax.*;
 import com.hp.hpl.jena.rdf.arp.*;
@@ -48,6 +49,12 @@ public class ImportDaml implements StatementHandler {
      * diagnostic input.
      */
     public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * When T, indicates that the import is performed othwise when false
+     * indicates that the DAML document should be parsed but not imported.
+     */
+    public boolean actuallyImport = true;
 
     /**
      * Sets verbosity of this application.  0 --> quiet ... 9 -> maximum
@@ -168,8 +175,13 @@ public class ImportDaml implements StatementHandler {
             equivalentDamlCycTerms.put("daml:Literal", "SubLAtomicTerm");
             equivalentDamlCycTerms.put("rdfs:Literal", "SubLAtomicTerm");
 
-            equivalentDamlCycTerms.put("xsd:string", "CharacterString");
-
+            equivalentDamlCycTerms.put("xsd:string", "SubLString");
+            equivalentDamlCycTerms.put("xsd:decimal", "SubLRealNumber");
+            equivalentDamlCycTerms.put("xsd:integer", "SubLInteger");
+            equivalentDamlCycTerms.put("xsd:float", "SubLRealNumber");
+            equivalentDamlCycTerms.put("xsd:double", "SubLRealNumber");
+            equivalentDamlCycTerms.put("xsd:date", "Date");
+            equivalentDamlCycTerms.put("xsd:uriReference", "UniformResourceLocator");
             equivalentDamlCycTerms.put("xsd:anyURI", "UniformResourceLocator");
 
             // Binary predicates
@@ -334,6 +346,8 @@ public class ImportDaml implements StatementHandler {
                                   DamlTermInfo predicateTermInfo,
                                   DamlTermInfo objLitTermInfo)
         throws IOException, UnknownHostException, CycApiException {
+        if (! actuallyImport)
+            return;
         if (predicateTermInfo.isURI) {
             predicateTermInfo.coerceToNamespace();
         }
@@ -398,33 +412,22 @@ public class ImportDaml implements StatementHandler {
             predicate = importTerm(predicateTermInfo);
             cycAccess.assertIsaBinaryPredicate(predicate);
         }
-        if (objLitTermInfo.isLiteral) {
-            cycAccess.assertGaf(importMt,
-                                predicate,
-                                subject,
-                                (String) objLitTermInfo.literal);
-            Log.current.println("(" + predicate.cyclify() + " " +
-                                subject.cyclify() + " \"" +
-                                (String) objLitTermInfo.literal + "\")\n");
-            return;
-        }
-        CycFort object = cycAccess.getConstantByName(objLitTermInfo.toString());
-        if (object == null)
-            object = importTerm(objLitTermInfo);
+        CycList arg1Constraints =
+            cycAccess.getArg1Isas((CycConstant) predicate, cycAccess.universalVocabularyMt);
+        assertForwardArgConstraints(subject, arg1Constraints);
         CycList arg2Constraints =
             cycAccess.getArg2Isas((CycConstant) predicate, cycAccess.universalVocabularyMt);
         arg2Constraints.addAllNew(cycAccess.getInterArgIsa1_2_forArg2((CycConstant) predicate,
                                                                       subject,
                                                                       cycAccess.universalVocabularyMt));
-        for (int i = 0; i < arg2Constraints.size(); i++) {
-            CycFort arg2Constraint = (CycFort) arg2Constraints.get(i);
-            if (! cycAccess.isa(object, arg2Constraint)) {
-                cycAccess.assertIsa(object, arg2Constraint, cycAccess.universalVocabularyMt);
-                Log.current.println("*** asserting forward arg constraint " +
-                                    "(#$isa " + object.cyclify() + " " +
-                                    arg2Constraint.cyclify() + ")");
-            }
+        if (objLitTermInfo.isLiteral) {
+            importLiteralTriple(subject, predicate, objLitTermInfo, arg2Constraints);
+            return;
         }
+        CycFort object = cycAccess.getConstantByName(objLitTermInfo.toString());
+        if (object == null)
+            object = importTerm(objLitTermInfo);
+        assertForwardArgConstraints(object, arg2Constraints);
         cycAccess.assertGaf(importMt,
                             predicate,
                             subject,
@@ -433,6 +436,104 @@ public class ImportDaml implements StatementHandler {
                             subject.cyclify() + " " +
                             object.cyclify() + ")\n");
     }
+
+    /**
+     * Imports the RDF literal triple.
+     *
+     * @param subject the subject
+     * @param predicate the predicate
+     * @param LiteralTermInfo the literal DamlTermInfo object
+     * @param arg2Constraints the argument constraints on the type of literal permitted
+     * by this assertion
+     */
+    protected void importLiteralTriple (CycFort subject,
+                                        CycFort predicate,
+                                        DamlTermInfo LiteralTermInfo,
+                                        CycList arg2Constraints)
+        throws IOException, UnknownHostException, CycApiException {
+        if (arg2Constraints.size() == 0) {
+            cycAccess.assertGaf(importMt,
+                                predicate,
+                                subject,
+                                (String) LiteralTermInfo.literal);
+        }
+        else {
+            if (arg2Constraints.size() > 1) {
+            Log.current.println("*** ignoring extra literal argument constraints " +
+                                arg2Constraints.cyclify());
+            }
+            CycFort arg2Constraint = (CycFort) arg2Constraints.first();
+            if (arg2Constraint.equals(cycAccess.getKnownConstantByName("SubLString"))) {
+                cycAccess.assertGaf(importMt,
+                                    predicate,
+                                    subject,
+                                    (String) LiteralTermInfo.literal);
+
+            }
+            else if (arg2Constraint.equals(cycAccess.getKnownConstantByName("SubLRealNumber"))) {
+                cycAccess.assertGaf(importMt,
+                                    predicate,
+                                    subject,
+                                    new Double(LiteralTermInfo.literal));
+
+            }
+            else if (arg2Constraint.equals(cycAccess.getKnownConstantByName("SubLInteger"))) {
+                cycAccess.assertGaf(importMt,
+                                    predicate,
+                                    subject,
+                                    new Integer(LiteralTermInfo.literal));
+
+            }
+            else if (arg2Constraint.equals(cycAccess.getKnownConstantByName("Date"))) {
+                CycFort date = new CycNart(cycAccess.getKnownConstantByName("DateDecodeStringFn"),
+                                           "YYYY-MM-DD",
+                                           LiteralTermInfo.literal);
+
+                cycAccess.assertGaf(importMt,
+                                    predicate,
+                                    subject,
+                                    date);
+
+            }
+            else if (arg2Constraint.equals(cycAccess.getKnownConstantByName("UniformResourceLocator"))) {
+                CycFort urlFn = new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                                           LiteralTermInfo.literal);
+
+                cycAccess.assertGaf(importMt,
+                                    predicate,
+                                    subject,
+                                    urlFn);
+
+            }
+            else
+                Log.current.println("*** unhandled literal type constraint " +
+                                    arg2Constraint.cyclify() + "\n");
+        }
+        Log.current.println("(" + predicate.cyclify() + " " +
+                            subject.cyclify() + " \"" +
+                            (String) LiteralTermInfo.literal + "\")\n");
+    }
+
+    /**
+     * Asserts argument constraints on a forward referenced term used
+     * in an assertion.
+     *
+     * @param term the given term
+     * @param argConstraints the list of collections for which term must be an instance
+     */
+    protected void assertForwardArgConstraints (CycFort term, CycList argConstraints)
+        throws IOException, UnknownHostException, CycApiException  {
+        for (int i = 0; i < argConstraints.size(); i++) {
+            CycFort argConstraint = (CycFort) argConstraints.get(i);
+            if (! cycAccess.isa(term, argConstraint)) {
+                cycAccess.assertIsa(term, argConstraint, cycAccess.universalVocabularyMt);
+                Log.current.println("*** asserting forward arg constraint " +
+                                    "(#$isa " + term.cyclify() + " " +
+                                    argConstraint.cyclify() + ")");
+            }
+        }
+    }
+
 
     /**
      * Imports the rdf:type triple.
@@ -444,6 +545,13 @@ public class ImportDaml implements StatementHandler {
                               DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
+        if (objectTermInfo.constantName.equals("daml:UnambiguousProperty")) {
+            cycAccess.assertArg1FormatSingleEntry(subjectTermInfo.cycFort);
+            Log.current.println("(#$arg1Format " +
+                                term.cyclify() + " #$SingleEntryFormat)\n");
+            return;
+        }
+
         CycFort collection = importTerm(objectTermInfo);
         if (! cycAccess.isCollection(collection)) {
             cycAccess.assertIsaCollection(collection);
@@ -466,6 +574,10 @@ public class ImportDaml implements StatementHandler {
                                 DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
+        if (! cycAccess.isCollection(term)) {
+            cycAccess.assertIsaCollection(term);
+            Log.current.println("*** forward reference to collection " + term.cyclify());
+        }
         CycFort collection = importTerm(objectTermInfo);
         if (! cycAccess.isCollection(collection)) {
             cycAccess.assertIsaCollection(collection);
@@ -773,6 +885,8 @@ public class ImportDaml implements StatementHandler {
         if (equivalentDamlCycTerms.containsKey(constantName))
             damlTermInfo.equivalentDamlCycTerm =
                 (String) equivalentDamlCycTerms.get(constantName);
+        else if (ontologyNickname.equals("xsd"))
+            Log.current.println("\n*** unhandled primitive datatype: " + constantName + "\n");
         return damlTermInfo;
     }
 
@@ -942,13 +1056,15 @@ public class ImportDaml implements StatementHandler {
         try {
             damlRestriction.formInterArgConstraints();
             if (damlRestriction.interArgIsaConstraint != null) {
-                cycAccess.assertGaf(damlRestriction.interArgIsaConstraint,
-                                    importMt);
+                if(actuallyImport)
+                    cycAccess.assertGaf(damlRestriction.interArgIsaConstraint,
+                                        importMt);
                 Log.current.println(damlRestriction.interArgIsaConstraint.cyclify());
             }
             if (damlRestriction.interArgFormatConstraint != null) {
-                cycAccess.assertGaf(damlRestriction.interArgFormatConstraint,
-                                    importMt);
+                if(actuallyImport)
+                    cycAccess.assertGaf(damlRestriction.interArgFormatConstraint,
+                                        importMt);
                 Log.current.println(damlRestriction.interArgFormatConstraint.cyclify());
             }
             Log.current.println();

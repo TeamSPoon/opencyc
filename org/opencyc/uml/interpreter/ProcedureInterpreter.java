@@ -63,8 +63,9 @@ public class ProcedureInterpreter {
      *
      * @param treeInterpreter the given tree interpreter
      */
-    public ProcedureInterpreter(TreeInterpreter treeInterpreter) {
+    public ProcedureInterpreter(TreeInterpreter treeInterpreter, int verbosity) {
         this.treeInterpreter = treeInterpreter;
+        this.verbosity = verbosity;
     }
 
     /**

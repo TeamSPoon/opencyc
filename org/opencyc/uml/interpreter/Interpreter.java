@@ -114,6 +114,11 @@ public class Interpreter {
     protected StateMachineFactory stateMachineFactory;
 
     /**
+     * indicates that the state machine has terminated
+     */
+    protected boolean isTerminated = false;
+
+    /**
      * Constructs a new Interpreter object.
      */
     public Interpreter() {
@@ -122,10 +127,25 @@ public class Interpreter {
 
     /**
      * Constructs a new Interpreter object given a state machine
-     * to interpret.
+     * to interpret given the state machine to interpret
+     *
+     * @param stateMachine the state machine to interpret
      */
     public Interpreter(StateMachine stateMachine) {
+        this(stateMachine, Interpreter.DEFAULT_VERBOSITY);
+    }
+
+    /**
+     * Constructs a new Interpreter object given the state machine
+     * to interpret.
+     *
+     * @param stateMachine the state machine to interpret
+     * @param verbosity indicates the verbosity of the interpreter's
+     * diagnostic output - 9 = maximum, 0 = quiet
+     */
+    public Interpreter(StateMachine stateMachine, int verbosity) {
         this.stateMachine = stateMachine;
+        this.verbosity = verbosity;
         initialize();
         if (verbosity > 2)
             Log.current.println("Interpreting " + stateMachine.toString());
@@ -159,7 +179,7 @@ public class Interpreter {
     public void terminate () {
         if (verbosity > 2)
             Log.current.println("Terminating " + stateMachine.toString());
-        System.exit(0);
+        isTerminated = true;
     }
 
     /**
@@ -168,7 +188,7 @@ public class Interpreter {
     public void interpret () {
         formAllStatesConfiguration();
         formInitialStateConfiguration();
-        while (true) {
+        while (! isTerminated) {
             eventDispatcher();
             eventProcessor();
             fireSelectedTransitions();
@@ -415,6 +435,17 @@ public class Interpreter {
     }
 
     /**
+     * Gets the  verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.  0 --> quiet ... 9 -> maximum diagnostic input.
+     *
+     * @return  the  verbosity of this object's output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input
+     */
+    public int getVerbosity () {
+        return verbosity;
+    }
+
+    /**
      * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      *
@@ -503,10 +534,12 @@ public class Interpreter {
      */
     public String displayStateConfigurationTree() {
         StringBuffer stringBuffer = new StringBuffer();
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) stateConfiguration.getRoot();
-        formStringTree(root,
-                       0,
-                       stringBuffer);
+        if (stateConfiguration != null) {
+            DefaultMutableTreeNode root = (DefaultMutableTreeNode) stateConfiguration.getRoot();
+            formStringTree(root,
+                           0,
+                           stringBuffer);
+        }
         return stringBuffer.toString();
     }
 
@@ -567,5 +600,16 @@ public class Interpreter {
      */
     public HashMap getActiveStates () {
         return this.activeStates;
+    }
+
+    /**
+     * Sets the active state configuration to the given
+     * configuration tree
+     *
+     * @param stateConfiguration the given configuration tree, or null if
+     * terminating the state machine
+     */
+    public void setStateConfiguration (DefaultTreeModel stateConfiguration) {
+        this.stateConfiguration = stateConfiguration;
     }
 }

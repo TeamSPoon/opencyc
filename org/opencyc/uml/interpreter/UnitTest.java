@@ -491,7 +491,8 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(source.getOutgoing().contains(transition3));
         Assert.assertTrue(target.getIncoming().contains(transition3));
 
-        Interpreter interpreter = new Interpreter(stateMachine);
+        int verbosity = 3;
+        Interpreter interpreter = new Interpreter(stateMachine, verbosity);
         Assert.assertNotNull(interpreter);
         Assert.assertTrue(interpreter instanceof Interpreter);
         Assert.assertTrue(interpreter.eventQueue.isEmpty());
@@ -500,10 +501,12 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(interpreter.getTreeInterpreter() instanceof TreeInterpreter);
 
         interpreter.formAllStatesConfiguration();
-        System.out.print(interpreter.displayAllStatesConfigurationTree());
+        if (verbosity > 2)
+            System.out.print(interpreter.displayAllStatesConfigurationTree());
         interpreter.formInitialStateConfiguration();
         Assert.assertEquals(new Integer(0), interpreter.treeInterpreter.getVariable("x"));
-        System.out.print(interpreter.displayStateConfigurationTree());
+        if (verbosity > 2)
+            System.out.print(interpreter.displayStateConfigurationTree());
         interpreter.eventDispatcher();
         Assert.assertNotNull(interpreter.getCurrentEvent());
         Assert.assertTrue(interpreter.getCurrentEvent() instanceof CompletionEvent);
@@ -523,19 +526,22 @@ public class UnitTest extends TestCase {
                             counterState.getStateInterpreter().getState());
 
         Assert.assertEquals(new Integer(1), interpreter.treeInterpreter.getVariable("x"));
-        System.out.print(interpreter.displayStateConfigurationTree());
+        if (verbosity > 2)
+            System.out.print(interpreter.displayStateConfigurationTree());
         for (int i = 2; i < 10; i++) {
             interpreter.eventDispatcher();
             interpreter.eventProcessor();
             interpreter.fireSelectedTransitions();
             Assert.assertEquals(new Integer(i), interpreter.treeInterpreter.getVariable("x"));
         }
-        System.out.print(interpreter.displayStateConfigurationTree());
+        if (verbosity > 2)
+            System.out.print(interpreter.displayStateConfigurationTree());
         interpreter.eventDispatcher();
         interpreter.eventProcessor();
         interpreter.fireSelectedTransitions();
         Assert.assertEquals(new Integer(9), interpreter.treeInterpreter.getVariable("x"));
-        System.out.print(interpreter.displayStateConfigurationTree());
+        if (verbosity > 2)
+            System.out.print(interpreter.displayStateConfigurationTree());
 
         System.out.println("\n**** testSimpleStateMachine ****");
     }

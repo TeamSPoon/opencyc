@@ -72,8 +72,9 @@ public class StateInterpreter extends Thread {
     public StateInterpreter(Interpreter interpreter,
                             State state) {
         this.interpreter = interpreter;
+        verbosity = interpreter.getVerbosity();
         this.state = state;
-        procedureInterpreter = new ProcedureInterpreter(interpreter.getTreeInterpreter());
+        procedureInterpreter = new ProcedureInterpreter(interpreter.getTreeInterpreter(), verbosity);
     }
 
     /**
@@ -244,7 +245,9 @@ public class StateInterpreter extends Thread {
         DefaultMutableTreeNode stateNode =
             (DefaultMutableTreeNode) interpreter.getActiveStates().get(state);
         interpreter.getActiveStates().remove(state);
-        stateNode.removeFromParent();
+        if (state.equals(interpreter.getStateMachine().getTop()))
+            interpreter.setStateConfiguration((DefaultTreeModel) null);
+            stateNode.removeFromParent();
         CompletionEvent completionEvent = new CompletionEvent(state);
         interpreter.enqueueEvent(completionEvent);
     }

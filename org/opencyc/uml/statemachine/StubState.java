@@ -24,12 +24,12 @@ package org.opencyc.uml.statemachine;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class StubState {
+public class StubState extends State {
 
     /**
      * the reference state for this stub state
      */
-    protected String referenceState;
+    protected State referenceState;
 
     /**
      * Constructs a new StubState object.
@@ -42,7 +42,7 @@ public class StubState {
      *
      * @return the reference state for this stub state
      */
-    public String getReferenceState () {
+    public State getReferenceState () {
         return referenceState;
     }
 
@@ -51,7 +51,7 @@ public class StubState {
      *
      * @param referenceState the reference state for this stub state
      */
-    public void setReferenceState (String referenceState) {
+    public void setReferenceState (State referenceState) {
         this.referenceState = referenceState;
     }
 }

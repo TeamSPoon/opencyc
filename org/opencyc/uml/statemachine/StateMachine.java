@@ -46,7 +46,7 @@ public class StateMachine extends ModelElement {
     /**
      * the Transitions for this state machine
      */
-    protected ArrayList transitions = new ArrayList();
+    protected ArrayList transition = new ArrayList();
 
     /**
      * the submachine state for this state machine
@@ -100,17 +100,17 @@ public class StateMachine extends ModelElement {
      *
      * @return the Transitions for this state machine
      */
-    public List getTransitions () {
-        return transitions;
+    public List getTransition () {
+        return transition;
     }
 
     /**
-     * Sets the Transitions for this state machine
+     * Sets the Transition for this state machine
      *
-     * @param transitions the Transitions for this state machine
+     * @param transition the Transitions for this state machine
      */
-    public void setTransitions (ArrayList transitions) {
-        this.transitions = transitions;
+    public void setTransition (ArrayList transition) {
+        this.transition = transition;
     }
 
     /**

@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
 
 //// External Imports
 
@@ -31,8 +32,33 @@ public class ActuateMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of ActuateMsg. */
-  public ActuateMsg() {
+  /** Creates a new instance of ActuateMsg.
+   *
+   * @param sender the sender of the message
+   * @param obj the object which is to be acted upon in the case where the actuator can act upon 
+   * one of several objects, or null if the actuator can only act upon one object
+   * @param data the action data specifying the parameters of the commanded action
+   */
+  public ActuateMsg(NodeComponent sender, Object obj, Object data) {
+    this.sender = sender;
+    this.obj = obj;
+    this.data = data;
+  }
+  
+  //// Public Area
+  
+  /** Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ObservedInputMsg: ");
+    stringBuffer.append(obj.toString());
+    stringBuffer.append(" data: ");
+    stringBuffer.append(data.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /** Gets the object which is to be acted upon in the case where the actuator can act upon 
@@ -45,16 +71,6 @@ public class ActuateMsg extends GenericMsg {
     return obj;
   }
 
-  /** Sets the object which is to be acted upon in the case where the actuator can act upon 
-   * one of several objects, or null if the actuator can only act upon one object.
-   *
-   * @param obj the object which is to be acted upon in the case where the actuator can act upon 
-   * one of several objects, or null if the actuator can only act upon one object
-   */
-  public void setObj (Object obj) {
-    this.obj = obj;
-  }
-
   /** Gets the action data specifying the parameters of the commanded action.
    *
    * @return the action data specifying the parameters of the commanded action
@@ -63,14 +79,6 @@ public class ActuateMsg extends GenericMsg {
     return data;
   }
 
-  /** Sets the action data specifying the parameters of the commanded action.
-   *
-   * @param data the action data specifying the parameters of the commanded action
-   */
-  public void setData (Object data) {
-    this.data = data;
-  }
-  
   //// Protected Area
   
   //// Private Area

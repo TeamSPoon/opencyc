@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
 
 //// External Imports
 
@@ -31,11 +32,26 @@ public class ReleaseMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of ReleaseMsg. */
-  public ReleaseMsg() {
+  /** Creates a new instance of ReleaseMsg. 
+   *
+   * @param sender the sender of the message
+   */
+  public ReleaseMsg(NodeComponent sender) {
+    this.sender = sender;
   }
   
   //// Public Area
+  
+  /** Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ReleaseMsg: ");
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
   
   //// Protected Area
   

@@ -1,6 +1,8 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
+
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
@@ -37,31 +39,35 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of ScheduleConsistencyEvaluationMsg */
-  public ScheduleConsistencyEvaluationMsg() {
+  /** Creates a new instance of ScheduleConsistencyEvaluationMsg
+   *
+   * @param sender the sender of the message
+   * @param schedule a proposed schedule of actions to carry out the commanded task using
+   * the node's contolled resources
+   * @param controlledResources the resources controlled by this node
+   */
+  public ScheduleConsistencyEvaluationMsg(NodeComponent sender,
+                                          Schedule schedule, 
+                                          List controlledResources) {
+    this.sender = sender;
+    this.schedule = schedule;
+    this.controlledResources = controlledResources;
   }
   
   //// Public Area
-  
-  /** Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (! (obj instanceof Class))
-      return false;
-    //TODO
-    return true;
-  }
   
   /** Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ScheduleConsistencyEvaluationMsg: ");
+    stringBuffer.append(schedule.toString());
+    stringBuffer.append(" controlledResources: ");
+    stringBuffer.append(controlledResources.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /** Gets the resources controlled by this node
@@ -70,30 +76,6 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
    */
   public List getControlledResources () {
     return controlledResources;
-  }
-
-  /** Sets the resources controlled by this node
-   *
-   * @param controlledResources the resources controlled by this node
-   */
-  public void setControlledResources (List controlledResources) {
-    this.controlledResources = controlledResources;
-  }
-
-  /** Gets the node's commanded task
-   *
-   * @return the node's commanded task
-   */
-  public TaskCommand getTaskCommand () {
-    return taskCommand;
-  }
-
-  /** Sets the node's commanded task
-   *
-   * @param taskCommand the node's commanded task
-   */
-  public void setTaskCommand (TaskCommand taskCommand) {
-    this.taskCommand = taskCommand;
   }
 
   /** Gets a proposed schedule of actions to carry out the commanded task using
@@ -106,16 +88,6 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
     return schedule;
   }
 
-  /** Sets a proposed schedule of actions to carry out the commanded task using
-   * the node's contolled resources
-   *
-   * @param schedule a proposed schedule of actions to carry out the commanded task using
-   * the node's contolled resources
-   */
-  public void setSchedule (Schedule schedule) {
-    this.schedule = schedule;
-  }
-  
   //// Protected Area
   
   //// Private Area
@@ -127,13 +99,7 @@ public class ScheduleConsistencyEvaluationMsg extends GenericMsg {
    */
   protected List controlledResources;
   
-  /**
-   * the node's commanded task
-   */
-  protected TaskCommand taskCommand;
-  
-  /**
-   * a proposed schedule of actions to carry out the commanded task using
+  /** a proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    */
   protected Schedule schedule;

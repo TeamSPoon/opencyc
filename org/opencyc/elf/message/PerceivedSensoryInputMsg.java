@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
 
 //// External Imports
 
@@ -31,13 +32,33 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of PerceivedSensoryInputMsg. */
-  public PerceivedSensoryInputMsg() {
+  /** Creates a new instance of PerceivedSensoryInputMsg. 
+   *
+   * @param sender the sender of the message
+   * @param obj the object for which data is perceived
+   * @param data the data associated with the object
+   */
+  public PerceivedSensoryInputMsg(NodeComponent sender, Object obj, Object data) {
+    this.sender = sender;
+    this.obj = obj;
+    this.data = data;
   }
   
   //// Public Area
   
-  //// Protected Area
+  /** Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ObservedInputMsg: ");
+    stringBuffer.append(obj.toString());
+    stringBuffer.append(" data: ");
+    stringBuffer.append(data.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
   
   /** Gets the object for which data is perceived.
    *
@@ -45,14 +66,6 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
    */
   public Object getObj () {
     return obj;
-  }
-
-  /** Sets the object for which data is perceived.
-   *
-   * @param obj the object for which data is perceived
-   */
-  public void setObj (Object obj) {
-    this.obj = obj;
   }
 
   /** Gets the perceived data associated with the object
@@ -63,14 +76,6 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
     return data;
   }
 
-  /** Sets the perceived data associated with the object
-   *
-   * @param data the data associated with the object
-   */
-  public void setData (Object data) {
-    this.data = data;
-  }
-  
   //// Protected Area
   
   //// Private Area

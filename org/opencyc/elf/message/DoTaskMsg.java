@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
@@ -33,8 +34,15 @@ public class DoTaskMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of DoTaskMsg. */
-  public DoTaskMsg() {
+  /** Creates a new instance of DoTaskMsg given the task command. 
+   *
+   * @param sender the sender of the message
+   * @param taskCommand the commanded task for job assignment
+   */
+  public DoTaskMsg(NodeComponent sender,
+                   TaskCommand taskCommand) {
+    this.sender = sender;
+    this.taskCommand = taskCommand;
   }
   
   //// Public Area
@@ -46,14 +54,18 @@ public class DoTaskMsg extends GenericMsg {
     return taskCommand;
   }
 
-  /** Sets the commanded task for job assignment
+  /** Returns a string representation of this object.
    *
-   * @param taskCommand the commanded task for job assignment
+   * @return a string representation of this object
    */
-  public void setTaskCommand (TaskCommand taskCommand) {
-    this.taskCommand = taskCommand;
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[DoTaskMsg: ");
+    stringBuffer.append(taskCommand.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
-
+  
   //// Protected Area
   
   //// Private Area

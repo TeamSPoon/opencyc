@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.Status;
 
@@ -33,8 +34,14 @@ public class ExecutorStatusMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of ExecutorStatusMsg */
-  public ExecutorStatusMsg() {
+  /** Creates a new instance of ExecutorStatusMsg
+   *
+   * @param sender the sender of the message
+   * @param status the sexecutor status
+   */
+  public ExecutorStatusMsg(NodeComponent sender, Status status) {
+    this.sender = sender;
+    this.status = status;
   }
   
   //// Public Area
@@ -44,8 +51,11 @@ public class ExecutorStatusMsg extends GenericMsg {
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ExecutorStatusMsg: ");
+    stringBuffer.append(status.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /** Gets the executor status
@@ -54,14 +64,6 @@ public class ExecutorStatusMsg extends GenericMsg {
    */
   public Status getStatus () {
     return status;
-  }
-
-  /** Sets the executor status
-   *
-   * @param status the sexecutor status
-   */
-  public void setStatus (Status status) {
-    this.status = status;
   }
 
   //// Protected Area

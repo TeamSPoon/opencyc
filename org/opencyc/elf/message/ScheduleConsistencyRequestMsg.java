@@ -1,6 +1,8 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
+
 import org.opencyc.elf.bg.planner.Schedule;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
@@ -36,8 +38,22 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of ScheduleConsistencyRequestMsg */
-  public ScheduleConsistencyRequestMsg() {
+  /** Creates a new instance of ScheduleConsistencyRequestMsg 
+   *
+   * @param sender the sender of the message
+   * @param controlledResources the resources controlled by this node
+   * @param taskCommand the node's commanded task
+   * @param schedule a proposed schedule of actions to carry out the commanded task using
+   * the node's contolled resources
+   */
+  public ScheduleConsistencyRequestMsg(NodeComponent sender,
+                                       List controlledResources,
+                                       TaskCommand taskCommand,
+                                       Schedule schedule) {
+    this.sender = sender;
+    this.controlledResources = controlledResources;
+    this.taskCommand = taskCommand;
+    this.schedule = schedule;
   }
   
   //// Public Area
@@ -47,8 +63,15 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ScheduleConsistencyRequestMsg: ");
+    stringBuffer.append(controlledResources.toString());
+    stringBuffer.append(" taskCommand: ");
+    stringBuffer.append(taskCommand.toString());
+    stringBuffer.append(" schedule: ");
+    stringBuffer.append(schedule.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /** Gets the resources controlled by this node
@@ -59,28 +82,12 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return controlledResources;
   }
 
-  /** Sets the resources controlled by this node
-   *
-   * @param controlledResources the resources controlled by this node
-   */
-  public void setControlledResources (List controlledResources) {
-    this.controlledResources = controlledResources;
-  }
-
   /** Gets the node's commanded task
    *
    * @return the node's commanded task
    */
   public TaskCommand getTaskCommand () {
     return taskCommand;
-  }
-
-  /** Sets the node's commanded task
-   *
-   * @param taskCommand the node's commanded task
-   */
-  public void setTaskCommand (TaskCommand taskCommand) {
-    this.taskCommand = taskCommand;
   }
 
   /** Gets a proposed schedule of actions to carry out the commanded task using
@@ -93,16 +100,6 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return schedule;
   }
 
-  /** Sets a proposed schedule of actions to carry out the commanded task using
-   * the node's contolled resources
-   *
-   * @param schedule a proposed schedule of actions to carry out the commanded task using
-   * the node's contolled resources
-   */
-  public void setSchedule (Schedule schedule) {
-    this.schedule = schedule;
-  }
-  
   //// Protected Area
   
   //// Private Area

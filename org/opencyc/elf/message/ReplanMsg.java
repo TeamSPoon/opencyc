@@ -2,6 +2,7 @@ package org.opencyc.elf.message;
 
 //// Internal Imports
 
+import org.opencyc.elf.NodeComponent;
 import org.opencyc.elf.Result;
 
 import org.opencyc.elf.bg.planner.Schedule;
@@ -40,33 +41,45 @@ public class ReplanMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of ReplanMsg */
-  public ReplanMsg() {
+  /** Creates a new instance of ReplanMsg 
+   *
+   * @param sender the sender of the message
+   * @param controlledResources the resources controlled by this node
+   * @param taskCommand the node's commanded task
+   * @param schedule a proposed schedule of actions to carry out the commanded task using
+   * the node's contolled resources
+   * @param result the schedule evaluation result
+   */
+  public ReplanMsg(NodeComponent sender,
+                   List controlledResources,
+                   TaskCommand taskCommand,
+                   Schedule schedule,
+                   Result result) {
+    this.sender = sender;
+    this.controlledResources = controlledResources;
+    this.taskCommand = taskCommand;
+    this.schedule = schedule;
+    this.result = result;
   }
   
   //// Public Area
   
-  /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (! (obj instanceof Class))
-      return false;
-    //TODO
-    return true;
-  }
-  
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
   public String toString() {
-    //TODO
-    return "";
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ReplanMsg: ");
+    stringBuffer.append(controlledResources.toString());
+    stringBuffer.append(" taskCommand: ");
+    stringBuffer.append(taskCommand.toString());
+    stringBuffer.append(" schedule: ");
+    stringBuffer.append(schedule.toString());
+    stringBuffer.append(" result: ");
+    stringBuffer.append(result.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
   }
   
   /**
@@ -79,30 +92,12 @@ public class ReplanMsg extends GenericMsg {
   }
 
   /**
-   * Sets the resources controlled by this node
-   *
-   * @param controlledResources the resources controlled by this node
-   */
-  public void setControlledResources (List controlledResources) {
-    this.controlledResources = controlledResources;
-  }
-
-  /**
    * Gets the node's commanded task
    *
    * @return the node's commanded task
    */
   public TaskCommand getTaskCommand () {
     return taskCommand;
-  }
-
-  /**
-   * Sets the node's commanded task
-   *
-   * @param taskCommand the node's commanded task
-   */
-  public void setTaskCommand (TaskCommand taskCommand) {
-    this.taskCommand = taskCommand;
   }
 
   /**
@@ -117,17 +112,6 @@ public class ReplanMsg extends GenericMsg {
   }
 
   /**
-   * Sets a proposed schedule of actions to carry out the commanded task using
-   * the node's contolled resources
-   *
-   * @param schedule a proposed schedule of actions to carry out the commanded task using
-   * the node's contolled resources
-   */
-  public void setSchedule (Schedule schedule) {
-    this.schedule = schedule;
-  }
-
-  /**
    * Gets the schedule evaluation result
    *
    * @return the schedule evaluation result
@@ -136,15 +120,6 @@ public class ReplanMsg extends GenericMsg {
     return result;
   }
 
-  /**
-   * Sets the schedule evaluation result
-   *
-   * @param result the schedule evaluation result
-   */
-  public void setResult (Result result) {
-    this.result = result;
-  }
-  
   //// Protected Area
   
   //// Private Area

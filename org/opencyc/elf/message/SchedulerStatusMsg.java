@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.Status;
 
@@ -32,11 +33,29 @@ public class SchedulerStatusMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of SchedulerStatusMsg. */
-  public SchedulerStatusMsg() {
+  /** Creates a new instance of SchedulerStatusMsg. 
+   *
+   * @param sender the sender of the message
+   * @param status the scheduler status
+   */
+  public SchedulerStatusMsg(NodeComponent sender, Status status) {
+    this.sender = sender;
+    this.status = status;
   }
   
   //// Public Area
+  
+  /** Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[SchedulerStatusMsg: ");
+    stringBuffer.append(status.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
   
   /** Gets the scheduler status
    *
@@ -44,14 +63,6 @@ public class SchedulerStatusMsg extends GenericMsg {
    */
   public Status getStatus () {
     return status;
-  }
-
-  /** Sets the scheduler status
-   *
-   * @param status the scheduler status
-   */
-  public void setStatus (Status status) {
-    this.status = status;
   }
 
   //// Protected Area

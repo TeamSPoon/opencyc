@@ -41,18 +41,6 @@ abstract public class GenericMsg {
   
   //// Public Area
   
-  /** Returns a string representation of this object.
-   *
-   * @return a string representation of this object
-   */
-  public String toString() {
-    StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[");
-    stringBuffer.append(this.getClass().getName());
-    stringBuffer.append("]");
-    return stringBuffer.toString();
-  }
-
   /** Gets the sender of the message
    *
    * @return the sender of the message

@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
 
 import org.opencyc.elf.Status;
 
@@ -33,26 +34,36 @@ public class JobAssignerStatusMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of JobAssignerStatusMsg. */
-  public JobAssignerStatusMsg() {
+  /** Creates a new instance of JobAssignerStatusMsg. 
+   *
+   * @param sender the sender of the message
+   * @param status the job assigner status
+   */
+  public JobAssignerStatusMsg(NodeComponent sender, Status status) {
+    this.sender = sender;
+    this.status = status;
   }
   
   //// Public Area
 
+  /** Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[JobAssignerStatusMsg: ");
+    stringBuffer.append(status.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
+  
   /** Gets the job assigner status
    *
    * @return the job assigner status
    */
   public Status getStatus () {
     return status;
-  }
-
-  /** Sets the job assigner status
-   *
-   * @param status the job assigner status
-   */
-  public void setStatus (Status status) {
-    this.status = status;
   }
 
   //// Protected Area

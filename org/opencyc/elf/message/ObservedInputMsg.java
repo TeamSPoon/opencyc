@@ -1,6 +1,8 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
+
 import org.opencyc.elf.s.Sensation;
 
 //// External Imports
@@ -32,14 +34,27 @@ public class ObservedInputMsg extends GenericMsg {
   
   /** Creates a new instance of ObservedInputMsg given the sensation.
    *
+   * @param sender the sender of the message
    * @param sensation the sensation
-   *
    */
-  public ObservedInputMsg(Sensation sensation) {
+  public ObservedInputMsg(NodeComponent sender, Sensation sensation) {
+    this.sender = sender;
     this.sensation = sensation;
   }
   
   //// Public Area
+  
+  /** Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString() {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[ObservedInputMsg: ");
+    stringBuffer.append(sensation.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
   
   /** Gets the sensation.
    *

@@ -1,6 +1,8 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.NodeComponent;
+
 import org.opencyc.elf.bg.planner.Job;
 
 //// External Imports
@@ -32,8 +34,14 @@ public class ScheduleJobMsg extends GenericMsg {
   
   //// Constructors
   
-  /** Creates a new instance of ScheduleJobMsg. */
-  public ScheduleJobMsg() {
+  /** Creates a new instance of ScheduleJobMsg. 
+   *
+   * @param sender the sender of the message
+   * @param job the assigned job
+   */
+  public ScheduleJobMsg(NodeComponent sender, Job job) {
+    this.sender = sender;
+    this.job = job;
   }
   
   //// Public Area
@@ -55,14 +63,6 @@ public class ScheduleJobMsg extends GenericMsg {
    */
   public Job getJob () {
     return job;
-  }
-
-  /** Sets the assigned job
-   *
-   * @param job the assigned job
-   */
-  public void setJob (Job job) {
-    this.job = job;
   }
 
   //// Protected Area

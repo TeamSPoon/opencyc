@@ -55,30 +55,35 @@ import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class JobAssigner extends BufferedNodeComponent implements Actuator {
+
   //// Constructors
 
   /**
-   * Creates a new instance of JobAssigner
-   */
-  public JobAssigner() {
-  }
-
-  /** 
-   * Creates a new instance of JobAssigner with the given
-   * input and output channels.
+   * Creates a new instance of JobAssigner within the given node, that can accompish
+   * the given named actions.
    *
    * @param node the containing ELF node
+   * @param actionCapabilities the names of actions that this virtual actuator can accomplish
+   */
+  public JobAssigner (Node node,
+                      ArrayList actionCapabilities) {
+    setNode(node);
+    node.getBehaviorGeneration().setJobAssigner(this);
+    getLogger().info("Creating JobAssigner");
+  }
+  
+  //// Public Area
+
+  /** 
+   * Initializes with the given input and output channels and starts consuming task commands.
+   *
    * @param jobAssignerChannel the takable channel from which messages are input
    * @param executorChannel the puttable channel to which messages are output to the higher
    * level executor, or null if this is the highest level
    */
-  public JobAssigner (Node node,
-                      Takable jobAssignerChannel,
-                      Puttable executorChannel) {
-    setNode(node);
-    node.getBehaviorGeneration().setJobAssigner(this);
-    System.out.println("");
-    getLogger().info("Creating JobAssigner");
+  public void initialize (Takable jobAssignerChannel,
+                          Puttable executorChannel) {
+    getLogger().info("Initializing JobAssigner");
     this.jobAssignerChannel = jobAssignerChannel;
     consumer = new Consumer(jobAssignerChannel,
                             executorChannel,
@@ -92,8 +97,6 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       System.exit(1);
     }
   }
-
-  //// Public Area
 
   /** 
    * Gets the puttable channel for this node component to which other node
@@ -179,6 +182,15 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
       }
     }
     return resources;
+  }
+  
+  /**
+   * Gets the names of actions that this virtual actuator can accomplish.
+   *
+   * @return names of the actions that this virtual actuator can accomplish
+   */
+  public ArrayList getActionCapabilities() {
+    return actionCapabilities;
   }
   
   //// Protected Area
@@ -330,6 +342,9 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   //// Private Area
 
   //// Internal Rep
+  
+  /** the names of actions that this virtual actuator can accomplish */
+  protected ArrayList actionCapabilities;
   
   /**
    * the takable channel from which messages are input

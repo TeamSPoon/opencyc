@@ -4,8 +4,7 @@ package org.opencyc.elf.goal;
 
 //// External Imports
 
-/**
- * GoalTime contains the goal achievement time and tolerance.
+/** GoalTime contains the goal achievement time and tolerance.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -35,8 +34,7 @@ public class GoalTime {
   public GoalTime() {
   }
   
-  /** 
-   * Creates a new instance of GoalTime given the goal achievment time and tolerance.
+  /** Creates a new instance of GoalTime given the goal achievment time and tolerance.
    *
    * @param goalTimeMilliseconds the goal achievement time in milliseconds
    * @param goalToleranceMilliseconds the goal achievement tolerance in milliseconds
@@ -48,8 +46,7 @@ public class GoalTime {
   
   //// Public Area
   
-  /**
-   * Gets the goal achievement time in milliseconds
+  /** Gets the goal achievement time in milliseconds
    *
    * @return the goal achievement time in milliseconds
    */
@@ -57,8 +54,7 @@ public class GoalTime {
     return goalTimeMilliseconds;
   }
 
-  /**
-   * Sets the goal achievement time in milliseconds
+  /** Sets the goal achievement time in milliseconds
    *
    * @param goalTimeMilliseconds the goal achievement time in milliseconds
    */
@@ -66,8 +62,7 @@ public class GoalTime {
     this.goalTimeMilliseconds = goalTimeMilliseconds;
   }
 
-  /**
-   * Gets the goal achievement tolerance in milliseconds
+  /** Gets the goal achievement tolerance in milliseconds
    *
    * @return the goal achievement tolerance in milliseconds
    */
@@ -75,8 +70,7 @@ public class GoalTime {
     return goalToleranceMilliseconds;
   }
 
-  /**
-   * Sets the goal achievement tolerance in milliseconds
+  /** Sets the goal achievement tolerance in milliseconds
    *
    * @param goalToleranceMilliseconds the goal achievement tolerance in milliseconds
    */
@@ -84,8 +78,7 @@ public class GoalTime {
     this.goalToleranceMilliseconds = goalToleranceMilliseconds;
   }
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */

@@ -76,16 +76,6 @@ public class Different extends Predicate {
     return stringBuffer.toString();
   }
   
- /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    return obj instanceof Different;
-  }
-  
   //// Protected Area
   
   //// Private Area

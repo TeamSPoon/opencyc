@@ -5,8 +5,7 @@ package org.opencyc.elf.wm.state;
 //// External Imports
 import java.util.Iterator;
 
-/**
- * Situation is designed to contain a situation described by a list of
+/** Situation is designed to contain a situation described by a list of
  * stateVariable/values.
  * 
  * @version $Id$
@@ -37,8 +36,7 @@ public class Situation {
     state = new State();
   }
 
-  /**
-   * Creates a new instance of Situation given an existing situation.
+  /** Creates a new instance of Situation given an existing situation.
    * 
    * @param situation the given situation
    */
@@ -64,8 +62,7 @@ public class Situation {
     }
   }
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return string representation of this object
    */
@@ -78,8 +75,7 @@ public class Situation {
     return stringBuffer.toString();
   }
 
-  /**
-   * Return the situation state.
+  /** Return the situation state.
    * 
    * @return the situation state
    */

@@ -21,8 +21,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
-/**
- * Provides Sensory Perception for the Elementary Loop Functioning (ELF).
+/** Provides Sensory Perception for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -67,8 +66,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   
   //// Public Area
   
-  /** 
-   * Initializes with the given output message channels and starts the message 
+  /**  Initializes with the given output message channels and starts the message 
    * consumer process.
    *
    * @param nextHigherLevelSensoryPerceptionChannel the puttable channel to which messages are output
@@ -89,8 +87,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     }
   }
 
-  /** 
-   * Gets the puttable channel for this node component to which other node
+  /** Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
    * @return the puttable channel for this node component to which other node
@@ -101,8 +98,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return (Puttable) sensoryPerceptionChannel;
   }  
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -110,8 +106,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return "SensoryPerception for " + node.getName();
   }
 
-  /**
-   * Gets the parent node's SensoryPerception object.
+  /** Gets the parent node's SensoryPerception object.
    * 
    * @return the parent node's SensoryPerception object
    */
@@ -119,8 +114,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return parentSensoryPerception;
   }
 
-  /**
-   * Sets the parent node's SensoryPerception object.
+  /** Sets the parent node's SensoryPerception object.
    * 
    * @param parentSensoryPerception the parent node's SensoryPerception object
    */
@@ -128,8 +122,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     this.parentSensoryPerception = parentSensoryPerception;
   }
 
-  /**
-   * Gets the child nodes' SensoryPerception objects.
+  /** Gets the child nodes' SensoryPerception objects.
    * 
    * @return the child nodes' SensoryPerception objects
    */
@@ -137,8 +130,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return childrenSensoryPerception;
   }
 
-  /**
-   * Sets the child nodes' SensoryPerception objects.
+  /** Sets the child nodes' SensoryPerception objects.
    * 
    * @param childrenSensoryPerception the child nodes' SensoryPerception
    *        objects
@@ -148,8 +140,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   }
   
 
-  /**
-   * Gets the estimator node component
+  /** Gets the estimator node component
    *
    * @return the estimator node component
    */
@@ -157,8 +148,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return estimator;
   }
 
-  /**
-   * Sets the estimator node component
+  /** Sets the estimator node component
    *
    * @param estimator the estimator node component
    */
@@ -166,8 +156,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     this.estimator = estimator;
   }
 
-  /**
-   * Gets the feature extractor node component
+  /** Gets the feature extractor node component
    *
    * @return the feature extractor node component
    */
@@ -175,8 +164,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return featureExtractor;
   }
 
-  /**
-   * Sets the feature extractor node component
+  /** Sets the feature extractor node component
    *
    * @param featureExtractor the feature extractor node component
    */
@@ -184,8 +172,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     this.featureExtractor = featureExtractor;
   }
 
-  /**
-   * Gets the hypothesis evaluator node component
+  /** Gets the hypothesis evaluator node component
    *
    * @return the hypothesis evaluator node component
    */
@@ -193,8 +180,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return hypothesisEvaluator;
   }
 
-  /**
-   * Sets the hypothesis evaluator node component
+  /** Sets the hypothesis evaluator node component
    *
    * @param hypothesisEvaluator the hypothesis evaluator node component
    */
@@ -202,8 +188,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     this.hypothesisEvaluator = hypothesisEvaluator;
   }
 
-  /**
-   * Gets the hypothesis former node component
+  /** Gets the hypothesis former node component
    *
    * @return the hypothesis former node component
    */
@@ -211,8 +196,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return hypothesisFormer;
   }
 
-  /**
-   * Sets the hypothesis former node component
+  /** Sets the hypothesis former node component
    *
    * @param hypothesisFormer the hypothesis former node component
    */
@@ -220,8 +204,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     this.hypothesisFormer = hypothesisFormer;
   }
 
-  /** 
-   * Gets the name of the virtual sensor.
+  /**  Gets the name of the virtual sensor.
    *
    * @return the name of the virtual sensor
    */
@@ -229,8 +212,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return name;
   }
   
-  /**
-   * Gets the resources required by this virtual sensor.
+  /** Gets the resources required by this virtual sensor.
    *
    * @return the resources required by this virtual sensor
    */
@@ -240,8 +222,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
     return resources;
   }
   
-  /**
-   * Gets the names of sensations that this virtual sensor can sense.
+  /** Gets the names of sensations that this virtual sensor can sense.
    *
    * @return the names of sensations that this virtual sensor can sense
    */
@@ -251,29 +232,21 @@ public class SensoryPerception extends NodeComponent implements Sensor {
   
   //// Protected Area
     
-  /**
-   * Thread which processes the input message channel.
-   */
+  /** Thread which processes the input message channel. */
   protected class Consumer implements Runnable {
     
-    /**
-     * the takable channel from which messages are input
-     */
+    /** the takable channel from which messages are input */
     protected final Takable sensoryPerceptionChannel;
     
-    /**
-     * the puttable channel to which sensory processing messages are output for the next
+    /** the puttable channel to which sensory processing messages are output for the next
      * higher level
      */
     protected final Puttable nextHigherLevelSensoryPerceptionChannel;
 
-    /**
-     * the parent node component
-     */
+    /** the parent node component */
     protected NodeComponent nodeComponent;
     
-    /**
-     * Creates a new instance of Consumer.
+    /** Creates a new instance of Consumer.
      *
      * @param sensoryPerceptionChannel the takable channel from which messages are input
      * @param nextHigherLevelSensoryPerceptionChannel the puttable channel to which messages are output
@@ -287,9 +260,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
       this.nodeComponent = nodeComponent;
     }
 
-    /**
-     * Reads messages from the input queue and processes them.
-     */
+    /** Reads messages from the input queue and processes them. */
     public void run () {
       try {
         while (true) { 
@@ -299,8 +270,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
       catch (InterruptedException ex) {}
     }
 
-    /**
-     * Dispatches the given input channel message by type.
+    /** Dispatches the given input channel message by type.
      *
      * @param genericMsg the given input channel message
      */
@@ -311,16 +281,13 @@ public class SensoryPerception extends NodeComponent implements Sensor {
         processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
     }
       
-    /**
-     * Processes the observed input message.
-     */
+    /** Processes the observed input message. */
     protected void processObservedInputMsg(ObservedInputMsg observedInputMsg) {
       Sensation sensation = observedInputMsg.getSensation();
       //TODO
     }
     
-    /**
-     * Processes the perceived sensory input message received from a next level lower sensory
+    /** Processes the perceived sensory input message received from a next level lower sensory
      * processing node component.
      */
     protected void processPerceivedSensoryInputMsg(PerceivedSensoryInputMsg perceivedSensoryInputMsg) {
@@ -329,8 +296,7 @@ public class SensoryPerception extends NodeComponent implements Sensor {
       //TODO
     }
     
-    /**
-     * Sends the output-perceived sensory-input message to (1) the predictor node
+    /** Sends the output-perceived sensory-input message to (1) the predictor node
      * component within the world model, to (2) the entity evaluator node component within value
      * judgement, and to (3) the sensory processing node component at the next highest level.
      */

@@ -12,8 +12,7 @@ import java.sql.Timestamp;
 
 import java.util.List;
 
-/**
- * Provides the Experience container for the Elementary Loop Functioning
+/** Provides the Experience container for the Elementary Loop Functioning
  * (ELF).
  * 
  * @version $Id$
@@ -55,8 +54,7 @@ public class Experience {
     return "Experience for " + finalState.toString();
   }
 
-  /**
-   * Gets when the experience occurred
+  /** Gets when the experience occurred
    * 
    * @return when the experience occurred
    */
@@ -64,8 +62,7 @@ public class Experience {
     return timestamp;
   }
 
-  /**
-   * Sets when the experience occurred
+  /** Sets when the experience occurred
    * 
    * @param timestamp when the experience occurred
    */
@@ -73,8 +70,7 @@ public class Experience {
     this.timestamp = timestamp;
   }
 
-  /**
-   * Gets the intial state of the experience
+  /** Gets the intial state of the experience
    * 
    * @return the intial state of the experience
    */
@@ -82,8 +78,7 @@ public class Experience {
     return initialState;
   }
 
-  /**
-   * Sets the intial state of the experience
+  /** Sets the intial state of the experience
    * 
    * @param initialState the intial state of the experience
    */
@@ -91,8 +86,7 @@ public class Experience {
     this.initialState = initialState;
   }
 
-  /**
-   * Gets the final state of the experience
+  /** Gets the final state of the experience
    * 
    * @return the final state of the experience
    */
@@ -100,8 +94,7 @@ public class Experience {
     return finalState;
   }
 
-  /**
-   * Sets the final state of the experience
+  /** Sets the final state of the experience
    * 
    * @param finalState the final state of the experience
    */
@@ -109,8 +102,7 @@ public class Experience {
     this.finalState = finalState;
   }
 
-  /**
-   * Gets the goal that was sought from the initial state
+  /** Gets the goal that was sought from the initial state
    * 
    * @return the goal that was sought from the initial state
    */
@@ -118,8 +110,7 @@ public class Experience {
     return goal;
   }
 
-  /**
-   * Sets the goal that was sought from the initial state
+  /** Sets the goal that was sought from the initial state
    * 
    * @param goal the goal that was sought from the initial state
    */
@@ -127,8 +118,7 @@ public class Experience {
     this.goal = goal;
   }
 
-  /**
-   * Gets the state transitions
+  /** Gets the state transitions
    * 
    * @return the state transitions
    */
@@ -136,8 +126,7 @@ public class Experience {
     return transitions;
   }
 
-  /**
-   * Sets the state transitions
+  /** Sets the state transitions
    * 
    * @param transitions the state transitions
    */
@@ -145,8 +134,7 @@ public class Experience {
     this.transitions = transitions;
   }
 
-  /**
-   * Gets the value of the experience
+  /** Gets the value of the experience
    * 
    * @return the value of the experience
    */
@@ -154,8 +142,7 @@ public class Experience {
     return value;
   }
 
-  /**
-   * Sets the value of the experience
+  /** Sets the value of the experience
    * 
    * @param value the value of the experience
    */

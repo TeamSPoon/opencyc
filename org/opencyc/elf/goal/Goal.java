@@ -7,8 +7,7 @@ import org.opencyc.elf.bg.predicate.PredicateExpression;
 //// External Imports
 import java.util.ArrayList;
 
-/**
- * Provides the Goal container for the Elementary Loop Functioning (ELF).
+/** Provides the Goal container for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -31,9 +30,10 @@ import java.util.ArrayList;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Goal {
+  
   //// Constructors
-  /**
-   * Constructs a new Goal object.
+  
+  /** Constructs a new Goal object.
    */
   public Goal() {
   }
@@ -41,8 +41,7 @@ public class Goal {
   //// Public Area
   
 
-  /**
-   * Gets the goal name
+  /** Gets the goal name
    *
    * @return the goal name
    */
@@ -50,8 +49,7 @@ public class Goal {
     return goalName;
   }
 
-  /**
-   * Sets the goal name
+  /** Sets the goal name
    *
    * @param goalName the goal name
    */
@@ -59,8 +57,7 @@ public class Goal {
     this.goalName = goalName;
   }
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -68,8 +65,7 @@ public class Goal {
     return predicateExpression.toString();
   }
   
-  /**
-   * Gets the predicate expression which when true, indicates that the goal
+  /** Gets the predicate expression which when true, indicates that the goal
    * is achieved
    *
    * @return the predicate expression which when true, indicates that the goal
@@ -79,8 +75,7 @@ public class Goal {
     return predicateExpression;
   }
 
-  /**
-   * Sets the predicate expression which when true, indicates that the goal
+  /** Sets the predicate expression which when true, indicates that the goal
    * is achieved
    *
    * @param predicateExpression the predicate expression which when true, indicates that 
@@ -90,8 +85,7 @@ public class Goal {
     this.predicateExpression = predicateExpression;
   }
 
-  /**
-   * Gets the list of predicate expressions which if true, indicate goal failure
+  /** Gets the list of predicate expressions which if true, indicate goal failure
    *
    * @return the list of predicate expressions which if true, indicate goal failure
    */
@@ -99,8 +93,7 @@ public class Goal {
     return failurePredicateExpressions;
   }
 
-  /**
-   * Sets the list of predicate expressions which if true, indicate goal failure
+  /** Sets the list of predicate expressions which if true, indicate goal failure
    *
    * @param failurePredicateExpressions the list of predicate expressions which if true, 
    * indicate goal failure
@@ -109,8 +102,7 @@ public class Goal {
     this.failurePredicateExpressions = failurePredicateExpressions;
   }
 
-  /**
-   * Gets the goal importance
+  /** Gets the goal importance
    * 
    * @return the goal importance
    */
@@ -118,8 +110,7 @@ public class Goal {
     return importance;
   }
 
-  /**
-   * Sets the goal importance
+  /** Sets the goal importance
    * 
    * @param importance the goal importance
    */
@@ -144,20 +135,15 @@ public class Goal {
    */
   protected String goalName;
   
-  /**
-   * the predicate expression which when true, indicates that the goal
+  /** the predicate expression which when true, indicates that the goal
    * is achieved
    */
   protected PredicateExpression predicateExpression;
 
-  /** 
-   * the list of predicate expressions which if true, indicate goal failure 
-   */
+  /**  the list of predicate expressions which if true, indicate goal failure */
   protected ArrayList failurePredicateExpressions = new ArrayList();
 
-  /** 
-   * the goal importance 
-   */
+  /** the goal importance */
   protected Importance importance;
 
   //// Main

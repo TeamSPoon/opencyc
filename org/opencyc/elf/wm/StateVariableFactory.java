@@ -5,8 +5,7 @@ import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 
-/**
- * StateVariableLibrary populates the state variable library.  There is a singleton instance.
+/** StateVariableLibrary populates the state variable library.  There is a singleton instance.
  * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
@@ -38,8 +37,7 @@ public class StateVariableFactory {
   
   //// Public Area
   
-  /**
-   * Gets the state variable factory singleton instance.
+  /** Gets the state variable factory singleton instance.
    *
    * @return the state variable factory singleton instance
    */

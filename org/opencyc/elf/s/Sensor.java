@@ -6,8 +6,7 @@ import org.opencyc.elf.bg.planner.Resource;
 //// External Imports
 import java.util.List;
 
-/**
- * Sensor defines the sensor interface for the Elementary Loop Functioning (ELF).
+/** Sensor defines the sensor interface for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -31,22 +30,19 @@ import java.util.List;
  */
 public interface Sensor {
   
-  /** 
-   * Gets the name of the sensor or virtual sensor (sensory perception).
+  /** Gets the name of the sensor or virtual sensor (sensory perception).
    *
    * @return the name of the sensor or virtual sensor (sensory perception)
    */
   public String getName();
 
-  /**
-   * Gets the resources required by this sensor or virtual sensor (sensory perception).
+  /** Gets the resources required by this sensor or virtual sensor (sensory perception).
    *
    * @return the resources required by this sensor or virtual sensor (sensory perception)
    */
   public List getResources();
   
-  /**
-   * Gets the names of sensations that this sensor or virtual sensor (sensory perception) can sense.
+  /** Gets the names of sensations that this sensor or virtual sensor (sensory perception) can sense.
    *
    * @return the names of sensations that this sensor or virtual sensor (sensory perception) can sense
    */

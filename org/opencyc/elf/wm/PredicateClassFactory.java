@@ -40,8 +40,7 @@ public class PredicateClassFactory {
   
   //// Public Area
   
-  /**
-   * Gets the predicate class factory singleton instance.
+  /** Gets the predicate class factory singleton instance.
    *
    * @return the predicate class factory singleton instance
    */

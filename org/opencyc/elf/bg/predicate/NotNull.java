@@ -6,8 +6,7 @@ import org.opencyc.elf.wm.state.State;
 //// External Imports
 import java.util.List;
 
-/**
- * NotNull is a predicate of arity one that returns true if its argument
+/** NotNull is a predicate of arity one that returns true if its argument
  * is not null.
  *
  * @version $Id$
@@ -42,8 +41,7 @@ public class NotNull extends Predicate {
   
   //// Public Area
     
-  /** 
-   * Evaluates the given arguments and returns true if the first is not null.
+  /** Evaluates the given arguments and returns true if the first is not null.
    *
    * @param arguments the given arguments to evaluate
    * @param state the given state
@@ -53,8 +51,7 @@ public class NotNull extends Predicate {
     return evaluateArgument(arguments.get(0), state) != null;
   }
   
-  /**
-   * Returns a string representation of this predicate given
+  /** Returns a string representation of this predicate given
    * the arguments.
    *
    * @param arguments the given arguments to evaluate
@@ -68,8 +65,7 @@ public class NotNull extends Predicate {
     return stringBuffer.toString();
   }
   
- /**
-   * Returns true if the given object equals this object.
+ /** Returns true if the given object equals this object.
    *
    * @param obj the given object
    * @return true if the given object equals this object

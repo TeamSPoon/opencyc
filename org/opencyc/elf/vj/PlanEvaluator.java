@@ -10,8 +10,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 //// External Imports
 import java.util.List;
 
-/**
- * PlanEvaluator is designed to evaluate plans and thus assist plan selection.
+/** PlanEvaluator is designed to evaluate plans and thus assist plan selection.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -41,8 +40,7 @@ public class PlanEvaluator extends NodeComponent {
   public PlanEvaluator() {
   }
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */

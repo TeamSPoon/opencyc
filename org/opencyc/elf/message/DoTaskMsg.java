@@ -6,7 +6,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
 
-/**Provides the container for the do task message, that is sent from the higher-level
+/** Provides the container for the do task message, that is sent from the higher-level
  * executor to the job assigner.
  * 
  * @version $Id$
@@ -39,8 +39,7 @@ public class DoTaskMsg extends GenericMsg {
   
   //// Public Area
   
-  /** Gets the commanded task for job assignment
-   *
+  /** 
    * @return the commanded task for job assignment
    */
   public TaskCommand getTaskCommand () {

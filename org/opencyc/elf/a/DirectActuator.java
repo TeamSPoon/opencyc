@@ -12,8 +12,7 @@ import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 
-/**
- * DirectActuator is the abstract super class of all direct actuators, as opposed to
+/** DirectActuator is the abstract super class of all direct actuators, as opposed to
  * virtual actuators (job assigner).
  * 
  * @version $Id$
@@ -40,8 +39,7 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
   
   //// Constructors
   
-  /** 
-   * Creates a new instance of DirectActuator given its name and
+  /** Creates a new instance of DirectActuator given its name and
    * required resources.
    *
    * @param name the actuator name
@@ -59,8 +57,7 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
   
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -72,20 +69,17 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
     return stringBuffer.toString();
   }
   
-  /** 
-   * Gets the puttable channel for this node component to which other node
+  /** Gets the puttable channel for this node component to which other node
    * components can send messages.
    *
    * @return the puttable channel for this node component to which other node
    * components can send messages
-   *
    */
   public Puttable getChannel() {
     return (Puttable) actuatorChannel;
   }
   
-  /** 
-   * Gets the name of the actuator.
+  /** Gets the name of the actuator.
    *
    * @return the name of the actuator
    */
@@ -93,8 +87,7 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
     return name;
   }
   
-  /**
-   * Gets the resources requried by this actuator.
+  /** Gets the resources requried by this actuator.
    *
    * @return the resources requried by this actuator
    */
@@ -102,8 +95,7 @@ public abstract class DirectActuator extends NodeComponent implements Actuator {
     return resources;
   }
   
-  /**
-   * Gets the actions that this actuator can accomplish.
+  /** Gets the actions that this actuator can accomplish.
    *
    * @return the actions that this actuatorcan accomplish
    */

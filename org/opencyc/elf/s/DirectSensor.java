@@ -10,8 +10,7 @@ import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
-/**
- * DirectSensor is the abstract super class of all direct sensors, as opposed to
+/** DirectSensor is the abstract super class of all direct sensors, as opposed to
  * virtual sensors (sensory perception).
  * 
  * @version $Id$
@@ -38,8 +37,7 @@ public class DirectSensor extends NodeComponent  implements Sensor {
   
   //// Constructors
   
-  /**
-   * Constructs a new DirectSensor object given its name.
+  /** Constructs a new DirectSensor object given its name.
    *
    * @param name the sensor name
    * @param resources the resources required by this sensor
@@ -55,8 +53,7 @@ public class DirectSensor extends NodeComponent  implements Sensor {
   
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -68,8 +65,7 @@ public class DirectSensor extends NodeComponent  implements Sensor {
     return stringBuffer.toString();
   }
   
-  /** 
-   * Gets the name of the sensor.
+  /** Gets the name of the sensor.
    *
    * @return the name of the sensor
    */
@@ -77,8 +73,7 @@ public class DirectSensor extends NodeComponent  implements Sensor {
     return name;
   }
   
-  /**
-   * Gets the resources required by this sensor.
+  /** Gets the resources required by this sensor.
    *
    * @return the resources required by this sensor
    */
@@ -86,8 +81,7 @@ public class DirectSensor extends NodeComponent  implements Sensor {
     return resources;
   }
   
-  /**
-   * Gets the names of sensations that this sensor can sense.
+  /** Gets the names of sensations that this sensor can sense.
    *
    * @return the names of sensations that this sensor can sense
    */

@@ -5,8 +5,7 @@ import org.opencyc.elf.NodeComponent;
 
 //// External Imports
 
-/**
- * Provides the HypothesisFormer for ELF SensoryPerception.
+/** Provides the HypothesisFormer for ELF SensoryPerception.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -38,8 +37,7 @@ public class HypothesisFormer extends NodeComponent {
 
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -47,8 +45,7 @@ public class HypothesisFormer extends NodeComponent {
     return "HypothesisFormer for " + node.getName();
   }
   
-  /**
-   * Gets the sensory perception instance which owns this hypothesis former
+  /** Gets the sensory perception instance which owns this hypothesis former
    * 
    * @return the sensory perception instance which owns this hypothesis former
    */
@@ -56,8 +53,7 @@ public class HypothesisFormer extends NodeComponent {
     return sensoryPerception;
   }
 
-  /**
-   * Sets the sensory perception instance which owns this hypothesis former
+  /** Sets the sensory perception instance which owns this hypothesis former
    * 
    * @param sensoryPerception the sensory perception instance which owns this
    *        hypothesis former

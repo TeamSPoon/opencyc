@@ -13,8 +13,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
 
-/**
- * Provides the Executor for ELF BehaviorGeneration.
+/** Provides the Executor for ELF BehaviorGeneration.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -46,8 +45,7 @@ public class Executor extends NodeComponent {
 
   //// Public Area
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -55,8 +53,7 @@ public class Executor extends NodeComponent {
     return "Executor for " + node.getName();
   }
   
-  /**
-   * Gets the schedule to execute
+  /** Gets the schedule to execute
    * 
    * @return the schedule to execute
    */
@@ -64,8 +61,7 @@ public class Executor extends NodeComponent {
     return scheduleToExecute;
   }
 
-  /**
-   * Sets the schedule to execute
+  /** Sets the schedule to execute
    * 
    * @param scheduleToExecute the schedule to execute
    */
@@ -73,8 +69,7 @@ public class Executor extends NodeComponent {
     this.scheduleToExecute = scheduleToExecute;
   }
 
-  /**
-   * Gets the behavior generation instance
+  /** Gets the behavior generation instance
    * 
    * @return the behavior generation instance
    */
@@ -82,8 +77,7 @@ public class Executor extends NodeComponent {
     return behaviorGeneration;
   }
 
-  /**
-   * Sets the behavior generation instance
+  /** Sets the behavior generation instance
    * 
    * @param behaviorGeneration the behavior generation instance
    */
@@ -91,8 +85,7 @@ public class Executor extends NodeComponent {
     this.behaviorGeneration = behaviorGeneration;
   }
 
-  /**
-   * Gets the scheduler whose plans this executor executes
+  /** Gets the scheduler whose plans this executor executes
    * 
    * @return the scheduler whose plans this executor executes
    */
@@ -100,8 +93,7 @@ public class Executor extends NodeComponent {
     return scheduler;
   }
 
-  /**
-   * Sets the scheduler whose plans this executor executes
+  /** Sets the scheduler whose plans this executor executes
    * 
    * @param scheduler the scheduler whose plans this executor executes
    */
@@ -119,8 +111,7 @@ public class Executor extends NodeComponent {
     // Schedule schedule
   }
 
-  /**
-   * Receives the execute schedule message from plan selector. 
+  /** Receives the execute schedule message from plan selector. 
    * (scheduler should be the intermediary)
    */
   protected void receiveExecuteSchedule () {
@@ -130,8 +121,7 @@ public class Executor extends NodeComponent {
     // Schedule schedule
   }
   
-  /**
-   * Sends the do subtask message to behavior generation, for subsequent forwarding to
+  /** Sends the do subtask message to behavior generation, for subsequent forwarding to
    * the next highest level node
    */
   protected void doSubTask () {

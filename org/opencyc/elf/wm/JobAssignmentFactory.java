@@ -12,8 +12,7 @@ import org.opencyc.elf.wm.ActionFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * JobAssignmentFactory populates the job assignment library.  There is a singleton instance.
+/** JobAssignmentFactory populates the job assignment library.  There is a singleton instance.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -46,8 +45,7 @@ public class JobAssignmentFactory {
   
   //// Public Area
   
-  /**
-   * Gets the job assignment factory singleton instance.
+  /** Gets the job assignment factory singleton instance.
    *
    * @return the job assignment factory singleton instance
    */
@@ -55,9 +53,7 @@ public class JobAssignmentFactory {
     return jobAssignmentFactory;
   }
   
-  /**
-   * Poplulates the job assignment library.
-   */
+  /** Poplulates the job assignment library. */
   public void populateJobAssignmentLibrary () {
     // converse with user
     JobAssignment jobAssignment = new JobAssignment();

@@ -6,8 +6,7 @@ import org.opencyc.elf.goal.Goal;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * GoalLibrary contains the goal dictionary.  There is a singleton instance
+/** GoalLibrary contains the goal dictionary.  There is a singleton instance
  * of the goal library.
  * @version $Id$
  * @author Stephen L. Reed  
@@ -40,8 +39,7 @@ public class GoalLibrary {
   
   //// Public Area
   
-  /**
-   * Gets the goal library singleton instance.
+  /** Gets the goal library singleton instance.
    *
    * @return the goal library singleton instance
    */
@@ -49,8 +47,7 @@ public class GoalLibrary {
     return goalLibrary;
   }
   
-  /**
-   * Gets the goal associated with the given goal name.
+  /** Gets the goal associated with the given goal name.
    *
    * @param name the given goal name
    * @return the goal associated with the given goal name
@@ -59,8 +56,7 @@ public class GoalLibrary {
     return (Goal) goalDictionary.get(name);
   }
 
-  /**
-   * Sets the goal associated with the given goal name.
+  /** Sets the goal associated with the given goal name.
    *
    * @param name the given goal name
    * @param goal the given goal

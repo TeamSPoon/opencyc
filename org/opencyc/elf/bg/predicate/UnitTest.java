@@ -16,8 +16,7 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 
-/**
- * Provides a suite of JUnit test cases for the org.opencyc.elf.bg.predicate
+/** Provides a suite of JUnit test cases for the org.opencyc.elf.bg.predicate
  * package.
  * 
  * @version $Id$
@@ -44,8 +43,7 @@ public class UnitTest extends TestCase {
   
   //// Constructors
   
-  /**
-   * Construct a new UnitTest object.
+  /** Construct a new UnitTest object.
    * 
    * @param name the test case name.
    */
@@ -55,8 +53,7 @@ public class UnitTest extends TestCase {
   
   //// Public Area
 
-  /**
-   * Runs the unit tests
+  /** Runs the unit tests
    * @return the test suite
    */
   public static Test suite() {
@@ -66,9 +63,7 @@ public class UnitTest extends TestCase {
     return testSuite;
   }
 
-  /**
-   * Tests predicate expression behavior.
-   */
+  /** Tests predicate expression behavior. */
   public void testPredicateExpression() {
     System.out.println("\n*** testPredicateExpression ***");
     State state = new State();
@@ -168,8 +163,7 @@ public class UnitTest extends TestCase {
   
   //// Main
   
-  /**
-   * Main method in case tracing is prefered over running JUnit.
+  /** Main method in case tracing is prefered over running JUnit.
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {

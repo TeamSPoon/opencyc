@@ -41,8 +41,7 @@ public class JobAssignmentLibrary {
   
   //// Public Area
   
-  /**
-   * Gets the singleton job assignment library instance
+  /** Gets the singleton job assignment library instance
    *
    * @return the singleton job assignment library instance
    */
@@ -50,8 +49,7 @@ public class JobAssignmentLibrary {
     return jobAssignmentLibrary;
   }
 
-  /**
-   * Gets the job assignment that accomplishes the given action name.
+  /** Gets the job assignment that accomplishes the given action name.
    *
    * @param actionName the given action name
    * @return the job assignment that accomplishes the given action name
@@ -62,8 +60,7 @@ public class JobAssignmentLibrary {
   
   //// Protected Area
   
-  /**
-   * Sets the job assignment that accomplishes the given action name.
+  /** Sets the job assignment that accomplishes the given action name.
    *
    * @param actionName the given action name
    * @param jobAssignment the job assignment that accomplishes the given action name

@@ -7,8 +7,7 @@ import org.opencyc.elf.wm.state.StateVariable;
 //// External Imports
 import java.util.List;
 
-/**
- * Predicatedefines the behavior for objects that evaluate
+/** Predicate defines the behavior for objects that evaluate
  * arguments and return a boolean result.  The arguments can be objects or
  * state variables.
  * 
@@ -36,8 +35,7 @@ public abstract class Predicate {
   
   //// Constructors
 
-  /**
-   * Constructs a new Predicate object.
+  /** Constructs a new Predicate object.
    */
   public Predicate() {
     predicate = this;
@@ -45,8 +43,7 @@ public abstract class Predicate {
   
   //// Public Area
     
-  /**
-   * Gets the singleton instance of predicate.
+  /** Gets the singleton instance of predicate.
    *
    * @return the singleton instance of predicate
    */
@@ -54,8 +51,7 @@ public abstract class Predicate {
     return predicate;
   }
   
-  /**
-   * Evaluates the given arguments within the given state and returns the result.  The semantics
+  /** Evaluates the given arguments within the given state and returns the result.  The semantics
    * of the predicate are defined by each implementing class.
    *
    * @param arguments the given arguments to evaluate
@@ -63,8 +59,7 @@ public abstract class Predicate {
    */
   public abstract boolean evaluate (List arguments, State state);
   
-  /**
-   * Returns a string representation of this predicate given
+  /** Returns a string representation of this predicate given
    * the arguments.
    *
    * @param arguments the given arguments to evaluate
@@ -72,18 +67,9 @@ public abstract class Predicate {
    */
   public abstract String toString(List arguments);
   
- /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public abstract boolean equals(Object obj);
-  
   //// Protected Area
   
-  /**
-   * Dereferences the given argument within the given state if the argument is a state 
+  /** Dereferences the given argument within the given state if the argument is a state 
    * variable.
    *
    * @param argument the given argument
@@ -103,9 +89,7 @@ public abstract class Predicate {
   
   //// Internal Rep
 
-  /**
-   * the singleton instance of predicate
-   */
+  /** the singleton instance of predicate */
   protected static Predicate predicate;
   
   //// Main

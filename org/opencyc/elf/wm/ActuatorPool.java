@@ -6,8 +6,7 @@ import org.opencyc.elf.a.Actuator;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * ActuatorPool provides a store in which actuators can be retrieved
+/** ActuatorPool provides a store in which actuators can be retrieved
  * by name.  It is initially populated by the actuator factory.  There is a singleton instance
  * of actuator pool.
  *
@@ -42,8 +41,7 @@ public class ActuatorPool {
   
   //// Public Area
   
-  /**
-   * Gets the actuator library singleton instance.
+  /** Gets the actuator library singleton instance.
    *
    * @return the actuator library singleton instance
    */
@@ -51,8 +49,7 @@ public class ActuatorPool {
     return actuatorPool;
   }
   
-  /**
-   * Gets the actuator associated with the given actuator name.
+  /** Gets the actuator associated with the given actuator name.
    *
    * @param name the given actuator name
    * @return the actuator associated with the given actuator name
@@ -61,8 +58,7 @@ public class ActuatorPool {
     return (Actuator)  actuatorDictionary.get(name);
   }
 
-  /**
-   * Sets the actuator associated with the given actuator name.
+  /** Sets the actuator associated with the given actuator name.
    *
    * @param name the given actuator name
    * @param actuator the given actuator

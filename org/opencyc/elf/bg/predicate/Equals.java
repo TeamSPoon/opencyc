@@ -6,8 +6,7 @@ import org.opencyc.elf.wm.state.State;
 //// External Imports
 import java.util.List;
 
-/**
- * Equals is a predicate of arity two that returns true if its arguments
+/** Equals is a predicate of arity two that returns true if its arguments
  * are equal to each other.
  *
  * @version $Id$
@@ -42,8 +41,7 @@ public class Equals extends Predicate {
   
   //// Public Area
     
-  /** 
-   * Evaluates the given arguments and returns true if the first and second are
+  /** Evaluates the given arguments and returns true if the first and second are
    * equal to each other.
    *
    * @param arguments the given arguments to evaluate
@@ -61,8 +59,7 @@ public class Equals extends Predicate {
        return  argument1.equals(argument2);
   }
   
-  /**
-   * Returns a string representation of this predicate given
+  /** Returns a string representation of this predicate given
    * the arguments.
    *
    * @param arguments the given arguments to evaluate
@@ -74,16 +71,6 @@ public class Equals extends Predicate {
     stringBuffer.append(arguments.get(0).toString());
     stringBuffer.append(")");
     return stringBuffer.toString();
-  }
-  
- /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    return obj instanceof Equals;
   }
   
   //// Protected Area

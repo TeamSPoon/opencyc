@@ -4,8 +4,7 @@ package org.opencyc.elf.goal;
 
 //// External Imports
 
-/**
- * Provides the Importance container for the Elementary Loop Functioning
+/** Provides the Importance container for the Elementary Loop Functioning
  * (ELF).
  * 
  * @version $Id$
@@ -36,8 +35,7 @@ public class Importance {
   public Importance() {
   }
 
-  /**
-   * Constructs a new Importance object given the importance.
+  /** Constructs a new Importance object given the importance.
    *
    * @param importance the importance
    */
@@ -62,8 +60,7 @@ public class Importance {
   /** least important */
   public static final float LEAST = 0.0f;
   
-  /**
-   * Gets the importance
+  /** Gets the importance
    * 
    * @return the importance
    */
@@ -71,8 +68,7 @@ public class Importance {
     return importance;
   }
 
-  /**
-   * Sets the importance
+  /** Sets the importance
    * 
    * @param importance the importance
    * @throws IllegalArgumentException when the importance is not in the range [0.0 ... +1.0]
@@ -85,7 +81,7 @@ public class Importance {
   
   //// Protected Area
   
-  /** Importances range from 0.0 for least important, to +1 for most important. */
+  /** importances range from 0.0 for least important, to +1 for most important. */
   protected float importance;
 
   //// Private Area

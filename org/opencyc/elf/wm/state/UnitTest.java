@@ -15,8 +15,7 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 
-/**
- * Provides a suite of JUnit test cases for the org.opencyc.elf.bg.state
+/** Provides a suite of JUnit test cases for the org.opencyc.elf.bg.state
  * package.
  * 
  * @version $Id$
@@ -43,8 +42,7 @@ public class UnitTest extends TestCase {
   
   //// Constructors
   
-  /**
-   * Construct a new UnitTest object.
+  /** Construct a new UnitTest object.
    * 
    * @param name the test case name.
    */
@@ -54,8 +52,8 @@ public class UnitTest extends TestCase {
   
   //// Public Area
 
-  /**
-   * Runs the unit tests
+  /** Runs the unit tests
+   *
    * @return the test suite
    */
   public static Test suite() {
@@ -65,9 +63,7 @@ public class UnitTest extends TestCase {
     return testSuite;
   }
 
-  /**
-   * Tests Situation object behavior.
-   */
+  /** Tests Situation object behavior. */
   public void testSituation() {
     System.out.println("\n*** testSituation ***");
     new StateVariableLibrary();
@@ -117,8 +113,8 @@ public class UnitTest extends TestCase {
   
   //// Main
   
-  /**
-   * Main method in case tracing is prefered over running JUnit.
+  /** Main method in case tracing is prefered over running JUnit.
+   *
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {

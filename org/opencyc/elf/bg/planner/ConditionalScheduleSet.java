@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * ConditionalScheduleSet contains a predicate expression and a set of schedules.  One or
+/** ConditionalScheduleSet contains a predicate expression and a set of schedules.  One or
  * more conditional schedule sets are contained in the task frame as a list.  The job 
  * assigner iterates over this list and takes action on the first element whose predicate
  * expression evaluates to true.
@@ -39,8 +38,7 @@ public class ConditionalScheduleSet {
   
   //// Constructors
   
-  /** 
-   * Creates a new instance of ConditionalScheduleSet given the predicate expression and
+  /** Creates a new instance of ConditionalScheduleSet given the predicate expression and
    * schedule set. 
    *
    * @param predicateExpression the given predicate expression
@@ -53,8 +51,7 @@ public class ConditionalScheduleSet {
   
   //// Public Area
   
-  /**
-   * Creates and returns a copy of this object as initialized by the task frame factory
+  /** Creates and returns a copy of this object as initialized by the task frame factory
    * when the task frame library is populated.  The remaining instance variables in the
    * cloned task frame are set by the job assinger according to the commanded task.
    */
@@ -68,8 +65,7 @@ public class ConditionalScheduleSet {
     return new ConditionalScheduleSet(predicateExpression, clonedScheduleSet);
   }
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -84,8 +80,7 @@ public class ConditionalScheduleSet {
     return stringBuffer.toString();
   }
   
-  /**
-   * Gets  the predicate expression 
+  /** Gets  the predicate expression 
    *
    * @return  the predicate expression 
    */
@@ -93,8 +88,7 @@ public class ConditionalScheduleSet {
     return predicateExpression;
   }
 
-  /**
-   * Gets the set of schedules in this schedule set, where each schedule is for a different actuator
+  /** Gets the set of schedules in this schedule set, where each schedule is for a different actuator
    *
    * @return the set of schedules in this schedule set, where each schedule is for a different actuator
    */
@@ -102,8 +96,7 @@ public class ConditionalScheduleSet {
     return scheduleSet;
   }
 
-  /**
-   * Gets all names of the actuators that are responsible for carrying out the task
+  /** Gets all names of the actuators that are responsible for carrying out the task
    * 
    * @return all names of the actuators that are responsible for carrying out the task
    */
@@ -118,8 +111,7 @@ public class ConditionalScheduleSet {
     return actuatorNames;
   }
 
-  /**
-   * Gets all the names of the sensors that are responsible for sensing phenomena related to the task
+  /** Gets all the names of the sensors that are responsible for sensing phenomena related to the task
    * 
    * @return all the names of the sensors that are responsible for sensing phenomena related to the task
    */

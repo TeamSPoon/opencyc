@@ -9,8 +9,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
 
-/**
- * PlanSelector selects the best plan from alternatives.
+/** PlanSelector selects the best plan from alternatives.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -42,8 +41,7 @@ public class PlanSelector extends NodeComponent {
   
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */

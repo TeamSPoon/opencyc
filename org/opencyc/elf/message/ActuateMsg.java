@@ -4,8 +4,7 @@ package org.opencyc.elf.message;
 
 //// External Imports
 
-/**
- * Provides the container for actuate message, that
+/** Provides the container for actuate message, that
  * is sent from an executor to an actuator.
  * 
  * @version $Id$
@@ -36,8 +35,7 @@ public class ActuateMsg extends GenericMsg {
   public ActuateMsg() {
   }
   
-  /**
-   * Gets the object which is to be acted upon in the case where the actuator can act upon 
+  /** Gets the object which is to be acted upon in the case where the actuator can act upon 
    * one of several objects, or null if the actuator can only act upon one object.
    *
    * @return the object which is to be acted upon in the case where the actuator can act upon 
@@ -47,8 +45,7 @@ public class ActuateMsg extends GenericMsg {
     return obj;
   }
 
-  /**
-   * Sets the object which is to be acted upon in the case where the actuator can act upon 
+  /** Sets the object which is to be acted upon in the case where the actuator can act upon 
    * one of several objects, or null if the actuator can only act upon one object.
    *
    * @param obj the object which is to be acted upon in the case where the actuator can act upon 
@@ -58,8 +55,7 @@ public class ActuateMsg extends GenericMsg {
     this.obj = obj;
   }
 
-  /**
-   * Gets the action data specifying the parameters of the commanded action.
+  /** Gets the action data specifying the parameters of the commanded action.
    *
    * @return the action data specifying the parameters of the commanded action
    */
@@ -67,8 +63,7 @@ public class ActuateMsg extends GenericMsg {
     return data;
   }
 
-  /**
-   * Sets the action data specifying the parameters of the commanded action.
+  /** Sets the action data specifying the parameters of the commanded action.
    *
    * @param data the action data specifying the parameters of the commanded action
    */
@@ -82,8 +77,7 @@ public class ActuateMsg extends GenericMsg {
   
   //// Internal Rep
   
-  /**
-   * the object which is to be acted upon in the case where the actuator can act upon 
+  /** the object which is to be acted upon in the case where the actuator can act upon 
    * one of several objects, or null if the actuator can only act upon one object.
    */  
   protected Object obj;

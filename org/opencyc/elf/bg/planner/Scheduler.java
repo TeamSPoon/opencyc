@@ -27,8 +27,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
-/**
- * Scheduler performs temporal task decomposition for a given assigned agent
+/** Scheduler performs temporal task decomposition for a given assigned agent
  * and its allocated resources.
  * 
  * @version $Id$
@@ -88,23 +87,7 @@ public class Scheduler extends NodeComponent {
       System.exit(1);
     }
   }
-  
-  
-  /** Returns true if the given object equals this object.
-   * 
-   * @param obj the given object
-   * 
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (!(obj instanceof Scheduler)) {
-      return false;
-    }
-
-    //TODO
-    return true;
-  }
-
+ 
   /** Returns a string representation of this object.
    * 
    * @return a string representation of this object

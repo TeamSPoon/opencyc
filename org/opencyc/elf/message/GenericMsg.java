@@ -7,8 +7,7 @@ import org.opencyc.elf.NodeComponent;
 //// External Imports
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
-/**
- * Provides generic message attributes and behavior that is extended by subclasses
+/** Provides generic message attributes and behavior that is extended by subclasses
  * for specific message types.
  * 
  * @version $Id$
@@ -42,8 +41,7 @@ abstract public class GenericMsg {
   
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
@@ -55,8 +53,7 @@ abstract public class GenericMsg {
     return stringBuffer.toString();
   }
 
-  /**
-   * Gets the sender of the message
+  /** Gets the sender of the message
    *
    * @return the sender of the message
    */
@@ -64,8 +61,7 @@ abstract public class GenericMsg {
     return sender;
   }
 
-  /**
-   * Sets the sender of the message
+  /** Sets the sender of the message
    *
    * @param sender the sender of the message
    */
@@ -73,8 +69,7 @@ abstract public class GenericMsg {
     this.sender = sender;
   }
 
-  /**
-   * Gets the in-reply-to message, or null if this message is unsolicited
+  /** Gets the in-reply-to message, or null if this message is unsolicited
    *
    * @return the in-reply-to message, or null if this message is unsolicited
    */
@@ -82,8 +77,7 @@ abstract public class GenericMsg {
     return inReplyToMsg;
   }
 
-  /**
-   * Sets the in-reply-to message, or null if this message is unsolicited
+  /** Sets the in-reply-to message, or null if this message is unsolicited
    *
    * @param inReplyToMsg the in-reply-to message, or null if this message is unsolicited
    */
@@ -91,8 +85,7 @@ abstract public class GenericMsg {
     this.inReplyToMsg = inReplyToMsg;
   }
 
-  /**
-   * Gets the reply-to channel, or null if no response is required
+  /** Gets the reply-to channel, or null if no response is required
    *
    * @return the reply-to channel, or null if no response is required
    */
@@ -100,8 +93,7 @@ abstract public class GenericMsg {
     return replyToChannel;
   }
 
-  /**
-   * Sets the reply-to channel, or null if no response is required
+  /** Sets the reply-to channel, or null if no response is required
    *
    * @param replyToChannel the reply-to channel, or null if no response is required
    */

@@ -6,8 +6,7 @@ import org.opencyc.elf.wm.state.StateVariable;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * StateVariableLibrary contains the state variable dictionary.  The association of
+/** StateVariableLibrary contains the state variable dictionary.  The association of
  * state variable to state value is done by the State object.  There is a singleton instance
  * of the state variable library.
  * @version $Id$
@@ -41,8 +40,7 @@ public class StateVariableLibrary {
   
   //// Public Area
   
-  /**
-   * Gets the state variable library singleton instance.
+  /** Gets the state variable library singleton instance.
    *
    * @return the state variable library singleton instance
    */
@@ -50,8 +48,7 @@ public class StateVariableLibrary {
     return stateVariableLibrary;
   }
   
-  /**
-   * Gets the state variable associated with the given state variable name.
+  /** Gets the state variable associated with the given state variable name.
    *
    * @param name the given state variable name
    * @return the state variable associated with the given state variable name
@@ -60,8 +57,7 @@ public class StateVariableLibrary {
     return (StateVariable) stateVariableDictionary.get(name);
   }
 
-  /**
-   * Sets the state variable associated with the given state variable name.
+  /** Sets the state variable associated with the given state variable name.
    *
    * @param name the given state variable name
    * @param stateVariable the given state variable

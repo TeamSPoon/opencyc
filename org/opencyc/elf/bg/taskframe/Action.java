@@ -9,8 +9,7 @@ import org.opencyc.elf.wm.state.State;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Action describes the action to be performed and may include a set of modifiers such as
+/** Action describes the action to be performed and may include a set of modifiers such as
  * priorities, mode, path constraints, acceptable cost, and required conditions.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
@@ -47,8 +46,7 @@ public class Action {
   
   //// Public Area
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
@@ -79,8 +77,7 @@ public class Action {
     return stringBuffer.toString();
   }
   
-  /**
-   * Creates and returns a copy of this object.
+  /** Creates and returns a copy of this object.
    *
    * @return a partially instantiated copy of this object
    */
@@ -93,8 +90,7 @@ public class Action {
     return action;
   }
   
-  /**
-   * Gets the name of the action
+  /** Gets the name of the action
    *
    * @return name the name of the action
    */
@@ -102,8 +98,7 @@ public class Action {
     return name;
   }
 
-  /**
-   * Gets the parameter names for this action.
+  /** Gets the parameter names for this action.
    *
    * @return the parameter names for this action
    */
@@ -111,8 +106,7 @@ public class Action {
     return parameterNames;
   }
    
-  /**
-   * Gets the parameter types for this action.
+  /** Gets the parameter types for this action.
    *
    * @return the parameter types for this action
    */
@@ -120,8 +114,7 @@ public class Action {
     return parameterTypes;
   }
     
-  /**
-   * Gets the parameter values for this action.
+  /** Gets the parameter values for this action.
    *
    * @return the parameter values for this action
    */
@@ -129,8 +122,7 @@ public class Action {
     return parameterValues;
   }
   
-  /**
-   * Sets the parameter values for this action.
+  /** Sets the parameter values for this action.
    *
    * @param parameterValues the parameter values for this action
    */
@@ -151,8 +143,7 @@ public class Action {
     this.parameterValues = parameterValues;
   }
   
-  /**
-   * Gets the output type for this action.
+  /** Gets the output type for this action.
    *
    * @return the output type for this action
    */
@@ -160,8 +151,7 @@ public class Action {
     return outputType;
    }
   
-  /**
-   * Gets the output value for this (completed) action.
+  /** Gets the output value for this (completed) action.
    *
    * @return the parameter values for this (completed) action
    */
@@ -172,8 +162,7 @@ public class Action {
   
   //// Protected Area
   
-  /**
-   * Sets the name of the action
+  /** Sets the name of the action
    *
    * @param name the name of the action
    */
@@ -181,8 +170,7 @@ public class Action {
     this.name = name;
   }  
   
-  /**
-   * Sets the parameter names for this action.
+  /** Sets the parameter names for this action.
    *
    * @param parameterNames the parameter names for this action
    */
@@ -190,8 +178,7 @@ public class Action {
     this.parameterNames = parameterNames;
   }
    
-  /**
-   * Sets the parameter types for this action.
+  /** Sets the parameter types for this action.
    *
    * @param parameterTypes the parameter types for this action
    */
@@ -199,16 +186,14 @@ public class Action {
     this.parameterTypes = parameterTypes;
   }
    
-  /**
-   * Sets the output type for this action.
+  /** Sets the output type for this action.
    *
    * @param outputType the output type for this action
    */
   public void setOutputType (Class outputType) {
     this.outputType = outputType;
   }
-   /**
-   * Sets the output value for this action.
+  /** Sets the output value for this action.
    *
    * @param outputValue the output valuefor this action
    */

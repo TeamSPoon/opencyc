@@ -6,8 +6,7 @@ import org.opencyc.elf.s.Sensor;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * SensorPool provides a store in which sensors can be retrieved
+/** SensorPool provides a store in which sensors can be retrieved
  * by name.  It is initially populated by the sensor factory.  There is a singleton instance
  * of sensor factory.
  *
@@ -42,8 +41,7 @@ public class SensorPool {
   
   //// Public Area
   
-  /**
-   * Gets the sensor library singleton instance.
+  /** Gets the sensor library singleton instance.
    *
    * @return the sensor library singleton instance
    */
@@ -51,8 +49,7 @@ public class SensorPool {
     return sensorPool;
   }
   
-  /**
-   * Gets the sensor associated with the given sensor name.
+  /** Gets the sensor associated with the given sensor name.
    *
    * @param name the given sensor name
    * @return the sensor associated with the given sensor name
@@ -61,8 +58,7 @@ public class SensorPool {
     return (Sensor)  sensorDictionary.get(name);
   }
 
-  /**
-   * Sets the sensor associated with the given sensor name.
+  /** Sets the sensor associated with the given sensor name.
    *
    * @param name the given sensor name
    * @param sensor the given sensor

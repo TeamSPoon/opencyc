@@ -5,8 +5,7 @@ import org.opencyc.elf.NodeComponent;
 
 //// External Imports
 
-/**
- * EntityEvaluator is designed to evaluate perceived sensory inputs and update
+/** EntityEvaluator is designed to evaluate perceived sensory inputs and update
  * the knowledge base with an worth judgement.
  *
  * @version $Id$
@@ -39,8 +38,7 @@ public class EntityEvaluator extends NodeComponent {
   
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */

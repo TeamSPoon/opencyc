@@ -6,8 +6,7 @@ import org.opencyc.elf.Status;
 
 //// External Imports
 
-/**
- * Provides the status message that is sent from the job assigner to the higher-level
+/** Provides the status message that is sent from the job assigner to the higher-level
  * executor.
  * 
  * @version $Id$
@@ -40,8 +39,7 @@ public class JobAssignerStatusMsg extends GenericMsg {
   
   //// Public Area
 
-  /**
-   * Gets the job assigner status
+  /** Gets the job assigner status
    *
    * @return the job assigner status
    */
@@ -49,8 +47,7 @@ public class JobAssignerStatusMsg extends GenericMsg {
     return status;
   }
 
-  /**
-   * Sets the job assigner status
+  /** Sets the job assigner status
    *
    * @param status the job assigner status
    */

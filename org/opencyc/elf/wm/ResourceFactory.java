@@ -6,8 +6,7 @@ import org.opencyc.elf.bg.planner.Resource;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * ResourceFactory populates the resource pool.  There is
+/** ResourceFactory populates the resource pool.  There is
  * a singleton instance.
  *
  * @version $Id$
@@ -42,8 +41,7 @@ public class ResourceFactory {
   
   //// Public Area
   
-  /**
-   * Gets the resource factory singleton instance.
+  /** Gets the resource factory singleton instance.
    *
    * @return the resource factory singleton instance
    */

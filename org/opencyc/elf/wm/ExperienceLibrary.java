@@ -5,8 +5,7 @@ import org.opencyc.elf.experience.Experience;
 
 //// External Imports
 
-/**
- * ExperienceLibrary stores experiences.  There is a singleton instance.
+/** ExperienceLibrary stores experiences.  There is a singleton instance.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -43,8 +42,7 @@ public class ExperienceLibrary {
   
   //// Public Area
   
-  /**
-   * Gets the experience library singleton instance.
+  /** Gets the experience library singleton instance.
    *
    * @return the experience library singleton instance
    */
@@ -52,8 +50,7 @@ public class ExperienceLibrary {
     return experienceLibrary;
   }
   
-  /**
-   * Adds the given experience to the library.
+  /** Adds the given experience to the library.
    *
    * @param experience the given experience 
    */

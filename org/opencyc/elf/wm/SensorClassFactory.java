@@ -4,8 +4,7 @@ package org.opencyc.elf.wm;
 
 //// External Imports
 
-/**
- * SensorClassFactory creates the java classes for Sensors.  There
+/** SensorClassFactory creates the java classes for Sensors.  There
  * is a singleton instance.
  *
  * @version $Id$
@@ -39,8 +38,7 @@ public class SensorClassFactory {
   
   //// Public Area
   
-  /**
-   * Gets the Sensor class factory singleton instance.
+  /** Gets the Sensor class factory singleton instance.
    *
    * @return the Sensor class factory singleton instance
    */

@@ -7,8 +7,7 @@ import org.opencyc.elf.goal.GoalTime;
 
 //// External Imports
 
-/**
- * TaskCommand is an instruction to perform a named task.
+/** TaskCommand is an instruction to perform a named task.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -40,24 +39,7 @@ public class TaskCommand {
 
   //// Public Area
 
-  /**
-   * Returns true if the given object equals this object.
-   * 
-   * @param obj the given object
-   * 
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (!(obj instanceof TaskCommand)) {
-      return false;
-    }
-
-    //TODO
-    return true;
-  }
-
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -72,8 +54,7 @@ public class TaskCommand {
     return stringBuffer.toString();
   }
 
-  /**
-   * Gets the action command plus modifiers
+  /** Gets the action command plus modifiers
    *
    * @return the action command plus modifiers
    */
@@ -81,8 +62,7 @@ public class TaskCommand {
     return actionCommand;
   }
 
-  /**
-   * Sets the action command plus modifiers
+  /** Sets the action command plus modifiers
    *
    * @param actionCommand the action command plus modifiers
    */
@@ -90,8 +70,7 @@ public class TaskCommand {
     this.actionCommand = actionCommand;
   }
 
-  /**
-   * Gets the goal to be accomplish, or the state to be maintained, plus modifiers
+  /** Gets the goal to be accomplish, or the state to be maintained, plus modifiers
    *
    * @return the goal to be accomplish, or the state to be maintained, plus modifiers
    */
@@ -99,8 +78,7 @@ public class TaskCommand {
     return goalCommand;
   }
 
-  /**
-   * Sets the goal to be accomplish, or the state to be maintained, plus modifiers
+  /** Sets the goal to be accomplish, or the state to be maintained, plus modifiers
    *
    * @param goalCommand the goal to be accomplish, or the state to be maintained, plus modifiers
    */
@@ -108,8 +86,7 @@ public class TaskCommand {
     this.goalCommand = goalCommand;
   }
 
-  /**
-   * Gets the goal time constraint plus modifiers such as tolerance
+  /** Gets the goal time constraint plus modifiers such as tolerance
    *
    * @return the goal time constraint plus modifiers such as tolerance
    */
@@ -117,8 +94,7 @@ public class TaskCommand {
     return goalTime;
   }
 
-  /**
-   * Sets the goal time constraint plus modifiers such as tolerance
+  /** Sets the goal time constraint plus modifiers such as tolerance
    *
    * @param goalTime the goal time constraint plus modifiers such as tolerance
    */
@@ -126,8 +102,7 @@ public class TaskCommand {
     this.goalTime = goalTime;
   }
 
-  /**
-   * Gets the planned next action command plus modifiers
+  /** Gets the planned next action command plus modifiers
    *
    * @return the planned next action command plus modifiers
    */
@@ -135,8 +110,7 @@ public class TaskCommand {
     return nextActionCommand;
   }
 
-  /**
-   * Sets the planned next action command plus modifiers
+  /** Sets the planned next action command plus modifiers
    *
    * @param nextActionCommand the planned next action command plus modifiers
    */
@@ -144,8 +118,7 @@ public class TaskCommand {
     this.nextActionCommand = nextActionCommand;
   }
 
-  /**
-   * Gets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
+  /** Gets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
    *
    * @return the planned next goal to be accomplish, or the state to be maintained, plus modifiers
    */
@@ -153,8 +126,7 @@ public class TaskCommand {
     return nextGoalCommand;
   }
 
-  /**
-   * Sets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
+  /** Sets the planned next goal to be accomplish, or the state to be maintained, plus modifiers
    *
    * @param nextGoalCommand the planned next goal to be accomplish, or the state to be maintained, plus modifiers
    */
@@ -162,8 +134,7 @@ public class TaskCommand {
     this.nextGoalCommand = nextGoalCommand;
   }
 
-  /**
-   * Gets the planned next goal time constraint plus modifiers such as tolerance
+  /** Gets the planned next goal time constraint plus modifiers such as tolerance
    *
    * @return the planned next goal time constraint plus modifiers such as tolerance
    */
@@ -171,8 +142,7 @@ public class TaskCommand {
     return nextGoalTime;
   }
 
-  /**
-   * Sets the planned next goal time constraint plus modifiers such as tolerance
+  /** Sets the planned next goal time constraint plus modifiers such as tolerance
    *
    * @param nextGoalTime the planned next goal time constraint plus modifiers such as tolerance
    */

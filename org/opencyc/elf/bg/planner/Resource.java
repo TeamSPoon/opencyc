@@ -4,11 +4,8 @@ package org.opencyc.elf.bg.planner;
 
 //// External Imports
 
-/**
- * <P>
- * Resource contains the attributes and behavior of a resource that must be
+/** Resource contains the attributes and behavior of a resource that must be
  * allocated to an agent in order for that perform a given task.
- * </p>
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -40,8 +37,7 @@ public class Resource {
 
   //// Public Area
 
-  /**
-   * Returns true if the given object equals this object.
+  /** Returns true if the given object equals this object.
    * 
    * @param obj the given object
    * 
@@ -56,8 +52,7 @@ public class Resource {
     return true;
   }
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -69,8 +64,7 @@ public class Resource {
     return stringBuffer.toString();
   }
 
-  /**
-   * Gets the resource name
+  /** Gets the resource name
    * 
    * @return the resource name
    */
@@ -78,8 +72,7 @@ public class Resource {
     return resourceName;
   }
 
-  /**
-   * Sets the resource name
+  /** Sets the resource name
    * 
    * @param resourceName the resource name
    */

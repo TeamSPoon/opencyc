@@ -20,8 +20,7 @@ import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
-/**
- * ConsoleInput is the ELF sensor for console input.
+/** ConsoleInput is the ELF sensor for console input.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -60,8 +59,7 @@ public class ConsoleInput extends DirectSensor {
 
   //// Public Area
   
-  /** 
-   * Initializes this instance of ConsoleInput with the given
+  /** Initializes this instance of ConsoleInput with the given
    * output message channel.
    *
    * @param sensoryPerceptionChannel the puttable channel to which messages are output
@@ -81,8 +79,7 @@ public class ConsoleInput extends DirectSensor {
     /** the parent node component */
     protected NodeComponent nodeComponent;
     
-    /**
-     * Creates a new instance of Consumer
+    /** Creates a new instance of Consumer
      *
      * @param sensoryPerceptionChannel the puttable channel to which messages are output
      * @param nodeComponent the parent node component
@@ -93,9 +90,7 @@ public class ConsoleInput extends DirectSensor {
       this.nodeComponent = nodeComponent;
     }
 
-    /**
-     * Senses the World and writes messages to the output channel.
-     */
+    /** Senses the World and writes messages to the output channel. */
     public void run () {
       while (true) {
         senseWorld();
@@ -103,9 +98,7 @@ public class ConsoleInput extends DirectSensor {
       }
     }
 
-    /**
-     * Senses the world.
-     */
+    /** Senses the world. */
     protected void senseWorld () {
       try {
         String data = bufferedReader.readLine();

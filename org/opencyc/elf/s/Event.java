@@ -4,8 +4,7 @@ package org.opencyc.elf.s;
 
 //// External Imports
 
-/**
- * Event contains the features and behavior of events.
+/** Event contains the features and behavior of events.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -36,24 +35,7 @@ public class Event {
 
   //// Public Area
 
-  /**
-   * Returns true if the given object equals this object.
-   * 
-   * @param obj the given object
-   * 
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (!(obj instanceof Class)) {
-      return false;
-    }
-
-    //TODO
-    return true;
-  }
-
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -63,6 +45,8 @@ public class Event {
   }
 
   //// Protected Area
+  
   //// Private Area
+  
   //// Internal Rep
 }

@@ -47,8 +47,7 @@ public class TaskFrameLibrary {
     return taskFrameLibrary;
   }
   
-  /**
-   * Gets the task frame given the task name.
+  /** Gets the task frame given the task name.
    *
    * @param taskName the task name
    * @return the task frame given the task name

@@ -4,8 +4,7 @@ package org.opencyc.elf.s;
 
 //// External Imports
 
-/**
- * Sensation contains the sensory input from a sensor or virtual sensor (sensory perception).
+/** Sensation contains the sensory input from a sensor or virtual sensor (sensory perception).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -31,8 +30,7 @@ public class Sensation {
   
   //// Constructors
   
-  /** 
-   * Creates a new instance of Sensation given the sensation name, object and sensed data associated with
+  /** Creates a new instance of Sensation given the sensation name, object and sensed data associated with
    * the object. 
    *
    * @param name the sensation name
@@ -45,8 +43,7 @@ public class Sensation {
     this.data = data;
   }
   
-  /**
-   * Gets the sensation name.
+  /** Gets the sensation name.
    *
    * @return the sensation name
    */
@@ -54,8 +51,7 @@ public class Sensation {
     return name;
   }
 
-  /**
-   * Gets the object for which data is sensed.
+  /** Gets the object for which data is sensed.
    *
    * @return the object for which data is sensed
    */
@@ -63,8 +59,7 @@ public class Sensation {
     return obj;
   }
 
-  /**
-   * Gets the sensed data associated with the object
+  /** Gets the sensed data associated with the object
    *
    * @return the sensed data associated with the object
    */

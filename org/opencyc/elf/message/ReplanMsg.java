@@ -12,8 +12,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import java.util.List;
 
-/**
- * Contains the ELF replan message that is sent from the plan selector to the
+/** Contains the ELF replan message that is sent from the plan selector to the
  * scheduler and to the job assigner.
  *
  * @version $Id$

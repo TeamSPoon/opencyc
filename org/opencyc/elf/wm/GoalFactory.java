@@ -11,8 +11,7 @@ import org.opencyc.elf.wm.state.StateVariable;
 
 //// External Imports
 
-/**
- * GoalFactory is designed to create goals.  There is a singleton instance of goal factory.
+/** GoalFactory is designed to create goals.  There is a singleton instance of goal factory.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -49,8 +48,7 @@ public class GoalFactory {
   
   //// Public Area
   
-  /**
-   * Gets the singleton goal factory instance.
+  /** Gets the singleton goal factory instance.
    *
    * @return the singleton goal factory instance
    */
@@ -58,9 +56,7 @@ public class GoalFactory {
     return goalFactory;
   }
   
-  /**
-   * Populates the goal library.
-   */
+  /** Populates the goal library. */
   public void populateGoalLibrary() {
     // get input from user
     Goal goal = new Goal();

@@ -6,8 +6,7 @@ import org.opencyc.elf.Status;
 
 //// External Imports
 
-/**
- * Provides the status message that is sent from the executor to the scheduler.
+/** Provides the status message that is sent from the executor to the scheduler.
  *
  * @version $Id$
  * @author  reed
@@ -40,21 +39,7 @@ public class ExecutorStatusMsg extends GenericMsg {
   
   //// Public Area
   
-  /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (! (obj instanceof Class))
-      return false;
-    //TODO
-    return true;
-  }
-  
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
@@ -63,8 +48,7 @@ public class ExecutorStatusMsg extends GenericMsg {
     return "";
   }
   
-  /**
-   * Gets the executor status
+  /** Gets the executor status
    *
    * @return the executor status
    */
@@ -72,8 +56,7 @@ public class ExecutorStatusMsg extends GenericMsg {
     return status;
   }
 
-  /**
-   * Sets the executor status
+  /** Sets the executor status
    *
    * @param status the sexecutor status
    */

@@ -5,8 +5,7 @@ import org.opencyc.elf.s.Sensation;
 
 //// External Imports
 
-/**
- * Provides the container for the observed input message, that
+/** Provides the container for the observed input message, that
  * is sent from a sensor to sensory processing.
  * 
  * @version $Id$
@@ -31,8 +30,7 @@ import org.opencyc.elf.s.Sensation;
  */
 public class ObservedInputMsg extends GenericMsg {
   
-  /** 
-   * Creates a new instance of ObservedInputMsg given the sensation.
+  /** Creates a new instance of ObservedInputMsg given the sensation.
    *
    * @param sensation the sensation
    *
@@ -43,8 +41,7 @@ public class ObservedInputMsg extends GenericMsg {
   
   //// Public Area
   
-  /**
-   * Gets the sensation.
+  /** Gets the sensation.
    *
    * @return tthe sensation
    */

@@ -11,8 +11,7 @@ import org.opencyc.elf.bg.planner.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *  SensorFactory is designed to create actuators.  There is a singleton instance of sensor factory.
+/**  SensorFactory is designed to create actuators.  There is a singleton instance of sensor factory.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -49,8 +48,7 @@ public class SensorFactory {
   
   //// Public Area
   
-  /**
-   * Gets the singleton sensor factory instance.
+  /** Gets the singleton sensor factory instance.
    *
    * @return the singleton sensor factory instance
    */

@@ -17,8 +17,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
-/**
- * ConsoleOutput is the console output actuator for the Elementary Loop Functioning (ELF).
+/** ConsoleOutput is the console output actuator for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -44,8 +43,7 @@ public class ConsoleOutput extends DirectActuator {
   
   //// Constructors
 
-  /** 
-   * Creates a new instance of ConsoleOutput given its name and
+  /** Creates a new instance of ConsoleOutput given its name and
    * required resources.
    *
    * @param name the actuator name
@@ -60,8 +58,7 @@ public class ConsoleOutput extends DirectActuator {
   
   //// Public Area
   
-  /** 
-   * Initializes this console output actuator with the given input message channel and
+  /** Initializes this console output actuator with the given input message channel and
    * starts the message consumer.
    *
    * @param actuatorChannel the takable channel from which messages are input
@@ -90,8 +87,7 @@ public class ConsoleOutput extends DirectActuator {
     /** the parent node component */
     protected NodeComponent nodeComponent;
     
-    /**
-     * Creates a new instance of Consumer.
+    /** Creates a new instance of Consumer.
      *
      * @param actuatorChannel the takable channel from which messages are input
      * @param nodeComponent the parent node component
@@ -112,8 +108,7 @@ public class ConsoleOutput extends DirectActuator {
       catch (InterruptedException ex) {}
     }
 
-    /**
-     * Outputs the data that is contained in the actuator message to the console.
+    /** Outputs the data that is contained in the actuator message to the console.
      *
      * @param actuateMsg the given input channel message
      */

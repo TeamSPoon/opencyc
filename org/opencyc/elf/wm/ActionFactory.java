@@ -9,8 +9,7 @@ import org.opencyc.elf.wm.state.State;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ActionFactory populates the action libary.  There is a singleton instance.
+/** ActionFactory populates the action libary.  There is a singleton instance.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -48,8 +47,7 @@ public class ActionFactory {
   
   //// Public Area
   
-  /**
-   * Gets the action factory singleton instance.
+  /** Gets the action factory singleton instance.
    *
    * @return the action factory singleton instance
    */
@@ -57,9 +55,7 @@ public class ActionFactory {
     return actionFactory;
   }
   
-  /**
-   * Populates the action library.
-   */
+  /** Populates the action library. */
   public void populateActionLibrary () {
     // abort
     Action action = new Action();

@@ -6,8 +6,7 @@ package org.opencyc.elf.wm.state;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-/**
- * State provides the container for the list of stateVariable/values.
+/** State provides the container for the list of stateVariable/values.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -40,8 +39,7 @@ public class State {
 
   //// Public Area
     
-  /**
-   * Returns true if the given object equals this state.
+  /** Returns true if the given object equals this state.
    * 
    * @param obj the given object
    * 
@@ -54,8 +52,7 @@ public class State {
     return this.stateVariableDictionary.equals(that.stateVariableDictionary);
   }
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return string representation of this object
    */
@@ -85,8 +82,7 @@ public class State {
     return stringBuffer.toString();
   }
 
-  /**
-   * Returns a clone of this state.
+  /** Returns a clone of this state.
    * 
    * @return a clone of this state
    */
@@ -110,8 +106,7 @@ public class State {
     return state;
   }
 
-  /**
-   * Returns an iterator over the state variables.
+  /** Returns an iterator over the state variables.
    * 
    * @return an iterator over the state variables
    */
@@ -119,8 +114,7 @@ public class State {
     return new StateIterator(this);
   }
 
-  /**
-   * Returns true if the given object is a state variable of this state.
+  /** Returns true if the given object is a state variable of this state.
    * 
    * @param obj the given object
    * @return true if the given object is a state variable of this state
@@ -129,8 +123,7 @@ public class State {
     return stateVariableDictionary.containsKey(obj);
   }
 
-  /**
-   * Sets the given state state variable to the given value.
+  /** Sets the given state state variable to the given value.
    * 
    * @param stateVariable variable the state variable
    * @param value the stateVariable's value
@@ -142,8 +135,7 @@ public class State {
       throw new IllegalArgumentException(value + " is not an instance of " + stateVariable.getType());
   }
 
-  /**
-   * Gets the value of the for the given  state variable.
+  /** Gets the value of the for the given  state variable.
    * 
    * @param stateVariable the states's stateVariable
    * 
@@ -159,8 +151,7 @@ public class State {
   
   //// Internal Rep
   
-  /**
-   * the state represented as a dictionary of concepts and a dictionary of
+  /** the state represented as a dictionary of concepts and a dictionary of
    * stateVariable/values.
    */
   protected Hashtable stateVariableDictionary;

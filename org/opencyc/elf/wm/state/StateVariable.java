@@ -4,8 +4,7 @@ package org.opencyc.elf.wm.state;
 
 //// External Imports
 
-/**
- * StateVariable contains the name of an ELF state variable.  This class is required to
+/** StateVariable contains the name of an ELF state variable.  This class is required to
  * distinguish state variables from string literals used in goal predicate expressions.
  *
  * @version $Id$
@@ -32,8 +31,7 @@ public class StateVariable {
   
   //// Constructors
   
-  /** 
-   * Creates a new instance of StateVariable given its name.
+  /** Creates a new instance of StateVariable given its name.
    *
    * @param type the state variable type
    * @param name the state variable name
@@ -47,8 +45,7 @@ public class StateVariable {
   
   //// Public Area
   
-  /**
-   * Gets the state variable type
+  /** Gets the state variable type
    *
    * @return the state variable type
    */
@@ -56,8 +53,7 @@ public class StateVariable {
     return type;
   }
 
-  /**
-   * Gets the state variable name
+  /** Gets the state variable name
    *
    * @return the state variable name
    */
@@ -65,8 +61,7 @@ public class StateVariable {
     return name;
   }
 
-  /**
-   * Gets the state variable comment
+  /** Gets the state variable comment
    *
    * @return the state variable comment
    */
@@ -74,28 +69,12 @@ public class StateVariable {
     return comment;
   }
 
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
   public String toString() {
     return name;
-  }
-  
-  /**
-   * Returns true if the given object equals this object.
-   * 
-   * @param obj the given object
-   * 
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (!(obj instanceof StateVariable)) {
-      return false;
-    }
-    StateVariable that = (StateVariable) obj;
-    return this.name.equals(that.name);
   }
   
   /** the user input state variable name */ 

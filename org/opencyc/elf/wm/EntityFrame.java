@@ -5,8 +5,7 @@ import org.opencyc.elf.wm.state.State;
 
 //// External Imports
 
-/**
- * EntityFrame is describes an entity with a list of stateVariable/values.
+/** EntityFrame is describes an entity with a list of stateVariable/values.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -29,15 +28,15 @@ import org.opencyc.elf.wm.state.State;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class EntityFrame {
-  /**
-   * Creates a new instance of EntityFrame.
-   */
+  
+  //// Constructors
+  
+  /** Creates a new instance of EntityFrame. */
   public EntityFrame() {
     state = new State();
   }
 
-  /**
-   * Creates a new instance of EntityFrame given an existing entityFrame.
+  /** Creates a new instance of EntityFrame given an existing entityFrame.
    * 
    * @param entityFrame the given entityFrame
    */
@@ -47,24 +46,7 @@ public class EntityFrame {
 
   //// Public Area
 
-  /**
-   * Returns true if the given object equals this entityFrame.
-   * 
-   * @param obj the given object
-   * 
-   * @return true if the given object equals this entityFrame
-   */
-  public boolean equals(Object obj) {
-    if (obj instanceof EntityFrame) {
-      return state.equals(((EntityFrame) obj).getState());
-    }
-    else {
-      return false;
-    }
-  }
-
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return string representation of this object
    */
@@ -77,8 +59,7 @@ public class EntityFrame {
     return stringBuffer.toString();
   }
 
-  /**
-   * Return the entityFrame state.
+  /** Return the entityFrame state.
    * 
    * @return the entityFrame state
    */

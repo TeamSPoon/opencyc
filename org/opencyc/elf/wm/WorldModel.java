@@ -12,8 +12,7 @@ import org.opencyc.elf.wm.state.State;
 //// External Imports
 import java.util.ArrayList;
 
-/**
- * Provides the World Model for the Elementary Loop Functioning (ELF).  There is one instance of
+/** Provides the World Model for the Elementary Loop Functioning (ELF).  There is one instance of
  * world model for each node.
  * 
  * @version $Id$
@@ -40,16 +39,13 @@ public class WorldModel extends NodeComponent {
   
   //// Constructors
   
-  /**
-   * Constructs a new WorldModel object.
-   */
+  /** Constructs a new WorldModel object. */
   public WorldModel() {
   }
 
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -57,8 +53,7 @@ public class WorldModel extends NodeComponent {
     return "WorldModel for " + node.getName();
   }
   
-  /**
-   * Gets the state.
+  /** Gets the state.
    *
    * @return the state 
    */
@@ -66,8 +61,7 @@ public class WorldModel extends NodeComponent {
     return state;
   }
 
-  /**
-   * Sets the state.
+  /** Sets the state.
    *
    * @param state the state 
    */
@@ -75,8 +69,7 @@ public class WorldModel extends NodeComponent {
     this.state = state;
   }
 
-  /**
-   * Gets the knowledge base node component
+  /** Gets the knowledge base node component
    *
    * @return the knowledge base node component
    */
@@ -84,8 +77,7 @@ public class WorldModel extends NodeComponent {
     return knowledgeBase;
   }
 
-  /**
-   * Sets the knowledge base node component
+  /** Sets the knowledge base node component
    *
    * @param knowledgeBase the knowledge base node component
    */
@@ -102,8 +94,7 @@ public class WorldModel extends NodeComponent {
     return planSimulator;
   }
 
-  /**
-   * Sets the plan simulator node component
+  /** Sets the plan simulator node component
    *
    * @param planSimulator the plan simulator node component
    */
@@ -111,8 +102,7 @@ public class WorldModel extends NodeComponent {
     this.planSimulator = planSimulator;
   }
 
-  /**
-   * Gets the predictor node component
+  /** Gets the predictor node component
    *
    * @return the predictor node component
    */
@@ -120,8 +110,7 @@ public class WorldModel extends NodeComponent {
     return predictor;
   }
 
-  /**
-   * Sets the predictor node component
+  /** Sets the predictor node component
    *
    * @param predictor the predictor node component
    */
@@ -129,8 +118,7 @@ public class WorldModel extends NodeComponent {
     this.predictor = predictor;
   }
 
-  /**
-   * Gets the entity of attention
+  /** Gets the entity of attention
    *
    * @return the entity of attention
    */
@@ -138,8 +126,7 @@ public class WorldModel extends NodeComponent {
     return entityOfAttention;
   }
 
-  /**
-   * Sets the entity of attention
+  /** Sets the entity of attention
    *
    * @param entityOfAttention the entity of attention
    */
@@ -156,24 +143,16 @@ public class WorldModel extends NodeComponent {
   /** the state */
   protected State state;
   
-  /**
-   * the knowledge base node component
-   */
+  /** the knowledge base node component */
   protected KnowledgeBase knowledgeBase;
   
-  /**
-   * the plan simulator node component
-   */
+  /** the plan simulator node component */
   protected PlanSimulator planSimulator;
   
-  /**
-   * the predictor node component
-   */
+  /** the predictor node component */
   protected Predictor predictor;
   
-  /**
-   * the entity of attention
-   */
+  /** the entity of attention */
   protected EntityFrame entityOfAttention;
   
   //// Main

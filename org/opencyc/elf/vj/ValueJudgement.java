@@ -12,8 +12,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
 
-/**
- * Provides Value Judgement for the Elementary Loop Functioning (ELF).
+/** Provides Value Judgement for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -39,16 +38,13 @@ public class ValueJudgement extends NodeComponent {
   
   //// Constructors
   
-   /**
-   * Constructs a new ValueJudgement object.
-   */
+  /** Constructs a new ValueJudgement object. */
   public ValueJudgement() {
   }
 
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -56,8 +52,7 @@ public class ValueJudgement extends NodeComponent {
     return "ValueJudgement for " + node.getName();
   }
 
-  /**
-   * Gets the plan evaluator
+  /** Gets the plan evaluator
    *
    * @return the plan evaluator
    */
@@ -65,8 +60,7 @@ public class ValueJudgement extends NodeComponent {
     return planEvaluator;
   }
 
-  /**
-   * Sets the plan evaluator
+  /** Sets the plan evaluator
    *
    * @param planEvaluator the plan evaluator
    */
@@ -74,8 +68,7 @@ public class ValueJudgement extends NodeComponent {
     this.planEvaluator = planEvaluator;
   }
 
-  /**
-   * Gets the entity evaluator
+  /** Gets the entity evaluator
    *
    * @return the entity evaluator
    */
@@ -83,8 +76,7 @@ public class ValueJudgement extends NodeComponent {
     return entityEvaluator;
   }
 
-  /**
-   * Sets the entity evaluator
+  /** Sets the entity evaluator
    *
    * @param entityEvaluator the entity evaluator
    */
@@ -98,14 +90,10 @@ public class ValueJudgement extends NodeComponent {
   
   //// Internal Rep
   
-  /**
-   * the plan evaluator
-   */
+  /** the plan evaluator */
   protected PlanEvaluator planEvaluator;
   
-  /**
-   * the entity evaluator
-   */
+  /** the entity evaluator */
   protected EntityEvaluator entityEvaluator;
   
   //// Main

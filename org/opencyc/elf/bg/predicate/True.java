@@ -6,8 +6,7 @@ import org.opencyc.elf.wm.state.State;
 //// External Imports
 import java.util.List;
 
-/**
- * True is a predicate of arity zero that always returns true.
+/** True is a predicate of arity zero that always returns true.
  *
  * @version $Id$
  * @author  reed
@@ -41,8 +40,7 @@ public class True extends Predicate {
   
   //// Public Area
     
-  /**
-   * Evaluates the given arguments and returns the result.  The semantics
+  /** Evaluates the given arguments and returns the result.  The semantics
    * of the predicate are defined by each implementing class.
    *
    * @param arguments the given arguments to evaluate
@@ -53,8 +51,7 @@ public class True extends Predicate {
     return true;
   }
   
-  /**
-   * Returns a string representation of this predicate given
+  /** Returns a string representation of this predicate given
    * the arguments.
    *
    * @param arguments the given arguments to evaluate
@@ -62,16 +59,6 @@ public class True extends Predicate {
    */
   public String toString(List arguments) {
     return "TRUE";
-  }
-  
- /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    return obj instanceof True;
   }
   
   //// Protected Area

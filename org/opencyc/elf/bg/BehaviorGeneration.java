@@ -16,8 +16,7 @@ import org.opencyc.elf.Result;
 
 //// External Imports
 
-/**
- * Provides Behavior Generation for the Elementary Loop Functioning (ELF).
+/** Provides Behavior Generation for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -47,8 +46,7 @@ public class BehaviorGeneration extends NodeComponent {
   public BehaviorGeneration() {
   }
 
-  /**
-   * Constructs a new BehaviorGeneration object given the containing node.
+  /** Constructs a new BehaviorGeneration object given the containing node.
    *
    * @param node the containing node
    */
@@ -59,8 +57,7 @@ public class BehaviorGeneration extends NodeComponent {
 
   //// Public Area
     
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -70,8 +67,7 @@ public class BehaviorGeneration extends NodeComponent {
   }
   
 
-  /**
-   * Gets the job assigner
+  /** Gets the job assigner
    *
    * @return the job assigner
    */
@@ -79,8 +75,7 @@ public class BehaviorGeneration extends NodeComponent {
     return jobAssigner;
   }
 
-  /**
-   * Sets the job assigner
+  /** Sets the job assigner
    *
    * @param jobAssigner the job assigner
    */
@@ -88,8 +83,7 @@ public class BehaviorGeneration extends NodeComponent {
     this.jobAssigner = jobAssigner;
   }
 
-  /**
-   * Gets the plan selector
+  /** Gets the plan selector
    *
    * @return the plan selector
    */
@@ -97,8 +91,7 @@ public class BehaviorGeneration extends NodeComponent {
     return planSelector;
   }
 
-  /**
-   * Sets the plan selector
+  /** Sets the plan selector
    *
    * @param planSelector the plan selector
    */

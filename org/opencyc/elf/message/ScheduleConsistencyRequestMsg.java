@@ -8,8 +8,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 //// External Imports
 import java.util.List;
 
-/**
- * Contains the schedule consistency request message which is sent from one
+/** Contains the schedule consistency request message which is sent from one
  * scheduler to each of its peer schedulers in a node.
  *
  * @version $Id$
@@ -43,21 +42,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
   
   //// Public Area
   
-  /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (! (obj instanceof Class))
-      return false;
-    //TODO
-    return true;
-  }
-  
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    *
    * @return a string representation of this object
    */
@@ -66,8 +51,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return "";
   }
   
-  /**
-   * Gets the resources controlled by this node
+  /** Gets the resources controlled by this node
    *
    * @return the resources controlled by this node
    */
@@ -75,8 +59,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return controlledResources;
   }
 
-  /**
-   * Sets the resources controlled by this node
+  /** Sets the resources controlled by this node
    *
    * @param controlledResources the resources controlled by this node
    */
@@ -84,8 +67,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     this.controlledResources = controlledResources;
   }
 
-  /**
-   * Gets the node's commanded task
+  /** Gets the node's commanded task
    *
    * @return the node's commanded task
    */
@@ -93,8 +75,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return taskCommand;
   }
 
-  /**
-   * Sets the node's commanded task
+  /** Sets the node's commanded task
    *
    * @param taskCommand the node's commanded task
    */
@@ -102,8 +83,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     this.taskCommand = taskCommand;
   }
 
-  /**
-   * Gets a proposed schedule of actions to carry out the commanded task using
+  /** Gets a proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    *
    * @return a proposed schedule of actions to carry out the commanded task using
@@ -113,8 +93,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
     return schedule;
   }
 
-  /**
-   * Sets a proposed schedule of actions to carry out the commanded task using
+  /** Sets a proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    *
    * @param schedule a proposed schedule of actions to carry out the commanded task using
@@ -136,8 +115,7 @@ public class ScheduleConsistencyRequestMsg extends GenericMsg {
   /** the node's commanded task */
   protected TaskCommand taskCommand;
   
-  /**
-   * a proposed schedule of actions to carry out the commanded task using
+  /** a proposed schedule of actions to carry out the commanded task using
    * the node's contolled resources
    */
   protected Schedule schedule;

@@ -39,8 +39,7 @@ public class Estimator extends NodeComponent {
 
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -48,8 +47,7 @@ public class Estimator extends NodeComponent {
     return "Estimator for " + node.getName();
   }
   
-  /**
-   * Gets the sensory perception instance which owns this estimator
+  /** Gets the sensory perception instance which owns this estimator
    * 
    * @return the sensory perception instance which owns this estimator
    */
@@ -57,8 +55,7 @@ public class Estimator extends NodeComponent {
     return sensoryPerception;
   }
 
-  /**
-   * Sets the sensory perception instance which owns this estimator
+  /** Sets the sensory perception instance which owns this estimator
    * 
    * @param sensoryPerception the sensory perception instance which owns this
    *        estimator

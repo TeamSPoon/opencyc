@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Schedule contains the timing specification for a plan.  It can be
+/** Schedule contains the timing specification for a plan.  It can be
  * represented as a time-labeled or event-labeled sequence of actitivies or
  * events.
  * 
@@ -42,8 +41,7 @@ public class Schedule {
 
   //// Public Area
 
-  /**
-   * Gets the schedule name or description
+  /** Gets the schedule name or description
    *
    * @return the schedule name or description
    */
@@ -51,8 +49,7 @@ public class Schedule {
     return name;
   }
 
-  /**
-   * Sets the schedule name or description
+  /** Sets the schedule name or description
    *
    * @param name the schedule name or description
    */
@@ -60,8 +57,7 @@ public class Schedule {
     this.name = name;
   }
 
-  /**
-   * Gets the list of planned actions
+  /** Gets the list of planned actions
    *
    * @return the list of planned actions
    */
@@ -69,8 +65,7 @@ public class Schedule {
     return plannedActions;
   }
 
-  /**
-   * Sets the list of planned actions
+  /** Sets the list of planned actions
    *
    * @param plannedActions the list of planned actions
    */
@@ -78,8 +73,7 @@ public class Schedule {
     this.plannedActions = plannedActions;
   }
 
-  /**
-   * Gets the list of planned goals
+  /** Gets the list of planned goals
    *
    * @return the list of planned goals
    */
@@ -87,8 +81,7 @@ public class Schedule {
     return plannedGoals;
   }
 
-  /**
-   * Sets the list of planned goals
+  /** Sets the list of planned goals
    *
    * @param plannedGoals the list of planned goals
    */
@@ -96,8 +89,7 @@ public class Schedule {
     this.plannedGoals = plannedGoals;
   }
 
-  /**
-   * Gets the list of planned goal times, each of which is the planned duration of time in milliseconds to
+  /** Gets the list of planned goal times, each of which is the planned duration of time in milliseconds to
    * elapse from the time the plan commences exectution until the planned goal is achieved
    *
    * @return the list of planned goal times, each of which is the planned duration of time in milliseconds to
@@ -107,8 +99,7 @@ public class Schedule {
     return plannedGoalTimeMilliseconds;
   }
 
-  /**
-   * Sets the list of planned goal times, each of which is the planned duration of time in milliseconds to
+  /** Sets the list of planned goal times, each of which is the planned duration of time in milliseconds to
    * elapse from the time the plan commences exectution until the planned goal is achieved
    *
    * @param plannedGoalTimeMilliseconds the list of planned goal times, each of which is the planned duration 
@@ -119,8 +110,7 @@ public class Schedule {
     this.plannedGoalTimeMilliseconds = plannedGoalTimeMilliseconds;
   }
 
-  /**
-   * Gets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+  /** Gets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
    *
    * @return the name of the actuator or virtual actuator that achieves or accomplishes the schedule
    */
@@ -128,8 +118,7 @@ public class Schedule {
     return actuatorName;
   }
 
-  /**
-   * Sets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
+  /** Sets the name of the actuator or virtual actuator that achieves or accomplishes the schedule
    *
    * @param actuatorName the name of the actuator or virtual actuator that achieves or accomplishes the schedule
    */
@@ -137,8 +126,7 @@ public class Schedule {
     this.actuatorName = actuatorName;
   }
 
-  /**
-   * Gets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+  /** Gets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
    *
    * @return the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
    */
@@ -146,8 +134,7 @@ public class Schedule {
     return sensorName;
   }
 
-  /**
-   * Sets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
+  /** Sets the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
    *
    * @param sensorName the name of the sensor or virtual sensor that senses the achievements or accomplishments of the schedule
    */
@@ -155,28 +142,7 @@ public class Schedule {
     this.sensorName = sensorName;
   }
 
-  /**
-   * Returns true if the given object equals this object.
-   * 
-   * @param obj the given object
-   * 
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (!(obj instanceof Schedule)) {
-      return false;
-    }
-    Schedule that = (Schedule) obj;
-    return 
-      this.plannedActions.equals(that.plannedActions) &&
-      this.plannedGoals.equals(that.plannedGoals) &&
-      this.plannedGoalTimeMilliseconds.equals(that.plannedGoalTimeMilliseconds) &&
-      this.actuatorName.equals(that.actuatorName) &&
-      this.sensorName.equals(that.sensorName);
-  }
-
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -192,8 +158,7 @@ public class Schedule {
     return stringBuffer.toString();
   }
 
-  /**
-   * Creates and returns a copy of this object.
+  /*** Creates and returns a copy of this object.
    *
    * @return a copy of this object
    */

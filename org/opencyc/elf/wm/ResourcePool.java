@@ -6,8 +6,7 @@ import org.opencyc.elf.bg.planner.Resource;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * ResourcePool contains the resources available to all ELF nodes.  There is a 
+/** ResourcePool contains the resources available to all ELF nodes.  There is a 
  * singleton instance.
  *
  * @version $Id$
@@ -42,8 +41,7 @@ public class ResourcePool {
   
   //// Public Area
   
-  /**
-   * Gets the singleton resource pool instance.
+  /** Gets the singleton resource pool instance.
    *
    * @return the singleton resource pool instance
    */
@@ -51,8 +49,7 @@ public class ResourcePool {
     return resourcePool;
   }
   
-  /**
-   * Gets the resource named by the given name.
+  /** Gets the resource named by the given name.
    *
    * @param name the given resource name
    * @return the resource named by the given name
@@ -61,8 +58,7 @@ public class ResourcePool {
     return (Resource) resourceDictionary.get(name);
   }
   
-  /**
-   * Sets the resource named by the given name.
+  /** Sets the resource named by the given name.
    *
    * @param name the given resource name
    * @param resource the resource named by the given name
@@ -80,8 +76,7 @@ public class ResourcePool {
   /** the singleton resource pool instance */
   protected static ResourcePool resourcePool;
   
-  /**
-   * the resource dictionary whose key is the unique resource name and 
+  /** the resource dictionary whose key is the unique resource name and 
    * whose value is the named resource
    */
   protected HashMap resourceDictionary = new HashMap();

@@ -12,8 +12,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *  ActuatorFactory is designed to create actuators.  There is a singleton instance of actuator factory.
+/** ActuatorFactory is designed to create actuators.  There is a singleton instance of actuator factory.
  *
  * <P>Copyright (c) 2003 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
@@ -50,8 +49,7 @@ public class ActuatorFactory {
   
   //// Public Area
   
-  /**
-   * Gets the singleton actuator factory instance.
+  /** Gets the singleton actuator factory instance.
    *
    * @return the singleton actuator factory instance
    */

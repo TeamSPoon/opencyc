@@ -8,8 +8,7 @@ import org.opencyc.elf.wm.state.StateVariable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * PredicateExpression contains a predicate and arguments that can be
+/** PredicateExpression contains a predicate and arguments that can be
  * evaluated to indicate the achivement of a goal (or alternately the
  * failure to achieve a goal).  A predicate expression can also govern
  * the selection of schedules by job assignment.
@@ -43,8 +42,7 @@ public class PredicateExpression {
  public PredicateExpression() {
   }
   
-  /** 
-   * Creates a new instance of a unary PredicateExpression given the
+  /**  Creates a new instance of a unary PredicateExpression given the
    * predicate and no arguments.
    *
    * @param predicate the unary predicate
@@ -54,8 +52,7 @@ public class PredicateExpression {
     arguments = new ArrayList();
   }
   
-  /** 
-   * Creates a new instance of a unary PredicateExpression given the
+  /**  Creates a new instance of a unary PredicateExpression given the
    * predicate and single argument.
    *
    * @param predicate the unary predicate
@@ -67,8 +64,7 @@ public class PredicateExpression {
     arguments.add(arg1);
   }
   
-  /** 
-   * Creates a new instance of a binary PredicateExpression given the
+  /** Creates a new instance of a binary PredicateExpression given the
    * predicate and two arguments.
    *
    * @param predicate the binary predicate
@@ -82,8 +78,7 @@ public class PredicateExpression {
     arguments.add(arg2);
   }
   
-  /** 
-   * Creates a new instance of a PredicateExpression given the
+  /** Creates a new instance of a PredicateExpression given the
    * predicate and three arguments.
    *
    * @param predicate the predicate
@@ -101,8 +96,7 @@ public class PredicateExpression {
   
   //// Public Area
   
-  /** 
-   * Evaluates the predicate and arguments within the given state, returning the result.
+  /** Evaluates the predicate and arguments within the given state, returning the result.
    *
    * @return the result of evaluating the predicate and arguments within the given state
    */
@@ -110,8 +104,7 @@ public class PredicateExpression {
     return predicate.evaluate(arguments, state);
   }
   
-  /**
-   * Gets the predicate
+  /** Gets the predicate
    *
    * @return the predicate
    */
@@ -119,8 +112,7 @@ public class PredicateExpression {
     return predicate;
   }
 
-  /**
-   * Sets the predicate
+  /** Sets the predicate
    *
    * @param predicate the predicate
    */
@@ -128,8 +120,7 @@ public class PredicateExpression {
     this.predicate = predicate;
   }
 
-  /**
-   * Gets the argument list
+  /** Gets the argument list
    *
    * @return the argument list
    */
@@ -137,32 +128,15 @@ public class PredicateExpression {
     return arguments;
   }
 
-  /**
-   * Sets the argument list
+  /** Sets the argument list
    *
    * @param arguments the argument list
    */
   public void setArguments (List arguments) {
     this.arguments = arguments;
   }
-  
- /**
-   * Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (! (obj instanceof PredicateExpression))
-      return false;
-    PredicateExpression that = (PredicateExpression) obj;
-    return
-      this.predicate.equals(that.predicate) &&
-      this.arguments.equals(that.arguments);
-  }
-  
-  /**
-   * Returns a string representation of this object.
+    
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */

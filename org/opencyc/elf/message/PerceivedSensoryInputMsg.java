@@ -4,8 +4,7 @@ package org.opencyc.elf.message;
 
 //// External Imports
 
-/**
- * Provides the container for the perceived input message, that
+/** Provides the container for the perceived input message, that
  * is sent from sensory processing.
  * 
  * @version $Id$
@@ -40,8 +39,7 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
   
   //// Protected Area
   
-  /**
-   * Gets the object for which data is perceived.
+  /** Gets the object for which data is perceived.
    *
    * @return the object for which data is perceived
    */
@@ -49,8 +47,7 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
     return obj;
   }
 
-  /**
-   * Sets the object for which data is perceived.
+  /** Sets the object for which data is perceived.
    *
    * @param obj the object for which data is perceived
    */
@@ -58,8 +55,7 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
     this.obj = obj;
   }
 
-  /**
-   * Gets the perceived data associated with the object
+  /** Gets the perceived data associated with the object
    *
    * @return the perceived data associated with the object
    */
@@ -67,8 +63,7 @@ public class PerceivedSensoryInputMsg extends GenericMsg {
     return data;
   }
 
-  /**
-   * Sets the perceived data associated with the object
+  /** Sets the perceived data associated with the object
    *
    * @param data the data associated with the object
    */

@@ -7,8 +7,7 @@ import org.opencyc.elf.wm.state.State;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Or is a predicate of variable arity that returns true if any of its
+/** Or is a predicate of variable arity that returns true if any of its
  * argument predicate expressions evaluate to true.
  *
  * @version $Id$
@@ -43,8 +42,7 @@ public class Or extends Predicate {
   
   //// Public Area
   
-  /** 
-   * Evaluates the given argument predicate expressions and returns the result.
+  /** Evaluates the given argument predicate expressions and returns the result.
    *
    * @param arguments the given predicate expressions to evaluate
    * @param state the given state
@@ -60,8 +58,7 @@ public class Or extends Predicate {
     return false;
   }
   
-  /** 
-   * Returns a string representation of this predicate given
+  /** Returns a string representation of this predicate given
    * the arguments.
    *
    * @param arguments the given arguments to evaluate
@@ -81,8 +78,7 @@ public class Or extends Predicate {
     return stringBuffer.toString();
   }
   
- /**
-   * Returns true if the given object equals this object.
+ /** Returns true if the given object equals this object.
    *
    * @param obj the given object
    * @return true if the given object equals this object
@@ -90,6 +86,7 @@ public class Or extends Predicate {
   public boolean equals(Object obj) {
     return obj instanceof Or;
   }
+  
   //// Protected Area
   
   //// Private Area

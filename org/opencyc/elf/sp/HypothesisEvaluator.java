@@ -5,8 +5,7 @@ import org.opencyc.elf.NodeComponent;
 
 //// External Imports
 
-/**
- * Provides the HypothesisEvaluator for ELF SensoryPerception.
+/** Provides the HypothesisEvaluator for ELF SensoryPerception.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -32,16 +31,13 @@ public class HypothesisEvaluator extends NodeComponent {
 
   //// Constructors
   
-  /**
-   * Constructs a new HypothesisEvaluator object.
-   */
+  /** Constructs a new HypothesisEvaluator object. */
   public HypothesisEvaluator() {
   }
   
   //// Public Area
   
-  /**
-   * Returns a string representation of this object.
+  /** Returns a string representation of this object.
    * 
    * @return a string representation of this object
    */
@@ -49,8 +45,7 @@ public class HypothesisEvaluator extends NodeComponent {
     return "HypothesisEvaluator for " + node.getName();
   }
   
-  /**
-   * Gets the sensory perception instance which owns this hypothesis evaluator
+  /** Gets the sensory perception instance which owns this hypothesis evaluator
    * 
    * @return the sensory perception instance which owns this hypothesis
    *         evaluator
@@ -59,8 +54,7 @@ public class HypothesisEvaluator extends NodeComponent {
     return sensoryPerception;
   }
 
-  /**
-   * Sets the sensory perception instance which owns this hypothesis evaluator
+  /** Sets the sensory perception instance which owns this hypothesis evaluator
    * 
    * @param sensoryPerception the sensory perception instance which owns this
    *        hypothesis evaluator

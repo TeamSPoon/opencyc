@@ -6,8 +6,7 @@ import org.opencyc.elf.bg.taskframe.Action;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * ActionLibrary provides a store in which partially instantiated actions can be retrieved
+/** ActionLibrary provides a store in which partially instantiated actions can be retrieved
  * by name.  It is initially populated by the action factory.  There is a singleton instance
  * of action libary.
  *
@@ -42,8 +41,7 @@ public class ActionLibrary {
   
   //// Public Area
   
-  /**
-   * Gets the action library singleton instance.
+  /** Gets the action library singleton instance.
    *
    * @return the action library singleton instance
    */
@@ -51,8 +49,7 @@ public class ActionLibrary {
     return actionLibrary;
   }
   
-  /**
-   * Gets the action associated with the given action name.
+  /** Gets the action associated with the given action name.
    *
    * @param name the given action name
    * @return the cloned action associated with the given action name
@@ -62,8 +59,7 @@ public class ActionLibrary {
     return (Action) action.clone();
   }
 
-  /**
-   * Sets the action associated with the given action name.
+  /** Sets the action associated with the given action name.
    *
    * @param name the given action name
    * @param action the given action

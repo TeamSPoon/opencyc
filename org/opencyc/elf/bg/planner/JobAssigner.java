@@ -16,7 +16,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.message.GenericMsg;
-import org.opencyc.elf.message.JobAssignmentStatus;
+import org.opencyc.elf.message.JobAssignerStatusMsg;
 import org.opencyc.elf.message.ReleaseMsg;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
@@ -111,20 +111,6 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
    */
   public Puttable getChannel() {
     return (Puttable) jobAssignerChannel;
-  }
-  
-  /** Returns true if the given object equals this object.
-   *
-   * @param obj the given object
-   * @return true if the given object equals this object
-   */
-  public boolean equals(Object obj) {
-    if (!(obj instanceof JobAssigner)) {
-      return false;
-    }
-    
-    //TODO
-    return true;
   }
   
   /** Returns a string representation of this object.
@@ -249,6 +235,8 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
         processDoTaskMsg((DoTaskMsg) genericMsg);
       else if (genericMsg instanceof SchedulerStatusMsg)
         processSchedulerStatusMsg((SchedulerStatusMsg) genericMsg);
+      else
+        throw new RuntimeException("Unhandled message " + genericMsg);
     }
     
     /** Processes the do task message.
@@ -455,20 +443,59 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
      * @param schedulerStatusMsg he schedule status message
      */
     protected void processSchedulerStatusMsg(SchedulerStatusMsg schedulerStatusMsg) {
+      Scheduler scheduler = (Scheduler) schedulerStatusMsg.getSender();
       Status status = schedulerStatusMsg.getStatus();
-      //TODO
+      boolean isBusy = (status.getValue(Status.SCHEDULE_FINISHED) != null);
+      if (! isBusy)
+        recordSchedulerCompletedSchedule(scheduler);
+      checkIfAllSchedulersDone();
     }
     
-    /** Sends the job assignment status message to the higher-level executor. */
-    protected void sendJobAssignmentStatus() {
-      //TODO
-      Status status = new Status();
-      
-      JobAssignmentStatus jobAssignmentStatus = new JobAssignmentStatus();
-      jobAssignmentStatus.setSender(nodeComponent);
-      jobAssignmentStatus.setStatus(status);
+    /** Records that the given scheduler has completed its assigned schedule.
+     * 
+     * @param scheduler the given scheduler
+     */
+    protected void recordSchedulerCompletedSchedule(Scheduler scheduler) {
+      Iterator schedulerInfoIterator = schedulerInfos.iterator();
+      while (schedulerInfoIterator.hasNext()) {
+        JobAssigner.SchedulerInfo schedulerInfo = (JobAssigner.SchedulerInfo) schedulerInfoIterator.next();
+        if (schedulerInfo.scheduler.equals(scheduler)) {
+          schedulerInfo.isBusy = false;
+          return;
+        }
+      }
+      throw new RuntimeException("Scheduler: " + scheduler + " not found");
     }
     
+    /** Checks if all the schedulers have completed their schedules and if so then sends
+     * the task completed status message to the higher level exector.  If this is the highest
+     * level job assigner, then the system exits.
+     */
+    protected void checkIfAllSchedulersDone() {
+      Iterator schedulerInfoIterator = schedulerInfos.iterator();
+      while (schedulerInfoIterator.hasNext()) {
+        JobAssigner.SchedulerInfo schedulerInfo = (JobAssigner.SchedulerInfo) schedulerInfoIterator.next();
+        if (schedulerInfo.isBusy)
+          return;
+      }
+      if (this.executorChannel == null) {
+        getLogger().info("The last task at the topmost level is done.");
+        System.exit(0);
+      }
+      else {
+        getLogger().info("The commanded task " + taskCommand + " is done");
+        JobAssignerStatusMsg jobAssignerStatusMsg = new JobAssignerStatusMsg();
+        jobAssignerStatusMsg.setSender(thisJobAssigner);
+        Status status = new Status();
+        status.setValue(Status.TASK_FINISHED, Boolean.TRUE);
+        jobAssignerStatusMsg.setStatus(status);
+        try {
+          executorChannel.put(jobAssignerStatusMsg);
+        }
+        catch (InterruptedException e) {
+        }
+      }
+    }   
   }
   
   /** Contains the current schedulers and their assigned schedules. */
@@ -518,7 +545,7 @@ public class JobAssigner extends BufferedNodeComponent implements Actuator {
   protected Executor executor;
   
   /** the list of scheduler infos for this job assigner */
-  protected List schedulerInfos;
+  protected List schedulerInfos = new ArrayList();
   
   /** a convenient reference to this object for use in the Consumer thread */
   protected JobAssigner thisJobAssigner;

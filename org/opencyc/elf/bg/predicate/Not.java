@@ -7,8 +7,7 @@ import org.opencyc.elf.wm.state.State;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Not is a predicate of arity one that returns true if its argument predicate 
+/** Not is a predicate of arity one that returns true if its argument predicate 
  * expressions evaluates to true, otherwise it returns false.
  *
  * @version $Id$
@@ -43,8 +42,7 @@ public class Not extends Predicate {
   
   //// Public Area
   
-  /** 
-   * Evaluates the given argument predicate expression and returns the result.
+  /** Evaluates the given argument predicate expression and returns the result.
    *
    * @param arguments the given predicate expressions to evaluate
    * @param state the given state
@@ -55,8 +53,7 @@ public class Not extends Predicate {
     return ! predicateExpression.evaluate(state);
   }
   
-  /** 
-   * Returns a string representation of this predicate given
+  /** Returns a string representation of this predicate given
    * the arguments.
    *
    * @param arguments the given arguments to evaluate
@@ -70,8 +67,7 @@ public class Not extends Predicate {
     return stringBuffer.toString();
   }
   
- /**
-   * Returns true if the given object equals this object.
+ /** Returns true if the given object equals this object.
    *
    * @param obj the given object
    * @return true if the given object equals this object

@@ -7,8 +7,7 @@ import org.opencyc.elf.bg.planner.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Actuator defines the actuator interface for the Elementary Loop Functioning (ELF).
+/** Actuator defines the actuator interface for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -32,22 +31,19 @@ import java.util.List;
  */
 public interface Actuator {
   
-  /** 
-   * Gets the name of the actuator or virtual actuator (job assigner)
+  /** Gets the name of the actuator or virtual actuator (job assigner)
    *
    * @return the name of the actuator or virtual actuator (job assigner).
    */
   public String getName();
   
-  /**
-   * Gets the resources required by this actuator or virtual actuator (job assigner).
+  /** Gets the resources required by this actuator or virtual actuator (job assigner).
    *
    * @return the resources required by this actuator or virtual actuator (job assigner)
    */
   public List getResources();
   
-  /**
-   * Gets the names of actions that this actuator or virtual actuator (job assigner) can accomplish.
+  /** Gets the names of actions that this actuator or virtual actuator (job assigner) can accomplish.
    *
    * @return the names of actions that this actuator or virtual actuator (job assigner) can accomplish
    */

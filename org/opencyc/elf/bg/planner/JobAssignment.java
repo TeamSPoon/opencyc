@@ -10,7 +10,6 @@ import java.util.List;
  * JobAssignment contains non-temporal (for example spatial) task decompositions
  * among agents and resources.
  *
- * </p>
  * @version $Id$
  * @author Stephen L. Reed  
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.

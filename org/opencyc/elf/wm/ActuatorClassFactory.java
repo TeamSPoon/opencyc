@@ -4,8 +4,7 @@ package org.opencyc.elf.wm;
 
 //// External Imports
 
-/**
- * ActuatorClassFactory creates the java classes for actuators.  There
+/** ActuatorClassFactory creates the java classes for actuators.  There
  * is a singleton instance.
  *
  * @version $Id$
@@ -39,8 +38,7 @@ public class ActuatorClassFactory {
   
   //// Public Area
   
-  /**
-   * Gets the actuator class factory singleton instance.
+  /** Gets the actuator class factory singleton instance.
    *
    * @return the actuator class factory singleton instance
    */

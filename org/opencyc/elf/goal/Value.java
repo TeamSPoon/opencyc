@@ -4,8 +4,7 @@ package org.opencyc.elf.goal;
 
 //// External Imports
 
-/**
- * Provides the Value container for the Elementary Loop Functioning (ELF).
+/** Provides the Value container for the Elementary Loop Functioning (ELF).
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -37,8 +36,7 @@ public class Value {
 
   //// Public Area
   
-  /**
-   * Gets the value
+  /** Gets the value
    * 
    * @return the value
    */
@@ -46,11 +44,10 @@ public class Value {
     return value;
   }
 
-  /**
-   * Sets the value
+  /** Sets the value
    * 
    * @param value the value
-   * @throws IllegalArgumentException DOCUMENT ME!
+   * @throws IllegalArgumentException when the argument is out of range
    */
   public void setValue(float value) {
     if ((value < -1.0) || (value > 1.0)) {
@@ -62,8 +59,7 @@ public class Value {
 
   //// Protected Area
 
-  /**
-   * Values range from -1 for most negative, to zero for neutral, to +1 for
+  /** Values range from -1 for most negative, to zero for neutral, to +1 for
    * most positive.
    */
   protected float value;

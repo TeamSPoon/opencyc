@@ -6,8 +6,7 @@ import org.opencyc.elf.Status;
 
 //// External Imports
 
-/**
- * Provides the status message that is sent from the scheduler to the job assigner.
+/** Provides the status message that is sent from the scheduler to the job assigner.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -39,8 +38,7 @@ public class SchedulerStatusMsg extends GenericMsg {
   
   //// Public Area
   
-  /**
-   * Gets the scheduler status
+  /** Gets the scheduler status
    *
    * @return the scheduler status
    */
@@ -48,8 +46,7 @@ public class SchedulerStatusMsg extends GenericMsg {
     return status;
   }
 
-  /**
-   * Sets the scheduler status
+  /** Sets the scheduler status
    *
    * @param status the scheduler status
    */

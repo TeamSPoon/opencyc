@@ -200,6 +200,8 @@ public class UnitTest extends TestCase {
     (new ActuatorFactory()).getInstance().populateActuatorPool();
     new SensorPool();
     (new SensorFactory()).getInstance().populateSensorPool();
+    new ScheduleLibrary();
+    (new ScheduleFactory()).getInstance().populateScheduleLibrary();
     new NodeFactory();
     Node node = NodeFactory.getInstance().makeNodeShell();
     
@@ -246,7 +248,7 @@ public class UnitTest extends TestCase {
     Assert.assertEquals("[Resource: console]", ResourcePool.getInstance().getResource(Resource.CONSOLE).toString());
     Assert.assertNotNull(JobLibrary.getInstance());
     Assert.assertNotNull(JobLibrary.getInstance().getJobSets(Action.CONVERSE_WITH_USER));
-    Assert.assertEquals("[[Job for [[Resource: console]] action: converse with user]]", 
+    Assert.assertEquals("[[[JobAssignment for [Action: converse with user( prompt: null)] using: [[Resource: console]]]]]", 
                         JobLibrary.getInstance().getJobSets(Action.CONVERSE_WITH_USER).toString());
     behaviorEngine.execute();
     try {

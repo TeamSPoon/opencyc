@@ -84,7 +84,7 @@ public class JobAssignment {
    * @return the action to be performed by a qualified scheduler that will entirely or in part
    * accomplish the commanded action
    */
-  public Action getactionForScheduling () {
+  public Action getActionForScheduling () {
     return actionForScheduling;
   }
 
@@ -95,7 +95,7 @@ public class JobAssignment {
    * @param actionForScheduling the action to be performed by a qualified scheduler that will entirely or in part
    * accomplish the commanded action
    */
-  public void setactionForScheduling (Action actionForScheduling) {
+  public void setActionForScheduling (Action actionForScheduling) {
     this.actionForScheduling = actionForScheduling;
   }
 

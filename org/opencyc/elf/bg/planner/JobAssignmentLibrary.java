@@ -1,8 +1,11 @@
 package org.opencyc.elf.bg.planner;
 
 //// Internal Imports
+import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.ActionFactory;
 
 //// External Imports
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -45,7 +48,15 @@ public class JobAssignmentLibrary {
    * Initializes the job library.
    */
   public void initialize() {
-    //TODO
+    // converse with user
+    JobAssignment jobAssignment = new JobAssignment();
+    jobAssignment.setActionName(Action.CONVERSE_WITH_USER);
+    ArrayList requiredResources = new ArrayList();
+    requiredResources.add(ResourceFactory.getResource(Resource.CONSOLE));
+    jobAssignment.setRequiredResources(requiredResources);
+    ActionFactory actionFactory = new ActionFactory();
+    Action action = actionFactory.makeConsolePromptedInput();
+    jobAssignment.setActionForScheduling(action);
   }
  
   /**

@@ -111,6 +111,11 @@ public class Resource {
     this.state = state;
   }
 
+  /**
+   * the name of the console resource
+   */
+  public static final String CONSOLE = "console"; 
+  
   //// Protected Area
 
   /** the resource name */

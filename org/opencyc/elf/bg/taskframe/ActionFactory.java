@@ -52,7 +52,7 @@ public class ActionFactory {
   public Action makeAbort () {
     Action abortAction = new Action();
     abortAction.setState(new State());
-    abortAction.setName("abort");
+    abortAction.setName(Action.ABORT);
     abortAction.setParameterNames(new ArrayList());
     abortAction.setParameterTypes(new ArrayList());
     return abortAction;
@@ -65,7 +65,7 @@ public class ActionFactory {
   public Action makeConsolePromptedInput () {
     Action consolePromptedInputAction = new Action();
     consolePromptedInputAction.setState(new State());
-    consolePromptedInputAction.setName("converse with user");
+    consolePromptedInputAction.setName(Action.CONSOLE_PROMPTED_INPUT);
     ArrayList parameterNames = new ArrayList();
     parameterNames.add("prompt");
     consolePromptedInputAction.setParameterNames(parameterNames);
@@ -83,7 +83,7 @@ public class ActionFactory {
   public Action makeConverseWithUser () {
     Action converseWithUserAction = new Action();
     converseWithUserAction.setState(new State());
-    converseWithUserAction.setName("converse with user");
+    converseWithUserAction.setName(Action.CONVERSE_WITH_USER);
     ArrayList parameterNames = new ArrayList();
     parameterNames.add("prompt");
     converseWithUserAction.setParameterNames(parameterNames);
@@ -99,7 +99,7 @@ public class ActionFactory {
   public Action makeEmergencyStop () {
     Action emergencyStopAction = new Action();
     emergencyStopAction.setState(new State());
-    emergencyStopAction.setName("emergency stop");
+    emergencyStopAction.setName(Action.EMERGENCY_STOP);
     emergencyStopAction.setParameterNames(new ArrayList());
     emergencyStopAction.setParameterTypes(new ArrayList());
     return emergencyStopAction;
@@ -111,7 +111,7 @@ public class ActionFactory {
   public Action makeInit () {
     Action initAction = new Action();
     initAction.setState(new State());
-    initAction.setName("init");
+    initAction.setName(Action.INIT);
     initAction.setParameterNames(new ArrayList());
     initAction.setParameterTypes(new ArrayList());
     return initAction;

@@ -344,7 +344,35 @@ public class CycConnection {
                 messageCycList = this.cycAccess.makeCycList((String) message);
             else
                 throw new RuntimeException("Invalid class for message " + message);
+            messageCycList = substituteForBackquote(messageCycList);
             return  converseBinary(messageCycList, timeout);
+        }
+    }
+
+    /**
+     * Substitute a READ-FROM-STRING expression for expressions directly containing a
+     * backquote symbol.  This transformation is only required for the binary api,
+     * which does not parse the backquoted expression.
+     *
+     * @param messageCyclist the input expression to be checked for directly containing
+     * a backquote symbol.
+     * @return the expression with a READ-FROM-STRING expression substituted for
+     * expressions directly containing a backquote symbol
+     */
+    protected CycList substituteForBackquote(CycList messageCycList) throws IOException {
+        if (messageCycList.contains(CycObjectFactory.makeCycSymbol("`"))) {
+            CycList substituteCycList = new CycList();
+            substituteCycList.add(CycObjectFactory.makeCycSymbol("read-from-string"));
+            substituteCycList.add(messageCycList.cyclify());
+            return cycAccess.converseList(substituteCycList);
+        }
+        else {
+            for (int i = 1; i < messageCycList.size(); i++) {
+                Object element = messageCycList.get(i);
+                if (element instanceof CycList)
+                    messageCycList.set(i, substituteForBackquote((CycList) element));
+            }
+            return messageCycList;
         }
     }
 

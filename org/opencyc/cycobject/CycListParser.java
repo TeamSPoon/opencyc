@@ -36,7 +36,6 @@ public class CycListParser  {
 
     // Read/scan functions' lexical analysis variables.
     private boolean endQuote = false;
-    private boolean endComma = false;
     private boolean dot = false;
     private boolean dotWord = false;
     private boolean dotParen = false;
@@ -110,9 +109,7 @@ public class CycListParser  {
      */
     public CycList read (StreamTokenizer st) {
         int tok;
-
         endQuote = false;
-        endComma = false;
 
         // Read and parse a lisp symbolic expression.
         try {
@@ -126,12 +123,6 @@ public class CycListParser  {
                 if (endQuote) {
                     // Close a quoted expression by inserting a right paren.
                     endQuote = false;
-                    st.pushBack();
-                    scanRightParen();
-                    }
-                else if (endComma) {
-                    // Close a comma expression by inserting a right paren.
-                    endComma = false;
                     st.pushBack();
                     scanRightParen();
                     }
@@ -161,7 +152,7 @@ public class CycListParser  {
                             scanRightParen();
                             break;
                         case 44:	// ,
-                            scanComma();
+                            scanComma(st);
                             break;
                         case 45:	// -
                             scanMinus();
@@ -208,21 +199,6 @@ public class CycListParser  {
         readStack.push(consMarkerSymbol);
         quoteStack.push(new Integer(++parenLevel));
         readStack.push(CycObjectFactory.quote);
-    }
-
-    /**
-     * Expands `s to (backquote s  when reading.
-     */
-    private void scanBackquote() {
-        Integer i;
-
-        //System.out.println("`");
-        if ((parenLevel > 0) && (parenLevel != readStack.sp))
-            readStack.push(consMarkerSymbol);
-
-        readStack.push(consMarkerSymbol);
-        quoteStack.push(new Integer(++parenLevel));
-        readStack.push(CycObjectFactory.backquote);
     }
 
     /**
@@ -327,11 +303,34 @@ public class CycListParser  {
     }
 
     /**
+     * Scans a backquote while reading.
+     */
+    private void scanBackquote() {
+        //System.out.println("`");
+        CycSymbol w = CycObjectFactory.makeCycSymbol("`");
+
+        if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
+            // Within a list.
+            readStack.push(consMarkerSymbol);
+
+        readStack.push(w);
+        checkQuotes();
+    }
+
+    /**
      * Scans a comma while reading.
      */
-    private void scanComma() {
-        //System.out.println(",");
-        CycSymbol w = CycObjectFactory.makeCycSymbol(",");
+    private void scanComma(StreamTokenizer st) throws IOException {
+        CycSymbol w;
+        if (st.nextToken() == '@') {
+            //System.out.println(",@");
+            w = CycObjectFactory.makeCycSymbol(",@");
+        }
+        else {
+            //System.out.println(",");
+            w = CycObjectFactory.makeCycSymbol(",");
+        }
+        st.pushBack();
 
         if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
             // Within a list.

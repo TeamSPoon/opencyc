@@ -2212,6 +2212,7 @@ public class UnitTest extends TestCase {
         // SubL scripts
         try {
             cycAccess.traceOn();
+            //cycAccess.traceOnDetailed();
             String script;
             Object responseObject;
             CycList responseList;

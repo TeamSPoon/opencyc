@@ -291,8 +291,25 @@ public class Parser {
             answer[0] = "I do not understand the CycL sentence to be asserted.";
             return answer;
         }
-        String script = "(cyc-assert '" + assertionSentence.cyclify() + ")";
-        answer[0] =  cycAccess.makeCycList(script);
+        String remainingString = cycListParser.remainingString();
+        if (remainingString.equals(".")) {
+            String script = "(cyc-assert '" + assertionSentence.cyclify() + ")";
+            answer[0] =  cycAccess.makeCycList(script);
+            return answer;
+        }
+        else if (remainingString.startsWith(" in ")) {
+            String mtString = remainingString.substring(4, remainingString.length() - 1);
+            CycConstant mt = cycAccess.getConstantByName(mtString);
+            if (mt == null) {
+                answer[0] = "I do not recognize the assertion mt \"" + mtString + "\".";
+                return answer;
+            }
+            String script = "(cyc-assert '" + assertionSentence.cyclify() +
+                            " " + mt.cyclify() + ")";
+            answer[0] =  cycAccess.makeCycList(script);
+            return answer;
+        }
+        answer[0] = "I do not recognize the CycL sentence to be asserted.";
         return answer;
     }
 
@@ -307,6 +324,52 @@ public class Parser {
     protected Object[] parseUnassertCommand (String userInput)
         throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
+        String text = userInput.substring(8);
+        int index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "I do not recognize the CycL sentence to be unasserted.";
+                return answer;
+            }
+            if (text.charAt(index) == '(') {
+                break;
+            }
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "I do not recognize the CycL sentence to be unasserted.";
+            return answer;
+        }
+        text = text.substring(index);
+        CycListParser cycListParser = new CycListParser(cycAccess);
+        CycList unassertionSentence = null;
+        try {
+            unassertionSentence = cycListParser.read(text);
+        }
+        catch (Exception e) {
+            answer[0] = "I do not understand the CycL sentence to be unasserted.";
+            return answer;
+        }
+        String remainingString = cycListParser.remainingString();
+        if (remainingString.equals(".")) {
+            String script = "(cyc-unassert '" + unassertionSentence.cyclify() + ")";
+            answer[0] =  cycAccess.makeCycList(script);
+            return answer;
+        }
+        else if (remainingString.startsWith(" from ")) {
+            String mtString = remainingString.substring(6, remainingString.length() - 1);
+            CycConstant mt = cycAccess.getConstantByName(mtString);
+            if (mt == null) {
+                answer[0] = "I do not recognize the assertion mt \"" + mtString + "\".";
+                return answer;
+            }
+            String script = "(cyc-unassert '" + unassertionSentence.cyclify() +
+                            " " + mt.cyclify() + ")";
+            answer[0] =  cycAccess.makeCycList(script);
+            return answer;
+        }
+        answer[0] = "I do not recognize the CycL sentence to be unasserted.";
         return answer;
     }
 
@@ -321,6 +384,52 @@ public class Parser {
     protected Object[] parseAskCommand (String userInput)
         throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
+        String text = userInput.substring(3);
+        int index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "I do not recognize the CycL query to be asked.";
+                return answer;
+            }
+            if (text.charAt(index) == '(') {
+                break;
+            }
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "I do not recognize the CycL query to be asked.";
+            return answer;
+        }
+        text = text.substring(index);
+        CycListParser cycListParser = new CycListParser(cycAccess);
+        CycList query = null;
+        try {
+            query = cycListParser.read(text);
+        }
+        catch (Exception e) {
+            answer[0] = "I do not understand the CycL query to be asked.";
+            return answer;
+        }
+        String remainingString = cycListParser.remainingString();
+        if (remainingString.equals(".")) {
+            String script = "(cyc-query '" + query.cyclify() + ")";
+            answer[0] =  cycAccess.makeCycList(script);
+            return answer;
+        }
+        else if (remainingString.startsWith(" in ")) {
+            String mtString = remainingString.substring(4, remainingString.length() - 1);
+            CycConstant mt = cycAccess.getConstantByName(mtString);
+            if (mt == null) {
+                answer[0] = "I do not recognize the query mt \"" + mtString + "\".";
+                return answer;
+            }
+            String script = "(cyc-query '" + query.cyclify() +
+                            " " + mt.cyclify() + ")";
+            answer[0] =  cycAccess.makeCycList(script);
+            return answer;
+        }
+        answer[0] = "I do not recognize the CycL query to be asked.";
         return answer;
     }
 
@@ -335,6 +444,40 @@ public class Parser {
     protected Object[] parseSummarizeCommand (String userInput)
         throws CycApiException, IOException, UnknownHostException {
         Object[] answer = {null, null};
+        String text = userInput.substring(9);
+        int index = 0;
+        while (true) {
+            if (index >= text.length()) {
+                answer[0] = "I do not recognize the constant to be summarized.";
+                return answer;
+            }
+            if (text.charAt(index) == '#') {
+                break;
+            }
+            if (text.charAt(index) == ' ') {
+                index++;
+                continue;
+            }
+            answer[0] = "I do not recognize the constant to be summarized.";
+            return answer;
+        }
+        StringBuffer constantNameBuffer = new StringBuffer();
+        while (true) {
+            if (index >= text.length())
+                break;
+
+            if (text.charAt(index) == ' ' || text.charAt(index) == '.')
+                break;
+            constantNameBuffer.append(text.charAt(index++));
+        }
+        String constantName = constantNameBuffer.toString();
+        CycConstant cycConstant = cycAccess.getConstantByName(constantName);
+        if (cycConstant == null) {
+            answer[0] = "I do not recognize the constant to be summarized.";
+            return answer;
+        }
+        String script = "(rkf-summarize " + cycConstant.cyclify() + ")";
+        answer[0] =  cycAccess.makeCycList(script);
         return answer;
     }
 

@@ -206,12 +206,62 @@ public class UnitTest extends TestCase {
             Assert.assertEquals("(CYC-ASSERT (QUOTE (#$isa #$Dog #$Collection)))",
                                 ((CycList) answer[0]).cyclify());
             Assert.assertNull(answer[1]);
+
+            answer = parser.parseUserInput("assert (#$isa #$Dog #$Collection) in #$UniversalVocabularyMt.");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-ASSERT (QUOTE (#$isa #$Dog #$Collection)) #$UniversalVocabularyMt)",
+                                ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
+
+            // unassert
+            answer = parser.parseUserInput("unassert (#$isa #$Dog #$Collection).");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-UNASSERT (QUOTE (#$isa #$Dog #$Collection)))",
+                                ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
+
+            answer = parser.parseUserInput("unassert (#$isa #$Dog #$Collection) from #$UniversalVocabularyMt.");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-UNASSERT (QUOTE (#$isa #$Dog #$Collection)) #$UniversalVocabularyMt)",
+                                ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
+
+            // ask
+            answer = parser.parseUserInput("ask (#$isa #$Dog #$Collection).");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-QUERY (QUOTE (#$isa #$Dog #$Collection)))",
+                                ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
+
+            answer = parser.parseUserInput("ask (#$isa #$Dog #$Collection) in #$UniversalVocabularyMt.");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(CYC-QUERY (QUOTE (#$isa #$Dog #$Collection)) #$UniversalVocabularyMt)",
+                                ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
+
+            // summarize
+            answer = parser.parseUserInput("summarize #$Dog.");
+            Assert.assertNotNull(answer[0]);
+            Assert.assertTrue(answer[0] instanceof CycList);
+            System.out.println(((CycList) answer[0]).cyclify());
+            Assert.assertEquals("(RKF-SUMMARIZE #$Dog)", ((CycList) answer[0]).cyclify());
+            Assert.assertNull(answer[1]);
         }
         catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
         }
-        System.out.println("**** testParser ****");
+        System.out.println("**** testParser OK ****");
     }
 
 

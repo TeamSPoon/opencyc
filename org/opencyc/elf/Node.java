@@ -2,7 +2,7 @@ package org.opencyc.elf;
 
 //// Internal Imports
 import org.opencyc.elf.bg.BehaviorGeneration;
-import org.opencyc.elf.bg.Status;
+import org.opencyc.elf.Status;
 
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 

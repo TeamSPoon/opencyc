@@ -1,21 +1,15 @@
 package org.opencyc.elf.bg.taskframe;
 
-//// External Imports
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.doomdark.uuid.UUID;
-
-import org.opencyc.elf.bg.state.State;
-
 //// Internal Imports
 import org.opencyc.elf.goal.Goal;
 
+//// External Imports
+import java.util.ArrayList;
+import org.doomdark.uuid.UUID;
 
 /**
  * <P>
- * TaskFrame specifies the materials, tools, and procedures to accomplish a
- * task.
+ * TaskFrame specifies the materials, tools, and procedures to accomplish a task.
  * </p>
  * 
  * @version $Id$
@@ -39,12 +33,14 @@ import org.opencyc.elf.goal.Goal;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class TaskFrame {
+  
   //// Constructors
 
   /**
-   * Creates a new instance of TaskFrame
+   * Creates a new instance of TaskFrame and gives it a unique ID.
    */
   public TaskFrame() {
+    this.taskId = new UUID();
   }
 
   //// Public Area
@@ -57,12 +53,11 @@ public class TaskFrame {
    * @return true if the given object equals this object
    */
   public boolean equals(Object obj) {
-    if (!(obj instanceof Class)) {
+    if (!(obj instanceof TaskFrame)) {
       return false;
     }
-
-    //TODO
-    return true;
+    TaskFrame that = (TaskFrame) obj;
+    return this.taskId.equals(that.taskId);
   }
 
   /**
@@ -82,22 +77,18 @@ public class TaskFrame {
   }
 
   /**
-   * Gets the task name from the library of tasks the system knows how to
-   * perform.
+   * Gets the task name.
    * 
-   * @return taskName the task name from the library of tasks the system knows
-   *         how to perform
+   * @return taskName the task name
    */
   public String getTaskName() {
     return taskName;
   }
 
   /**
-   * Sets the task name from the library of tasks the system knows how to
-   * perform.
+   * Sets the task name.
    * 
-   * @param taskName the task name from the library of tasks the system knows
-   *        how to perform
+   * @param taskName the task name from
    */
   public void setTaskName(String taskName) {
     this.taskName = taskName;
@@ -105,26 +96,13 @@ public class TaskFrame {
 
   /**
    * Gets the task identifier consisting of a unique id for each task
-   * commanded, which provides a method for keeping track of tasks in a queue.
+   * commanded.
    * 
    * @return taskId the task identifier consisting of a unique id for each task
-   *         commanded, which provides a method for keeping track of tasks in
-   *         a queue
+   *         commanded
    */
   public UUID getTaskId() {
     return taskId;
-  }
-
-  /**
-   * Sets the task identifier consisting of a unique id for each task
-   * commanded, which provides a method for keeping track of tasks in a queue.
-   * 
-   * @param taskId the task identifier consisting of a unique id for each task
-   *        commanded, which provides a method for keeping track of tasks in a
-   *        queue
-   */
-  public void setTaskId(UUID taskId) {
-    this.taskId = taskId;
   }
 
   /**
@@ -152,7 +130,7 @@ public class TaskFrame {
    * 
    * @return taskObjects the objects upon which the desired task is performed
    */
-  public State getTaskObjects() {
+  public ArrayList getTaskObjects() {
     return taskObjects;
   }
 
@@ -161,7 +139,7 @@ public class TaskFrame {
    * 
    * @param taskObjects the objects upon which the desired task is performed
    */
-  public void setTaskObjects(State taskObjects) {
+  public void setTaskObjects(ArrayList taskObjects) {
     this.taskObjects = taskObjects;
   }
 
@@ -172,7 +150,7 @@ public class TaskFrame {
    * @return taskParameters the parameters that specify or modulate how the
    *         task should be performed
    */
-  public State getTaskParameters() {
+  public ArrayList getTaskParameters() {
     return taskParameters;
   }
 
@@ -183,14 +161,14 @@ public class TaskFrame {
    * @param taskParameters the parameters that specify or modulate how the task
    *        should be performed
    */
-  public void setTaskParameters(State taskParameters) {
+  public void setTaskParameters(ArrayList taskParameters) {
     this.taskParameters = taskParameters;
   }
 
   /**
-   * Gets the agents (actuators) that are responsible for carrying out the task
+   * Gets the agents that are responsible for carrying out the task
    * 
-   * @return agents the agents (actuators) that are responsible for carrying
+   * @return agents the agents that are responsible for carrying
    *         out the task
    */
   public ArrayList getAgents() {
@@ -198,9 +176,9 @@ public class TaskFrame {
   }
 
   /**
-   * Sets the agents (actuators) that are responsible for carrying out the task
+   * Sets the agents that are responsible for carrying out the task
    * 
-   * @param agents the agents (actuators) that are responsible for carrying out
+   * @param agents the agents that are responsible for carrying out
    *        the task
    */
   public void setAgents(ArrayList agents) {
@@ -213,7 +191,7 @@ public class TaskFrame {
    * 
    * @return taskRequirements
    */
-  public State gettaskRequirements() {
+  public ArrayList getTaskRequirements() {
     return taskRequirements;
   }
 
@@ -225,7 +203,7 @@ public class TaskFrame {
    *        information, aside from task objects, which are required to
    *        execute the task
    */
-  public void setXXX(State taskRequirements) {
+  public void setTaskRequirements(ArrayList taskRequirements) {
     this.taskRequirements = taskRequirements;
   }
 
@@ -234,7 +212,7 @@ public class TaskFrame {
    * 
    * @return taskConstraints the constraints upon the performance of the task
    */
-  public State getTaskConstraints() {
+  public ArrayList getTaskConstraints() {
     return taskConstraints;
   }
 
@@ -243,7 +221,7 @@ public class TaskFrame {
    * 
    * @param taskConstraints the constraints upon the performance of the task
    */
-  public void setTaskConstraints(State taskConstraints) {
+  public void setTaskConstraints(ArrayList taskConstraints) {
     this.taskConstraints = taskConstraints;
   }
 
@@ -252,12 +230,12 @@ public class TaskFrame {
    * plans, organized as a dictionary of execeptional states and associated
    * procedures for handling them
    * 
-   * @return taskProcedures the plans for accomplishing the task, or procedures
+   * @return schedules the plans for accomplishing the task, or procedures
    *         for generating plans, organized as a dictionary of execeptional
    *         states and associated procedures for handling them
    */
-  public HashMap getTaskProcedures() {
-    return taskProcedures;
+  public ArrayList getSchedules() {
+    return schedules;
   }
 
   /**
@@ -265,22 +243,21 @@ public class TaskFrame {
    * plans, organized as a dictionary of execeptional states and associated
    * procedures for handling them
    * 
-   * @param taskProcedures the plans for accomplishing the task, or procedures
+   * @param schedules the plans for accomplishing the task, or procedures
    *        for generating plans, organized as a dictionary of execeptional
    *        states and associated procedures for handling them
    */
-  public void setTaskProcedures(HashMap taskProcedures) {
-    this.taskProcedures = taskProcedures;
+  public void setSchedules(ArrayList schedules) {
+    this.schedules = schedules;
   }
 
   //// Protected Area
 
-  /** the task name from the library of tasks the system knows how to perform */
+  /** the task name */
   protected String taskName;
 
   /**
-   * the task identifier consisting of a unique id for each task commanded,
-   * which provides a method for keeping track of tasks in a queue
+   * the task identifier consisting of a unique id for each task commanded
    */
   protected UUID taskId;
 
@@ -288,10 +265,10 @@ public class TaskFrame {
   protected Goal taskGoal;
 
   /** the objects upon which the desired task is performed */
-  protected State taskObjects;
+  protected ArrayList taskObjects;
 
   /** the parameters that specify or modulate how the task should be performed */
-  protected State taskParameters;
+  protected ArrayList taskParameters;
 
   /** the agents (actuators) that are responsible for carrying out the task */
   protected ArrayList agents = new ArrayList();
@@ -300,17 +277,17 @@ public class TaskFrame {
    * the tools, resources, conditions and state information, aside from task
    * objects, which are required to execute the task
    */
-  protected State taskRequirements;
+  protected ArrayList taskRequirements;
 
   /** the constraints upon the performance of the task */
-  protected State taskConstraints;
+  protected ArrayList taskConstraints;
 
   /**
    * the plans for accomplishing the task, or procedures for generating plans,
    * organized as a dictionary of execeptional states and associated
    * procedures for handling them
    */
-  protected HashMap taskProcedures;
+  protected ArrayList schedules;
 
   //// Private Area
   //// Internal Rep

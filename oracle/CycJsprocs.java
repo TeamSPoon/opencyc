@@ -60,7 +60,7 @@ public class CycJsprocs {
     protected static CycAccess cycAccess;
 
     /**
-     * Initialize connection to Cyc.
+     * Initialize connection to Cyc, connection to hostname
      * 
      * Because Oracle java stored procedure calls are calls to static methods, the
      * constructor isn't called. (or something).
@@ -68,7 +68,28 @@ public class CycJsprocs {
      *
      * That's why this makeConnection method is here for initialization.
      */
-    public static void makeConnection() {
+    public static void makeConnection( String hostname ) {
+        try {
+            cycAccess = new CycAccess( hostname );
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    // the trace is visible in the $ORACLE_BASE/admin/<instancename>/udump directory.
+    // Use only for debugging, because this is very verbose!
+       cycAccess.traceOn();
+    }
+
+    /**
+     * Initialize connection to Cyc, default connection to localhost
+     * 
+     * Because Oracle java stored procedure calls are calls to static methods, the
+     * constructor isn't called. (or something).
+     * http://download-west.oracle.com/otndoc/oracle9i/901_doc/java.901/a90210/03_pub.htm#28941
+     *
+     * That's why this makeConnection method is here for initialization.
+     */
+    public static void makeConnection( ) {
         try {
             cycAccess = new CycAccess();
         }
@@ -79,6 +100,7 @@ public class CycJsprocs {
     // Use only for debugging, because this is very verbose!
        cycAccess.traceOn();
     }
+
 
     /**
      * End previously opened connection to Cyc.
@@ -222,9 +244,8 @@ public class CycJsprocs {
                                           String comment,
                                           String isaMt,
                                           oracle.sql.ARRAY genlMts)
-        throws IOException, CycApiException, SQLException {
-//        try {
-//            CycFort cIsaMt = cycAccess.getKnownConstantByName (isaMt);
+        throws RuntimeException {
+        try {
             Object[] mts = (Object[]) genlMts.getArray();
             ArrayList cGenlMts = new ArrayList ();
             for (int i=0; i<mts.length; i++)
@@ -234,11 +255,45 @@ public class CycJsprocs {
             System.out.println( cGenlMts);
             CycConstant mt = cycAccess.createMicrotheory (mtName, comment, isaMt, cGenlMts);
             return;    // return nothing; in oracle this becomes a procedure.
-//        }
-//        catch (Exception e) {
-//            throw new RuntimeException(e.getMessage());
-//        }
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
+
+    /**
+     * Wrapper of Cyc Java API createMicroTheorySystem
+     * Create a microtheory system for a new mt.  Given a root mt name, create a theory <Root>Mt,
+     * create a vocabulary <Root>VocabMt, and a data <Root>DataMt.  Establish genlMt links for the
+     * theory mt and data mt.  Assert that the theory mt is a genlMt of the WorldLikeOursCollectorMt.
+     * Assert that the data mt is a genlMt of the collector CurrentWorldDataMt.
+     *
+     * @param mtRootName the root name of the microtheory system
+     * @param comment the root comment of the microtheory system
+     * @param genlMts the list of more general microtheories
+     * @return an array of three elements consisting of the theory mt, vocabulary mt,
+     * and the data mt
+     */
+    public static void createMicrotheorySystem (String mtRootName,
+                                          String comment,
+                                          oracle.sql.ARRAY genlMts)
+        throws RuntimeException {
+        try {
+            Object[] mts = (Object[]) genlMts.getArray();
+            ArrayList cGenlMts = new ArrayList ();
+            for (int i=0; i<mts.length; i++)
+            {
+                  cGenlMts.add (mts[i]);
+            }
+            System.out.println( cGenlMts);
+            CycConstant[] mt = cycAccess.createMicrotheorySystem (mtRootName, comment, cGenlMts);
+            return;    // return nothing; in oracle this becomes a procedure.
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 
     /**
      * Turns a cyclist into an oracle.sql.ARRAY
@@ -427,7 +482,7 @@ public class CycJsprocs {
     public static String converseEscapedList (String command)
         throws RuntimeException {
         try {
-            CycList list  = cycAccess.converseList( command );
+            CycList list  = cycAccess.converseList (command);
             return list.cyclifyWithEscapeChars();
         }
         catch (Exception e) {

@@ -31,3 +31,5 @@ USAGE:
 See the PDF documentation 'ooi.pdf' that is in the doc directory of the
 OpenCyc 0.7 distribution.
 
+See also the 'Extras' directory that contains some optional things that can
+be used when 'ooi' is installed.

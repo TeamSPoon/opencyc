@@ -40,6 +40,7 @@ IS
     TYPE cyclist_type_indexed IS TABLE OF VARCHAR2(4000) INDEX BY BINARY_INTEGER; -- for input cyclists
 
 PROCEDURE makeConnection;
+PROCEDURE makeConnection( hostname_in IN VARCHAR2 );
 
 PROCEDURE endConnection;
 
@@ -50,6 +51,11 @@ PROCEDURE createMicrotheory(
     comment_in IN VARCHAR2,
     isamt_in IN VARCHAR2,
     genlmts_in IN cyclist_type );
+
+PROCEDURE createMicrotheorySystem(
+    mtname_in IN VARCHAR2,
+    isamt_in IN VARCHAR2,
+    genlmts_in IN cyclist_type  );
 
 PROCEDURE assertGaf( gaf_in IN VARCHAR2, mt_in IN VARCHAR2 );
 

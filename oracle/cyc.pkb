@@ -55,7 +55,7 @@ IS
 
 /***************************************************************************
  *
- * Make a persistent connection to CYC.
+ * Make a persistent connection to CYC, default connection to localhost.
  *
  * Currently, only persistent connections to Cyc (see CycAccess.java) are
  * supported in this Oracle -> Cyc interface.
@@ -64,6 +64,15 @@ IS
 PROCEDURE makeConnection
 AS LANGUAGE JAVA
 	NAME 'CycJsprocs.makeConnection()';
+
+/***************************************************************************
+ *
+ * Make a persistent connection to CYC, connection to hostname.
+ *
+ ***************************************************************************/
+PROCEDURE makeConnection( hostname_in IN VARCHAR2 )
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.makeConnection( java.lang.String )';
 
 /***************************************************************************
  *
@@ -145,6 +154,21 @@ PROCEDURE createMicrotheory(
 AS LANGUAGE JAVA
 	NAME 'CycJsprocs.createMicrotheory(
 	    java.lang.String,
+	    java.lang.String,
+	    java.lang.String,
+	    oracle.sql.ARRAY )';
+
+/***************************************************************************
+ *
+ * Creates a new microtheory system (vocab, rules and data mt)
+ *
+ ***************************************************************************/
+PROCEDURE createMicrotheorySystem(
+    mtname_in IN VARCHAR2,
+    isamt_in IN VARCHAR2,
+    genlmts_in IN cyclist_type  )
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.createMicrotheorySystem(
 	    java.lang.String,
 	    java.lang.String,
 	    oracle.sql.ARRAY )';

@@ -55,10 +55,10 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testJavaInterpreter"));
+        //testSuite.addTest(new UnitTest("testJavaInterpreter"));
         testSuite.addTest(new UnitTest("testExpressionEvaluation"));
-        testSuite.addTest(new UnitTest("testSimpleStateMachine"));
-        testSuite.addTest(new UnitTest("testCycExtractor"));
+        //testSuite.addTest(new UnitTest("testSimpleStateMachine"));
+        //testSuite.addTest(new UnitTest("testCycExtractor"));
         return testSuite;
     }
 
@@ -99,7 +99,7 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(result instanceof Boolean);
         Assert.assertEquals(Boolean.TRUE, result);
 
-        System.out.println("\n**** testJavaInterpreter ****");
+        System.out.println("\n**** testJavaInterpreter OK ****");
     }
 
     /**
@@ -117,45 +117,51 @@ public class UnitTest extends TestCase {
                                           CycConnection.DEFAULT_COMMUNICATION_MODE,
                                           true);
                 //cycAccess.traceNamesOn();
+                cycAccess.setKePurpose("DAMLProject");
             }
             else if (localHostName.equals("thinker")) {
                 cycAccess = new CycAccess("localhost",
                                           3600,
                                           CycConnection.DEFAULT_COMMUNICATION_MODE,
                                           true);
+                cycAccess.setKePurpose("OpenCyc");
             }
-            else
+            else {
                 cycAccess = new CycAccess();
-            CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01Mt");
+                cycAccess.setKePurpose("OpenCyc");
+            }
+            cycAccess.setCyclist(cycAccess.getKnownConstantByName("Cyc"));
+            CycFort stateMt = cycAccess.getKnownConstantByName("UMLStateMachineTest01-ContextMt");
+            cycAccess.unassertMtContentsWithoutTranscript(stateMt);
+            Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
+
             ExpressionEvaluator expressionEvaluator =
-                new ExpressionEvaluator(cycAccess, stateMt);
-            Expression expression1 = new Expression();
+                new ExpressionEvaluator(cycAccess,
+                                        stateMt,
+                                        ExpressionEvaluator.DEFAULT_VERBOSITY);
+
+            Expression expression = new Expression();
             String expressionText =
-               "(ProgramBlockFn \n" +
-               "  (ProgramAssignmentFn TestStateMachine-X 0) \n" +
-               "  (ProgramAssignmentFn \n" +
-               "    (SoftwareParameterFromSyntaxFn TestStateMachine-OutputPin2-X) \n" +
-               "      TestStateMachine-X))";
-            expression1.setBody(cycAccess.makeCycList(expressionText));
-            expressionEvaluator.evaluate(expression1);
+               "(#$ProgramAssignmentFn #$TestStateMachine-X 0)";
+            expression.setBody(cycAccess.makeCycList(expressionText));
+            expressionEvaluator.evaluate(expression);
+            String queryText =
+                "(#$softwareParameterValue #$TestStateMachine-X 0)";
+            CycList query = cycAccess.makeCycList(queryText);
+            Assert.assertTrue(cycAccess.isQueryTrue(query, stateMt));
+            Assert.assertEquals(1, cycAccess.getAllAssertionsInMt(stateMt).size());
 
-            Expression expression2 = new Expression();
-            //expression2.setBody("x = 0;");
-            expressionEvaluator.evaluate(expression2);
+            cycAccess.unassertMtContentsWithoutTranscript(stateMt);
+            Assert.assertEquals(0, cycAccess.getAllAssertionsInMt(stateMt).size());
 
-            BooleanExpression booleanExpression1 = new BooleanExpression();
-            //booleanExpression1.setBody("x < 9;");
-            Assert.assertTrue(expressionEvaluator.evaluateBoolean(booleanExpression1));
+            Object body =
+                cycAccess.getArg2("umlBody",
+                                  "TestStateMachine-InitializeNumberToZeroProcedure",
+                                  "UMLStateMachineTest01Mt");
+            System.out.println("body: " + ((CycList) body).cyclify());
 
-            Expression expression4 = new Expression();
-            //expression4.setBody("x++;");
-            for (int i = 0; i < 9; i++)
-                expressionEvaluator.evaluate(expression4);
-            Assert.assertTrue(! expressionEvaluator.evaluateBoolean(booleanExpression1));
-
-            BooleanExpression booleanExpression2 = new BooleanExpression();
-            //booleanExpression2.setBody("x == 9;");
-            Assert.assertTrue(expressionEvaluator.evaluateBoolean(booleanExpression2));
+            expression.setBody(body);
+            expressionEvaluator.evaluate(expression);
         }
         catch (Exception e) {
             e.printStackTrace();

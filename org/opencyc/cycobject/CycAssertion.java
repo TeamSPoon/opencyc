@@ -114,7 +114,7 @@ public class CycAssertion extends CycObject {
      * @return this object in a form suitable for use as an <tt>String</tt> api expression value
      */
     public String stringApiValue() {
-        return formula.cyclify();
+        return getFormula().cyclify();
     }
 
     /**

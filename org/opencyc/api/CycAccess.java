@@ -4114,7 +4114,7 @@ public class CycAccess {
     }
 
     /**
-     * Asserts the given sentence, and then places it on
+     * Asserts the given sentence with bookkeeping, and then places it on
      * the transcript queue.
      *
      * @param sentence the given sentence for assertion
@@ -4129,7 +4129,7 @@ public class CycAccess {
     }
 
     /**
-     * Asserts the given sentence, and then places it on
+     * Asserts the given sentence with bookkeeping, and then places it on
      * the transcript queue.
      *
      * @param sentence the given sentence for assertion
@@ -4152,6 +4152,50 @@ public class CycAccess {
             "  (clet ((*the-cyclist* " + cyclistName + ")\n" +
             "         (*ke-purpose* " + projectName + "))\n" +
             "    (ke-assert-now\n" +
+            "      '" + sentence + "\n" +
+            "      " + mt.cyclify() + ")))";
+        converseVoid(command);
+    }
+
+    /**
+     * Asserts the given sentence with bookkeeping and without placing it on
+     * the transcript queue.
+     *
+     * @param sentence the given sentence for assertion
+     * @param mt the microtheory in which the assertion is placed
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertWithBookkeepingAndWithoutTranscript (CycList sentence, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        assertWithBookkeepingAndWithoutTranscript (sentence.cyclify(), mt);
+    }
+
+    /**
+     * Asserts the given sentence with bookkeeping and without placing it on
+     * the transcript queue.
+     *
+     * @param sentence the given sentence for assertion
+     * @param mt the microtheory in which the assertion is placed
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public void assertWithBookkeepingAndWithoutTranscript (String sentence, CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        String projectName = "nil";
+        if (project != null)
+            projectName = project.stringApiValue();
+        String cyclistName = "nil";
+        if (cyclist != null)
+            cyclistName = cyclist.stringApiValue();
+        String command =
+            "(with-bookkeeping-info \n" +
+            "  (new-bookkeeping-info " + cyclistName + " (the-date) " + projectName + "(the-second))\n" +
+            "  (clet ((*the-cyclist* " + cyclistName + ")\n" +
+            "         (*ke-purpose* " + projectName + "))\n" +
+            "    (cyc-assert\n" +
             "      '" + sentence + "\n" +
             "      " + mt.cyclify() + ")))";
         converseVoid(command);
@@ -7066,9 +7110,59 @@ public class CycAccess {
         return converseString(query);
     }
 
+    /**
+     * Returns the list of assertions contained in the given mt.
+     *
+     * @param mt the given microtheory
+     * @return  the list of assertions contained in the given mt
+     */
+    public CycList getAllAssertionsInMt (CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("gather-mt-index"));
+        command.add(mt);
+        return converseList(command);
+    }
 
+    /**
+     * Unasserts all assertions from the given mt, with a transcript record of
+     * the unassert operation.
+     *
+     * @param mt the microtheory from which to delete all its assertions
+     */
+    public void unassertMtContentsWithTranscript (CycFort mt)
+            throws IOException, UnknownHostException, CycApiException {
+        CycList assertions = getAllAssertionsInMt(mt);
+        Iterator iter = assertions.iterator();
+        while (iter.hasNext()) {
+            CycAssertion assertion = (CycAssertion) iter.next();
+            String command = withBookkeepingInfo() +
+                "(ke-unassert-now '" +
+                assertion.stringApiValue() +
+                mt.stringApiValue() + "))";
+            converseVoid(command);
+        }
+    }
 
-
+    /**
+     * Unasserts all assertions from the given mt, without a transcript record of
+     * the unassert operation.
+     *
+     * @param mt the microtheory from which to delete all its assertions
+     */
+    public void unassertMtContentsWithoutTranscript (CycFort mt)
+            throws IOException, UnknownHostException, CycApiException {
+        CycList assertions = getAllAssertionsInMt(mt);
+        Iterator iter = assertions.iterator();
+        while (iter.hasNext()) {
+            CycAssertion assertion = (CycAssertion) iter.next();
+            String command =
+                "(cyc-unassert '" +
+                assertion.stringApiValue() +
+                mt.stringApiValue() + "))";
+            converseVoid(command);
+        }
+    }
 
 
 

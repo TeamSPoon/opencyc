@@ -142,7 +142,7 @@ public class Interpreter {
     public Interpreter(StateMachine stateMachine,
                        CycAccess cycAccess,
                        CycFort stateMt)
-        throws IOException {
+        throws IOException, CycApiException {
         this(stateMachine,
              cycAccess,
              stateMt,
@@ -163,7 +163,7 @@ public class Interpreter {
                        CycAccess cycAccess,
                        CycFort stateMt,
                        int verbosity)
-        throws IOException {
+        throws IOException, CycApiException {
         this.stateMachine = stateMachine;
         this.cycAccess = cycAccess;
         this.stateMt = stateMt;
@@ -176,9 +176,11 @@ public class Interpreter {
     /**
      * Initializes this object.
      */
-    protected void initialize () throws IOException {
+    protected void initialize () throws IOException, CycApiException {
         Log.makeLog("state-machine-interpreter.log");
-        expressionEvaluator = new ExpressionEvaluator(cycAccess, stateMt);
+        expressionEvaluator = new ExpressionEvaluator(cycAccess,
+                                                      stateMt,
+                                                      verbosity);
         stateMachineFactory = new StateMachineFactory();
         stateMachineFactory.setStateMachine(stateMachine);
         stateMachineFactory.setNamespace(stateMachine.getNamespace());
@@ -191,8 +193,15 @@ public class Interpreter {
      * @param args ignored
      */
     public static void main(String[] args) {
+        try {
         Interpreter interpreter = new Interpreter();
         interpreter.interpret();
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            System.exit(1);
+        }
     }
 
     /**
@@ -207,7 +216,8 @@ public class Interpreter {
     /**
      * Interprets the state machine.
      */
-    public void interpret () {
+    public void interpret ()
+        throws IOException, CycApiException {
         formAllStatesConfiguration();
         formInitialStateConfiguration();
         while (! isTerminated) {
@@ -264,7 +274,8 @@ public class Interpreter {
      * Forms the initial (active) state configuration for this
      * state machine.
      */
-    protected void formInitialStateConfiguration () {
+    protected void formInitialStateConfiguration ()
+        throws IOException, CycApiException {
         State topState = stateMachine.getTop();
         if (verbosity > 2)
             Log.current.println("Forming initial state configuration from " + topState.toString());
@@ -306,7 +317,8 @@ public class Interpreter {
      * Selects the transitions from active source states which are triggered
      * by the current event.
      */
-    protected void eventProcessor () {
+    protected void eventProcessor ()
+        throws IOException, CycApiException {
         selectedTransitions = new ArrayList();
         Iterator activeStatesIter = activeStates.keySet().iterator();
         while (activeStatesIter.hasNext()) {
@@ -325,7 +337,8 @@ public class Interpreter {
      *
      * @param transitions the given state transition iterator
      */
-    protected void selectTransitions (Iterator transitions) {
+    protected void selectTransitions (Iterator transitions)
+        throws IOException, CycApiException {
         while (transitions.hasNext()) {
             Transition transition = (Transition) transitions.next();
             if (currentEventEnables(transition)) {
@@ -379,7 +392,8 @@ public class Interpreter {
      * Fires the selected transitions and runs the associated
      * actions to completion.
      */
-    protected void fireSelectedTransitions () {
+    protected void fireSelectedTransitions ()
+        throws IOException, CycApiException {
         Iterator iter = selectedTransitions.iterator();
         while (iter.hasNext()) {
             Transition transition = (Transition) iter.next();
@@ -397,7 +411,8 @@ public class Interpreter {
      *
      * @param transition the given internal transition
      */
-    protected void internalTransition (Transition transition) {
+    protected void internalTransition (Transition transition)
+        throws IOException, CycApiException {
         State targetState = (State) transition.getTarget();
         if (verbosity > 2)
             Log.current.println("Internal transition " + transition.toString() +
@@ -410,7 +425,8 @@ public class Interpreter {
      *
      * @param transition the given transition
      */
-    protected void transitionExit (Transition transition) {
+    protected void transitionExit (Transition transition)
+        throws IOException, CycApiException {
         StateVertex source = transition.getSource();
         if (source instanceof State) {
             State sourceState = (State) source;
@@ -429,7 +445,8 @@ public class Interpreter {
      *
      * @param transition the given transition
      */
-    protected void transitionEnter (Transition transition) {
+    protected void transitionEnter (Transition transition)
+        throws IOException, CycApiException {
         StateVertex target = transition.getTarget();
         if (target instanceof State) {
             State targetState = (State) target;
@@ -468,6 +485,43 @@ public class Interpreter {
      */
     public void setStateMachine (StateMachine stateMachine) {
         this.stateMachine = stateMachine;
+    }
+
+
+    /**
+     * Gets the cyc access instance
+     *
+     * @return the cyc access instance
+     */
+    public CycAccess getCycAccess () {
+        return cycAccess;
+    }
+
+    /**
+     * Sets the cyc access instance
+     *
+     * @param cycAccess the cyc access instance
+     */
+    public void setCycAccess (CycAccess cycAccess) {
+        this.cycAccess = cycAccess;
+    }
+
+    /**
+     * Gets the expression evaluation state context
+     *
+     * @return the expression evaluation state context
+     */
+    public CycFort getStateMt () {
+        return stateMt;
+    }
+
+    /**
+     * Sets the expression evaluation state context
+     *
+     * @param xxxx the expression evaluation state context
+     */
+    public void setStateMt (CycFort stateMt) {
+        this.stateMt = stateMt;
     }
 
     /**

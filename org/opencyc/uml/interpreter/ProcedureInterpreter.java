@@ -2,6 +2,8 @@ package org.opencyc.uml.interpreter;
 
 import java.util.*;
 import java.io.*;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
@@ -48,15 +50,26 @@ public class ProcedureInterpreter {
     /**
      * the procedure to interpret
      */
-    Procedure procedure;
+    protected Procedure procedure;
+
+    /**
+     * the expression evaluator
+     */
+    protected ExpressionEvaluator expressionEvaluator;
 
     /**
      * Constructs a new ProcedureInterpreter object.
      *
-     * @param verbosity the desired verbosity for interpreting procedures
-     *
+     * @param cycAccess the reference to the parent CycAccess object which provides Cyc api
+     * services
+     * @param stateMt the expression evaluation state context
+     * @param verbosity the output verbosity for this object
      */
-    public ProcedureInterpreter(int verbosity) {
+    public ProcedureInterpreter(CycAccess cycAccess,
+                                CycFort stateMt,
+                                int verbosity)
+        throws IOException, CycApiException {
+        expressionEvaluator = new ExpressionEvaluator(cycAccess, stateMt, verbosity);
         this.verbosity = verbosity;
     }
 
@@ -65,12 +78,13 @@ public class ProcedureInterpreter {
      *
      * @param procedure the procedure to interpret
      */
-    public void interpret (Procedure procedure) {
+    public void interpret (Procedure procedure)
+        throws IOException, CycApiException {
         this.procedure = procedure;
         if (verbosity > 2)
             Log.current.println("Interpreting " + procedure.toString() +
                                 "\n  " + procedure.getBody());
-        // TODO
+        expressionEvaluator.evaluateCycLExpression((CycList) procedure.getBody());
     }
 
     /**

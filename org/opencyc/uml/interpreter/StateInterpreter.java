@@ -1,7 +1,9 @@
 package org.opencyc.uml.interpreter;
 
+import java.io.*;
 import java.util.*;
 import javax.swing.tree.*;
+import org.opencyc.api.*;
 import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
@@ -70,11 +72,14 @@ public class StateInterpreter extends Thread {
      * @param state the state to interpret
      */
     public StateInterpreter(Interpreter interpreter,
-                            State state) {
+                            State state)
+        throws IOException, CycApiException {
         this.interpreter = interpreter;
         verbosity = interpreter.getVerbosity();
         this.state = state;
-        procedureInterpreter = new ProcedureInterpreter(verbosity);
+        procedureInterpreter = new ProcedureInterpreter(interpreter.getCycAccess(),
+                                                        interpreter.getStateMt(),
+                                                        verbosity);
     }
 
     /**
@@ -95,7 +100,8 @@ public class StateInterpreter extends Thread {
      *
      * @param transition the transistion
      */
-    public void interpretTransitionEntry (Transition transition) {
+    public void interpretTransitionEntry (Transition transition)
+        throws IOException, CycApiException {
         if (verbosity > 2)
             Log.current.println(transition.toString() + " entering " + state.toString());
         performTransitionEffect(transition);
@@ -111,7 +117,8 @@ public class StateInterpreter extends Thread {
      *
      * @param transition the transition
      */
-    protected void performEntryActions (Transition transition) {
+    protected void performEntryActions (Transition transition)
+        throws IOException, CycApiException {
         Object[] statesFromRootToTarget = interpreter.getStatesFromRootTo(state);
         //TODO think more about how to handle complex tranistions whose source is a vertex
         StateVertex sourceStateVertex = (StateVertex)transition.getSource();
@@ -133,7 +140,8 @@ public class StateInterpreter extends Thread {
      * Performs the transition effect in this state and creates
      * the transition completion event.
      */
-    public void performTransitionEffect (Transition transition) {
+    public void performTransitionEffect (Transition transition)
+        throws IOException, CycApiException {
         Procedure procedure = transition.getEffect();
         if (procedure != null) {
             if (verbosity > 2)
@@ -157,7 +165,8 @@ public class StateInterpreter extends Thread {
      * Completes this composite state.  If this is the top state then
      * the state machine terminates.
      */
-    protected void complete () {
+    protected void complete ()
+        throws IOException, CycApiException {
         if (verbosity > 2)
             Log.current.println("Completing " + state.toString());
         exit();
@@ -172,7 +181,8 @@ public class StateInterpreter extends Thread {
      *
      * @param entryState the given state
      */
-    public void enterState (State entryState) {
+    public void enterState (State entryState)
+        throws IOException, CycApiException {
         if (entryState.equals(state))
             enter();
         else {
@@ -188,7 +198,8 @@ public class StateInterpreter extends Thread {
     /**
      * Enters this state, performing the entry action and the do-activity.
      */
-    public void enter () {
+    public void enter ()
+        throws IOException, CycApiException {
         if (verbosity > 2)
             Log.current.println("Entering " + state.toString());
         state.setIsActive(true);
@@ -212,7 +223,8 @@ public class StateInterpreter extends Thread {
      *
      * @param transition the transistion
      */
-    public void interpretTransitionExit (Transition transition) {
+    public void interpretTransitionExit (Transition transition)
+        throws IOException, CycApiException {
         if (! isCompositeState()) {
             exit();
             return;
@@ -235,7 +247,7 @@ public class StateInterpreter extends Thread {
     /**
      * Exits this state.
      */
-    public void exit () {
+    public void exit () throws IOException, CycApiException {
         if (verbosity > 2)
             Log.current.println("Exiting " + state.toString());
         DoActivity doActivityThread = state.getDoActivityThread();

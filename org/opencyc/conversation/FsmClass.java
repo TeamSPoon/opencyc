@@ -193,8 +193,13 @@ public class FsmClass {
         while (states.hasNext()) {
             State state = (State) states.next();
             State stateClone = (State) state.clone();
+            if (! stateClone.equals(state))
+                throw new RuntimeException("stateClone\n" + stateClone.toString() +
+                                           "\nnot equal to state\n" + state.toString());
             fsmClass.addState(stateClone);
         }
+        fixupClonedStates(fsmClass.fsmStates);
+        fsmClass.validateIntegrity();
         return fsmClass;
     }
 
@@ -231,7 +236,26 @@ public class FsmClass {
             State stateClone = (State) state.clone();
             fsm.addState(stateClone);
         }
+        fixupClonedStates(fsm.fsmStates);
+        fsm.validateIntegrity();
         return fsm;
+    }
+
+    /**
+     * Fixes up references to states embedded in arcs, after the states have
+     * been cloned.
+     */
+    protected void fixupClonedStates (HashMap states) {
+        Iterator statesIterator = states.values().iterator();
+        while (statesIterator.hasNext()) {
+            State state = (State) statesIterator.next();
+            Iterator arcs = state.getArcs().iterator();
+            while (arcs.hasNext()) {
+                Arc arc = (Arc) arcs.next();
+                arc.setTransitionFromState((State) states.get(arc.transitionFromState.getStateId()));
+                arc.setTransitionToState((State) states.get(arc.transitionToState.getStateId()));
+            }
+        }
     }
 
     /**
@@ -241,13 +265,60 @@ public class FsmClass {
      */
     public String toString () {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("[fsm class ");
+        stringBuffer.append("[fsm class: ");
         stringBuffer.append(name);
         if (superClass != null) {
-            stringBuffer.append(", super class ");
+            stringBuffer.append(", superclass: ");
             stringBuffer.append(superClass.name);
+        }
+        stringBuffer.append(", states:");
+        Iterator states = fsmStates.values().iterator();
+        while (states.hasNext()) {
+            stringBuffer.append(" ");
+            State state = (State) states.next();
+            stringBuffer.append(state.toString());
         }
         stringBuffer.append("]");
         return stringBuffer.toString();
     }
+
+    /**
+     * Validates fsm class integrity.
+     */
+    protected void validateIntegrity () {
+        ArrayList statesList = new ArrayList();
+        Iterator states = fsmStates.values().iterator();
+        while (states.hasNext())
+            statesList.add(states.next());
+        if (statesList.size() == 0)
+            throw new RuntimeException("fsm class has no states\n" + this);
+        for (int i = 0; i < statesList.size(); i++) {
+            State state = (State) statesList.get(i);
+            Iterator arcs = state.getArcs().iterator();
+            while (arcs.hasNext()) {
+                Arc arc = (Arc) arcs.next();
+                Arc arcByPerformative = state.getArc(arc.getPerformative());
+                if (arc != arcByPerformative)
+                    throw new RuntimeException("arcs list does not contain arc\n" +
+                                               arc.toString());
+                State transitionFromState = arc.getTransitionFromState();
+                State stateById = this.getState(transitionFromState.getStateId());
+                if (transitionFromState != stateById) {
+                    throw new RuntimeException("fsm class transitionFromState not found\n" +
+                                               transitionFromState.toString() +
+                                               "\nfsm:\n" + this.toString());
+                }
+                State transitionToState = arc.getTransitionToState();
+                if (! statesList.contains(transitionToState))
+                    throw new RuntimeException("fsm class transitionToState not found\n" +
+                                               transitionToState.toString() +
+                                               "\nfsm:\n" + this.toString());
+                Fsm subFsm = arc.getSubFsm();
+                if (((arc.getAction() != null) && (subFsm != null)))
+                    throw new RuntimeException("arc has both an action and a subFsm\n" +
+                                               arc.toString());
+            }
+        }
+    }
+
 }

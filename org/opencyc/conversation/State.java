@@ -35,7 +35,7 @@ public class State implements Comparable {
     protected String stateId;
 
     /**
-     * performative --> Arc
+     * performative name --> Arc
      */
     protected HashMap arcs = new HashMap();
 
@@ -105,7 +105,7 @@ public class State implements Comparable {
      */
     public void addArc (Performative performative,
                                  Arc arc) {
-         arcs.put(performative, arc);
+         arcs.put(performative.performativeName, arc);
     }
 
     /**
@@ -115,7 +115,7 @@ public class State implements Comparable {
      * @return the FSM arc which specifies a transition-to state and an action
      */
     public Arc getArc (Performative performative) {
-        return (Arc) arcs.get(performative);
+        return (Arc) arcs.get(performative.performativeName);
     }
 
     /**
@@ -152,7 +152,19 @@ public class State implements Comparable {
      * @return the representation of the <tt>State</tt> as a <tt>String</tt>
      */
     public String toString() {
-        return stateId;
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("\n  ");
+        stringBuffer.append(stateId.toString());
+        stringBuffer.append(", ");
+        stringBuffer.append(arcs.size());
+        stringBuffer.append(" arcs");
+        Iterator arcsIterator = arcs.values().iterator();
+        while (arcsIterator.hasNext()) {
+            Arc arc = (Arc) arcsIterator.next();
+            stringBuffer.append("\n    ");
+            stringBuffer.append(arc.toString());
+        }
+        return stringBuffer.toString();
     }
 
     /**

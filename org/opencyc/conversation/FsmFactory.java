@@ -3,6 +3,7 @@ package org.opencyc.conversation;
 import java.util.*;
 import org.opencyc.chat.*;
 import org.opencyc.templateparser.*;
+import org.opencyc.util.*;
 
 /**
  * Makes finite state machines which can be interpreted by the Interpreter.<p>
@@ -31,6 +32,18 @@ import org.opencyc.templateparser.*;
 public class FsmFactory {
 
     /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 1;
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
      * Stores fsm class objects by name.
      * name --> FsmClass
      */
@@ -51,6 +64,7 @@ public class FsmFactory {
      * Constructs a new FsmFactory object.
      */
     public FsmFactory() {
+        Log.makeLog();
         templateFactory = new TemplateFactory();
     }
 
@@ -100,7 +114,7 @@ public class FsmFactory {
      *
      * @param name the fsmClass name
      */
-    public FsmClass getFsmClass (String name) {
+    public static FsmClass getFsmClass (String name) {
         return (FsmClass) fsmClassStore.get(name);
     }
 
@@ -109,7 +123,7 @@ public class FsmFactory {
      *
      * @param name the fsm name
      */
-    public Fsm getFsm (String name) {
+    public static Fsm getFsm (String name) {
         return (Fsm) fsmStore.get(name);
     }
 
@@ -143,12 +157,12 @@ public class FsmFactory {
     public void makeQuitArc (State currentState) {
         Performative quitPerformative =
             new Performative("quit");
-        State finalState = new State("final");
+        State quitState = new State("quit");
         Action doFinalizationAction =
             new Action("do-finalization");
        Arc quitArc = new Arc(currentState,
                              quitPerformative,
-                             finalState,
+                             quitState,
                              null,
                              doFinalizationAction);
     }
@@ -160,20 +174,27 @@ public class FsmFactory {
     public void makeRootFsmClass () {
         FsmClass fsmClass = new FsmClass("root", (FsmClass) null);
         State startState = new State("start", fsmClass);
+        State quitState = new State("quit", fsmClass);
         makeQuitArc(startState);
         fsmClass.setInitialState(startState);
+        fsmClass.validateIntegrity();
         fsmClassStore.put(fsmClass.name, fsmClass);
-    }
+        if (verbosity > 2)
+            Log.current.println("made fsm class\n" + getFsmClass("root"));
+        }
 
     /**
      * Makes a start-end fsm class object.
      * The start-end class inherits from root and has an end state.
      */
     public void makeStartEndFsmClass () {
-        FsmClass fsmClass = new FsmClass("start-end", "root");
+        FsmClass fsmClass = FsmClass.makeSubClass("start-end", "root");
         State endState = new State("end", fsmClass);
         makeQuitArc(endState);
+        fsmClass.validateIntegrity();
         fsmClassStore.put(fsmClass.name, fsmClass);
+        if (verbosity > 2)
+            Log.current.println("made fsm class\n" + getFsmClass("start-end"));
     }
 
     /**
@@ -198,7 +219,10 @@ public class FsmFactory {
                 fsmClass.getState("start"),
                 disambiguateTermQuery,
                 null);
+        fsmClass.validateIntegrity();
         fsmClassStore.put(fsmClass.name, fsmClass);
+        if (verbosity > 2)
+            Log.current.println("made fsm class\n" + getFsmClass("chat"));
     }
 
     /**
@@ -206,7 +230,10 @@ public class FsmFactory {
       */
     public void makeChat () {
         Fsm fsm = FsmClass.makeInstance("chat", "chat");
+        fsm.validateIntegrity();
         fsmStore.put(fsm.name, fsm);
+        if (verbosity > 2)
+            Log.current.println("made fsm\n" + getFsm("chat"));
     }
 
     /**
@@ -263,8 +290,10 @@ public class FsmFactory {
                 fsmClass.getState("end"),
                 new Fsm("end-sub-fsm"),
                 null);
-
+        fsmClass.validateIntegrity();
         fsmClassStore.put(fsmClass.name, fsmClass);
+        if (verbosity > 2)
+            Log.current.println("made fsm class\n" + getFsmClass("disambiguate-term-query"));
     }
 
     /**
@@ -272,7 +301,10 @@ public class FsmFactory {
       */
     public void makeDisambiguateTermQuery () {
         Fsm fsm = FsmClass.makeInstance("disambiguate-term-query", "disambiguate-term-query");
+        fsm.validateIntegrity();
         fsmStore.put(fsm.name, fsm);
+        if (verbosity > 2)
+            Log.current.println("made fsm\n" + getFsm("disambiguate-term-query"));
     }
 
     /**
@@ -366,8 +398,10 @@ public class FsmFactory {
                 fsmClass.getState("end"),
                 null,
                 new Action("do-end-sub-fsm"));
-
+        fsmClass.validateIntegrity();
         fsmClassStore.put(fsmClass.name, fsmClass);
+        if (verbosity > 2)
+            Log.current.println("made fsm class\n" + getFsmClass("disambiguate-phrase"));
     }
 
     /**
@@ -375,7 +409,10 @@ public class FsmFactory {
       */
     public void makeDisambiguatePhrase () {
         Fsm fsm = FsmClass.makeInstance("disambiguate-phrase", "disambiguate-phrase");
+        fsm.validateIntegrity();
         fsmStore.put(fsm.name, fsm);
+        if (verbosity > 2)
+            Log.current.println("made fsm\n" + getFsm("disambiguate-phrase"));
     }
 
     /**
@@ -402,13 +439,12 @@ public class FsmFactory {
          * 1. If we are in the start state and get a term-query performative, transition to the
          * retrieve-first-fact state and perform the do-reply-with-first-fact action.
          */
+        Arc arc1 =
         new Arc(fsmClass.getState("start"),
                 new Performative("term-query"),
                 retrieveFactState,
                 null,
                 new Action("do-reply-with-first-fact"));
-
-
         /**
          * 2. If we are in the retrieve-first-fact state and get a more performative, transition to the
          * prompt-for-more state and perform the do-reply-with-next-fact action.
@@ -427,8 +463,10 @@ public class FsmFactory {
                 fsmClass.getState("end"),
                 null,
                 new Action("do-end-sub-fsm"));
-
+        fsmClass.validateIntegrity();
         fsmClassStore.put(fsmClass.name, fsmClass);
+        if (verbosity > 2)
+            Log.current.println("made fsm class\n" + getFsmClass("term-query"));
     }
 
     /**
@@ -436,7 +474,10 @@ public class FsmFactory {
       */
     public void makeTermQuery () {
         Fsm fsm = FsmClass.makeInstance("term-query", "term-query");
+        fsm.validateIntegrity();
         fsmStore.put(fsm.name, fsm);
+        if (verbosity > 2)
+            Log.current.println("made fsm\n" + getFsm("term-query"));
     }
 
     /**
@@ -466,5 +507,15 @@ public class FsmFactory {
                 }
             }
         }
+    }
+
+    /**
+     * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
     }
 }

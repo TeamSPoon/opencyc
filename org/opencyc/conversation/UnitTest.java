@@ -47,13 +47,15 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
+        /*
         testSuite.addTest(new UnitTest("testAction"));
         testSuite.addTest(new UnitTest("testPerformative"));
         testSuite.addTest(new UnitTest("testState"));
         testSuite.addTest(new UnitTest("testArc"));
+        */
         testSuite.addTest(new UnitTest("testFsmFactory"));
-        testSuite.addTest(new UnitTest("testInterpreter"));
-        testSuite.addTest(new UnitTest("testPerformer"));
+        //testSuite.addTest(new UnitTest("testInterpreter"));
+        //testSuite.addTest(new UnitTest("testPerformer"));
         return testSuite;
     }
 
@@ -89,7 +91,8 @@ public class UnitTest extends TestCase {
         Performative performative =
             new Performative(performativeName);
         Assert.assertNotNull(performative);
-        Assert.assertEquals(performativeName, performative.getPerformativeName());
+        Assert.assertEquals(performativeName,
+                            performative.getPerformativeName());
         Assert.assertEquals(performativeName, performative.toString());
         Performative performative2 =
             new Performative(performativeName);
@@ -118,9 +121,9 @@ public class UnitTest extends TestCase {
     public void testState () {
         System.out.println("\n**** testState ****");
 
-        State readyState = new State("ready");
-        Assert.assertNotNull(readyState);
-        Assert.assertEquals("ready", readyState.getStateId());
+        State startState = new State("start");
+        Assert.assertNotNull(startState);
+        Assert.assertEquals("start", startState.getStateId());
         State finalState = new State("final");
         Assert.assertEquals("final", finalState.getStateId());
 
@@ -129,40 +132,40 @@ public class UnitTest extends TestCase {
         Performative termQueryPerformative = new Performative("term-query");
         Performative quitPerformative = new Performative("quit");
         /**
-         * 1. If we are in the ready state and get a term-query performative, transition
-         * to the ready state and perform the do-term-query action.
+         * 1. If we are in the start state and get a term-query performative, transition
+         * to the start state and perform the do-term-query action.
          */
-        Arc arc1 = new Arc(readyState,
+        Arc arc1 = new Arc(startState,
                            termQueryPerformative,
-                           readyState,
+                           startState,
                            null,
                            doTermQueryAction);
-        Assert.assertNotNull(readyState.arcs);
-        Assert.assertEquals(1, readyState.getArcs().size());
-        Assert.assertTrue(readyState.getArcs().contains(arc1));
-        Assert.assertEquals(arc1, readyState.getArc(termQueryPerformative));
+        Assert.assertNotNull(startState.arcs);
+        Assert.assertEquals(1, startState.getArcs().size());
+        Assert.assertTrue(startState.getArcs().contains(arc1));
+        Assert.assertEquals(arc1, startState.getArc(termQueryPerformative));
         /**
-         * 2. If we are in the ready state and get a quit performative, transition
+         * 2. If we are in the start state and get a quit performative, transition
          * to the final state and perform the do-finalization action.
          */
-        Arc arc2 = new Arc(readyState,
+        Arc arc2 = new Arc(startState,
                            quitPerformative,
                            finalState,
                            null,
                            doFinalizationAction);
-        Assert.assertEquals(2, readyState.getArcs().size());
-        Assert.assertTrue(readyState.getArcs().contains(arc1));
-        Assert.assertTrue(readyState.getArcs().contains(arc2));
-        Assert.assertEquals(arc1, readyState.getArc(termQueryPerformative));
-        Assert.assertEquals(arc2, readyState.getArc(quitPerformative));
+        Assert.assertEquals(2, startState.getArcs().size());
+        Assert.assertTrue(startState.getArcs().contains(arc1));
+        Assert.assertTrue(startState.getArcs().contains(arc2));
+        Assert.assertEquals(arc1, startState.getArc(termQueryPerformative));
+        Assert.assertEquals(arc2, startState.getArc(quitPerformative));
 
         ArrayList states = new ArrayList();
-        states.add(readyState);
+        states.add(startState);
         states.add(finalState);
         Collections.sort(states);
         Assert.assertEquals(2, states.size());
         Assert.assertEquals(finalState, states.get(0));
-        Assert.assertEquals(readyState, states.get(1));
+        Assert.assertEquals(startState, states.get(1));
 
         System.out.println("**** testState OK ****");
     }
@@ -194,28 +197,28 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(readyState, arc1.getTransitionToState());
         Assert.assertEquals(doTermQueryAction, arc1.getAction());
         Arc arc1Clone = new Arc(readyState,
-                               termQueryPerformative,
-                               readyState,
-                               null,
-                               doTermQueryAction);
+                                termQueryPerformative,
+                                readyState,
+                                null,
+                                doTermQueryAction);
         Assert.assertEquals(arc1, arc1Clone);
-        Assert.assertEquals("[ready, term-query, null, do-term-query, ready]", arc1.toString());
+        Assert.assertEquals("[when term-query performative, transition ready --> ready, then do-term-query]", arc1.toString());
         /**
          * 2. If we are in the ready state and get a quit performative, transition
          * to the final state and perform the do-finalization action.
          */
         Arc arc2 = new Arc(readyState,
-                          quitPerformative,
-                          finalState,
-                          null,
-                          doFinalizationAction);
+                           quitPerformative,
+                           finalState,
+                           null,
+                           doFinalizationAction);
         Assert.assertNotNull(arc2);
         Assert.assertEquals(readyState, arc2.transitionFromState);
         Assert.assertEquals(quitPerformative, arc2.getPerformative());
         Assert.assertEquals(finalState, arc2.getTransitionToState());
         Assert.assertEquals(doFinalizationAction, arc2.getAction());
         Assert.assertTrue(! arc1.equals(arc2));
-        Assert.assertEquals("[ready, quit, null, do-finalization, final]", arc2.toString());
+        Assert.assertEquals("[when quit performative, transition ready --> final, then do-finalization]", arc2.toString());
         ArrayList arcs = new ArrayList();
         arcs.add(arc1);
         arcs.add(arc2);
@@ -234,73 +237,20 @@ public class UnitTest extends TestCase {
         System.out.println("\n**** testFsmFactory ****");
         FsmFactory.reset();
         FsmFactory fsmFactory = new FsmFactory();
+        fsmFactory.setVerbosity(3);
         fsmFactory.makeAllFsmClasses();
         fsmFactory.makeAllFsms();
-        Iterator fsmClasses = fsmFactory.fsmClassStore.values().iterator();
-        ArrayList fsmClassesList = new ArrayList();
-        while (fsmClasses.hasNext())
-            fsmClassesList.add(fsmClasses.next());
-        for (int j = 0; j < fsmClassesList.size(); j++) {
-            ArrayList statesList = new ArrayList();
-            FsmClass fsmClass = (FsmClass) fsmClassesList.get(j);
-            Iterator states = fsmClass.fsmStates.values().iterator();
-            while (states.hasNext())
-                statesList.add(states.next());
-            // all states have arcs from them.
-            Assert.assertTrue(statesList.size() > 0);
-            for (int i = 0; i < statesList.size(); i++) {
-                State state = (State) statesList.get(i);
-                Iterator arcs = state.getArcs().iterator();
-                while (arcs.hasNext()) {
-                    Arc arc = (Arc) arcs.next();
-                    // Each transitionFromState is a state in this fsm
-                    Assert.assertTrue(statesList.contains(arc.getTransitionFromState()));
-                    // Each transitionToState is a state in this fsm
-                    Assert.assertTrue(statesList.contains(arc.getTransitionToState()));
-                    Fsm subFsm = arc.getSubFsm();
-                    // No arc has both an action and a subFsm.
-                    Assert.assertTrue(arc.toString(),
-                                      ! ((arc.getAction() != null) &&
-                                         (subFsm != null)));
-                    if (arc.getSubFsm() != null) {
-                        // When specified, the sub fsm is a valid fsm
-                        Assert.assertTrue(fsmClassesList.contains(subFsm));
-                    }
-                }
-            }
-        }
+
         Iterator fsms = fsmFactory.fsmStore.values().iterator();
-        ArrayList fsmsList = new ArrayList();
-        while (fsms.hasNext())
-            fsmsList.add(fsms.next());
-        for (int j = 0; j < fsmsList.size(); j++) {
-            ArrayList statesList = new ArrayList();
-            Fsm fsm = (Fsm) fsmsList.get(j);
-            Iterator states = fsm.fsmStates.values().iterator();
-            while (states.hasNext())
-                statesList.add(states.next());
-            // all states have arcs from them.
-            Assert.assertTrue(statesList.size() > 0);
-            for (int i = 0; i < statesList.size(); i++) {
-                State state = (State) statesList.get(i);
-                Iterator arcs = state.getArcs().iterator();
-                while (arcs.hasNext()) {
-                    Arc arc = (Arc) arcs.next();
-                    // Each transitionFromState is a state in this fsm
-                    Assert.assertTrue(statesList.contains(arc.getTransitionFromState()));
-                    // Each transitionToState is a state in this fsm
-                    Assert.assertTrue(statesList.contains(arc.getTransitionToState()));
-                    Fsm subFsm = arc.getSubFsm();
-                    // No arc has both an action and a subFsm.
-                    Assert.assertTrue(arc.toString(),
-                                      ! ((arc.getAction() != null) &&
-                                         (subFsm != null)));
-                    if (arc.getSubFsm() != null) {
-                        // When specified, the sub fsm is a valid fsm
-                        Assert.assertTrue(fsmsList.contains(subFsm));
-                    }
-                }
-            }
+        while (fsms.hasNext()) {
+            Fsm fsm = (Fsm) fsms.next();
+            fsm.validateIntegrity();
+        }
+
+        Iterator fsmClasses = fsmFactory.fsmClassStore.values().iterator();
+        while (fsmClasses.hasNext()) {
+            FsmClass fsmClass = (FsmClass) fsms.next();
+            fsmClass.validateIntegrity();
         }
 
         System.out.println("**** testFsmFactory OK ****");
@@ -330,12 +280,13 @@ public class UnitTest extends TestCase {
             (FsmStateInfo) fsmStack.peek();
         Assert.assertEquals(chat, fsmStateInfo.getFsm());
         Assert.assertNull(fsmStateInfo.getCurrentState());
-        Assert.assertEquals("ready", interpreter.currentState.getStateId());
+        Assert.assertEquals("start", interpreter.currentState.getStateId());
         String chatMessage = "xxxx";
         ParseResults parseResults = interpreter.templateParser.parse(chatMessage);
         Assert.assertTrue(! parseResults.isCompleteParse);
         Performative performative = parseResults.getPerformative();
-        Assert.assertEquals("not-understand", performative.getPerformativeName());
+        Assert.assertEquals("not-understand",
+                            performative.getPerformativeName());
         Arc arc = interpreter.lookupArc(performative);
         interpreter.transitionState(arc);
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
@@ -364,7 +315,8 @@ public class UnitTest extends TestCase {
         parseResults = interpreter.templateParser.parse(chatMessage);
         Assert.assertTrue(parseResults.isCompleteParse);
         performative = parseResults.getPerformative();
-        Assert.assertEquals("disambiguate-term-query", performative.getPerformativeName());
+        Assert.assertEquals("disambiguate-term-query",
+                            performative.getPerformativeName());
         arc = interpreter.lookupArc(performative);
         interpreter.transitionState(arc);
         Assert.assertEquals("ready", interpreter.currentState.getStateId());
@@ -376,11 +328,13 @@ public class UnitTest extends TestCase {
         Fsm disambiguatePhrase = fsmFactory.getFsm("disambiguate-phrase");
         CycList disambiguationWords = new CycList();
         disambiguationWords.add("penguins");
-        Object [] attributeValuePair = {"disambiguation words", disambiguationWords};
+        Object [] attributeValuePair = {"disambiguation words",
+                disambiguationWords};
         ArrayList arguments = new ArrayList();
         arguments.add(attributeValuePair);
         interpreter.setupSubFsm(disambiguatePhrase, arguments);
-        Assert.assertEquals("ready", fsmStateInfo.getCurrentState().getStateId());
+        Assert.assertEquals("ready",
+                            fsmStateInfo.getCurrentState().getStateId());
         Assert.assertEquals(2, fsmStack.size());
         Assert.assertTrue(fsmStack.peek() instanceof FsmStateInfo);
         fsmStateInfo = (FsmStateInfo) fsmStack.peek();

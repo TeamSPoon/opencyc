@@ -78,12 +78,30 @@ public class Arc implements Comparable {
     }
 
     /**
+     * Sets the finite state machine state transition from state.
+     *
+     * @param transitionFromState the finite state machine state transition from state
+     */
+    public void setTransitionFromState (State transitionFromState) {
+        this.transitionFromState = transitionFromState;
+    }
+
+    /**
      * Returns the finite state machine state transition from state.
      *
      * @return the finite state machine state transition from state
      */
     public State getTransitionFromState () {
         return transitionFromState;
+    }
+
+    /**
+     * Sets the finite state machine state transition to state.
+     *
+     * @param transitionFromState the finite state machine state transition to state
+     */
+    public void setTransitionToState (State transitionToState) {
+        this.transitionToState = transitionToState;
     }
 
     /**
@@ -159,9 +177,23 @@ public class Arc implements Comparable {
     public boolean equals(Object object) {
         if (! (object instanceof Arc))
             return false;
-        return ((Arc) object).performative.equals(performative) &&
-               ((Arc) object).action.equals(action) &&
-               ((Arc) object).transitionToState.equals(transitionToState);
+        if (! ((Arc) object).performative.getPerformativeName().equals(performative.getPerformativeName()))
+            return false;
+        if (! ((Arc) object).transitionToState.equals(transitionToState))
+            return false;
+        if (action != null) {
+            if (((Arc) object).action == null)
+                return false;
+            else
+                return ((Arc) object).action.getName().equals(action.getName());
+        }
+        if (subFsm != null) {
+            if (((Arc) object).subFsm == null)
+                return false;
+            else
+                return ((Arc) object).subFsm.getName().equals(subFsm.getName());
+        }
+        return true;
     }
 
     /**
@@ -171,16 +203,20 @@ public class Arc implements Comparable {
      */
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("[");
-        stringBuffer.append(transitionFromState);
-        stringBuffer.append(", ");
-        stringBuffer.append(performative);
-        stringBuffer.append(", ");
-        stringBuffer.append(subFsm);
-        stringBuffer.append(", ");
-        stringBuffer.append(action);
-        stringBuffer.append(", ");
-        stringBuffer.append(transitionToState);
+        stringBuffer.append("[when ");
+        stringBuffer.append(performative.getPerformativeName());
+        stringBuffer.append(" performative, transition ");
+        stringBuffer.append(transitionFromState.stateId);
+        stringBuffer.append(" --> ");
+        stringBuffer.append(transitionToState.stateId);
+        if (subFsm != null) {
+            stringBuffer.append(", then perform fsm ");
+            stringBuffer.append(subFsm.getName());
+        }
+        if (action != null) {
+            stringBuffer.append(", then ");
+            stringBuffer.append(action.getName());
+        }
         stringBuffer.append("]");
         return stringBuffer.toString();
     }

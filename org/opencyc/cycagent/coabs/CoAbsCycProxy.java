@@ -8,8 +8,10 @@ import net.jini.core.lookup.ServiceID;
 import net.jini.lookup.ServiceIDListener;
 import com.globalinfotek.coabsgrid.*;
 import com.globalinfotek.coabsgrid.entry.fipa98.AMSAgentDescription;
-//import fipaos.ont.fipa.ACL;
-//import fipaos.parser.ParserException;
+import fipaos.ont.fipa.*;
+import fipaos.ont.fipa.fipaman.*;
+import fipaos.util.*;
+import fipaos.parser.ParserException;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 import org.opencyc.util.*;
@@ -314,30 +316,57 @@ public class CoAbsCycProxy implements MessageListener, ShutdownHook {
             Log.current.errorPrintln("Conversation state not api ready" + conversationState);
             return;
         }
+        this.processCycApiRequest(message);
+    }
+
+    /**
+     * Processes a cyc api request
+     *
+     * @param message the received cyc api request message
+     */
+    protected void processCycApiRequest (Message apiRequestMessage) {
         conversationState = "api request";
-        String command = "(remove-duplicates (with-all-mts (isa #$Dog)))";
-        Object [] response = {null, null};
+        ACL coAbsRequestAcl = null;
+        CycList apiRequest = null;
         try {
             cycAccess = new CycAccess();
+            coAbsRequestAcl = new ACL(apiRequestMessage.getRawText());
+            Object contentXml = coAbsRequestAcl.getContentObject();
+            apiRequest =
+                (CycList) XMLDataBinding.zeusUnmarshall((String) contentXml,
+                                                        "org.opencyc.cycobject");
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            return;
+        }
+
+        Object [] response = {null, null};
+        try {
             cycAccess.traceOn();
-            response = cycAccess.getCycConnection().converse(command);
+            response = cycAccess.getCycConnection().converse(apiRequest);
             if (! response[0].equals(Boolean.TRUE))
                 throw new CycApiException(response[1].toString());
         }
         catch (Exception e) {
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
+            return;
         }
 
-        String replyMessageText = "(inform :\n" +
-                                  "  sender: " + agentName + "\n" +
-                                  "  receiver: " + fromAgentName + "\n" +
-                                  "  content: " + ((CycList) response[1]).cyclify() + "\n" +
-                                  ")";
-        Message replyMessage = new BasicMessage(fromAgentName,
+        ACL coAbsReplyAcl = (ACL) coAbsRequestAcl.clone();
+        coAbsReplyAcl.setPerformative(FIPACONSTANTS.INFORM);
+        coAbsReplyAcl.setSenderAID(coAbsRequestAcl.getReceiverAID());
+        coAbsReplyAcl.setReceiverAID(coAbsRequestAcl.getSenderAID());
+        coAbsReplyAcl.setContentObject(response[1]);
+        coAbsReplyAcl.setReplyWith(null);
+        coAbsReplyAcl.setInReplyTo(coAbsRequestAcl.getReplyWith());
+
+        Message replyMessage = new BasicMessage(coAbsRequestAcl.getSenderAID().getName(),
                                                 regHelper.getAgentRep(),
-                                                message.getACL(),
-                                                replyMessageText);
+                                                "fipa-acl",
+                                                coAbsReplyAcl.toString());
         if (verbosity > 2)
             Log.current.println("\nReplying with " + replyMessage.toString());
         forward(replyMessage);

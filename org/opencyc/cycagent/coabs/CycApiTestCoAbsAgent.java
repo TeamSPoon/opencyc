@@ -8,6 +8,9 @@ import net.jini.core.lookup.ServiceID;
 import net.jini.lookup.ServiceIDListener;
 import com.globalinfotek.coabsgrid.*;
 import com.globalinfotek.coabsgrid.entry.fipa98.AMSAgentDescription;
+import fipaos.ont.fipa.*;
+import fipaos.ont.fipa.fipaman.*;
+import fipaos.util.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
 import org.opencyc.util.*;
@@ -149,6 +152,14 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
             }
             catch (InterruptedException e) {
             }
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            System.exit(1);
+        }
         conversationState = "api request sent";
         sendCycApiRequest();
         while (conversationState.equals("api request sent"))
@@ -173,7 +184,6 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
             Log.current.errorPrintln(e.getMessage());
             Log.current.printStackTrace(e);
         }
-        cycApiTestCoAbsAgent.cleanup();
     }
 
     /**
@@ -288,15 +298,33 @@ public class CycApiTestCoAbsAgent implements MessageListener, ShutdownHook {
      * Sends the Cyc API request message.
      */
     public void sendCycApiRequest() {
-        String command = "(remove-duplicates (with-all-mts (isa #$Dog)))";
-        String requestMessageText = "(request :\n" +
-                                    "  sender: " + agentName + "\n" +
-                                    "  receiver: " + cycApiServiceAgentName + "\n" +
-                                    "  content: " + command + "\n" +
-                                    ")";
+        ACL acl = new ACL();
+        acl.setPerformative(FIPACONSTANTS.REQUEST);
+        AgentID senderAid = new AgentID();
+        senderAid.setName(agentName);
+        acl.setSenderAID(senderAid);
+        AgentID receiverAid = new AgentID();
+        receiverAid.setName(cycApiServiceAgentName);
+        acl.addReceiverAID(receiverAid);
+        CycList apiRequest = null;
+        String apiRequestXml;
+        try {
+            apiRequest =
+                cycAccess.makeCycList("(remove-duplicates (with-all-mts (isa #$Dog)))");
+            apiRequestXml = XMLDataBinding.zeusMarshall(apiRequest);
+        }
+        catch (Exception e) {
+            Log.current.errorPrintln(e.getMessage());
+            Log.current.printStackTrace(e);
+            return;
+        }
+        acl.setContentObject(apiRequestXml, ACL.BYTELENGTH_ENCODING);
+        acl.setLanguage(FIPACONSTANTS.XML);
+        acl.setOntology("cyc-api");
+        acl.setReplyWith("message" + count);
         Message requestMessage = new BasicMessage(cycApiServiceAgentName,
-                                                  "naturalLanguage",
-                                                  requestMessageText);
+                                                  "fipa-acl",
+                                                  acl.toString());
         if (verbosity > 2)
             Log.current.println("\nSending " + requestMessage.toString() +
                                 "\n  receiver: " + requestMessage.getReceiver());

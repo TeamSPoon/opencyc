@@ -45,30 +45,56 @@ public class State {
   //// Public Area
     
   /**
-   * state variable for procedure
+   * state variable for action name
    */
-  public static final String PROCEDURE = "procedure";
+  public static final String ACTION_NAME = "action name";
   
   /**
    * state variable for the list of parameter names
    */
-  public static final String PARAMETER_NAMES = "procedure parameter names";
+  public static final String PARAMETER_NAMES = "parameter names";
   
   /**
    * state variable for the list of parameter types
    */
-  public static final String PARAMETER_TYPES = "procedure parameter types";
+  public static final String PARAMETER_TYPES = "parameter types";
   
   /**
    * state variable for the list of parameter values
    */
-  public static final String PARAMETER_VALUES = "procedure parameter values";
+  public static final String PARAMETER_VALUES = "parameter values";
+  
+  /**
+   * state variable for the procedure output type
+   */
+  public static final String OUTPUT_TYPE = "output type";
   
   /**
    * state variable for the procedure output value
    */
-  public static final String PROCEDURE_OUTPUT_VALUE = "procedure output value";
+  public static final String OUTPUT_VALUE = "output value";
   
+  /**
+   * the state variable for the output time-trajectory of motion which
+   * constists of a pair (Object[]) of ordered lists, the first being a list
+   * of vectors and the second a list of time instances
+   */
+  public static final String OUTPUT_TIME_TRAJECTORY_OF_MOTION = "output time trajectory of Motion";
+
+  /**
+   * the state variable for the trajectory of the action vector, which consists
+   * of a pair (Object[]) of ordered lists, the first being a list of vectors
+   * and the second a list of time instances
+   */
+  public static final String ACTION_VECTOR_TRAJECTORY = "action vector trajectory";
+
+  /**
+   * the state variable for the trajectory of the input control vector, which
+   * consists of a pair (Object[]) of ordered lists, the first being a list of
+   * vectors and the second a list of time instances
+   */
+ public static final String INPUT_CONTROL_VECTOR_TIME_TRAJECTORY = "input control vector time trajectory";
+
   /**
    * Returns true if the given object equals this state.
    * 

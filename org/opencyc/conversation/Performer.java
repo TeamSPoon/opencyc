@@ -1,6 +1,14 @@
 package org.opencyc.conversation;
 
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import ViolinStrings.*;
+import org.opencyc.api.*;
+import org.opencyc.cycobject.*;
+import org.opencyc.templateparser.*;
 import org.opencyc.util.*;
+
 /**
  * Performs actions for the chat conversation interpreter.<p>
  *
@@ -34,9 +42,32 @@ import org.opencyc.util.*;
 public class Performer {
 
     /**
+     * The default verbosity of the solution output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
+     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    protected int verbosity = DEFAULT_VERBOSITY;
+
+    /**
      * reference to the parent Interpreter object
      */
-    Interpreter interpreter;
+    protected Interpreter interpreter;
+
+    /**
+     * The context for RKF-related inferences involving all and only english lexical mts.
+     */
+    protected CycConstant rkfEnglishLexicalMicrotheoryPsc;
+
+    /**
+     * #$InferencePSC is a problem solving context in which all assertions in the
+     *  entire KB are initially visible.
+     */
+    protected CycConstant inferencePsc;
 
     /**
      * Constructs a new Performer object given the reference to the parent
@@ -55,7 +86,8 @@ public class Performer {
      * @param currentState the current state of the finite state machine
      * @param action the action to be performed
      */
-    protected void performArc (State currentState, Action action) {
+    protected void performArc (State currentState, Action action)
+        throws CycApiException, IOException, UnknownHostException {
         if (action.getName().equals("do-not-understand")) {
             doNotUnderstand(currentState, action);
         }
@@ -101,8 +133,58 @@ public class Performer {
      * @param currentState the current conversation state
      * @param action the action object.
      */
-    protected void doTermQuery (State currentState, Action action) {
+    protected void doTermQuery (State currentState, Action action)
+        throws CycApiException, IOException, UnknownHostException {
+        ParseResults parseResults = (ParseResults) currentState.get("parse results");
+        ArrayList queryWords =
+            parseResults.getTextBinding(CycObjectFactory.makeCycVariable("?term"));
+        currentState.set("query words", queryWords);
+        CycList parsedTerms = parseTermsString(queryWords);
+        currentState.set("parsed terms", parsedTerms);
+    }
 
+    /**
+     * Returns the terms whose parse covers the given phrase words.
+     *
+     * @param words the phrase words
+     * @return the terms whose parse covers the given phrase words
+     */
+    protected CycList parseTermsString (ArrayList words)
+        throws CycApiException, IOException, UnknownHostException {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < words.size(); i++)
+            stringBuffer.append(words.get(i));
+        return parseTermsString(stringBuffer.toString());
+    }
+
+    /**
+     * Returns the terms whose parse covers the given text.
+     *
+     * @param the text phrase
+     * @return the terms whose parse covers the given text
+     */
+    protected CycList parseTermsString (String text)
+        throws CycApiException, IOException, UnknownHostException {
+        if (rkfEnglishLexicalMicrotheoryPsc  == null)
+            rkfEnglishLexicalMicrotheoryPsc =
+                CycAccess.current().getKnownConstantByGuid("bf6df6e3-9c29-11b1-9dad-c379636f7270");
+        if (inferencePsc == null)
+            inferencePsc =
+                CycAccess.current().getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+        CycList parseExpressions =
+            CycAccess.current().rkfPhraseReader(text,
+                                                rkfEnglishLexicalMicrotheoryPsc,
+                                                inferencePsc);
+        CycList answer = new CycList();
+        for (int i = 0; i < parseExpressions.size(); i++) {
+            CycList parseExpression = (CycList) parseExpressions.first();
+            CycList spanExpression = (CycList) parseExpression.first();
+            if (spanExpression.size() == Strings.numWords(text))
+                answer.addAllNew((CycList) parseExpression.second());
+            else if (verbosity > 2)
+                Log.current.println("Bypassing parse\n" + parseExpression.cyclify());
+        }
+        return answer;
     }
 
     /**
@@ -124,4 +206,13 @@ public class Performer {
     }
 
 
+    /**
+     * Sets verbosity of the output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     *
+     * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input
+     */
+    public void setVerbosity(int verbosity) {
+        this.verbosity = verbosity;
+    }
 }

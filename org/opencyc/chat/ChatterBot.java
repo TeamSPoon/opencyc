@@ -135,7 +135,8 @@ public class ChatterBot {
      */
     public void receiveChatMessage (String chatUserNickname,
                                     String chatUserUniqueId,
-                                    String chatMessage) {
+                                    String chatMessage)
+        throws CycApiException, IOException, UnknownHostException {
         Interpreter interpreter =
             (Interpreter) interpreters.get(chatUserUniqueId);
         if (interpreter == null)

@@ -1,6 +1,9 @@
 package org.opencyc.conversation;
 
+import java.io.*;
+import java.net.*;
 import java.util.*;
+import org.opencyc.api.*;
 import org.opencyc.chat.*;
 import org.opencyc.templateparser.*;
 import org.opencyc.util.*;
@@ -102,11 +105,13 @@ public class Interpreter {
      * @param chatPartner the name of the chat partner
      * @param chatMessage the chat message
      */
-    public void receiveChatMessage (String chatMessage) {
+    public void receiveChatMessage (String chatMessage)
+        throws CycApiException, IOException, UnknownHostException {
         ParseResults parseResults = templateParser.parse(chatMessage);
         Performative performative = parseResults.getPerformative();
         Arc arc = lookupArc(performative);
         transitionState(arc);
+        currentState.set("parse results", parseResults);
         performer.performArc(currentState, arc.getAction());
     }
 
@@ -125,7 +130,7 @@ public class Interpreter {
             if (performative.equals(arc.getPerformative()))
                 return arc;
         }
-        Iterator arcs = this.currentState.getArcs().iterator();
+        Iterator arcs = currentState.getArcs().iterator();
         while (arcs.hasNext()) {
             Arc arc = (Arc) arcs.next();
             if (performative.equals(arc.getPerformative()))

@@ -223,17 +223,11 @@ public class ExportHtml {
      */
     public boolean print_guid = false;
 
-    /**
-     * List of the query strings used to make categorized vocabulary
-     * pages.  The sequence aligns with the categoryPageOutputPaths array.
-     */
-    public ArrayList categoryQueryStrings = new ArrayList();
 
     /**
-     * List of the file names used to output categorized vocabulary
-     * pages.  The sequence aligns with the categoryQueryStrings array.
+     * List of HTML vocabulary category page information items.
      */
-    public ArrayList categoryPageOutputPaths = new ArrayList();
+    public ArrayList categories = new ArrayList();
 
     /**
      * Constructs a new ExportHtml object.
@@ -374,7 +368,7 @@ public class ExportHtml {
             Log.current.println("Sorting " + selectedCycForts.size() + " CycFort terms");
         Collections.sort(selectedCycForts);
         createVocabularyPage();
-        if (categoryQueryStrings.size() > 0)
+        if (categories.size() > 0)
             createCategorizedVocabularies();
         if (rootTerm != null &&
             produceHierarchyPages)
@@ -940,9 +934,16 @@ public class ExportHtml {
      */
     protected void createGenlNodes (CycFort cycFort, Element parentElement) throws IOException, CycApiException {
         CycList genls = cycAccess.getGenls(cycFort);
+        /*
+        if (cycFort.equals(cycAccess.getKnownConstantByName("CarAccident"))) {
+            verbosity = 9;
+        }
+        */
         if (verbosity > 3)
             Log.current.println("  starting genls: " + genls.cyclify());
         CycList tempList = filterSelectedConstants(genls);
+        if (verbosity > 3)
+            Log.current.println("  after filtering: " + tempList.cyclify());
         if (tempList.size() == 0) {
             for (int i = 0; i < genls.size(); i++) {
                 CycFort genl = (CycFort) genls.get(i);
@@ -957,6 +958,11 @@ public class ExportHtml {
                     Log.current.println("  cannot replace " + genl.cyclify() +
                                         " with a valid genl");
             }
+        }
+        if (tempList.contains(cycFort)) {
+            tempList.remove(cycFort);
+            if (verbosity > 2)
+                Log.current.println("  removed " + cycFort.cyclify() + " as a spec of itself");
         }
         genls = specificCollections(tempList);
         lineBreak(parentElement);
@@ -1305,21 +1311,25 @@ public class ExportHtml {
      */
     protected void createCategorizedVocabularies ()
         throws UnknownHostException, IOException, CycApiException {
-        for (int i = 0; i < categoryQueryStrings.size(); i++) {
-            String queryString = (String) categoryQueryStrings.get(i);
-            String outputPath = (String) categoryPageOutputPaths.get(i);
-            createCategorizedVocabulary(queryString, outputPath);
+        for (int i = 0; i < categories.size(); i++) {
+            Category category = (Category) categories.get(i);
+            createCategorizedVocabulary(category.title,
+                                        category.queryString,
+                                        category.outputPath);
         }
     }
 
     /**
      * Creates the given categorized vocabulary HTML page.
      *
+     * @param title the title of the categorized vocabulary HTML page
      * @param queryString the query string which finds the terms in the
      * category
      * @param outputPath the name of the output HTML page
      */
-    protected void createCategorizedVocabulary (String queryString, String outputPath)
+    protected void createCategorizedVocabulary (String title,
+                                                String queryString,
+                                                String outputPath)
         throws UnknownHostException, IOException, CycApiException {
         CycList categoryTerms = askQueryString(queryString);
         if (categoryTerms.size() == 0) {
@@ -1328,9 +1338,8 @@ public class ExportHtml {
             return;
         }
         if (verbosity > 2)
-            Log.current.println("Building HTML model for category page " + outputPath);
+            Log.current.println("Building HTML model for category: " + title);
         htmlDocument = new HTMLDocumentImpl();
-        String title = "Cyc ontology vocabulary for " + cycKbSubsetCollection.cyclify();
         htmlDocument.setTitle(title);
         Node htmlNode = htmlDocument.getChildNodes().item(0);
         htmlBodyElement = htmlDocument.createElement("body");
@@ -1396,9 +1405,11 @@ public class ExportHtml {
      * Categorizes all ontology constants directly referenced in the Veridian Mapping.
      */
     protected void addAllVeridianRef () {
-        String outputPath = "all-veridian-ref.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All release constants referenced in the current Veridian ontology mapping";
+        category.outputPath = "all-veridian-ref.html";
+        category.queryString =
             " (#$thereExists ?SOMETHING\n" +
             "  (#$and\n" +
             "    (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
@@ -1406,32 +1417,34 @@ public class ExportHtml {
             "      (#$synonymousExternalConcept ?TERM #$VeridianOntology ?SOMETHING) \n" +
             "      (#$overlappingExternalConcept ?TERM #$VeridianOntology ?SOMETHING)\n" +
             "      (#$synonymousListFields ?TERM #$VeridianOntology ?SOMETHING))))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all ontology constants directly referenced in the Syracuse Mapping.
      */
     protected void addAllSyracuseRef () {
-        String outputPath = "all-syracuse-ref.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All release constants referenced in the current Syracuse ontology mapping";
+        category.outputPath = "all-syracuse-ref.html";
+        category.queryString =
             " (#$thereExists ?SOMETHING\n" +
             "  (#$and\n" +
             "    (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "    (#$or\n" +
             "      (#$synonymousExternalConcept ?TERM #$SyracuseOntology ?SOMETHING)\n" +
             "      (#$overlappingExternalConcept ?TERM #$SyracuseOntology ?SOMETHING))))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all constants directly reference in the SRA NetOwl Mapping.
      */
     protected void addAllSraRef () {
-        String outputPath = "all-sra-ref.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All release constants referenced in the currant SRA ontology mapping";
+        category.outputPath = "all-sra-ref.html";
+        category.queryString =
             " (#$thereExists ?SOMETHING\n" +
             "  (#$and\n" +
             "    (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
@@ -1440,159 +1453,171 @@ public class ExportHtml {
             "         ?TERM #$SRATemplateExtractionOntology ?SOMETHING)\n" +
             "      (#$overlappingExternalConcept\n" +
             "         ?TERM #$SRATemplateExtractionOntology ?SOMETHING))))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Cyc public constants in the shared ontology.
      */
     protected void addAllPublicIsas () {
-        String outputPath = "all-public-isas.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "All Cycorp public release constants in the shared ontology";
+        category.outputPath = "all-public-isas.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$isa ?TERM #$PublicConstant))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Roles.
      */
     protected void addAllRoleIsas () {
-        String outputPath = "all-role-isas.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Roles";
+        category.outputPath = "all-role-isas.html";
+        category.queryString =
             " (#$and \n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$isa ?TERM #$Role))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Predicates.
      */
     protected void addAllPredicateIsas () {
-        String outputPath = "all-predicate-isas.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Predicates";
+        category.outputPath = "all-predicate-isas.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$isa ?TERM #$Predicate))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Functions.
      */
     protected void addAllFunctionIsas () {
-        String outputPath = "all-function-isas.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Functions";
+        category.outputPath = "all-function-isas.html";
+        category.queryString =
             " (#$and\n" +
             "  (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$isa ?TERM #$Function-Denotational))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Event Types.
      */
     protected void addAllEventSpecs () {
-        String outputPath = "all-event-specs.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Event types";
+        category.outputPath = "all-event-specs.html";
+        category.queryString =
             " (#$and \n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$genls ?TERM #$Event))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Organization Types.
      */
     protected void addAllOrgSpecs () {
-        String outputPath = "all-org-specs.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Organization types";
+        category.outputPath = "all-org-specs.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$genls ?TERM #$Organization))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Occupation Types.
      */
     protected void addAllOcctypeSpecs () {
-        String outputPath = "all-occtype-specs.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Occupation types";
+        category.outputPath = "all-occtype-specs.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$isa ?TERM #$PersonTypeByOccupation))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Kinds of Person.
      */
     protected void addAllPersonSpecs () {
-        String outputPath = "all-person-specs.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Person types";
+        category.outputPath = "all-person-specs.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$genls ?TERM #$Person))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Places (GeographicalRegions).
      */
     protected void addAllPlaceIsas () {
-        String outputPath = "all-place-isas.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Place types";
+        category.outputPath = "all-place-isas.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$isa ?TERM #$GeographicalRegion))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Location Types.
      */
     protected void addAllPlaceSpecs () {
-        String outputPath = "all-place-specs.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Location types";
+        category.outputPath = "all-place-specs.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$genls ?TERM #$Place))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all Weapon Types.
      */
     protected void addAllWeaponSpecs () {
-        String outputPath = "all-weapon-specs.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Weapon types";
+        category.outputPath = "all-weapon-specs.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$genls ?TERM #$Weapon))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all terms relating to the topic of Conceptual Works.
      */
     protected void addAllCwTopic () {
-        String outputPath = "all-cw-topic.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Conceptual Works";
+        category.outputPath = "all-cw-topic.html";
+        category.queryString =
             " (#$and\n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)  \n" +
             "   (#$or    \n" +
@@ -1602,33 +1627,34 @@ public class ExportHtml {
             "          (#$and\n" +
             "            (#$argIsa ?TERM ?N ?ARG-COL)\n" +
             "            (#$genls ?ARG-COL #$ConceptualWork))))))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes all terms relating to the topic of Scripts.
      */
     protected void addAllScriptTopic () {
-        String outputPath = "all-script-topic.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "Script related terms";
+        category.outputPath = "all-script-topic.html";
+        category.queryString =
             " (#$and \n" +
             "   (#$isa ?TERM #$EELDSharedOntologyConstant)\n" +
             "   (#$or\n" +
             "	  (#$isa ?TERM #$ScriptRelation)\n" +
             "	  (#$isa ?TERM #$ScriptedEventType)))\n";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
      * Categorizes the original EELD 'core' ontology.
      */
     protected void askEeldCoreOntology () {
-        String outputPath = "all-core.html";
-        categoryPageOutputPaths.add(outputPath);
-        String queryString =
+        Category category = new Category();
+        categories.add(category);
+        category.title = "EELD Core Ontology";
+        category.outputPath = "all-core.html";
+        category.queryString =
             "(#$isa ?TERM #$EELDSharedOntologyCoreConstant)";
-        categoryQueryStrings.add(queryString);
     }
 
     /**
@@ -1648,6 +1674,27 @@ public class ExportHtml {
         }
         Collections.sort(answer);
         return answer;
+    }
+
+    /**
+     * Provides a container for term category information used to make
+     * vocabulary category HTML pages.
+     */
+    public class Category {
+        /**
+         * The query string used to make this categorized vocabulary page.
+         */
+        public String queryString;
+
+        /**
+         * The file name used to output this categorized vocabulary page.
+         */
+        public String outputPath;
+
+        /**
+         * The title of this categorized vocabulary page.
+         */
+        public String title;
     }
 }
 

@@ -75,10 +75,10 @@ public class UnitTest extends TestCase {
      */
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
+        /*
         testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
-        /*
         testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
@@ -93,10 +93,10 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
         testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
-        */
         testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
+        */
         testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
-        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         return testSuite;
     }
 
@@ -3515,7 +3515,7 @@ public class UnitTest extends TestCase {
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
             else
                 Assert.fail("Invalid connection mode " + connectionMode);
-       }
+        }
         catch (Exception e) {
             Assert.fail(e.toString());
         }
@@ -3563,6 +3563,39 @@ public class UnitTest extends TestCase {
                 Assert.assertEquals(cycAccess.makeCycList("(nil 1)"),
                                     responseList);
             }
+
+            // rkfPhraseReader
+            CycFort inferencePsc =
+                cycAccess.getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+            CycFort rkfEnglishLexicalMicrotheoryPsc =
+                cycAccess.getKnownConstantByGuid("bf6df6e3-9c29-11b1-9dad-c379636f7270");
+            String text = "penguins";
+            CycList parseExpressions = cycAccess.rkfPhraseReader(text,
+                                                                rkfEnglishLexicalMicrotheoryPsc,
+                                                                inferencePsc);
+            CycList parseExpression = (CycList) parseExpressions.first();
+            CycList spanExpression = (CycList) parseExpression.first();
+            CycList terms = (CycList) parseExpression.second();
+            // #$Penguin
+            CycFort penguin = cycAccess.getKnownConstantByGuid("bd58a986-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(terms.contains(penguin));
+            // #$PittsburghPenguins
+            CycFort pittsburghPenguins = cycAccess.getKnownConstantByGuid("c08dec11-9c29-11b1-9dad-c379636f7270");
+            Assert.assertTrue(terms.contains(pittsburghPenguins));
+
+            // generateDisambiguationPhraseAndTypes
+            CycList objects = new CycList();
+            objects.add(penguin);
+            objects.add(pittsburghPenguins);
+            CycList disambiguationExpression = cycAccess.generateDisambiguationPhraseAndTypes(objects);
+            Assert.assertEquals(2, disambiguationExpression.size());
+            CycList penguinDisambiguationExpression = (CycList) disambiguationExpression.first();
+            Assert.assertTrue(penguinDisambiguationExpression.contains("penguin"));
+            Assert.assertTrue(penguinDisambiguationExpression.contains("bird"));
+            CycList pittsburghPenguinDisambiguationExpression = (CycList) disambiguationExpression.second();
+            Assert.assertTrue(pittsburghPenguinDisambiguationExpression.contains("the Pittsburgh Penguins"));
+            Assert.assertTrue(pittsburghPenguinDisambiguationExpression.contains("ice hockey team"));
+
         }
         catch (Exception e) {
             CycAccess.current().close();

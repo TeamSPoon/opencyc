@@ -2516,7 +2516,55 @@ public class CycAccess {
         command1.add(mucExpression.cycListApiValue());
         command.add(mtName);
         //this.traceOn();
-        return this.converseInt(command);
+        return converseInt(command);
+    }
+
+    /**
+     * Returns a list of parsing expressions, each consisting of a parsing span expression,
+     * and a list of parsed terms.
+     * <pre>
+     * (RKF-PHRASE-READER "penguins" #$RKFEnglishLexicalMicrotheoryPSC #$InferencePSC)
+     * ==>
+     * (((0) (#$Penguin #$PittsburghPenguins)))
+     * </pre>
+     *
+     * @param text the phrase to be parsed
+     * @param parsingMt the microtheory in which lexical info is asked
+     * @param domainMt the microtherory in which the info about candidate terms is asked
+     * @return a parsing expression consisting of a parsing span expression, and a list
+     * of parsed terms
+     */
+    public CycList rkfPhraseReader (String text, CycFort parsingMt, CycFort domainMt)
+        throws IOException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("rkf-phrase-reader"));
+        command.add(text);
+        command.add(parsingMt);
+        command.add(domainMt);
+        return converseList(command);
+    }
+
+    /**
+     * Returns a list of disambiguation expressions, corresponding to each of the terms
+     * in the given list of objects.
+     *
+     * <pre>
+     * (GENERATE-DISAMBIGUATION-PHRASES-AND-TYPES (QUOTE (#$Penguin #$PittsburghPenguins)))
+     * ==>
+     * ((#$Penguin "penguin" #$Bird "bird")
+     *  (#$PittsburghPenguins "the Pittsburgh Penguins" #$IceHockeyTeam "ice hockey team"))
+     * </pre>
+     *
+     * @param objects the list of terms to be disambiguated
+     * @return a list of disambiguation expressions, corresponding to each of the terms
+     * in the given list of objects
+     */
+    public CycList generateDisambiguationPhraseAndTypes (CycList objects)
+        throws IOException, CycApiException {
+        CycList command = new CycList();
+        command.add(CycObjectFactory.makeCycSymbol("generate-disambiguation-phrases-and-types"));
+        command.addQuoted(objects);
+        return converseList(command);
     }
 
 }

@@ -51,6 +51,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testState"));
         testSuite.addTest(new UnitTest("testArc"));
         testSuite.addTest(new UnitTest("testInterpreter"));
+        testSuite.addTest(new UnitTest("testPerformer"));
         return testSuite;
     }
 
@@ -273,6 +274,39 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(expectedTextBinding, actualTextBinding);
 
         System.out.println("**** testInterpreter OK ****");
+    }
+
+    /**
+     * Tests the Performer object.
+     */
+    public void testPerformer () {
+        System.out.println("\n**** testPerformer ****");
+
+        Interpreter interpreter = new Interpreter();
+        Performer performer = new Performer(interpreter);
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+
+            CycList terms = performer.parseTermsString("penguins");
+            // #$Penguin
+            Assert.assertTrue(terms.contains(cycAccess.getKnownConstantByGuid("bd58a986-9c29-11b1-9dad-c379636f7270")));
+            // #$PittsburghPenguins
+            Assert.assertTrue(terms.contains(cycAccess.getKnownConstantByGuid("c08dec11-9c29-11b1-9dad-c379636f7270")));
+
+            CycList words = new CycList();
+            words.add("penguins");
+            terms = performer.parseTermsString(words);
+            // #$Penguin
+            Assert.assertTrue(terms.contains(cycAccess.getKnownConstantByGuid("bd58a986-9c29-11b1-9dad-c379636f7270")));
+            // #$PittsburghPenguins
+            Assert.assertTrue(terms.contains(cycAccess.getKnownConstantByGuid("c08dec11-9c29-11b1-9dad-c379636f7270")));
+
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+        System.out.println("**** testPerformer OK ****");
     }
 
 

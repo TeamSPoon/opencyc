@@ -3,8 +3,20 @@ package org.opencyc.elf.sp;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+import org.opencyc.elf.message.GenericMsg;
+import org.opencyc.elf.message.ObservedInputMsg;
+import org.opencyc.elf.message.PerceivedSensoryInputMsg;
+import org.opencyc.elf.message.PredictedInputMsg;
+
+import org.opencyc.elf.s.Sensor;
+
 //// External Imports
 import java.util.ArrayList;
+
+import EDU.oswego.cs.dl.util.concurrent.Executor;
+import EDU.oswego.cs.dl.util.concurrent.Puttable;
+import EDU.oswego.cs.dl.util.concurrent.Takable;
+import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /**
  * Provides Sensory Perception for the Elementary Loop Functioning (ELF).<br>
@@ -38,6 +50,35 @@ public class SensoryPerception extends NodeComponent {
    * Constructs a new SensoryPerception object.
    */
   public SensoryPerception() {
+  }
+
+  /** 
+   * Creates a new instance of KnowledgeBase with the given
+   * input message channel.
+   *
+   * @param sensoryProcessingChannel the takable channel from which messages are input
+   * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
+   * @param simulatorPredictorChannel the simulator / predictor channel to which messages are output
+   * @param entityEvaluatorChannel the puttable channel to which messages are output for the 
+   * entity evaluator node component in value judgement
+   */
+  public SensoryPerception(Takable sensoryProcessingChannel,
+                           Puttable nextHigherLevelSensoryProcessingChannel,
+                           Puttable simulatorPredictorChannel,
+                           Puttable entityEvaluatorChannel) {
+    consumer = new Consumer(sensoryProcessingChannel,
+                            nextHigherLevelSensoryProcessingChannel,
+                            simulatorPredictorChannel,
+                            entityEvaluatorChannel,
+                            this);
+    executor = new ThreadedExecutor();
+    try {
+      executor.execute(consumer);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
   //// Public Area
@@ -89,56 +130,131 @@ public class SensoryPerception extends NodeComponent {
   }
   
   //// Protected Area
-  
-  //commented reference to Senso_Output (?Data) ||> SP.SP_RCV_Observed_input (?Data)
-  
+    
   /**
-   * Receives the predicted intput message from ?.
+   * Thread which processes the input message channel.
    */
-  protected void predictedInput () {
-    //TODO
-    // received via channel from ?
-    // Object data
-  }
-  
-  /**
-   * Receives the observed intput message from ?.
-   */
-  protected void observedInput () {
-    //TODO
-    // received via channel from ?
-    // Object data
-  }
-  
-  /**
-   * receives the sensory perception data message from the node, which previously 
-   * received it from the next lowest level node's sensory perception.
-   */
-  protected void sensoryPerceptionReceiveSensoryPerceptionData () {
-    //TODO
-    // received via channel from node
-    // Object obj
-    // Object data
-  }
-  
-  /**
-   * Sends the sensory perception update message to the node, which in turn sends it
-   * to the next highest level node, ultimately destined for sensory perception at
-   * the next highest level from this level. Also sends the sensory perception update
-   * message to value judgement and to world model
-   */
-  protected void sensoryPerceptionSendUpdate () {
-    //TODO
-    // sent via channel to next higher level node's sensory perception 
-    // sent via channel to value judgement 
-    // sent via channel to value world model 
-    // Object obj
-    // Object data
-    // send sendSensoryPerceptionData(obj, data) to (this level) node
-    // send receiveUpdate(obj, data) to valueJudgement
-  }
+  protected class Consumer implements Runnable {
+    
+    /**
+     * the takable channel from which messages are input
+     */
+    protected final Takable sensoryProcessingChannel;
+    
+    /**
+     * the simulator / predictor channel to which messages are output
+     */
+    protected final Puttable simulatorPredictorChannel;
+    
+    /**
+     * the puttable channel to which messages are output for the entity evaluator node
+     * component in value judgement
+     */
+    protected final Puttable entityEvaluatorChannel;
+    
+    /**
+     * the puttable channel to which sensory processing messages are output for the next
+     * higher level
+     */
+    protected final Puttable nextHigherLevelSensoryProcessingChannel;
 
-  public void run() {
+    /**
+     * the parent node component
+     */
+    protected NodeComponent nodeComponent;
+    
+    /**
+     * Creates a new instance of Consumer.
+     *
+     * @param sensoryProcessingChannel the takable channel from which messages are input
+     * @param nextHigherLevelSensoryProcessingChannel the puttable channel to which messages are output
+     * @param simulatorPredictorChannel the simulator / predictor channel to which messages are output
+     * @param entityEvaluatorChannel the puttable channel to which messages are output for the 
+     * entity evaluator node component in value judgement
+     * @param nodeComponent the parent node component
+     */
+    protected Consumer (Takable sensoryProcessingChannel,
+                        Puttable nextHigherLevelSensoryProcessingChannel,
+                        Puttable simulatorPredictorChannel,
+                        Puttable entityEvaluatorChannel,
+                        NodeComponent nodeComponent) { 
+      this.sensoryProcessingChannel = sensoryProcessingChannel;
+      this.simulatorPredictorChannel = simulatorPredictorChannel;
+      this.entityEvaluatorChannel = entityEvaluatorChannel;
+      this.nextHigherLevelSensoryProcessingChannel = nextHigherLevelSensoryProcessingChannel;
+      this.nodeComponent = nodeComponent;
+    }
+
+    /**
+     * Reads messages from the input queue and processes them.
+     */
+    public void run () {
+      try {
+        while (true) { 
+          dispatchMsg((GenericMsg) sensoryProcessingChannel.take()); 
+        }
+      }
+      catch (InterruptedException ex) {}
+    }
+
+    /**
+     * Dispatches the given input channel message by type.
+     *
+     * @param genericMsg the given input channel message
+     */
+    void dispatchMsg (GenericMsg genericMsg) {
+      if (genericMsg instanceof ObservedInputMsg)
+        processObservedInputMsg((ObservedInputMsg) genericMsg);
+      else if (genericMsg instanceof PerceivedSensoryInputMsg)
+        processPerceivedSensoryInputMsg((PerceivedSensoryInputMsg) genericMsg);
+    }
+  
+    /**
+     * Processes the predicted input message.
+     */
+    protected void processPredictedInputMsg(PredictedInputMsg predictedInputMsg) {
+      Object obj = predictedInputMsg.getObj();
+      Object data = predictedInputMsg.getData();
+      //TODO
+    }
+    
+    /**
+     * Processes the observed input message.
+     */
+    protected void processObservedInputMsg(ObservedInputMsg observedInputMsg) {
+      Object obj = observedInputMsg.getObj();
+      Object data = observedInputMsg.getData();
+      //TODO
+    }
+    
+    /**
+     * Processes the perceived sensory input message received from a next level lower sensory
+     * processing node component.
+     */
+    protected void processPerceivedSensoryInputMsg(PerceivedSensoryInputMsg perceivedSensoryInputMsg) {
+      Object obj = perceivedSensoryInputMsg.getObj();
+      Object data = perceivedSensoryInputMsg.getData();
+      //TODO
+    }
+    
+    /**
+     * Sends the output-perceived sensory-input message to (1) the simulator / predictor node
+     * component within the world model, to (2) the entity evaluator node component within value
+     * judgement, and to (3) the sensory processing node component at the next highest level.
+     */
+    protected void senderceivedSensoryInputMsg() {
+      //TODO
+      Object obj = null;
+      Object data = null;
+      
+      PerceivedSensoryInputMsg perceivedSensoryInputMsg = new PerceivedSensoryInputMsg();
+      perceivedSensoryInputMsg.setSender(nodeComponent);
+      perceivedSensoryInputMsg.setObj(obj);
+      perceivedSensoryInputMsg.setData(data);
+      sendMsgToRecipient(nextHigherLevelSensoryProcessingChannel, perceivedSensoryInputMsg);
+      sendMsgToRecipient(simulatorPredictorChannel, perceivedSensoryInputMsg);
+      sendMsgToRecipient(entityEvaluatorChannel, perceivedSensoryInputMsg);
+    }
   }
   
   //// Private Area
@@ -146,17 +262,25 @@ public class SensoryPerception extends NodeComponent {
   //// Internal Rep
   
   /**
-   * Reference to the parent node's SensoryPerception object.  The topmost
-   * SensoryPerception object has a value null here.
+   * the parent sensory perception node component
    */
-  protected SensoryPerception parentSensoryPerception;
-
+  SensoryPerception parentSensoryPerception;
+  
   /**
-   * Reference to the child nodes' SensoryPerception objects.  The lowest level
-   * SensoryPerception object has a value null here.
+   * the children sensory perception node compontents
    */
-  protected ArrayList childrenSensoryPerception;
-
+  ArrayList childrenSensoryPerception;
+  
+  /**
+   * the thread which processes the input channel of messages
+   */
+  Consumer consumer;
+  
+  /**
+   * the executor of the observed input consumer thread
+   */
+  Executor executor;
+  
   //// Main
   
 }

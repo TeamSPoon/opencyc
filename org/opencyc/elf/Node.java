@@ -131,6 +131,7 @@ public class Node {
    */
   public void setParentNode(Node parentNode) {
     this.parentNode = parentNode;
+    depth = parentNode.getDepth() + 1;
   }
 
   /** Gets the Child nodes of this node for the task at hand
@@ -173,6 +174,14 @@ public class Node {
     this.siblingNodes = siblingNodes;
   }
   
+  /** Gets the depth of this node from the root node, whose depth is zero.
+   *
+   * @return the depth of this node from the root node, whose depth is zero
+   */
+  public int getDepth () {
+    return depth;
+  }
+
   /** Gets the logger
    *
    * @return the logger
@@ -214,6 +223,9 @@ public class Node {
 
   /** the list of sibling nodes at this ELF resolution level */
   protected List siblingNodes;
+  
+  /** the depth of this node from the root node, whose depth is zero */
+  protected int depth = 0;
   
   /** the logger */
   protected Logger logger;

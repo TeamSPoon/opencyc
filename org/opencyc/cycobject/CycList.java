@@ -2,6 +2,7 @@ package org.opencyc.cycobject;
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
 import java.lang.reflect.*;
 import org.opencyc.util.*;
 import org.opencyc.xml.*;
@@ -215,6 +216,49 @@ public class CycList extends ArrayList {
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Returns true if formula is well-formed in the relevant mt.
+     *
+     * @param formula the given EL formula
+     * @param mt the relevant mt
+     * @return true if formula is well-formed in the relevant mt, otherwise false
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public boolean isFormulaWellFormed(CycFort mt)
+        throws IOException, UnknownHostException, CycApiException {
+        return CycAccess.current().isFormulaWellFormed(this, mt);
+    }
+
+    /**
+     * Returns true if formula is well-formed Non Atomic Reifable Term.
+     *
+     * @param formula the given EL formula
+     * @return true if formula is well-formed Non Atomic Reifable Term, otherwise false
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public boolean isCycLNonAtomicReifableTerm()
+        throws IOException, UnknownHostException, CycApiException {
+        return CycAccess.current().isCycLNonAtomicReifableTerm(this);
+    }
+
+    /**
+     * Returns true if formula is well-formed Non Atomic Un-reifable Term.
+     *
+     * @param formula the given EL formula
+     * @return true if formula is well-formed Non Atomic Un-reifable Term, otherwise false
+     * @throws UnknownHostException if cyc server host not found on the network
+     * @throws IOException if a data communication error occurs
+     * @throws CycApiException if the api request results in a cyc server error
+     */
+    public boolean isCycLNonAtomicUnreifableTerm()
+        throws IOException, UnknownHostException, CycApiException {
+        return CycAccess.current().isCycLNonAtomicUnreifableTerm(this);
     }
 
     /**

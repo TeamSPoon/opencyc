@@ -2,6 +2,7 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.s.ConsoleInput;
+import org.opencyc.elf.s.Sensation;
 import org.opencyc.elf.s.Sensor;
 
 import org.opencyc.elf.bg.planner.Resource;
@@ -60,7 +61,9 @@ public class SensorFactory {
   public void populateSensorPool() {
     ArrayList resources = new ArrayList();
     resources.add(ResourcePool.getInstance().getResource(Resource.CONSOLE));
-    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources);
+    ArrayList sensationCapabilities = new ArrayList();
+    sensationCapabilities.add(Sensation.CONSOLE_INPUT);
+    ConsoleInput consoleInput = new ConsoleInput(Sensor.CONSOLE_INPUT, resources, sensationCapabilities);
     SensorPool.getInstance().setSensor(consoleInput.getName(), consoleInput);
   }
   //// Protected Area

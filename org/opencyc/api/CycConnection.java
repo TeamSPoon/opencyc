@@ -51,7 +51,8 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Default base tcp port for the OpenCyc server.
      */
-    public static final int DEFAULT_BASE_PORT = 3600;
+    //public static final int DEFAULT_BASE_PORT = 3600;
+    public static final int DEFAULT_BASE_PORT = 3640;
 
     /**
      * HTTP port offset for the OpenCyc server.
@@ -418,11 +419,6 @@ public class CycConnection implements CycConnectionInterface {
      * Close the api sockets and streams.
      */
     public void close () {
-        if (messagingMode == CONCURRENT_MESSAGING_MODE) {
-            taskProcessingEnded = true;
-            interruptAllWaitingReplyThreads();
-            taskProcessorBinaryResponseHandler.interrupt();
-        }
         if (asciiSocket != null) {
             if (out != null) {
                 try {
@@ -506,6 +502,17 @@ public class CycConnection implements CycConnectionInterface {
                 }
             }
         }
+        if (messagingMode == CONCURRENT_MESSAGING_MODE) {
+            taskProcessingEnded = true;
+            interruptAllWaitingReplyThreads();
+
+            try {
+                taskProcessorBinaryResponseHandler.join();
+            }
+            catch (InterruptedException e) {
+            }
+        }
+
     }
 
     /**
@@ -1167,7 +1174,7 @@ public class CycConnection implements CycConnectionInterface {
          * The binary interface input stream which receives asychronous
          * messages from the Cyc server.</tt>.
          */
-        protected CfaslInputStream inboundStream;
+        public CfaslInputStream inboundStream;
 
         /**
          * Reference to the parent thread which will sleep until
@@ -1203,6 +1210,7 @@ public class CycConnection implements CycConnectionInterface {
                 inboundSocket = listenerSocket.accept();
                 inboundStream = new CfaslInputStream(inboundSocket.getInputStream());
                 inboundStream.trace = trace;
+                listenerSocket.close();
             }
             catch (IOException e) {
                 e.printStackTrace();

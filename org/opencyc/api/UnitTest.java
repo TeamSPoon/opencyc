@@ -76,11 +76,10 @@ public class UnitTest extends TestCase {
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
 
-        //testSuite.addTest(new UnitTest("testAsciiCycConnection"));
+        testSuite.addTest(new UnitTest("testAsciiCycConnection"));
         testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
-        /*
         testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
@@ -100,9 +99,10 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testBinaryCycAccess9"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess10"));
         testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
+
         testSuite.addTest(new UnitTest("testBinaryCycAccess11"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
-*/
+
         return testSuite;
     }
 
@@ -264,12 +264,13 @@ public class UnitTest extends TestCase {
         CycAccess cycAccess = null;
         CycConnectionInterface cycConnection = null;
         try {
-            if (connectionMode == LOCAL_CYC_CONNECTION)
+            if (connectionMode == LOCAL_CYC_CONNECTION) {
                 cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                           CycConnection.DEFAULT_BASE_PORT,
                                           CycConnection.BINARY_MODE,
                                           CycAccess.PERSISTENT_CONNECTION,
                                           CycConnection.CONCURRENT_MESSAGING_MODE);
+            }
             else if (connectionMode == REMOTE_CYC_CONNECTION) {
                 cycAccess = new CycAccess(myAgentName, cycProxyAgentName, agentCommunity);
                 //System.out.println("RemoteCycConnection created");
@@ -283,7 +284,7 @@ public class UnitTest extends TestCase {
             e.printStackTrace();
             Assert.fail(e.toString());
         }
-
+        //cycAccess.traceOn();
         // turn on api if not on.
         String script = "(pwhen (cand (boundp '*eval-in-api?*) \n" +
                         "             (cnot *eval-in-api?*)) \n" +
@@ -380,7 +381,7 @@ public class UnitTest extends TestCase {
             CycAccess.current().close();
             Assert.fail(e.toString());
         }
-        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Operator NIL is not defined in the API\")",
+        Assert.assertEquals("Operator NIL is not defined in the API",
                             response[1].toString());
 
         cycConnection.close();
@@ -489,7 +490,7 @@ public class UnitTest extends TestCase {
             cycConnection.close();
             Assert.fail(e.toString());
         }
-        Assert.assertEquals("(CYC-EXCEPTION :MESSAGE \"Operator NIL is not defined in the API\")",
+        Assert.assertEquals("Operator NIL is not defined in the API",
                             response[1].toString());
 
         cycConnection.close();
@@ -3594,20 +3595,13 @@ public class UnitTest extends TestCase {
 
             // List containing null is coerced to list containing NIL.
             if (cycAccess.communicationMode == CycConnection.BINARY_MODE) {
-                CycList script = new CycList();
-                script.add(CycObjectFactory.makeCycSymbol("csetq"));
-                script.add(CycObjectFactory.makeCycSymbol("a"));
-                script.add(null);
+                String script =
+                    "(put-api-user-variable 'a '(nil 1))";
                 Object responseObject = cycAccess.converseObject(script);
                 Assert.assertEquals(CycObjectFactory.nil, responseObject);
 
-                script = new CycList();
-                script.add(CycObjectFactory.makeCycSymbol("csetq"));
-                script.add(CycObjectFactory.makeCycSymbol("a"));
-                CycList cycList = new CycList();
-                cycList.add(null);
-                cycList.add(new Integer(1));
-                script.addQuoted(cycList);
+                script =
+                    "(get-api-user-variable 'a)";
                 CycList responseList = cycAccess.converseList(script);
                 Assert.assertEquals(cycAccess.makeCycList("(nil 1)"),
                                     responseList);
@@ -4031,62 +4025,62 @@ public class UnitTest extends TestCase {
 
         ApiRequestor apiRequestor = new ApiRequestor("Long",
                                                      1,
-                                                     "10000000",
+                                                     "80000000",
                                                      cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short1",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short2",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short3",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short4",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short5",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short6",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short7",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();
         apiRequestors.add(apiRequestor);
 
         apiRequestor = new ApiRequestor("Short8",
-                                        5,
+                                        4,
                                         "700000",
                                         cycAccess);
         apiRequestor.start();

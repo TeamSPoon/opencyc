@@ -59,12 +59,6 @@ public class CycConstant extends CycFort implements Comparable {
     protected static Cache cache = new CacheLRU(500);
 
     /**
-     * The ID of the <tt>CycConstant<tt> object which is an integer unique within an OpenCyc
-     * KB but not necessarily unique globally.
-     */
-    public int id;
-
-    /**
      * The GUID (Globally Unique IDentifier) of the <tt>CycConstant<tt> object.
      * A string such as "c10af8ae-9c29-11b1-9dad-c379636f7270"
      */

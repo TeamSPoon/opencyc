@@ -40,21 +40,31 @@ public class CycAccess {
     static HashMap cycAccessInstances = new HashMap();
 
     /**
-     * Response code returned by the OpenCyc api.
+     * Value indicating that the OpenCyc api socket is created and then closed for each api call.
      */
-    public Integer responseCode = null;
+    public static final boolean TRANSIENT_CONNECTION = false;
+
+    /**
+     * Value indicating that the OpenCyc api should use one TCP socket for the entire session.
+     */
+    public static final boolean PERSISTENT_CONNECTION = true;
+
+    /**
+     * Default value indicating that the OpenCyc api should use one TCP socket for the entire session.
+     */
+    public static final boolean DEFAULT_PERSISTENT_CONNECTION = PERSISTENT_CONNECTION;
 
     /**
      * Parameter indicating whether the OpenCyc api should use one TCP socket for the entire
      * session, or if the socket is created and then closed for each api call.
      */
-    public boolean persistentConnection = true;
+    public boolean persistentConnection;
 
     private boolean trace = false;
-    private String hostName = CycConnection.DEFAULT_HOSTNAME;
-    private int port = CycConnection.DEFAULT_BASE_PORT;
+    private String hostName;
+    private int port;
+    private int communicationMode;
     private static final Integer OK_RESPONSE_CODE = new Integer(200);
-    private CycConnection cycConnection;
 
     /**
      * Convenient reference to #$BaseKb.
@@ -150,118 +160,37 @@ public class CycAccess {
     protected Cache isGenlOfCache = new CacheLRU(500);
 
     /**
+     * Reference to <tt>CycConnection</tt> object which manages the api connection to the OpenCyc server.
+     */
+    protected CycConnection cycConnection;
+
+    /**
      * Constructs a new CycAccess object.
      */
     public CycAccess() throws IOException, UnknownHostException {
-        cycAccessInstances.put(Thread.currentThread(), this);
-        if (persistentConnection)
-            cycConnection = new CycConnection();
-        initializeConstants();
+        this(CycConnection.DEFAULT_HOSTNAME,
+             CycConnection.DEFAULT_BASE_PORT,
+             CycConnection.DEFAULT_COMMUNICATION_MODE,
+             CycAccess.DEFAULT_PERSISTENT_CONNECTION);
     }
     /**
-     * Constructs a new CycAccess object given a host name.
-     *
-     * @param hostName the host name
-     */
-    public CycAccess(String hostName) throws IOException, UnknownHostException {
-        cycAccessInstances.put(Thread.currentThread(), this);
-        this.hostName = hostName;
-        if (persistentConnection)
-            cycConnection = new CycConnection(hostName);
-        initializeConstants();
-    }
-
-    /**
-     * Constructs a new CycAccess object given a port.
-     *
-     * @param port the TCP socket port number
-     */
-    public CycAccess(int port) throws IOException, UnknownHostException {
-        cycAccessInstances.put(Thread.currentThread(), this);
-        this.port = port;
-        if (persistentConnection)
-            cycConnection = new CycConnection(port);
-        initializeConstants();
-    }
-
-    /**
-     * Constructs a new CycAccess object given a host name and port.
+     * Constructs a new CycAccess object given a host name, port, communication mode and persistence indicator.
      *
      * @param hostName the host name
      * @param port the TCP socket port number
-     */
-    public CycAccess(String hostName, int port) throws IOException, UnknownHostException {
-        cycAccessInstances.put(Thread.currentThread(), this);
-        this.hostName = hostName;
-        this.port = port;
-        if (persistentConnection)
-            cycConnection = new CycConnection(port);
-        initializeConstants();
-    }
-
-    /**
-     * Constructs a new CycAccess object given an indicator for a persistent socket connection.
-     *
+     * @param communicationMode either ASCII_MODE or BINARY_MODE
      * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with
      * the OpenCyc server
      */
-    public CycAccess(boolean persistentConnection) throws IOException, UnknownHostException {
-        cycAccessInstances.put(Thread.currentThread(), this);
-        this.persistentConnection = persistentConnection;
-        if (persistentConnection)
-            cycConnection = new CycConnection();
-        initializeConstants();
-    }
-
-    /**
-     * Constructs a new CycAccess object given a host name.
-     *
-     * @param hostName the host name
-     * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with
-     * the OpenCyc server
-     */
-    public CycAccess(String hostName, boolean persistentConnection) throws IOException, UnknownHostException {
-        cycAccessInstances.put(Thread.currentThread(), this);
-        this.hostName = hostName;
-        this.persistentConnection = persistentConnection;
-        if (persistentConnection)
-            cycConnection = new CycConnection(hostName);
-        initializeConstants();
-    }
-
-    /**
-     * Constructs a new CycAccess object given a port.
-     *
-     * @param port the TCP socket port number
-     * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with
-     * the OpenCyc server
-     */
-    public CycAccess(int port, boolean persistentConnection)
-        throws IOException, UnknownHostException {
-        cycAccessInstances.put(Thread.currentThread(), this);
-        this.port = port;
-        this.persistentConnection = persistentConnection;
-        if (persistentConnection)
-            cycConnection = new CycConnection(port);
-        initializeConstants();
-    }
-
-    /**
-     * Constructs a new CycAccess object given a host name and port.
-     *
-     * @param hostName the host name
-     * @param port the TCP socket port number
-     * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with
-     * the OpenCyc server
-     */
-    public CycAccess(String hostName, int port, boolean persistentConnection)
+    public CycAccess(String hostName, int port, int communicationMode, boolean persistentConnection)
         throws IOException, UnknownHostException {
         cycAccessInstances.put(Thread.currentThread(), this);
         this.hostName = hostName;
         this.port = port;
+        this.communicationMode = communicationMode;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(port);
+            cycConnection = new CycConnection(hostName, port, communicationMode);
         initializeConstants();
     }
 
@@ -314,12 +243,12 @@ public class CycAccess {
      * Converses with Cyc to perform an API command.  Creates a new connection for this command
      * if the connection is not persistent.
      *
-     * @param command the command string
+     * @param command the command string or CycList
      */
-    private Object [] converse(String command)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+    private Object [] converse(Object command)  throws IOException, UnknownHostException {
+        Object [] response = {null, null};
         if (! persistentConnection)
-            cycConnection = new CycConnection(hostName, port);
+            cycConnection = new CycConnection(hostName, port, communicationMode);
         response = cycConnection.converse(command);
         if (! persistentConnection)
             cycConnection.close();
@@ -329,14 +258,13 @@ public class CycAccess {
     /**
      * Converses with Cyc to perform an API command whose result is returned as a list.
      *
-     * @param command the command string
+     * @param command the command string or CycList
      * @return the result of processing the API command
      */
-    public CycList converseList(String command)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+    public CycList converseList(Object command)  throws IOException, UnknownHostException {
+        Object [] response = {null, null};
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.TRUE)) {
             return (CycList) response[1];
         }
         else
@@ -346,14 +274,13 @@ public class CycAccess {
     /**
      * Converses with Cyc to perform an API command whose result is returned as a String.
      *
-     * @param command the command string
+     * @param command the command string or CycList
      * @return the result of processing the API command
      */
-    public String converseString(String command)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+    public String converseString(Object command)  throws IOException, UnknownHostException {
+        Object [] response = {null, null};
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.TRUE)) {
             return (String) response[1];
         }
         else
@@ -363,14 +290,13 @@ public class CycAccess {
     /**
      * Converses with Cyc to perform an API command whose result is returned as a boolean.
      *
-     * @param command the command string
+     * @param command the command string or CycList
      * @return the result of processing the API command
      */
-    public boolean converseBoolean(String command)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+    public boolean converseBoolean(Object command)  throws IOException, UnknownHostException {
+        Object [] response = {null, null};
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.TRUE)) {
             if (response[1].equals("T"))
                 return true;
             else
@@ -383,14 +309,13 @@ public class CycAccess {
     /**
      * Converses with Cyc to perform an API command whose result is returned as an int.
      *
-     * @param command the command string
+     * @param command the command string or CycList
      * @return the result of processing the API command
      */
-    public int converseInt(String command)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+    public int converseInt(Object command)  throws IOException, UnknownHostException {
+        Object [] response = {null, null};
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.TRUE)) {
             return (new Integer(response[1].toString())).intValue();
         }
         else
@@ -400,13 +325,12 @@ public class CycAccess {
     /**
      * Converses with Cyc to perform an API command whose result is void.
      *
-     * @param command the command string
+     * @param command the command string or CycList
      */
-    public void converseVoid(String command)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+    public void converseVoid(Object command)  throws IOException, UnknownHostException {
+        Object [] response = {null, null};
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (! responseCode.equals(OK_RESPONSE_CODE))
+        if (response[0].equals(Boolean.FALSE))
             throw new IOException(response[1].toString());
     }
 
@@ -458,11 +382,10 @@ public class CycAccess {
         CycConstant answer = CycConstant.getCache(guid);
         if (answer != null)
             return answer;
-        Object [] response = {new Integer(0), ""};
+        Object [] response = {null, null};
         String command = "(find-constant-by-guid (string-to-guid \"" + guid + "\"))";
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.TRUE)) {
             String constantName = (String) response[1];
             return CycConstant.makeCycConstant(guid, constantName);
         }
@@ -472,18 +395,23 @@ public class CycAccess {
 
     /**
      * Gets a CycConstant by using its constant name.
+     *
+     * @return the complete <tt>CycConstant</tt> if found, otherwise return null
      */
     public CycConstant getConstantByName (String constantName)
         throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
-        String command;
-        if (constantName.startsWith("#$"))
-           command = "(constant-guid " + constantName + ")";
-        else
-           command = "(constant-guid #$" + constantName + ")";
+        Object [] response = {null, null};
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("find-constant"));
+        command.add(constantName);
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.FALSE))
+            throw new IOException(response[1].toString());
+        if (response[1].equals(CycSymbol.nil))
+            return null;
+        /*
+
+         {
             String guid = ((String) response[1]).substring(3, 39);
             return CycConstant.makeCycConstant(guid, constantName);
         }
@@ -491,17 +419,18 @@ public class CycAccess {
             return null;
         else
             throw new IOException(response[1].toString());
+            */
+            return null;
     }
 
     /**
      * Gets a CycConstant by using its ID.
      */
     public CycConstant getConstantById (int id)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+        Object [] response = {null, null};
         String command = "(find-constant-by-id " + id + ")";
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.TRUE)) {
             String constantName = (String) response[1];
             return getConstantByName(constantName);
         }
@@ -607,14 +536,13 @@ public class CycAccess {
     public boolean predicateRelates (CycConstant binaryPredicate,
                                      CycConstant arg1,
                                      CycConstant arg2)  throws IOException, UnknownHostException {
-        Object [] response = {new Integer(0), ""};
+        Object [] response = {null, null};
         String command = "(pred-u-v-holds-in-any-mt " +
             binaryPredicate.cycName() + " " +
             arg1.cycName() + " " +
             arg2.cycName() + ")";
         response = converse(command);
-        responseCode = (Integer) response[0];
-        if (responseCode.equals(OK_RESPONSE_CODE)) {
+        if (response[0].equals(Boolean.TRUE)) {
             if (response[1].equals("T"))
                 return true;
             else

@@ -31,6 +31,12 @@ import java.io.Serializable;
 public abstract class CycFort implements Serializable {
 
 
+    /**
+     * The ID of the <tt>CycFort<tt> object which is an integer unique within an OpenCyc
+     * KB but not necessarily unique globally.
+     */
+    public int id;
+
   /**
    * Returns a cyclified string representation of the OpenCyc FORT.
    * Embedded constants are prefixed with ""#$".

@@ -455,7 +455,6 @@ public class UnitTest extends TestCase {
             Assert.fail(e.getMessage());
         }
 
-
         // randomPermutation
         try {
             CycList cycList34 = cycAccess.makeCycList("(1 2 3 4 5 6 7 8 9 10)");
@@ -529,6 +528,10 @@ public class UnitTest extends TestCase {
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
+
+        // last
+        CycList cycList46 = cycAccess.makeCycList("(8 7 6)");
+        Assert.assertEquals(new Long(6), cycList46.last());
 
         try {
             cycAccess.close();

@@ -287,6 +287,17 @@ public class CycList extends ArrayList {
     }
 
     /**
+     * Returns the last element of the <tt>CycList</tt>.
+     *
+     * @return the <tt>Object</tt> which is the last element of the list.
+     */
+    public Object last() {
+        if (size() == 0)
+            throw new RuntimeException("Last element not available");
+        return this.get(this.size() - 1);
+    }
+
+    /**
      * Returns the CycList after removing the first element.
      *
      * @ret urn new <tt>CycList</tt> with first element removed.

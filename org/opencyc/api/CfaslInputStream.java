@@ -61,6 +61,7 @@ public class CfaslInputStream extends BufferedInputStream {
     protected static final int CFASL_BTREE_LEAF = 22;
     protected static final int CFASL_P_BIGNUM = 23;
     protected static final int CFASL_N_BIGNUM = 24;
+    protected static final int CFASL_GUID = 25;
     protected static final int CFASL_CONSTANT = 30;
     protected static final int CFASL_NART = 31;
     protected static final int CFASL_ASSERTION = 33;
@@ -185,6 +186,9 @@ public class CfaslInputStream extends BufferedInputStream {
                     throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
                 case CFASL_BTREE_LEAF:
                     throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
+                case CFASL_GUID:
+                    o = readGuid();
+                    break;
                 case CFASL_CONSTANT:
                     o = readConstant();
                     break;
@@ -403,6 +407,16 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public CycSymbol readSymbol () throws IOException {
         return  CycSymbol.makeCycSymbol((String)readObject());
+    }
+
+    /**
+     * Reads the body of a Guid from the CfaslInputStream.  The CFASL opcode
+     * has already been read in at this point, so we only read in what follows.
+     *
+     * @return the <tt>Guid</tt> read
+     */
+    public Guid readGuid () throws IOException {
+        return  Guid.makeGuid((String)readObject());
     }
 
     /**

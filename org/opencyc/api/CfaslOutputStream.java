@@ -67,6 +67,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
     protected static final int CFASL_BTREE_LEAF = 22;
     protected static final int CFASL_P_BIGNUM = 23;
     protected static final int CFASL_N_BIGNUM = 24;
+    protected static final int CFASL_GUID = 25;
     protected static final int CFASL_CONSTANT = 30;
     protected static final int CFASL_NART = 31;
     protected static final int CFASL_ASSERTION = 33;
@@ -384,6 +385,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
      * @param guid the <tt>Guid</tt> to be written
      */
     public void writeGuid(Guid guid) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeGuid = " + guid);
+        write(CFASL_GUID);
+        writeString(guid.toString());
     }
 
     /**
@@ -392,6 +397,14 @@ public class CfaslOutputStream extends BufferedOutputStream {
      * @param cycSymbol the <tt>CycSymbol</tt> to be written
      */
     public void writeSymbol(CycSymbol cycSymbol) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeSymbol = " + cycSymbol);
+        if (cycSymbol.equals(CycSymbol.nil))
+            write(CFASL_NIL);
+        else {
+            write(CFASL_SYMBOL);
+            writeString(cycSymbol.toString().toUpperCase());
+        }
     }
 
     /**
@@ -400,6 +413,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
      * @param cycVariable the <tt>CycVariable</tt> to be written
      */
     public void writeVariable(CycVariable cycVariable) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeVariable = " + cycVariable);
+        write(CFASL_SYMBOL);
+        writeString(cycVariable.toString().toUpperCase());
     }
 
     /**
@@ -408,6 +425,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
      * @param cycConstant the <tt>CycConstant</tt> to be written
      */
     public void writeConstant(CycConstant cycConstant) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeConstant = " + cycConstant);
+        write(CFASL_CONSTANT);
+        writeInt(cycConstant.id);
     }
 
     /**
@@ -415,7 +436,11 @@ public class CfaslOutputStream extends BufferedOutputStream {
      *
      * @param cycNart the <tt>CycNart</tt> to be written
      */
-    public void writeNart(CycNart cycSNart) throws IOException {
+    public void writeNart(CycNart cycNart) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeNart = " + cycNart);
+        write(CFASL_NART);
+        writeInt(cycNart.id);
     }
 
     /**
@@ -424,6 +449,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
      * @param cycAssertion the <tt>CycAssertion</tt> to be written
      */
     public void writeAssertion(CycAssertion cycAssertion) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeAssertion = " + cycAssertion);
+        write(CFASL_ASSERTION);
+        writeInt(cycAssertion.getId().intValue());
     }
 
     /**
@@ -435,7 +464,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
     public void writeObject (Object o) throws IOException {
         if (cycConnection.trace)
             System.out.println("writeObject = " + o + " (" + o.getClass() + ")");
-        else if (o instanceof Guid)
+        if (o instanceof Guid)
             writeGuid((Guid)o);
         else if (o instanceof CycSymbol)
             writeSymbol((CycSymbol)o);

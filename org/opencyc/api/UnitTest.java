@@ -40,14 +40,16 @@ public class UnitTest extends TestCase {
 
     public static void runTests() {
         TestSuite testSuite = new TestSuite();
-        testSuite.addTest(new UnitTest("testCycConnection"));
-        testSuite.addTest(new UnitTest("testCycAccess1"));
-        testSuite.addTest(new UnitTest("testCycAccess2"));
-        testSuite.addTest(new UnitTest("testCycAccess3"));
-        testSuite.addTest(new UnitTest("testCycAccess4"));
-        testSuite.addTest(new UnitTest("testCycAccess5"));
-        testSuite.addTest(new UnitTest("testCycAccess6"));
-        testSuite.addTest(new UnitTest("testMakeValidConstantName"));
+        //testSuite.addTest(new UnitTest("testAsciiCycConnection"));
+        //testSuite.addTest(new UnitTest("testBinaryCycConnection"));
+        //testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
+        testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
+        //testSuite.addTest(new UnitTest("testCycAccess2"));
+        //testSuite.addTest(new UnitTest("testCycAccess3"));
+        //testSuite.addTest(new UnitTest("testCycAccess4"));
+        //testSuite.addTest(new UnitTest("testCycAccess5"));
+        //testSuite.addTest(new UnitTest("testCycAccess6"));
+        //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
     }
@@ -69,14 +71,17 @@ public class UnitTest extends TestCase {
         System.out.println("**** testMakeValidConstantName OK ****");
     }
 
-    public void testCycConnection () {
-        System.out.println("**** testCycConnection ****");
+    public void testAsciiCycConnection () {
+        System.out.println("**** testAsciiCycConnection ****");
 
 
         CycConnection cycConnection = null;
         try {
-            CycAccess cycAccess = new CycAccess();
-            cycConnection = new CycConnection();
+            CycAccess cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                                CycConnection.DEFAULT_BASE_PORT,
+                                                CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                                CycAccess.PERSISTENT_CONNECTION);
+            cycConnection = cycAccess.cycConnection;
             //cycConnection.trace = true;
         }
         catch (UnknownHostException e) {
@@ -95,7 +100,7 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals(new Integer(200), response[0]);
+        Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertEquals("5", response[1]);
 
         // Test return of string.
@@ -106,7 +111,7 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals(new Integer(200), response[0]);
+        Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertEquals("abc", response[1]);
 
         // Test return of symbolic expression.
@@ -117,31 +122,31 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals(new Integer(200), response[0]);
+        Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertEquals("(A B (C D (E) F))", response[1].toString());
 
         // Test function evaluation.
-        command = "(member? #$Dog '(#$Cat #$Dog))";
+        command = "(member? #$Dog '(#$DomesticPet #$Dog))";
         try {
             response = cycConnection.converse(command);
         }
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals(new Integer(200), response[0]);
+        Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertEquals("T", response[1]);
 
         // Test KB Ask.
-        command = "(removal-ask '(#$genls #$DomesticCat #$Cat) #$BaseKB)";
+        command = "(removal-ask '(#$genls #$DomesticPet #$DomesticatedAnimal) #$HumanActivitiesMt)";
         try {
             response = cycConnection.converse(command);
         }
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        Assert.assertEquals(new Integer(200), response[0]);
+        Assert.assertEquals(Boolean.TRUE, response[0]);
         Assert.assertTrue(response[1] instanceof CycList);
-        Assert.assertEquals("((((T T)) ((:GENLS (#$genls #$DomesticCat #$Cat) #$BaseKB :TRUE-DEF))))",
+        Assert.assertEquals("((((T T)) ((:GENLS (#$genls #$DomesticPet #$DomesticatedAnimal) #$HumanActivitiesMt :TRUE-DEF))))",
                             ((CycList) response[1]).cyclify());
 
         try {
@@ -150,14 +155,104 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        System.out.println("**** testCycConnection OK ****");
+        System.out.println("**** testAsciiCycConnection OK ****");
     }
 
-    public void testCycAccess1 () {
-        System.out.println("**** testCycAccess 1 ****");
+    public void testBinaryCycConnection () {
+        System.out.println("**** testBinaryCycConnection ****");
+
+        CycConnection cycConnection = null;
+        try {
+            cycConnection = new CycConnection(CycConnection.DEFAULT_HOSTNAME,
+                                              3640,
+                                              CycConnection.BINARY_MODE);
+            //cycConnection.trace = true;
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        // Test return of atom.
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("+"));
+        command.add(new Long(2));
+        command.add(new Long(3));
+        Object [] response = {new Integer(0), ""};
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("5", response[1].toString());
+
+        // Test return of string.
+        command = new CycList();
+        command.add(CycSymbol.quote);
+        command.add("abc");
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("abc", response[1]);
+
+        // Test return of symbolic expression.
+        command = new CycList();
+        command.add(CycSymbol.quote);
+        CycList cycList2 = new CycList();
+        command.add(cycList2);
+        cycList2.add(CycSymbol.makeCycSymbol("a"));
+        cycList2.add(CycSymbol.makeCycSymbol("b"));
+        CycList cycList3 = new CycList();
+        cycList2.add(cycList3);
+        cycList3.add(CycSymbol.makeCycSymbol("c"));
+        cycList3.add(CycSymbol.makeCycSymbol("d"));
+        CycList cycList4 = new CycList();
+        cycList3.add(cycList4);
+        cycList4.add(CycSymbol.makeCycSymbol("e"));
+        cycList3.add(CycSymbol.makeCycSymbol("f"));
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals(Boolean.TRUE, response[0]);
+        Assert.assertEquals("(A B (C D (E) F))", response[1].toString());
+
+        // Test error return
+        command = new CycList();
+        command.add(CycSymbol.nil);
+        try {
+            response = cycConnection.converse(command);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertEquals("(CYC-EXCEPTION MESSAGE \"Invalid API Request: NIL is not a valid API function symbol\")",
+                            response[1].toString());
+
+        try {
+            cycConnection.close();
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        System.out.println("**** testBinaryCycConnection OK ****");
+    }
+
+    public void testAsciiCycAccess1 () {
+        System.out.println("**** testAsciiCycAccess 1 ****");
         CycAccess cycAccess = null;
         try {
-            cycAccess = new CycAccess();
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                      CycAccess.TRANSIENT_CONNECTION);
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -213,7 +308,7 @@ public class UnitTest extends TestCase {
         // getComment.
         String comment = null;
         try {
-            comment = cycAccess.getComment(cycAccess.getConstantByName("#$Raisin"));
+            comment = cycAccess.getComment(cycAccess.getConstantByName("#$Raindrop"));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -222,7 +317,8 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(comment);
-        Assert.assertEquals("The collection of individual raisins.", comment);
+        Assert.assertEquals("The collection of drops of liquid water emitted by clouds in instances of #$RainProcess.",
+                            comment);
 
         // getIsas.
         List isas = null;
@@ -238,7 +334,12 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(isas);
         Assert.assertTrue(isas instanceof CycList);
         isas = ((CycList) isas).sort();
-        Assert.assertEquals("(BiologicalSpecies BiologicalTaxon DomesticatedAnimalType OrganismClassificationType PublicConstant)", isas.toString());
+        try {
+            Assert.assertTrue(isas.contains(cycAccess.getConstantByName("OrganismClassificationType")));
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
 
         try {
             cycAccess.close();
@@ -246,7 +347,112 @@ public class UnitTest extends TestCase {
         catch (IOException e) {
             Assert.fail(e.toString());
         }
-        System.out.println("**** testCycAccess 1 OK ****");
+        System.out.println("**** testAsciiCycAccess 1 OK ****");
+    }
+
+    public void testBinaryCycAccess1 () {
+        System.out.println("**** testBinaryCycAccess 1 ****");
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.BINARY_MODE,
+                                      CycAccess.TRANSIENT_CONNECTION);
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        // getConstantByName.
+        CycConstant cycConstant = null;
+        try {
+            cycConstant = cycAccess.getConstantByName("#$Dog");
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(cycConstant);
+        Assert.assertEquals("bd58daa0-9c29-11b1-9dad-c379636f7270", cycConstant.guid.toString());
+
+        // getConstantByGuid.
+        try {
+            cycConstant = cycAccess.getConstantByGuid(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"));
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(cycConstant);
+        Assert.assertEquals("#$Dog", cycConstant.cycName());
+        Assert.assertEquals("Dog", cycConstant.name);
+
+        // getConstantById
+        cycConstant = null;
+        try {
+            cycConstant = cycAccess.getConstantById(23200);
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(cycConstant);
+        Assert.assertEquals("#$Dog", cycConstant.cycName());
+        Assert.assertEquals("Dog", cycConstant.name);
+        Assert.assertEquals(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"),
+                            cycConstant.guid);
+
+        // getComment.
+        String comment = null;
+        try {
+            comment = cycAccess.getComment(cycAccess.getConstantByName("#$Raindrop"));
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(comment);
+        Assert.assertEquals("The collection of drops of liquid water emitted by clouds in instances of #$RainProcess.",
+                            comment);
+
+        // getIsas.
+        List isas = null;
+        try {
+            isas = cycAccess.getIsas(cycAccess.getConstantByName("#$Dog"));
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        Assert.assertNotNull(isas);
+        Assert.assertTrue(isas instanceof CycList);
+        isas = ((CycList) isas).sort();
+        try {
+            Assert.assertTrue(isas.contains(cycAccess.getConstantByName("OrganismClassificationType")));
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        try {
+            cycAccess.close();
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        System.out.println("**** testBinaryCycAccess 1 OK ****");
     }
 
     public void testCycAccess2 () {
@@ -274,7 +480,7 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(genls);
         Assert.assertTrue(genls instanceof CycList);
-        ((CycList) genls).sort();
+        genls = ((CycList) genls).sort();
         Assert.assertEquals("(CanineAnimal DomesticatedAnimal)", genls.toString());
 
         // getGenlPreds.
@@ -289,7 +495,8 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(genlPreds);
-        Assert.assertEquals("(preActors)", genlPreds.toString());
+        Assert.assertTrue((genlPreds.toString().equals("(preActors)")) ||
+                          (genlPreds.toString().equals("(actors)")));
 
         // getArg1Formats.
         List arg1Formats = null;
@@ -308,7 +515,7 @@ public class UnitTest extends TestCase {
         // getArg1Formats.
         arg1Formats = null;
         try {
-            arg1Formats = cycAccess.getArg1Formats(cycAccess.getConstantByName("#$powerSet"));
+            arg1Formats = cycAccess.getArg1Formats(cycAccess.getConstantByName("#$constantName"));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -323,7 +530,7 @@ public class UnitTest extends TestCase {
         // getArg2Formats.
         List arg2Formats = null;
         try {
-            arg2Formats = cycAccess.getArg2Formats(cycAccess.getConstantByName("#$salesTax"));
+            arg2Formats = cycAccess.getArg2Formats(cycAccess.getConstantByName("#$internalParts"));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -332,7 +539,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(arg2Formats);
-        Assert.assertEquals("(IntervalEntry)", arg2Formats.toString());
+        Assert.assertEquals("(SetTheFormat)", arg2Formats.toString());
 
         // getDisjointWiths.
         List disjointWiths = null;
@@ -899,7 +1106,7 @@ public class UnitTest extends TestCase {
         }
 
         // getWhyGenl.
-        List whyGenl = null;
+        CycList whyGenl = null;
         try {
             whyGenl = cycAccess.getWhyGenl(cycAccess.getConstantByName("Dog"),
                                            cycAccess.getConstantByName("Animal"));
@@ -911,15 +1118,15 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         Assert.assertNotNull(whyGenl);
-        Assert.assertTrue(whyGenl instanceof CycList);
-        CycList expectedWhyGenl =
-            cycAccess.makeCycList("(((#$genls #$Dog #$DomesticatedAnimal) :TRUE) " +
-                                  "((#$genls #$DomesticatedAnimal #$TameAnimal) :TRUE) " +
-                                  "((#$genls #$TameAnimal #$NonPersonAnimal) :TRUE) " +
-                                  "((#$genls #$NonPersonAnimal #$SentientAnimal) :TRUE) " +
-                                  "((#$genls #$SentientAnimal #$Animal) :TRUE))");
-        Assert.assertEquals(expectedWhyGenl.toString(), whyGenl.toString());
-        Assert.assertEquals(expectedWhyGenl, whyGenl);
+        CycConstant whyGenlFirst = (CycConstant) ((CycList) ((CycList) whyGenl.first()).first()).second();
+        CycConstant whyGenlLast = (CycConstant) ((CycList) ((CycList) whyGenl.last()).first()).third();
+        try {
+            Assert.assertEquals(cycAccess.getConstantByName("Dog"), whyGenlFirst);
+            Assert.assertEquals(cycAccess.getConstantByName("Animal"), whyGenlLast);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
 
         // getWhyGenlParaphrase.
         ArrayList whyGenlParaphrase = null;

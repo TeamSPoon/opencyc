@@ -4,40 +4,42 @@ Use Cases for the Behavior Engine
 1. emit the prompt (actuator)
 2. read the response (sensor)
 
-BEL (Behavior Engine Language):
+BL (Behavior Language):
 
-;; define the direct actuators
+;; define the direct actions
 
-(define-direct-actuator ConsoleOutput
-  (:name "ConsoleOutput"
-   :capabilities ("ConsolePromptedInput")))
+(define-action OutputTextToConsole
+  (:input-formal-parameters ((?OUTPUT-TEXT String))
+   :output-formal-parameters ()
+   :actuator ConsoleOutput))
+
+;; define the direct sensations
+
+(define-sensation ConsoleInput
+
+
 
 ;; define the direct sensors
 
-(define-actuator-sensor CycApi
-  (:name "CycApi"
-   :input-formal-parameters ((?CYC-API-REQUEST CycList))
-   :sensation ?CYC-API-RESPONSE))
+(define-direct-sensor ConsoleInput
+  (:sensation ConsoleInput))
 
 ;; define the actuator-sensors
 
-;; define the actions
+(define-actuator-sensor CycApi
+  (:command-capabilities (CycApiRequest)
+   :sensation CycApiResponse))
 
-(define-action ConsolePromptedInput
-  (:name "ConsolePromptedInput"
-   :input-formal-parameters ((?PROMPT String))
-   :output-formal-parameters ()))
 
-;; waits until the given variable has a value or a goal timeout occurs
+
+
 (define-goal PerceiveSensation
-  (:name "PerceiveSensation"
-   :input-formal-parameters ((?PERCEIVED-SENSATION Object))
+  (:input-formal-parameters ((?PERCEIVED-SENSATION Object))
    :when (NotNull ?PERCEIVED-SENSATION)))
 
-(define-sensor ConsoleInput
+;; define the schedule sets
 
-(define-sensor UserInput (:sensation ?USER-INPUT)
-
+(define-schedule-set 
 
 ;; 
 (define-action ConverseWithUser

@@ -48,7 +48,6 @@ public class ValueJudgement extends NodeComponent {
   public ValueJudgement() {
   }
 
-  
   //// Public Area
   
   /**
@@ -61,70 +60,7 @@ public class ValueJudgement extends NodeComponent {
   }
   
   //// Protected Area
-  
-  /**
-   * Receives the evaluate schedule message forwarded from world model.
-   */
-  protected void receiveEvaluateSchedule () {
-    //TODO
-    // receive via channel from world model
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // may call sendScheduleEvaluation();
-  }
-  
-  /**
-   * Sends the schedule evaluation message to behavior generation.
-   */
-  protected void sendScheduleEvaluation () {
-    //TODO
-    // send via channel to behavior generation
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // Result result
-    // send receiveScheduleEvaluation(controlledResources, taskCommand, schedule, result)
-    // to behaviorGeneration
-  }
-  
-  /**
-   * Receives the predicted input message from ?.
-   */
-  protected void receivePredictedInput () {
-    //TODO
-    // receive via channel from ?
-    // Object obj
-  }
-  
-  /**
-   * Receives the update message from sensory perception.
-   */
-  protected void receiveUpdate () {
-    //TODO
-    // receive via channel from sensory perception
-    // Object obj
-    // Object data
-  }
-  
-  /**
-   * Sends the value Judgement status message to behavior generation.
-   */
-  protected void sendValueJudgementStatus () {
-    //TODO
-    // send via channel to behavior generation
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // Status status
-    // send receiveValueJudgementStatus(controlledResources, taskCommand, schedule, status)
-    // to behaviorGeneration
-  }
-  
-  public void run() {
-  }  
-  
-  
+    
   //// Private Area
   
   //// Internal Rep

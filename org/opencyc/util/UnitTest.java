@@ -30,6 +30,13 @@ import junit.framework.*;
 public class UnitTest extends TestCase {
 
     /**
+     * Main method in case tracing is prefered over running JUnit.
+     */
+    public static void main(String[] args) {
+        runTests();
+    }
+
+    /**
      * Constructs a new UnitTest object.
      * @param name the test case name.
      */
@@ -79,5 +86,36 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(OcCollectionUtils.hasIntersection(bigA, bigB));
         Assert.assertTrue(OcCollectionUtils.hasIntersection(bigB, bigA));
         System.out.println("** testHasIntersection OK **");
+    }
+
+    /**
+     * Tests the StringUtils.isNumeric method.
+     */
+    public void testIsNumeric() {
+        System.out.println("** testIsNumeric **");
+        Assert.assertTrue(StringUtils.isNumeric("0"));
+        Assert.assertTrue(StringUtils.isNumeric("1"));
+        Assert.assertTrue(StringUtils.isNumeric("2"));
+        Assert.assertTrue(StringUtils.isNumeric("3"));
+        Assert.assertTrue(StringUtils.isNumeric("4"));
+        Assert.assertTrue(StringUtils.isNumeric("5"));
+        Assert.assertTrue(StringUtils.isNumeric("6"));
+        Assert.assertTrue(StringUtils.isNumeric("7"));
+        Assert.assertTrue(StringUtils.isNumeric("8"));
+        Assert.assertTrue(StringUtils.isNumeric("9"));
+        Assert.assertTrue(! StringUtils.isNumeric("A"));
+        Assert.assertTrue(! StringUtils.isNumeric("@"));
+        Assert.assertTrue(! StringUtils.isNumeric("."));
+        Assert.assertTrue(StringUtils.isNumeric("12345"));
+        Assert.assertTrue(! StringUtils.isNumeric("123.45"));
+        Assert.assertTrue(! StringUtils.isNumeric("123-45"));
+        Assert.assertTrue(! StringUtils.isNumeric("12345+"));
+        Assert.assertTrue(! StringUtils.isNumeric("+"));
+        Assert.assertTrue(! StringUtils.isNumeric("-"));
+        Assert.assertTrue(StringUtils.isNumeric("+1"));
+        Assert.assertTrue(StringUtils.isNumeric("-1"));
+        Assert.assertTrue(StringUtils.isNumeric("+12345"));
+        Assert.assertTrue(StringUtils.isNumeric("-12345"));
+        System.out.println("** testIsNumeric OK **");
     }
 }

@@ -2,6 +2,7 @@ package  org.opencyc.api;
 
 import  java.net.*;
 import  java.io.*;
+import  ViolinStrings.*;
 import  org.opencyc.util.*;
 import  org.opencyc.cycobject.*;
 
@@ -152,6 +153,11 @@ public class CycConnection {
     protected CycAccess cycAccess;
 
     /**
+     * An indicator for ascii communications mode that strings should retain their quote delimiters.
+     */
+    protected boolean quotedStrings;
+
+    /**
      * Constructs a new CycConnection object using the default host name, default base port number and
      * binary communication mode.
      */
@@ -285,7 +291,7 @@ public class CycConnection {
      * @return an array of two objects, the first is an Integer response code, and the second is the
      * response object or error string.
      */
-    public Object[] converse (Object message) throws IOException {
+    public synchronized Object[] converse (Object message) throws IOException {
         return  converse(message, notimeout);
     }
 
@@ -302,7 +308,8 @@ public class CycConnection {
      * @return an array of two objects, the first is an Integer response code, and the second is the
      * response object or error string.
      */
-    public Object[] converse (Object message, Timer timeout) throws IOException, TimeOutException {
+    public synchronized Object[] converse (Object message, Timer timeout)
+        throws IOException, TimeOutException {
         if (communicationMode == CycConnection.ASCII_MODE) {
             String messageString;
             if (message instanceof String)
@@ -404,6 +411,7 @@ public class CycConnection {
             else if (answer.equals("NIL"))
                 response[1] = new CycList();
             else
+                // Treat a non-string object as a string.
                 response[1] = answer;
         }
         return  response;
@@ -515,7 +523,7 @@ public class CycConnection {
             if (trace)
                 System.out.print((char)ch);
             if (ch == '"')
-                return  result.toString();
+                return  "\"" + result.toString() + "\"";
             result.append((char)ch);
         }
     }

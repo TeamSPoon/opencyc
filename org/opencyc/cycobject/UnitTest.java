@@ -123,6 +123,18 @@ public class UnitTest extends TestCase {
         CycSymbol cycSymbol6 = CycSymbol.makeCycSymbol(":pos");
         Assert.assertTrue(cycSymbol6.isKeyword());
 
+        // isValidSymbolName
+        Assert.assertTrue(CycSymbol.isValidSymbolName("t"));
+        Assert.assertTrue(CycSymbol.isValidSymbolName("nil"));
+        Assert.assertTrue(CycSymbol.isValidSymbolName("a_"));
+        Assert.assertTrue(CycSymbol.isValidSymbolName("a-b"));
+        Assert.assertTrue(CycSymbol.isValidSymbolName("a-b"));
+        Assert.assertTrue(CycSymbol.isValidSymbolName("a-9b"));
+        Assert.assertTrue(CycSymbol.isValidSymbolName("*MY-SYMBOL*"));
+        Assert.assertTrue(! CycSymbol.isValidSymbolName(" "));
+        Assert.assertTrue(! CycSymbol.isValidSymbolName("#$Brazil"));
+        Assert.assertTrue(! CycSymbol.isValidSymbolName("\"a-string\""));
+
         System.out.println("** testCycSymbol OK **");
     }
 

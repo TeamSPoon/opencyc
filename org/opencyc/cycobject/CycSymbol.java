@@ -122,6 +122,25 @@ public class CycSymbol implements Comparable {
      }
 
     /**
+     * Returns <tt>true</tt> iff the given string is a valid symbol name.
+     *
+     * @param string the name to be tested
+     * @return <tt>true</tt> iff the given string is a valid symbol name
+     */
+    public static boolean isValidSymbolName(String string) {
+        for (int i = 0; i < string.length(); i++) {
+            char c = string.charAt(i);
+            if (! (Character.isLetterOrDigit(c) ||
+                   c == '-' ||
+                   c == '_' ||
+                   c == '*' ||
+                   c == '?'||
+                   c == ':'))
+                return false;
+        }
+        return true;
+    }
+    /**
      * Resets the <tt>CycSymbol</tt> cache.
      */
     public static void resetCache() {

@@ -258,6 +258,46 @@ public class CycAccess {
     }
 
     /**
+     * Converses with Cyc to perform an API command whose result is returned as an object.
+     *
+     * @param command the command string or CycList
+     * @return the result of processing the API command
+     */
+    public Object converseObject(Object command)  throws IOException, UnknownHostException {
+        Object [] response = {null, null};
+        response = converse(command);
+        if (response[0].equals(Boolean.TRUE)) {
+            if (cycConnection.communicationMode == CycConnection.BINARY_MODE) {
+                // The binary api correctly determines object types.
+                if (response[1] == null)
+                    // Do not coerce empty lists to the symbol nil, instead return a list of size zero.
+                    return new CycList();
+                else
+                    return response[1];
+            }
+            else {
+                // The ascii api returns strings which need further parsing because in this method the
+                // expected return object type is unknown.
+                String string = (String) response[1];
+                if (StringUtils.isNumeric(string))
+                    response[1] = new Long(string);
+                else if (CycSymbol.isValidSymbolName(string))
+                    response[1] = CycSymbol.makeCycSymbol(string);
+                else if (string.startsWith("#$"))
+                    response[1] = getConstantByName(string);
+                else if ((string.length() > 2) &&
+                         (string.charAt(0) == '"') &&
+                         (string.charAt(string.length() - 1) == '"'))
+                    // Strip off the delimiting quotes and return a java string object.
+                    response[1] = string.substring(1, string.length() - 1);
+                return response[1];
+            }
+        }
+        else
+            throw new IOException(response[1].toString());
+    }
+
+    /**
      * Converses with Cyc to perform an API command whose result is returned as a list.
      *
      * @param command the command string or CycList
@@ -1691,7 +1731,7 @@ public class CycAccess {
         command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :backward) ");
         command.append("       (cpush (assertion-formula rule) backchain-rules))) ");
         command.append("   backchain-rules)");
-        this.traceOn();
+        //this.traceOn();
         return converseList(command.toString());
     }
 
@@ -1711,6 +1751,33 @@ public class CycAccess {
         command.append("       (cpush (assertion-formula rule) forward-chain-rules))) ");
         command.append("   forward-chain-rules)");
         return converseList(command.toString());
+    }
+
+    /**
+     * Gets the value of a given KB symbol.  This is intended mainly for test case setup.
+     *
+     * @param symbol the KB symbol which will have a value bound
+     * @return the value assigned to the symbol
+     */
+    public Object getSymbolValue (CycSymbol cycSymbol)
+        throws IOException, UnknownHostException {
+        return converseObject("(symbol-value '" + cycSymbol + ")");
+    }
+
+    /**
+     * Sets a KB symbol to have the specified value.  This is intended mainly for test case setup.  If the symbol does
+     * not exist at the KB, then it will be created and assigned the value.
+     *
+     * @param symbol the KB symbol which will have a value bound
+     * @param value the value assigned to the symbol
+     */
+    public void setSymbolValue (CycSymbol cycSymbol, Object value)
+        throws IOException, UnknownHostException {
+        CycList command = new CycList();
+        command.add(CycSymbol.makeCycSymbol("csetq"));
+        command.add(cycSymbol);
+        command.add(value);
+        converseVoid(command);
     }
 
 

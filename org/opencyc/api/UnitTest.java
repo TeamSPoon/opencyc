@@ -58,8 +58,8 @@ public class UnitTest extends TestCase {
         //testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
         //testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
         //testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
-        //testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
-        testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+        testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
+        //testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
         //testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -1832,12 +1832,70 @@ public class UnitTest extends TestCase {
                 cycAccess.getForwardChainRules(cycAccess.getConstantByName("#$doneBy"),
                                             cycAccess.getConstantByName("HumanActivitiesMt"));
             Assert.assertNotNull(forwardChainRules);
+            /*
             for (int i = 0; i < forwardChainRules.size(); i++)
                 System.out.println(((CycList) forwardChainRules.get(i)).cyclify());
+            */
         }
         catch (Exception e) {
             Assert.fail(e.toString());
         }
+
+        // Test getCycNartById
+        Integer nartId = new Integer(1);
+        try {
+            CycNart nart1 = cycAccess.getCycNartById(nartId);
+            Assert.assertNotNull(nart1);
+            Assert.assertNotNull(nart1.getFunctor());
+            Assert.assertTrue(nart1.getFunctor() instanceof CycFort);
+            Assert.assertNotNull(nart1.getArguments());
+            Assert.assertTrue(nart1.getArguments() instanceof CycList);
+            //System.out.println(nart1.cyclify());
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+        // setSymbolValue, getSymbolValue
+        try {
+            cycAccess.traceOn();
+            CycSymbol a = CycSymbol.makeCycSymbol("a");
+            cycAccess.setSymbolValue(a, new Long(1));
+            Assert.assertEquals(new Long(1), cycAccess.getSymbolValue(a));
+            cycAccess.setSymbolValue(a, "abc");
+            Assert.assertEquals("abc", cycAccess.getSymbolValue(a));
+            cycAccess.setSymbolValue(a, CycSymbol.t);
+            Assert.assertEquals(CycSymbol.t, cycAccess.getSymbolValue(a));
+            cycAccess.setSymbolValue(a, CycSymbol.nil);
+            Assert.assertEquals(new CycList(), cycAccess.getSymbolValue(a));
+            CycConstant brazil = cycAccess.makeCycConstant("#$Brazil");
+            cycAccess.setSymbolValue(a, brazil);
+            Assert.assertEquals(brazil, cycAccess.getSymbolValue(a));
+            CycList valueList = cycAccess.makeCycList("(#$France #$Brazil)");
+            cycAccess.setSymbolValue(a, valueList);
+            Assert.assertEquals(valueList, cycAccess.getSymbolValue(a));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.toString());
+        }
+
+
+        // Narts in a list.
+        try {
+            CycNart nart1 = cycAccess.getCycNartById(nartId);
+            CycNart nart2 = cycAccess.getCycNartById(nartId);
+            Assert.assertTrue(nart1 == nart2);
+            CycList nartList = new CycList();
+            nartList.add(nart1);
+            nartList.add(nart2);
+
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+
     }
 }
 

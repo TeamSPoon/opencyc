@@ -1,6 +1,7 @@
 package org.opencyc.elf.wm;
 
 //// Internal Imports
+import org.opencyc.elf.bg.predicate.NotNull;
 
 //// External Imports
 
@@ -52,6 +53,7 @@ public class PredicateClassFactory {
    * Generates the predicate classes.
    */
   public void generate () {
+    new NotNull();
     //TODO
   }
   

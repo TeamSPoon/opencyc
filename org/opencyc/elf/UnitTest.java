@@ -10,7 +10,10 @@ import org.opencyc.elf.bg.taskframe.ActionFactory;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.bg.planner.JobAssigner;
+import org.opencyc.elf.bg.planner.JobAssignmentLibrary;
 import org.opencyc.elf.bg.planner.PlanSelector;
+import org.opencyc.elf.bg.planner.ResourcePool;
+import org.opencyc.elf.bg.planner.ScheduleLibrary;
 
 import org.opencyc.elf.message.DoTaskMsg;
 
@@ -89,6 +92,7 @@ public class UnitTest extends TestCase {
     TestSuite testSuite = new TestSuite();
     testSuite.addTest(new UnitTest("testELFFactory"));
     testSuite.addTest(new UnitTest("testBehaviorGeneration"));
+    testSuite.addTest(new UnitTest("testBehaviorEngine"));
     return testSuite;
   }
 
@@ -199,6 +203,9 @@ public class UnitTest extends TestCase {
     System.out.println("\n*** testBehaviorGeneration ***");
     
     logger.info("Testing behavior generation");
+    (new ResourcePool()).getInstance().initialize();
+    (new JobAssignmentLibrary()).getInstance().initialize();
+    (new ScheduleLibrary()).getInstance().initialize();
     ELFFactory elfFactory = new ELFFactory();
     Node node = elfFactory.makeNodeShell("test-node");
     
@@ -231,10 +238,22 @@ public class UnitTest extends TestCase {
     }
     catch (InterruptedException e) {
     }
-    
-    
-    
     System.out.println("*** testBehaviorGeneration OK ***");
+  }
+  
+  /**
+   * Tests BehaviorEngine.
+   */
+  public void testBehaviorEngine () {
+    System.out.println("\n*** testBehaviorEngine ***");
+    
+    logger.info("Testing behavior engine");
+    try {
+      Thread.sleep(2000);
+    }
+    catch (InterruptedException e) {
+    }
+    System.out.println("*** testBehaviorEngine OK ***");
   }
 
   //// Protected Area

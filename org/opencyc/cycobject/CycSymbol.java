@@ -27,7 +27,7 @@ import org.apache.oro.util.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycSymbol {
+public class CycSymbol implements Comparable {
 
     /**
      * Least Recently Used Cache of CycSymbols, so that a reference to an existing <tt>CycSymbol</tt>
@@ -92,6 +92,21 @@ public class CycSymbol {
             return false;
         return ((CycSymbol) object).toString().equals(symbolName);
     }
+
+    /**
+     * Compares this object with the specified object for order.
+     * Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param object the reference object with which to compare.
+     * @return a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object
+     */
+     public int compareTo (Object object) {
+        if (! (object instanceof CycSymbol))
+            throw new ClassCastException("Must be a CycSymbol object");
+        return this.symbolName.compareTo(((CycSymbol) object).symbolName);
+     }
 
     /**
      * Resets the <tt>CycSymbol</tt> cache.

@@ -29,7 +29,7 @@ import org.apache.oro.util.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycConstant extends CycFort {
+public class CycConstant extends CycFort implements Comparable {
 
     /**
      * These XML tag names are expected to be
@@ -181,6 +181,21 @@ public class CycConstant extends CycFort {
         else
             return false;
     }
+
+    /**
+     * Compares this object with the specified object for order.
+     * Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param object the reference object with which to compare.
+     * @return a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object
+     */
+     public int compareTo (Object object) {
+        if (! (object instanceof CycConstant))
+            throw new ClassCastException("Must be a CycConstant object");
+        return this.name.compareTo(((CycConstant) object).name);
+     }
 
     /**
      * Returns a String representation of the <tt>CycConstant</tt>.

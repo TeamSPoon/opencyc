@@ -31,7 +31,7 @@ import java.util.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycNart extends CycFort {
+public class CycNart extends CycFort implements Comparable {
 
     /**
      * XML serialization tags.
@@ -56,10 +56,11 @@ public class CycNart extends CycFort {
     /**
      * The list of the arguments of the <ttt>CycNart</tt> object.
      */
-    protected List arguments;
+    protected List arguments = new ArrayList();
 
     /**
-     * Constructs a new <ttt>CycNart</tt> object.
+     * Constructs a new <tt>CycNart</tt> object from the given functor and
+     * argument list.
      *
      * @param functor a <tt>CycFort</tt> which is the functor of this
      * <tt>CycNart</tt> object.
@@ -72,7 +73,8 @@ public class CycNart extends CycFort {
     }
 
     /**
-     * Constructs a new unary <ttt>CycNart</tt> object.
+     * Constructs a new unary <tt>CycNart</tt> object from the functor and
+     * argument.
      *
      * @param functor a <tt>CycFort</tt> which is the functor of this
      * <tt>CycNart</tt> object.
@@ -81,13 +83,13 @@ public class CycNart extends CycFort {
      */
     public CycNart (CycFort functor, Object argument) {
         this.functor = functor;
-        ArrayList arguments = new ArrayList();
         arguments.add(argument);
         this.arguments = arguments;
     }
 
     /**
-     * Constructs a new binary <ttt>CycNart</tt> object.
+     * Constructs a new binary <tt>CycNart</tt> object from the functor and
+     * the two arguments.
      *
      * @param functor a <tt>CycFort</tt> which is the functor of this
      * <tt>CycNart</tt> object.
@@ -97,10 +99,23 @@ public class CycNart extends CycFort {
      */
     public CycNart (CycFort functor, Object argument1, Object argument2) {
         this.functor = functor;
-        ArrayList arguments = new ArrayList();
         arguments.add(argument1);
         arguments.add(argument2);
         this.arguments = arguments;
+    }
+
+    /**
+     * Constructs a new <tt>CycNart</tt> object from the <tt>CycList</tt> object.
+     *
+     * @param cycList a list representation of the <tt>CycNart</tt>
+     */
+    public CycNart (CycList cycList) {
+        if (cycList.size() == 0)
+            throw new RuntimeException("Cannot make a CycNart from an empty CycList");
+        if (! (cycList.first() instanceof CycFort))
+            throw new RuntimeException("CycNart functor must be a CycFort");
+        functor = (CycFort) cycList.first();
+        arguments.addAll(cycList.rest());
     }
 
     /**
@@ -272,5 +287,20 @@ public class CycNart extends CycFort {
     else
         return false;
     }
+
+    /**
+     * Compares this object with the specified object for order.
+     * Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param object the reference object with which to compare.
+     * @return a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object
+     */
+     public int compareTo (Object object) {
+        if (! (object instanceof CycNart))
+            throw new ClassCastException("Must be a CycNart object");
+        return this.toString().compareTo(object.toString());
+     }
 
 }

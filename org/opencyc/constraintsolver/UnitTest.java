@@ -47,6 +47,7 @@ public class UnitTest extends TestCase {
         //testSuite.addTest(new UnitTest("testHelloWorld"));
         //testSuite.addTest(new UnitTest("testRule"));
         //testSuite.addTest(new UnitTest("testBinding"));
+        //testSuite.addTest(new UnitTest("testSolution"));
         //testSuite.addTest(new UnitTest("testRuleEvaluator"));
         //testSuite.addTest(new UnitTest("testConstraintProblem"));
         TestResult testResult = new TestResult();
@@ -220,6 +221,15 @@ public class UnitTest extends TestCase {
         }
         printWriter.close();
         System.out.println("** Rule OK **");
+    }
+
+    /**
+     * Tests the <tt>Solution</tt> class.
+     */
+    public void testSolution() {
+        System.out.println("** testSolution **");
+
+        System.out.println("** testSolution OK **");
     }
 
     /**

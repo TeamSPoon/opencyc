@@ -105,26 +105,22 @@ public class ForwardCheckingSearcher {
         ArrayList annotatedVariables = new ArrayList();
         Integer remainingDomainSize = null;
         Integer degree = null;
-        Object[] annotation = {null, null, null};
         for (int i = 0; i < variables.size(); i++) {
             CycVariable variable = (CycVariable) variables.get(i);
             remainingDomainSize = new Integer(constraintProblem.valueDomains.getUnmarkedDomainSize(variable));
             degree = new Integer(constraintDegree(variable, variables));
-            annotation[0] = variable;
-            annotation[1] = remainingDomainSize;
-            annotation[2] = degree;
-            annotatedVariables.add(annotation.clone());
+            annotatedVariables.add(new VariableSelectionAttibutes(variable,
+                                                                  remainingDomainSize,
+                                                                  degree));
         }
-        Collections.sort(annotatedVariables, new VariableSelectionComparator());
-        if (verbosity > 8) {
-            System.out.println("\nHeuristic selection order (variable remainingDomainSize degree)");
+        Collections.sort(annotatedVariables);
+        if (verbosity > 7) {
+            System.out.println("\nHeuristic selection order");
             for (int i = 0; i < annotatedVariables.size(); i++) {
-                annotation = (Object[]) annotatedVariables.get(i);
-                System.out.println(annotation[0] + "  " +  annotation[1] + "  " +  annotation[2]);
+                System.out.println("  " + (VariableSelectionAttibutes) annotatedVariables.get(i));
             }
         }
-        annotation = (Object[]) annotatedVariables.get(0);
-        return (CycVariable) annotation[0];
+        return ((VariableSelectionAttibutes) annotatedVariables.get(0)).cycVariable;
     }
 
     /**

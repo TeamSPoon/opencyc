@@ -29,7 +29,7 @@ import org.opencyc.cycobject.*;
  *
  * @see UnitTest#testBinding
  */
-public class Binding {
+public class Binding implements Comparable {
 
     /**
      * The <tt>CycVariable</tt> which is bound.
@@ -98,6 +98,21 @@ public class Binding {
             return false;
         else
             return true;
+     }
+
+    /**
+     * Compares this object with the specified object for order.
+     * Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param object the reference object with which to compare.
+     * @return a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object
+     */
+     public int compareTo (Object object) {
+        if (! (object instanceof Binding))
+            throw new ClassCastException("Must be a Binding object");
+        return this.cycVariable.compareTo(((Binding) object).cycVariable);
      }
 
     /**

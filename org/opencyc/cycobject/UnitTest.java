@@ -98,6 +98,15 @@ public class UnitTest extends TestCase {
         CycSymbol cycSymbol3 = CycSymbol.makeCycSymbol(symbolName);
         Assert.assertEquals(cycSymbol, cycSymbol3);
         Assert.assertEquals(5, CycSymbol.getCacheSize());
+
+        // compareTo
+        ArrayList symbols = new ArrayList();
+        symbols.add(CycSymbol.makeCycSymbol("isa?"));
+        symbols.add(CycSymbol.makeCycSymbol("define-private"));
+        symbols.add(CycSymbol.makeCycSymbol("nil"));
+        Collections.sort(symbols);
+        Assert.assertEquals("[define-private, isa?, nil]", symbols.toString());
+
         System.out.println("** testCycSymbol OK **");
     }
 
@@ -121,6 +130,16 @@ public class UnitTest extends TestCase {
         CycConstant cycConstant2 = CycConstant.makeCycConstant(guidString, constantName);
         Assert.assertEquals(1, CycConstant.getCacheSize());
         Assert.assertEquals(cycConstant1, cycConstant2);
+
+        // compareTo
+        ArrayList constants = new ArrayList();
+        constants.add(CycConstant.makeCycConstant("#$Dog"));
+        constants.add(CycConstant.makeCycConstant("#$Cat"));
+        constants.add(CycConstant.makeCycConstant("#$Brazil"));
+        constants.add(CycConstant.makeCycConstant("#$Collection"));
+        Collections.sort(constants);
+        Assert.assertEquals("[Brazil, Cat, Collection, Dog]", constants.toString());
+
         System.out.println("** testCycConstant OK **");
     }
 
@@ -150,6 +169,16 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(cycNart.toString(), cycNart2.toString());
         Assert.assertEquals(cycNart, cycNart2);
 
+        // compareTo
+        ArrayList narts = new ArrayList();
+        narts.add(new CycNart(new CycList("(#$GovernmentFn #$Brazil)")));
+        Assert.assertEquals("[(GovernmentFn Brazil)]", narts.toString());
+        narts.add(new CycNart(new CycList("(#$PlusFn 100)")));
+        narts.add(new CycNart(new CycList("(#$FruitFn #$AppleTree)")));
+        Collections.sort(narts);
+        Assert.assertEquals("[(FruitFn AppleTree), (GovernmentFn Brazil), (PlusFn 100)]",
+                            narts.toString());
+
         System.out.println("** testCycNart OK **");
     }
 
@@ -167,6 +196,18 @@ public class UnitTest extends TestCase {
         Assert.assertNotNull(cycVariable2);
         Assert.assertEquals("variable", cycVariable2.toString());
         Assert.assertEquals("?variable", cycVariable2.cyclify());
+
+        // compareTo
+        ArrayList variables = new ArrayList();
+        variables.add(CycVariable.makeCycVariable("?y"));
+        variables.add(CycVariable.makeCycVariable("?Z"));
+        variables.add(CycVariable.makeCycVariable("?Y"));
+        variables.add(CycVariable.makeCycVariable("?X"));
+        variables.add(CycVariable.makeCycVariable("?z"));
+        variables.add(CycVariable.makeCycVariable("?x"));
+        Collections.sort(variables);
+        Assert.assertEquals("[X, Y, Z, x, y, z]", variables.toString());
+
         System.out.println("** testCycVariable OK **");
     }
 

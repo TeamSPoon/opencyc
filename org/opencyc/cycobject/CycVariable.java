@@ -27,7 +27,7 @@ import org.apache.oro.util.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycVariable {
+public class CycVariable implements Comparable {
 
     /**
      * Least Recently Used Cache of CycVariables, so that a reference to an existing <tt>CycVariable</tt>
@@ -97,6 +97,21 @@ public class CycVariable {
             return false;
         return ((CycVariable) object).toString().equals(variableName);
     }
+
+    /**
+     * Compares this object with the specified object for order.
+     * Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param object the reference object with which to compare.
+     * @return a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object
+     */
+     public int compareTo (Object object) {
+        if (! (object instanceof CycVariable))
+            throw new ClassCastException("Must be a CycVariable object");
+        return this.variableName.compareTo(((CycVariable) object).variableName);
+     }
 
     /**
      * Resets the <tt>CycVariable</tt> cache.

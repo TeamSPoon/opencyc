@@ -5,7 +5,6 @@ import  java.io.*;
 import  org.opencyc.util.*;
 import  org.opencyc.cycobject.*;
 
-
 /**
  * Provides a binary connection and an ascii connection to the OpenCyc server.  The ascii connection is
  * legacy and its use is deprecated.<p>
@@ -32,95 +31,119 @@ import  org.opencyc.cycobject.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class CycConnection {
+
     /**
      * Default host name for the OpenCyc server.
      */
     public static final String DEFAULT_HOSTNAME = "localhost";
+
     /**
      * Default base tcp port for the OpenCyc server.
      */
     public static final int DEFAULT_BASE_PORT = 3600;
+
     /**
      * HTTP port offset for the OpenCyc server.
      */
     public static final int HTTP_PORT_OFFSET = 0;
+
     /**
      * ASCII port offset for the OpenCyc server.
      */
     public static final int ASCII_PORT_OFFSET = 1;
+
     /**
      * CFASL (binary) port offset for the OpenCyc server.
      */
     public static final int CFASL_PORT_OFFSET = 14;
+
     /**
      * Parameter that, when true, causes a trace of the messages to and from the server.
      */
     public boolean trace = false;
+
     /**
      * Ascii mode connnection to the OpenCyc server.
      */
+
     public static final int ASCII_MODE = 1;
     /**
      * CFASL (binary) mode connnection to the OpenCyc server.
      */
     public static final int BINARY_MODE = 2;
+
     /**
      * Default communication mode connnection to the OpenCyc server.
      */
     public static final int DEFAULT_COMMUNICATION_MODE = ASCII_MODE;
+
     /**
      * Indicator for whether to use the binary or acsii connection with OpenCyc.
      */
     protected int communicationMode = 0;
+
     /**
      * The ascii interface input stream.
      */
     protected BufferedReader in;
+
     /**
      * The ascii interface output stream.
      */
     protected BufferedWriter out;
+
     /**
      * The binary interface input stream</tt>.
      */
     protected CfaslInputStream cfaslInputStream;
+
     /**
      * The binary interface output stream</tt>.
      */
     protected CfaslOutputStream cfaslOutputStream;
+
     /**
      * The name of the computer hosting the OpenCyc server.
      */
     protected String hostName;
+
     /**
      * The tcp port from which the asciiPort and cfaslPorts are derived.
      */
     protected int basePort;
+
     /**
      * The tcp port assigned to the the ascii connection to the OpenCyc server.
      */
     protected int asciiPort;
+
     /**
      * The tcp port assigned to the the binary connection to the OpenCyc server.
      */
     protected int cfaslPort;
+
     /**
      * The tcp socket assigned to the the ascii connection to the OpenCyc server.
      */
     protected Socket asciiSocket;
+
     /**
      * The tcp socket assigned to the the binary connection to the OpenCyc server.
+     *
      */
     protected Socket cfaslSocket;
+
     /**
      * The timer which optionally monitors the duration of requests to the OpenCyc server.
      */
     protected static final Timer notimeout = new Timer();
+
     /**
      * Indicates if the response from the OpenCyc server is a symbolic expression (enclosed in
      * parentheses).
      */
     protected boolean isSymbolicExpression = false;
+
     /**
      * A reference to the parent CycAccess object for dereferencing constants in ascii symbolic expressions.
      */
@@ -130,8 +153,8 @@ public class CycConnection {
      * Constructs a new CycConnection object using the default host name, default base port number and
      * binary communication mode.
      */
-    public CycConnection () throws IOException, UnknownHostException {
-        this(DEFAULT_HOSTNAME, DEFAULT_BASE_PORT, DEFAULT_COMMUNICATION_MODE);
+    public CycConnection (CycAccess cycAccess) throws IOException, UnknownHostException {
+        this(DEFAULT_HOSTNAME, DEFAULT_BASE_PORT, DEFAULT_COMMUNICATION_MODE, cycAccess);
     }
 
     /**
@@ -142,13 +165,14 @@ public class CycConnection {
      * @param basePort the base tcp port on which the OpenCyc server is listening for connections.
      * @param communicationMode either ASCII_MODE or BINARY_MODE
      */
-    public CycConnection (String hostName, int basePort, int communicationMode) throws IOException,
-            UnknownHostException {
+    public CycConnection (String hostName, int basePort, int communicationMode, CycAccess cycAccess)
+        throws IOException, UnknownHostException {
         this.hostName = hostName;
         this.basePort = basePort;
         asciiPort = basePort + ASCII_PORT_OFFSET;
         cfaslPort = basePort + CFASL_PORT_OFFSET;
         this.communicationMode = communicationMode;
+        this.cycAccess = cycAccess;
         if ((communicationMode != ASCII_MODE) && (communicationMode != BINARY_MODE))
             throw  new RuntimeException("Invalid communication mode " + communicationMode);
         initializeApiConnections();
@@ -452,6 +476,10 @@ public class CycConnection {
         return  result.toString();
     }
 }
+
+
+
+
 
 
 

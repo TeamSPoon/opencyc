@@ -70,56 +70,26 @@ public class CycConstant extends CycFort implements Comparable {
     public String name;
 
     /**
-     * Constructs a new incomplete <tt>CycConstant</tt> object, given an id.
-     *
-     * @param id the local KB id for this constant
+     * Constructs a new incomplete <tt>CycConstant</tt> object.
      */
-    public CycConstant (int id) {
-        this.id = id;
+    public CycConstant () {
     }
 
     /**
-     * Constructs a new <tt>CycConstant</tt> object, given a guidString and constant
-     * name.
+     * Constructs a new <tt>CycConstant</tt> object from name, guid and id.
      *
-     * @param guidString Globally Unique Identifier <tt>String</tt> representation
-     * @param name Name of the constant. If prefixed with "#$", then the prefix is
-     * removed for canonical representation.
+     * @param name the constant name
+     * @param guid the GUID that uniquely identifies the constant everywhere
+     * @param id the id that uniquely identifies the constant on a given OpenCyc server
      */
-    public static CycConstant makeCycConstant(String guidString, String name) {
-        return makeCycConstant(Guid.makeGuid(guidString), name);
-    }
-
-    /**
-     * Constructs a new <tt>CycConstant</tt> object given the guid and constant name.
-     *
-     * @param guid Globally Unique Identifier
-     * @param name Name of the constant. If prefixed with "#$", then the prefix is
-     * removed for canonical representation.
-     */
-    public static CycConstant makeCycConstant(Guid guid, String name) {
-        CycConstant cycConstant = getCache(guid);
-        if (cycConstant == null) {
-            cycConstant = new CycConstant(guid, name);
-            addCache(cycConstant);
-            return cycConstant;
-        }
-        return cycConstant;
-    }
-
-    /**
-     * Constructs a <tt>CycConstant<tt> object given the guid and constant name.
-     *
-     * @param guid Globally Unique Identifier
-     * @param name Name of the constant. If prefixed with "#$", then the prefix is
-     * removed for canonical representation.
-     */
-    protected CycConstant (Guid guid, String name) {
-        this.guid = guid;
+    public CycConstant (String name, Guid guid, Integer id) {
         if (name.startsWith("#$"))
             this.name = name.substring(2);
         else
             this.name = name;
+        this.guid = guid;
+        this.id = id;
+        this.addCache(this);
     }
 
     /**
@@ -129,7 +99,10 @@ public class CycConstant extends CycFort implements Comparable {
      * @param indent an int that specifies by how many spaces to indent
      * @param relative a boolean; if true indentation is relative, otherwise absolute
      */
-    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
+    /**
+     * Prints the XML representation of the CycFort to an <tt>XMLPrintWriter</tt>
+     */
+    public void toXML (XMLPrintWriter xmlWriter, int indent, boolean relative)
         throws java.io.IOException {
         xmlWriter.printXMLStartTag(constantXMLTag, indent, relative, true);
         xmlWriter.printXMLStartTag(guidXMLTag, indentLength, true, false);
@@ -211,23 +184,23 @@ public class CycConstant extends CycFort implements Comparable {
      * Adds the <tt>CycConstant<tt> to the cache.
      */
     public static void addCache(CycConstant cycConstant) {
-        cache.addElement(cycConstant.guid, cycConstant);
+        cache.addElement(cycConstant.name, cycConstant);
     }
 
     /**
-     * Retrieves the <tt>CycConstant<tt> with guid, returning null if not found in the cache.
+     * Retrieves the <tt>CycConstant<tt> with name, returning null if not found in the cache.
      */
-    public static CycConstant getCache(Guid guid) {
-        return (CycConstant) cache.getElement(guid);
+    public static CycConstant getCache(String name) {
+        return (CycConstant) cache.getElement(name);
     }
 
     /**
      * Removes the cycConstant from the cache if it is contained within.
      */
-    public static void removeCache(Guid guid) {
-        Object element = cache.getElement(guid);
+    public static void removeCache(CycConstant cycConstant) {
+        Object element = cache.getElement(cycConstant.name);
         if (element != null)
-            cache.addElement(guid, null);
+            cache.addElement(cycConstant.name, null);
     }
 
     /**

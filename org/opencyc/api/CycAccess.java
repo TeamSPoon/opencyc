@@ -190,7 +190,7 @@ public class CycAccess {
         this.communicationMode = communicationMode;
         this.persistentConnection = persistentConnection;
         if (persistentConnection)
-            cycConnection = new CycConnection(hostName, port, communicationMode);
+            cycConnection = new CycConnection(hostName, port, communicationMode, this);
         initializeConstants();
     }
 
@@ -248,7 +248,7 @@ public class CycAccess {
     private Object [] converse(Object command)  throws IOException, UnknownHostException {
         Object [] response = {null, null};
         if (! persistentConnection)
-            cycConnection = new CycConnection(hostName, port, communicationMode);
+            cycConnection = new CycConnection(hostName, port, communicationMode, this);
         response = cycConnection.converse(command);
         if (! persistentConnection)
             cycConnection.close();
@@ -265,6 +265,9 @@ public class CycAccess {
         Object [] response = {null, null};
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
+
+            //TODO make sure constants are complete
+
             return (CycList) response[1];
         }
         else
@@ -297,7 +300,7 @@ public class CycAccess {
         Object [] response = {null, null};
         response = converse(command);
         if (response[0].equals(Boolean.TRUE)) {
-            if (response[1].equals("T"))
+            if (response[1].toString().equals("T"))
                 return true;
             else
                 return false;
@@ -376,66 +379,129 @@ public class CycAccess {
     }
 
     /**
-     * Gets a CycConstant by using its GUID.
-     */
-    public CycConstant getConstantByGuid (Guid guid)  throws IOException, UnknownHostException {
-        CycConstant answer = CycConstant.getCache(guid);
-        if (answer != null)
-            return answer;
-        Object [] response = {null, null};
-        String command = "(find-constant-by-guid (string-to-guid \"" + guid + "\"))";
-        response = converse(command);
-        if (response[0].equals(Boolean.TRUE)) {
-            String constantName = (String) response[1];
-            return CycConstant.makeCycConstant(guid, constantName);
-        }
-        else
-            throw new IOException(response[1].toString());
-    }
-
-    /**
      * Gets a CycConstant by using its constant name.
      *
+     * @param constantName the name of the constant to be instantiated
      * @return the complete <tt>CycConstant</tt> if found, otherwise return null
      */
     public CycConstant getConstantByName (String constantName)
         throws IOException, UnknownHostException {
-        Object [] response = {null, null};
-        CycList command = new CycList();
-        command.add(CycSymbol.makeCycSymbol("find-constant"));
-        command.add(constantName);
-        response = converse(command);
-        if (response[0].equals(Boolean.FALSE))
-            throw new IOException(response[1].toString());
-        if (response[1].equals(CycSymbol.nil))
+        String name = constantName;
+        if (constantName.startsWith("#$"))
+            name = name.substring(2);
+        CycConstant answer = CycConstant.getCache(name);
+        if (answer != null)
+            return answer;
+        answer = new CycConstant();
+        answer.name = name;
+        Integer id = getConstantId(name);
+        if (id == null)
             return null;
-        /*
+        answer.id = id;
+        answer.guid = getConstantGuid(name);
+        CycConstant.addCache(answer);
+        return answer;
+    }
 
-         {
-            String guid = ((String) response[1]).substring(3, 39);
-            return CycConstant.makeCycConstant(guid, constantName);
+    /**
+     * Gets the ID for the given CycConstant.
+     *
+     * @param cycConstant the <tt>CycConstant</tt> object for which the id is sought
+     * @return the ID for the given CycConstant, or null if the constant does not exist.
+     */
+    public Integer getConstantId (CycConstant cycConstant)  throws IOException, UnknownHostException {
+        return getConstantId(cycConstant.name);
+    }
+
+    /**
+     * Gets the ID for the given constant name.
+     *
+     * @param constantName the name of the constant object for which the id is sought
+     * @return the ID for the given constant name, or null if the constant does not exist.
+     */
+    public Integer getConstantId (String constantName)  throws IOException, UnknownHostException {
+        String command = "(boolean (find-constant \"" + constantName + "\"))";
+        boolean constantExists = converseBoolean(command);
+        if (constantExists) {
+            command = "(constant-id (find-constant \"" + constantName + "\"))";
+            return new Integer(converseInt(command));
         }
-        else if (((String) response[1]).indexOf("is not an existing constant") > -1)
-            return null;
         else
-            throw new IOException(response[1].toString());
-            */
             return null;
     }
 
     /**
-     * Gets a CycConstant by using its ID.
+     * Gets the Guid for the given CycConstant, raising an exception if the constant does not
+     * exist.
+     *
+     * @param cycConstant the <tt>CycConstant</tt> object for which the id is sought
+     * @return the Guid for the given CycConstant
      */
-    public CycConstant getConstantById (int id)  throws IOException, UnknownHostException {
-        Object [] response = {null, null};
-        String command = "(find-constant-by-id " + id + ")";
-        response = converse(command);
-        if (response[0].equals(Boolean.TRUE)) {
-            String constantName = (String) response[1];
-            return getConstantByName(constantName);
+    public Guid getConstantGuid (CycConstant cycConstant)
+        throws IOException, UnknownHostException {
+        return getConstantGuid(cycConstant.name);
+    }
+
+    /**
+     * Gets the Guid for the given constant name, raising an exception if the constant does not
+     * exist.
+     *
+     * @param constantName the name of the constant object for which the Guid is sought
+     * @return the Guid for the given CycConstant
+     */
+    public Guid getConstantGuid (String constantName)
+        throws IOException, UnknownHostException {
+        String command = "(guid-to-string (constant-guid (find-constant \"" +
+                         constantName + "\")))";
+        return Guid.makeGuid(converseString(command));
+    }
+
+    /**
+     * Gets a <tt>CycConstant</tt> by using its ID.
+     *
+     * @param id the id of the <tt>CycConstant</tt> sought
+     * @return the <tt>CycConstant</tt> if found or <tt>null</tt> if not found
+     */
+    public CycConstant getConstantById (Integer id)  throws IOException, UnknownHostException {
+        String command = "(boolean (find-constant-by-id " + id + "))";
+        boolean constantExists = converseBoolean(command);
+        if (! constantExists)
+            return null;
+        command = "(constant-name (find-constant-by-id " + id + "))";
+        String constantName = this.converseString(command);
+        return this.getConstantByName(constantName);
+    }
+
+    /**
+     * Gets a CycConstant by using its GUID.
+     */
+    public CycConstant getConstantByGuid (Guid guid)  throws IOException, UnknownHostException {
+        String command = "(boolean (find-constant-by-guid (string-to-guid \"" + guid + "\")))";
+        boolean constantExists = converseBoolean(command);
+        if (! constantExists)
+            return null;
+        command = "(constant-name (find-constant-by-guid (string-to-guid \"" + guid + "\")))";
+        String constantName = this.converseString(command);
+        return this.getConstantByName(constantName);
+    }
+
+    /**
+     * Gets a CycNart by using its id.
+     */
+    public CycNart getCycNartById (Integer id)  throws IOException, UnknownHostException {
+        CycNart answer = CycNart.getCache(id);
+        if (answer != null) {
+            return answer;
         }
-        else
-            throw new IOException(response[1].toString());
+        else {
+            answer = new CycNart();
+            answer.id = id;
+        }
+            /*
+        String command = "(assertion-formula (find-assertion-by-id " + id + "))";
+        answer.setFormula(converseList(command));
+        */
+        return answer;
     }
 
     /**
@@ -1082,7 +1148,7 @@ public class CycAccess {
      */
     public synchronized void kill (CycConstant cycConstant)   throws IOException, UnknownHostException {
         converseBoolean("(cyc-kill " + cycConstant.cycName() + ")");
-        CycConstant.removeCache(cycConstant.guid);
+        CycConstant.removeCache(cycConstant);
     }
 
     public synchronized void kill (CycConstant[] cycConstants)   throws IOException, UnknownHostException {
@@ -1152,10 +1218,13 @@ public class CycAccess {
         CycConstant cycConstant = getConstantByName(constantName);
         if (cycConstant != null)
             return cycConstant;
+        String name = constantName;
+        if (name.startsWith("#$"))
+            name = name.substring(2);
         String command = withBookkeepingInfo() +
-            "(cyc-create-new-permanent \"" + constantName + "\"))";
+            "(cyc-create-new-permanent \"" + name + "\"))";
         converseString(command);
-        return getConstantByName(constantName);
+        return getConstantByName(name);
     }
 
     /**

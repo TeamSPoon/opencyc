@@ -457,7 +457,9 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return an incomplete <tt>CycConstant</tt> having the input id
      */
     public CycConstant readConstant () throws IOException {
-        return  new CycConstant(readInt());
+        CycConstant answer = new CycConstant();
+        answer.id = new Integer(readInt());
+        return  answer;
     }
 
     /**
@@ -466,7 +468,9 @@ public class CfaslInputStream extends BufferedInputStream {
      * @return an incomplete <tt>CycConstant</tt> having the input id
      */
     public CycNart readNart () throws IOException {
-        return  new CycNart(readInt());
+        CycNart answer = new CycNart();
+        answer.id = new Integer(readInt());
+        return  answer;
     }
 
     /**
@@ -478,6 +482,10 @@ public class CfaslInputStream extends BufferedInputStream {
         return  new CycAssertion(new Integer(readInt()));
     }
 }
+
+
+
+
 
 
 

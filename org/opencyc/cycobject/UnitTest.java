@@ -30,6 +30,12 @@ import org.opencyc.api.*;
 public class UnitTest extends TestCase {
 
     /**
+     * Main method in case tracing is prefered over running JUnit.
+     */
+    public static void main(String[] args) {
+        runTests();
+    }
+    /**
      * Construct a new UnitTest object.
      * @param name the test case name.
      */
@@ -129,7 +135,10 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(0, CycConstant.getCacheSize());
         String guidString = "bd58c19d-9c29-11b1-9dad-c379636f7270";
         String constantName = "#$TameAnimal";
-        CycConstant cycConstant1 = CycConstant.makeCycConstant(guidString, constantName);
+        CycConstant cycConstant1 =
+            new CycConstant(constantName,
+                            Guid.makeGuid(guidString),
+                            new Integer(61101217));
         Assert.assertNotNull(cycConstant1);
         Assert.assertEquals(1, CycConstant.getCacheSize());
         Assert.assertEquals(constantName.substring(2), cycConstant1.toString());
@@ -137,11 +146,17 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(guidString, cycConstant1.guid.toString());
 
         // Attempt to create a duplicate returns the cached existing object.
-        CycConstant cycConstant2 = CycConstant.makeCycConstant(guidString, constantName);
+        CycConstant cycConstant2 =
+            new CycConstant(constantName,
+                            Guid.makeGuid(guidString),
+                            new Integer(61101217));
         Assert.assertEquals(1, CycConstant.getCacheSize());
         Assert.assertEquals(cycConstant1, cycConstant2);
 
-        CycConstant cycConstant3 = CycConstant.makeCycConstant(guidString, constantName);
+        CycConstant cycConstant3 =
+            new CycConstant(constantName,
+                            Guid.makeGuid(guidString),
+                            new Integer(61101217));
         Assert.assertEquals(cycConstant1.toString(), cycConstant3.toString());
         Assert.assertEquals(cycConstant1.cyclify(), cycConstant3.cyclify());
         Assert.assertEquals(cycConstant1, cycConstant3);
@@ -150,10 +165,18 @@ public class UnitTest extends TestCase {
         // compareTo
         ArrayList constants = new ArrayList();
 
-        constants.add(CycConstant.makeCycConstant(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"), "#$Dog"));
-        constants.add(CycConstant.makeCycConstant(Guid.makeGuid("bd590573-9c29-11b1-9dad-c379636f7270"), "#$Cat"));
-        constants.add(CycConstant.makeCycConstant(Guid.makeGuid("bd588f01-9c29-11b1-9dad-c379636f7270"), "#$Brazil"));
-        constants.add(CycConstant.makeCycConstant(Guid.makeGuid("bd5880cc-9c29-11b1-9dad-c379636f7270"), "#$Collection"));
+        constants.add(new CycConstant("#$Dog",
+                                      Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"),
+                                      new Integer(23200)));
+        constants.add(new CycConstant("#$Cat",
+                                      Guid.makeGuid("bd590573-9c29-11b1-9dad-c379636f7270"),
+                                      new Integer(34163)));
+        constants.add(new CycConstant("#$Brazil",
+                                      Guid.makeGuid("bd588f01-9c29-11b1-9dad-c379636f7270"),
+                                      new Integer(3841)));
+        constants.add(new CycConstant("#$Collection",
+                                      Guid.makeGuid("bd5880cc-9c29-11b1-9dad-c379636f7270"),
+                                      new Integer(204)));
         Collections.sort(constants);
         Assert.assertEquals("[Brazil, Cat, Collection, Dog]", constants.toString());
 
@@ -166,38 +189,49 @@ public class UnitTest extends TestCase {
     public void testCycNart() {
         System.out.println("** testCycNart **");
         CycConstant fruitFn =
-            CycConstant.makeCycConstant("bd58c19d-9c29-11b1-9dad-c379636f7270",
-                            "FruitFn");
+            new CycConstant("FruitFn",
+                            Guid.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f7270"),
+                            new Integer(10614));
         CycConstant appleTree =
-            CycConstant.makeCycConstant("bd58c19d-9c29-11b1-9dad-c379636f0000",
-                            "AppleTree");
+            new CycConstant("AppleTree",
+                            Guid.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f0000"),
+                            new Integer(16797));
         CycNart cycNart = new CycNart(fruitFn, appleTree);
         Assert.assertNotNull(cycNart);
         Assert.assertEquals("(FruitFn AppleTree)",cycNart.toString());
         Assert.assertEquals("(#$FruitFn #$AppleTree)",cycNart.cyclify());
 
         CycConstant fruitFn2 =
-            CycConstant.makeCycConstant("bd58c19d-9c29-11b1-9dad-c379636f7270",
-                            "FruitFn");
+            new CycConstant("FruitFn",
+                            Guid.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f7270"),
+                            new Integer(10614));
         CycConstant appleTree2 =
-            CycConstant.makeCycConstant("bd58c19d-9c29-11b1-9dad-c379636f0000",
-                            "AppleTree");
+            new CycConstant("AppleTree",
+                            Guid.makeGuid("bd58c19d-9c29-11b1-9dad-c379636f0000"),
+                            new Integer(16797));
         CycNart cycNart2 = new CycNart(fruitFn2, appleTree2);
         Assert.assertEquals(cycNart.toString(), cycNart2.toString());
         Assert.assertEquals(cycNart, cycNart2);
 
         // compareTo
         ArrayList narts = new ArrayList();
-        CycConstant governmentFn = new CycConstant(Guid.makeGuid("c10aef3d-9c29-11b1-9dad-c379636f7270"),
-                                                   "GovernmentFn");
-        CycConstant brazil = new CycConstant(Guid.makeGuid("bd588f01-9c29-11b1-9dad-c379636f7270"),
-                                             "Brazil");
+        CycConstant governmentFn =
+            new CycConstant("GovernmentFn",
+                            Guid.makeGuid("c10aef3d-9c29-11b1-9dad-c379636f7270"),
+                            new Integer(62025533));
+        CycConstant brazil =
+            new CycConstant("#$Brazil",
+                            Guid.makeGuid("bd588f01-9c29-11b1-9dad-c379636f7270"),
+                            new Integer(3841));
         CycList nartCycList = new CycList();
         nartCycList.add(governmentFn);
         nartCycList.add(brazil);
         narts.add(new CycNart(nartCycList));
         Assert.assertEquals("[(GovernmentFn Brazil)]", narts.toString());
-        CycConstant plusFn = new CycConstant(Guid.makeGuid("bd5880ae-9c29-11b1-9dad-c379636f7270"), "PlusFn");
+        CycConstant plusFn =
+            new CycConstant("PlusFn",
+                            Guid.makeGuid("bd5880ae-9c29-11b1-9dad-c379636f7270"),
+                            new Integer(174));
         CycList nartCycList2 = new CycList();
         nartCycList2.add(plusFn);
         nartCycList2.add(new Long(100));
@@ -265,13 +299,6 @@ public class UnitTest extends TestCase {
     public void testCycList() {
         System.out.println("** testCycList **");
 
-        CycAccess cycAccess = null;
-        try {
-            cycAccess = new CycAccess();
-        }
-        catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
 
         // Simple empty list constructor.
         ArrayList arrayList = new ArrayList();
@@ -282,8 +309,9 @@ public class UnitTest extends TestCase {
         // Construct list of one element.
         ArrayList arrayList2 = new ArrayList();
         CycConstant brazil =
-            CycConstant.makeCycConstant("bd58c19d-9c29-11b1-9dad-c379636f0099",
-                                        "Brazil");
+            new CycConstant("#$Brazil",
+                            Guid.makeGuid("bd588f01-9c29-11b1-9dad-c379636f7270"),
+                            new Integer(3841));
         arrayList2.add(brazil);
         CycList cycList2 = new CycList(arrayList2);
         Assert.assertEquals("(Brazil)", cycList2.toString());
@@ -335,6 +363,15 @@ public class UnitTest extends TestCase {
         Assert.assertTrue(cycList7.size() == 1);
         Assert.assertEquals("(10 . Brazil)", cycList7.toString());
         //CycListParser.verbosity = 10;
+
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
         try {
             CycList cycList7a = cycAccess.makeCycList("(a . (b . (c . (d))))");
             Assert.assertEquals("(a b c d)", cycList7a.toString());
@@ -390,6 +427,7 @@ public class UnitTest extends TestCase {
             Assert.assertEquals(cycAccess.makeCycList("(((d)))"), cycList17.third());
         }
         catch (Exception e) {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
 

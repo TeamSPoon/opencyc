@@ -261,6 +261,9 @@ public abstract class XMLWriter {
         this.indentPrintln(xmltag, indent, relative);
     }
 
+    public void printXMLStartTag (String tag, int indent, boolean relative) throws IOException {
+         indentPrint(tag, indent, relative);
+    }
     /**
      * Prints to this <code>XMLWriter</code> an XML start tag with no attributes.
      * The tag is indented by @see #indent spaces either from the beginning of the
@@ -375,6 +378,10 @@ public abstract class XMLWriter {
         this.print(xmltag + "\n");
     }
 }
+
+
+
+
 
 
 

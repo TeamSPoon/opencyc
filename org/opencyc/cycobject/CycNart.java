@@ -1,9 +1,9 @@
 package org.opencyc.cycobject;
 
-import java.io.Serializable;
-
+import java.io.*;
 import java.util.*;
-//import com.cyc.xml.XMLPrintWriter;
+import org.apache.oro.util.*;
+import org.opencyc.xml.XMLPrintWriter;
 
 /**
  * This class implements the behavior and attributes of a
@@ -59,12 +59,15 @@ public class CycNart extends CycFort implements Comparable {
     protected List arguments = new ArrayList();
 
     /**
-     * Constructs a new incomplete <tt>CycNart</tt> object from the id.
-     *
-     * @param id the id for this NART in the local KB
+     * Least Recently Used Cache of CycNarts, so that a reference to an existing <tt>CycNart</tt>
+     * is returned instead of constructing a duplicate.
      */
-    public CycNart (int id) {
-        this.id = id;
+    protected static Cache cache = new CacheLRU(500);
+
+    /**
+     * Constructs a new incomplete <tt>CycNart</tt> object.
+     */
+    public CycNart () {
     }
 
     /**
@@ -175,8 +178,8 @@ public class CycNart extends CycFort implements Comparable {
      * of the xml_writer object, relative = true.
      *
      */
-/*
-    public void toXML (XMLPrintWriter xmlWriter, int indent, boolean relative) {
+    public void toXML (XMLPrintWriter xmlWriter, int indent, boolean relative)
+        throws IOException {
         xmlWriter.printXMLStartTag(natXMLtag, indent, relative);
         xmlWriter.printXMLStartTag(functorXMLtag, indentLength, true);
         this.functor.toXML(xmlWriter, indentLength, true);
@@ -195,7 +198,7 @@ public class CycNart extends CycFort implements Comparable {
         }
         xmlWriter.printXMLEndTag(natXMLtag, -indentLength, true);
     }
-*/
+
     /**
      * Returns a string representation of the OpenCyc NART.
      *
@@ -329,4 +332,45 @@ public class CycNart extends CycFort implements Comparable {
             throw new ClassCastException("Must be a CycNart object");
         return this.toString().compareTo(object.toString());
      }
+
+    /**
+     * Resets the <tt>CycNart</tt> cache.
+     */
+    public static void resetCache() {
+        cache = new CacheLRU(500);
+    }
+
+    /**
+     * Adds the <tt>CycNart</tt> to the cache.
+     */
+    public static void addCache(CycNart cycNart) {
+        cache.addElement(cycNart.id, cycNart);
+    }
+
+    /**
+     * Retrieves the <tt>CycNart</tt> with name, returning null if not found in the cache.
+     */
+    public static CycNart getCache(Integer id) {
+        return (CycNart) cache.getElement(id);
+    }
+
+    /**
+     * Removes the <tt>CycNart</tt> from the cache if it is contained within.
+     */
+    public static void removeCache(CycNart cycNart) {
+        Object element = cache.getElement(cycNart.id);
+        if (element != null)
+            cache.addElement(cycNart.id, null);
+    }
+
+    /**
+     * Returns the size of the <tt>CycNart</tt> object cache.
+     *
+     * @return an <tt>int</tt> indicating the number of <tt>CycNart</tt> objects in the cache
+     */
+    public static int getCacheSize() {
+        return cache.size();
+    }
+
 }
+

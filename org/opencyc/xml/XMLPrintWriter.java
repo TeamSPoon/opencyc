@@ -61,6 +61,7 @@ public class XMLPrintWriter extends XMLWriter {
         writer.print(indentString + string);
     }
 
+
     /**
      * Prints a string to the <code>PrintWriter</code> stored in the field @see #writer.
      *
@@ -77,6 +78,10 @@ public class XMLPrintWriter extends XMLWriter {
         writer.flush();
     }
 }
+
+
+
+
 
 
 

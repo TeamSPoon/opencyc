@@ -428,7 +428,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         if (cycConnection.trace)
             System.out.println("writeConstant = " + cycConstant);
         write(CFASL_CONSTANT);
-        writeInt(cycConstant.id);
+        writeInt(cycConstant.id.intValue());
     }
 
     /**
@@ -440,7 +440,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
         if (cycConnection.trace)
             System.out.println("writeNart = " + cycNart);
         write(CFASL_NART);
-        writeInt(cycNart.id);
+        writeInt(cycNart.id.intValue());
     }
 
     /**
@@ -504,6 +504,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
             throw  new RuntimeException("No cfasl opcode for " + o);
     }
 }
+
+
+
+
 
 
 

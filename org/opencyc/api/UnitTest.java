@@ -88,6 +88,7 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         catch (IOException e) {
+            e.printStackTrace();
             Assert.fail(e.toString());
         }
 
@@ -160,12 +161,14 @@ public class UnitTest extends TestCase {
 
     public void testBinaryCycConnection () {
         System.out.println("**** testBinaryCycConnection ****");
-
+        CycAccess cycAccess = null;
         CycConnection cycConnection = null;
         try {
-            cycConnection = new CycConnection(CycConnection.DEFAULT_HOSTNAME,
-                                              3640,
-                                              CycConnection.BINARY_MODE);
+            cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
+                                      CycConnection.DEFAULT_BASE_PORT,
+                                      CycConnection.BINARY_MODE,
+                                      CycAccess.PERSISTENT_CONNECTION);
+            cycConnection = cycAccess.cycConnection;
             //cycConnection.trace = true;
         }
         catch (Exception e) {
@@ -291,7 +294,7 @@ public class UnitTest extends TestCase {
         // getConstantById
         cycConstant = null;
         try {
-            cycConstant = cycAccess.getConstantById(23200);
+            cycConstant = cycAccess.getConstantById(new Integer(23200));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -357,14 +360,14 @@ public class UnitTest extends TestCase {
             cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
                                       CycConnection.DEFAULT_BASE_PORT,
                                       CycConnection.BINARY_MODE,
-                                      CycAccess.TRANSIENT_CONNECTION);
+                                      CycAccess.PERSISTENT_CONNECTION);
         }
-        catch (UnknownHostException e) {
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("\nException: " + e.getMessage());
             Assert.fail(e.toString());
         }
-        catch (IOException e) {
-            Assert.fail(e.toString());
-        }
+
         // getConstantByName.
         CycConstant cycConstant = null;
         try {
@@ -381,7 +384,8 @@ public class UnitTest extends TestCase {
 
         // getConstantByGuid.
         try {
-            cycConstant = cycAccess.getConstantByGuid(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"));
+            cycConstant =
+                cycAccess.getConstantByGuid(Guid.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -396,7 +400,7 @@ public class UnitTest extends TestCase {
         // getConstantById
         cycConstant = null;
         try {
-            cycConstant = cycAccess.getConstantById(23200);
+            cycConstant = cycAccess.getConstantById(new Integer(23200));
         }
         catch (UnknownHostException e) {
             Assert.fail(e.toString());
@@ -438,6 +442,7 @@ public class UnitTest extends TestCase {
         }
         Assert.assertNotNull(isas);
         Assert.assertTrue(isas instanceof CycList);
+        System.out.println("isas " + isas);
         isas = ((CycList) isas).sort();
         try {
             Assert.assertTrue(isas.contains(cycAccess.getConstantByName("OrganismClassificationType")));

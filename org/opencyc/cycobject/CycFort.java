@@ -1,8 +1,8 @@
 package org.opencyc.cycobject;
 
 
-import java.io.Serializable;
-//import org.opencyc.xml.XMLPrintWriter;
+import java.io.*;
+import org.opencyc.xml.XMLPrintWriter;
 
 /**
  * This class implements a Cyc Fort (First Order Reified Term).
@@ -35,21 +35,21 @@ public abstract class CycFort implements Serializable {
      * The ID of the <tt>CycFort<tt> object which is an integer unique within an OpenCyc
      * KB but not necessarily unique globally.
      */
-    public int id;
+    public Integer id;
 
-  /**
-   * Returns a cyclified string representation of the OpenCyc FORT.
-   * Embedded constants are prefixed with ""#$".
-   *
-   * @return a cyclified <tt>String</tt>.
-   */
-  public abstract String cyclify();
+    /**
+     * Returns a cyclified string representation of the OpenCyc FORT.
+     * Embedded constants are prefixed with ""#$".
+     *
+     * @return a cyclified <tt>String</tt>.
+     */
+    public abstract String cyclify();
 
-  /**
-   * Prints the XML representation of the CycFort to an <tt>XMLPrintWriter</tt>
-   */
-/*
-  public abstract void toXML (XMLPrintWriter xml_writer, int indent, boolean relative);
-*/
+    /**
+     * Prints the XML representation of the CycFort to an <tt>XMLPrintWriter</tt>
+     */
+    public abstract void toXML (XMLPrintWriter xml_writer, int indent, boolean relative)
+        throws IOException;
+
 }
 

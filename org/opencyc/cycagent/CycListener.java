@@ -83,10 +83,10 @@ class CycListener implements Runnable {
                 if (verbosity > 2)
                     Log.current.println("Cyc Connection accepted " + cycSocket);
                 // Spawn child thread to read from the socket.
-                CycInputHandler cycInputHandler =
-                    new CycInputHandler(cycSocket);
-                Thread cycInputHandlerThread = new Thread(cycInputHandler);
-                cycInputHandlerThread.start();
+                CycClientHandler cycClientHandler =
+                    new CycClientHandler(cycSocket);
+                Thread cycClientHandlerThread = new Thread(cycClientHandler);
+                cycClientHandlerThread.start();
             }
         }
         catch (IOException e) {
@@ -103,7 +103,7 @@ class CycListener implements Runnable {
     }
 
     /**
-     * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
+     * Sets verbosity of this object's output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      *
      * @param verbosity 0 --> quiet ... 9 -> maximum diagnostic input

@@ -16,7 +16,10 @@ import  org.opencyc.util.*;
  * message queue.<p>
  *
  * The cyc image hosts one or more agent processes that can access the agent community
- * via connection to the AgentManager.
+ * via connection to the AgentManager.  The input message from the Cyc agent is forwarded
+ * onto the agent community via the CycProxy instance associated with this cyc image.  A
+ * CycProxy object is created if it does not yet exist.  A message of (T T) is sent back
+ * to the client cyc agent to acknowledge receipt of it's message by this object.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -87,15 +90,15 @@ class CycClientHandler implements Runnable {
             cycConnection = new CycConnection(cfaslSocket);
         }
         catch (Exception e) {
-            Log.current.println("Exception creating socket i/o: " + e.getMessage());
-            throw new RuntimeException("Exception creating socket i/o: " + e.getMessage());
+            Log.current.println("Exception creating CycConnection " + e.getMessage());
+            throw new RuntimeException("Exception creating CycConnection: " + e.getMessage());
         }
         Object fipaTransportMessage = null;
         try {
-            fipaTransportMessage = cfaslInputStream.readObject();
+            fipaTransportMessage = cycConnection.receiveBinary();
         }
         catch (Exception e) {
-            Log.current.println("Exception reading socket i/o: " + e.getMessage());
+            Log.current.println("Exception reading CycConnection: " + e.getMessage());
             return;
         }
         if (! (fipaTransportMessage instanceof CycList)) {
@@ -191,16 +194,27 @@ class CycClientHandler implements Runnable {
         catch (Exception e) {
             Log.current.println("Exception when sending\n" + acl + "\n" + e.getMessage());
         }
+        CycList acknowledgement = new CycList();
+        acknowledgement.add(CycObjectFactory.t);
+        acknowledgement.add(CycObjectFactory.t);
+
+        try {
+            cycConnection.sendBinary(acknowledgement);
+        }
+        catch (Exception e) {
+            Log.current.println("Exception sending acknowledgement: " + e.getMessage());
+            return;
+        }
         close();
     }
 
 
     /**
-     * Closes the socket
+     * Closes the cyc connection.
      */
     public void close () {
         try {
-            socket.close();
+            cycConnection.close();
         }
         catch (Exception e) {
             Log.current.println("Exception closing socket i/o: " + e);

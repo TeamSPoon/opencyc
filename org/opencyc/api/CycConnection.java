@@ -470,7 +470,7 @@ public class CycConnection implements CycConnectionInterface {
      *
      * @param message the api command
      */
-    private void sendBinary (Object message) throws IOException {
+    public void sendBinary (Object message) throws IOException {
         if (trace > API_TRACE_NONE) {
             if (message instanceof CycList)
                 System.out.println(((CycList) message).safeToString() + " --> cyc");
@@ -489,7 +489,7 @@ public class CycConnection implements CycConnectionInterface {
      * @return an array of two objects, the first is a Boolean response, and the second is the
      * response object or error string.
      */
-    private Object[] receiveBinary () throws IOException, CycApiException {
+    public Object[] receiveBinary () throws IOException, CycApiException {
         Object[] answer =  {
             null, null
         };

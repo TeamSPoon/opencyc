@@ -25,6 +25,9 @@ import org.opencyc.elf.wm.Predictor;
 import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
+import java.util.logging.Logger;
+import java.util.logging.LogManager;
+
 import junit.framework.*;
 
 import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
@@ -86,6 +89,8 @@ public class UnitTest extends TestCase {
    */
   public void testELFFactory() {
     System.out.println("\n*** testELFFactory ***");
+    
+    logger.info("Creating ELFFactory");
     ELFFactory elfFactory = new ELFFactory();
     Node node = elfFactory.makeNodeShell();
     
@@ -177,6 +182,11 @@ public class UnitTest extends TestCase {
   
   //// Internal Rep
   
+  /**
+   * the logger
+   */
+  protected static Logger logger;
+  
   //// Main
   
   /**
@@ -184,6 +194,7 @@ public class UnitTest extends TestCase {
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {
+    logger = Logger.getLogger("org.opencyc.elf");
     junit.textui.TestRunner.run(suite());
     System.exit(0);
   }

@@ -25,6 +25,8 @@ import org.opencyc.elf.wm.Predictor;
 import org.opencyc.elf.wm.WorldModel;
 
 //// External Imports
+import java.util.logging.Logger;
+
 import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
 import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
@@ -59,6 +61,7 @@ public class ELFFactory {
   
   /** Creates a new instance of ELFFactory. */
   public ELFFactory() {
+    logger = Logger.getLogger("org.opencyc.elf.ELFFactory");
   }
   
   //// Public Area
@@ -199,6 +202,11 @@ public class ELFFactory {
   
   //// Internal Rep
     
+  /**
+   * the logger
+   */
+  protected Logger logger;
+  
   /**
    * the Elementary Loop Functioning (ELF) node
    */

@@ -505,9 +505,37 @@ public class UnitTest extends TestCase {
         Assert.assertEquals(new Integer(0), interpreter.treeInterpreter.getVariable("x"));
         System.out.print(interpreter.displayStateConfigurationTree());
         interpreter.eventDispatcher();
+        Assert.assertNotNull(interpreter.getCurrentEvent());
+        Assert.assertTrue(interpreter.getCurrentEvent() instanceof CompletionEvent);
         interpreter.eventProcessor();
         interpreter.fireSelectedTransitions();
+        interpreter.getStateMachineFactory().destroyEvent(interpreter.getCurrentEvent());
+        interpreter.currentEvent = null;
 
+        Assert.assertNotNull(stateMachine.getTop());
+        Assert.assertTrue(stateMachine.getTop() instanceof CompositeState);
+        Assert.assertNotNull(stateMachine.getTop().getStateInterpreter());
+        Assert.assertEquals(stateMachine.getTop(),
+                            stateMachine.getTop().getStateInterpreter().getState());
+
+        Assert.assertNotNull(counterState.getStateInterpreter());
+        Assert.assertEquals(counterState,
+                            counterState.getStateInterpreter().getState());
+
+        Assert.assertEquals(new Integer(1), interpreter.treeInterpreter.getVariable("x"));
+        System.out.print(interpreter.displayStateConfigurationTree());
+        for (int i = 2; i < 10; i++) {
+            interpreter.eventDispatcher();
+            interpreter.eventProcessor();
+            interpreter.fireSelectedTransitions();
+            Assert.assertEquals(new Integer(i), interpreter.treeInterpreter.getVariable("x"));
+        }
+        System.out.print(interpreter.displayStateConfigurationTree());
+        interpreter.eventDispatcher();
+        interpreter.eventProcessor();
+        interpreter.fireSelectedTransitions();
+        Assert.assertEquals(new Integer(9), interpreter.treeInterpreter.getVariable("x"));
+        System.out.print(interpreter.displayStateConfigurationTree());
 
         System.out.println("\n**** testSimpleStateMachine ****");
     }

@@ -97,22 +97,8 @@ public class StateInterpreter extends Thread {
     public void interpretTransitionEntry (Transition transition) {
         if (verbosity > 2)
             Log.current.println(transition.toString() + " entering " + state.toString());
-        Procedure procedure = transition.getEffect();
-        if (procedure != null) {
-            if (verbosity > 2)
-                Log.current.println("Evaluating effect " + procedure.toString());
-            procedureInterpreter.interpret(procedure);
-        }
-        if (! transition.isSelfTransition())
-            performEntryActions(transition);
-        CompletionEvent completionEvent =
-            interpreter.getStateMachineFactory().makeCompletionEvent(transition.toString() +
-                                                                     "EntyrInto" + state.toString(),
-                                                                     "Completion of " + transition.toString() +
-                                                                     " entering " + state.toString(),
-                                                                     state);
-
-        interpreter.enqueueEvent(completionEvent);
+        performEntryActions(transition);
+        performTransitionEffect(transition);
     }
 
     /**
@@ -140,6 +126,43 @@ public class StateInterpreter extends Thread {
         }
     }
 
+    /**
+     * Performs the transition effect in this state and creates
+     * the transition completion event.
+     */
+    public void performTransitionEffect (Transition transition) {
+        Procedure procedure = transition.getEffect();
+        if (procedure != null) {
+            if (verbosity > 2)
+                Log.current.println("Evaluating effect " + procedure.toString());
+            procedureInterpreter.interpret(procedure);
+        }
+        if (state instanceof FinalState) {
+            exit();
+            state.getContainer().getStateInterpreter().complete();
+            return;
+        }
+        CompletionEvent completionEvent =
+            interpreter.getStateMachineFactory().makeCompletionEvent(transition.toString() +
+                                                                     "EntryInto" + state.toString(),
+                                                                     "Completion of " + transition.toString() +
+                                                                     " entering " + state.toString(),
+                                                                     state);
+        interpreter.enqueueEvent(completionEvent);
+    }
+
+    /**
+     * Completes this composite state.  If this is the top state then
+     * the state machine terminates.
+     */
+    protected void complete () {
+        if (verbosity > 2)
+            Log.current.println("Completing " + state.toString());
+        exit();
+        if (state.equals(interpreter.getStateMachine().getTop()))
+            interpreter.terminate();
+    }
+
 
     /**
      * Enters the given state, which might be the state interpreted by
@@ -154,7 +177,7 @@ public class StateInterpreter extends Thread {
             StateInterpreter stateInterpreter = entryState.getStateInterpreter();
             if (stateInterpreter == null) {
                 stateInterpreter = new StateInterpreter(interpreter, entryState);
-                state.setStateInterpreter(stateInterpreter);
+                entryState.setStateInterpreter(stateInterpreter);
             }
             stateInterpreter.enter();
         }
@@ -214,9 +237,14 @@ public class StateInterpreter extends Thread {
         if (verbosity > 2)
             Log.current.println("Exiting " + state.toString());
         DoActivity doActivityThread = state.getDoActivityThread();
-        doActivityThread.terminate();
+        if (doActivityThread != null)
+            doActivityThread.terminate();
         if (state.getExit() != null)
             procedureInterpreter.interpret(state.getExit());
+        DefaultMutableTreeNode stateNode =
+            (DefaultMutableTreeNode) interpreter.getActiveStates().get(state);
+        interpreter.getActiveStates().remove(state);
+        stateNode.removeFromParent();
         CompletionEvent completionEvent = new CompletionEvent(state);
         interpreter.enqueueEvent(completionEvent);
     }

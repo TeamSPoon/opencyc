@@ -522,6 +522,8 @@ public class StateMachineFactory {
         modelElement.setNamespace(namespace);
         modelElement.setName(name);
         Comment comment = new Comment();
+        comment.setNamespace(namespace);
+        comment.setName("");
         comment.setBody(commentString);
         comment.setAnnotatedElement(modelElement);
         modelElement.setComment(comment);

@@ -154,6 +154,15 @@ public class Interpreter {
     }
 
     /**
+     * Terminates the interpretation of the state machine.
+     */
+    public void terminate () {
+        if (verbosity > 2)
+            Log.current.println("Terminating " + stateMachine.toString());
+        System.exit(0);
+    }
+
+    /**
      * Interprets the state machine.
      */
     public void interpret () {
@@ -318,9 +327,26 @@ public class Interpreter {
         Iterator iter = selectedTransitions.iterator();
         while (iter.hasNext()) {
             Transition transition = (Transition) iter.next();
-            transitionExit(transition);
-            transitionEnter(transition);
+            if (transition.isSelfTransition())
+                 internalTransition(transition);
+            else {
+                transitionExit(transition);
+                transitionEnter(transition);
+            }
         }
+    }
+
+    /**
+     * Interprets the given internal transition.
+     *
+     * @param transition the given internal transition
+     */
+    protected void internalTransition (Transition transition) {
+        State targetState = (State) transition.getTarget();
+        if (verbosity > 2)
+            Log.current.println("Internal transition " + transition.toString() +
+                                " in " + targetState.toString());
+        targetState.getStateInterpreter().performTransitionEffect(transition);
     }
 
     /**

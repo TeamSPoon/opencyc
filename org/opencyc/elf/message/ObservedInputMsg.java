@@ -1,6 +1,7 @@
 package org.opencyc.elf.message;
 
 //// Internal Imports
+import org.opencyc.elf.s.Sensation;
 
 //// External Imports
 
@@ -30,65 +31,35 @@ package org.opencyc.elf.message;
  */
 public class ObservedInputMsg extends GenericMsg {
   
-  /** Creates a new instance of ObservedInputMsg*/
-  public ObservedInputMsg() {
+  /** 
+   * Creates a new instance of ObservedInputMsg given the sensation.
+   *
+   * @param sensation the sensation
+   *
+   */
+  public ObservedInputMsg(Sensation sensation) {
+    this.sensation = sensation;
   }
   
   //// Public Area
   
-  //// Protected Area
-  
   /**
-   * Gets the object for which data is observed.
+   * Gets the sensation.
    *
-   * @return the object for which data is observed
+   * @return tthe sensation
    */
-  public Object getObj () {
-    return obj;
+  public Sensation getSensation () {
+    return sensation;
   }
 
-  /**
-   * Sets the object for which data is observed.
-   *
-   * @param obj the object for which data is observed
-   */
-  public void setObj (Object obj) {
-    this.obj = obj;
-  }
-
-  /**
-   * Gets the observed data associated with the object
-   *
-   * @return the observed data associated with the object
-   */
-  public Object getData () {
-    return data;
-  }
-
-  /**
-   * Sets the observed data associated with the object
-   *
-   * @param data the data associated with the object
-   */
-  public void setData (Object data) {
-    this.data = data;
-  }
-  
   //// Protected Area
   
   //// Private Area
   
   //// Internal Rep
   
-  /**
-   * the object for which data is observed
-   */  
-  protected Object obj;
-  
-  /**
-   * the observed data associated with the object
-   */  
-  protected Object data;
-  
+  /** the sensation */
+  protected Sensation sensation;
+    
   //// Main
 }

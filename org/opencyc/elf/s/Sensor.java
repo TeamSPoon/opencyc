@@ -45,6 +45,13 @@ public interface Sensor {
    */
   public ArrayList getResources();
   
+  /**
+   * Gets the names of sensations that this sensor or virtual sensor (sensory perception) can sense.
+   *
+   * @return the names of sensations that this sensor or virtual sensor (sensory perception) can sense
+   */
+  public ArrayList getSensationCapabilities ();
+  
   /** the console input sensor name */
   public static final String CONSOLE_INPUT = "console input";
 }

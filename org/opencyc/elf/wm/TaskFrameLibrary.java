@@ -40,11 +40,40 @@ public class TaskFrameLibrary {
   
   //// Public Area
   
+  /**
+   * Gets the task frame library singleton instance.
+   *
+   * @return the task frame library singleton instance
+   */
+  public static TaskFrameLibrary getInstance() {
+    return taskFrameLibrary;
+  }
+  
+  /**
+   * Gets the task frame given the task name.
+   *
+   * @param taskName the task name
+   * @return the task frame given the task name
+   */
+  public TaskFrame getTaskFrame (String taskName) {
+    return (TaskFrame) taskFrameDictionary.get(taskName);
+  }
+    
   //// Protected Area
+  
+  /**
+   * Adds a named task frame to the dictionary.
+   */
+  protected void addTaskFrame (TaskFrame taskFrame) {
+    taskFrameDictionary.put(taskFrame.getTaskName(), taskFrame);
+  }
   
   //// Private Area
   
   //// Internal Rep
+  
+  /** the task frame dictionary, task name --> task frame */
+  protected HashMap taskFrameDictionary = new HashMap();
   
   /**
    * the task frame library singleton instance

@@ -1,10 +1,16 @@
 package org.opencyc.elf.bg.taskframe;
 
 //// Internal Imports
+import org.opencyc.elf.a.Actuator;
+
+import org.opencyc.elf.bg.planner.Schedule;
+
 import org.opencyc.elf.goal.Goal;
 
 //// External Imports
 import java.util.ArrayList;
+import java.util.Iterator;
+
 import org.doomdark.uuid.UUID;
 
 /**
@@ -52,8 +58,7 @@ public class TaskFrame {
   public Object clone () {
     TaskFrame taskFrame = new TaskFrame();
     taskFrame.setTaskName(taskName);
-    taskFrame.setActuators(actuators);
-    taskFrame.setSchedules(schedules);
+    taskFrame.setScheduleInfos(scheduleInfos);
     taskFrame.setTaskAction(taskAction);
     taskFrame.setTaskGoal(taskGoal);    
     return taskFrame;
@@ -205,45 +210,34 @@ public class TaskFrame {
   }
 
   /**
-   * Gets the actuators that are responsible for carrying out the task
+   * Gets all the actuators that are responsible for carrying out the task
    * 
-   * @return the actuators that are responsible for carrying
+   * @return all the actuators that are responsible for carrying
    *         out the task
    */
   public ArrayList getActuators () {
+    ArrayList actuators = new ArrayList();
+    Iterator iter = scheduleInfos.iterator();
+    while (iter.hasNext()) {
+      ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
+      actuators.addAll(scheduleInfo.actuators);
+    }
     return actuators;
   }
 
   /**
-   * Sets the actuators that are responsible for carrying out the task
+   * Gets all the resources which are required to execute the task.
    * 
-   * @param actuators the actuators that are responsible for carrying out
-   *        the task
+   * @return all the resources which are required to execute the task
    */
-  public void setActuators (ArrayList actuators) {
-    this.actuators = actuators;
-  }
-
-  /**
-   * Gets the tools, resources, conditions and state information, aside from
-   * task objects, which are required to execute the task
-   * 
-   * @return taskRequirements
-   */
-  public ArrayList getTaskRequirements () {
-    return taskRequirements;
-  }
-
-  /**
-   * Sets the tools, resources, conditions and state information, aside from
-   * task objects, which are required to execute the task
-   * 
-   * @param taskRequirements the tools, resources, conditions and state
-   *        information, aside from task objects, which are required to
-   *        execute the task
-   */
-  public void setTaskRequirements (ArrayList taskRequirements) {
-    this.taskRequirements = taskRequirements;
+  public ArrayList getTaskResources () {
+    ArrayList taskResources = new ArrayList();
+    Iterator iter = scheduleInfos.iterator();
+    while (iter.hasNext()) {
+      ScheduleInfo scheduleInfo = (ScheduleInfo) iter.next();
+      taskResources.addAll(scheduleInfo.resources);
+    }
+    return taskResources;
   }
 
   /**
@@ -273,8 +267,8 @@ public class TaskFrame {
    *         for generating plans, organized as a dictionary of execeptional
    *         states and associated procedures for handling them
    */
-  public ArrayList getSchedules () {
-    return schedules;
+  public ArrayList getScheduleInfos () {
+    return scheduleInfos;
   }
 
   /**
@@ -286,12 +280,83 @@ public class TaskFrame {
    *        for generating plans, organized as a dictionary of execeptional
    *        states and associated procedures for handling them
    */
-  public void setSchedules (ArrayList schedules) {
-    this.schedules = schedules;
+  public void addScheduleInfo (Schedule schedule,
+                               ArrayList resources,
+                               ArrayList actuators) {
+    ScheduleInfo scheduleInfo = new ScheduleInfo (schedule, resources, actuators);
+    scheduleInfos.add(scheduleInfo);
   }
 
+  /**
+   * ScheduleInfo contains the information about one schedule that contributes to achieving the
+   * task goal or to accomplishing the task action.
+   */
+  public class ScheduleInfo {
+    
+    /**
+     * Constructs a new ScheduleInfo object given the schedule, resources and actuators.
+     *
+     * @param schedule the schedule of actions
+     * @param resources the resources required by the schedule
+     * @param actuators the actuators or virtual actuators (a lower level ELF) that achieves or accomplishes the schedule
+     */
+    protected ScheduleInfo (Schedule schedule,
+                  ArrayList resources,
+                  ArrayList actuators) {
+      this.schedule = schedule;
+      this.resources = resources;
+      this.actuators = actuators;
+    }
+    
+    /**
+     * Gets the schedule of actions
+     *
+     * @return the schedule of actions
+     */
+    public Schedule getSchedule () {
+      return schedule;
+    }
+
+    /**
+     * Gets the resources required by the schedule
+     *
+     * @return the resources required by the schedule
+     */
+    public ArrayList getResources () {
+      return resources;
+    }
+
+    /**
+     * Gets the actuators or virtual actuators (a lower level ELF) that achieves or accomplishes the schedule
+     *
+     * @return the actuators or virtual actuators (a lower level ELF) that achieves or accomplishes the schedule
+     */
+    public ArrayList getActuators () {
+      return actuators;
+    }
+    
+    /** the schedule of actions */
+    public Schedule schedule;
+    
+    /** the resources required by the schedule */
+    public ArrayList resources;
+    
+    /** the actuators or virtual actuators (a lower level ELF) that achieves or accomplishes the schedule */
+    public ArrayList actuators;
+    
+  }
+  
   //// Protected Area
 
+  /**
+   * Sets the schedule info objects, each containing a schedule, resources and actuator
+   *
+   * @param scheduleInfos the schedule info objects, each containing a schedule, resources and actuator
+   */
+  protected void setScheduleInfos (ArrayList scheduleInfos) {
+    this.scheduleInfos = scheduleInfos;
+  }
+  
   //// Private Area
   
   //// Internal Rep
@@ -314,23 +379,10 @@ public class TaskFrame {
   /** the parameters that specify or modulate how the task should be performed */
   protected ArrayList taskParameters = new ArrayList();
 
-  /** the actuators (actuators) that are responsible for carrying out the task */
-  protected ArrayList actuators = new ArrayList();
-
-  /**
-   * the tools, resources, conditions and state information, aside from task
-   * objects, which are required to execute the task
-   */
-  protected ArrayList taskRequirements = new ArrayList();
-
   /** the constraints upon the performance of the task */
   protected ArrayList taskConstraints = new ArrayList();
 
-  /**
-   * the plans for accomplishing the task, or procedures for generating plans,
-   * organized as a dictionary of execeptional states and associated
-   * procedures for handling them
-   */
-  protected ArrayList schedules = new ArrayList();
+  /** the schedule info objects, each containing a schedule, resources and actuator */
+  protected ArrayList scheduleInfos = new ArrayList();
 
 }

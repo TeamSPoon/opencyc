@@ -254,7 +254,9 @@ public class Scheduler extends BufferedNodeComponent {
       Iterator scheduleIterator = schedules.iterator();
       while (scheduleIterator.hasNext()) {
         Schedule schedule = (Schedule) scheduleIterator.next();
-        if (schedule.getPredicateExpression() == null) 
+        PredicateExpression predicateExpression = schedule.getPredicateExpression();
+        if (predicateExpression == null || 
+            predicateExpression.evaluate(thisScheduler.getNode().getWorldModel().getState()).equals(Boolean.TRUE))
           return schedule;
       }
       throw new BehaviorEngineException("No schedule to send to executor among " + schedules);

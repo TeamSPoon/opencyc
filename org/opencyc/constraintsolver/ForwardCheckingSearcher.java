@@ -1,11 +1,11 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
-import org.opencyc.util.*;
 import org.apache.commons.collections.*;
-import org.apache.oro.util.*;
 import java.util.*;
 import java.io.IOException;
+import org.opencyc.cycobject.*;
+import org.opencyc.util.*;
+import org.opencyc.api.*;
 
 /**
  * The <tt>ForwardCheckingSearcher</tt> object to perform forward checking search for one or
@@ -84,10 +84,6 @@ public class ForwardCheckingSearcher {
      */
     protected int nbrSteps = 0;
 
-    /**
-     * Least Recently Used Cache of ask results.
-     */
-    protected Cache askCache = new CacheLRU(500);
     /**
      * Constructs a new <tt>FowardCheckingSearcher</tt> object.
      *
@@ -383,7 +379,9 @@ public class ForwardCheckingSearcher {
         CycVariable selectedVariable = currentBinding.getCycVariable();
         if (remainingVariables.size() == 0) {
             // This is the terminating recursion case, with no more variables left to instantiate.
-            boolean instantiatedRuleResult = constraintRuleAsk(instantiatedRule);
+            boolean instantiatedRuleResult =
+                CycAccess.current().isQueryTrue_Cached(instantiatedRule,
+                                                       constraintProblem.mt);
             if (verbosity > 2) {
                 System.out.println("Bindings " + bindings);
                 System.out.println(instantiatedRule.cyclify() + " --> " + instantiatedRuleResult);
@@ -520,31 +518,6 @@ public class ForwardCheckingSearcher {
                                "\n  in mt " + constraintProblem.mt.cyclify() +
                                "\n  --> " + kbValues.cyclify());
         return result;
-    }
-
-    /**
-     * Returns <tt>true</tt> iff the instantiated (fully bound) rule is proven true in
-     * the constraint problem KB microtheory.
-     *
-     * @param instantiatedRule the fully bound constraint rule
-     * @return <tt>true</tt> iff the instantiated (fully bound) rule is proven true in
-     * the constraint problem KB microtheory
-     */
-    protected boolean constraintRuleAsk(CycList instantiatedRule) throws IOException {
-        boolean answer;
-        Boolean isQueryTrue = (Boolean) askCache.getElement(instantiatedRule);
-        if (isQueryTrue != null) {
-            answer = isQueryTrue.booleanValue();
-            if (verbosity > 3)
-                System.out.println("Cached answer to \n" + instantiatedRule.cyclify() + " --> " + answer);
-            return answer;
-        }
-        constraintProblem.nbrAsks++;
-        answer = constraintProblem.cycAccess.isQueryTrue(instantiatedRule, constraintProblem.mt);
-        askCache.addElement(instantiatedRule, new Boolean(answer));
-        if (verbosity > 3)
-            System.out.println("Answer to \n" + instantiatedRule.cyclify() + " --> " + answer);
-        return answer;
     }
 
     /**

@@ -3,6 +3,7 @@ package org.opencyc.api;
 import java.util.*;
 import java.net.*;
 import java.io.*;
+import org.apache.oro.util.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.util.*;
 
@@ -38,25 +39,110 @@ public class CycAccess {
      */
     static HashMap cycAccessInstances = new HashMap();
 
-    public boolean persistentConnection = true;
-    private boolean trace = false;
+    /**
+     * Response code returned by the OpenCyc api.
+     */
     public Integer responseCode = null;
+
+    /**
+     * Parameter indicating whether the OpenCyc api should use one TCP socket for the entire
+     * session, or if the socket is created and then closed for each api call.
+     */
+    public boolean persistentConnection = true;
+
+    private boolean trace = false;
     private String hostName = CycConnection.DEFAULT_HOSTNAME;
     private int port = CycConnection.DEFAULT_PORT;
     private static final Integer OK_RESPONSE_CODE = new Integer(200);
     private CycConnection cycConnection;
 
-    // Common constants.
-    public CycConstant baseKB = null;
-    public CycConstant isa = null;
-    public CycConstant genls = null;
-    public CycConstant genlMt = null;
-    public CycConstant comment = null;
-    public CycConstant collection = null;
-    public CycConstant binaryPredicate = null;
+    /**
+     * Convenient reference to #$BaseKb.
+     */
+    public static CycConstant baseKB = null;
+
+    /**
+     * Convenient reference to #$isa.
+     */
+    public static CycConstant isa = null;
+
+    /**
+     * Convenient reference to #$genls.
+     */
+    public static CycConstant genls = null;
+
+    /**
+     * Convenient reference to #$genlMt.
+     */
+    public static CycConstant genlMt = null;
+
+    /**
+     * Convenient reference to #$comment.
+     */
+    public static CycConstant comment = null;
+
+    /**
+     * Convenient reference to #$Collection.
+     */
+    public static CycConstant collection = null;
+
+    /**
+     * Convenient reference to #$binaryPredicate.
+     */
+    public static CycConstant binaryPredicate = null;
+
+    /**
+     * Convenient reference to #$elementOf.
+     */
+    public static CycConstant elementOf = null;
+
+    /**
+     * Convenient reference to #$and.
+     */
+    public static CycConstant and = null;
+
+    /**
+     * Convenient reference to #$or.
+     */
+    public static CycConstant or = null;
+
+    /**
+     * Convenient reference to #$numericallyEqual.
+     */
+    public static CycConstant numericallyEqual = null;
+
+    /**
+     * Convenient reference to #$PlusFn.
+     */
+    public static CycConstant plusFn = null;
+
+    /**
+     * Convenient reference to #$different.
+     */
+    public static CycConstant different = null;
 
     private CycConstant cyclist = null;
     private CycConstant project = null;
+
+    /**
+     * Least Recently Used Cache of ask results.
+     */
+    protected Cache askCache = new CacheLRU(500);
+
+    /**
+     * Least Recently Used Cache of countAllInstances results.
+     */
+    protected Cache countAllInstancesCache = new CacheLRU(500);
+
+    /**
+     * Least Recently Used Cache of isCollection results.
+     */
+    protected Cache isCollectionCache = new CacheLRU(500);
+
+    /**
+     * Least Recently Used Cache of isGenlOf results.
+     */
+    protected Cache isGenlOfCache = new CacheLRU(500);
 
     /**
      * Constructs a new CycAccess object.
@@ -67,7 +153,6 @@ public class CycAccess {
             cycConnection = new CycConnection();
         initializeConstants();
     }
-
     /**
      * Constructs a new CycAccess object given a host name.
      *
@@ -331,13 +416,32 @@ public class CycAccess {
      * Initializes common cyc constants.
      */
     private void initializeConstants()    throws IOException, UnknownHostException {
-        baseKB = getConstantByName("BaseKB");
-        isa = getConstantByName("isa");
-        genls = getConstantByName("genls");
-        genlMt = getConstantByName("genlMt");
-        comment = getConstantByName("comment");
-        collection = getConstantByName("Collection");
-        binaryPredicate = getConstantByName("BinaryPredicate");
+        if (baseKB == null)
+            baseKB = getConstantByName("BaseKB");
+        if (isa == null)
+            isa = getConstantByName("isa");
+        if (genls == null)
+            genls = getConstantByName("genls");
+        if (genlMt == null)
+            genlMt = getConstantByName("genlMt");
+        if (comment == null)
+            comment = getConstantByName("comment");
+        if (collection == null)
+            collection = getConstantByName("Collection");
+        if (binaryPredicate == null)
+            binaryPredicate = getConstantByName("BinaryPredicate");
+        if (elementOf == null)
+            elementOf = getConstantByName("elementOf");
+        if (and == null)
+            and = getConstantByName("and");
+        if (or == null)
+            or = getConstantByName("or");
+        if (numericallyEqual == null)
+            numericallyEqual = getConstantByName("numericallyEqual");
+        if (plusFn == null)
+            plusFn = getConstantByName("PlusFn");
+        if (different == null)
+            different = getConstantByName("different");
     }
 
     /**
@@ -622,9 +726,38 @@ public class CycAccess {
 
     /**
      * Returns true if CycConstant GENL is a genl of CycConstant SPEC.
+     *
+     * @param genl the collection for genl determination
+     * @param spec the collection for spec determination
+     * @return <tt>true</tt> if CycConstant GENL is a genl of CycConstant SPEC
      */
-    public boolean isGenlOf (CycConstant genl, CycConstant spec)  throws IOException, UnknownHostException {
+    public boolean isGenlOf (CycConstant genl, CycConstant spec)  throws IOException,
+                                                                         UnknownHostException {
         return converseBoolean("(genl-in-any-mt? " + spec.cycName() + " " + genl.cycName() + ")");
+    }
+
+    /**
+     * Returns true if CycConstant GENL is a genl of CycConstant SPEC, implements a cache
+     * to avoid asking the same question twice from the KB.
+     *
+     * @param genl the collection for genl determination
+     * @param spec the collection for spec determination
+     * @return <tt>true</tt> if CycConstant GENL is a genl of CycConstant SPEC
+     */
+    public boolean isGenlOf_Cached (CycConstant genl, CycConstant spec)
+        throws IOException,  UnknownHostException {
+        boolean answer;
+        ArrayList args = new ArrayList();
+        args.add(genl);
+        args.add(spec);
+        Boolean isGenlOf = (Boolean) isGenlOfCache.getElement(args);
+        if (isGenlOf != null) {
+            answer = isGenlOf.booleanValue();
+            return answer;
+        }
+        answer = isGenlOf(genl, spec);
+        isGenlOfCache.addElement(args, new Boolean(answer));
+        return answer;
     }
 
     /**
@@ -898,6 +1031,25 @@ public class CycAccess {
      */
     public boolean isCollection (CycConstant cycConstant)  throws IOException, UnknownHostException {
         return converseBoolean("(isa-in-any-mt? " + cycConstant.cycName() + " #$Collection)");
+    }
+
+    /**
+     * Returns true if cycConstant is a Collection, implements a cache
+     * to avoid asking the same question twice from the KB.
+     *
+     * @param cycConstant the constant for determination as a Collection
+     * @return <tt>true</tt> iff cycConstant is a Collection,
+     */
+    public boolean isCollection_Cached(CycConstant cycConstant)  throws IOException {
+        boolean answer;
+        Boolean isCollection = (Boolean) isCollectionCache.getElement(cycConstant);
+        if (isCollection != null) {
+            answer = isCollection.booleanValue();
+            return answer;
+        }
+        answer = isCollection(cycConstant);
+        isCollectionCache.addElement(cycConstant, new Boolean(answer));
+        return answer;
     }
 
     /**
@@ -1293,12 +1445,34 @@ public class CycAccess {
      */
     public boolean isQueryTrue (CycList query,
                                 CycConstant mt)  throws IOException, UnknownHostException {
-        CycList response = converseList("(removal-ask '" + query.cyclify() + " " + mt.cyclify() + ")");
+        CycList response = converseList("(removal-ask '" + query.cyclify() + " " + mt.cyclify() +
+                                        ")");
         return response.size() > 0;
     }
 
     /**
-     * Return the count of the instances of the given collection.
+     * Returns <tt>true</tt> iff the query is true in the knowledge base, implements a cache
+     * to avoid asking the same question twice from the KB.
+     *
+     * @param query the query to be asked in the knowledge base
+     * @param mt the microtheory in which the query is asked
+     * @return <tt>true</tt> iff the query is true in the knowledge base
+     */
+    public boolean isQueryTrue_Cached (CycList query,
+                                          CycConstant mt) throws IOException {
+        boolean answer;
+        Boolean isQueryTrue = (Boolean) askCache.getElement(query);
+        if (isQueryTrue != null) {
+            answer = isQueryTrue.booleanValue();
+            return answer;
+        }
+        answer = isQueryTrue(query, mt);
+        askCache.addElement(query, new Boolean(answer));
+        return answer;
+    }
+
+    /**
+     * Returns the count of the instances of the given collection.
      *
      * @param collection the collection whose instances are counted
      * @param mt microtheory (including its genlMts) in which the count is determined
@@ -1309,5 +1483,27 @@ public class CycAccess {
                                 collection.cyclify() + " " +
                                 mt.cyclify() + ")");
     }
+
+    /**
+     * Returns the count of the instances of the given collection, implements a cache
+     * to avoid asking the same question twice from the KB.
+     *
+     * @param collection the collection whose instances are counted
+     * @param mt microtheory (including its genlMts) in which the count is determined
+     * @return the count of the instances of the given collection
+     */
+    public int countAllInstances_Cached(CycConstant collection,
+                                        CycConstant mt) throws IOException {
+        int answer;
+        Integer countAllInstances = (Integer) countAllInstancesCache.getElement(collection);
+        if (countAllInstances != null) {
+            answer = countAllInstances.intValue();
+            return answer;
+        }
+        answer = countAllInstances(collection, mt);
+        countAllInstancesCache.addElement(collection, new Integer(answer));
+        return answer;
+    }
+
 
 }

@@ -65,7 +65,8 @@ public class UnitTest extends TestCase {
             //testSuite.addTest(new UnitTest("testSolution"));
             //testSuite.addTest(new UnitTest("testRuleEvaluator"));
             //testSuite.addTest(new UnitTest("testArgumentTypeConstrainer"));
-            testSuite.addTest(new UnitTest("testConstraintProblem"));
+            testSuite.addTest(new UnitTest("testProblemParser"));
+            //testSuite.addTest(new UnitTest("testConstraintProblem"));
         }
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -78,6 +79,61 @@ public class UnitTest extends TestCase {
         System.out.println("** testHelloWorld **");
         Assert.assertTrue(true);
         System.out.println("** testHelloWorld OK **");
+    }
+
+    /**
+     * Tests the <tt>ProblemParser</tt> class.
+     */
+    public void testProblemParser() {
+        System.out.println("** testProblemParser **");
+
+        ConstraintProblem constraintProblem = new ConstraintProblem();
+        String problemString1 =
+            "(#$and " +
+            "  (#$isa ?country #$WesternEuropeanCountry) " +
+            "  (#$isa ?cathedral #$Cathedral) " +
+            "  (#$countryOfCity ?country ?city) " +
+            "  (#$objectFoundInLocation ?cathedral ?city)) ";
+            Rule rule1 = null;
+            Rule rule2 = null;
+            Rule rule3 = null;
+            Rule rule4 = null;
+            Rule rule5 = null;
+            Rule rule6 = null;
+        try {
+            CycList problem1 = CycAccess.current().makeCycList(problemString1);
+            constraintProblem.problem = problem1;
+            constraintProblem.simplifiedRules = Rule.simplifyRuleExpression(problem1);
+            ProblemParser problemParser = constraintProblem.problemParser;
+            problemParser.extractRulesAndDomains();
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        Assert.assertNotNull(constraintProblem.constraintRules);
+        Assert.assertNotNull(constraintProblem.domainPopulationRules);
+        try {
+            rule1 = new Rule("(#$isa ?country #$WesternEuropeanCountry)");
+            rule2 = new Rule("(#$isa ?cathedral #$Cathedral)");
+            rule3 = new Rule("(#$countryOfCity ?country ?city)");
+            rule4 = new Rule("(#$objectFoundInLocation ?cathedral ?city)");
+            rule5 = new Rule("(#$isa ?city #$City)");
+            rule6 = new Rule("(#$isa ?country #$Country)");
+        }
+        catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        System.out.println("domainPopulationRules\n" + constraintProblem.domainPopulationRules);
+        Assert.assertEquals(3, constraintProblem.domainPopulationRules.size());
+        Assert.assertTrue(constraintProblem.domainPopulationRules.contains(rule1));
+        Assert.assertTrue(constraintProblem.domainPopulationRules.contains(rule2));
+        Assert.assertTrue(constraintProblem.domainPopulationRules.contains(rule5));
+        System.out.println("constraintRules\n" + constraintProblem.constraintRules);
+        Assert.assertEquals(2, constraintProblem.constraintRules.size());
+        Assert.assertTrue(constraintProblem.constraintRules.contains(rule3));
+        Assert.assertTrue(constraintProblem.constraintRules.contains(rule4));
+
+        System.out.println("** testProblemParser OK **");
     }
 
     /**

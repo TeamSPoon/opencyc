@@ -42,11 +42,6 @@ public class ConstraintProblem {
     CycAccess cycAccess;
 
     /**
-     * <tt>ProblemParser</tt> object for this <tt>ConstraintProblem</tt>.
-     */
-    protected ProblemParser problemParser = new ProblemParser(this);
-
-    /**
      * <tt>ValueDomains</tt> object for this <tt>ConstraintProblem</tt>.
      */
     protected ValueDomains valueDomains = new ValueDomains(this);
@@ -133,6 +128,11 @@ public class ConstraintProblem {
      * solution(s).
      */
     protected ArrayList constraintRules = new ArrayList();
+
+    /**
+     * <tt>ProblemParser</tt> object for this <tt>ConstraintProblem</tt>.
+     */
+    protected ProblemParser problemParser = new ProblemParser(this);
 
     /**
      * Collection of additional argument type constraint rules.

@@ -161,7 +161,8 @@ public class RuleEvaluator {
                 argument1Long = ((Long) argument1).longValue();
             else
                 // Ask OpenCyc.
-                return constraintProblem.forwardCheckingSearcher.constraintRuleAsk(rule.getRule());
+                return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
+                                                              constraintProblem.mt);
             Object argument2 = rule.getRule().third();
             long argument2Long = 0;
             if (argument2 instanceof CycList) {
@@ -173,7 +174,8 @@ public class RuleEvaluator {
                 argument2Long = ((Long) argument2).longValue();
             else
                 // Ask OpenCyc.
-                return constraintProblem.forwardCheckingSearcher.constraintRuleAsk(rule.getRule());
+                return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
+                                                              constraintProblem.mt);
             return argument1Long == argument2Long;
         }
         else if (predicate.equals(different)) {
@@ -182,7 +184,8 @@ public class RuleEvaluator {
         }
         else
             // Ask OpenCyc.
-            return constraintProblem.forwardCheckingSearcher.constraintRuleAsk(rule.getRule());
+            return CycAccess.current().isQueryTrue_Cached(rule.getRule(),
+                                                          constraintProblem.mt);
     }
 
     /**

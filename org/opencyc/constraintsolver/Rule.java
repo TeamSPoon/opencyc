@@ -55,6 +55,23 @@ public class Rule {
     protected int backchainDepth = 0;
 
     /**
+     * Value which indicates that a given rule subsumes another given rule.
+     */
+    public static final int SUBSUMES = 1;
+
+    /**
+     * Value which indicates that a given rule is subsumed by another given rule.
+     */
+    public static final int SUBSUMED_BY = 2;
+
+    /**
+     * Value which indicates that a given rule neither subsumes another given rule or is
+     * subsumed by another given rule.
+     */
+    public static final int NO_SUBSUMPTION = 3;
+
+
+    /**
      * Constructs a new <tt>Rule</tt> object from a <tt>CycList</tt> <tt>String</tt>
      * representation.<p>
      *
@@ -115,7 +132,7 @@ public class Rule {
             throw new RuntimeException("Invalid rule: " + cycList);
         Object object = cycList.first();
         if (object instanceof CycConstant &&
-            ((CycConstant) object).equals(CycAccess.current().getConstantByName("and")))
+            ((CycConstant) object).equals(CycAccess.and))
             for (int i = 1; i < cycList.size(); i++)
                 rules.add(new Rule((CycList) cycList.get(i)));
         else
@@ -193,6 +210,80 @@ public class Rule {
     }
 
     /**
+     * Returns a value indicating the subsumption relationship, or lack of subsumption
+     * relationship between this rule and another rule.
+     *
+     * @param rule the rule for subsumption determination
+     * @return <tt>Rule.SUBSUMES</tt> if this rule subsumes the given rule,
+     * <tt>Rule.SUBSUMED_BY</tt> if this rule is subsumed by the given rule,
+     * <tt>Rule.NO_SUBSUMPTION</tt> if this rule is neither subsumed by the given rule, nor
+     * subsumes the given rule
+     */
+    public int subsumes(Rule rule) throws IOException {
+        if (this.equals(rule))
+            return SUBSUMES;
+        if (! (this.getPredicate().equals(rule.getPredicate())))
+            return NO_SUBSUMPTION;
+        if (this.getArity() != rule.getArity())
+            return NO_SUBSUMPTION;
+        int answer = 0;
+        for (int i = 0; i < this.getArguments().size(); i++) {
+            Object thisArgument = this.getArguments().get(i);
+            Object thatArgument = rule.getArguments().get(i);
+            if (thisArgument.equals(thatArgument))
+                continue;
+            if (thisArgument instanceof CycVariable) {
+                if (thatArgument instanceof CycVariable) {
+                    if (! (thisArgument.equals(thatArgument)))
+                        return NO_SUBSUMPTION;
+                }
+                else if (answer == SUBSUMED_BY)
+                    return NO_SUBSUMPTION;
+                else if (answer == 0) {
+                    answer = SUBSUMES;
+                    continue;
+                }
+            }
+            if (thatArgument instanceof CycVariable) {
+                if (answer == SUBSUMES)
+                    return NO_SUBSUMPTION;
+                else
+                    answer = SUBSUMED_BY;
+            }
+            if (! (thisArgument instanceof CycConstant) ||
+                ! (thatArgument instanceof CycConstant))
+                return NO_SUBSUMPTION;
+            if (! (CycAccess.current().isCollection_Cached((CycConstant) thisArgument)))
+                return NO_SUBSUMPTION;
+            if (! (CycAccess.current().isCollection_Cached((CycConstant) thatArgument)))
+                return NO_SUBSUMPTION;
+            if (CycAccess.current().isGenlOf_Cached((CycConstant) thisArgument,
+                                                    (CycConstant) thatArgument)) {
+                if (answer == SUBSUMED_BY)
+                    return NO_SUBSUMPTION;
+                else if (answer == 0) {
+                    answer = SUBSUMES;
+                    continue;
+                }
+            }
+            if (CycAccess.current().isGenlOf_Cached((CycConstant) thatArgument,
+                                                    (CycConstant) thisArgument)) {
+                if (answer == SUBSUMES)
+                    return NO_SUBSUMPTION;
+                else if (answer == 0) {
+                    answer = SUBSUMED_BY;
+                    continue;
+                }
+            }
+            return NO_SUBSUMPTION;
+        }
+        if (answer == 0)
+            return SUBSUMES;
+        else
+            return answer;
+    }
+
+    /**
      * Creates and returns a copy of this <tt>Rule</tt>.
      *
      * @return a clone of this instance
@@ -255,7 +346,7 @@ public class Rule {
     public boolean isAllDifferent() throws IOException{
         if (this.getArity() < 2)
             return false;
-        if (this.getPredicate().equals(CycAccess.current().getConstantByName("different")))
+        if (this.getPredicate().equals(CycAccess.different))
             return true;
         else
             return false;
@@ -273,7 +364,7 @@ public class Rule {
     public boolean isEvaluatable() throws IOException {
         if (this.getArguments().size() < 2)
             return false;
-        if (this.getPredicate().equals(CycAccess.current().getConstantByName("numericallyEqual")))
+        if (this.getPredicate().equals(CycAccess.numericallyEqual))
             return hasEvaluatableNumericalArgs();
         else if (this.getPredicate().toString().equals("or") ||
                  this.getPredicate().toString().equals("and")) {
@@ -306,7 +397,7 @@ public class Rule {
                 continue;
             else if (arg instanceof CycNart) {
                 CycNart cycNart = (CycNart) arg;
-                if (cycNart.getFunctor().equals(CycAccess.current().getConstantByName("PlusFn"))) {
+                if (cycNart.getFunctor().equals(CycAccess.plusFn)) {
                     Object plusFnArg = cycNart.getArguments().get(0);
                     if (plusFnArg instanceof CycVariable)
                         continue;
@@ -316,7 +407,7 @@ public class Rule {
             }
             else if (arg instanceof CycList) {
                 CycList cycList = (CycList) arg;
-                if (cycList.first().equals(CycAccess.current().getConstantByName("PlusFn"))) {
+                if (cycList.first().equals(CycAccess.plusFn)) {
                     Object plusFnArg = cycList.second();
                     if (plusFnArg instanceof CycVariable)
                         continue;
@@ -339,7 +430,7 @@ public class Rule {
      */
     public static boolean evaluateConstraintRule(CycList instantiatedRule) throws IOException {
         CycConstant predicate = (CycConstant) instantiatedRule.first();
-        if (predicate.equals(CycAccess.current().getConstantByName("numericallyEqual"))) {
+        if (predicate.equals(CycAccess.numericallyEqual)) {
             long value = numericallyEvaluateExpression(instantiatedRule.second());
             for (int i = 2; i < instantiatedRule.size(); i++) {
                 if (numericallyEvaluateExpression(instantiatedRule.get(i)) != value)
@@ -347,7 +438,7 @@ public class Rule {
             }
             return true;
         }
-        else if (predicate.equals(CycAccess.current().getConstantByName("or"))) {
+        else if (predicate.equals(CycAccess.or)) {
             CycList args = instantiatedRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
@@ -356,7 +447,7 @@ public class Rule {
             }
             return false;
         }
-        else if (predicate.equals(CycAccess.current().getConstantByName("and"))) {
+        else if (predicate.equals(CycAccess.and)) {
             CycList args = instantiatedRule.rest();
             for (int i = 0; i < args.size(); i++) {
                 CycList arg = (CycList) args.get(i);
@@ -383,7 +474,7 @@ public class Rule {
             CycNart cycNart = (CycNart) expression;
             CycFort functor = cycNart.getFunctor();
             Object arg = cycNart.getArguments().get(0);
-            if (functor.equals(CycAccess.current().getConstantByName("PlusFn"))) {
+            if (functor.equals(CycAccess.plusFn)) {
                 return numericallyEvaluateExpression(arg) + 1;
             }
         }
@@ -391,7 +482,7 @@ public class Rule {
             CycList cycList = (CycList) expression;
             CycConstant functor = (CycConstant) cycList.first();
             Object arg = cycList.get(1);
-            if (functor.equals(CycAccess.current().getConstantByName("PlusFn"))) {
+            if (functor.equals(CycAccess.plusFn)) {
                 return numericallyEvaluateExpression(arg) + 1;
             }
         }
@@ -410,7 +501,9 @@ public class Rule {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
-        if (this.getPredicate().equals(CycAccess.current().getConstantByName("isa")))
+        if (this.getPredicate().equals(CycAccess.isa))
+            return true;
+        else if (this.getPredicate().equals(CycAccess.genls))
             return true;
         else
             return false;
@@ -427,7 +520,7 @@ public class Rule {
         if (this.getArity() != 1)
             // Only unary rules can populate a domain.
             return false;
-        if (this.getPredicate().equals(CycAccess.current().getConstantByName("elementOf")))
+        if (this.getPredicate().equals(CycAccess.elementOf))
             return true;
         else
             return false;

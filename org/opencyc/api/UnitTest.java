@@ -46,6 +46,7 @@ public class UnitTest extends TestCase {
         testSuite.addTest(new UnitTest("testCycAccess3"));
         testSuite.addTest(new UnitTest("testCycAccess4"));
         testSuite.addTest(new UnitTest("testCycAccess5"));
+        testSuite.addTest(new UnitTest("testCycAccess6"));
         testSuite.addTest(new UnitTest("testMakeValidConstantName"));
         TestResult testResult = new TestResult();
         testSuite.run(testResult);
@@ -1360,6 +1361,49 @@ public class UnitTest extends TestCase {
             Assert.fail(e.toString());
         }
         System.out.println("**** testCycAccess 5 OK ****");
+    }
+
+    public void testCycAccess6 () {
+        System.out.println("**** testCycAccess 6 ****");
+        CycAccess cycAccess = null;
+        try {
+            cycAccess = new CycAccess();
+        }
+        catch (UnknownHostException e) {
+            Assert.fail(e.toString());
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+
+        // Test common constants.
+        try {
+            Assert.assertEquals(cycAccess.getConstantByName("and"), CycAccess.and);
+            Assert.assertEquals(cycAccess.getConstantByName("BaseKB"), CycAccess.baseKB);
+            Assert.assertEquals(cycAccess.getConstantByName("BinaryPredicate"), CycAccess.binaryPredicate);
+            Assert.assertEquals(cycAccess.getConstantByName("comment"), CycAccess.comment);
+            Assert.assertEquals(cycAccess.getConstantByName("different"), CycAccess.different);
+            Assert.assertEquals(cycAccess.getConstantByName("elementOf"), CycAccess.elementOf);
+            Assert.assertEquals(cycAccess.getConstantByName("genlMt"), CycAccess.genlMt);
+            Assert.assertEquals(cycAccess.getConstantByName("genls"), CycAccess.genls);
+            Assert.assertEquals(cycAccess.getConstantByName("isa"), CycAccess.isa);
+            Assert.assertEquals(cycAccess.getConstantByName("numericallyEqual"), CycAccess.numericallyEqual);
+            Assert.assertEquals(cycAccess.getConstantByName("or"), CycAccess.or);
+            Assert.assertEquals(cycAccess.getConstantByName("PlusFn"), CycAccess.plusFn);
+        }
+        catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+
+
+        //--------- last.
+        try {
+            cycAccess.close();
+        }
+        catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        System.out.println("**** testCycAccess 6 OK ****");
     }
 
 }

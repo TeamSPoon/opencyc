@@ -84,6 +84,8 @@ public class ArgumentTypeConstrainer {
     public ArrayList retrieveArgumentTypeConstraintRules(Rule rule) throws IOException {
         ArrayList result = new ArrayList();
         CycConstant predicate = rule.getPredicate();
+        if (verbosity > 3)
+            System.out.println("Gathering type constraints for\n" + rule.cyclify());
         for (int i = 0; i < rule.getArguments().size(); i++) {
             Object argument = rule.getArguments().get(i);
             if (rule.getVariables().contains(argument)) {

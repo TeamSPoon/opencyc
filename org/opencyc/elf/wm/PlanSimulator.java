@@ -9,6 +9,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.EvaluateScheduleMsg;
+import org.opencyc.elf.message.PredictedInputMsg;
 import org.opencyc.elf.message.SimulateScheduleMsg;
 
 //// External Imports
@@ -136,19 +137,44 @@ public class PlanSimulator extends NodeComponent {
     public void run () {
       try {
         while (true) { 
-          processSimulateScheduleMsg((SimulateScheduleMsg) planSimulationChannel.take()); 
+          dispatchMsg((GenericMsg) planSimulationChannel.take()); 
         }
       }
       catch (InterruptedException ex) {}
     }
       
     /**
-     * Simulates the schedule from an executor and sends the result to the plan evaluator. 
+     * Dispatches the given input channel message by type.
+     *
+     * @param genericMsg the given input channel message
+     */
+    void dispatchMsg (GenericMsg genericMsg) {
+      if (genericMsg instanceof PredictedInputMsg)
+        processPredictedInputMsg((PredictedInputMsg) genericMsg);
+      else if (genericMsg instanceof SimulateScheduleMsg)
+        processSimulateScheduleMsg((SimulateScheduleMsg) genericMsg);
+    }
+  
+    /**
+     * Simulates the schedule from an executor and sends the result to the plan evaluator.
+     *
+     * @param simulateScheduleMsg the simulate schedule message
      */
     protected void processSimulateScheduleMsg(SimulateScheduleMsg simulateScheduleMsg) {
       controlledResources =  simulateScheduleMsg.getControlledResources();
       taskCommand =  simulateScheduleMsg.getTaskCommand();
       schedule =  simulateScheduleMsg.getSchedule();
+      //TODO
+    }
+    
+    /**
+     * Processes the predicted input message.
+     *
+     * @param predictedInputMsg the predicted input message
+     */
+    protected void processPredictedInputMsg(PredictedInputMsg predictedInputMsg) {
+      Object obj = predictedInputMsg.getObj();
+      Object data = predictedInputMsg.getData();
       //TODO
     }
     

@@ -1,10 +1,19 @@
 package org.opencyc.elf.bg.executor;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
+
 import org.opencyc.elf.bg.BehaviorGeneration;
+
 import org.opencyc.elf.bg.planner.Planner;
+import org.opencyc.elf.bg.planner.Schedule;
+
 import org.opencyc.elf.bg.procedure.Procedure;
 
+import org.opencyc.elf.bg.taskframe.TaskCommand;
+
+//// External Imports
+import java.util.ArrayList;
 
 /**
  * Provides the Executor for ELF BehaviorGeneration.<br>
@@ -30,20 +39,14 @@ import org.opencyc.elf.bg.procedure.Procedure;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Executor extends NodeComponent {
-  /** the procedure to execute */
-  protected Procedure procedureToExecute;
-
-  /** the behavior generation instance which owns this executor */
-  protected BehaviorGeneration behaviorGeneration;
-
-  /** the planner whose plans this executor executes */
-  protected Planner planner;
-
+  //// Constructors
   /**
    * Constructs a new Executor object.
    */
   public Executor() {
   }
+
+  //// Public Area
 
   /**
    * Gets the procedure to execute
@@ -98,4 +101,61 @@ public class Executor extends NodeComponent {
   public void setPlanner(Planner planner) {
     this.planner = planner;
   }
+
+  //// Protected Area
+  
+  /**
+   * Receives the update schedule message from ?
+   */
+  protected void receiveUpdateSchedule () {
+    // TODO
+    // receive via channel from ?
+    // TaskCommnd taskCommand
+    // Schedule schedule
+  }
+
+  /**
+   * Receives the execute schedule message from ?.
+   */
+  protected void receiveExecuteSchedule () {
+    // TODO
+    // receive via channel from ?
+    // TaskCommnd taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Performs the subtask.
+   */
+  protected void doSubTask () {
+    // TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommnd taskCommand
+  }
+  
+  /**
+   * Sends the executor status to ?.
+   */
+  protected void sendExecutorStatus () {
+    // TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommnd taskCommand
+    // Schedule schedule
+    // Status status
+  }
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the procedure to execute */
+  protected Procedure procedureToExecute;
+
+  /** the behavior generation instance which owns this executor */
+  protected BehaviorGeneration behaviorGeneration;
+
+  /** the planner whose plans this executor executes */
+  protected Planner planner;
 }

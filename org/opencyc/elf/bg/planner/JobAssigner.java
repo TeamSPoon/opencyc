@@ -41,7 +41,11 @@ import EDU.oswego.cs.dl.util.concurrent.Takable;
 import EDU.oswego.cs.dl.util.concurrent.ThreadedExecutor;
 
 /** JobAssigner performs the non-temporal (for example spatial) task decomposition
- * among the available agents and resources.
+ * among the available agents and resources.  In many cases the task frame as retrieved from
+ * the task frame library will aleady contain decomposed schedules for the task command.  In
+ * that case a complete schedule is passed to the scheduler which then passes it to the 
+ * executor.  Otherwise the spatially decomposed task command is passed to the scheduler which
+ * computes a schedule to accomplish it. 
  *
  * @version $Id$
  * @author Stephen L. Reed

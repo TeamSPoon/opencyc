@@ -73,7 +73,7 @@ public class UnitTest extends TestCase {
     System.out.println("\n*** testOperatorExpression ***");
     try {
       new CycAccess();
-      State state = new State();
+      State state = new State(null);
 
       // TheEmptyList
       new TheEmptyList();

@@ -66,7 +66,7 @@ public class UnitTest extends TestCase {
   /** Tests predicate expression behavior. */
   public void testPredicateExpression() {
     System.out.println("\n*** testPredicateExpression ***");
-    State state = new State();
+    State state = new State(null);
     
     // True
     True true1 = new True();

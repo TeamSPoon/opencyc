@@ -89,7 +89,7 @@ public class BehaviorEngine {
     node.getSensoryPerception().initialize((Puttable) null);
     node.getBehaviorGeneration().getJobAssigner().initialize(
           (Puttable) null);
-    node.getWorldModel().setState(new State());
+    node.getWorldModel().setState(new State(node));
 
     Command rootCommand = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
     TaskCommand taskCommand = new TaskCommand(rootCommand, null);

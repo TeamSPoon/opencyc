@@ -11,6 +11,7 @@ import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
 import org.opencyc.elf.bg.predicate.*;
 import org.opencyc.elf.bg.taskframe.Action;
+import org.opencyc.elf.bg.taskframe.Parameter;
 import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.sp.*;
@@ -226,12 +227,12 @@ public class UnitTest extends TestCase {
     
     ActionFactory actionFactory = new ActionFactory();
     Action converseWithUserAction = ActionLibrary.getInstance().getAction(Action.CONVERSE_WITH_USER);
-    List parameterValues = new ArrayList();
-    parameterValues.add(">");
-    converseWithUserAction.setParameterValues(parameterValues);
+    List inputParameterValues = new ArrayList();
+    inputParameterValues.add(">");
+    converseWithUserAction.setInputParameterValues(inputParameterValues);
     
     Assert.assertEquals("converse with user", converseWithUserAction.getName());
-    Assert.assertEquals("prompt", converseWithUserAction.getParameterNames().get(0));
+    Assert.assertEquals("prompt", ((Parameter) converseWithUserAction.getInputParameters().get(0)).getName());
     Assert.assertEquals("[Action: converse with user( prompt: \">\")]", 
                         converseWithUserAction.toString());    
     node.getSensoryPerception().initialize((Puttable) null);

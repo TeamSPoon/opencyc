@@ -66,7 +66,7 @@ public class UnitTest extends TestCase {
   /** Tests operator expression behavior. */
   public void testOperatorExpression() {
     System.out.println("\n*** testOperatorExpression ***");
-    State state = new State();
+    State state = new State(null);
     
     // Plus
     Plus plus = new Plus();

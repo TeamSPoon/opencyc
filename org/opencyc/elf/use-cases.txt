@@ -1,20 +1,32 @@
-Use Cases for Elementary Loop Functioning
+Use Cases for the Behavior Engine
 
 1. Emit a prompt and read the response from the console.
 1. emit the prompt (actuator)
 2. read the response (sensor)
 
-TaskCommand name: ConsolePromptRead
+BEL (Behavior Engine Language):
 
-Parameter: prompt
-Parameter type: String
+define ConverseWithUser to obtain ?USER-INPUT which is saved in the state at this level as ?USER-INPUT
+  [command name: "ConverseWithUser"
+   input formal parameters: none
+   output formal parameters: "?USER-INPUT" (String)
+   output state variables: "?USER-INPUT"]
+  
+  perform ConsolePromptedInput using ">" as ?PROMPT
+    [command name: "ConsolePromptedInput"
+     input formal parameters: ?PROMPT (String)]
+     
+  achieve PerceiveSensation using ?USER-INPUT as ?PERCEIVED-SENSATION
+    [command name: "PerceiveSensation"
+     input formal parameters: ?PERCEIVED-SENSATION (Object)
+     predicate expression: (not-null ?PERCEIVED-SENSATION)]
 
-ELF Sensory Perception object: response
-ELF Sensory Perception data type: String
 
-Required resources: console input, console output, operator
+The Schedule for ConverseWithUser
 
-Rationale: With no learning and no choices, this is the simplest ELF use case.
+(ConverseWithUser perceiving ?USER-INPUT)
+  (ConsolePromptedInput using ">")
+  (PerceiveSensation perceiving when (not-null ?USER-INPUT))
 
 
 

@@ -61,7 +61,7 @@ public class Minus extends Operator {
     }
     else if (arguments.size() == 2) {
       Number arg1Obj = (Number) evaluateArgument(arguments.get(0), state);
-      Number arg2Obj = (Number) evaluateArgument(arguments.get(0), state);
+      Number arg2Obj = (Number) evaluateArgument(arguments.get(1), state);
       Number[] args = convertNumericArguments(arg1Obj, arg2Obj);
       return evaluate(args[0], args[1]);
     }
@@ -83,6 +83,7 @@ public class Minus extends Operator {
       stringBuffer.append(iter.next().toString());
     while (iter.hasNext()) {
       stringBuffer.append(" ");
+      Object obj = iter.next();
       stringBuffer.append(iter.next().toString());
     }
     stringBuffer.append(")");

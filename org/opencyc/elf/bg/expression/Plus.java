@@ -50,7 +50,7 @@ public class Plus extends Operator {
     if (arguments.size() != 2)
       throw new BehaviorEngineException("Wrong number of arguments " + arguments);
     Number arg1Obj = (Number) evaluateArgument(arguments.get(0), state);
-    Number arg2Obj = (Number) evaluateArgument(arguments.get(0), state);
+    Number arg2Obj = (Number) evaluateArgument(arguments.get(1), state);
     Number[] args = convertNumericArguments(arg1Obj, arg2Obj);
     return evaluate(args[0], args[1]);
   }
@@ -83,8 +83,7 @@ public class Plus extends Operator {
    *
    * @param arg1 the first numeric argument
    * @param arg2 the second numeric argument
-   * @return true if the first numeric argument is less than the second
-   * numeric argument
+   * @return the sum of the given two numeric arguments which have the same class
    */
   protected Object evaluate(Number arg1, Number arg2) {
     if (arg1 instanceof Integer) {

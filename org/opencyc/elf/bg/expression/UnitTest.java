@@ -175,6 +175,11 @@ public class UnitTest extends TestCase {
     state.setStateValue(testStateVariable2, new Integer(-99));
     Assert.assertEquals(new Integer(-1), operatorExpression1.evaluate(state));
     
+    // (+ 1 (- 10 8)) = 3
+    operatorExpression1 = new OperatorExpression(minus, new Integer(10), new Integer(8));
+    OperatorExpression operatorExpression2 = new OperatorExpression(plus, new Integer(1), operatorExpression1);
+    Assert.assertEquals(new Integer(3), operatorExpression2.evaluate(state));
+    
     System.out.println("*** testOperatorExpression OK ***");
   }
   

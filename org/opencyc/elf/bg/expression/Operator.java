@@ -103,7 +103,7 @@ public abstract class Operator {
   //// Protected Area
   
   /** Dereferences the given argument within the given state if the argument is a state 
-   * variable.
+   * variable or operator expression.
    *
    * @param argument the given argument
    * @param state the given state
@@ -114,6 +114,8 @@ public abstract class Operator {
     if (argument instanceof StateVariable) {
       return state.getStateValue((StateVariable) argument);
     }
+    else if (argument instanceof OperatorExpression)
+      return ((OperatorExpression) argument).evaluate(state);
     else
       return argument;
   }

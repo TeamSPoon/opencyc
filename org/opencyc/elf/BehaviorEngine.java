@@ -5,6 +5,7 @@ import org.opencyc.elf.bg.state.StateVariable;
 
 import org.opencyc.elf.wm.ActuatorClassFactory;
 import org.opencyc.elf.wm.ActionFactory;
+import org.opencyc.elf.wm.ActionLibrary;
 import org.opencyc.elf.wm.ELFFactory;
 import org.opencyc.elf.wm.ExperienceLibrary;
 import org.opencyc.elf.wm.GoalFactory;
@@ -80,7 +81,8 @@ public class BehaviorEngine {
     new KnowledgeBase();
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
-    new ActionFactory();
+    new ActionLibrary();
+    (new ActionFactory()).getInstance().populateActionLibrary();
     new GoalLibrary();
     (new GoalFactory()).getInstance().populateGoalLibrary();
     new ResourcePool();

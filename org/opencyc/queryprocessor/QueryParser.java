@@ -1,5 +1,4 @@
 package org.opencyc.queryprocessor;
-package org.opencyc.inferencesupport;
 
 import java.util.*;
 import java.io.IOException;

@@ -70,57 +70,57 @@ public class Unifier {
      * @return an <tt>ArrayList</tt> of the antecedants with the required variable renamings and
      * substitutions if unification succeeds otherwise return <tt>null</tt>
      */
-    public ArrayList semanticallyUnify(Rule rule, HornClause hornClause) throws IOException {
+    public ArrayList semanticallyUnify(Literal literal, HornClause hornClause) throws IOException {
         if (verbosity > 3)
-            System.out.println("Attempting to unify \n" + rule + "\n" + hornClause);
-        if (! (rule.getPredicate().equals(hornClause.getConsequent().getPredicate()))) {
+            System.out.println("Attempting to unify \n" + literal + "\n" + hornClause);
+        if (! (literal.getPredicate().equals(hornClause.getConsequent().getPredicate()))) {
             if (verbosity > 3)
-                System.out.println("predicates not equal \n" + rule.getPredicate() +
+                System.out.println("predicates not equal \n" + literal.getPredicate() +
                 " " + hornClause.getConsequent().getPredicate());
             return null;
         }
         // Clone a new horn clause having no variables in common with those variable which
         // are already included in the constraint problem.
         HornClause unifiedHornClause = (HornClause) hornClause.clone();
-        unifiedHornClause.renameVariables(backchainer.constraintProblem.variables, verbosity);
+        unifiedHornClause.renameVariables(backchainer.variables, verbosity);
 
-        // Visit each corresponding argument position in the rule and in the horn clause
+        // Visit each corresponding argument position in the literal and in the horn clause
         // consequent.
         CycList consequentArguments = unifiedHornClause.getConsequent().getArguments();
-        CycList ruleArguments = rule.getArguments();
+        CycList literalArguments = literal.getArguments();
 
-        for (int i = 0; i < ruleArguments.size(); i++) {
-            Object ruleArgument = ruleArguments.get(i);
+        for (int i = 0; i < literalArguments.size(); i++) {
+            Object literalArgument = literalArguments.get(i);
             Object consequentArgument = consequentArguments.get(i);
-            if (ruleArgument instanceof CycVariable) {
+            if (literalArgument instanceof CycVariable) {
                 if (consequentArgument instanceof CycVariable) {
-                    // Unify a rule variable.
+                    // Unify a literal variable.
                     unifiedHornClause.substituteVariable((CycVariable) consequentArgument,
-                                                         ruleArgument,
+                                                         literalArgument,
                                                          verbosity);
                 if (verbosity > 3)
                     System.out.println("at argument position " + (i + 1) +
-                                       ". " + ((CycVariable) ruleArgument).cyclify() +
+                                       ". " + ((CycVariable) literalArgument).cyclify() +
                                        " substituted for " +
                                        ((CycVariable) consequentArgument).cyclify());
                 }
                 else {
                     if (verbosity > 3)
                         System.out.println("at argument position " + (i + 1) +
-                                           ", " + ruleArgument + " is a variable " +
+                                           ", " + literalArgument + " is a variable " +
                                            " but " + consequentArgument + " is not a variable");
                     return null;
                 }
 
             }
             else if (consequentArgument instanceof CycVariable) {
-                // Unify a horn clause consequent variable with a rule term.
+                // Unify a horn clause consequent variable with a literal term.
                 if (unifiedHornClause.substituteVariable((CycVariable) consequentArgument,
-                                                         ruleArgument,
+                                                         literalArgument,
                                                          verbosity)) {
                     if (verbosity > 3)
                         System.out.println("at argument position " + (i + 1) +
-                                           ". " + ruleArgument + " substituted for " +
+                                           ". " + literalArgument + " substituted for " +
                                            ((CycVariable) consequentArgument).cyclify());
                 }
                 else {
@@ -129,12 +129,12 @@ public class Unifier {
                     return null;
                 }
             }
-            else if (! (ruleArgument.equals(consequentArgument))) {
-                // Otherwise respective terms in the rule and horn clause consequent must be
+            else if (! (literalArgument.equals(consequentArgument))) {
+                // Otherwise respective terms in the literal and horn clause consequent must be
                 // equal for unification to succeed.
                 if (verbosity > 3)
                     System.out.println("at argument position " + (i + 1) +
-                                       ", " + ruleArgument + " does not equal " +
+                                       ", " + literalArgument + " does not equal " +
                                        consequentArgument);
                 return null;
             }
@@ -159,11 +159,11 @@ public class Unifier {
         if (backchainer.backchainDepth < backchainer.maxBackchainDepth)
             return false;
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
-            Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
+            ConstraintRule antecedantConjunct = (ConstraintRule) antecedantConjuncts.get(i);
             if (antecedantConjunct.isGround()) {
                 boolean isAntecedantConjunctTrue =
                     CycAccess.current().isQueryTrue(antecedantConjunct.getFormula(),
-                                                    backchainer.constraintProblem.mt);
+                                                    backchainer.mt);
                     if (verbosity > 8)
                         System.out.println("asking KB about antecedant conjunct\n" +
                                            antecedantConjunct + "\n  --> " + isAntecedantConjunctTrue);
@@ -188,12 +188,12 @@ public class Unifier {
      */
     protected boolean anyFalseViaIrreflexsivity(ArrayList antecedantConjuncts) throws IOException {
         for (int i = 0; i < antecedantConjuncts.size(); i++) {
-            Rule antecedantConjunct = (Rule) antecedantConjuncts.get(i);
+            ConstraintRule antecedantConjunct = (ConstraintRule) antecedantConjuncts.get(i);
             if (verbosity > 8) {
                 System.out.println("  Screening irreflexivity usage\n  " +
                                    antecedantConjunct);
                 System.out.println("    isIrreflexive " +
-                                   antecedantConjunct.isIrreflexive(backchainer.constraintProblem.mt));
+                                   antecedantConjunct.isIrreflexive(backchainer.mt));
                 System.out.println("    isAllDifferent " +
                                    antecedantConjunct.isAllDifferent());
                 System.out.println("    arguments size " +
@@ -201,7 +201,7 @@ public class Unifier {
                 System.out.println("    arity " +
                                    antecedantConjunct.getArity());
             }
-            if (antecedantConjunct.isIrreflexive(backchainer.constraintProblem.mt) &&
+            if (antecedantConjunct.isIrreflexive(backchainer.mt) &&
                 antecedantConjunct.getArguments().get(0).equals(antecedantConjunct.getArguments().get(1))) {
                 if (verbosity > 1)
                     System.out.println("  unification abandoned because antecedant conjunct " +

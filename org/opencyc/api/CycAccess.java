@@ -6,6 +6,7 @@ import java.io.*;
 import org.apache.oro.util.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.constraintsolver.*;
+import org.opencyc.inferencesupport.*;
 import org.opencyc.util.*;
 
 /**
@@ -1782,7 +1783,7 @@ public class CycAccess {
      * @param mt the microtheory (and its genlMts) in which the search for backchaining rules takes place
      * @return a list of the backchaining rules which might apply to the given predicate
      */
-    public CycList getBackchainRules (Rule rule, CycFort mt)
+    public CycList getBackchainRules (ConstraintRule rule, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
         if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||
@@ -1819,7 +1820,7 @@ public class CycAccess {
      * @param mt the microtheory (and its genlMts) in which the search for forward chaining rules takes place
      * @return a list of the forward chaining rules which might apply to the given predicate
      */
-    public CycList getForwardChainRules (Rule rule, CycFort mt)
+    public CycList getForwardChainRules (ConstraintRule rule, CycFort mt)
         throws IOException, UnknownHostException {
         StringBuffer command = new StringBuffer();
         if (mt.equals(this.getKnownConstantByName("InferencePSC")) ||

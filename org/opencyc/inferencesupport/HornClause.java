@@ -75,9 +75,9 @@ public class HornClause {
     /**
      * Constructs a new <tt>HornClause</tt> object from the given implication <tt>ConstraintRule</tt>.
      *
-     * @param rule the given implication <tt>Rule</tt>
+     * @param rule the given implication <tt>ConstraintRule</tt>
      */
-    public HornClause(Rule rule) {
+    public HornClause(Literal rule) {
         this(rule.getFormula());
     }
 
@@ -335,17 +335,17 @@ public class HornClause {
         if (! implies.equals(CycAccess.current().getKnownConstantByName("#$implies")))
             return false;
         CycList consequentCycList = (CycList) cycList.third();
-        if (! QueryLiteral.isValidQueryLiteralExpression(consequentCycList))
+        if (! QueryLiteral.isValidConstraintRuleExpression(consequentCycList))
             return false;
         CycList antecedantCycList = (CycList) cycList.second();
         if (antecedantCycList.first().equals(CycAccess.current().getKnownConstantByName("#$and"))) {
             antecedantCycList = antecedantCycList.rest();
             for (int i = 0; i < antecedantCycList.size(); i++)
-                if (! QueryLiteral.isValidQueryLiteralExpression((CycList) antecedantCycList.get(i)))
+                if (! QueryLiteral.isValidConstraintRuleExpression((CycList) antecedantCycList.get(i)))
                     return false;
         }
         else {
-            if (! QueryLiteral.isValidQueryLiteralExpression(antecedantCycList))
+            if (! QueryLiteral.isValidConstraintRuleExpression(antecedantCycList))
                 return false;
         }
         return true;

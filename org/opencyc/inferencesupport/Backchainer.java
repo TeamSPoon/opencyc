@@ -5,6 +5,8 @@ import java.io.*;
 import org.apache.oro.util.*;
 import org.opencyc.cycobject.*;
 import org.opencyc.api.*;
+import org.opencyc.constraintsolver.*;
+import org.opencyc.queryprocessor.*;
 
 /**
  * Provides additional constraint rules through backwards KB inference using the input constraint
@@ -41,20 +43,31 @@ import org.opencyc.api.*;
 public class Backchainer {
 
     /**
+     * The default verbosity of the query processor output.  0 --> quiet ... 9 -> maximum
+     * diagnostic input.
+     */
+    public static final int DEFAULT_VERBOSITY = 3;
+
+    /**
      * Sets verbosity of the constraint solver output.  0 --> quiet ... 9 -> maximum
      * diagnostic input.
      */
-    protected int verbosity = ConstraintProblem.DEFAULT_VERBOSITY;
-
-    /**
-     * Reference to the parent <tt>ConstraintProblem</tt> object.
-     */
-    protected ConstraintProblem constraintProblem;
+    protected int verbosity = DEFAULT_VERBOSITY;
 
     /**
      * <tt>Unifier</tt> for this <tt>Backchainer</tt>.
      */
     protected Unifier unifier = new Unifier(this);
+
+    /**
+     * The list of variables in this problem or query.
+     */
+    ArrayList variables;
+
+    /**
+     * The microtheory in which inferences are performed.
+     */
+    protected CycFort mt;
 
     /**
      * current depth of backchaining from an input constraint rule.
@@ -81,10 +94,11 @@ public class Backchainer {
      * Constructs a new <tt>Backchainer</tt> object given the parent <tt>ConstraintProblem</tt>
      * object.
      *
-     * @param constraintProblem the parent constraint problem
+     * @param mt the microtheory in which inferences are performed
      */
-    public Backchainer(ConstraintProblem constraintProblem) {
-        this.constraintProblem = constraintProblem;
+    public Backchainer(ArrayList variables, CycFort mt) {
+        this.variables = variables;
+        this.mt = mt;
     }
 
     /**
@@ -95,7 +109,7 @@ public class Backchainer {
      * @param rule the unary rule for which additional bindings are sought via backchaining
      * @return the <tt>ArrayList</tt> of values found
      */
-    public ArrayList backchain(Rule rule) throws IOException {
+    public ArrayList backchain(Literal rule) throws IOException {
         ArrayList values = new ArrayList();
         if (rule.getVariables().size() != 1)
             throw new RuntimeException("Attempt to backchain on non-unary rule " + rule);
@@ -106,7 +120,7 @@ public class Backchainer {
 
         ArrayList backchainRules = getBackchainRules(rule);
         for (int i = 0; i < backchainRules.size(); i++) {
-            Rule backchainRule = (Rule) backchainRules.get(i);
+            Literal backchainRule = (Literal) backchainRules.get(i);
             if (verbosity > 1)
                 System.out.println("\nRecursive constraint problem to solve\n  " + backchainRule);
             // Reuse the existing <tt>CycAccess</tt> object for the new constraint problem.
@@ -116,7 +130,7 @@ public class Backchainer {
             //backchainProblem.setVerbosity(9);
             // Request all solutions.
             backchainProblem.nbrSolutionsRequested = null;
-            backchainProblem.mt = constraintProblem.mt;
+            backchainProblem.mt = mt;
             // Keep the same limit on maximum backchain depth
             backchainProblem.setMaxBackchainDepth(this.maxBackchainDepth);
             // Increment the depth of backchaining.
@@ -157,7 +171,7 @@ public class Backchainer {
     public ArrayList getBackchainRules(ArrayList domainPopulationRules) throws IOException {
         ArrayList result = new ArrayList();
         for (int i = 0; i < domainPopulationRules.size(); i++) {
-            Rule domainPopulationRule = (Rule) domainPopulationRules.get(i);
+            Literal domainPopulationRule = (Literal) domainPopulationRules.get(i);
             result.addAll(getBackchainRules(domainPopulationRule));
         }
         return result;
@@ -169,7 +183,7 @@ public class Backchainer {
      * @param rule a rule is to be proven via backchaining
      * @return the sets of conjunctive antecentant rules which can prove the given rule
      */
-    public ArrayList getBackchainRules(Rule rule) throws IOException {
+    public ArrayList getBackchainRules(Literal rule) throws IOException {
         ArrayList result = new ArrayList();
         if (verbosity > 3)
             System.out.println("getting rules to conclude\n" + rule);
@@ -177,7 +191,7 @@ public class Backchainer {
         int nbrAcceptedRules = 0;
         int nbrCandidateRules = candidateImplicationRules.size();
         for (int i = 0; i < nbrCandidateRules; i++) {
-            Rule candidateImplicationRule = (Rule) candidateImplicationRules.get(i);
+            Literal candidateImplicationRule = (Literal) candidateImplicationRules.get(i);
             if (verbosity > 4)
                 System.out.println("\nConsidering implication rule\n" + candidateImplicationRule.cyclify());
             HornClause hornClause = new HornClause(candidateImplicationRule);
@@ -189,16 +203,16 @@ public class Backchainer {
                 CycList conjunctiveAntecedantRule = new CycList();
                 conjunctiveAntecedantRule.add(CycAccess.and);
                 for (int j = 0; j < antecedants.size(); j++) {
-                    Rule antecedant = (Rule) antecedants.get(j);
+                    Literal antecedant = (Literal) antecedants.get(j);
                     conjunctiveAntecedantRule.add(antecedant.getFormula());
                 }
-                result.add(new Rule(conjunctiveAntecedantRule));
+                result.add(new Literal(conjunctiveAntecedantRule));
             }
         }
         if (verbosity > 1) {
             System.out.println("\nSummary of accepted backchain rules");
             for (int i = 0; i < result.size(); i++)
-                System.out.println("  " + ((Rule) result.get(i)).cyclify());
+                System.out.println("  " + ((Literal) result.get(i)).cyclify());
             System.out.println("Accepted " + nbrAcceptedRules + " backchain rules from " +
                                nbrCandidateRules + " candidates");
         }
@@ -211,7 +225,7 @@ public class Backchainer {
      * @param rule the rule to be proven via backchaining
      * @return the implication rules which conclude the given rule
      */
-    public ArrayList gatherRulesConcluding(Rule rule) throws IOException {
+    public ArrayList gatherRulesConcluding(Literal rule) throws IOException {
         ArrayList result = new ArrayList();
         CycConstant predicate = rule.getPredicate();
         if (! this.sbhlBackchain &&
@@ -246,12 +260,11 @@ public class Backchainer {
         }
         */
 
-        CycList backchainRules = CycAccess.current().getBackchainRules(rule,
-                                                                       constraintProblem.mt);
+        CycList backchainRules = CycAccess.current().getBackchainRules(rule, mt);
         for (int i = 0; i < backchainRules.size(); i++) {
             CycList cycListRule = (CycList) backchainRules.get(i);
             if (HornClause.isValidHornExpression(cycListRule)) {
-                Rule backchainRule = new Rule(cycListRule);
+                Literal backchainRule = new Literal(cycListRule);
                 result.add(backchainRule);
             }
             else {
@@ -259,12 +272,11 @@ public class Backchainer {
                     System.out.println("dropped ill-formed (backward) rule " + cycListRule.cyclify());
             }
         }
-        CycList forwardChainRules = CycAccess.current().getForwardChainRules(rule,
-                                                                             constraintProblem.mt);
+        CycList forwardChainRules = CycAccess.current().getForwardChainRules(rule, mt);
         for (int i = 0; i < forwardChainRules.size(); i++) {
             CycList cycListRule = (CycList) forwardChainRules.get(i);
             if (HornClause.isValidHornExpression(cycListRule)) {
-                Rule forwardChainRule = new Rule(cycListRule);
+                Literal forwardChainRule = new Literal(cycListRule);
                 result.add(forwardChainRule);
             }
             else {

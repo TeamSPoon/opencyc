@@ -34,6 +34,7 @@ import org.opencyc.elf.wm.JobAssignmentFactory;
 import org.opencyc.elf.wm.JobAssignmentLibrary;
 import org.opencyc.elf.wm.ELFFactory;
 import org.opencyc.elf.wm.GoalFactory;
+import org.opencyc.elf.wm.GoalLibrary;
 import org.opencyc.elf.wm.KnowledgeBase;
 import org.opencyc.elf.wm.PlanSimulator;
 import org.opencyc.elf.wm.Predictor;
@@ -218,7 +219,8 @@ public class UnitTest extends TestCase {
     new StateVariableLibrary();
     (new StateVariableFactory()).getInstance().populateStateVariableLibrary();
     new ActionFactory();
-    new GoalFactory();
+    new GoalLibrary();
+    (new GoalFactory()).getInstance().populateGoalLibrary();
     new ResourcePool();
     (new ResourceFactory()).getInstance().populateResourcePool();
     new JobAssignmentLibrary();

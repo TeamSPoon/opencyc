@@ -1,0 +1,19 @@
+<project name="OpenCyc" default="compile" basedir=".">
+  <!-- ant manual and download site: http://jakarta.apache.org/ant/manual/index.html  -->
+
+  <!-- set global properties for this build -->
+  <property name="src" value="."/>
+  <property name="build" value="classes"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" 
+      classpath="h:\jars\junit.jar;h:\jars\jakarta-oro-2.0.3.jar;h:\jars\commons-collections.jar:."/>
+  </target>
+</project>
+

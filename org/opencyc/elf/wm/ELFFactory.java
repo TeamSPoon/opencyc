@@ -36,7 +36,8 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 
 /**
- * Factory that instantiates an Elementary Loop Functioning (ELF) node.
+ * Factory that instantiates an Elementary Loop Functioning (ELF) node.  There is a singleton 
+ * instance.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -65,9 +66,19 @@ public class ELFFactory {
   /** Creates a new instance of ELFFactory. */
   public ELFFactory() {
     logger = Logger.getLogger("org.opencyc.elf.ELFFactory");
+    elfFactory = this;
   }
   
   //// Public Area
+  
+  /**
+   * Gets the ELF factory singleton instance.
+   * 
+   * @return the ELF factory singleton instance
+   */
+  public ELFFactory getInstance () {
+    return elfFactory;
+  }
   
   /**
    * Makes a shell ELF node.
@@ -325,6 +336,11 @@ public class ELFFactory {
    * higher level
    */
   protected Puttable nextHigherLevelSensoryPerceptionChannel;
+  
+  /**
+   * the ELF factory singleton instance
+   */
+  protected static ELFFactory elfFactory;
   
   //// Main
   

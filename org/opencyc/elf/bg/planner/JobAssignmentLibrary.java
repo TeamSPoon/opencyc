@@ -51,7 +51,7 @@ public class JobAssignmentLibrary {
    *
    * @return the singleton job assignment library instance
    */
-  public JobAssignmentLibrary getInstance () {
+  public static JobAssignmentLibrary getInstance () {
     return jobAssignmentLibrary;
   }
 

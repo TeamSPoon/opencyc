@@ -2,8 +2,6 @@ package org.opencyc.elf;
 
 import java.util.*;
 import java.io.*;
-import koala.dynamicjava.interpreter.*;
-import koala.dynamicjava.parser.wrapper.*;
 import org.opencyc.util.*;
 import org.opencyc.uml.core.*;
 import org.opencyc.uml.commonbehavior.*;
@@ -37,13 +35,6 @@ import org.opencyc.elf.s.*;
  */
 
 public class LowestLevelNode extends Node {
-
-    /**
-     * Access the World via the tree interpreter which interprets
-     * java statements.  This World access is shared between the
-     * actuator and the sensor.
-     */
-    protected TreeInterpreter treeInterpreter;
 
     /**
      * the Actuator for this node
@@ -94,24 +85,6 @@ public class LowestLevelNode extends Node {
      */
     public void setSensor (Sensor sensor) {
         this.sensor = sensor;
-    }
-
-    /**
-     * Gets the tree interpreter which interprets java statements
-     *
-     * @return the tree interpreter which interprets java statements
-     */
-    public TreeInterpreter getTreeInterpreter () {
-        return treeInterpreter;
-    }
-
-    /**
-     * Sets the tree interpreter which interprets java statements
-     *
-     * @param treeInterpreter the tree interpreter which interprets java statements
-     */
-    public void setTreeInterpreter (TreeInterpreter treeInterpreter) {
-        this.treeInterpreter = treeInterpreter;
     }
 
 }

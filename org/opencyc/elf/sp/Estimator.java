@@ -1,7 +1,9 @@
 package org.opencyc.elf.sp;
 
+//// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+//// External Imports
 
 /**
  * Provides the Estimator for ELF SensoryPerception.<br>
@@ -27,15 +29,27 @@ import org.opencyc.elf.NodeComponent;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Estimator extends NodeComponent {
-  /** the sensory perception instance which owns this estimator */
-  protected SensoryPerception sensoryPerception;
-
+  
+  
+  //// Constructors
+  
   /**
    * Constructs a new Estimator object.
    */
   public Estimator() {
   }
 
+  //// Public Area
+  
+  /**
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
+   */
+  public String toString() {
+    return "Estimator for " + node.getName();
+  }
+  
   /**
    * Gets the sensory perception instance which owns this estimator
    * 
@@ -55,7 +69,15 @@ public class Estimator extends NodeComponent {
     this.sensoryPerception = sensoryPerception;
   }
   
-  public void run() {
-  }
+  //// Protected Area
+    
+  //// Private Area
+  
+  //// Internal Rep
+  
+  /** the sensory perception instance which owns this estimator */
+  protected SensoryPerception sensoryPerception;
+  
+  //// Main
   
 }

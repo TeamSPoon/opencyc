@@ -45,72 +45,17 @@ public class PlanSelector extends NodeComponent {
   
   //// Public Area
   
-  //// Protected Area
-  
   /**
-   * Receives the schedule evaluation message from behavior generation.
+   * Returns a string representation of this object.
+   * 
+   * @return a string representation of this object
    */
-  protected void receiveScheduleEvaluation () {
-    //TODO
-    // receive via channel from behavior generation
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // Result result
-  }
-  
-  /**
-   * Sends the plan selector status message to the appropriate scheduler
-   */
-  protected void sendPlanSelectorStatus () {
-    //TODO
-    // send via channel to the appropriate scheduler
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // Status status
-    // send receivePlanSelectorStatus(taskCommand, schedule, status)
-    // to (appropriate) scheduler
-  }
-  
-  /**
-   * Sends the post schedule message to behavior generation, which in turn forwards
-   * the message to the world model.
-   */
-  protected void postSchedule () {
-    //TODO
-    // send via channel to behavior generation
-    // ArrayList controlledResources
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // send forwardPostSchedule(controlledResources, taskCommand, schedule)
-    // to behaviorGeneration
+  public String toString() {
+    return "PlanSelector " + node.getName();
   }
 
-  /**
-   * Sends the update schedule message to ?
-   */
-  protected void sendUdpateSchedule () {
-    //TODO
-    // send via channel to ?
-    // TaskCommand taskCommand
-    // Schedule schedule
-  }
-  
-  /**
-   * Sends the execute schedule message to the appropriate executor.
-   */
-  protected void sendExecuteSchedule () {
-    //TODO
-    // send via channel to to the appropriate executor
-    // TaskCommand taskCommand
-    // Schedule schedule
-    // send receiveExecuteSchedule(taskCommand, schedule) to (appropriate) executor
-  }
-  
-  public void run() {
-  }
-  
+  //// Protected Area
+    
   //// Private Area
   
   //// Internal Rep

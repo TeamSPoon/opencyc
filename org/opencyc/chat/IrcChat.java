@@ -211,8 +211,6 @@ public class IrcChat extends Thread  implements ChatSender {
         }
     }
 
-
-
     public void startChatterBot() {
         if ( chatterBot==null ) {
             try {
@@ -394,7 +392,11 @@ public class IrcChat extends Thread  implements ChatSender {
             String destination = params.substring(0,col-1).trim();
             ircDestination = destination;
             params = params.substring(col+1).trim();
-            serviceIRCTransaction(prefix.substring(0, prefix.indexOf('!')),prefix,command,destination, params);
+            serviceIRCTransaction(prefix.substring(0, prefix.indexOf('!')),
+                                  prefix,
+                                  command,
+                                  destination,
+                                  params);
         } catch ( Exception e ) {
         }
     }
@@ -452,7 +454,11 @@ public class IrcChat extends Thread  implements ChatSender {
      *     or
      *     <my nick> <message>
      */
-    public boolean serviceToken(String from, String hostmask, String returnpath,String token,String params) {
+    public boolean serviceToken(String from,
+                                String hostmask,
+                                String returnpath,
+                                String token,
+                                String params) {
         System.out.println("token: '" + token + "' params: '" + params + "'");
         if ( token.equals("hello") ) {
             sendMessage(returnpath, "hello " + from);
@@ -505,8 +511,8 @@ public class IrcChat extends Thread  implements ChatSender {
         if ( token.equals("mt") ) {
             try {
                 CycConstant mt = cyc.makeCycConstant(params);
-                cyc.assertIsa(mt,cyc.makeCycConstant("#$Microtheory"),cyc.baseKB);
-                mtUser.put(from,mt);
+                cyc.assertIsa(mt, cyc.makeCycConstant("#$Microtheory"),cyc.baseKB);
+                mtUser.put(from, mt);
             } catch ( Exception e ) {
             }
             return true;
@@ -557,14 +563,14 @@ public class IrcChat extends Thread  implements ChatSender {
 
     /**
      * Process a SubL command
-     * @param destination String nickname of the user who sentence the message
+     * @param destination String nickname of the user who sent the message
      * @param message String the command
      * params are in the form
      * <my nick> :<message>
      * or
      * <my nick> <message>
      */
-    public void serviceSubL(String cyclist,String returnpath, String subl) {
+    public void serviceSubL(String cyclist, String returnpath, String subl) {
         try {
             sendAnswers(returnpath,cyc.converseObject(subl));
         } catch ( Exception e ) {
@@ -593,7 +599,7 @@ public class IrcChat extends Thread  implements ChatSender {
 
     /**
      * Process a Prove command (Query with proof)
-     * @param destination String nickname of the user who sentence the message
+     * @param destination String nickname of the user who sent the message
      * @param message String the command
      * params are in the form
      * <my nick> :<message>
@@ -636,7 +642,7 @@ public class IrcChat extends Thread  implements ChatSender {
      * <my nick>  <message>
      */
     public void serviceAssert(String cyclist,String returnpath, String sentence) {
-        serviceSubL(cyclist,returnpath, "(cyc-assert '" +toCycListString(sentence) + " " +
+        serviceSubL(cyclist, returnpath, "(cyc-assert '" + toCycListString(sentence) + " " +
                     mtForUser(cyclist).stringApiValue() + ")");
     }
 

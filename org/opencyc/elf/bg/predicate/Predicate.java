@@ -53,6 +53,15 @@ public abstract class Predicate {
    */
   public abstract boolean evaluate (ArrayList arguments);
   
+  /**
+   * Returns a string representation of this predicate given
+   * the arguments.
+   *
+   * @param arguments the given arguments to evaluate
+   * @return a string representation of this object
+   */
+  public abstract String toString(ArrayList arguments);
+  
   //// Protected Area
   
   //// Private Area

@@ -36,6 +36,11 @@ public class CyclopsBenchmark {
     }
 
     /**
+     * Path to benchmark the subl file.
+     */
+    public String benchmarkFilePath = "benchmarks.lisp";
+
+    /**
      * Main method to load and execute the Cyclops benchmark.
      */
     public static void main(String[] args) {
@@ -48,7 +53,7 @@ public class CyclopsBenchmark {
         try {
             CycAccess cycAccess = new CycAccess();
             System.out.println("Loading benchmarks.lisp");
-            String script = "(load \"benchmarks.lisp\")";
+            String script = "(load \"" + benchmarkFilePath + "\")";
             cycAccess.converseVoid(script);
             script = "(benchmark-cyclops)";
             System.out.println("Running Cyclops benchmark");

@@ -169,6 +169,31 @@ public class UnitTest extends TestCase {
         System.out.println("** testIsNumeric OK **");
     }
 
+    /**
+     * Tests the ByteArray class.
+     */
+    public void testByteArray() {
+        System.out.println("** testByteArray **");
+        byte[] bytes = {0, 1, 2, 3, 4, -128};
+        ByteArray byteArray1 = new ByteArray(bytes);
+        Assert.assertNotNull(byteArray1);
+        Assert.assertEquals(6, byteArray1.byteArrayValue().length);
+        Assert.assertEquals(0, byteArray1.byteArrayValue()[0]);
+        Assert.assertEquals(1, byteArray1.byteArrayValue()[1]);
+        Assert.assertEquals(2, byteArray1.byteArrayValue()[2]);
+        Assert.assertEquals(3, byteArray1.byteArrayValue()[3]);
+        Assert.assertEquals(4, byteArray1.byteArrayValue()[4]);
+        Assert.assertEquals(-128, byteArray1.byteArrayValue()[5]);
+        byte[] bytes2 = {0, 1, 2, 3, 4, -128};
+        ByteArray byteArray2 = new ByteArray(bytes2);
+        Assert.assertEquals(byteArray1, byteArray1);
+        Assert.assertEquals(byteArray1, byteArray2);
+        byte[] bytes3 = {0, -1, 2, 3, 4, -128};
+        ByteArray byteArray3 = new ByteArray(bytes3);
+        Assert.assertTrue(! byteArray1.equals(byteArray3));
+        Assert.assertEquals("[ByteArray len:6 0,1,2,3,4,-128]", byteArray1.toString());
+        System.out.println("** testByteArray OK**");
+    }
 
 }
 

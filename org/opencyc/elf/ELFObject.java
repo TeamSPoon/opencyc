@@ -1,5 +1,9 @@
 package org.opencyc.elf;
 
+//// Internal Imports
+
+//// External Imports
+
 /**
  * Provides common behavior and attributes for all Elementary Loop Functioning
  * (ELF) objects.<br>
@@ -34,6 +38,8 @@ public abstract class ELFObject {
   public ELFObject() {
   }
 
+  //// Public Area
+  
   /**
    * Gets the unique name of this ELF object
    * 
@@ -58,4 +64,13 @@ public abstract class ELFObject {
   public void setName(String name) {
     this.name = name;
   }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+    
+  //// Main
+  
 }

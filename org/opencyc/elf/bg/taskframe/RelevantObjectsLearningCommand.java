@@ -41,14 +41,92 @@ public class RelevantObjectsLearningCommand implements Command {
   
   //// Constructors
   
-  /** Creates a new instance of RelevantObjectsLearningCommand. */
-  public RelevantObjectsLearningCommand() {
+  /** Creates a new instance of RelevantObjectsLearningCommand. 
+   *
+   * @param name the name of this relevant objects learning command
+   * @param relevantStateVariables the list of relevant state variables whose values provide the context 
+   * for learning the relevant objects
+   * @param relevantObjectsList the training list of relevant objects
+   * @param relevancyRelationship the relevancy relationship
+   */
+  public RelevantObjectsLearningCommand(String name,
+                                        List relevantStateVariables,
+                                        List relevantObjectsList,
+                                        CycFort relevancyRelationship) {
+    this.name = name;
+    this.relevantStateVariables = relevantStateVariables;
+    this.relevantObjectsList = relevantObjectsList;
+    this.relevancyRelationship = relevancyRelationship;
   }
-  
-  public String getName() {
-  }
-  
+    
   //// Public Area
+  
+  /** Executes this relevant objects leaning command.
+   *
+   * @param state the state
+   */
+  public void execute(State state) {
+    //TODO machine learning
+  }  
+  
+  /** Returns a string representation of this object.
+   *
+   * @return a string representation of this object
+   */
+  public String toString () {
+    StringBuffer stringBuffer = new StringBuffer();
+    stringBuffer.append("[RelevantObjectsLearningCommand in context ");
+    stringBuffer.append(relevantStateVariables.toString());
+    stringBuffer.append(" with respect to ");
+    stringBuffer.append(relevancyRelationship.cyclify());
+    stringBuffer.append(" relevant objects: ");
+    stringBuffer.append(relevantObjectsList.toString());
+    stringBuffer.append("]");
+    return stringBuffer.toString();
+  }
+  
+  /** Creates and returns a copy of this object.
+   *
+   * @return a copy of this object
+   */
+  public Object clone() {
+    return new RelevantObjectsLearningCommand(name, 
+                                              relevantStateVariables, 
+                                              relevantObjectsList,
+                                              relevancyRelationship);
+  }
+  
+  /** Gets the name of this relevant objects learning command
+   *
+   * @return the name of this relevant objects learning command
+   */
+  public String getName () {
+    return name;
+  }
+
+  /** Gets the list of relevant state variables whose values provide the context for learning the relevant objects
+   *
+   * @return the list of relevant state variables whose values provide the context for learning the relevant objects
+   */
+  public List getRelevantStateVariables () {
+    return relevantStateVariables;
+  }
+
+  /** Gets the training list of relevant objects
+   *
+   * @return the training list of relevant objects
+   */
+  public List geRrelevantObjectsList () {
+    return relevantObjectsList;
+  }
+
+  /** Gets the relevancy relationship
+   *
+   * @return the relevancy relationship
+   */
+  public CycFort getRelevancyRelationship () {
+    return relevancyRelationship;
+  }  
   
   //// Protected Area
   
@@ -56,14 +134,14 @@ public class RelevantObjectsLearningCommand implements Command {
   
   //// Internal Rep
   
-  /** the name of this relevant objects command */
+  /** the name of this relevant objects learning command */
   protected String name;
   
-  /** the list of relevant state variables */
+  /** the list of relevant state variables whose values provide the context for learning the relevant objects */
   protected List relevantStateVariables;
   
-  /** the state variable whose value will be set to the output list of relevant objects */
-  protected StateVariable relevantObjects;
+  /** the training list of relevant objects */
+  protected List relevantObjectsList;
   
   /** the relevancy relationship */
   protected CycFort relevancyRelationship;

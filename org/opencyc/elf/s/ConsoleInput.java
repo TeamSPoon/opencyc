@@ -43,7 +43,7 @@ import EDU.oswego.cs.dl.util.concurrent.Puttable;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ConsoleInput extends NodeComponent implements Sensor {
+public class ConsoleInput extends DirectSensor {
   
   //// Constructors
   
@@ -55,12 +55,11 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    * @param sensationCapabilities the names of sensations that this sensor can sense
    */
   public ConsoleInput (String name, List resources, List sensationCapabilities) {
-    this.name = name;
-    this.resources = resources;
-    this.sensationCapabilities = sensationCapabilities;
-    logger = Logger.getLogger("org.opencyc.elf");
+    super(name, resources, sensationCapabilities);
   }
 
+  //// Public Area
+  
   /** 
    * Initializes this instance of ConsoleInput with the given
    * output message channel.
@@ -69,53 +68,6 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    */
   public void Initialize (Puttable sensoryPerceptionChannel) {
     producer = new Producer(sensoryPerceptionChannel, this);
-  }
-  //// Public Area
-  
-  /**
-   * Provides the method to be executed when the thread is started.
-   */  
-  public void run() {
-  }
-  
-  /**
-   * Returns a string representation of this object.
-   * 
-   * @return a string representation of this object
-   */
-  public String toString() {
-    StringBuffer stringBuffer = new StringBuffer();
-    stringBuffer.append("[ConsoleInput resources: ");
-    stringBuffer.append(resources.toString());
-    stringBuffer.append("]");
-    return stringBuffer.toString();
-  }
-  
-  /** 
-   * Gets the name of the sensor.
-   *
-   * @return the name of the sensor
-   */
-  public String getName() {
-    return name;
-  }
-  
-  /**
-   * Gets the resources required by this sensor.
-   *
-   * @return the resources required by this sensor
-   */
-  public List getResources() {
-    return resources;
-  }
-  
-  /**
-   * Gets the names of sensations that this sensor can sense.
-   *
-   * @return the names of sensations that this sensor can sense
-   */
-  public List getSensationCapabilities() {
-    return sensationCapabilities;
   }
   
   //// Protected Area
@@ -187,20 +139,8 @@ public class ConsoleInput extends NodeComponent implements Sensor {
   
   //// Internal Rep
   
-  /** the name of the sensor */
-  protected String name;
-  
-  /** the names of sensations that this sensor can sense */
-  protected List sensationCapabilities;
-  
-  /** the resources required by this sensor */
-  protected List resources;
-  
   /** the thread which processes the input channel of messages */
   protected Producer producer;
-  
-  /** the logger */
-  protected static Logger logger;
   
   //// Main
   

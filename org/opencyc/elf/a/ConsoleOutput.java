@@ -50,10 +50,14 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
    *
    * @param name the actuator name
    * @param resources the resources requried by this actuator
+   * @param actionCapabilities the actions that this actuator can accomplish
    */
-  public ConsoleOutput(String name, ArrayList resources) {
+  public ConsoleOutput(String name, 
+                       ArrayList resources, 
+                       ArrayList actionCapabilities) {
     this.name = name;
     this.resources = resources;
+    this.actionCapabilities = actionCapabilities;
   }
   
   //// Public Area
@@ -120,6 +124,15 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
     return resources;
   }
   
+  /**
+   * Gets the actions that this actuator or virtual actuator (job assigner) can accomplish.
+   *
+   * @return the actions that this actuator or virtual actuator (job assigner) can accomplish
+   */
+  public ArrayList getActionCapabilities() {
+    return actionCapabilities;
+  }
+  
   //// Protected Area
     
   /**
@@ -180,6 +193,9 @@ public class ConsoleOutput extends NodeComponent implements Actuator {
 
   /** the name of the actuator */
   protected String name;
+  
+  /** the names of actions that this actuator can accomplish */
+  protected ArrayList actionCapabilities;
   
   /** the resources requried by this actuator */
   protected ArrayList resources;

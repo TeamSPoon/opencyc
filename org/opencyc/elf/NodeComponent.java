@@ -1,8 +1,6 @@
 package org.opencyc.elf;
 
 //// Internal Imports
-import org.opencyc.elf.bg.procedure.Procedure;
-
 import org.opencyc.elf.message.GenericMsg;
 
 //// External Imports

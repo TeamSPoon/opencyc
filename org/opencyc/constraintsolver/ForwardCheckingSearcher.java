@@ -1,6 +1,8 @@
 package org.opencyc.constraintsolver;
 
 import org.opencyc.cycobject.*;
+import org.opencyc.util.*;
+import org.apache.commons.collections.*;
 import java.util.*;
 
 /**
@@ -44,6 +46,12 @@ public class ForwardCheckingSearcher {
     protected ConstraintProblem constraintProblem;
 
     /**
+     * Reference to the collection of the constraint rules used in the search for
+     * solution(s).
+     */
+    protected ArrayList constraintRules;
+
+    /**
      * Reference to the <tt>Solution</tt> for the parent <tt>ConstraintProblem</tt> object.
      */
     protected Solution solution;
@@ -62,6 +70,7 @@ public class ForwardCheckingSearcher {
     public ForwardCheckingSearcher(ConstraintProblem constraintProblem) {
         // Set direct references to collaborating objects.
         this.constraintProblem = constraintProblem;
+        constraintRules = constraintProblem.constraintRules;
         solution = constraintProblem.solution;
         valueDomains = constraintProblem.valueDomains;
     }
@@ -194,9 +203,43 @@ public class ForwardCheckingSearcher {
     protected boolean checkForwardRules(ArrayList remainingVariables,
                                         int level,
                                         Binding currentBinding) {
+        for (int i = 0; i < constraintRules.size(); i++) {
+            Rule rule = (Rule) constraintRules.get(i);
+            ArrayList ruleVariables = rule.getVariables();
+            if ((rule.getArity() > 1) &&
+                // Does rule apply?
+                ruleVariables.contains(currentBinding.getCycVariable()) &&
+                // Can it rule out any remaining variable values?
+                OcCollectionUtils.hasIntersection(remainingVariables, ruleVariables)) {
 
-
+                if (verbosity > 4)
+                    System.out.println("Applicable rule \n" + rule +
+                                       "  for " + currentBinding.getCycVariable());
+                if (! checkForwardRule(rule,
+                                       remainingVariables,
+                                       level,
+                                       currentBinding))
+                    // found a forward rule which wipes out a domain
+                    return false;
+            }
+        }
     return true;
+    }
+
+    /**
+     * Performs forward checking of the given rule to restrict the domains of remaining
+     * variables.  Returns <tt>true</tt> iff no remaining variable domains are wiped out.
+     *
+     * @param remainingVariables the <tt>ArrayList</tt> of variables for which no domain
+     * values have yet been bound
+     * @param currentBinding the current variable and bound value
+     * @return <tt>true</tt> iff no remaining variable domains are wiped out
+     */
+    protected boolean checkForwardRule(Rule rule,
+                                       ArrayList remainingVariables,
+                                       int level,
+                                       Binding currentBinding) {
+        return true;
     }
 
     /**

@@ -4,6 +4,7 @@ import  java.io.*;
 import  java.math.BigInteger;
 import  java.util.HashMap;
 import  org.opencyc.cycobject.*;
+import  org.opencyc.util.ByteArray;
 
 
 /**
@@ -63,6 +64,7 @@ public class CfaslInputStream extends BufferedInputStream {
     protected static final int CFASL_P_BIGNUM = 23;
     protected static final int CFASL_N_BIGNUM = 24;
     protected static final int CFASL_GUID = 25;
+    protected static final int CFASL_BYTE_VECTOR = 26;
     protected static final int CFASL_CONSTANT = 30;
     protected static final int CFASL_NART = 31;
     protected static final int CFASL_ASSERTION = 33;
@@ -116,6 +118,7 @@ public class CfaslInputStream extends BufferedInputStream {
         cfaslOpcodeDescriptions.put(new Integer(23), "CFASL_P_BIGNUM");
         cfaslOpcodeDescriptions.put(new Integer(24), "CFASL_N_BIGNUM");
         cfaslOpcodeDescriptions.put(new Integer(25), "CFASL_GUID");
+	cfaslOpcodeDescriptions.put(new Integer(26), "CFASL_BYTE_VECTOR");
         cfaslOpcodeDescriptions.put(new Integer(30), "CFASL_CONSTANT");
         cfaslOpcodeDescriptions.put(new Integer(31), "CFASL_NART");
         cfaslOpcodeDescriptions.put(new Integer(33), "CFASL_ASSERTION");
@@ -244,6 +247,9 @@ public class CfaslInputStream extends BufferedInputStream {
                     throw  new RuntimeException("CFASL opcode " + cfaslOpcode + " is not supported");
                 case CFASL_GUID:
                     o = readGuid();
+                    break;
+                case CFASL_BYTE_VECTOR:
+	            o = readByteArray();
                     break;
                 case CFASL_CONSTANT:
                     o = readConstant();
@@ -481,6 +487,22 @@ public class CfaslInputStream extends BufferedInputStream {
     public Guid readGuid () throws IOException {
         return  CycObjectFactory.makeGuid((String)readObject());
     }
+
+  /**
+   * Reads a byte vector from the CfaslInputStream. The CFASL opcode 
+   * has already been read in at this point, so we only read in what follows.
+   *
+   * @return the <tt>ByteArray</tt> read
+   */ 
+  public ByteArray readByteArray() throws IOException {
+    int off = 0;
+    int len = readInt();
+    byte[] bytes = new byte[len];
+    while (off < len) {
+      off += read(bytes, off, len - off);
+    }
+    return new ByteArray(bytes);
+  }
 
     /**
      * Reads a list from the CfaslInputStream.  The CFASL opcode

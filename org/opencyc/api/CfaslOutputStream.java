@@ -4,6 +4,7 @@ import  java.io.*;
 import  java.math.BigInteger;
 import  java.util.*;
 import  org.opencyc.cycobject.*;
+import  org.opencyc.util.ByteArray;
 
 /**
  * A CFASL translating buffered output stream.  All Java-native types which have logical
@@ -15,7 +16,7 @@ import  org.opencyc.cycobject.*;
  *
  * @version $Id$
  * @author Christopher
- * @autoor Dan Lipofsky
+ * @author Dan Lipofsky
  *
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
@@ -68,6 +69,7 @@ public class CfaslOutputStream extends BufferedOutputStream {
     protected static final int CFASL_P_BIGNUM = 23;
     protected static final int CFASL_N_BIGNUM = 24;
     protected static final int CFASL_GUID = 25;
+    protected static final int CFASL_BYTE_VECTOR = 26;
     protected static final int CFASL_CONSTANT = 30;
     protected static final int CFASL_NART = 31;
     protected static final int CFASL_ASSERTION = 33;
@@ -350,6 +352,19 @@ public class CfaslOutputStream extends BufferedOutputStream {
         write(s.getBytes());
     }
 
+  /**
+   * Writes a byte array to this CfaslOutputStream.
+   *
+   * @param bytes the byte array to be written.
+   */ 
+  public void writeByteArray(byte[] bytes) throws IOException {
+    if (cycConnection.trace == CycConnection.API_TRACE_DETAILED)
+      System.out.println("writeByteArray = \"" + bytes + "\"");
+    write(CFASL_BYTE_VECTOR);
+    writeInt(bytes.length);
+    write(bytes);
+  }
+
     /**
      * Writes a List of Objects to this CfaslOutputStream as a CFASL List.
      *
@@ -545,6 +560,8 @@ public class CfaslOutputStream extends BufferedOutputStream {
             writeBigInteger((BigInteger)o);
         else if (o instanceof Object[])
             writeList((Object[])o);
+	else if (o instanceof byte[])
+	    writeByteArray((byte[])o);
         else
             throw  new RuntimeException("No cfasl opcode for " + o);
     }

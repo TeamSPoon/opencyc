@@ -3,7 +3,6 @@ package org.opencyc.elf.bg.state;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-
 /**
  * <P>
  * State provides the container for the list of stateVariable/values.

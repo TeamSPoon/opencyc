@@ -46,66 +46,6 @@ public class Scheduler {
   //// Public Area
 
   /**
-   * Receives the task command for scheduling.
-   *
-   * @param taskCommand the task command
-   */
-  public void receiveScheduleJob (TaskCommand taskCommand) {
-    //TODO
-    // receive via channel
-  }
-  
-  /**
-   * Receives the status from the plan selector given the task command and
-   * schedule
-   *
-   * @param taskCommand the task command
-   * @param schedule the schedule
-   * @param the plan selector status
-   */
-  public void receivePlanSelectorStatus (TaskCommand taskCommand,
-                                         Schedule schedule,
-                                         Status status) {
-    //TODO
-    // receive via channel
-  }
-  
-  /**
-   * Receives the status from the executor given the task command and
-   * schedule
-   *
-   * @param taskCommand the task command
-   * @param schedule the schedule
-   * @param the executor status
-   */
-  public void receiveExecutorStatus (TaskCommand taskCommand,
-                                     Schedule schedule,
-                                     Status status) {
-    //TODO
-    // receive via channel
-  }
-  
-  /**
-   * Receives the status from value judgement given the task command and
-   * schedule
-   *
-   * @param taskCommand the task command
-   * @param schedule the schedule
-   * @param the value judgement status
-   */
-  public void receiveValueJudgementStatus (TaskCommand taskCommand,
-                                           Schedule schedule,
-                                           Status status) {
-    //TODO
-    // receive via channel
-  }
-
-  
-  
-  // TODO
-  
-  
-  /**
    * Returns true if the given object equals this object.
    * 
    * @param obj the given object
@@ -132,6 +72,137 @@ public class Scheduler {
   }
 
   //// Protected Area
+  
+  /**
+   * Receives the task command for scheduling.
+   *
+   * @param taskCommand the task command
+   */
+  protected void receiveScheduleJob (TaskCommand taskCommand) {
+    //TODO
+    // receive via channel
+  }
+  
+  /**
+   * Receives the status from the plan selector given the task command and
+   * schedule
+   *
+   * @param taskCommand the task command
+   * @param schedule the schedule
+   * @param the plan selector status
+   */
+  protected void receivePlanSelectorStatus (TaskCommand taskCommand,
+                                         Schedule schedule,
+                                         Status status) {
+    //TODO
+    // receive via channel
+  }
+  
+  /**
+   * Receives the status from the executor given the task command and
+   * schedule
+   *
+   * @param taskCommand the task command
+   * @param schedule the schedule
+   * @param the executor status
+   */
+  protected void receiveExecutorStatus (TaskCommand taskCommand,
+                                     Schedule schedule,
+                                     Status status) {
+    //TODO
+    // receive via channel
+  }
+  
+  /**
+   * Receives the status from value judgement given the task command and
+   * schedule
+   *
+   * @param taskCommand the task command
+   * @param schedule the schedule
+   * @param the value judgement status
+   */
+  protected void receiveValueJudgementStatus (TaskCommand taskCommand,
+                                           Schedule schedule,
+                                           Status status) {
+    //TODO
+    // receive via channel
+  }
+
+  /**
+   * Receives simulation failure notification from the simulator/predictor.
+   */
+  protected void receiveSimulationFailureNotification () {
+    // TODO
+    // receive via channel
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Receives the check schedule consistent information from ?.
+   */
+  protected void receiveCheckScheduleConsistent () {
+    // TODO
+    // receive via channel
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+
+  /**
+   * Receives the schedule consistency evaluation from ?.
+   */
+  protected void receiveScheduleConsistencyEvaluation () {
+    // TODO
+    // receive via channel
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Requests schedule simulation.
+   */
+  protected void requestSimulateSchedule () {
+    // TODO
+    // send via channel?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Checks if the schedule is consistent.
+   */
+  protected void checkIfScheduleConsistent () {
+    // TODO
+    // send via channel?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Sends the schedule consistency evaluation to ?
+   */
+  protected void sendScheduleConsistencyEvaluation () {
+    // TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // TaskCommand taskCommand
+    // Schedule schedule
+  }
+  
+  /**
+   * Provides the scheduler status to ?.
+   */
+  protected void schedulerStatus () {
+    // TODO
+    // send via channel to ?
+    // ArrayList controlledResources
+    // Status status
+  }
+  
   //// Private Area
   //// Internal Rep
 }

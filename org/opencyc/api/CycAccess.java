@@ -683,6 +683,8 @@ public class CycAccess {
             inferencePSC = getKnownConstantByGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
         if (universalVocabularyMt == null)
             universalVocabularyMt = getKnownConstantByGuid("dff4a041-4da2-11d6-82c0-0002b34c7c9f");
+        if (bookkeepingMt == null)
+            bookkeepingMt = getKnownConstantByGuid("beaed5bd-9c29-11b1-9dad-c379636f7270");
     }
 
     /**

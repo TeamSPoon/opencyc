@@ -562,15 +562,17 @@ public class ImportDaml implements StatementHandler {
                               DamlTermInfo objectTermInfo)
         throws IOException, UnknownHostException, CycApiException  {
         CycFort term = importTerm(subjectTermInfo);
-        cycAccess.assertGaf(importMt,
+        cycAccess.assertGaf(cycAccess.bookkeepingMt,
                             cycAccess.getKnownConstantByName("damlOntology"),
                             term,
                             damlOntologyDefiningURL);
-        cycAccess.assertGaf(importMt,
-                            cycAccess.getKnownConstantByName("damlURI"),
-                            term,
-                            new CycNart(cycAccess.getKnownConstantByName("URLFn"),
-                                        subjectTermInfo.uri));
+        if ((! subjectTermInfo.isURI) &&
+            (! subjectTermInfo.isAnonymous))
+            cycAccess.assertGaf(cycAccess.bookkeepingMt,
+                                cycAccess.getKnownConstantByName("damlURI"),
+                                term,
+                                new CycNart(cycAccess.getKnownConstantByName("URLFn"),
+                                            subjectTermInfo.uri));
         if (objectTermInfo.constantName.equals("daml:UnambiguousProperty")) {
             cycAccess.assertArg1FormatSingleEntry(subjectTermInfo.cycFort);
             Log.current.println("(#$arg1Format " +

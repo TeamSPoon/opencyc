@@ -3,6 +3,7 @@ package org.opencyc.elf.bg.procedure;
 //// Internal Imports
 
 //// External Imports
+import java.util.ArrayList;
 
 /**
  * <P>
@@ -36,12 +37,58 @@ public abstract class Statement {
 
   //// Public Area
 
+  /**
+   * Gets the operator which is an instance of Procedure or SpecialForm
+   *
+   * @return operator the operator which is an instance of Procedure or SpecialForm
+   */
+  public Statement getOperator () {
+    return operator;
+  }
+
+  /**
+   * Sets the operator which is an instance of Procedure or SpecialForm
+   *
+   * @param operator the operator which is an instance of Procedure or SpecialForm
+   */
+  public void setOperator (Statement operator) {
+    this.operator = operator;
+  }
+
+  /**
+   * Gets the list of operand objects for the operator
+   *
+   * @return operands the list of operand objects for the operator
+   */
+  public ArrayList getOperands () {
+    return operands;
+  }
+
+  /**
+   * Sets the list of operand objects for the operator
+   *
+   * @param operands the list of operand objects for the operator
+   */
+  public void setOperands (ArrayList operands) {
+    this.operands = operands;
+  }
+  
   //// Protected Area
 
   //// Private Area
   
   //// Internal Rep
 
+  /**
+   * the operator which is an instance of Procedure or SpecialForm
+   */
+  protected Statement operator;
+  
+  /**
+   * the list of operand objects for the operator
+   */
+  protected ArrayList operands;
+  
   //// Main
   
 }

@@ -2,6 +2,7 @@ package org.opencyc.elf.wm;
 
 //// Internal Imports
 import org.opencyc.elf.bg.predicate.NotNull;
+import org.opencyc.elf.bg.predicate.Predicate;
 import org.opencyc.elf.bg.predicate.PredicateExpression;
 
 import org.opencyc.elf.goal.Goal;
@@ -61,14 +62,14 @@ public class GoalFactory {
     // get input from user
     Goal goal = new Goal();
     goal.setName(Goal.GET_USER_INPUT);
-    goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
+    goal.setPredicateExpression(new PredicateExpression((Predicate)NotNull.getInstance(),
                                                         StateVariable.USER_INPUT));
     goal.setImportance(new Importance(Importance.NEUTRAL));
     GoalLibrary.getInstance().setGoal(goal.getName(), goal);
     // get console prompted input
     goal = new Goal();
     goal.setName(Goal.GET_CONSOLE_PROMPTED_INPUT);
-    goal.setPredicateExpression(new PredicateExpression(NotNull.getInstance(),
+    goal.setPredicateExpression(new PredicateExpression((Predicate)NotNull.getInstance(),
                                                         StateVariable.CONSOLE_INPUT));
     goal.setImportance(new Importance(Importance.NEUTRAL));
     GoalLibrary.getInstance().setGoal(goal.getName(), goal);

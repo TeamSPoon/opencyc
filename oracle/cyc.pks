@@ -42,6 +42,9 @@ CREATE OR REPLACE PACKAGE CYC
 IS
     TYPE cyclist_type_indexed IS TABLE OF VARCHAR2(4000) INDEX BY BINARY_INTEGER; -- for input cyclists
 
+    TYPE generic_curtype IS REF CURSOR;                                           -- for cursor parameters
+
+
 PROCEDURE makeConnection;
 PROCEDURE makeConnection( hostname_in IN VARCHAR2 );
 
@@ -112,6 +115,19 @@ FUNCTION getKnownConstantByName( name_in IN VARCHAR2 )
 RETURN VARCHAR2;
 
 PROCEDURE kill( constant_in IN VARCHAR2 );
+
+FUNCTION escapeList( list_in IN VARCHAR2 )
+RETURN VARCHAR2;
+
+PROCEDURE truncate_collection ( collection_name_in IN VARCHAR2 );
+
+PROCEDURE openAskWithVariable(
+    query_in        IN VARCHAR2,
+    variable_in     IN VARCHAR2,
+    mt_in           IN VARCHAR2,
+    backchain_in    IN NUMBER,
+    bindings_out    OUT generic_curtype       -- reference cursor
+);
 
 END cyc;
 /

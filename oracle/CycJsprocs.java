@@ -596,4 +596,23 @@ public class CycJsprocs {
         cycAccess.kill(cycConstant);
     }
 
+    /**
+     * Converses with Cyc to perform an API command whose result is returned is an list
+     * Convert to cyclified string to enable conversion to VARCHAR2.
+     *
+     * @param command the command string or CycList
+     * @return the result of processing the API command
+     */
+    public static String escapeList(String cyclist)
+        throws RuntimeException {
+        try {
+            CycList list  = cycAccess.makeCycList(cyclist);
+            return list.cyclifyWithEscapeChars();
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e.getMessage() );
+        }
+    }
+
+
 }

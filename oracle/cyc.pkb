@@ -316,6 +316,76 @@ AS LANGUAGE JAVA
 	NAME 'CycJsprocs.kill( java.lang.String )';
 
 
+/***************************************************************************
+ *
+ * Escape a string with a list
+ *
+ ***************************************************************************/
+FUNCTION escapeList( list_in IN VARCHAR2 )
+RETURN VARCHAR2
+AS LANGUAGE JAVA
+	NAME 'CycJsprocs.escapeList( java.lang.String )
+		return java.lang.String';
+
+
+PROCEDURE truncate_collection ( collection_name_in IN VARCHAR2 )
+/*
+||==========================================================================
+|| PROCEDURE: truncate_collection
+||
+|| Kills all the constants that are instance of the collection.
+|| e.g. clean_opencyc_collection( '#$EVSHClient' );
+||==========================================================================
+*/
+IS
+   CURSOR kill_cur( collection IN VARCHAR2 ) IS
+         SELECT COLUMN_VALUE AS cons
+           FROM TABLE(
+         SELECT cyc.askwithvariable(
+        '(#$isa ?X ' || collection || ')', '?X', 'EverythingPSC' )
+           FROM DUAL);
+	kill_rec kill_cur%ROWTYPE;
+BEGIN
+	 FOR kill_rec IN kill_cur( collection_name_in )
+	 LOOP
+	 	 cyc.kill( kill_rec.cons );
+     END LOOP;
+END truncate_collection;
+
+/*
+||==========================================================================
+|| PROCEDURE: openAskWithVariable - opens a cyc query and returns the resultset.
+||
+|| DESCRIPTION
+|| This command provides...
+||
+||  Argument Name      Description
+||  query_in           open Cycl formula, e.g. '(#$isa ?X #$Employee)'
+||  variable_in        the variable,      e.g. '?X'
+||  mt_in              the microtheory,   e.g. 'InferencePSC'
+||  backchain_in       number of bc steps, default 0
+||  bindings_out       the result cursor
+||==========================================================================
+*/
+PROCEDURE openAskWithVariable(
+    query_in        IN VARCHAR2,
+    variable_in     IN VARCHAR2,
+    mt_in           IN VARCHAR2,
+    backchain_in    IN NUMBER,
+    bindings_out    OUT generic_curtype       -- reference cursor
+)
+IS
+BEGIN
+    /*--------------------------------------------------------------------------
+     * Open the result cursor
+     *--------------------------------------------------------------------------*/
+   OPEN bindings_out FOR
+      SELECT COLUMN_VALUE FROM THE(
+      SELECT cyc.askWithVariable( query_in, variable_in, mt_in, backchain_in )
+        FROM DUAL);
+
+END openAskWithVariable;
+
 END cyc;
 /
 QUIT

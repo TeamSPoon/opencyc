@@ -39,7 +39,6 @@ X = 'Buffy' ;
 
 No
 ?- cycAssert(isa('Fido','Dog'),'PrologDataMt').
-T
 
 Yes
 ?- cycQuery(isa(X,'Dog')).
@@ -52,7 +51,6 @@ X = 'Fido' ;
 
 No
 ?- cycRetract(isa('Fido','Dog')).
-T
 
 Yes
 ?- cycQuery(isa('Fido','Dog')).

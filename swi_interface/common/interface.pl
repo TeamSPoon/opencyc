@@ -197,7 +197,7 @@ toCycApiExpression(Prolog,Vars,Prolog):-(atom(Prolog);number(Prolog)),!.
 toCycApiExpression(Prolog,Vars,Chars):-is_string(Prolog),!,sformat(Chars,'"~s"',[Prolog]).
 toCycApiExpression([P|List],Vars,Chars):-
 			toCycApiExpression_l([P|List],Vars,Term),
-			sformat(Chars,'\(~w)',[Term]).
+			sformat(Chars,'\'(~w)',[Term]).
 toCycApiExpression(quote(List),Vars,Chars):-
 			toCycApiExpression(List,Vars,Term),
 			sformat(Chars,'\'~w',[Term]).
@@ -236,7 +236,7 @@ is_string([A,B|_]):-integer(A),integer(B).
 
 % isDebug.
 
-isDebug(Call):- isDebug -> Call ; true.
+isDebug(Call):- isDebug -> ignore(once(Call)) ; true.
 
 
 % ===================================================================
@@ -263,8 +263,13 @@ cycAssert(CycL,Mt):-
       system:retractall(opencyc:cached_query(_,_)),
       cyclifyNew(CycL,CycLGood),
       cyclify(Mt,MtGood),
-      toCycApiExpression('CYC-ASSERT'(quote(CycLGood),MtGood),API),
+      defaultAssertOptions(DefaultOptions), 
+      toCycApiExpression('CYC-ASSERT'(quote(CycLGood),MtGood,DefaultOptions),API),
       invokeSubL(API),!.
+
+:-dynamic(defaultAssertOptions/1).
+
+defaultAssertOptions([':FORWARD',':MONOTONIC']).
 
       
 % ===================================================================
@@ -360,6 +365,8 @@ cyclify(Before,After):-
 
 cyclify('#',Before,Before).
 cyclify('?',Before,Before).
+cyclify(':',Before,Before).
+cyclify('!',Before,After):-atom_concat('!',After,Before).
 cyclify('"',Before,Before).
 cyclify(_,Before,After):-atom_concat('#$',Before,After).
       
@@ -384,6 +391,8 @@ cyclifyNew(Before,After):-
 
 cyclifyNew('#',Before,Before).
 cyclifyNew('?',Before,Before).
+cyclifyNew(':',Before,Before).
+cyclifyNew('!',Before,After):-atom_concat('!',After,Before).
 cyclifyNew('"',Before,Before).
 cyclifyNew(_,Before,After):-atom_concat('#$',Before,After),makeConstant(Before).
       

@@ -32,14 +32,14 @@ import org.opencyc.uml.interpreter.*;
 public class State extends StateVertex {
 
     /**
-     * the entry action for this state
+     * the entry procedure for this state
      */
-    protected Action entry;
+    protected Procedure entry;
 
     /**
-     * the exit action for this state
+     * the exit procedure for this state
      */
-    protected Action exit;
+    protected Procedure exit;
 
     /**
      * the deferrable events for this state
@@ -49,7 +49,7 @@ public class State extends StateVertex {
     /**
      * the do activity for this state
      */
-    protected Action doActivity;
+    protected Procedure doActivity;
 
     /**
      * the state machine for this state (if top)
@@ -82,38 +82,38 @@ public class State extends StateVertex {
     }
 
     /**
-     * Gets the entry action for this state.
+     * Gets the entry procedure for this state.
      *
-     * @return the entry action for this state
+     * @return the entry procedure for this state
      */
-    public Action getEntry () {
+    public Procedure getEntry () {
         return entry;
     }
 
     /**
-     * Sets the entry action for this state.
+     * Sets the entry procedure for this state.
      *
-     * @param entry the entry action for this state
+     * @param entry the entry procedure for this state
      */
-    public void setEntry (Action entry) {
+    public void setEntry (Procedure entry) {
         this.entry = entry;
     }
 
     /**
-     * Gets the exit action for this state.
+     * Gets the exit procedure for this state.
      *
-     * @return the exit action for this state
+     * @return the exit procedure for this state
      */
-    public Action getExit () {
+    public Procedure getExit () {
         return exit;
     }
 
     /**
-     * Sets the exit action for this state.
+     * Sets the exit procedure for this state.
      *
-     * @param exit the exit action for this state
+     * @param exit the exit procedure for this state
      */
-    public void setExit (Action exit) {
+    public void setExit (Procedure exit) {
         this.exit = exit;
     }
 
@@ -140,7 +140,7 @@ public class State extends StateVertex {
      *
      * @return the do activity for this state
      */
-    public Action getDoActivity () {
+    public Procedure getDoActivity () {
         return doActivity;
     }
 
@@ -149,7 +149,7 @@ public class State extends StateVertex {
      *
      * @param doActivity the do activity for this state
      */
-    public void setDoActivity (Action doActivity) {
+    public void setDoActivity (Procedure doActivity) {
         this.doActivity = doActivity;
     }
 

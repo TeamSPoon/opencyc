@@ -8,12 +8,11 @@ import org.opencyc.uml.commonbehavior.*;
  * <p>
  * Make objects in this order:<br>
  * 1. state machine<br>
- * 2. actions<br>
- * 3. procedures<br>
- * 4. events<br>
- * 5. states<br>
- * 6. state vertices<br>
- * 7. transistions<p>
+ * 2. procedures<br>
+ * 3. events<br>
+ * 4. states<br>
+ * 5. state vertices<br>
+ * 6. transistions<p>
  *
  * The context object for the state machine contains the all the variables
  * used in guards, actions, procedures and events.  The context object also
@@ -80,6 +79,7 @@ public class StateMachineFactory {
         return stateMachine;
     }
 
+
     /**
      * Makes a new state vertex object.
      *
@@ -123,9 +123,9 @@ public class StateMachineFactory {
                             String name,
                             String commentString,
                             CompositeState container,
-                            Action entry,
-                            Action exit,
-                            Action doActivity) {
+                            Procedure entry,
+                            Procedure exit,
+                            Procedure doActivity) {
         State state = new State();
         state.setNamespace(namespace);
         state.setName(name);
@@ -161,9 +161,9 @@ public class StateMachineFactory {
                                      String name,
                                      String commentString,
                                      CompositeState container,
-                                     Action entry,
-                                     Action exit,
-                                     Action doActivity,
+                                     Procedure entry,
+                                     Procedure exit,
+                                     Procedure doActivity,
                                      boolean isConcurrent) {
         CompositeState compositeState = new CompositeState();
         compositeState.setNamespace(namespace);

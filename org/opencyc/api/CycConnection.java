@@ -2,6 +2,7 @@ package  org.opencyc.api;
 
 import  java.net.*;
 import  java.io.*;
+import  java.util.Hashtable;
 import  ViolinStrings.*;
 import  org.opencyc.util.*;
 import  org.opencyc.cycobject.*;
@@ -84,8 +85,8 @@ public class CycConnection implements CycConnectionInterface {
     /**
      * Ascii mode connnection to the OpenCyc server.
      */
-
     public static final int ASCII_MODE = 1;
+
     /**
      * CFASL (binary) mode connnection to the OpenCyc server.
      */
@@ -100,6 +101,26 @@ public class CycConnection implements CycConnectionInterface {
      * Indicator for whether to use the binary or acsii connection with OpenCyc.
      */
     protected int communicationMode = 0;
+
+    /**
+     * Serial messaging mode to the OpenCyc server.
+     */
+    public static final int SERIAL_MESSAGING_MODE = 0;
+
+    /**
+     * Concurrent messaging mode to the OpenCyc server.
+     */
+    public static final int CONCURRENT_MESSAGING_MODE = 1;
+
+    /**
+     * Default messaging mode to the OpenCyc server.
+     */
+    public static final int DEFAULT_MESSAGING_MODE = SERIAL_MESSAGING_MODE;
+
+    /**
+     * Messaging mode to the OpenCyc server.
+     */
+    public int messagingMode = DEFAULT_MESSAGING_MODE;
 
     /**
      * The ascii interface input stream.
@@ -174,6 +195,43 @@ public class CycConnection implements CycConnectionInterface {
     protected boolean quotedStrings;
 
     /**
+     * outbound request serial id
+     */
+    public int apiRequestId = 0;
+
+    /**
+     * The default priority of a task-processor request.
+     */
+    protected static final int DEFAULT_PRIORITY = 3;
+
+    /**
+     * name of my api client
+     */
+    protected String myClientName = "api client";
+
+    /**
+     * Implements an association:  apiRequestId --> waiting thread for the response.
+     * Used when submitting concurrent requests to the task-processor.
+     */
+    protected Hashtable waitingReplyThreads = new Hashtable();
+
+    /**
+     * Implements an association:  apiRequestId --> response message.
+     * Used when submitting concurrent requests to the task-processor.
+     */
+    protected Hashtable responseMessages = new Hashtable();
+
+    /**
+     * handles responses from task-processor requests in ascii communication mode.
+     */
+    protected TaskProcessorAsciiResponseHandler taskProcessorAsciiResponseHandler;
+
+    /**
+     * handles responses from task-processor requests in binary communication mode.
+     */
+    protected TaskProcessorBinaryResponseHandler taskProcessorBinaryResponseHandler;
+
+    /**
      * Constructs a new CycConnection using the given socket obtained from the parent AgentManager
      * listener.
      *
@@ -236,6 +294,8 @@ public class CycConnection implements CycConnectionInterface {
             else
                 System.out.println("Binary connection " + cfaslSocket);
         }
+        if (messagingMode == CONCURRENT_MESSAGING_MODE)
+            initializeConcurrentProcessing();
     }
 
     /**
@@ -257,6 +317,17 @@ public class CycConnection implements CycConnectionInterface {
     }
 
     /**
+     * Initializes the concurrent processing mode.
+     */
+    protected void initializeConcurrentProcessing () {
+        taskProcessorAsciiResponseHandler = new TaskProcessorAsciiResponseHandler();
+        taskProcessorAsciiResponseHandler.start();
+        taskProcessorBinaryResponseHandler = new TaskProcessorBinaryResponseHandler();
+        taskProcessorBinaryResponseHandler.start();
+    }
+
+
+    /**
      * Ensures that the api socket connections are closed when this object is garbage collected.
      */
     protected void finalize() {
@@ -274,7 +345,7 @@ public class CycConnection implements CycConnectionInterface {
                 }
                 catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                    System.out.println("Error quitting the api connection " + e.getMessage());
                 }
             }
             if (in != null) {
@@ -292,7 +363,7 @@ public class CycConnection implements CycConnectionInterface {
                 }
                 catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                    System.out.println("Error closing the api connection " + e.getMessage());
                 }
             }
         }
@@ -305,7 +376,7 @@ public class CycConnection implements CycConnectionInterface {
                 }
                 catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                    System.out.println("Error quitting the api connection " + e.getMessage());
                 }
             }
             if (cfaslInputStream != null) {
@@ -323,7 +394,7 @@ public class CycConnection implements CycConnectionInterface {
                 }
                 catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("Error finalizing the api connection " + e.getMessage());
+                    System.out.println("Error closing the api connection " + e.getMessage());
                 }
             }
         }
@@ -458,10 +529,98 @@ public class CycConnection implements CycConnectionInterface {
      * @return an array of two objects, the first is an Integer response code, and the second is the
      * response object or error string.
      */
-    synchronized protected Object[] converseBinary (Object message, Timer timeout)
+    synchronized protected Object[] converseBinary (CycList message, Timer timeout)
         throws IOException, TimeOutException, CycApiException {
-        sendBinary(message);
-        return  receiveBinary();
+        if (this.messagingMode == SERIAL_MESSAGING_MODE) {
+            sendBinary(message);
+            return receiveBinary();
+        }
+        else { // CONCURRENT_MESSAGING_MODE
+            CycSymbol taskProcessorRequestSymbol =
+                CycObjectFactory.makeCycSymbol("task-processor-request");
+            Integer id = null;
+            CycList taskProcessorRequest = null;
+            if (message.first().equals(taskProcessorRequestSymbol)) {
+                // client has supplied the task-processor-request form
+                taskProcessorRequest = message;
+                id = (Integer) message.third();
+            }
+            else {
+                id = nextApiRequestId();
+                taskProcessorRequest = new CycList();
+                taskProcessorRequest.add(taskProcessorRequestSymbol);
+                // request
+                taskProcessorRequest.add(message);
+                // id
+                taskProcessorRequest.add(id);
+                // priority
+                taskProcessorRequest.add(new Integer(DEFAULT_PRIORITY));
+                // requestor
+                taskProcessorRequest.add(myClientName);
+                // client-bindings
+                taskProcessorRequest.add(CycObjectFactory.nil);
+            }
+            sendBinary(message);
+            waitingReplyThreads.put(id, Thread.currentThread());
+            while (true) {
+                try {
+                    Thread.sleep(10000);
+                }
+                catch (InterruptedException e) {
+                    break;
+                }
+            }
+            CycList taskProcessorResponse = (CycList) responseMessages.get(id);
+            responseMessages.remove(id);
+            Object response = taskProcessorResponse.get(5);
+            Object status = taskProcessorResponse.get(6);
+            Object[] answer =  {
+                null, null
+            };
+
+            if (status.equals(CycObjectFactory.nil)) {
+                answer[0] = Boolean.FALSE;
+                answer[1] = response;
+                if (trace > API_TRACE_NONE) {
+                    String responseString = null;
+                    if (response instanceof CycList)
+                        responseString = ((CycList) response).safeToString();
+                    else if (response instanceof CycFort)
+                        responseString = ((CycFort) response).safeToString();
+                    else
+                        responseString = response.toString();
+                    System.out.println("received error = (" + status + ") " + responseString);
+                }
+                return answer;
+            }
+            answer[0] = Boolean.TRUE;
+            if (cycAccess == null)
+                answer[1] = response;
+            else if (cycAccess.deferObjectCompletion)
+                answer[1] = response;
+            else
+                answer[1] = cycAccess.completeObject(response);
+            if (trace > API_TRACE_NONE) {
+                String responseString = null;
+                if (response instanceof CycList)
+                    responseString = ((CycList) response).safeToString();
+                else if (response instanceof CycFort)
+                    responseString = ((CycFort) response).safeToString();
+                else
+                    responseString = response.toString();
+                System.out.println("cyc --> (" + answer[0] + ") " + responseString);
+            }
+            return  answer;
+        }
+    }
+
+    /**
+     * Returns the next apiRequestId.
+     *
+     * @return the next apiRequestId
+     */
+    public synchronized Integer nextApiRequestId () {
+        return new Integer(++apiRequestId);
     }
 
     /**
@@ -681,7 +840,8 @@ public class CycConnection implements CycConnectionInterface {
         // Parse the response code digits.
         StringBuffer responseCodeDigits = new StringBuffer();
         while (true) {
-            timeout.checkForTimeOut();
+            if (timeout != null)
+                timeout.checkForTimeOut();
             int ch = in.read();
             if (trace > API_TRACE_NONE)
                 System.out.print((char)ch);
@@ -854,6 +1014,80 @@ public class CycConnection implements CycConnectionInterface {
         return "host " + hostName +
                ", asciiPort " + asciiPort +
                ", cfaslPort " + cfaslPort;
+    }
+
+    /**
+     * Class TaskProcessorAsciiResponseHandler handles responses
+     * from task-processor requests in ascii communication mode.
+     */
+    protected class TaskProcessorAsciiResponseHandler extends Thread {
+
+        /**
+         * Constructs a TaskProcessorAsciiResponseHandler object.
+         */
+        public TaskProcessorAsciiResponseHandler() {
+        }
+
+        /**
+         * Blocks until the next task-processor response is available,
+         * then awakens the client thread that made the request.
+         */
+        public void run() {
+            while (true) {
+                Object[] answer = null;
+                CycList taskProcessorResponse = null;
+                try {
+                    answer = readAsciiCycResponse (null);
+                }
+                catch (IOException e) {
+                    System.err.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                taskProcessorResponse = (CycList) answer[1];
+                Integer id = (Integer) taskProcessorResponse.get(2);
+                responseMessages.put(id, taskProcessorResponse);
+                Thread clientThread = (Thread) waitingReplyThreads.get(id);
+                waitingReplyThreads.remove(id);
+                clientThread.interrupt();
+            }
+        }
+    }
+
+    /**
+     * Class TaskProcessorBinaryResponseHandler handles responses
+     * from task-processor requests in binary communication mode.
+     */
+    protected class TaskProcessorBinaryResponseHandler extends Thread {
+
+        /**
+         * Constructs a TaskProcessorBinaryResponseHandler object.
+         */
+        public TaskProcessorBinaryResponseHandler() {
+        }
+
+        /**
+         * Blocks until the next task-processor response is available,
+         * then awakens the client thread that made the request.
+         */
+        public void run() {
+            while (true) {
+                Object[] answer = null;
+                CycList taskProcessorResponse = null;
+                try {
+                    answer = receiveBinary();
+                }
+                catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                taskProcessorResponse = (CycList) answer[1];
+                Integer id = (Integer) taskProcessorResponse.get(2);
+                responseMessages.put(id, taskProcessorResponse);
+                Thread clientThread = (Thread) waitingReplyThreads.get(id);
+                waitingReplyThreads.remove(id);
+                clientThread.interrupt();
+            }
+        }
     }
 
 }

@@ -28,7 +28,7 @@ import org.opencyc.xml.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycVariable implements Comparable {
+public class CycVariable extends CycObject implements Comparable {
 
     /**
      * The name of the XML tag for this object.

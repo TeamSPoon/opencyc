@@ -28,7 +28,7 @@ import org.opencyc.xml.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CycSymbol implements Comparable, Serializable {
+public class CycSymbol extends CycObject implements Comparable, Serializable {
 
     /**
      * The name of the XML tag for this object.

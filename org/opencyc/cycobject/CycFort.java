@@ -27,7 +27,7 @@ import org.opencyc.xml.XMLWriter;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class CycFort implements Serializable, Comparable {
+public abstract class CycFort extends CycObject implements Serializable, Comparable {
 
 
     /**

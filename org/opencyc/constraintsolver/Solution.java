@@ -82,7 +82,7 @@ public class Solution {
      *
      * @param binding the variable / value binding to be removed
      */
-    protected void removeBinding(Binding binding) {
+    protected void removeBindingFromCurrentSolution(Binding binding) {
         getCurrentSolution().remove(binding);
     }
 
@@ -136,7 +136,7 @@ public class Solution {
     }
 
     /**
-     * Display the bindings in a given solution to the constraint problem.
+     * Displays the bindings in a given solution to the constraint problem.
      */
     protected void displaySolution(ArrayList solution) {
         System.out.println("Variables and solution value:");
@@ -147,13 +147,23 @@ public class Solution {
     }
 
     /**
-     * Display the bindings in all solutions to the constraint problem.
+     * Displays the bindings in all solutions to the constraint problem.
      */
     protected void displaySolutions() {
         for (int i = 0; i < solutions.size(); i++) {
             displaySolution((ArrayList) solutions.get(i));
             System.out.println();
         }
+    }
+
+    /**
+     * Removes the current empty solution in the special case where all solutions
+     * were requested and where all solutions were found.
+     */
+    protected void finalizeAllSolutions() {
+        if (this.constraintProblem.nbrSolutionsRequested == null &&
+            this.nbrSolutionsFound > 0)
+            solutions.remove(solutions.size() - 1);
     }
 
     /**

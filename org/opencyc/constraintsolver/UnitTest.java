@@ -229,6 +229,61 @@ public class UnitTest extends TestCase {
     public void testSolution() {
         System.out.println("** testSolution **");
 
+        // constructor
+        ConstraintProblem constraintProblem = new ConstraintProblem();
+        Solution solution = new Solution(constraintProblem);
+
+        // getCurrentSolution
+        Assert.assertTrue(solution.getCurrentSolution().size() == 0);
+
+        // getSolutions
+        Assert.assertTrue(solution.getSolutions().size() == 1);
+        Binding binding1 = new Binding(CycVariable.makeCycVariable("?x"), new Long(1));
+
+        // addBindingToCurrentSolution
+        solution.addBindingToCurrentSolution(binding1);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 1);
+        Assert.assertTrue(solution.getCurrentSolution().contains(binding1));
+
+        // removeBindingFromCurrentSolution
+        solution.removeBindingFromCurrentSolution(binding1);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 0);
+
+        // addBindingToCurrentSolution
+        Binding binding2 = new Binding(CycVariable.makeCycVariable("?y"), new Long(2));
+        Binding binding3 = new Binding(CycVariable.makeCycVariable("?z"), new Long(3));
+        solution.addBindingToCurrentSolution(binding2);
+        solution.addBindingToCurrentSolution(binding3);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 2);
+
+        // addSolution
+        solution.addSolution(new ArrayList());
+        Assert.assertTrue(solution.getSolutions().size() == 2);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 0);
+        solution.addBindingToCurrentSolution(binding1);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 1);
+        Assert.assertTrue(solution.getCurrentSolution().contains(binding1));
+
+        // recordNewSolution
+        solution.addBindingToCurrentSolution(binding2);
+        solution.addBindingToCurrentSolution(binding3);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 3);
+        Assert.assertTrue(solution.getCurrentSolution().contains(binding2));
+        solution.recordNewSolution(binding2);
+        Assert.assertTrue(solution.getSolutions().size() == 3);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 2);
+        Assert.assertTrue(! solution.getCurrentSolution().contains(binding2));
+
+        // finalizeAllSolutions
+        solution.addSolution(new ArrayList());
+        Assert.assertTrue(solution.getSolutions().size() == 4);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 0);
+        constraintProblem.nbrSolutionsRequested = null;
+        solution.nbrSolutionsFound = 3;
+        solution.finalizeAllSolutions();
+        Assert.assertTrue(solution.getSolutions().size() == 3);
+        Assert.assertTrue(solution.getCurrentSolution().size() == 2);
+
         System.out.println("** testSolution OK **");
     }
 

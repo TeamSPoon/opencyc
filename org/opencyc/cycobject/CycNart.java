@@ -302,5 +302,4 @@ public class CycNart extends CycFort implements Comparable {
             throw new ClassCastException("Must be a CycNart object");
         return this.toString().compareTo(object.toString());
      }
-
 }

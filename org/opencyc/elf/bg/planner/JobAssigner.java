@@ -10,10 +10,6 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 import org.opencyc.elf.message.DoTaskMsg;
 import org.opencyc.elf.message.GenericMsg;
 import org.opencyc.elf.message.JobAssignmentStatus;
-import org.opencyc.elf.message.KBObjectRequestMsg;
-import org.opencyc.elf.message.KBObjectResponseMsg;
-import org.opencyc.elf.message.PredictedInputMsg;
-import org.opencyc.elf.message.PredictionRequestMsg;
 import org.opencyc.elf.message.SchedulerStatusMsg;
 import org.opencyc.elf.message.ScheduleJobMsg;
 
@@ -68,19 +64,12 @@ public class JobAssigner extends NodeComponent {
    * @param jobAssignerChannel the takable channel from which messages are input
    * @param executorChannel the puttable channel to which messages are output to the higher
    * level executor, or null if this is the highest level
-   * @param knowledgeBaseChannel the puttable channel to which messages are output to the
-   * knowledge base
-   * @param predictorChannel the puttable channel to which messages are output to the predictor
    */
   public JobAssigner (Takable jobAssignerChannel,
-                      Puttable executorChannel,
-                      Puttable knowledgeBaseChannel,
-                      Puttable predictorChannel) {
+                      Puttable executorChannel) {
     this.jobAssignerChannel = jobAssignerChannel;
     consumer = new Consumer(jobAssignerChannel,
                             executorChannel,
-                            knowledgeBaseChannel,
-                            predictorChannel,
                             this);
     executor = new ThreadedExecutor();
     try {
@@ -169,17 +158,6 @@ public class JobAssigner extends NodeComponent {
     protected final Puttable executorChannel;
     
     /**
-     * the puttable channel to which messages are output to the
-     * knowledge base
-     */
-    protected final Puttable knowledgeBaseChannel;
-    
-    /**
-     * the puttable channel to which messages are output to the predictor
-     */
-    protected final Puttable predictorChannel;
-    
-    /**
      * the parent node component
      */
     protected NodeComponent nodeComponent;
@@ -200,20 +178,13 @@ public class JobAssigner extends NodeComponent {
      * @param jobAssignerChannel the takable channel from which messages are input
      * @param executorChannel the puttable channel to which messages are output to the higher
      * level executor, or null if this is the highest level
-     * @param knowledgeBaseChannel the puttable channel to which messages are output to the
-     * knowledge base
-     * @param predictorChannel the puttable channel to which messages are output to the predictor
      * @param nodeComponent the parent node component
      */
     protected Consumer (Takable jobAssignerChannel,
                         Puttable executorChannel,
-                        Puttable knowledgeBaseChannel,
-                        Puttable predictorChannel,
                         NodeComponent nodeComponent) { 
       this.jobAssignerChannel = jobAssignerChannel;
       this.executorChannel = executorChannel;
-      this.knowledgeBaseChannel = knowledgeBaseChannel;
-      this.predictorChannel = predictorChannel;
       this.nodeComponent = nodeComponent;
     }
 
@@ -239,10 +210,6 @@ public class JobAssigner extends NodeComponent {
     void dispatchMsg (GenericMsg genericMsg) {
       if (genericMsg instanceof DoTaskMsg)
         processDoTaskMsg((DoTaskMsg) genericMsg);
-      else if (genericMsg instanceof KBObjectResponseMsg)
-        processKBObjectResponseMsg((KBObjectResponseMsg) genericMsg);
-      else if (genericMsg instanceof PredictedInputMsg)
-        processPredictedInputMsg((PredictedInputMsg) genericMsg);
       else if (genericMsg instanceof SchedulerStatusMsg)
         processSchedulerStatusMsg((SchedulerStatusMsg) genericMsg);
     }
@@ -256,29 +223,7 @@ public class JobAssigner extends NodeComponent {
       taskCommand = doTaskMsg.getTaskCommand();
       //TOTO
     }
-
-    /**
-     * Processes the knowledge base object response message.
-     *
-     * @param kbObjectResponseMsg the knowledge base object response message
-     */
-    protected void processKBObjectResponseMsg (KBObjectResponseMsg kbObjectResponseMsg) {
-      Object obj = kbObjectResponseMsg.getObj();
-      Object data = kbObjectResponseMsg.getData();
-      //TODO
-    }
-        
-    /**
-     * Processes the predicted input message.
-     *
-     * @param predictedInputMsg the predicted input message
-     */
-    protected void processPredictedInputMsg (PredictedInputMsg predictedInputMsg) {
-      Object obj = predictedInputMsg.getObj();
-      Object data = predictedInputMsg.getData();
-      //TODO
-    }
-        
+                
     /**
      * Processes the schedule status message.
      *
@@ -300,34 +245,7 @@ public class JobAssigner extends NodeComponent {
       jobAssignmentStatus.setSender(nodeComponent);
       jobAssignmentStatus.setStatus(status);
     }
-    
-    /**
-     * Requests the given object from the knowledge base.
-     *
-     * @param obj the given object whose value is requested from the
-     * knowledge base
-     */
-    protected void sendKBObjectRequestMsg (Object obj) {
-      KBObjectRequestMsg kbObjectRequestMsg = new KBObjectRequestMsg();
-      kbObjectRequestMsg.setSender(nodeComponent);
-      kbObjectRequestMsg.setReplyToChannel((Puttable) jobAssignerChannel);
-      kbObjectRequestMsg.setObj(obj);
-      nodeComponent.sendMsgToRecipient(knowledgeBaseChannel, kbObjectRequestMsg);
-    }
-    
-    /**
-     * Requests a predicted value for the given object.
-     *
-     * @param obj the given object whose predicted value is requested from
-     * the predictor
-     */
-    protected void sendPredictionRequestMsg (Object obj) {
-      PredictionRequestMsg predictionRequestMsg = new PredictionRequestMsg();
-      predictionRequestMsg.setSender(nodeComponent);
-      predictionRequestMsg.setReplyToChannel((Puttable) jobAssignerChannel);
-      predictionRequestMsg.setObj(obj);
-      nodeComponent.sendMsgToRecipient(predictorChannel, predictionRequestMsg);
-    }    
+        
   }
   
   /**

@@ -1,6 +1,7 @@
 package org.opencyc.chat;
 
 import java.lang.*;
+import java.lang.reflect.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -23,23 +24,23 @@ public class IrcChat extends Thread  implements ChatSender {
     public String ircComment = "http://www.opencyc.org";
 
     // IRC Auto-join
-    public String ircChannel = "#cyclbot";
+    public String ircChannel = "#opencyc";
 
     /**
      * IRC Sever details
      */
-    public String ircServer = "irc.openprojects.net";
+    public String ircServer = "irc.freenode.net";
 
     public int ircPort = 6667;
 
     // IRC Unkown message replies sentence to
-    public String ircDestination = "#cyclbot";
+    public String ircDestination = "#opencyc";
 
     // ArrayList of paraphrased writable locations
     public ArrayList paraphrased = new ArrayList();
 
     // IRC Debug messages sentence to ( may send to an IRC username instead of channel )
-    public String ircDebug = "#cycbot";
+    public String ircDebug = "dmiles";
 
     /**
      * IRC Server comunication
@@ -189,10 +190,10 @@ public class IrcChat extends Thread  implements ChatSender {
         if ( ircChannel!=null ) ircJoin(ircChannel);
         while ( !this.interrupted() && running )
             try {
-            this.serviceLoop();
-        } catch ( Exception e ) {
-            System.out.println(""+e);
-        }
+                this.serviceLoop();
+            } catch ( Exception e ) {
+                System.out.println(""+e);
+            }
     }
 
     public void restartChatterBot() {
@@ -427,7 +428,7 @@ public class IrcChat extends Thread  implements ChatSender {
     <my nick> <message>
      */
     public void servicePublicMessage(String from, String hostmask, String returnpath,String params) {
-        if (!returnpath.startsWith("#"))
+        if ( !returnpath.startsWith("#") )
             returnpath = from;
         String lcparams = params.toLowerCase().trim();
         int ccol = params.indexOf(':');
@@ -517,6 +518,16 @@ public class IrcChat extends Thread  implements ChatSender {
             }
             return true;
         }
+        if ( token.equals("bsh") ) {
+            try {
+                if (bshObj!=null) {
+                    sendMessage(returnpath, bshInv.invoke(bshObj,new Object[]{params}));
+                }
+            } catch ( Exception e ) {
+                sendMessage(returnpath, e);
+            }
+            return true;
+        }
         if ( token.equals("prove") ) {
             serviceProve(from,returnpath, params);
             return true;
@@ -553,8 +564,30 @@ public class IrcChat extends Thread  implements ChatSender {
         return false;
     }
 
+    public Object bshObj;
+    public Method bshInv;
+    public Method bshSet;
+    public Class bshcls;
+
     public void startPlugins() {
+        try {
+            bshcls = Class.forName("bsh.Interpreter");
+            bshObj = bshcls.newInstance();
+            bshInv = bshcls.getMethod("eval",new Class[]{String.class});
+            bshSet = bshcls.getMethod("set",new Class[]{String.class,Object.class});
+            addObj("client",this);
+            addObj("cyc",cyc);
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
         return;
+    }
+
+    public void addObj(String name, Object val) {
+        try {
+            bshSet.invoke(bshObj,new Object[]{name,val});
+        } catch ( Exception e ) {
+        }
     }
 
     public void sendHelp(String returnpath, String params) {
@@ -591,7 +624,7 @@ public class IrcChat extends Thread  implements ChatSender {
     public void serviceQuery(String cyclist,String returnpath, String query) {
         try {
             sendAnswers(returnpath, cyc.converseObject( "(cyc-query '" +
-                        toCycListString(query) + " #$InferencePSC)"));
+                                                        toCycListString(query) + " #$InferencePSC)"));
         } catch ( Exception e ) {
             sendMessage(returnpath, ""+ e);
         }
@@ -609,7 +642,7 @@ public class IrcChat extends Thread  implements ChatSender {
     public void serviceProve(String cyclist,String returnpath, String query) {
         try {
             sendAnswers(returnpath, cyc.converseObject( "(fi-prove '" +
-                        toCycListString(query) + " #$InferencePSC)"));
+                                                        toCycListString(query) + " #$InferencePSC)"));
         } catch ( Exception e ) {
             sendMessage(returnpath, ""+ e);
         }
@@ -681,8 +714,8 @@ public class IrcChat extends Thread  implements ChatSender {
             } catch ( Exception e ) {
                 mt = cyc.baseKB;
             }
-            sendMessage(ircDestination,"Using microtheory" + mt.cyclify() +
-                        " for assertions until " + cyclist + " types \"mt <something>\"");
+            sendMessage(ircDestination,"Using microtheory: " + mt.cyclify());
+            sendMessage(ircDestination," for assertions until " + cyclist + " types \"mt <something>\"");
             mtUser.put(cyclist,mt);
         }
         return(CycFort)mt;
@@ -724,33 +757,33 @@ public class IrcChat extends Thread  implements ChatSender {
      */
     public void sendAnswers(String returnpath, Object results) {
 
-    if ( results instanceof CycSymbol ) {
-        if (results.equals(SYMBOL_NIL)) {
-        sendMessage(returnpath,"no answers found");
-        return;
-        }
-    }
-
-    if ( results instanceof CycList ) {
-        CycList answers = (CycList) results;
-        if ( answers.size()==1 && answers.first().equals(IrcChat.SYMBOL_NIL)) {
-        sendMessage(returnpath,"true sentence");
-        return;
-        }
-        if ( answers.toString().length()>120 ) {
-            if ( answers.size()>50 ) {
-                sendMessage(returnpath,"Your question returned " + answers.size() +
-                            " answers .. please refine. (here are the first five)");
-                CycList five = new CycList();
-                for ( int i=0 ; i<5 ; i++ )	five.add(answers.get(i));
-                sendAnswers(returnpath,five);
+        if ( results instanceof CycSymbol ) {
+            if ( results.equals(SYMBOL_NIL) ) {
+                sendMessage(returnpath,"no answers found");
                 return;
             }
-            sendMessage(returnpath,answers.iterator());
-            return;
         }
-    }
-    sendMessage(returnpath,results);
+
+        if ( results instanceof CycList ) {
+            CycList answers = (CycList) results;
+            if ( answers.size()==1 && answers.first().equals(IrcChat.SYMBOL_NIL) ) {
+                sendMessage(returnpath,"true sentence");
+                return;
+            }
+            if ( answers.toString().length()>120 ) {
+                if ( answers.size()>50 ) {
+                    sendMessage(returnpath,"Your question returned " + answers.size() +
+                                " answers .. please refine. (here are the first five)");
+                    CycList five = new CycList();
+                    for ( int i=0 ; i<5 ; i++ ) five.add(answers.get(i));
+                    sendAnswers(returnpath,five);
+                    return;
+                }
+                sendMessage(returnpath,answers.iterator());
+                return;
+            }
+        }
+        sendMessage(returnpath,results);
     }
 
     public void sendDebug(String message) {
@@ -762,7 +795,7 @@ public class IrcChat extends Thread  implements ChatSender {
      */
 
     public void sendChatMessage(String chatMessage) {
-       // sendMessage(ircDestination,chatMessage);
+        // sendMessage(ircDestination,chatMessage);
     }
 
     /**

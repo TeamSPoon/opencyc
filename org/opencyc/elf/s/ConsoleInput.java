@@ -3,9 +3,18 @@ package org.opencyc.elf.s;
 //// Internal Imports
 import org.opencyc.elf.NodeComponent;
 
+import org.opencyc.elf.bg.planner.Resource;
+
 import org.opencyc.elf.message.ObservedInputMsg;
 
+import org.opencyc.elf.wm.ResourcePool;
+
 //// External Imports
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+import java.util.logging.Logger;
 
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 
@@ -37,18 +46,23 @@ public class ConsoleInput extends NodeComponent implements Sensor {
   //// Constructors
   
   /**
-   * Constructs a new ConsoleInput object.
+   * Constructs a new ConsoleInput object given its name.
+   *
+   * @param name the sensor name
    */
-  public ConsoleInput () {
+  public ConsoleInput (String name, Resource sensedObject) {
+    this.name = name;
+    this.sensedObject = sensedObject;
+    logger = Logger.getLogger("org.opencyc.elf");
   }
 
   /** 
-   * Creates a new instance of ConsoleInput with the given
+   * Initializes this instance of ConsoleInput with the given
    * output message channel.
    *
    * @param sensoryPerceptionChannel the puttable channel to which messages are output
    */
-  public ConsoleInput (Puttable sensoryPerceptionChannel) {
+  public void Initialize (Puttable sensoryPerceptionChannel) {
     producer = new Producer(sensoryPerceptionChannel, this);
   }
   //// Public Area
@@ -65,7 +79,16 @@ public class ConsoleInput extends NodeComponent implements Sensor {
    * @return a string representation of this object
    */
   public String toString() {
-    return "Sensor for " + node.getName();
+    return "Console input sensor for " + node.getName();
+  }
+  
+  /** 
+   * Gets the name of the sensor.
+   *
+   * @return the name of the sensor
+   */
+  public String getName() {
+    return name;
   }
   
   //// Protected Area
@@ -111,39 +134,46 @@ public class ConsoleInput extends NodeComponent implements Sensor {
      * Senses the world.
      */
     protected void senseWorld () {
-      //TODO
+      try {
+        String data = bufferedReader.readLine();
+      }
+      catch (IOException e) {
+        logger.severe(e.getMessage());
+      }
     }
     
-    /**
-     * Sends the sensed object message.
-     */
+    /** Sends the sensed object message. */
     protected void sendObservedInputMsg () {
       ObservedInputMsg observedInputMsg = new ObservedInputMsg();
       observedInputMsg.setSender(nodeComponent);
-      observedInputMsg.setObj(obj);
+      observedInputMsg.setObj(sensedObject);
       observedInputMsg.setData(data);
       sendMsgToRecipient(sensoryPerceptionChannel, observedInputMsg);
     }
       
-    /**
-     * the object for which data is sensed
-     */  
-    protected Object obj;
-
-    /**
-     * the sensed data associated with the object
-     */  
+    /** the sensed data associated with the object */
     protected Object data;
+    
+    /** the console buffered input reader */
+    protected BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+ 
   }
   
   //// Private Area
   
   //// Internal Rep
   
-  /**
-   * the thread which processes the input channel of messages
-   */
-  Producer producer;
+  /** the name of the sensor */
+  protected String name;
+  
+  /** the object for which data is sensed */
+  protected Object sensedObject = ResourcePool.getInstance().getResource(Resource.CONSOLE);
+  
+  /** the thread which processes the input channel of messages */
+  protected Producer producer;
+  
+  /** the logger */
+  protected static Logger logger;
   
   //// Main
   

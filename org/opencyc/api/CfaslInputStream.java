@@ -103,10 +103,10 @@ public class CfaslInputStream extends BufferedInputStream {
         cfaslOpcodeDescriptions.put(new Integer(11), "CFASL_SYMBOL");
         cfaslOpcodeDescriptions.put(new Integer(12), "CFASL_NIL");
         cfaslOpcodeDescriptions.put(new Integer(13), "CFASL_LIST");
-        cfaslOpcodeDescriptions.put(new Integer(17), "CFASL_DOTTED");
         cfaslOpcodeDescriptions.put(new Integer(14), "CFASL_VECTOR");
         cfaslOpcodeDescriptions.put(new Integer(15), "CFASL_STRING");
         cfaslOpcodeDescriptions.put(new Integer(16), "CFASL_CHARACTER");
+        cfaslOpcodeDescriptions.put(new Integer(17), "CFASL_DOTTED");
         cfaslOpcodeDescriptions.put(new Integer(18), "CFASL_HASHTABLE");
         cfaslOpcodeDescriptions.put(new Integer(19), "CFASL_BTREE_LOW_HIGH");
         cfaslOpcodeDescriptions.put(new Integer(20), "CFASL_BTREE_LOW");
@@ -483,13 +483,13 @@ public class CfaslInputStream extends BufferedInputStream {
     public CycList readCycList () throws IOException {
         int size = readInt();
         if (cycConnection.trace)
-            System.out.println("CycList.size: " + size);
+            System.out.println("readCycList.size: " + size);
         CycList cycList = new CycList();
         for (int i = 0; i < size; i++) {
             cycList.add(readObject());
         }
         if (cycConnection.trace)
-            System.out.println("CycList.readObject: " + cycList);
+            System.out.println("readCycList.readObject: " + cycList);
         return  cycList;
     }
 
@@ -501,10 +501,22 @@ public class CfaslInputStream extends BufferedInputStream {
      */
     public CycList readCons () throws IOException {
         int size = readInt();
+        if (cycConnection.trace)
+            System.out.println("readCons.size: " + size);
         CycList cycList = new CycList();
-        for (int i = 0; i < (size - 1); i++)
-            cycList.add(readObject());
-        cycList.setDottedElement(readObject());
+        //for (int i = 0; i < (size - 1); i++) {
+        for (int i = 0; i < size; i++) {
+            Object consObject = readObject();
+            if (cycConnection.trace)
+                System.out.println("readCons.consObject: " + consObject);
+            cycList.add(consObject);
+        }
+        Object cdrObject = readObject();
+        if (cycConnection.trace)
+            System.out.println("readCons.cdrObject: " + cdrObject);
+        cycList.setDottedElement(cdrObject);
+        if (cycConnection.trace)
+            System.out.println("readCons.readCons: " + cycList);
         return  cycList;
     }
 

@@ -1648,6 +1648,7 @@ public class CycAccess {
         command.append("    (do-rule-index (rule " + predicate.cyclify() + " :pos nil :backward) ");
         command.append("       (cpush (assertion-formula rule) backchain-rules))) ");
         command.append("   backchain-rules)");
+        this.traceOn();
         return converseList(command.toString());
     }
 

@@ -54,7 +54,8 @@ public class CycSymbol implements Comparable {
      *
      * @param symbolName a <tt>String</tt> name.
      */
-    public static CycSymbol makeCycSymbol(String symbolName) {
+    public static CycSymbol makeCycSymbol(String symbolNameAnyCase) {
+        String symbolName = symbolNameAnyCase.toUpperCase();
         CycSymbol cycSymbol = (CycSymbol) cache.getElement(symbolName);
         if (cycSymbol == null) {
             cycSymbol = new CycSymbol(symbolName);
@@ -69,7 +70,7 @@ public class CycSymbol implements Comparable {
      *
      * @param symbolName the <tt>String</tt> name of the <tt>CycSymbol</tt>.
      */
-    protected CycSymbol(String symbolName) {
+    private CycSymbol(String symbolName) {
         this.symbolName = symbolName;
     }
 

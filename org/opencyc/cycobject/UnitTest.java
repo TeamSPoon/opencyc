@@ -396,7 +396,7 @@ public class UnitTest extends TestCase {
         CycList cycList9 = CycList.construct(brazil, new Integer(1));
         Assert.assertEquals("(Brazil . 1)", cycList9.toString());
 
-        CycList cycList10 = CycList.construct(brazil, new CycSymbol("foo"));
+        CycList cycList10 = CycList.construct(brazil, CycSymbol.makeCycSymbol("foo"));
         Assert.assertEquals("(Brazil . foo)", cycList10.toString());
 
         // Parse strings to make CycLists.
@@ -434,16 +434,16 @@ public class UnitTest extends TestCase {
         // subst
         try {
             CycList cycList18 = cycAccess.makeCycList("(b)");
-            CycList cycList19 = cycList18.subst(new CycSymbol("x"), new CycSymbol("a"));
+            CycList cycList19 = cycList18.subst(CycSymbol.makeCycSymbol("x"), CycSymbol.makeCycSymbol("a"));
             Assert.assertEquals(cycAccess.makeCycList("(b)"), cycList19);
             CycList cycList20 = cycAccess.makeCycList("(a)");
-            CycList cycList21 = cycList20.subst(new CycSymbol("x"), new CycSymbol("a"));
+            CycList cycList21 = cycList20.subst(CycSymbol.makeCycSymbol("x"), CycSymbol.makeCycSymbol("a"));
             Assert.assertEquals(cycAccess.makeCycList("(x)"), cycList21);
             CycList cycList22 = cycAccess.makeCycList("((a))");
-            CycList cycList23 = cycList22.subst(new CycSymbol("x"), new CycSymbol("a"));
+            CycList cycList23 = cycList22.subst(CycSymbol.makeCycSymbol("x"), CycSymbol.makeCycSymbol("a"));
             Assert.assertEquals(cycAccess.makeCycList("((x))"), cycList23);
             CycList cycList24 = cycAccess.makeCycList("((a) (b c) (((d))))");
-            CycList cycList25 = cycList24.subst(new CycSymbol("x"), new CycSymbol("a"));
+            CycList cycList25 = cycList24.subst(CycSymbol.makeCycSymbol("x"), CycSymbol.makeCycSymbol("a"));
             Assert.assertEquals(cycAccess.makeCycList("((x) (b c) (((d))))"), cycList25);
         }
         catch (Exception e) {
@@ -611,7 +611,7 @@ public class UnitTest extends TestCase {
             Assert.assertTrue(e2.hasMoreElements());
             Assert.assertEquals("a", e2.nextElement());
             Assert.assertTrue(e2.hasMoreElements());
-            Assert.assertEquals(new CycSymbol(":foo"), e2.nextElement());
+            Assert.assertEquals(CycSymbol.makeCycSymbol(":foo"), e2.nextElement());
             Assert.assertTrue(e2.hasMoreElements());
             Assert.assertEquals(cycAccess.makeCycConstant("#$Brazil"),
                                 e2.nextElement());

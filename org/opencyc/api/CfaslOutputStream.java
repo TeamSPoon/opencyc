@@ -56,10 +56,10 @@ public class CfaslOutputStream extends BufferedOutputStream {
     protected static final int CFASL_SYMBOL = 11;
     protected static final int CFASL_NIL = 12;
     protected static final int CFASL_LIST = 13;
-    protected static final int CFASL_DOTTED = 17;
     protected static final int CFASL_VECTOR = 14;
     protected static final int CFASL_STRING = 15;
     protected static final int CFASL_CHARACTER = 16;
+    protected static final int CFASL_DOTTED = 17;
     protected static final int CFASL_HASHTABLE = 18;
     protected static final int CFASL_BTREE_LOW_HIGH = 19;
     protected static final int CFASL_BTREE_LOW = 20;
@@ -355,6 +355,11 @@ public class CfaslOutputStream extends BufferedOutputStream {
      * @param list the list of objects to be written
      */
     public void writeList (List list) throws IOException {
+        if (list instanceof CycList &&
+            ! ((CycList) list).isProperList()) {
+            writeDottedList((CycList) list);
+            return;
+        }
         if (cycConnection.trace)
             System.out.println("writeList = " + list + "\n  of size " + list.size());
         write(CFASL_LIST);
@@ -362,6 +367,25 @@ public class CfaslOutputStream extends BufferedOutputStream {
         for (int i = 0; i < list.size(); i++) {
             writeObject(list.get(i));
         }
+    }
+
+    /**
+     * Writes an improper (dotted) CycList of Objects to this CfaslOutputStream as a CFASL dotted list.
+     *
+     * @param improperList the list of objects to be written
+     */
+    public void writeDottedList (CycList dottedList) throws IOException {
+        if (cycConnection.trace)
+            System.out.println("writeDottedList = " + dottedList + "\n  proper elements size " +
+                               dottedList.size());
+        write(CFASL_DOTTED);
+        writeInt(dottedList.size());
+        for (int i = 0; i < dottedList.size(); i++) {
+            writeObject(dottedList.get(i));
+        }
+        if (cycConnection.trace)
+            System.out.println("writeDottedList.cdr = " + dottedList.getDottedElement());
+        writeObject(dottedList.getDottedElement());
     }
 
     /**

@@ -306,7 +306,7 @@ public class CycListParser  {
      */
     private void scanMinus() {
         //System.out.println("-");
-        CycSymbol w = new CycSymbol("-");
+        CycSymbol w = CycSymbol.makeCycSymbol("-");
 
         if (( parenLevel > 0 ) && ( readStack.sp != parenLevel ))
             // Within a list.
@@ -331,7 +331,7 @@ public class CycListParser  {
         else if (st.sval.startsWith("?"))
             w = CycVariable.makeCycVariable(st.sval);
         else
-            w = new CycSymbol(st.sval);
+            w = CycSymbol.makeCycSymbol(st.sval);
 
         if ((parenLevel > 0) && (readStack.sp != parenLevel))
             // Within a list.

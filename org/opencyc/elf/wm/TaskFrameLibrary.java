@@ -6,8 +6,7 @@ import org.opencyc.elf.bg.taskframe.TaskFrame;
 //// External Imports
 import java.util.HashMap;
 
-/**
- * TaskFrameLibrary provides the library of task frames.  There is a singleton instance.
+/** TaskFrameLibrary provides the library of task frames.  There is a singleton instance.
  *
  * @version $Id$
  * @author Stephen L. Reed  
@@ -40,8 +39,7 @@ public class TaskFrameLibrary {
   
   //// Public Area
   
-  /**
-   * Gets the task frame library singleton instance.
+  /** Gets the task frame library singleton instance.
    *
    * @return the task frame library singleton instance
    */
@@ -62,8 +60,7 @@ public class TaskFrameLibrary {
     return clonedTaskFrame;
   }
     
-  /**
-   * Gets the root task frame
+  /** Gets the root task frame
    *
    * @return the root task frame
    */
@@ -71,8 +68,7 @@ public class TaskFrameLibrary {
     return rootTaskFrame;
   }
 
-  /**
-   * Sets the root task frame
+  /** Sets the root task frame
    *
    * @param rootTaskFrame the root task frame
    */
@@ -82,8 +78,7 @@ public class TaskFrameLibrary {
 
   //// Protected Area
   
-  /**
-   * Adds a named task frame to the dictionary.
+  /** Adds a named task frame to the dictionary.
    *
    * @param taskFrame the named task frame
    */
@@ -95,11 +90,11 @@ public class TaskFrameLibrary {
   
   //// Internal Rep
   
-  /** the task frame dictionary, task name --> task frame */
-  protected HashMap taskFrameDictionary = new HashMap();
-  
   /** the task frame library singleton instance */
   protected static TaskFrameLibrary taskFrameLibrary;
+  
+  /** the task frame dictionary, task name --> task frame */
+  protected HashMap taskFrameDictionary = new HashMap();
   
   /** the root task frame */
   protected TaskFrame rootTaskFrame;

@@ -6,8 +6,7 @@ import org.opencyc.elf.bg.taskframe.TaskCommand;
 
 //// External Imports
 
-/**
- * Provides the container for the schedule job message, that is sent from the job assigner to
+/** Provides the container for the schedule job message, that is sent from the job assigner to
  * the scheduler.
  * 
  * @version $Id$
@@ -40,8 +39,7 @@ public class ScheduleJobMsg extends GenericMsg {
   
   //// Public Area
   
-  /**
-   * Gets the commanded task for scheduling
+  /** Gets the commanded task for scheduling
    *
    * @return the commanded task for scheduling
    */
@@ -49,8 +47,7 @@ public class ScheduleJobMsg extends GenericMsg {
     return taskCommand;
   }
 
-  /**
-   * Sets the commanded task for scheduling
+  /** Sets the commanded task for scheduling
    *
    * @param taskCommand the commanded task for scheduling
    */

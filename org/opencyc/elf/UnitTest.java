@@ -12,8 +12,6 @@ import org.opencyc.elf.bg.planner.JobAssigner;
 import org.opencyc.elf.bg.planner.PlanSelector;
 import org.opencyc.elf.bg.planner.Resource;
 
-import org.opencyc.elf.bg.state.StateVariable;
-
 import org.opencyc.elf.message.DoTaskMsg;
 
 import org.opencyc.elf.s.Sensor;
@@ -54,6 +52,8 @@ import org.opencyc.elf.wm.TaskFrameFactory;
 import org.opencyc.elf.wm.TaskFrameLibrary;
 import org.opencyc.elf.wm.WorldModel;
 
+import org.opencyc.elf.wm.state.StateVariable;
+
 //// External Imports
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +67,7 @@ import EDU.oswego.cs.dl.util.concurrent.Channel;
 import EDU.oswego.cs.dl.util.concurrent.Puttable;
 import EDU.oswego.cs.dl.util.concurrent.Takable;
 
-/**
- * Provides a suite of JUnit test cases for the org.opencyc.elf package.
+/** Provides a suite of JUnit test cases for the org.opencyc.elf package.
  * 
  * @version $Id$
  * @author Stephen L. Reed  
@@ -94,8 +93,7 @@ public class UnitTest extends TestCase {
   
   //// Constructors
   
-  /**
-   * Construct a new UnitTest object.
+  /** Construct a new UnitTest object.
    * 
    * @param name the test case name.
    */
@@ -105,8 +103,7 @@ public class UnitTest extends TestCase {
   
   //// Public Area
   
-  /**
-   * Runs the unit tests
+  /** Runs the unit tests
    * @return the test suite
    */
   public static Test suite() {
@@ -117,8 +114,7 @@ public class UnitTest extends TestCase {
     return testSuite;
   }
 
-  /**
-   * Tests NodeFactory object behavior.
+  /** Tests NodeFactory object behavior.
    */
   public void testNodeFactory() {
     System.out.println("\n*** testNodeFactory ***");
@@ -217,8 +213,7 @@ public class UnitTest extends TestCase {
     System.out.println("*** testNodeFactory OK ***");
   }
 
-  /**
-   * Tests BehaviorGeneration object behavior.
+  /** Tests BehaviorGeneration object behavior.
    */
   public void testBehaviorGeneration() {
     System.out.println("\n*** testBehaviorGeneration ***");
@@ -278,8 +273,7 @@ public class UnitTest extends TestCase {
     System.out.println("*** testBehaviorGeneration OK ***");
   }
   
-  /**
-   * Tests BehaviorEngine.
+  /** Tests BehaviorEngine.
    */
   public void testBehaviorEngine () {
     System.out.println("\n*** testBehaviorEngine ***");
@@ -308,15 +302,12 @@ public class UnitTest extends TestCase {
   
   //// Internal Rep
   
-  /**
-   * the logger
-   */
+  /** the logger */
   protected static Logger logger;
   
   //// Main
   
-  /**
-   * Main method in case tracing is prefered over running JUnit.
+  /** Main method in case tracing is prefered over running JUnit.
    * @param args command line arguments (unused)
    */
   public static void main(String[] args) {

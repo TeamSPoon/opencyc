@@ -98,6 +98,7 @@ public class Echo extends GenericAgent {
         acl.setLanguage(FIPACONSTANTS.XML);
         acl.setOntology(AgentCommunityAdapter.CYC_ECHO_ONTOLOGY);
         acl.setReplyWith(agentCommunityAdapter.nextMessageId());
+        acl.setProtocol(FIPACONSTANTS.FIPA_REQUEST);
         System.out.println("\nSending to remote agent " + remoteAgentName + ":" + echoRequestXml);
         ACL replyAcl = null;
         try {

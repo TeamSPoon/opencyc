@@ -69,6 +69,11 @@ public class GenericAgent implements MessageReceiver {
     protected int remoteAgentCommunity;
 
     /**
+     * type of the local agent
+     */
+    protected String myAgentType = "OpenCyc-agent";
+
+    /**
      * the interface for interacting with the CoABS agent community
      */
     protected CoAbsCommunityAdapter coAbsCommunityAdapter;
@@ -256,6 +261,15 @@ public class GenericAgent implements MessageReceiver {
      */
     public String getMyAgentName () {
         return myAgentName;
+    }
+
+    /**
+     * Returns my agent type (FIPA-OS requirement).
+     *
+     * @return my agent type
+     */
+    public String getAgentType () {
+        return myAgentType;
     }
 
     /**

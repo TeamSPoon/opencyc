@@ -36,6 +36,11 @@ public interface  MessageReceiver {
     public String getMyAgentName();
 
     /**
+     * Returns the agent type for FIPA-OS
+     */
+    public String getAgentType();
+
+    /**
      * Notifies my agent that an Agent Communication Language message has been received.
      *
      * @param remoteAgentCommunity indicates either CoAbs or FIPA-OS agent community

@@ -142,6 +142,7 @@ public class RemoteCycConnection extends GenericAgent implements CycConnectionIn
         acl.setContentObject(apiRequestXml, ACL.BYTELENGTH_ENCODING);
         acl.setLanguage(FIPACONSTANTS.XML);
         acl.setOntology(AgentCommunityAdapter.CYC_API_ONTOLOGY);
+        acl.setProtocol(FIPACONSTANTS.FIPA_REQUEST);
         acl.setReplyWith(agentCommunityAdapter.nextMessageId());
 
         ACL replyAcl = null;

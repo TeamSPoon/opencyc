@@ -307,8 +307,8 @@ public class CoAbsCommunityAdapter
         AgentRep receivingAgentRep = this.lookupAgentRep(receiverName);
         if (receivingAgentRep == null)
             throw new IOException("Receiving agent " + receiverName + " not found");
-        receivingAgentRep.addMessage(requestMessage);
         waitingReplyThreads.put(replyWith, Thread.currentThread());
+        receivingAgentRep.addMessage(requestMessage);
         while (true)
             try {
                 Thread.sleep(500);

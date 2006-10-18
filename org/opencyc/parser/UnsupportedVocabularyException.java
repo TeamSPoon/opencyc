@@ -1,12 +1,15 @@
-package  org.opencyc.util;
+package org.opencyc.parser;
+
+//// Internal Imports
+import org.opencyc.cycobject.CycConstant;
+
+//// External Imports
 
 /**
- * Implements an exception class for notification when a Cyc server 
- * communication has timed out. When this is thrown, the outstanding
- * task on the Cyc server is arborted.
+ * <P>Provides 
  *
  * @version $Id$
- * @author Eric E. Allen<br>
+ * @author Tony Brusseau
  *
  * <p>Copyright 2001 Cycorp, Inc., license is open source GNU LGPL.
  * <p><a href="http://www.opencyc.org/license.txt">the license</a>
@@ -26,42 +29,31 @@ package  org.opencyc.util;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class TimeOutException extends RuntimeException {
+public class UnsupportedVocabularyException extends Exception {
   
-  /**
-   * Construct a TimeOutException object with no 
-   * specified message.
-   */
-  public TimeOutException () {
-    super();
-  }
+  //// Constructors
   
-  /**
-  * Construct a TimeOutException object with a 
-  * specified message.
-  * @param message a message describing the exception.
-  */
-  public TimeOutException(String message) {
-    super(message);
+  /** Creates a new instance of InvalidConstantName. */
+  public UnsupportedVocabularyException(CycConstant invalidConstant) {
+    this.invalidConstant = invalidConstant;
   }
   
-  /**
-   * Construct a TimeOutException object with a 
-   * specified message and throwable.
-   * @param message the message string
-   * @param t the throwable that caused this exception
-   */
-  public TimeOutException(String message, Throwable t) {
-    super(message, t);
+  //// Public Area
+  
+  public String getMessage() {
+    return "The following vocabulary is not supported: '" + invalidConstant.cyclify() + "'.";
   }
-    
-  /**
-   * Construct a TimeOutException object with the 
-   * specified throwable.
-   * @param t the throwable that caused this exception
-   */
-  public TimeOutException(Throwable t) {
-    super(t);
-  }
+  
+  public CycConstant getInvalidVocabulary() { return invalidConstant; }
+  
+  //// Protected Area
+  
+  //// Private Area
+  
+  //// Internal Rep
+  
+  private CycConstant invalidConstant;
+  
+  //// Main
   
 }

@@ -42,6 +42,6 @@ package org.opencyc.cyclobject;
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *      Copyright &copy; 2000 - 2001 Cycorp, Inc.  All rights reserved.
+ *      Copyright &copy; 2000 - 2006 Cycorp, Inc.  All rights reserved.
  *****************************************************************************/
 public interface CycLDenotationalTerm extends CycLTerm { }

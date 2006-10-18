@@ -27,101 +27,56 @@ import org.opencyc.xml.XMLWriter;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public abstract class CycFort extends DefaultCycObject implements Serializable, Comparable, ELMT {
-
-    /**
-     * The name of the XML tag for id objects
-     */
-    public static final String idXMLTag = "id";
-
-    /**
-     * The ID of the <tt>CycFort<tt> object which is an integer unique within an OpenCyc
-     * KB but not necessarily unique globally.
-     */
-    private Integer id;
-
-    /**
-     * Returns a cyclified string representation of the OpenCyc FORT.
-     * Embedded constants are prefixed with ""#$".
-     *
-     * @return a cyclified <tt>String</tt>.
-     */
-    public abstract String cyclify();
-
-    /**
-     * Prints the XML representation of the CycFort to an <tt>XMLWriter</tt>
-     */
-    public abstract void toXML (XMLWriter xmlWriter, int indent, boolean relative)
-        throws IOException;
-
-    /**
-     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
-     *
-     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
-     */
-    public abstract String stringApiValue();
-
-    /**
-     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
-     *
-     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
-     */
-    public abstract Object cycListApiValue();
-
-    /**
-     * Sets the id.
-     *
-     * @param id the id value
-     */
-    public void setId(Integer id) {
-        this.id = id;
+public abstract class CycFort extends DefaultCycObject implements Serializable, Comparable {
+  
+  /**
+   * Compares this object with the specified object for order.
+   * Returns a negative integer, zero, or a positive integer as this
+   * object is less than, equal to, or greater than the specified object.
+   *
+   * @param object the reference object with which to compare.
+   * @return a negative integer, zero, or a positive integer as this
+   * object is less than, equal to, or greater than the specified object
+   */
+  public int compareTo(Object object) {
+    if (this instanceof CycConstant) {
+      if (object instanceof CycConstant)
+        return this.toString().compareTo(object.toString());
+      else if (object instanceof CycNart)
+        return this.toString().compareTo(object.toString().substring(1));
+      else
+        throw new ClassCastException("Must be a CycFort object");
     }
-
-    /**
-     * Gets the id.
-     *
-     * @return the id
-     */
-    public Integer getId() {
-        return id;
+    else {
+      if (object instanceof CycNart)
+        return this.toString().compareTo(object.toString());
+      else if (object instanceof CycConstant)
+        return this.toString().substring(1).compareTo(object.toString());
+      else
+        throw new ClassCastException("Must be a CycFort object");
     }
-
-    /**
-     * Returns a string representation without causing additional api calls to determine
-     * constant names.
-     *
-     * @return a string representation without causing additional api calls to determine
-     * constant names
-     */
-    public abstract String safeToString ();
-
-    /**
-     * Compares this object with the specified object for order.
-     * Returns a negative integer, zero, or a positive integer as this
-     * object is less than, equal to, or greater than the specified object.
-     *
-     * @param object the reference object with which to compare.
-     * @return a negative integer, zero, or a positive integer as this
-     * object is less than, equal to, or greater than the specified object
-     */
-     public int compareTo (Object object) {
-        if (this instanceof CycConstant) {
-            if (object instanceof CycConstant)
-                return this.toString().compareTo(object.toString());
-            else if (object instanceof CycNart)
-                return this.toString().compareTo(object.toString().substring(1));
-            else
-                throw new ClassCastException("Must be a CycFort object");
-        }
-        else {
-            if (object instanceof CycNart)
-                return this.toString().compareTo(object.toString());
-            else if (object instanceof CycConstant)
-                return this.toString().substring(1).compareTo(object.toString());
-            else
-                throw new ClassCastException("Must be a CycFort object");
-        }
-     }
-
+  }
+  
+  /**
+   * Returns <tt>true</tt> some object equals this <tt>CycConstant</tt>. The equality check uses only the guid.
+   *
+   * @param object the <tt>Object</tt> for equality comparison
+   * @return equals <tt>boolean</tt> value indicating equality or non-equality.
+   */
+  abstract public boolean equals(Object object);
+  
+  /**
+   * Returns <tt>true</tt> some object equals this <tt>CycConstant</tt>. The equality check uses only the guid.
+   *
+   * @param object the <tt>Object</tt> for equality comparison
+   * @return equals <tt>boolean</tt> value indicating equality or non-equality.
+   */
+  abstract public boolean equalsAtEL(Object object);
+  
+  /**
+   * When true, indicates that the fort is invalid.
+   */
+  protected boolean isInvalid = false;
+  
 }
 

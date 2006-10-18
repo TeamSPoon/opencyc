@@ -116,7 +116,7 @@ public class RDFTriples implements StatementHandler {
      *
      * @param subject the RDF Triple Subject
      * @param predicate the RDF Triple Predicate
-     * @param object the RDF Triple Object
+     * @param literal the RDF Triple Object
      */
     public void statement(AResource subject, AResource predicate, ALiteral literal) {
         String lang = literal.getLang();

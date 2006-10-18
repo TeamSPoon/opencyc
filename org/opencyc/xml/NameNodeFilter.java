@@ -43,8 +43,6 @@ public class NameNodeFilter
      * that were tagged <MyTag>...</MyTag> in the input XML document, do
      * NameNodeFilter filter = new NameNodeFilter("MyTag");
      *
-     * @return a NameNodeFilter object.
-     *
      */
     public NameNodeFilter (String tag) {
         this.tagname = tag;

@@ -175,6 +175,11 @@ public abstract class CycWorker extends SwingWorker {
    * @return Returns the result of this CycWorker or null if
    * CycWorker interrupted or not started. 
    **/
-  public Object getWork() { return super.get(); }
+  public Object getWork() throws Exception { 
+    if (getException() != null) {
+      throw getException();
+    }
+    return super.get(); 
+  }
 
 }

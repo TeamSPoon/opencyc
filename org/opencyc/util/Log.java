@@ -4,7 +4,9 @@ package org.opencyc.util;
  * Provides the behavior and attributes of a event log for OpenCyc.<p>
  *
  * Class Log provides a local log facility for OpenCyc agents.  Messages can be
- * written to a file, displayed to stdout, stderr, or ignored.<p>
+ * written to a file, displayed to stdout, stderr.<p>
+ *
+ * user -Dorg.opencyc.util.log=file  to enable writing to a file.
  *
  * @version $Id$
  * @author Stephen L. Reed
@@ -44,19 +46,9 @@ public class Log {
     protected boolean writeToFile;
 
     /**
-     * If true, write error messages to System.err.
-     */
-    protected boolean writeToErr;
-
-    /**
      * If true, write messages to System.out.
      */
     protected boolean writeToOut;
-
-    /**
-     * If true, ignore all messages.
-     */
-    protected boolean ignore;
 
     /**
      * File pathname for the log file.
@@ -96,37 +88,30 @@ public class Log {
         if (current != null) {
             return;
         }
-        boolean writeToFile = true;
-        boolean writeToErr = true;
+        boolean writeToFile = false;
         boolean writeToOut = true;
         try {
             String logProperty = System.getProperty("org.opencyc.util.log", "default");
-            if (logProperty.equalsIgnoreCase("display")) {
-                writeToFile = false;
-            }
-            else if (logProperty.equalsIgnoreCase("file")) {
-                writeToOut = false;
-            }
-            else if (logProperty.equalsIgnoreCase("errors")) {
-                writeToFile = false;
-                writeToOut = false;
+            if (logProperty.equalsIgnoreCase("file")) {
+                writeToFile = true;
             }
             else if (! logProperty.equalsIgnoreCase("default"))
                 System.err.println("Invalid value for property org.opencyc.util.log " +
                                    logProperty + " substituting default");
         }
         catch (SecurityException e) {
+            writeToFile = false;
         }
-        current = new Log(logName, writeToFile, writeToErr, writeToOut, false);
+        current = new Log(logName, writeToFile, writeToOut);
     }
 
 
     /**
      * Constructs a new Log object.  Display all messages only to
-     * the default log file.
+     * the default log file only if the runtime property is file.
      */
     public Log() {
-        this(DEFAULT_LOG_FILENAME, false, false, false, false);
+        this(DEFAULT_LOG_FILENAME, false, false);
     }
 
     /**
@@ -135,7 +120,7 @@ public class Log {
      * @param logFilePath specifies the path for the log file.
      */
     public Log(String logFilePath) {
-        this(logFilePath, true, true, true, false);
+        this(logFilePath, false, true);
     }
 
     /**
@@ -143,35 +128,16 @@ public class Log {
      *
      * @param logFilePath specifies the path for the log file.
      * @param writeToFile if true, write messages to the log file.
-     * @param writeToErr if true, write error messages to System.err.
      * @param writeToOut if true, write messages to System.out.
      * @param ignore if true, ignore all messages.
      */
     public Log(String logFilePath,
                boolean writeToFile,
-               boolean writeToErr,
-               boolean writeToOut,
-               boolean ignore) {
+               boolean writeToOut) {
         this.logFilePath = logFilePath;
         this.writeToFile = writeToFile;
-        this.writeToErr = writeToErr;
         this.writeToOut = writeToOut;
-        this.ignore = ignore;
-
         printWriter = null;
-        if (writeToFile) {
-            try {
-                printWriter = new PrintWriter( new BufferedWriter(new FileWriter(logFilePath)));
-            }
-            catch (IOException e) {
-                System.err.println("Error creating log file " + logFilePath);
-                System.err.println(e);
-            }
-            catch (SecurityException e) {
-                System.out.println("Security policy does not permit a log file.");
-                writeToFile = false;
-            }
-        }
     }
 
     /**
@@ -183,9 +149,6 @@ public class Log {
         if (printWriter != null)
             close();
         logFilePath = location;
-        if (writeToFile) {
-            printWriter = new PrintWriter(new BufferedWriter(new FileWriter(logFilePath)));
-        }
     }
 
     /**
@@ -208,27 +171,25 @@ public class Log {
      * Writes a newline to the log.
      */
     public void println() {
-        if (ignore)
-            return;
         if (writeToOut)
             System.out.print("\n");
         if (writeToFile) {
+            checkLogFile();
             printWriter.print("\n");
             printWriter.flush();
         }
     }
 
     /**
-     * Writes the object's string representation to the log.
+     * Writes a char to the log.
      *
-     * @param object the object whose string representation is to be logged.
+     * @param c the char to be logged.
      */
     public void print(char c) {
-        if (ignore)
-            return;
         if (writeToOut)
             System.out.print(c);
         if (writeToFile) {
+            checkLogFile();
             printWriter.print(c);
             printWriter.flush();
         }
@@ -249,11 +210,10 @@ public class Log {
      * @param message the String message to be logged.
      */
     public void print(String message) {
-        if (ignore)
-            return;
         if (writeToOut)
             System.out.print(message);
         if (writeToFile) {
+            checkLogFile();
             printWriter.print(message);
             printWriter.flush();
         }
@@ -276,11 +236,10 @@ public class Log {
      * @param message the String message to be logged.
      */
     public void println(String message) {
-        if (ignore)
-            return;
         if (writeToOut)
             System.out.println(message);
         if (writeToFile) {
+            checkLogFile();
             printWriter.println(message);
             printWriter.flush();
         }
@@ -292,9 +251,9 @@ public class Log {
      * @param errorMessage the error message to be logged.
      */
     public void errorPrintln(String errorMessage) {
-        if (writeToErr)
-            System.err.println(errorMessage);
+        System.err.println(errorMessage);
         if (writeToFile) {
+            checkLogFile();
             printWriter.println(errorMessage);
             printWriter.flush();
         }
@@ -306,9 +265,9 @@ public class Log {
      * @param exception the exception to be reported.
      */
     public void printStackTrace(Exception exception) {
-        if (writeToErr)
-            exception.printStackTrace();
+        exception.printStackTrace();
         if (writeToFile) {
+            checkLogFile();
             exception.printStackTrace(printWriter);
             printWriter.flush();
         }
@@ -318,8 +277,9 @@ public class Log {
      * Closes the log file.
      */
     public void close() {
-        if (writeToFile) {
+        if (writeToFile && printWriter != null) {
             printWriter.close();
+            printWriter = null;
         }
     }
 
@@ -330,5 +290,25 @@ public class Log {
      */
     public static void setCurrent(Log log) {
         current = log;
+    }
+
+    /**
+     * Opens the log file if not open and a log file was
+     * specified.
+     */
+    protected void checkLogFile() {
+        if (printWriter != null)
+            return;
+        try {
+            printWriter = new PrintWriter( new BufferedWriter(new FileWriter(logFilePath)));
+        }
+        catch (IOException e) {
+            System.err.println("Error creating log file " + logFilePath);
+            System.err.println(e);
+        }
+        catch (SecurityException e) {
+            System.out.println("Security policy does not permit a log file.");
+            writeToFile = false;
+        }
     }
 }

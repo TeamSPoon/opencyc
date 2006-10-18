@@ -33,6 +33,7 @@ public class Timer {
     public static final Date APOCALYPSE = new Date(Long.MAX_VALUE);
     private Date timeOut = APOCALYPSE;
     private Date start;
+    private long timeAlloted;
 
     /**
      * Creates and starts a new timer that will run the specified number of
@@ -43,6 +44,7 @@ public class Timer {
      */
     public Timer (int timeAlloted) {
         this.start = new Date();
+        this.timeAlloted = timeAlloted * 1000L;
         this.timeOut = new Date(start.getTime() + (((long)timeAlloted)*1000L));
     }
 
@@ -55,6 +57,7 @@ public class Timer {
      */
     public Timer (long timeAlloted) {
         this.start = new Date();
+        this.timeAlloted = timeAlloted;
         this.timeOut = new Date(start.getTime() + timeAlloted);
     }
 
@@ -63,9 +66,14 @@ public class Timer {
      */
     public Timer () {
         this.start = new Date();
+        this.timeAlloted = 0;
+    }
+    
+    public long getAllotedMSecs() {
+      return timeAlloted;
     }
 
-    /*
+    /**
      * Restarts this timer with the same timeout it had previously.
      */
     public void start () {
@@ -132,10 +140,6 @@ public class Timer {
         }
     }
 }
-
-
-
-
 
 
 

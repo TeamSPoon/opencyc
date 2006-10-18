@@ -1,5 +1,4 @@
 package org.opencyc.util;
-import org.apache.commons.collections.*;
 import java.util.*;
 
 /**

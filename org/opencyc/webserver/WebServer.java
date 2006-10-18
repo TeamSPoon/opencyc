@@ -125,10 +125,6 @@ public class WebServer extends Thread {
     /**
      * Constructs a WebServer object.
      *
-     * @param port the port to use
-     * @param directories the directory to serve files from
-     * @param trees true if files within jar files should be served up
-     * @param traceRequests true if client's request text should be logged.
      * @exception IOException if the listening socket cannot be opened, or problem opening jar files.
      */
     public WebServer() throws IOException {
@@ -192,7 +188,7 @@ public class WebServer extends Thread {
                     getBytes();
                 }
                 catch (Exception e) {
-                    Log.current.println("file not found: " + notFoundPath);
+                    Log.current.println("file not found: " + notFoundPath + " " + e.getMessage());
                     try {
                         out.writeBytes("HTTP/1.1 404 Not Found\r\n");
                         out.writeBytes("Server: Cyc WebServer\r\n");
@@ -333,13 +329,13 @@ public class WebServer extends Thread {
                             return;
                         }
                         try {
+                            Log.current.println("...from " + nativePath);
                             File f = new File(nativePath);
                             byte[] fileBytes = getBytes(new FileInputStream(f), f.length());
                             writeDataBytes(fileBytes);
                             if (fileCache.size() >= CACHE_CAPACITY)
                                 fileCache.clear();
                             fileCache.put(nativePath, fileBytes);
-                            Log.current.println("...from " + nativePath);
                             nbrFilesServed++;
                             return;
                         }
@@ -441,7 +437,15 @@ public class WebServer extends Thread {
             out.writeBytes("Server: Cyc WebServer\r\n");
             out.writeBytes("Connection: close\r\n");
             out.writeBytes("Content-Length: " + bytes.length + "\r\n");
-            String prefix = (new String(bytes)).toLowerCase();
+            int PREFIX_SIZE = 1000;
+            byte[] prefixBytes = new byte[PREFIX_SIZE];
+            for (int i = 0; i < PREFIX_SIZE; i++) {
+              if (i < bytes.length)
+                prefixBytes[i] = bytes[i];
+              else
+                prefixBytes[i] = ' ';
+            }
+            String prefix = (new String(prefixBytes)).toLowerCase();
             if (prefix.indexOf("<html>") > -1)
                 out.writeBytes("Content-Type: text/html\r\n\r\n");
             else

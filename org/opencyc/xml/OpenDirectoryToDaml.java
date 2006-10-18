@@ -6,8 +6,6 @@ import java.net.URL;
 import java.util.zip.GZIPInputStream;
 import org.opencyc.util.Log;
 
-import ViolinStrings.Strings;
-
 /**
  * Translates non-compliant OpenDirectory RDF Structure file into
  * DAML compliant format.<p>
@@ -340,7 +338,7 @@ public class OpenDirectoryToDaml {
             if (textLine.startsWith("  <catid>")) {
                 nbrOfTriples++;
                 String translatedTextLine =
-                    Strings.change(textLine, "catid", "dmoz:catid");
+                    textLine.replaceAll("catid", "dmoz:catid");
                 damlOutput.println(translatedTextLine);
                 if (verbosity > 2)
                     Log.current.println(translatedTextLine);
@@ -349,7 +347,7 @@ public class OpenDirectoryToDaml {
             if (textLine.startsWith("  <lastUpdate>")) {
                 nbrOfTriples++;
                 String translatedTextLine =
-                    Strings.change(textLine, "lastUpdate", "dmoz:lastUpdate");
+                    textLine.replaceAll("lastUpdate", "dmoz:lastUpdate");
                 damlOutput.println(translatedTextLine);
                 if (verbosity > 2)
                     Log.current.println(translatedTextLine);
@@ -369,7 +367,7 @@ public class OpenDirectoryToDaml {
             }
             if (textLine.startsWith("  <d:Description>")) {
                 nbrOfTriples++;
-                String translatedTextLine = Strings.change(textLine, "d:", "dc:");
+                String translatedTextLine = textLine.replaceAll("d:", "dc:");
                 if (translatedTextLine.indexOf("</dc:Description>") < 0) {
                     inDescriptionTag = true;
                 }
@@ -379,7 +377,7 @@ public class OpenDirectoryToDaml {
                 continue;
             }
             if (textLine.indexOf("</d:Description>") > -1) {
-                String translatedTextLine = Strings.change(textLine, "d:", "dc:");
+                String translatedTextLine = textLine.replaceAll("d:", "dc:");
                 inDescriptionTag = false;
                 damlOutput.println(translatedTextLine);
                 if (verbosity > 2)
@@ -388,7 +386,7 @@ public class OpenDirectoryToDaml {
             }
             if (textLine.startsWith("  <d:")) {
                 nbrOfTriples++;
-                String translatedTextLine = Strings.change(textLine, "d:", "dc:");
+                String translatedTextLine = textLine.replaceAll("d:", "dc:");
                 damlOutput.println(translatedTextLine);
                 if (verbosity > 2)
                      Log.current.println(translatedTextLine);

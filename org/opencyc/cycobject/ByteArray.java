@@ -33,8 +33,10 @@ import org.opencyc.xml.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ByteArray {
+public class ByteArray extends DefaultCycObject implements Serializable {
 
+    static final long serialVersionUID = -6247169945186440269L;
+    
     /**
      * the name of the XML tag for Cyc byte-vector objects
      */
@@ -58,7 +60,7 @@ public class ByteArray {
     /**
      * The actual array of bytes of this byte array.
      */
-    private final byte[] bytes;
+    private byte[] bytes;
 
     /**
      * Creates a new byte array from the specified array of bytes.
@@ -142,7 +144,66 @@ public class ByteArray {
         }
         xmlWriter.printXMLEndTag(byteVectorXMLTag, -indentLength, true);
     }
+    
+    public String stringApiValue() {
+      StringBuffer buf = new StringBuffer(bytes.length*4);
+      buf.append( "(read-from-string \"#(");
+      for (int i = 0; i < bytes.length; i++) {
+        buf.append( ' ');
+        int value = bytes[i];
+        if (value < 0) {
+          value += 256;
+        }
+        buf.append( value);
+      }
+      buf.append( ")\")");
+      return buf.toString();
+    }
+
+    //// Private Area
+  private void writeObject(ObjectOutputStream stream) throws java.io.IOException {
+    stream.defaultWriteObject();
+    stream.writeInt( this.byteArrayValue().length);
+    stream.write( byteArrayValue());
+  }
+   
+  private void readObject(ObjectInputStream stream) throws java.io.IOException, 
+  java.lang.ClassNotFoundException {
+    stream.defaultReadObject();
+    int size = stream.readInt();
+    this.bytes = new byte[size];
+    int index = 0, remainder = size;
+    while (index < size) {
+      int numOfBytes = stream.read(bytes, index, remainder);
+      if (numOfBytes == -1) 
+        throw new java.io.EOFException( "Unexpected EOF at index " + index + " of " + size);
+      else {
+        index += numOfBytes;
+        remainder -= numOfBytes;
+      }
+    }
+  }
+
+  public int compareTo(Object o){
+    if(!(o instanceof ByteArray)) return this.toString().compareTo(o.toString());
+    int thisbound=bytes.length;
+    ByteArray cmp=(ByteArray)o;
+    int obound=cmp.bytes.length;
+    int bound=thisbound>obound?obound:thisbound;
+    for(int i=0;i<bound;i++){
+      if(bytes[i]==cmp.bytes[i]) continue;
+      return (int)bytes[i]-(int)cmp.bytes[i];
+    }
+    return bound-obound;
+  }
+
+
 }
+
+
+
+
+
 
 
 

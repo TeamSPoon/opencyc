@@ -376,8 +376,8 @@ public abstract class XMLWriter {
      * indentation level(if @see #relative is <code>true</code>).
      *
      * @param tag the name of the XML tag.
-     * @param attributesName the name of the attribute.
-     * @param attributesValue the value of the attribute.
+     * @param attributeName the name of the attribute.
+     * @param attributeValue the value of the attribute.
      * @param indent the number of spaces by which the tag needs to be indented.
      * @param relative specifies whether the indentation is from the beginning
      * of the line (if @see #relative is <code>false</code>) or from the current

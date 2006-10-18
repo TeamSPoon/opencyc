@@ -1,7 +1,6 @@
 package org.opencyc.xml;
 
 import org.opencyc.util.StringUtils;
-import ViolinStrings.*;
 
 /**
  * Provides utility methods for XML text processing.<p>
@@ -59,9 +58,9 @@ public class TextUtil {
      * @return the text with xml special character substitution
      */
     public static String undoEntityReference (String text) {
-        String result = Strings.change(text, "&lt;", "<");
-        result = Strings.change(result, "&amp;", "&");
-        result = Strings.change(result, "&gt;", ">");
+        String result = text.replaceAll("&lt;", "<");
+        result = result.replaceAll("&amp;", "&");
+        result = result.replaceAll("&gt;", ">");
         return result;
     }
 }

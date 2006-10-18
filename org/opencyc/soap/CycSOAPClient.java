@@ -44,13 +44,13 @@ public class CycSOAPClient {
      * jaxrpc.jar
      * commons-discovery.jar
      * commons-logging.jar
-     * ViolinStrings.jar
      */
 
    /**
     * the web service URL
     */
-   public String endpointURL = "http://localhost:8080/axis/CycSOAPService.jws";
+   public String endpointURL = "http://localhost:8080/axis/services/CycSOAPService";
+//   public String endpointURL = "http://207.207.8.29/axis/services/CycSOAPService";
     
     /**
      * Construct a new CycSOAPClient object.
@@ -68,8 +68,22 @@ public class CycSOAPClient {
         CycSOAPClient cycSOAPClient = new CycSOAPClient();
         try {
             cycSOAPClient.helloWorld();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++) {
+                Log.current.print((i + 1) + ". ");
                 Log.current.println(cycSOAPClient.remoteSubLInteractor("(isa #$TransportationDevice)"));
+            }
+            Log.current.println("categorizeEntity Service");
+            String entityString = "Osama Bin Laden";
+            String generalEntityKindString = "PERSON";
+            Log.current.println("categorizeEntity(\"" + entityString + "\", \"" + generalEntityKindString + "\")");
+            String response = cycSOAPClient.categorizeEntity(entityString, generalEntityKindString);
+            Log.current.println("response=" + response);
+            
+            String ontologyString = "AXISConstant";
+            Log.current.println("categorizeEntityWithinOntology Service");
+            Log.current.println("categorizeEntityWithinOntology(\"" + entityString + "\", \"" + generalEntityKindString + "\", \"" + ontologyString + "\")");
+            response = cycSOAPClient.categorizeEntityWithinOntology(entityString, generalEntityKindString, ontologyString);
+            Log.current.println("response=" + response);
         }
         catch( Exception e ) {
             Log.current.errorPrintln(e.getMessage());
@@ -140,6 +154,36 @@ public class CycSOAPClient {
                           ParameterMode.IN);
         call.setReturnType(XMLType.XSD_STRING);
         return (String) call.invoke(new Object[] {entityString, generalEntityKindString});
+    }
+    
+    /**
+     * Categorizes the given entity within the given ontology.
+     *
+     * @param entity the given entity to categorize
+     * @param entityKind the given general entity kind as determined from information
+     * extraction
+     * @param ontologyString the given ontology (i.e. KBSubsetCollection term)
+     * @return an XML structure consisting of the mathched entity paraphrase and Cyc category, 
+     * and if unmatched return an empty string
+     */
+    public String categorizeEntityWithinOntology  (final String entityString, final String generalEntityKindString, final String ontologyString)
+        throws ServiceException, MalformedURLException, RemoteException {
+        String methodName = "categorizeEntityWithinOntology";
+        Service service = new Service();
+        Call call = (Call) service.createCall();
+        call.setTargetEndpointAddress(new java.net.URL(endpointURL));
+        call.setOperationName(methodName);
+        call.addParameter("entityString",
+                          XMLType.XSD_STRING,
+                          ParameterMode.IN);
+        call.addParameter("generalEntityKindString",
+                          XMLType.XSD_STRING,
+                          ParameterMode.IN);
+        call.addParameter("ontologyString",
+                          XMLType.XSD_STRING,
+                          ParameterMode.IN);
+        call.setReturnType(XMLType.XSD_STRING);
+        return (String) call.invoke(new Object[] {entityString, generalEntityKindString, ontologyString});
     }
 }
 

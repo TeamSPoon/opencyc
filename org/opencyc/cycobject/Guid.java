@@ -29,7 +29,7 @@ import org.opencyc.xml.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Guid {
+public class Guid implements Serializable {
 
     /**
      * The name of the XML tag for this object.
@@ -62,6 +62,15 @@ public class Guid {
             return false;
     }
 
+    /**
+     * Returns the hash code for this object.
+     *
+     * @return the hash code for this object
+     */
+    public int hashCode () {
+        return guidString.hashCode();
+    }
+    
     /**
      * Returns a string representation of the <tt>Guid</tt>.
      *

@@ -46,8 +46,6 @@ public class UnitTest extends TestCase {
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
         testSuite = new TestSuite();
-        //testSuite.addTest(new UnitTest("testExportDaml1"));
-        //testSuite.addTest(new UnitTest("testExportDaml2"));
         testSuite.addTest(new UnitTest("testTextUtil"));
         return testSuite;
     }
@@ -58,46 +56,6 @@ public class UnitTest extends TestCase {
      */
     public UnitTest(String name) {
         super(name);
-    }
-
-    /**
-     * Tests the ExportDaml class.
-     */
-    public void xtestExportDaml1() {
-        System.out.println("\n*** testExportDaml1 ***");
-        try {
-            ExportDaml exportDaml = new ExportDaml(new CycAccess());
-            exportDaml.verbosity = 3;
-            // Export #$PublicConstant terms to DAML.
-            exportDaml.cycKbSubsetCollectionGuid =
-                CycObjectFactory.makeGuid("bd7abd90-9c29-11b1-9dad-c379636f7270");
-            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("*** testExportDaml1 OK ***");
-    }
-
-    /**
-     * Tests the ExportDaml class.
-     */
-    public void testExportDaml2() {
-        System.out.println("\n*** testExportDaml2 ***");
-        try {
-            ExportDaml exportDaml = new ExportDaml(new CycAccess());
-            exportDaml.verbosity = 3;
-            // Export #$IKBConstant terms to DAML.
-            exportDaml.cycKbSubsetCollectionGuid =
-                CycObjectFactory.makeGuid("bf90b3e2-9c29-11b1-9dad-c379636f7270");
-            exportDaml.export(ExportDaml.EXPORT_KB_SUBSET);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-        System.out.println("*** testExportDaml2 OK ***");
     }
 
     /**

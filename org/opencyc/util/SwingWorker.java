@@ -34,7 +34,8 @@ import javax.swing.SwingUtilities;
 public abstract class SwingWorker {
     private Object value;  // see getValue(), setValue()
     private Thread thread;
-
+    private Exception exception;
+ 
     /** 
      * Class to maintain reference to current worker thread
      * under separate synchronization control.
@@ -66,7 +67,7 @@ public abstract class SwingWorker {
     /** 
      * Compute the value to be returned by the <code>get</code> method. 
      */
-    public abstract Object construct();
+    public abstract Object construct() throws Exception;
 
     /**
      * Called on the event dispatching thread (not on the worker thread)
@@ -124,8 +125,9 @@ public abstract class SwingWorker {
             public void run() {
                 try {
                     setValue(construct());
-                }
-                finally {
+                } catch (Exception e) {
+                  setException(e);
+                } finally {
                     threadVar.clear();
                 }
 
@@ -145,6 +147,15 @@ public abstract class SwingWorker {
         if (t != null) {
             t.start();
         }
-    }
+    } 
+    
+  public Exception getException() {
+    return exception;
+  }
+  
+  public void setException(Exception exception) { 
+    this.exception = exception;
+  }
+
 }
 

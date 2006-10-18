@@ -6,7 +6,15 @@
 
 package org.opencyc.util;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import javax.swing.SwingUtilities;
 import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.api.CycIOException;
+import org.opencyc.api.DefaultSubLWorkerSynch;
+import org.opencyc.api.SubLWorkerSynch;
 
 /**
  * This is a placeholder class for general cyc utilities.
@@ -29,6 +37,8 @@ import org.opencyc.api.CycAccess;
  */
 public class CycUtils {
     
+  
+  private static boolean useTiming = false;
   /*
    * Creates a new instance of CycUtils and hides it since no instances 
    * of this class need ever be made. All methods here are static. 
@@ -43,23 +53,66 @@ public class CycUtils {
    * exceptions are caught and stack traces printed to standard
    * err. I expect that the API on this method may change in the near future
    * to throw appropriate exceptions.
-   * @param conn The CycAccess object to use for communications
+   * @param connection The CycAccess object to use for communications
+   * with the appropriate Cyc image.
+   * @param subl The string that represents the SubL expression that
+   * needs to be evaluated.
+   * @return The value of evaluating the passed in subl expression or
+   * null if an error occurred.
+   * @deprecated use SubLWorker instead
+   **/
+  public static synchronized Object evalSubL(CycAccess connection, String subl) {
+    Object result = null;
+    try {
+      if (SwingUtilities.isEventDispatchThread()) {
+        throw new RuntimeException("Unable to communicate with Cyc from the AWT event dispatch thread.");
+      }
+      long resultMsecs = 0;
+      if(useTiming) {
+        resultMsecs = System.currentTimeMillis();
+      }
+      result = connection.converseObject(subl);
+      if(useTiming) {
+        System.out.println("Finished call: " + subl);
+        resultMsecs = System.currentTimeMillis() - resultMsecs;
+        System.out.println("Call took: " + resultMsecs + " msecs.");
+      }
+    } catch (IOException e) {
+      throw new CycIOException(e);
+    }
+    return result;
+  }
+
+  
+  /** 
+   * Evaluates the given SubL expression given on the cyc image
+   * provided by the CycAccess object given. 
+   * @param connection The CycAccess object to use for communications
    * with the appropriate Cyc image.
    * @param subl The string that represents the SubL expression that
    * needs to be evaluated.
    * @return The value of evaluating the passed in subl expression or
    * null if an error occurred.
    **/
-  public static synchronized Object evalSubL(CycAccess connection, 
-					     String subl) {
+  public static synchronized Object evalSubLWithWorker(final CycAccess connection, final String subl) 
+    throws IOException, TimeOutException, CycApiException {
+    final SubLWorkerSynch worker = new DefaultSubLWorkerSynch(subl, connection);
+    return worker.getWork();
+  }
+
+  /** 
+   * Resolve the value of the Symbol whose name is in the string
+   * symbol.
+   * @param connection The CycAccess object to use for communications
+   * with the appropriate Cyc image.
+   * @param symbol The string that represents the Symbol that
+   * whose value is requested
+   * @return The value of the symbol or null if an error occurred.
+   **/
+  public static Object getSymbolValue(CycAccess connection, 
+                                      String symbol) {
     Object result = null;
-    try {
-      //System.out.println("Submitting: " + subl);
-      result = connection.converseObject(subl);
-    } catch (Exception e) {
-      System.err.println("converseString(" + subl + ") failed");
-      e.printStackTrace();
-    }
+    result = evalSubL( connection, "(SYMBOL-VALUE (QUOTE " + symbol + "))");
     return result;
   }
   
@@ -77,16 +130,35 @@ public class CycUtils {
    * either already be started.
    * @see CycWorker
    * @see CycWorkerListener
+   * @deprecated use SubLWorker instead
    */
   public static CycWorker evalSubLInBackground(final CycAccess conn,
 					       final String subl,
 					       final CycWorkerListener cwl) {
     CycWorker worker = new CycWorker() {
-	public Object construct() { return evalSubL(conn, subl); }
-      };
+      public Object construct() throws Exception {
+        return evalSubL(conn, subl); 
+      }
+    };
     if(cwl != null) { worker.addListener(cwl); }
     worker.start();
     return worker;
   }
-    
+  
+  private static long SUBL_TIME_OFFSET;
+  
+  static {
+    Calendar cal = Calendar.getInstance();
+    cal.set(1900, Calendar.JANUARY, 1);
+    long time = cal.getTime().getTime();
+    cal.set(1970, Calendar.JANUARY, 1);
+    SUBL_TIME_OFFSET = (cal.getTime().getTime() - time);
+  }
+  
+  public static Date convertSubLTimeStampToDate(long timeStamp) {
+    //@hack the (60*60*1000) is a complete hack and should be remved once
+    //we can determine why out timestamps are off by 1 hour
+    return new Date((long)(timeStamp * 1000) - SUBL_TIME_OFFSET + (60 * 60 * 1000));
+  }
+  
 }

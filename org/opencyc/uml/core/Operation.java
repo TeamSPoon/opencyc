@@ -97,7 +97,7 @@ public class Operation extends BehavioralFeature {
      * a declaration of the same operation
      */
     public boolean isRoot () {
-        return isRoot;;
+        return isRoot;
     }
 
     /**

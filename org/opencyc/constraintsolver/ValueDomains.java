@@ -1,8 +1,13 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.Binding;
+import org.opencyc.inferencesupport.UnitTest;
 
 /**
  * <tt>ValueDomains</tt> object to model the attributes and behavior of

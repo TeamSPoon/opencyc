@@ -1,10 +1,17 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
-import java.io.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
-import org.opencyc.api.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.Binding;
+import org.opencyc.inferencesupport.ConstraintRule;
+import org.opencyc.inferencesupport.UnitTest;
 
 /**
  * <tt>VariableDomainPopulator</tt> object to contain information about variables

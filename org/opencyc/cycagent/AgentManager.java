@@ -1,11 +1,12 @@
 package  org.opencyc.cycagent;
 
-import java.net.*;
-import java.util.*;
-import java.io.*;
-import fipaos.ont.fipa.*;
-import org.opencyc.api.*;
-import org.opencyc.util.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Hashtable;
+
+import org.opencyc.util.Log;
 
 /**
  * Provides a FIPA-OS agent proxy and a Grid proxy for an OpenCyc server.<p>

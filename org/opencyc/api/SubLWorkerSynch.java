@@ -4,13 +4,9 @@
 package org.opencyc.api;
 
 //// Internal Imports
-import org.opencyc.cycobject.*;
-import org.opencyc.api.*;
-import org.opencyc.util.*;
+import java.io.IOException;
 
-//// External Imports
-import java.util.*;
-import java.io.*;
+import org.opencyc.util.TimeOutException;
 
 /**
  * <P>SubLWorkerSynch is designed to provide a handle for a particular 
@@ -65,6 +61,6 @@ public interface SubLWorkerSynch extends SubLWorker {
    * @throws CycApiException thrown if any other error occurs
    * @return The work produced by this SubLWorkerSynch
    */  
-  Object getWork() throws IOException, TimeOutException, CycApiException, OpenCycTaskInterruptedException;
+  Object getWork() throws IOException, TimeOutException, CycApiException;
   
 }

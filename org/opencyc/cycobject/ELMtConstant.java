@@ -1,6 +1,5 @@
 package org.opencyc.cycobject;
 
-import org.opencyc.api.CycAccess;
 import org.opencyc.api.CycObjectFactory;
 
 /**
@@ -33,9 +32,7 @@ public class ELMtConstant extends CycConstant implements ELMt {
   
   static final long serialVersionUID = -2405506745680227189L;
   
-  /** Privately creates a new instance of ELMtConstant 
-   * deprecated
-   */
+  /** Privately creates a new instance of ELMtConstant */
   private ELMtConstant(CycConstant cycConstant) {
     super(cycConstant.getName(), cycConstant.getGuid());
   }
@@ -47,7 +44,10 @@ public class ELMtConstant extends CycConstant implements ELMt {
   public static ELMtConstant makeELMtConstant(CycConstant cycConstant) {
     CycObjectFactory.removeCaches(cycConstant);
     ELMtConstant elmtConstant = new ELMtConstant(cycConstant);
-    CycObjectFactory.addCycConstantCache(cycConstant);
+    CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
+    CycObjectFactory.addCycConstantCacheByName(cycConstant);
+    if (cycConstant.safeGetId() != null)
+        CycObjectFactory.addCycConstantCacheById(cycConstant);
     return elmtConstant;
   }
 }

@@ -1,7 +1,11 @@
 package org.opencyc.cycobject;
 
-import java.io.*;
-import org.opencyc.xml.*;
+import java.io.IOException;
+import java.io.Serializable;
+
+import org.opencyc.xml.TextUtil;
+import org.opencyc.xml.XMLStringWriter;
+import org.opencyc.xml.XMLWriter;
 
 /**
  * Provides the behavior and attributes of an OpenCyc symbol, typically used
@@ -41,7 +45,7 @@ public class CycSymbol extends DefaultCycObject implements Comparable, Serializa
   /**
    * The symbol represented as a <tt>String</tt>.
    */
-  private String symbolName;
+  public String symbolName;
   
   /**
    * The name of the XML tag for this object.

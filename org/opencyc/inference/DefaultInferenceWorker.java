@@ -55,7 +55,7 @@ public class DefaultInferenceWorker extends DefaultSubLWorker implements Inferen
   public DefaultInferenceWorker(String query, ELMt mt, InferenceParameters queryProperties, 
       CycAccess access, long timeoutMsecs) {
     this(access.makeCycList(query), mt, queryProperties, 
-      access, timeoutMsecs, CycConnection.NORMAL_PRIORITY);
+      null, null, false, access, timeoutMsecs);
   }
   
   /**
@@ -68,40 +68,11 @@ public class DefaultInferenceWorker extends DefaultSubLWorker implements Inferen
    */
   public DefaultInferenceWorker(CycList query, ELMt mt, InferenceParameters queryProperties, 
       CycAccess access, long timeoutMsecs) {
-    this(query, mt, queryProperties, access, timeoutMsecs, 
-      CycConnection.NORMAL_PRIORITY);
-  }
-  
-  /**
-   * Creates a new instance of DefaultInferenceWorker.
-   * @param query
-   * @param mt
-   * @param queryProperties
-   * @param access
-   * @param timeoutMsecs
-   * @param priority
-   */
-  public DefaultInferenceWorker(String query, ELMt mt, InferenceParameters queryProperties, 
-      CycAccess access, long timeoutMsecs, Integer priority) {
-    this(access.makeCycList(query), mt, queryProperties, 
-      null, null, false, access, timeoutMsecs, priority);
-  }
-  
-  /**
-   * Creates a new instance of DefaultInferenceWorker.
-   * @param query
-   * @param mt
-   * @param queryProperties
-   * @param access
-   * @param timeoutMsecs
-   */
-  public DefaultInferenceWorker(CycList query, ELMt mt, InferenceParameters queryProperties, 
-      CycAccess access, long timeoutMsecs, Integer priority) {
-    super(access.makeCycList(createInferenceCommand(query, mt, queryProperties, 
-      null, null, false, access)), access, true, timeoutMsecs, priority);
+    super(createInferenceCommand(query, mt, queryProperties, 
+      null, null, false, access), access, true, timeoutMsecs);
     init();
   }
-
+  
   /**
    * Creates a new instance of DefaultInferenceWorker.
    * @param query
@@ -117,8 +88,7 @@ public class DefaultInferenceWorker extends DefaultSubLWorker implements Inferen
       Map nlGenerationProperties, CycSymbol answerProcessingFunction, 
       boolean optimizeVariables, CycAccess access, long timeoutMsecs) {
     this(access.makeCycList(query), mt, queryProperties, nlGenerationProperties, 
-      answerProcessingFunction, optimizeVariables, access, timeoutMsecs, 
-      CycConnection.NORMAL_PRIORITY);
+      answerProcessingFunction, optimizeVariables, access, timeoutMsecs);
   }
   
   /**
@@ -131,33 +101,13 @@ public class DefaultInferenceWorker extends DefaultSubLWorker implements Inferen
    * @param optimizeVariables
    * @param access
    * @param timeoutMsecs
-   * @param priority
    */
   public DefaultInferenceWorker(CycList query, ELMt mt, InferenceParameters queryProperties, 
       Map nlGenerationProperties, CycSymbol answerProcessingFunction, 
       boolean optimizeVariables, CycAccess access, long timeoutMsecs) {
-    this(query, mt, queryProperties, nlGenerationProperties, answerProcessingFunction,
-      optimizeVariables, access, timeoutMsecs, CycConnection.NORMAL_PRIORITY);
-  }
-  
-  /**
-   * Creates a new instance of DefaultInferenceWorker.
-   * @param query
-   * @param mt
-   * @param queryProperties
-   * @param nlGenerationProperties
-   * @param answerProcessingFunction
-   * @param optimizeVariables
-   * @param access
-   * @param timeoutMsecs
-   * @param priority
-   */
-  public DefaultInferenceWorker(CycList query, ELMt mt, InferenceParameters queryProperties, 
-      Map nlGenerationProperties, CycSymbol answerProcessingFunction, 
-      boolean optimizeVariables, CycAccess access, long timeoutMsecs, Integer priority) {
-    super(access.makeCycList(createInferenceCommand(query, mt, queryProperties, 
-      nlGenerationProperties, answerProcessingFunction, optimizeVariables, access)), 
-      access, true, timeoutMsecs, priority); 
+    super(createInferenceCommand(query, mt, queryProperties, 
+      nlGenerationProperties, answerProcessingFunction, optimizeVariables, access), 
+      access, true, timeoutMsecs);
     this.answerProcessingFunction = answerProcessingFunction;
     init();
   }
@@ -659,7 +609,7 @@ public class DefaultInferenceWorker extends DefaultSubLWorker implements Inferen
    */
   public static void main(String[] args) {
     try {
-      CycAccess access = new CycAccess("localhost", 3640);
+      CycAccess access = new CycAccess("CycServer", 3640);
       ELMt inferencePSC = access.makeELMt("#$InferencePSC");
       InferenceWorker worker = new DefaultInferenceWorker("(#$isa ?X #$Dog)", 
         inferencePSC, null, access, 50000);

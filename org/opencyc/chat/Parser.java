@@ -2,8 +2,12 @@ package org.opencyc.chat;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import org.opencyc.api.*;
-import org.opencyc.cycobject.*;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycConstant;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycListParser;
 
 /**
  * Provides a chat conversation parser.<p>

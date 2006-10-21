@@ -1,20 +1,17 @@
 package org.opencyc.api;
 
 import java.io.IOException;
-import java.io.*;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.logging.*;
 import java.util.Stack;
 import java.util.Map.Entry;
-import org.opencyc.util.StringUtils;
+
 import org.apache.oro.util.Cache;
 import org.apache.oro.util.CacheLRU;
 import org.opencyc.cycobject.CycAssertion;
@@ -31,8 +28,6 @@ import org.opencyc.cycobject.ELMtConstant;
 import org.opencyc.cycobject.ELMtCycList;
 import org.opencyc.cycobject.ELMtNart;
 import org.opencyc.cycobject.Guid;
-import org.opencyc.inference.DefaultInferenceParameterDescriptions;
-import org.opencyc.soap.SOAPBinaryCycConnection;
 import org.opencyc.util.Log;
 
 
@@ -47,85 +42,6 @@ import org.opencyc.util.Log;
  * @author Stephen L. Reed <p><p><p><p><p>
  */
 public class CycAccess {
-  //// Constructors
-  
-  /**
-   * Constructs a new CycAccess object.
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycAccess()
-            throws IOException, UnknownHostException, CycApiException {
-    this(CycConnection.DEFAULT_HOSTNAME, 
-         CycConnection.DEFAULT_BASE_PORT);
-  }
-  
-  /**
-   * Constructs a new CycAccess object.
-   * 
-   * @param conn the Cyc connection object (in persistent, binary mode)
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycAccess(CycConnectionInterface conn)
-            throws IOException, CycApiException {
-    hostName = conn.getHostName();
-    port = conn.getBasePort();
-    persistentConnection = PERSISTENT_CONNECTION;
-    cycConnection = conn;
-    commonInitialization();
-  }
-
-  /**
-   * Constructs a new CycAccess object for a SOAP connection.
-   * 
-   * @param endpointURL the SOAP XML endpoint URL which indicates the Cyc API web services host
-   * @param hostName the name of the computer hosting the Cyc server
-   * @param basePort the Cyc server base listening port
-   * 
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycAccess(URL endpointURL, 
-                   String hostName, 
-                   int basePort)
-            throws IOException, CycApiException {
-    this.hostName = hostName;
-    this.port = basePort;
-    isSOAPConnection = true;
-    this.persistentConnection = PERSISTENT_CONNECTION;
-    cycConnection = new SOAPBinaryCycConnection(endpointURL, hostName, basePort, this);
-    commonInitialization();
-  }
-
-  /**
-   * Constructs a new CycAccess object given a host name, port, communication mode, and messaging mode
-   * 
-   * @param hostName the host name
-   * @param basePort the base (HTML serving) TCP socket port number
-   *
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycAccess(String hostName, 
-                   int basePort)
-            throws IOException, UnknownHostException, CycApiException {
-    this.hostName = hostName;
-    this.port = basePort;
-    this.persistentConnection = PERSISTENT_CONNECTION;
-
-    cycConnection = new CycConnection(hostName, 
-                                      port, 
-                                      this);
-    commonInitialization();
-  }
-
-  //// Public Area
-  
   /**
    * Dictionary of CycAccess instances, indexed by thread so that the application does not have to
    * keep passing around a CycAccess object reference.
@@ -139,6 +55,37 @@ public class CycAccess {
    */
   public static CycAccess sharedCycAccessInstance = null;
 
+  /**
+   * When true performs tracing of binary mode messages with constant names displayed, which
+   * involves recursive api requests.
+   */
+  public boolean traceWithNames = false;
+
+  /**
+   * indicates whether to eagerly obtain constant names for constants returned from the api
+   */
+  public boolean eagerlyObtainConstantNames = true;
+  
+  /**
+   * the threshold above which constant names are automatically obtained for constants returned
+   * from the api
+   */
+  public int eagerlyObtainConstantNamesThreshold = 10;
+  
+  /**
+   * the list of constants returned from the api that currently have no constant name
+   */
+  public CycList constantsHavingNoName = new CycList();
+  
+  /**
+   * Stack to prevent tracing of recursive api calls whose sole purpose is to obtain names for
+   * traceWithNames.
+   */
+  protected Stack traceWithNamesStack = new Stack();
+
+  /** Value indicating that the OpenCyc api socket is created and then closed for each api call. */
+  public static final int TRANSIENT_CONNECTION = 1;
+
   /** Value indicating that the OpenCyc api should use one TCP socket for the entire session. */
   public static final int PERSISTENT_CONNECTION = 2;
 
@@ -146,20 +93,52 @@ public class CycAccess {
   public static final int XML_SOAP_CONNECTION = 3;
 
   /**
+   * Default value indicating that the OpenCyc api should use one TCP socket for the entire
+   * session.
+   */
+  public static final int DEFAULT_CONNECTION = PERSISTENT_CONNECTION;
+
+  /**
+   * Parameter indicating whether the OpenCyc binary api defers the completion of CycConstant
+   * attributes until used for the first time.
+   */
+  public boolean deferObjectCompletion = true;
+
+  /**
    * Parameter indicating whether the OpenCyc api should use one TCP socket for the entire session,
    * or if the socket is created and then closed for each api call, or if an XML SOAP service
    * provides the message transport.
    */
-  public int persistentConnection = PERSISTENT_CONNECTION;
+  public int persistentConnection = DEFAULT_CONNECTION;
+
+  /** Parameter indicating the serial or concurrent messaging mode to the OpenCyc server. */
+  public int messagingMode = CycConnection.DEFAULT_MESSAGING_MODE;
+
+  /** Parameter indicating that compatibility with older versions of the OpenCyc api is desired. */
+  protected boolean isLegacyMode = false;
 
   /** Default value for isLegacyMode is no compatibility with older versions of the OpenCyc api. */
   public static final boolean DEFAULT_IS_LEGACY_MODE = false;
 
-  /** the indicator that API request forms should be logged to a file api-requests.lisp in the working directory */
-  public boolean areAPIRequestsLoggedToFile = false;
-  
-  public FileWriter apiRequestLog = null;
-  
+  /** the Cyc server host name */
+  protected String hostName;
+
+  /** the Cyc server host tcp port number */
+  protected int port;
+
+  /** the Cyc server communication mode */
+  protected int communicationMode;
+
+  /** the Cyc server OK response code */
+  protected static final Integer OK_RESPONSE_CODE = new Integer(200);
+
+  /**
+   * Parameter that, when true, causes a trace of the messages to and from the server. This
+   * variable preserves the value of the CycConnection trace between instantiations when the
+   * connection is transient.
+   */
+  protected int saveTrace = CycConnection.API_TRACE_NONE;
+
   /** Convenient reference to #$BaseKb. */
   public static ELMt baseKB = null;
 
@@ -234,6 +213,9 @@ public class CycAccess {
   /** Convenient reference to #$SubLQuoteFn. */
   public static CycConstant sublQuoteFnConst = null;
   
+  /********************************************************************/
+
+
   /** Convenient reference to #$PlusFn. */
   public static CycConstant plusFn = null;
 
@@ -252,6 +234,263 @@ public class CycAccess {
   /** Convenient reference to #$bookkeepingMt. */
   public static ELMt bookkeepingMt = null;
 
+  /** the current Cyc Cyclist (user) */
+  private CycFort cyclist = null;
+
+  /** the current Cyc project */
+  private CycFort project = null;
+
+  /** Least Recently Used Cache of ask results. */
+  protected Cache askCache = new CacheLRU(500);
+
+  /** Least Recently Used Cache of countAllInstances results. */
+  protected Cache countAllInstancesCache = new CacheLRU(
+                                                 500);
+
+  /** Least Recently Used Cache of isCollection results. */
+  protected Cache isCollectionCache = new CacheLRU(500);
+
+  /** Least Recently Used Cache of isGenlOf results. */
+  protected Cache isGenlOfCache = new CacheLRU(500);
+
+  /**
+   * Reference to <tt>CycConnection</tt> object which manages the api connection to the OpenCyc
+   * server.
+   */
+  protected CycConnectionInterface cycConnection;
+  
+  /** the query properties */
+  private final HashMap queryProperties = new HashMap();
+  
+  /**
+   * Constructs a new CycAccess object.
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess()
+            throws IOException, UnknownHostException, CycApiException {
+    this(CycConnection.DEFAULT_HOSTNAME, CycConnection.DEFAULT_BASE_PORT, 
+         CycConnection.DEFAULT_COMMUNICATION_MODE, 
+         CycAccess.DEFAULT_CONNECTION, 
+         CycAccess.DEFAULT_IS_LEGACY_MODE);
+  }
+  
+  public CycAccess(CycConnectionInterface conn)
+            throws IOException, CycApiException {
+    hostName = conn.getHostName();
+    port = conn.getBasePort();
+    communicationMode = CycConnection.BINARY_MODE;
+    
+    
+    persistentConnection = XML_SOAP_CONNECTION;
+    persistentConnection = PERSISTENT_CONNECTION;
+    
+    cycConnection = conn;
+    commonInitialization();
+  }
+
+  /**
+   * Constructs a new CycAccess object for a SOAP connection.
+   * 
+   * @param endpointURL the SOAP XML endpoint URL which indicates the Cyc API web services host
+   * @param hostName the name of the computer hosting the Cyc server
+   * @param port the Cyc server listening port
+   * 
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess(URL endpointURL, 
+                   String hostName, 
+                   int port)
+            throws IOException, CycApiException {
+    throw new RuntimeException("Not implememted");
+  }
+
+  /**
+   * Constructs a new CycAccess object given a host name.
+   * 
+   * @param hostName the host name
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess(String hostName)
+            throws IOException, UnknownHostException, CycApiException {
+    this(hostName, CycConnection.DEFAULT_BASE_PORT, CycConnection.DEFAULT_COMMUNICATION_MODE, 
+         CycAccess.DEFAULT_CONNECTION, 
+         false);
+  }
+
+  /**
+   * Constructs a new CycAccess object given a host name and base port
+   * 
+   * @param hostName the host name
+   * @param basePort the base (HTML serving) TCP socket port number
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess(String hostName, int basePort)
+            throws IOException, UnknownHostException, CycApiException {
+    this(hostName, basePort, CycConnection.DEFAULT_COMMUNICATION_MODE, 
+         CycAccess.DEFAULT_CONNECTION, 
+         false);
+  }
+
+  /**
+   * Constructs a new CycAccess object given a host name, port, communication mode, persistence
+   * indicator and legacy mode.
+   * 
+   * @param hostName the host name
+   * @param basePort the base (HTML serving) TCP socket port number
+   * @param communicationMode either ASCII_MODE or BINARY_MODE
+   * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with the
+   *        OpenCyc server
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess(String hostName, 
+                   int basePort, 
+                   int communicationMode, 
+                   int persistentConnection)
+            throws IOException, UnknownHostException, CycApiException {
+    this(hostName, basePort, communicationMode, persistentConnection, false);
+  }
+
+  /**
+   * Constructs a new CycAccess object given a host name, port, communication mode, persistence
+   * indicator and legacy mode.
+   * 
+   * @param hostName the host name
+   * @param basePort the base (HTML serving) TCP socket port number
+   * @param communicationMode either ASCII_MODE or BINARY_MODE
+   * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with the
+   *        OpenCyc server
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess(String hostName, 
+                   int basePort, 
+                   int communicationMode, 
+                   boolean persistentConnection)
+            throws IOException, UnknownHostException, CycApiException {
+    this(hostName, basePort, communicationMode, 
+         persistentConnection ? PERSISTENT_CONNECTION : TRANSIENT_CONNECTION, 
+         false);
+  }
+
+  /**
+   * Constructs a new CycAccess object given a host name, port, communication mode, persistence
+   * indicator and legacy mode.
+   * 
+   * @param hostName the host name
+   * @param basePort the base (HTML serving) TCP socket port number
+   * @param communicationMode either ASCII_MODE or BINARY_MODE
+   * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with the
+   *        OpenCyc server
+   * @param isLegacyMode indicates if legacy OpenCyc server compatibility is desired
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess(String hostName, 
+                   int basePort, 
+                   int communicationMode, 
+                   int persistentConnection, 
+                   boolean isLegacyMode)
+            throws IOException, UnknownHostException, CycApiException {
+    this.hostName = hostName;
+    this.port = basePort;
+    this.communicationMode = communicationMode;
+    this.persistentConnection = persistentConnection;
+    this.isLegacyMode = isLegacyMode;
+
+    if (persistentConnection == CycAccess.PERSISTENT_CONNECTION) {
+      cycConnection = new CycConnection(hostName, 
+                                        port, 
+                                        communicationMode, 
+                                        this);
+    }
+
+    commonInitialization();
+  }
+
+  /**
+   * Constructs a new CycAccess object given a host name, port, communication mode, persistence
+   * indicator, and messaging mode
+   * 
+   * @param hostName the host name
+   * @param basePort the base (HTML serving) TCP socket port number
+   * @param communicationMode either ASCII_MODE or BINARY_MODE
+   * @param persistentConnection when <tt>true</tt> keep a persistent socket connection with the
+   *        OpenCyc server
+   * @param messagingMode either SERIAL_MESSAGING_MODE or CONCURRENT_MESSAGING_MODE
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycAccess(String hostName, 
+                   int basePort, 
+                   int communicationMode, 
+                   int persistentConnection, 
+                   int messagingMode)
+            throws IOException, UnknownHostException, CycApiException {
+    this.hostName = hostName;
+    this.port = basePort;
+
+    if (messagingMode == CycConnection.CONCURRENT_MESSAGING_MODE) {
+      if (persistentConnection != PERSISTENT_CONNECTION) {
+        throw new CycApiException("Concurrent Messaging requires Persistent Connections");
+      }
+    }
+
+    this.communicationMode = communicationMode;
+    this.persistentConnection = persistentConnection;
+    this.messagingMode = messagingMode;
+
+    if (persistentConnection == this.PERSISTENT_CONNECTION) {
+      cycConnection = new CycConnection(hostName, 
+                                        port, 
+                                        communicationMode, 
+                                        messagingMode, 
+                                        this);
+    }
+
+    commonInitialization();
+  }
+
+  /**
+   * Provides common local and remote CycAccess object initialization.
+   * 
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  protected void commonInitialization()
+                               throws IOException, CycApiException {
+    if (Log.current == null) {
+      Log.makeLog("cyc-api.log");
+    }
+
+    cycAccessInstances.put(Thread.currentThread(), 
+                           this);
+
+    if (sharedCycAccessInstance == null) {
+      sharedCycAccessInstance = this;
+    }
+
+    initializeConstants();
+  }
+
   /**
    * Returns a string representation of this object.
    * 
@@ -265,8 +504,8 @@ public class CycAccess {
    * Returns the <tt>CycAccess</tt> object for this thread.
    * 
    * @return the <tt>CycAccess</tt> object for this thread
+   * 
    * @throws RuntimeException when there is no CycAcess object for this thread
-   * @deprecated
    */
   public static CycAccess current() {
     CycAccess cycAccess = (CycAccess) cycAccessInstances.get(Thread.currentThread());
@@ -310,21 +549,13 @@ public class CycAccess {
   public static void setSharedCycAccessInstance(CycAccess sharedCycAccessInstance) {
     CycAccess.sharedCycAccessInstance = sharedCycAccessInstance;
   }
-  
-  /** Returns the Cyc api services lease manager.
-   *
-   *@return the Cyc api services lease manager
-   */
-  public CycLeaseManager getCycLeaseManager() {
-    return cycLeaseManager;
-  }
 
   /**
    * Turns on the diagnostic trace of socket messages.
    */
   public void traceOn() {
     cycConnection.traceOn();
-    trace = CycConnection.API_TRACE_MESSAGES;
+    saveTrace = CycConnection.API_TRACE_MESSAGES;
   }
 
   /**
@@ -335,7 +566,7 @@ public class CycAccess {
       cycConnection.traceOnDetailed();
     }
 
-    trace = CycConnection.API_TRACE_DETAILED;
+    saveTrace = CycConnection.API_TRACE_DETAILED;
   }
 
   /**
@@ -343,7 +574,23 @@ public class CycAccess {
    */
   public void traceOff() {
     cycConnection.traceOff();
-    trace = CycConnection.API_TRACE_NONE;
+    saveTrace = CycConnection.API_TRACE_NONE;
+  }
+
+  /**
+   * Turns on the diagnostic trace of messages with constant names looked up via recursive api
+   * request.
+   */
+  public void traceNamesOn() {
+    traceWithNames = true;
+  }
+
+  /**
+   * Turns on the diagnostic trace of messages with constant names looked up via recursive api
+   * request.
+   */
+  public void traceNamesOff() {
+    traceWithNames = false;
   }
 
   /**
@@ -352,7 +599,9 @@ public class CycAccess {
    * @return the hostname of the connection
    */
   public String getHostName() {
-    return cycConnection.getHostName();
+    // @hack: we dont actually know if this is a CycConnection object,
+    // so this cast may fail woefully -> fix later
+    return ((CycConnection) cycConnection).getHostName();
   }
 
   /**
@@ -361,7 +610,9 @@ public class CycAccess {
    * @return the baseport of the connection
    */
   public int getBasePort() {
-    return cycConnection.getBasePort();
+    // @hack: we dont actually know if this is a CycConnection object,
+    // so this cast may fail woefully -> fix later
+    return ((CycConnection) cycConnection).getBasePort();
   }
 
   /**
@@ -374,45 +625,269 @@ public class CycAccess {
   }
 
   /** Indicates whether the connection is closed */
-  private volatile boolean isClosed = false;
-  
-  /** Returns whether the connection is closed 
-   * @return whether the connection is closed
-   */
-  public boolean isClosed() {
-    return isClosed;
-  }
+  private boolean isClosed = false;
 
   /**
    * Closes the CycConnection object. Modified by APB to be able to handle multiple calls to
    * close() safely.
    */
   public synchronized void close() {
-    if (isClosed) { return; }
+    if (isClosed) {
+      return;
+    }
+
     isClosed = true;
-    if (cycLeaseManager != null)
-      cycLeaseManager.interrupt();
+
     if (cycConnection != null) {
+      try {
+        /*if (cycConnection instanceof RemoteCycConnection) {
+          try {
+            this.converseVoid(CycObjectFactory.END_CYC_CONNECTION);
+          }
+           catch (UnknownHostException e) {
+          }
+           catch (IOException e) {
+          }
+           catch (CycApiException e) {
+          }
+        }*/
+      }
+
+      // in case the org.opencyc.cycagent package is omitted
+       catch (java.lang.NoClassDefFoundError e) {
+      }
+
       cycConnection.close();
     }
-    if (areAPIRequestsLoggedToFile) 
-      try {
-        apiRequestLog.close();
-      }
-      catch (IOException e) {
-        System.err.println("error when closing apiRequestLog: " + e.getMessage());
-      }
 
     cycAccessInstances.remove(Thread.currentThread());
-    if (sharedCycAccessInstance == null || sharedCycAccessInstance.equals(this)) {
-      final Iterator iter = cycAccessInstances.values().iterator();
-      if (iter.hasNext())
-        sharedCycAccessInstance = (CycAccess) iter.next();
-      else
-        sharedCycAccessInstance = null;
-    }
   }
 
+  /**
+   * Returns the communication mode.
+   * 
+   * @return the communication mode
+   */
+  public int getCommunicationMode() {
+    return communicationMode;
+  }
+
+  /**
+   * Contains trace with names information
+   * 
+   * @version $Revision$
+   * @author $author$
+   */
+  protected class TraceWithNamesInfo {
+    /** indicates whether to trace with names */
+    public boolean traceWithNames;
+
+    /** indicates whether a constant name request is bypassed */
+    public boolean bypassConstantNameRequest;
+
+    /**
+     * Creates a new TraceWithNamesInfo object.
+     */
+    public TraceWithNamesInfo() {
+    }
+  }
+  
+  /**
+   * indicates that the thread is within the converse method
+   */
+  protected boolean isWithinConverse = false;
+  
+  /**
+   * Converses with Cyc to perform an API command.  Creates a new connection for this command if
+   * the connection is not persistent.
+   * 
+   * @param command the command string or CycList
+   * 
+   * @return the result as an object array of two objects
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  protected Object[] converse(Object command)
+                       throws IOException, UnknownHostException, CycApiException {
+    Object[] response = { null, null };
+
+    // stack discipline is required to prevent tracing of recursive
+    // name-seeking api requests.
+    TraceWithNamesInfo traceWithNamesInfo = new TraceWithNamesInfo();
+    boolean bypassConstantNameRequest = false;
+
+    if (traceWithNames) {
+      traceWithNamesInfo.traceWithNames = true;
+
+      CycList commandCyclist;
+
+      if (command instanceof String) {
+        commandCyclist = this.makeCycList((String) command);
+      }
+      else {
+        commandCyclist = (CycList) command;
+      }
+
+      if (commandCyclist.first().equals(CycObjectFactory.makeCycSymbol(
+                                              "constant-name"))) {
+        traceWithNamesInfo.bypassConstantNameRequest = true;
+      }
+      else {
+        Log.current.println(commandCyclist.cyclify() + " --> cyc");
+      }
+
+      traceWithNames = false;
+    }
+
+    traceWithNamesStack.push(traceWithNamesInfo);
+
+    if (persistentConnection == this.TRANSIENT_CONNECTION) {
+      cycConnection = new CycConnection(hostName, 
+                                        port, 
+                                        communicationMode, 
+                                        messagingMode, 
+                                        this);
+      cycConnection.setTrace(saveTrace);
+    }
+
+    response = cycConnection.converse(command);
+
+    if (persistentConnection == this.TRANSIENT_CONNECTION) {
+      saveTrace = cycConnection.getTrace();
+      cycConnection.close();
+    }
+
+    traceWithNamesInfo = (TraceWithNamesInfo) traceWithNamesStack.pop();
+    traceWithNames = traceWithNamesInfo.traceWithNames;
+    bypassConstantNameRequest = traceWithNamesInfo.bypassConstantNameRequest;
+
+    if (traceWithNames && !bypassConstantNameRequest) {
+      String responseString;
+
+      if (response[1] instanceof CycList) {
+        responseString = ((CycList) response[1]).cyclify();
+      }
+      else if (response[1] instanceof CycFort) {
+        responseString = ((CycFort) response[1]).cyclify();
+      }
+      else {
+        responseString = response[1].toString();
+      }
+
+      Log.current.println("cyc --> " + responseString);
+    }
+
+    if (eagerlyObtainConstantNames  && (! isWithinConverse)) {
+      if (response[1] instanceof CycList) {
+        CycList constantNames = ((CycList) response[1]).treeConstants();
+        Iterator iter = constantNames.iterator();
+        while (iter.hasNext()) { 
+          CycConstant cycConstant = (CycConstant) iter.next();
+          if (cycConstant.safeGetName() == null)
+            constantsHavingNoName.add(cycConstant);
+        }
+      }
+      else if (response[1] instanceof CycConstant &&
+               ((CycConstant) response[1]).safeGetName() == null)
+        constantsHavingNoName.add(response[1]);
+      if (constantsHavingNoName.size() >= eagerlyObtainConstantNamesThreshold) {
+        CycList constantsHavingNoName1 = (CycList) constantsHavingNoName.clone();
+        constantsHavingNoName = new CycList();
+        isWithinConverse = true;
+        obtainConstantNames(constantsHavingNoName1);
+        isWithinConverse = false;
+      }
+    }
+        
+    return response;
+  }
+
+  /**
+   * Obtains constant names for a list of constants
+   *
+   * @param constants the given list of constants having no name yet
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public void obtainConstantNames (List constants)
+                            throws IOException, UnknownHostException, CycApiException {
+    CycList guidStrings = new CycList();
+    Iterator iter = constants.iterator();
+    while (iter.hasNext()) {
+      CycConstant cycConstant = (CycConstant) iter.next();
+      if (cycConstant.safeGetName() == null)
+        guidStrings.add(cycConstant.getGuid().toString());
+    }
+    if (guidStrings.size() == 0)
+      return;
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("constant-info-from-guid-strings"));
+    command.addQuoted(guidStrings);
+    CycList constantInfos = converseList(command);
+    iter = constantInfos.iterator();
+    while (iter.hasNext()) {
+      Object constantInfoObject = iter.next();
+
+      if (constantInfoObject instanceof CycList) {
+        CycList constantInfo = (CycList) constantInfoObject;
+        Guid guid = CycObjectFactory.makeGuid((String) constantInfo.first());
+        CycConstant cycConstant = CycObjectFactory.getCycConstantCacheByGuid(guid);
+        if (cycConstant != null) {
+          String name = (String) constantInfo.second();
+          cycConstant.setName(name);
+          CycObjectFactory.addCycConstantCacheByName(cycConstant);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Obtains constant guids for a list of constants
+   *
+   * @param constants the given list of constants having no Guid yet
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public void obtainConstantGuids (List constants)
+                            throws IOException, UnknownHostException, CycApiException {
+    CycList guidStrings = new CycList();
+    Iterator iter = constants.iterator();
+    while (iter.hasNext()) {
+      CycConstant cycConstant = (CycConstant) iter.next();
+      if (cycConstant.safeGetGuid() == null)
+        guidStrings.add(cycConstant.getName());
+    }
+    if (guidStrings.size() == 0)
+      return;
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("constant-info-from-name-strings"));
+    command.addQuoted(guidStrings);
+    //System.out.println("Calling: " + command);
+    CycList constantInfos = converseList(command);
+    iter = constantInfos.iterator();
+    while (iter.hasNext()) {
+      Object constantInfoObject = iter.next();
+
+      if (constantInfoObject instanceof CycList) {
+        CycList constantInfo = (CycList) constantInfoObject;
+        String name = (String) constantInfo.second();
+        //Guid guid = CycObjectFactory.makeGuid((String) constantInfo.first());
+        CycConstant cycConstant = CycObjectFactory.getCycConstantCacheByName(name);
+        if (cycConstant != null) {
+          Guid guid = (Guid)constantInfo.first();
+          cycConstant.setGuid(guid);
+          CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
+        }
+      }
+    }
+  }
+    
   /**
    * Converses with Cyc to perform an API command whose result is returned as an object.
    * 
@@ -637,7 +1112,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public void converseVoid(final Object command)
+  public void converseVoid(Object command)
                     throws IOException, UnknownHostException, CycApiException {
     Object[] response = { null, null };
     response = converse(command);
@@ -669,6 +1144,279 @@ public class CycAccess {
   }
 
   /**
+   * Initializes common cyc constants.
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  private void initializeConstants()
+                            throws IOException, UnknownHostException, CycApiException {
+    CycList guidStrings = new CycList();
+    guidStrings.add("bd588111-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd588104-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd58810e-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880e5-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd588109-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880cc-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd588102-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("c0659a2b-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880f9-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880fa-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880fb-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd589d90-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880ae-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd63f343-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880f4-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd58915a-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("dff4a041-4da2-11d6-82c0-0002b34c7c9f");
+    guidStrings.add("beaed5bd-9c29-11b1-9dad-c379636f7270");
+    guidStrings.add("bd5880d9-9c29-11b1-9dad-c379636f7270"); // true
+    guidStrings.add("bd5880d8-9c29-11b1-9dad-c379636f7270"); // false
+    guidStrings.add("bde7f9f2-9c29-11b1-9dad-c379636f7270"); // xor
+    guidStrings.add("bda887b6-9c29-11b1-9dad-c379636f7270"); // equiv
+    guidStrings.add("bd5880f8-9c29-11b1-9dad-c379636f7270"); // implies
+    guidStrings.add("bd5880f7-9c29-11b1-9dad-c379636f7270"); // forAll
+    guidStrings.add("bd5880f6-9c29-11b1-9dad-c379636f7270"); // thereExists
+    guidStrings.add("c10ae7b8-9c29-11b1-9dad-c379636f7270"); // thereExistExactly
+    guidStrings.add("c10af932-9c29-11b1-9dad-c379636f7270"); // thereExistAtMost
+    guidStrings.add("c10af5e7-9c29-11b1-9dad-c379636f7270"); // thereExistAtLeast
+    guidStrings.add("94f07021-8b0d-11d7-8701-0002b3a8515d"); // SubLQuoteFn
+    guidStrings.add("c0b2bc13-9c29-11b1-9dad-c379636f7270"); // ExpandSubLFn
+
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("constant-info-from-guid-strings"));
+    command.addQuoted(guidStrings);
+
+    CycList constantInfos = converseList(command);
+    Iterator iter = constantInfos.iterator();
+    HashMap constantInfoDictionary = new HashMap();
+
+    while (iter.hasNext()) {
+      Object constantInfoObject = iter.next();
+
+      if (constantInfoObject instanceof CycList) {
+        CycList constantInfo = (CycList) constantInfoObject;
+        Guid guid = CycObjectFactory.makeGuid((String) constantInfo.first());
+        String name = (String) constantInfo.second();
+        constantInfoDictionary.put(guid, name);
+      }
+    }
+
+    Guid guid = null;
+    
+    if (this.trueConst == null) { 
+      trueConst = makePrefetchedConstant("bd5880d9-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.falseConst == null) { 
+      falseConst = makePrefetchedConstant("bd5880d8-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.xorConst == null) { 
+      xorConst = makePrefetchedConstant("bde7f9f2-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.equivConst == null) { 
+      equivConst = makePrefetchedConstant("bda887b6-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.impliesConst == null) { 
+      impliesConst = makePrefetchedConstant("bd5880f8-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.forAllConst == null) { 
+      forAllConst = makePrefetchedConstant("bd5880f7-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.thereExistsConst == null) { 
+      thereExistsConst = makePrefetchedConstant("bd5880f6-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.thereExistExactlyConst == null) { 
+      thereExistExactlyConst = makePrefetchedConstant("c10ae7b8-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.thereExistAtMostConst == null) { 
+      thereExistAtMostConst = makePrefetchedConstant("c10af932-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.thereExistAtLeastConst == null) { 
+      thereExistAtLeastConst = makePrefetchedConstant("c10af5e7-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    if (this.sublQuoteFnConst == null) { 
+      sublQuoteFnConst = makePrefetchedConstant("94f07021-8b0d-11d7-8701-0002b3a8515d", constantInfoDictionary);
+    }
+    if (this.expandSubLFnConst == null) { 
+      expandSubLFnConst = makePrefetchedConstant("c0b2bc13-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
+    }
+    
+    if (baseKB == null) {
+      guid = CycObjectFactory.makeGuid("bd588111-9c29-11b1-9dad-c379636f7270");
+      baseKB = makeELMt(makeConstantWithGuidName(guid, 
+                                                 (String) constantInfoDictionary.get(guid)));
+      CycObjectFactory.addCycConstantCacheByName((CycConstant) baseKB);
+      CycObjectFactory.addCycConstantCacheByGuid((CycConstant) baseKB);
+    }
+
+    if (isa == null) {
+      guid = CycObjectFactory.makeGuid("bd588104-9c29-11b1-9dad-c379636f7270");
+      isa = makeConstantWithGuidName(guid, 
+                                     (String) constantInfoDictionary.get(
+                                           guid));
+      CycObjectFactory.addCycConstantCacheByName(isa);
+      CycObjectFactory.addCycConstantCacheByGuid(isa);
+    }
+
+    if (genls == null) {
+      guid = CycObjectFactory.makeGuid("bd58810e-9c29-11b1-9dad-c379636f7270");
+      genls = makeConstantWithGuidName(guid, 
+                                       (String) constantInfoDictionary.get(
+                                             guid));
+      CycObjectFactory.addCycConstantCacheByName(genls);
+      CycObjectFactory.addCycConstantCacheByGuid(genls);
+    }
+
+    if (genlMt == null) {
+      guid = CycObjectFactory.makeGuid("bd5880e5-9c29-11b1-9dad-c379636f7270");
+      genlMt = makeConstantWithGuidName(guid, 
+                                        (String) constantInfoDictionary.get(
+                                              guid));
+      CycObjectFactory.addCycConstantCacheByName(genlMt);
+      CycObjectFactory.addCycConstantCacheByGuid(genlMt);
+    }
+
+    if (comment == null) {
+      guid = CycObjectFactory.makeGuid("bd588109-9c29-11b1-9dad-c379636f7270");
+      comment = makeConstantWithGuidName(guid, 
+                                         (String) constantInfoDictionary.get(
+                                               guid));
+      CycObjectFactory.addCycConstantCacheByName(comment);
+      CycObjectFactory.addCycConstantCacheByGuid(comment);
+    }
+
+    if (collection == null) {
+      guid = CycObjectFactory.makeGuid("bd5880cc-9c29-11b1-9dad-c379636f7270");
+      collection = makeConstantWithGuidName(guid, 
+                                            (String) constantInfoDictionary.get(
+                                                  guid));
+      CycObjectFactory.addCycConstantCacheByName(collection);
+      CycObjectFactory.addCycConstantCacheByGuid(collection);
+    }
+
+    if (binaryPredicate == null) {
+      guid = CycObjectFactory.makeGuid("bd588102-9c29-11b1-9dad-c379636f7270");
+      binaryPredicate = makeConstantWithGuidName(guid, 
+                                                 (String) constantInfoDictionary.get(
+                                                       guid));
+      CycObjectFactory.addCycConstantCacheByName(binaryPredicate);
+      CycObjectFactory.addCycConstantCacheByGuid(binaryPredicate);
+    }
+
+    if (elementOf == null) {
+      guid = CycObjectFactory.makeGuid("c0659a2b-9c29-11b1-9dad-c379636f7270");
+      elementOf = makeConstantWithGuidName(guid, 
+                                           (String) constantInfoDictionary.get(
+                                                 guid));
+      CycObjectFactory.addCycConstantCacheByName(elementOf);
+      CycObjectFactory.addCycConstantCacheByGuid(elementOf);
+    }
+
+    if (and == null) {
+      guid = CycObjectFactory.makeGuid("bd5880f9-9c29-11b1-9dad-c379636f7270");
+      and = makeConstantWithGuidName(guid, 
+                                     (String) constantInfoDictionary.get(
+                                           guid));
+      CycObjectFactory.addCycConstantCacheByName(and);
+      CycObjectFactory.addCycConstantCacheByGuid(and);
+    }
+
+    if (or == null) {
+      guid = CycObjectFactory.makeGuid("bd5880fa-9c29-11b1-9dad-c379636f7270");
+      or = makeConstantWithGuidName(guid, 
+                                    (String) constantInfoDictionary.get(
+                                          guid));
+      CycObjectFactory.addCycConstantCacheByName(or);
+      CycObjectFactory.addCycConstantCacheByGuid(or);
+    }
+
+    if (not == null) {
+      guid = CycObjectFactory.makeGuid("bd5880fb-9c29-11b1-9dad-c379636f7270");
+      not = makeConstantWithGuidName(guid, 
+                                     (String) constantInfoDictionary.get(
+                                           guid));
+      CycObjectFactory.addCycConstantCacheByName(not);
+      CycObjectFactory.addCycConstantCacheByGuid(not);
+    }
+
+    if (numericallyEqual == null) {
+      guid = CycObjectFactory.makeGuid("bd589d90-9c29-11b1-9dad-c379636f7270");
+      numericallyEqual = makeConstantWithGuidName(guid, 
+                                                  (String) constantInfoDictionary.get(
+                                                        guid));
+      CycObjectFactory.addCycConstantCacheByName(numericallyEqual);
+      CycObjectFactory.addCycConstantCacheByGuid(numericallyEqual);
+    }
+
+    if (plusFn == null) {
+      guid = CycObjectFactory.makeGuid("bd5880ae-9c29-11b1-9dad-c379636f7270");
+      plusFn = makeConstantWithGuidName(guid, 
+                                        (String) constantInfoDictionary.get(
+                                              guid));
+      CycObjectFactory.addCycConstantCacheByName(plusFn);
+      CycObjectFactory.addCycConstantCacheByGuid(plusFn);
+    }
+
+    if (different == null) {
+      guid = CycObjectFactory.makeGuid("bd63f343-9c29-11b1-9dad-c379636f7270");
+      different = makeConstantWithGuidName(guid, 
+                                           (String) constantInfoDictionary.get(
+                                                 guid));
+      CycObjectFactory.addCycConstantCacheByName(different);
+      CycObjectFactory.addCycConstantCacheByGuid(different);
+    }
+
+    if (thing == null) {
+      guid = CycObjectFactory.makeGuid("bd5880f4-9c29-11b1-9dad-c379636f7270");
+      thing = makeConstantWithGuidName(guid, 
+                                       (String) constantInfoDictionary.get(
+                                             guid));
+      CycObjectFactory.addCycConstantCacheByName(thing);
+      CycObjectFactory.addCycConstantCacheByGuid(thing);
+    }
+
+    if (inferencePSC == null) {
+      guid = CycObjectFactory.makeGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
+      inferencePSC = makeELMt(makeConstantWithGuidName(
+                                    guid, 
+                                    (String) constantInfoDictionary.get(
+                                          guid)));
+      CycObjectFactory.addCycConstantCacheByName((CycConstant) inferencePSC);
+      CycObjectFactory.addCycConstantCacheByGuid((CycConstant) inferencePSC);
+    }
+
+    if ((!isLegacyMode) && (universalVocabularyMt == null)) {
+      guid = CycObjectFactory.makeGuid("dff4a041-4da2-11d6-82c0-0002b34c7c9f");
+      universalVocabularyMt = makeELMt(makeConstantWithGuidName(
+                                             guid, 
+                                             (String) constantInfoDictionary.get(
+                                                   guid)));
+      CycObjectFactory.addCycConstantCacheByName((CycConstant) universalVocabularyMt);
+      CycObjectFactory.addCycConstantCacheByGuid((CycConstant) universalVocabularyMt);
+    }
+
+    if (bookkeepingMt == null) {
+      guid = CycObjectFactory.makeGuid("beaed5bd-9c29-11b1-9dad-c379636f7270");
+      bookkeepingMt = makeELMt(makeConstantWithGuidName(
+                                     guid, 
+                                     (String) constantInfoDictionary.get(
+                                           guid)));
+      CycObjectFactory.addCycConstantCacheByName((CycConstant) bookkeepingMt);
+      CycObjectFactory.addCycConstantCacheByGuid((CycConstant) bookkeepingMt);
+    }
+  }
+  
+  private CycConstant makePrefetchedConstant(String guidStr, HashMap constantInfoDictionary) {
+    Guid guid = CycObjectFactory.makeGuid(guidStr);
+    CycConstant prefetchedConstant = makeConstantWithGuidName(guid, 
+      (String)constantInfoDictionary.get(guid));
+    CycObjectFactory.addCycConstantCacheByName(prefetchedConstant);
+    CycObjectFactory.addCycConstantCacheByGuid(prefetchedConstant);
+    return prefetchedConstant;
+  }
+
+  /**
    * Gets a known CycConstant by using its constant name.
    * 
    * @param constantName the name of the constant to be instantiated
@@ -689,43 +1437,6 @@ public class CycAccess {
 
     return cycConstant;
   }
-  
-  public List findConstantsForNames(List constantNames) 
-  throws IOException, UnknownHostException, CycApiException {
-    if ((constantNames == null) || (constantNames.size() <= 0)) {
-      return null;
-    }
-    StringBuffer command = new StringBuffer("(MAPCAR (QUOTE FIND-CONSTANT) (LIST");
-    for (Iterator iter = constantNames.iterator(); iter.hasNext(); ) {
-      command.append(" \"");
-      String curConstName = StringUtils.escapeDoubleQuotes("" + iter.next());
-      command.append(curConstName);
-      command.append("\"");
-    }
-    command.append("))");
-    final Object result = converseCycObject("" + command);
-    if (!(result instanceof CycList)) { return null; }
-    return (CycList)result;
-  }
-  
-  public List findConstantsForGuids(List constantGuids) 
-  throws IOException, UnknownHostException, CycApiException {
-    if ((constantGuids == null) || (constantGuids.size() <= 0)) {
-      return null;
-    }
-    List result = new ArrayList();
-    // @ToDo this is very inefficient...we need to find a way to do this
-    // with a single round trip to Cyc. --Tony
-    for (Iterator iter = constantGuids.iterator(); iter.hasNext(); ) {
-      CycConstant item = (CycConstant)iter.next();
-      try {
-        result.add(getConstantByGuid(item.getGuid()));
-      } catch (Exception e) {
-        result.add(CycObjectFactory.nil);
-      }
-    }
-    return result;
-  }
 
   /**
    * Gets a CycConstant by using its constant name.
@@ -738,25 +1449,137 @@ public class CycAccess {
    * @throws UnknownHostException if cyc server host not found on the network
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycConstant getConstantByName(final String constantName)
+  public CycConstant getConstantByName(String constantName)
                                 throws IOException, UnknownHostException, CycApiException {
     String name = constantName;
-    if (constantName.startsWith("#$"))
-      name = name.substring(2);
-    CycConstant answer = CycObjectFactory.getCycConstantCacheByName(name);
-    if (answer != null)
-      return answer;
 
-    final CycList command = new CycList();
-    command.add(CycObjectFactory.makeCycSymbol("find-constant"));
-    command.add(name);
-    final Object answerObject = converseObject(command);
-    if (answerObject instanceof CycConstant) {
-      answer = (CycConstant) answerObject;
-      CycObjectFactory.addCycConstantCache(answer);
+    if (constantName.startsWith("#$")) {
+      name = name.substring(2);
+    }
+
+    CycConstant answer = CycObjectFactory.getCycConstantCacheByName(name);
+
+    if (answer != null) {
       return answer;
     }
-    return null;
+
+    answer = new CycConstant();
+    answer.setName(name);
+
+    Integer id = getConstantId(name);
+
+    if (id == null) {
+      return null;
+    }
+
+    answer.setId(id);
+    answer.setGuid(getConstantGuid(name));
+    CycObjectFactory.addCycConstantCacheByName(answer);
+    CycObjectFactory.addCycConstantCacheById(answer);
+
+    return answer;
+  }
+
+  /**
+   * Gets the ID for the given CycConstant.
+   * 
+   * @param cycConstant the <tt>CycConstant</tt> object for which the id is sought
+   * 
+   * @return the ID for the given CycConstant, or null if the constant does not exist.
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public Integer getConstantId(CycConstant cycConstant)
+                        throws IOException, UnknownHostException, CycApiException {
+    return getConstantId(cycConstant.getName());
+  }
+
+  /**
+   * Gets the ID for the given constant name.
+   * 
+   * @param constantName the name of the constant object for which the id is sought
+   * 
+   * @return the ID for the given constant name, or null if the constant does not exist.
+   * 
+   * @throws IOException if a data communication error occurs
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws CycApiException if the api request results in a cyc server error
+   * @throws RuntimeException if a NumberFormatException is thrown when parsing the constant id
+   */
+  public Integer getConstantId(String constantName)
+                        throws IOException, UnknownHostException, CycApiException {
+    String command = "(fif " + "  (cand (boolean (find-constant \"" + constantName + "\"))\n" + 
+                     "        (valid-constant? (find-constant \"" + constantName + "\")))" + 
+                     "  (constant-internal-id (find-constant \"" + constantName + "\"))" + 
+                     "  nil)";
+    Object obj = converseObject(command);
+
+    if (!(obj instanceof Integer)) {
+      return null;
+    }
+
+    try {
+      return new Integer(converseInt(command));
+    }
+     catch (NumberFormatException e) {
+      e.printStackTrace();
+      throw new RuntimeException("NumberFormatException\n" + e.getMessage() + "\nConstantName: " + 
+                                 constantName);
+    }
+  }
+
+  /**
+   * Gets the constant ID for the given constant guid.
+   * 
+   * @param guid the name of the constant object for which the id is sought
+   * 
+   * @return the ID for the given constant name, or null if the constant does not exist.
+   * 
+   * @throws IOException if a data communication error occurs
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws CycApiException if the api request results in a cyc server error
+   * @throws RuntimeException if a NumberFormatException is thrown when parsing the constant id
+   */
+  public Integer getConstantId(Guid guid)
+                        throws IOException, UnknownHostException, CycApiException {
+    String command = "(fif " + 
+                     "  (cand (boolean (find-constant-by-external-id (string-to-guid \"" + 
+                     guid.toString() + "\")))\n" + 
+                     "        (valid-constant? (find-constant-by-external-id (string-to-guid \"" + 
+                     guid.toString() + "\"))))" + 
+                     "  (constant-internal-id (find-constant-by-external-id (string-to-guid \"" + 
+                     guid.toString() + "\")))" + "  nil)";
+    Object obj = converseObject(command);
+
+    if (!(obj instanceof Integer)) {
+      return null;
+    }
+
+    try {
+      return new Integer(converseInt(command));
+    }
+     catch (NumberFormatException e) {
+      e.printStackTrace();
+      throw new RuntimeException("NumberFormatException\n" + e.getMessage() + "\nGUID: " + guid);
+    }
+  }
+
+  /**
+   * Gets the Guid for the given CycConstant, raising an exception if the constant does not exist.
+   * 
+   * @param cycConstant the <tt>CycConstant</tt> object for which the id is sought
+   * 
+   * @return the Guid for the given CycConstant
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public Guid getConstantGuid(CycConstant cycConstant)
+                       throws IOException, UnknownHostException, CycApiException {
+    return getConstantGuid(cycConstant.getName());
   }
 
   /**
@@ -777,6 +1600,73 @@ public class CycAccess {
                      "\")))";
 
     return CycObjectFactory.makeGuid(converseString(command));
+  }
+
+  /**
+   * Gets the Guid for the given constant id.
+   * 
+   * @param id the id of the <tt>CycConstant</tt> whose guid is sought
+   * 
+   * @return the Guid for the given CycConstant
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public Guid getConstantGuid(Integer id)
+                       throws IOException, UnknownHostException, CycApiException {
+    // Optimized for the binary api.
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("guid-to-string"));
+
+    CycList command1 = new CycList();
+    command.add(command1);
+    command1.add(CycObjectFactory.makeCycSymbol("constant-external-id"));
+
+    CycList command2 = new CycList();
+    command1.add(command2);
+    command2.add(CycObjectFactory.makeCycSymbol("find-constant-by-internal-id"));
+    command2.add(id);
+
+    return CycObjectFactory.makeGuid(converseString(command));
+  }
+
+  /**
+   * Gets a <tt>CycConstant</tt> by using its ID.
+   * 
+   * @param id the id of the <tt>CycConstant</tt> sought
+   * 
+   * @return the <tt>CycConstant</tt> if found or <tt>null</tt> if not found
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycConstant getConstantById(Integer id)
+                              throws IOException, UnknownHostException, CycApiException {
+    // Optimized for the binary api.
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("boolean"));
+
+    CycList command1 = new CycList();
+    command.add(command1);
+    command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-internal-id"));
+    command1.add(id);
+
+    boolean constantExists = converseBoolean(command);
+
+    if (!constantExists) {
+      return null;
+    }
+
+    CycConstant answer = new CycConstant();
+    answer.setName(getConstantName(id));
+    answer.setId(id);
+    answer.setGuid(getConstantGuid(id));
+    CycObjectFactory.addCycConstantCacheByName(answer);
+    CycObjectFactory.addCycConstantCacheById(answer);
+
+    return answer;
   }
 
   /**
@@ -804,6 +1694,31 @@ public class CycAccess {
   }
 
   /**
+   * Gets the name for the given constant id.
+   * 
+   * @param id the id of the constant object for which the name is sought
+   * 
+   * @return the name for the given CycConstant
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public String getConstantName(Integer id)
+                         throws IOException, UnknownHostException, CycApiException {
+    // Optimized for the binary api.
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("constant-name"));
+
+    CycList command1 = new CycList();
+    command.add(command1);
+    command1.add(CycObjectFactory.makeCycSymbol("find-constant-by-internal-id"));
+    command1.add(id);
+
+    return converseString(command);
+  }
+
+  /**
    * Gets the name for the given constant guid.
    * 
    * @param guid the guid of the constant object for which the name is sought
@@ -828,6 +1743,31 @@ public class CycAccess {
     command1.add(command2);
     command2.add(CycObjectFactory.makeCycSymbol("string-to-guid"));
     command2.add(guid.toString());
+
+    return converseString(command);
+  }
+
+  /**
+   * Gets the name for the given variable id.
+   * 
+   * @param id the id of the variable object for which the name is sought
+   * 
+   * @return the name for the given CycVariable
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public String getVariableName(Integer id)
+                         throws IOException, UnknownHostException, CycApiException {
+    // Optimized for the binary api.
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("variable-name"));
+
+    CycList command1 = new CycList();
+    command.add(command1);
+    command1.add(CycObjectFactory.makeCycSymbol("find-variable-by-id"));
+    command1.add(id);
 
     return converseString(command);
   }
@@ -887,21 +1827,43 @@ public class CycAccess {
                                 throws IOException, UnknownHostException, CycApiException {
     CycConstant answer = CycObjectFactory.getCycConstantCacheByGuid(
                                guid);
-    if (answer != null)
-      return answer;
 
-    final String command = "(find-constant-by-external-id (string-to-guid \"" + guid.toString() + "\"))";
-    final Object answerObject = converseObject(command);
-    if (answerObject instanceof CycConstant) {
-      answer = (CycConstant) answerObject;
-      CycObjectFactory.addCycConstantCache(answer);
+    if (answer != null) {
       return answer;
     }
-    return null;
+
+    answer = new CycConstant();
+    answer.setGuid(guid);
+
+    String command = "(fif (boolean (find-constant-by-external-id " + 
+                     "                (string-to-guid \"" + guid.toString() + "\")))" + 
+                     "  (constant-name (find-constant-by-external-id (string-to-guid \"" + 
+                     guid.toString() + "\")))" + "  nil)";
+    Object nameObj = converseObject(command);
+
+    if (!(nameObj instanceof String)) {
+      return null;
+    }
+
+    answer.setName((String) nameObj);
+
+    Integer id = getConstantId((String) nameObj);
+
+    if (id == null) {
+      return null;
+    }
+
+    answer.setId(id);
+    CycObjectFactory.addCycConstantCacheByName(answer);
+    CycObjectFactory.addCycConstantCacheById(answer);
+    CycObjectFactory.addCycConstantCacheByGuid(answer);
+
+    return answer;
   }
 
   /**
-   * Makes a known CycConstant by using its GUID and name, adding it to the cache. 
+   * Makes a known CycConstant by using its GUID and name. This method does not access the Cyc
+   * server.
    * 
    * @param guidString the known GUID string from which to make the constant
    * @param constantName the known name to associate with the constant
@@ -916,7 +1878,8 @@ public class CycAccess {
   }
 
   /**
-   * Makes a known CycConstant by using its GUID and name, adding it to the cache.
+   * Makes a known CycConstant by using its GUID and name. This method does not access the Cyc
+   * server.
    * 
    * @param guid the known GUID from which to make the constant
    * @param constantName the known name to associate with the constant
@@ -925,14 +1888,305 @@ public class CycAccess {
    */
   public CycConstant makeConstantWithGuidName(Guid guid, 
                                               String constantName) {
-    CycConstant answer = CycObjectFactory.getCycConstantCacheByGuid(guid);
-    if (answer != null)
-      return answer;
+    CycConstant answer = CycObjectFactory.getCycConstantCacheByGuid(
+                               guid);
 
-    answer = new CycConstant(constantName, guid);
-    CycObjectFactory.addCycConstantCache(answer);
+    if (answer != null) {
+      if ((answer.safeGetName() == null) && (constantName != null)) { 
+        answer.setName(constantName); 
+        CycObjectFactory.addCycConstantCacheByName(answer);
+      }
+      return answer;
+    }
+
+    answer = new CycConstant();
+    answer.setGuid(guid);
+    answer.setName(constantName);
+    CycObjectFactory.addCycConstantCacheByName(answer);
+    CycObjectFactory.addCycConstantCacheByGuid(answer);
 
     return answer;
+  }
+
+  /**
+   * Completes the instantiation of objects contained in the given <tt>CycList</tt>. The binary api
+   * sends only constant ids, and the constant names and guids must be retrieved if the constant
+   * is not cached.
+   * 
+   * @param object the <tt>CycConstant</tt> to be completed, or the <tt>Object</tt> whose embedded
+   *        constants are to be completed
+   * 
+   * @return the completed object, or a reference to a cached instance
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public Object completeObject(Object object)
+                        throws IOException, UnknownHostException, CycApiException {
+    if (object instanceof CycConstant) {
+      return completeCycConstant((CycConstant) object);
+    }
+    else if (object instanceof CycList) {
+      return completeCycList((CycList) object);
+    }
+    else if (object instanceof CycNart) {
+      return completeCycNart((CycNart) object);
+    }
+    else {
+      return object;
+    }
+  }
+
+  /**
+   * Completes the instantiation of <tt>CycConstant</tt> returned by the binary api. The binary api
+   * sends only constant ids, and the constant names and guids must be retrieved if the constant
+   * is not cached.
+   * 
+   * @param cycConstant the <tt>CycConstant</tt> whose name and guid are to be completed
+   * 
+   * @return the completed <tt>CycConstant</tt> object, or a reference to the previously cached
+   *         instance
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycConstant completeCycConstant(CycConstant cycConstant)
+                                  throws IOException, UnknownHostException, CycApiException {
+    cycConstant.setName(getConstantName(cycConstant.getId()));
+
+    CycConstant cachedConstant = CycObjectFactory.getCycConstantCacheByName(
+                                       cycConstant.getName());
+
+    if (cachedConstant == null) {
+      cycConstant.setGuid(getConstantGuid(cycConstant.getId()));
+      CycObjectFactory.addCycConstantCacheByName(cycConstant);
+
+      return cycConstant;
+    }
+    else {
+      return cachedConstant;
+    }
+  }
+
+  /**
+   * Completes the instantiation of HL <tt>CycVariable</tt> returned by the binary api. The binary
+   * api sends only HL variable ids, and the variable name must be retrieved if the variable is
+   * not cached.  The variable id is not used when sending variables to the binary api, instead
+   * the variable is output as a symbol.  In the case where an EL variable is returned by the
+   * binary api, then then variable name is already present.
+   * 
+   * @param cycVariable the <tt>CycVariable</tt> whose name is to be completed
+   * 
+   * @return the completed <tt>CycVariable</tt> object, or a reference to the previously cached
+   *         instance
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycVariable completeCycVariable(CycVariable cycVariable)
+                                  throws IOException, UnknownHostException, CycApiException {
+    if (cycVariable.name == null) {
+      cycVariable.name = getVariableName(cycVariable.hlVariableId);
+    }
+
+    CycVariable cachedVariable = CycObjectFactory.getCycVariableCache(
+                                       cycVariable.name);
+
+    if (cachedVariable == null) {
+      CycObjectFactory.addCycVariableCache(cycVariable);
+
+      return cycVariable;
+    }
+    else {
+      return cachedVariable;
+    }
+  }
+
+  /**
+   * Completes the instantiation of objects contained in the given <tt>CycList</tt>. The binary api
+   * sends only constant ids, and the constant names and guids must be retrieved if the constant
+   * is not cached.
+   * 
+   * @param cycList the <tt>CycList</tt> whose constants are to be completed
+   * 
+   * @return the given list with completed objects
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycList completeCycList(CycList cycList)
+                          throws IOException, UnknownHostException, CycApiException {
+    for (int i = 0; i < cycList.size(); i++) {
+      Object element = cycList.get(i);
+
+      if (element instanceof CycList) {
+        completeCycList((CycList) element);
+      }
+      else if (element instanceof CycConstant) {
+        // Replace element with the completed constant, which might be previously cached.
+        cycList.set(i, 
+                    completeCycConstant((CycConstant) element));
+      }
+      else if (element instanceof CycNart) {
+        // Replace element with the completed constant, which might be previously cached.
+        cycList.set(i, 
+                    completeCycNart((CycNart) element));
+      }
+      else if (element instanceof CycVariable) {
+        // Replace element with the completed variable, which might be previously cached.
+        cycList.set(i, 
+                    completeCycVariable((CycVariable) element));
+      }
+      else {
+        completeObject(element);
+      }
+    }
+
+    return cycList;
+  }
+
+  /**
+   * Completes the instantiation of a <tt>CycNart</tt> returned by the binary api. The binary api
+   * sends only constant ids, and the constant names and guids must be retrieved if the constant
+   * is not cached.  Also finds the id of the CycNart if the functor and arguments are
+   * instantiated.
+   * 
+   * @param cycNart the <tt>CycNart</tt> whose constants are to be completed
+   * 
+   * @return the completely instantiated CycNart
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycNart completeCycNart(CycNart cycNart)
+                          throws IOException, UnknownHostException, CycApiException {
+    Integer id = cycNart.safeGetId();
+
+    if ((id == null) && cycNart.hasFunctorAndArgs()) {
+      id = findNartId(cycNart);
+
+      if (id != null) {
+        cycNart.setId(id);
+      }
+    }
+
+    if (id == null) {
+      throw new CycApiException("CycNart has no id " + cycNart.safeToString());
+    }
+
+    return getCycNartById(cycNart.getId());
+  }
+
+  /**
+   * Finds the id of a CycNart given its formula.
+   * 
+   * @param cycNart the CycNart object with functor and arguments instantiated
+   * 
+   * @return the id of the nart if found in the KB, otherwise null
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public Integer findNartId(CycNart cycNart)
+                     throws IOException, UnknownHostException, CycApiException {
+    CycList command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("find-nart"));
+    command.addQuoted(cycNart.toCycList());
+
+    Object object = converseObject(command);
+
+    if (object.equals(CycObjectFactory.nil)) {
+      return null;
+    }
+
+    CycNart foundCycNart = null;
+
+    if (object instanceof CycNart) {
+      foundCycNart = (CycNart) object;
+    }
+    else {
+      throw new CycApiException("findNart did not return an null or a nart " + object + " (" + 
+                                object.getClass() + ")");
+    }
+
+    command = new CycList();
+    command.add(CycObjectFactory.makeCycSymbol("nart-id"));
+    command.add(foundCycNart);
+
+    return new Integer(converseInt(command));
+  }
+
+  /**
+   * Gets a CycNart by using its id.
+   * 
+   * @param id the nart id (local to the KB)
+   * 
+   * @return the CycNart
+   * 
+   * @throws UnknownHostException if cyc server host not found on the network
+   * @throws IOException if a data communication error occurs
+   * @throws CycApiException if the api request results in a cyc server error
+   */
+  public CycNart getCycNartById(Integer id)
+                         throws IOException, UnknownHostException, CycApiException {
+    CycNart cycNart = CycObjectFactory.getCycNartCache(
+                            id);
+
+    if (cycNart != null) {
+      return cycNart;
+    }
+    else {
+      cycNart = new CycNart();
+      cycNart.setId(id);
+    }
+
+    CycObjectFactory.addCycNartCache(cycNart);
+
+    CycList command = new CycList();
+
+    if (communicationMode == CycConnection.BINARY_MODE) {
+      command.add(CycObjectFactory.makeCycSymbol("nart-hl-formula"));
+
+      CycList command1 = new CycList();
+      command.add(command1);
+      command1.add(CycObjectFactory.makeCycSymbol("find-nart-by-id"));
+      command1.add(id);
+
+      CycList formula = converseList(command);
+      cycNart.setFunctor((CycFort) formula.first());
+      cycNart.setArguments((CycList) formula.rest());
+    }
+    else {
+      command.add(CycObjectFactory.makeCycSymbol("nart-el-formula"));
+
+      CycList command1 = new CycList();
+      command.add(command1);
+      command1.add(CycObjectFactory.makeCycSymbol("find-nart-by-id"));
+      command1.add(id);
+
+      CycList formula = converseList(command);
+      cycNart.setFunctor((CycFort) formula.first());
+      cycNart.setArguments((CycList) formula.rest());
+
+      List arguments = cycNart.getArguments();
+
+      for (int i = 0; i < arguments.size(); i++) {
+        Object argument = arguments.get(i);
+
+        if (argument instanceof CycList) {
+          arguments.set(i, 
+                        new CycNart((CycList) argument));
+        }
+      }
+    }
+
+    return cycNart;
   }
 
   /**
@@ -1061,12 +2315,9 @@ public class CycAccess {
   public String getPluralGeneratedPhrase(CycObject cycObject)
                                   throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseString("(with-precise-paraphrase-on (generate-phrase " + 
                           cycObject.stringApiValue() + " '(#$plural)))");
@@ -1087,12 +2338,9 @@ public class CycAccess {
                                              throws IOException, UnknownHostException, 
                                                     CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseString("(with-precise-paraphrase-off (generate-phrase " + 
                           cycObject.stringApiValue() + " '(#$singular)))");
@@ -1112,12 +2360,9 @@ public class CycAccess {
   public String getSingularGeneratedPhrase(CycObject cycObject)
                                     throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseString("(with-precise-paraphrase-on (generate-phrase " + 
                           cycObject.stringApiValue() + " '(#$singular)))");
@@ -1137,12 +2382,9 @@ public class CycAccess {
   public String getGeneratedPhrase(CycObject cycObject)
                             throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseString("(with-precise-paraphrase-on (generate-phrase " + 
                           cycObject.stringApiValue() + "))");
@@ -1215,12 +2457,9 @@ public class CycAccess {
   public String getComment(CycObject cycObject)
                     throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     if (cycObject instanceof CycList)
       return null;
@@ -1244,21 +2483,15 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public String getComment(final CycObject cycObject, 
-                           final CycObject mt)
+  public String getComment(CycFort cycFort, 
+                           CycObject mt)
                     throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-    
-    String script = 
-      "(clet ((comment-string \n" + 
-      "         (comment " + cycObject.stringApiValue() + " " + makeELMt(mt).stringApiValue() + "))) \n" + 
-      "  (fif comment-string \n" + 
-      "       (string-substitute \" \" \"\\\"\" comment-string) \n" + 
-      "       \"\"))";
+    String script = "(clet ((comment-string \n" + "         (comment " + 
+                    cycFort.stringApiValue() + " " + makeELMt(
+                                                           mt).stringApiValue() + "))) \n" + 
+                    "  (fif comment-string \n" + 
+                    "       (string-substitute \" \" \"\\\"\" comment-string) \n" + 
+                    "       \"\"))";
 
     return converseString(script);
   }
@@ -1277,12 +2510,9 @@ public class CycAccess {
   public CycList getIsas(CycObject cycObject)
                   throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseList("(remove-duplicates (with-all-mts (isa " + cycObject.stringApiValue() + 
                         ")))");
@@ -1291,7 +2521,7 @@ public class CycAccess {
   /**
    * Gets the list of the isas for the given CycFort.
    * 
-   * @param cycObject the term for which its isas are sought
+   * @param cycFort the term for which its isas are sought
    * @param mt the relevant mt
    * 
    * @return the list of the isas for the given CycFort
@@ -1300,22 +2530,11 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getIsas(final CycObject cycObject, 
+  public CycList getIsas(CycFort cycFort, 
                          CycObject mt)
                   throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-            
-                    
-    return converseList("(isa " + cycObject.stringApiValue() + 
-                        " " + makeELMt(mt).stringApiValue() + 
+    return converseList("(isa " + cycFort.stringApiValue() + " " + makeELMt(
+                                                                         mt).stringApiValue() + 
                         ")");
   }
 
@@ -1333,12 +2552,9 @@ public class CycAccess {
   public CycList getGenls(CycObject cycObject)
                    throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseList("(remove-duplicates (with-all-mts (genls " + cycObject.stringApiValue() + 
                         ")))");
@@ -1347,7 +2563,7 @@ public class CycAccess {
   /**
    * Gets the list of the directly asserted true genls for the given CycFort collection.
    * 
-   * @param cycObject the given term
+   * @param cycFort the given term
    * @param mt the relevant mt
    * 
    * @return the list of the directly asserted true genls for the given CycFort collection
@@ -1356,20 +2572,10 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getGenls(final CycObject cycObject, 
-                          final CycObject mt)
+  public CycList getGenls(CycFort cycFort, 
+                          CycObject mt)
                    throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-           
-    return converseList("(genls " + cycObject.stringApiValue() + " " + 
+    return converseList("(genls " + cycFort.stringApiValue() + " " + 
                         makeELMt(mt).stringApiValue() + ")");
   }
 
@@ -1616,7 +2822,7 @@ public class CycAccess {
    * Gets the list of all of the direct and indirect genls for a CycFort collection given a
    * relevant microtheory.
    * 
-   * @param cycObject the collection
+   * @param cycFort the collection
    * @param mt the relevant mt
    * 
    * @return the list of all of the direct and indirect genls for a CycFort collection given a
@@ -1626,20 +2832,10 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getAllGenls(CycObject cycObject, 
+  public CycList getAllGenls(CycFort cycFort, 
                              CycObject mt)
                       throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-           
-    return converseList("(all-genls " + cycObject.stringApiValue() + " " + 
+    return converseList("(all-genls " + cycFort.stringApiValue() + " " + 
                         makeELMt(mt).stringApiValue() + ")");
   }
 
@@ -1855,77 +3051,9 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycFort getMinCol(final CycList collections)
+  public CycFort getMinCol(CycList collections)
                     throws IOException, UnknownHostException, CycApiException {
     return (CycFort) converseObject("(with-all-mts (min-col " + collections.stringApiValue() + 
-                                    "))");
-  }
-
-  /**
-   * Returns the single most specific collection from the given list of collectons.
-   * 
-   * @param collections the given collections
-   * @param mt the relevant mt
-   * 
-   * @return the single most specific collection from the given list of collectons
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycFort getMinCol(final CycList collections, final CycObject mt)
-                    throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (collections == null)
-      throw new NullPointerException("collections must not be null");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-    
-    return (CycFort) converseObject("(with-mt " + makeELMt(mt).stringApiValue() + 
-                                    " (min-col " + collections.stringApiValue() + "))");
-  }
-
-  /**
-   * Returns the most general collections from the given list of collectons.
-   * 
-   * @param collections the given collections
-   * 
-   * @return the most general collections from the given list of collectons
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycList getMaxCols(final CycList collections)
-                    throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    assert collections != null : "collections cannot be null";                  
-                      
-    return converseList("(with-all-mts (max-cols " + collections.stringApiValue() + 
-                                    "))");
-  }
-
-  /**
-   * Returns the most general collections from the given list of collectons.
-   * 
-   * @param collections the given collections
-   * @param mt the inference microtheory
-   * 
-   * @return the most general collections from the given list of collectons
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycList getMaxCols(final CycList collections, final CycObject mt)
-                    throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (collections == null)
-      throw new NullPointerException("collections must not be null");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-                      
-    return converseList("(with-mt " + makeELMt(mt).stringApiValue() + " (max-cols " + collections.stringApiValue() + 
                                     "))");
   }
 
@@ -1950,30 +3078,6 @@ public class CycAccess {
   }
 
   /**
-   * Returns the most specific collections from the given list of collectons.
-   * 
-   * @param collections the given collections
-   * @param mt the inference microtheory
-   * 
-   * @return the most specific collections from the given list of collectons
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public CycList getMinCols(final CycList collections, final CycObject mt)
-                    throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (collections == null)
-      throw new NullPointerException("collections must not be null");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-                      
-    return converseList("(with-mt " + makeELMt(mt).stringApiValue() + 
-                        " (min-cols " + collections.stringApiValue() +  "))");
-  }
-
-  /**
    * Returns true if CycFort SPEC is a spec of CycFort GENL.
    * 
    * @param spec the considered spec collection
@@ -1985,8 +3089,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isSpecOf(CycObject spec, 
-                          CycObject genl)
+  public boolean isSpecOf(CycFort spec, 
+                          CycFort genl)
                    throws IOException, UnknownHostException, CycApiException {
     return isGenlOf(genl, 
                     spec);
@@ -2005,8 +3109,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isSpecOf(CycObject spec, 
-                          CycObject genl, 
+  public boolean isSpecOf(CycFort spec, 
+                          CycFort genl, 
                           CycObject mt)
                    throws IOException, UnknownHostException, CycApiException {
     return isGenlOf(genl, 
@@ -2026,8 +3130,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isGenlOf(CycObject genl, 
-                          CycObject spec)
+  public boolean isGenlOf(CycFort genl, 
+                          CycFort spec)
                    throws IOException, UnknownHostException, CycApiException {
     return converseBoolean("(genl-in-any-mt? " + spec.stringApiValue() + " " + 
                            genl.stringApiValue() + ")");
@@ -2046,8 +3150,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isGenlOf_Cached(CycObject genl, 
-                                 CycObject spec)
+  public boolean isGenlOf_Cached(CycFort genl, 
+                                 CycFort spec)
                           throws IOException, UnknownHostException, CycApiException {
     boolean answer;
     List args = new ArrayList();
@@ -2084,8 +3188,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isGenlOf(CycObject genl, 
-                          CycObject spec, 
+  public boolean isGenlOf(CycFort genl, 
+                          CycFort spec, 
                           CycObject mt)
                    throws IOException, UnknownHostException, CycApiException {
     return converseBoolean("(genl? " + spec.stringApiValue() + " " + genl.stringApiValue() + " " + 
@@ -2699,7 +3803,7 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if the Cyc server returns an error
    */
-  public CycList getLocalDisjointWith(CycObject cycFort)
+  public CycList getLocalDisjointWith(CycFort cycFort)
                                throws IOException, UnknownHostException, CycApiException {
     return converseList("(with-all-mts (local-disjoint-with " + cycFort.stringApiValue() + "))");
   }
@@ -2716,7 +3820,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getLocalDisjointWith(CycObject cycFort, 
+  public CycList getLocalDisjointWith(CycFort cycFort, 
                                       CycObject mt)
                                throws IOException, UnknownHostException, CycApiException {
     return converseList("(local-disjoint-with " + cycFort.stringApiValue() + " " + 
@@ -2735,8 +3839,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean areDisjoint(CycObject collection1, 
-                             CycObject collection2)
+  public boolean areDisjoint(CycFort collection1, 
+                             CycFort collection2)
                       throws IOException, UnknownHostException, CycApiException {
     return converseBoolean("(with-all-mts (disjoint-with? " + collection1.stringApiValue() + " " + 
                            collection2.stringApiValue() + "))");
@@ -2755,8 +3859,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean areDisjoint(CycObject collection1, 
-                             CycObject collection2, 
+  public boolean areDisjoint(CycFort collection1, 
+                             CycFort collection2, 
                              CycObject mt)
                       throws IOException, UnknownHostException, CycApiException {
     return converseBoolean("(with-all-mts (disjoint-with? " + collection1.stringApiValue() + " " + 
@@ -2777,7 +3881,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getMinIsas(CycObject cycFort)
+  public CycList getMinIsas(CycFort cycFort)
                      throws IOException, UnknownHostException, CycApiException {
     return converseList("(with-all-mts (min-isa " + cycFort.stringApiValue() + "))");
   }
@@ -2796,7 +3900,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getMinIsas(CycObject cycFort, 
+  public CycList getMinIsas(CycFort cycFort, 
                             CycObject mt)
                      throws IOException, UnknownHostException, CycApiException {
     return converseList("(min-isa " + cycFort.stringApiValue() + " " + 
@@ -2804,7 +3908,7 @@ public class CycAccess {
   }
 
   /**
-   * Gets the list of the asserted instances of a CycFort collection.
+   * Gets the list of the instances (who are individuals) of a CycFort collection.
    * 
    * @param cycFort the given collection
    * 
@@ -2814,14 +3918,13 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getInstances(CycObject cycFort)
+  public CycList getInstances(CycFort cycFort)
                        throws IOException, UnknownHostException, CycApiException {
-    CycList result = converseList("(with-all-mts (instances " + cycFort.stringApiValue() + "))");
-    return result;
+    return converseList("(with-all-mts (instances " + cycFort.stringApiValue() + "))");
   }
 
   /**
-   * Gets the list of the asserted instances of a CycFort collection.
+   * Gets the list of the instances (who are individuals) of a CycFort collection.
    * 
    * @param cycFort the given collection
    * @param mt the relevant mt
@@ -2832,7 +3935,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getInstances(CycObject cycFort, 
+  public CycList getInstances(CycFort cycFort, 
                               CycObject mt)
                        throws IOException, UnknownHostException, CycApiException {
     return converseList("(instances " + cycFort.stringApiValue() + " " + 
@@ -2852,7 +3955,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getInstanceSiblings(CycObject cycFort)
+  public CycList getInstanceSiblings(CycFort cycFort)
                               throws IOException, UnknownHostException, CycApiException {
     return converseList("(with-all-mts (instance-siblings " + cycFort.stringApiValue() + "))");
   }
@@ -2871,7 +3974,7 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if an error is returned by the Cyc server
    */
-  public CycList getInstanceSiblings(CycObject cycFort, 
+  public CycList getInstanceSiblings(CycFort cycFort, 
                                      CycObject mt)
                               throws IOException, UnknownHostException, CycApiException {
     return converseList("(instance-siblings " + cycFort.stringApiValue() + " " + 
@@ -2890,11 +3993,9 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getAllIsa(CycObject cycFort)
+  public CycList getAllIsa(CycFort cycFort)
                     throws IOException, UnknownHostException, CycApiException {
-    String command = "(all-isa-in-any-mt " + cycFort.stringApiValue() + ")";
-    CycList result = converseList(command);
-    return result;
+    return converseList("(all-isa-in-any-mt " + cycFort.stringApiValue() + ")");
   }
 
   /**
@@ -2910,7 +4011,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getAllIsa(CycObject cycFort, 
+  public CycList getAllIsa(CycFort cycFort, 
                            CycObject mt)
                     throws IOException, UnknownHostException, CycApiException {
     return converseList("(all-isa " + cycFort.stringApiValue() + " " + 
@@ -2930,7 +4031,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getAllInstances(CycObject cycFort)
+  public CycList getAllInstances(CycFort cycFort)
                           throws IOException, UnknownHostException, CycApiException {
     return converseList("(all-instances-in-all-mts " + cycFort.stringApiValue() + ")");
   }
@@ -2948,7 +4049,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error given collection
    */
-  public CycList getAllInstances(CycObject cycFort, 
+  public CycList getAllInstances(CycFort cycFort, 
                                  CycObject mt)
                           throws IOException, UnknownHostException, CycApiException {
     return converseList("(all-instances " + cycFort.stringApiValue() + " " + 
@@ -2969,7 +4070,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error given collection
    */
-  public CycList getAllQuotedInstances(final CycObject cycFort, final CycObject mt) throws IOException, UnknownHostException, CycApiException {
+  public CycList getAllQuotedInstances(final CycFort cycFort, final CycObject mt) throws IOException, UnknownHostException, CycApiException {
     CycList results = null;
     final CycVariable queryVariable = CycObjectFactory.makeCycVariable("?QUOTED-INSTANCE");
     final CycList query = new CycList();
@@ -2995,7 +4096,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public HashSet getAllInstancesHashSet(CycObject cycFort, 
+  public HashSet getAllInstancesHashSet(CycFort cycFort, 
                                         CycObject mt)
                                  throws IOException, UnknownHostException, CycApiException {
     return new HashSet(getAllInstances(cycFort, 
@@ -3016,7 +4117,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public HashSet getAllInstancesHashSet(CycObject cycFort)
+  public HashSet getAllInstancesHashSet(CycFort cycFort)
                                  throws IOException, UnknownHostException, CycApiException {
     return new HashSet(getAllInstances(cycFort));
   }
@@ -3034,7 +4135,7 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isa(CycObject term, 
+  public boolean isa(CycFort term, 
                      String collectionName)
               throws IOException, UnknownHostException, CycApiException {
     return isa(term, 
@@ -3075,8 +4176,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isa(CycObject term, 
-                     CycObject collection, 
+  public boolean isa(CycFort term, 
+                     CycFort collection, 
                      CycObject mt)
               throws IOException, UnknownHostException, CycApiException {
     CycList command = new CycList();
@@ -3101,50 +4202,13 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isQuotedIsa(final CycObject term, final CycObject collection)
+  public boolean isQuotedIsa(CycFort term, CycFort collection)
               throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (term == null)
-      throw new NullPointerException("term must not be null");
-    if (collection == null)
-      throw new NullPointerException("collection must not be null");
-                      
     CycList query = new CycList();
     query.add(getKnownConstantByName("quotedIsa"));
     query.add(term);
     query.add(collection);
     return isQueryTrue(query, inferencePSC, null);
-  }
-
-  /**
-   * Returns true if the quoted CycFort TERM is a instance of CycFort COLLECTION, 
-   * in the given inference microtheory.
-   * 
-   * @param term the term
-   * @param collection the collection
-   * @param mt the inference microtheory
-   * 
-   * @return <tt>true</tt> if the quoted CycFort TERM is a instance of CycFort COLLECTION
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public boolean isQuotedIsa(final CycObject term, final CycObject collection, final CycObject mt)
-              throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (term == null)
-      throw new NullPointerException("term must not be null");
-    if (collection == null)
-      throw new NullPointerException("collection must not be null");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-                      
-    CycList query = new CycList();
-    query.add(getKnownConstantByName("quotedIsa"));
-    query.add(term);
-    query.add(collection);
-    return isQueryTrue(query, mt, null);
   }
 
   /**
@@ -3162,8 +4226,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getWhyIsa(CycObject spec, 
-                           CycObject genl)
+  public CycList getWhyIsa(CycFort spec, 
+                           CycFort genl)
                     throws IOException, UnknownHostException, CycApiException {
     return converseList("(with-all-mts (why-isa? " + spec.stringApiValue() + " " + 
                         genl.stringApiValue() + "))");
@@ -3185,8 +4249,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getWhyIsa(CycObject spec, 
-                           CycObject genl, 
+  public CycList getWhyIsa(CycFort spec, 
+                           CycFort genl, 
                            CycObject mt)
                     throws IOException, UnknownHostException, CycApiException {
     return converseList("(why-isa? " + spec.stringApiValue() + " " + genl.stringApiValue() + " " + 
@@ -3207,8 +4271,8 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public List getWhyIsaParaphrase(CycObject spec, 
-                                  CycObject genl)
+  public List getWhyIsaParaphrase(CycFort spec, 
+                                       CycFort genl)
                                 throws IOException, CycApiException {
     String command = "(with-all-mts (why-isa? " + spec.stringApiValue() + " " + 
                      genl.stringApiValue() + "))";
@@ -3276,19 +4340,10 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getGenlPreds(final CycObject predicate)
+  public CycList getGenlPreds(CycFort predicate)
                        throws IOException, UnknownHostException, CycApiException {
-    if (predicate instanceof CycList) {
-      final String script = 
-        "(clet ((canonicalized-predicate (canonicalize-term " + predicate.stringApiValue() + ")))" +
-        "  (pif (fort-p canonicalized-predicate)" +
-        "    (remove-duplicates (with-all-mts (genl-predicates canonicalized-predicate)))" +
-        "    nil))";
-      return converseList(script);
-    }
-    else
-      return converseList("(remove-duplicates (with-all-mts (genl-predicates " + 
-                          predicate.stringApiValue() + ")))");
+    return converseList("(remove-duplicates (with-all-mts (genl-predicates " + 
+                        predicate.stringApiValue() + ")))");
   }
 
   /**
@@ -3303,19 +4358,11 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getGenlPreds(final CycObject predicate, 
-                              final CycObject mt)
+  public CycList getGenlPreds(CycFort predicate, 
+                              CycObject mt)
                        throws IOException, UnknownHostException, CycApiException {
-    if (predicate instanceof CycList) {
-      final String script = 
-        "(clet ((canonicalized-predicate (canonicalize-term " + predicate.stringApiValue() + ")))" +
-        "  (pif (fort-p canonicalized-predicate)" +
-        "    (remove-duplicates (with-all-mts (genl-predicates canonicalized-predicate "  + makeELMt(mt).stringApiValue() + ")))" +
-        "    nil))";
-      return converseList(script);
-    }
-    else
-      return converseList("(genl-predicates " + predicate.stringApiValue() + " " + makeELMt(mt).stringApiValue() + ")");
+    return converseList("(genl-predicates " + predicate.stringApiValue() + " " + 
+                        makeELMt(mt).stringApiValue() + ")");
   }
 
   /**
@@ -3547,7 +4594,7 @@ public class CycAccess {
   /**
    * Gets a list of the arg1Isas for a CycConstant predicate.
    * 
-   * @param cycObject the predicate for which argument 1 contraints are sought.
+   * @param predicate the predicate for which argument 1 contraints are sought.
    * 
    * @return the list of the arg1Isas for a CycConstant predicate
    * 
@@ -3555,18 +4602,15 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg1Isas(CycObject cycObject)
+  public CycList getArg1Isas(CycObject predicate)
                       throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+    assert predicate instanceof CycConstant || 
+           predicate instanceof CycNart || 
+           predicate instanceof CycList : predicate.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseList("(remove-duplicates (with-all-mts (arg1-isa " + 
-                        cycObject.stringApiValue() + ")))");
+                        predicate.stringApiValue() + ")))");
   }
 
   /**
@@ -3581,23 +4625,17 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg1Isas(final CycObject cycObject, 
-                             final CycObject mt)
+  public CycList getArg1Isas(CycFort predicate, 
+                             CycObject mt)
                       throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-    
-    return converseList("(arg1-isa " + cycObject.stringApiValue() + " " + 
+    return converseList("(arg1-isa " + predicate.stringApiValue() + " " + 
                         makeELMt(mt).stringApiValue() + ")");
   }
 
   /**
    * Gets a list of the arg2Isas for a CycConstant predicate.
    * 
-   * @param cycObject the predicate for which argument 2 contraints are sought.
+   * @param predicate the predicate for which argument 2 contraints are sought.
    * 
    * @return the list of the arg1Isas for a CycConstant predicate
    * 
@@ -3605,24 +4643,21 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg2Isas(CycObject cycObject)
+  public CycList getArg2Isas(CycObject predicate)
                       throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+    assert predicate instanceof CycConstant || 
+           predicate instanceof CycNart || 
+           predicate instanceof CycList : predicate.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseList("(remove-duplicates (with-all-mts (arg2-isa " + 
-                        cycObject.stringApiValue() + ")))");
+                        predicate.stringApiValue() + ")))");
   }
 
   /**
    * Gets the list of the arg2Isas for a CycConstant predicate given an mt.
    * 
-   * @param cycObject the predicate for which argument 2 contraints are sought.
+   * @param predicate the predicate for which argument 2 contraints are sought.
    * @param mt the relevant microtheory
    * 
    * @return the list of the arg2Isas for a CycConstant predicate given an mt
@@ -3631,20 +4666,10 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg2Isas(CycObject cycObject, 
+  public CycList getArg2Isas(CycFort predicate, 
                              CycObject mt)
                       throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-            
-    return converseList("(arg2-isa " + cycObject.stringApiValue() + " " + 
+    return converseList("(arg2-isa " + predicate.stringApiValue() + " " + 
                         makeELMt(mt).stringApiValue() + ")");
   }
 
@@ -3957,7 +4982,7 @@ public class CycAccess {
   /**
    * Gets a list of the arg1Formats for a CycConstant predicate.
    * 
-   * @param cycObject the given predicate term
+   * @param predicate the given predicate term
    * 
    * @return a list of the arg1Formats for a CycConstant predicate
    * 
@@ -3965,23 +4990,20 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg1Formats(CycObject cycObject)
+  public CycList getArg1Formats(CycObject predicate)
                          throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+    assert predicate instanceof CycConstant || 
+           predicate instanceof CycNart || 
+           predicate instanceof CycList : predicate.cyclify() + " must be a CycConstant, CycNart or CycList";
             
-    return converseList("(with-all-mts (arg1-format " + cycObject.stringApiValue() + "))");
+    return converseList("(with-all-mts (arg1-format " + predicate.stringApiValue() + "))");
   }
 
   /**
    * Gets a list of the arg1Formats for a CycConstant predicate.
    * 
-   * @param cycObject the given predicate term
+   * @param predicate the given predicate term
    * @param mt the relevant mt
    * 
    * @return a list of the arg1Formats for a CycConstant predicate
@@ -3990,27 +5012,17 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg1Formats(CycObject cycObject, 
+  public CycList getArg1Formats(CycFort predicate, 
                                 CycObject mt)
                          throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-
-    return converseList("(arg1-format " + cycObject.stringApiValue() + " " + 
+    return converseList("(arg1-format " + predicate.stringApiValue() + " " + 
                         makeELMt(mt).stringApiValue() + ")");
   }
 
   /**
    * Gets a list of the arg2Formats for a CycConstant predicate.
    * 
-   * @param cycObject the given predicate term
+   * @param predicate the given predicate term
    * 
    * @return a list of the arg2Formats for a CycConstant predicate
    * 
@@ -4018,23 +5030,20 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg2Formats(final CycObject cycObject)
+  public CycList getArg2Formats(CycObject predicate)
                          throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+    assert predicate instanceof CycConstant || 
+           predicate instanceof CycNart || 
+           predicate instanceof CycList : predicate.cyclify() + " must be a CycConstant, CycNart or CycList";
             
-    return converseList("(with-all-mts (arg2-format " + cycObject.stringApiValue() + "))");
+    return converseList("(with-all-mts (arg2-format " + predicate.stringApiValue() + "))");
   }
 
   /**
    * Gets a list of the arg2Formats for a CycConstant predicate.
    * 
-   * @param cycObject the given predicate term
+   * @param predicate the given predicate term
    * @param mt the relevant mt
    * 
    * @return a list of the arg2Formats for a CycConstant predicate
@@ -4043,20 +5052,10 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getArg2Formats(final CycObject cycObject, 
-                                final CycObject mt)
+  public CycList getArg2Formats(CycFort predicate, 
+                                CycObject mt)
                          throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-
-    return converseList("(arg2-format " + cycObject.stringApiValue() + " " + 
+    return converseList("(arg2-format " + predicate.stringApiValue() + " " + 
                         makeELMt(mt).stringApiValue() + ")");
   }
 
@@ -4074,12 +5073,9 @@ public class CycAccess {
   public CycList getDisjointWiths(CycObject cycObject)
                            throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseList("(remove-duplicates (with-all-mts (local-disjoint-with " + 
                         cycObject.stringApiValue() + ")))");
@@ -4118,14 +5114,24 @@ public class CycAccess {
   public CycList getCoExtensionals(CycObject cycObject)
                             throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    
-    return getCoExtensionals(cycObject, inferencePSC);
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
+            
+    CycList answer = null;
+    try {
+      answer = converseList("(ask-template '?X '(#$coExtensional " + cycObject.stringApiValue() + 
+                            " ?X) #$EverythingPSC nil nil 120)");
+    }
+     catch (IOException e) {
+      Log.current.println("getCoExtensionals - ignoring:\n" + e.getMessage());
+
+      return new CycList();
+    }
+
+    answer.remove(cycObject);
+
+    return canonicalizeList(answer);
   }
 
   /**
@@ -4140,32 +5146,22 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public CycList getCoExtensionals(CycObject cycObject, 
+  public CycList getCoExtensionals(CycFort cycFort, 
                                    CycObject mt)
                             throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-            
     CycList answer = null;
+
     try {
-      final String queryString = 
-        "(#$and" + 
-        "  (#$different  " + cycObject.cyclify() + " ?X) " + 
-        "  (#$or (#$coExtensional " + cycObject.cyclify() + " ?X) " +
-        "    (#$coextensionalSetOrCollections " + cycObject.cyclify() + " ?X)))";
-      final CycList query = makeCycList(queryString);
-      final CycVariable queryVariable = CycObjectFactory.makeCycVariable("?X");
-      answer = queryVariable(queryVariable, query, makeELMt(mt), null);
+      answer = converseList("(ask-template '?X '(#$coExtensional " + cycFort.stringApiValue() + 
+                            " ?X) " + makeELMt(mt).stringApiValue() + " nil nil 120)");
     }
      catch (IOException e) {
       Log.current.println("getCoExtensionals - ignoring:\n" + e.getMessage());
+
       return new CycList();
     }
+
+    answer.remove(cycFort);
 
     return canonicalizeList(answer);
   }
@@ -4197,65 +5193,20 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isCollection(final CycObject cycObject)
+  public boolean isCollection(CycObject cycObject)
                        throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseBoolean("(isa-in-any-mt? " + cycObject.stringApiValue() + " #$Collection)");
   }
 
-  /**
-   * Returns true if the given term is a Collection.
-   * 
-   * @param cycObject the given term
-   * @param mt the inference microtheory
-   * 
-   * @return true if the given term is a Collection
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public boolean isCollection(final CycObject cycObject, final CycObject mt)
+  public boolean isCollection(Object term)
                        throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-            
-    return converseBoolean("(isa? " + cycObject.stringApiValue() + " #$Collection " + makeELMt(mt).stringApiValue() + ")");
-  }
-
-  /**
-   * Returns true if the given object is a Collection.
-   * 
-   * @param term the given term
-   * 
-   * @return true if the given term is a Collection
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public boolean isCollection(final Object obj)
-                       throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (obj == null)
-      throw new NullPointerException("term must not be null");
-    
-    if (obj instanceof CycObject)
-      return isCollection((CycObject) obj);
+    if (term instanceof CycObject)
+      return isCollection((CycObject)term);
     else
       return false;
   }
@@ -4274,12 +5225,9 @@ public class CycAccess {
   public boolean isCollection_Cached(CycObject cycObject)
                               throws IOException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     boolean answer;
     Boolean isCollection = (Boolean) isCollectionCache.getElement(
@@ -4317,44 +5265,14 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isIndividual(final CycObject cycObject)
+  public boolean isIndividual(CycObject cycObject)
                        throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseBoolean("(isa-in-any-mt? " + cycObject.stringApiValue() + " #$Individual)");
-  }
-
-  /**
-   * Returns true if the given term is an Individual.
-   * 
-   * @param cycObject the given term
-   * @param mt the inference microtheory
-   * 
-   * @return true if the given term is an Individual
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public boolean isIndividual(final CycObject cycObject, final CycObject mt)
-                       throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-            
-    return converseBoolean("(isa? " + cycObject.stringApiValue() + " #$Individual " + makeELMt(mt).stringApiValue() + ")");
   }
 
   /**
@@ -4412,41 +5330,11 @@ public class CycAccess {
   public boolean isPredicate(CycObject cycObject)
                       throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseBoolean("(isa-in-any-mt? " + cycObject.stringApiValue() + " #$Predicate)");
-  }
-
-  /**
-   * Returns true if cycObject is a Predicate.
-   * 
-   * @param cycObject the term for determination as a predicate
-   * @param mt the inference microtheory
-   * 
-   * @return true if cycObject is a Predicate
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public boolean isPredicate(final CycObject cycObject, final CycObject mt)
-                      throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-            
-    return converseBoolean("(isa? " + cycObject.stringApiValue() + " #$Predicate " + makeELMt(mt).stringApiValue() + ")");
   }
 
   /**
@@ -4463,46 +5351,15 @@ public class CycAccess {
   public boolean isUnaryPredicate(CycObject cycObject)
                            throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseBoolean("(isa-in-any-mt? " + cycObject.stringApiValue() + 
                            " #$UnaryPredicate)");
   }
 
   /**
-   * Returns true if the given term is a UnaryPredicate.
-   * 
-   * @param cycObject the given term
-   * @param mt the inference microtheory
-   * 
-   * @return true if true if the given term is a UnaryPredicate, otherwise false
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public boolean isUnaryPredicate(CycObject cycObject, final CycObject mt)
-                           throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-            
-    return converseBoolean("(isa? " + cycObject.stringApiValue() + 
-                           " #$UnaryPredicate " + makeELMt(mt).stringApiValue() + ")");
-  }
-
-  /**
    * Returns true if the cyc object is a BinaryPredicate.
    * 
    * @param cycObject the given cyc object
@@ -4513,46 +5370,15 @@ public class CycAccess {
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
    */
-  public boolean isBinaryPredicate(final CycObject cycObject)
+  public boolean isBinaryPredicate(CycObject cycObject)
                             throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
     return converseBoolean("(isa-in-any-mt? " + cycObject.stringApiValue() + 
                            " #$BinaryPredicate)");
-  }
-
-  /**
-   * Returns true if the cyc object is a BinaryPredicate.
-   * 
-   * @param cycObject the given cyc object
-   * @param mt the inference microtheory
-   * 
-   * @return true if cycObject is a BinaryPredicate, otherwise false
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  public boolean isBinaryPredicate(final CycObject cycObject, final CycObject mt)
-                            throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-            
-    return converseBoolean("(isa? " + cycObject.stringApiValue() + 
-                           " #$BinaryPredicate " + makeELMt(mt).stringApiValue() + ")");
   }
 
   /**
@@ -4597,11 +5423,11 @@ public class CycAccess {
    * @throws UnknownHostException if cyc server host not found on the network
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
-   * @deprecated
    */
   public boolean isQuotedCollection(CycFort cycFort)
                              throws IOException, UnknownHostException, CycApiException {
-    throw new CycApiException("quotedCollection is no longer supported, see Quote");
+    return this.isQuotedCollection(cycFort, 
+                                   inferencePSC);
   }
 
   /**
@@ -4615,12 +5441,16 @@ public class CycAccess {
    * @throws UnknownHostException if cyc server host not found on the network
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
-   * @deprecated
    */
   public boolean isQuotedCollection(CycFort cycFort, 
                                     CycObject mt)
                              throws IOException, UnknownHostException, CycApiException {
-    throw new CycApiException("quotedCollection is no longer supported, see Quote");
+    CycList query = new CycList();
+    query.add(getKnownConstantByName("quotedCollection"));
+    query.add(cycFort);
+
+    return this.isQueryTrue(query, 
+                            mt);
   }
 
   /**
@@ -4692,7 +5522,10 @@ public class CycAccess {
       throw new CycApiException(newName + " is an invalid new name for " + cycConstant.cyclify());
     CycObjectFactory.removeCaches(cycConstant);
     cycConstant.setName(newName);
-    CycObjectFactory.addCycConstantCache(cycConstant);
+    cycConstant.getGuid();
+    CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
+    CycObjectFactory.addCycConstantCacheByName(cycConstant);
+    CycObjectFactory.addCycConstantCacheById(cycConstant);
   }
 
   /**
@@ -4809,7 +5642,11 @@ public class CycAccess {
    */
   public void setCyclist(String cyclistName)
                   throws IOException, UnknownHostException, CycApiException {
-    setCyclist((CycFort) getHLCycTerm(cyclistName));
+    if (!(cyclistName.startsWith("#$"))) {
+      cyclistName = "#$" + cyclistName;
+    }
+
+    setCyclist((CycFort) getELCycTerm(cyclistName));
   }
 
   /**
@@ -4843,7 +5680,11 @@ public class CycAccess {
    */
   public void setKePurpose(String projectName)
                     throws IOException, UnknownHostException, CycApiException {
-    setKePurpose((CycFort) getHLCycTerm(projectName));
+    if (!(projectName.startsWith("#$"))) {
+      projectName = "#$" + projectName;
+    }
+
+    setKePurpose((CycFort) getELCycTerm(projectName));
   }
 
   /**
@@ -5029,6 +5870,28 @@ public class CycAccess {
                                                                        mt) + "\n  " + 
                                 sentence.cyclify());
     }
+  }
+
+  /**
+   * Returns a with-bookkeeping-info macro expresssion.
+   * 
+   * @return a with-bookkeeping-info macro expresssion
+   */
+  protected String withBookkeepingInfo() {
+    String projectName = "nil";
+
+    if (project != null) {
+      projectName = project.stringApiValue();
+    }
+
+    String cyclistName = "nil";
+
+    if (cyclist != null) {
+      cyclistName = cyclist.stringApiValue();
+    }
+
+    return "(with-bookkeeping-info (new-bookkeeping-info " + cyclistName + " (the-date) " + 
+           projectName + "(the-second)) ";
   }
 
   /**
@@ -6155,7 +7018,7 @@ public class CycAccess {
 
     if (elmtString.startsWith("(")) {
       CycList elmtCycList = makeCycList(elmtString);
-      return makeELMt(elmtCycList);
+      return makeELMt(canonicalizeHLMT(elmtCycList));
     }
     else {
       return makeELMt(getKnownConstantByName(elmtString));
@@ -6237,7 +7100,7 @@ public class CycAccess {
       constantName = constantName.substring(2);
     }
 
-    CycConstant cycConstant = getConstantByName(name);
+    CycConstant cycConstant = this.getConstantByName(name);
 
     if (cycConstant != null) {
       return cycConstant;
@@ -6252,14 +7115,19 @@ public class CycAccess {
     else {
       throw new CycApiException("Cannot create new constant for " + name);
     }
-    CycObjectFactory.addCycConstantCache(cycConstant);
+
+    cycConstant.getName();
+    cycConstant.getGuid();
+    CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
+    CycObjectFactory.addCycConstantCacheByName(cycConstant);
+    CycObjectFactory.addCycConstantCacheById(cycConstant);
 
     return cycConstant;
   }
 
   /**
    * Returns a new unique <tt>CycConstant</tt> object using the constant start name prefixed by
-   * TMP-, recording bookkeeping information and archiving to the Cyc transcript.  If
+   * TMP-, recording bookkeeping information and but without archiving to the Cyc transcript.  If
    * the start name begins with #$ that portion of the start name is ignored.
    * 
    * @param startName the starting name of the constant which will be made unique using a suffix.
@@ -6320,7 +7188,11 @@ public class CycAccess {
                                      "\")");
     CycConstant cycConstant = (CycConstant) converseObject(
                                     command);
-    CycObjectFactory.addCycConstantCache(cycConstant);
+    cycConstant.getName();
+    cycConstant.getGuid();
+    CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
+    CycObjectFactory.addCycConstantCacheByName(cycConstant);
+    CycObjectFactory.addCycConstantCacheById(cycConstant);
 
     return cycConstant;
   }
@@ -6338,47 +7210,38 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if the Cyc server returns an error
    */
-  public CycList askNewCycQuery(final CycList query, 
-                                final CycObject mt, 
-                                final HashMap queryProperties)
+  public CycList askNewCycQuery(CycList query, 
+                             CycObject mt, 
+                             HashMap queryProperties)
                       throws IOException, UnknownHostException, CycApiException {
+    String queryPropertiesString = "";
+    if (queryProperties != null) {
+      CycList parameterList = new CycList();
+      Iterator iter = queryProperties.entrySet().iterator();
+
+      if (iter.hasNext()) {
+        while (iter.hasNext()) {
+          Entry mapEntry = (Entry) iter.next();
+          CycSymbol queryParameterKeyword = (CycSymbol) mapEntry.getKey();
+          parameterList.add(queryParameterKeyword);
+
+          Object queryParameterValue = mapEntry.getValue();
+          parameterList.add(queryParameterValue);
+        }
+        queryPropertiesString = parameterList.stringApiValue();
+      }
+    }
     final String script =
-      "(new-cyc-query "+ query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesToString(queryProperties) + ")";
+      "(new-cyc-query "+ query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesString + ")";
     return converseList(script);
   }
 
   /**
-   * Asks a Cyc query (new inference parameters) and returns an XML stream according
-   * to the specifications in the CycList xmlSpec.
-   *
-   * @param query the query expression
-   * @param mt the inference microtheory
-   * @param queryProperties queryProperties the list of query property keywords and values
-   * @param xmlSpec the specification of elements, attributes, sort order and bindings for the XML that the method returns
-   *
-   * @return the binding list from the query in the XML format specified by xmlSpec
-   *
-   * @throws IOException if a communications error occurs
-   * @throws UnknownHostException if the Cyc server cannot be found
-   * @throws CycApiException if the Cyc server returns an error
-   */
-  public String queryResultsToXMLString(CycList query,
-                                        CycObject mt,
-                                        HashMap queryProperties,
-                                        CycList xmlSpec)
-                      throws IOException, UnknownHostException, CycApiException {
-    String xmlSpecString = (xmlSpec == null) ? ":default" : xmlSpec.stringApiValue();
-    final String script =
-      "(query-results-to-xml-string "+ query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesToString(queryProperties) + " " + xmlSpecString + ")";
-    return converseString(script);
-  }
-
-  /**
-   * Returns true if the  Cyc query (with inference parameters) is proven true.
+   * Returns true if the  Cyc query (new inference parameters) is proven true.
    * 
    * @param query the query expression
    * @param mt the inference microtheory
-   * @param queryProperties queryProperties the list of query property keywords and values, or null if the defaults are to used
+   * @param queryProperties queryProperties the list of query property keywords and values
    * 
    * @return true if the  Cyc query (new inference parameters) is proven true.
    * 
@@ -6390,10 +7253,25 @@ public class CycAccess {
                              CycObject mt, 
                              HashMap queryProperties)
                       throws IOException, UnknownHostException, CycApiException {
-    final HashMap tempQueryProperties = (queryProperties == null) ? (HashMap) this.queryProperties.clone() : queryProperties;
-    tempQueryProperties.put(CycObjectFactory.makeCycSymbol(":max-number"), new Integer(1));
+    String queryPropertiesString = "";
+    if (queryProperties != null) {
+      CycList parameterList = new CycList();
+      Iterator iter = queryProperties.entrySet().iterator();
+
+      if (iter.hasNext()) {
+        while (iter.hasNext()) {
+          Entry mapEntry = (Entry) iter.next();
+          CycSymbol queryParameterKeyword = (CycSymbol) mapEntry.getKey();
+          parameterList.add(queryParameterKeyword);
+
+          Object queryParameterValue = mapEntry.getValue();
+          parameterList.add(queryParameterValue);
+        }
+        queryPropertiesString = parameterList.stringApiValue();
+      }
+    }
     final String script =
-      "(new-cyc-query "+ query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesToString(tempQueryProperties) + ")";
+      "(new-cyc-query "+ query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesString + ")";
     return ! converseObject(script).equals(CycObjectFactory.nil);
   }
 
@@ -6403,7 +7281,7 @@ public class CycAccess {
    * @param variable the unbound variable for which bindings are sought
    * @param query the query expression
    * @param mt the inference microtheory
-   * @param queryProperties queryProperties the list of query property keywords and values, or null if the defaults are to used
+   * @param queryProperties queryProperties the list of query property keywords and values
    * 
    * @return the binding list resulting from the given query
    * 
@@ -6416,54 +7294,27 @@ public class CycAccess {
                                final CycObject mt, 
                                final HashMap queryProperties)
                       throws IOException, UnknownHostException, CycApiException {
+    String queryPropertiesString = "";
+    if (queryProperties != null) {
+      CycList parameterList = new CycList();
+      Iterator iter = queryProperties.entrySet().iterator();
+
+      if (iter.hasNext()) {
+        while (iter.hasNext()) {
+          Entry mapEntry = (Entry) iter.next();
+          CycSymbol queryParameterKeyword = (CycSymbol) mapEntry.getKey();
+          parameterList.add(queryParameterKeyword);
+
+          Object queryParameterValue = mapEntry.getValue();
+          parameterList.add(queryParameterValue);
+        }
+        queryPropertiesString = parameterList.stringApiValue();
+      }
+    }
     final String script =
       "(query-variable "+ queryVariable.stringApiValue() + " " +
-      query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesToString(queryProperties) + ")";
+      query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesString + ")";
     
-    return converseList(script);
-  }
-
-  /**
-   * Asks a Cyc query (new inference parameters) and returns the binding list for the given variable.
-   * 
-   * @param variable the unbound variable for which bindings are sought
-   * @param query the query expression
-   * @param mt the inference microtheory
-   * @param queryProperties queryProperties the list of query property keywords and values, or null if the defaults are to used
-   * @param inferenceProblemStoreName the problem store name
-   * 
-   * @return the binding list resulting from the given query
-   * 
-   * @throws IOException if a communications error occurs
-   * @throws UnknownHostException if the Cyc server cannot be found
-   * @throws CycApiException if the Cyc server returns an error
-   */
-  public CycList queryVariable(final CycVariable queryVariable,
-                               final CycList query, 
-                               final CycObject mt, 
-                               final HashMap queryProperties,
-                               final String inferenceProblemStoreName)
-                      throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions                    
-    if (queryVariable == null)
-      throw new NullPointerException("queryVariables must not be null");
-    if (query == null)
-      throw new NullPointerException("query must not be null");
-    if (query.isEmpty())
-      throw new IllegalArgumentException("query must not be empty");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-    if (inferenceProblemStoreName == null)
-      throw new NullPointerException("inferenceProblemStoreName must not be null");
-    if (inferenceProblemStoreName.length() == 0)
-      throw new IllegalArgumentException("inferenceProblemStoreName must not be an empty list");
-                        
-    final HashMap tempQueryProperties = (queryProperties == null) ? (HashMap) this.queryProperties.clone() : queryProperties;
-    tempQueryProperties.put(CycObjectFactory.makeCycSymbol(":problem-store"), CycObjectFactory.makeCycSymbol("problem-store", false));
-    final String script =
-      "(clet ((problem-store (find-problem-store-by-name \"" + inferenceProblemStoreName + "\")))" +
-      "  (query-variable "+ queryVariable.stringApiValue() + " " +
-      query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesToString(tempQueryProperties) + "))";
     return converseList(script);
   }
 
@@ -6473,7 +7324,7 @@ public class CycAccess {
    * @param variables the list of unbound variables for which bindings are sought
    * @param query the query expression
    * @param mt the inference microtheory
-   * @param queryProperties queryProperties the list of query property keywords and values, or null if the defaults are to be used
+   * @param queryProperties queryProperties the list of query property keywords and values
    * 
    * @return the binding list resulting from the given query
    * 
@@ -6486,56 +7337,26 @@ public class CycAccess {
                                 final CycObject mt, 
                                 final HashMap queryProperties)
                       throws IOException, UnknownHostException, CycApiException {
+    String queryPropertiesString = "";
+    if (queryProperties != null) {
+      CycList parameterList = new CycList();
+      Iterator iter = queryProperties.entrySet().iterator();
+
+      if (iter.hasNext()) {
+        while (iter.hasNext()) {
+          Entry mapEntry = (Entry) iter.next();
+          CycSymbol queryParameterKeyword = (CycSymbol) mapEntry.getKey();
+          parameterList.add(queryParameterKeyword);
+
+          Object queryParameterValue = mapEntry.getValue();
+          parameterList.add(queryParameterValue);
+        }
+        queryPropertiesString = parameterList.stringApiValue();
+      }
+    }
     final String script =
       "(query-template "+ queryVariables.stringApiValue() + " " +
-      query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesToString(queryProperties) + ")";
-    
-    return converseList(script);
-  }
-
-  /**
-   * Asks a Cyc query (new inference parameters) and returns the binding list for the given variable list.
-   * 
-   * @param variables the list of unbound variables for which bindings are sought
-   * @param query the query expression
-   * @param mt the inference microtheory
-   * @param queryProperties queryProperties the list of query property keywords and values, or null if the defaults are to be used
-   * @param inferenceProblemStoreName the problem store name
-   * 
-   * @return the binding list resulting from the given query
-   * 
-   * @throws IOException if a communications error occurs
-   * @throws UnknownHostException if the Cyc server cannot be found
-   * @throws CycApiException if the Cyc server returns an error
-   */
-  public CycList queryVariables(final CycList queryVariables,
-                                final CycList query, 
-                                final CycObject mt, 
-                                final HashMap queryProperties,
-                                final String inferenceProblemStoreName)
-                      throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions                    
-    if (queryVariables == null)
-      throw new NullPointerException("queryVariables must not be null");
-    if (queryVariables.isEmpty())
-      throw new IllegalArgumentException("queryVariables must not be empty");
-    if (query == null)
-      throw new NullPointerException("query must not be null");
-    if (query.isEmpty())
-      throw new IllegalArgumentException("query must not be empty");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");
-    if (inferenceProblemStoreName == null)
-      throw new NullPointerException("inferenceProblemStoreName must not be null");
-    if (inferenceProblemStoreName.length() == 0)
-      throw new IllegalArgumentException("inferenceProblemStoreName must not be an empty list");
-                        
-    final HashMap tempQueryProperties = (queryProperties == null) ? (HashMap) this.queryProperties.clone() : queryProperties;
-    tempQueryProperties.put(CycObjectFactory.makeCycSymbol(":problem-store"), CycObjectFactory.makeCycSymbol("problem-store", false));
-    final String script =
-      "(clet ((problem-store (find-problem-store-by-name \"" + inferenceProblemStoreName + "\")))" +
-      "  (query-template "+ queryVariables.stringApiValue() + " " +
-      query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesToString(tempQueryProperties) + "))";
+      query.stringApiValue() + " " + makeELMt(mt).stringApiValue() + " " + queryPropertiesString + ")";
     
     return converseList(script);
   }
@@ -8612,7 +9433,7 @@ public class CycAccess {
    * Returns the list of gafs in which the predicate is a element of the given list of predicates
    * and in which the given term appears in the first argument position.
    * 
-   * @param cycObject the given term
+   * @param cycFort the given term
    * @param predicates the given list of predicates
    * @param mt the relevant inference microtheory
    * 
@@ -8623,26 +9444,14 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if the Cyc server returns an error
    */
-  public CycList getGafsForPredicates(final CycObject cycObject, 
-                                      final List predicates, 
-                                      final CycObject mt)
+  public CycList getGafs(CycFort cycFort, 
+                         CycList predicates, 
+                         CycObject mt)
                   throws IOException, UnknownHostException, CycApiException {
-    //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
-           cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (predicates == null)
-      throw new NullPointerException("predicates must not be null");
-    if (predicates == null)
-      throw new NullPointerException("predicates must not be null");
-
-    final CycList result = new CycList();
+    CycList result = new CycList();
 
     for (int i = 0; i < predicates.size(); i++) {
-      result.addAllNew(getGafs(cycObject, 
+      result.addAllNew(getGafs(cycFort, 
                                (CycFort) predicates.get(
                                      i), 
                                makeELMt(mt)));
@@ -8666,27 +9475,18 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if the Cyc server returns an error
    */
-  public CycList getGafs(final CycObject cycFort, 
-                         final CycObject predicate, 
-                         final CycObject mt)
+  public CycList getGafs(CycFort cycFort, 
+                         CycFort predicate, 
+                         CycObject mt)
                   throws IOException, UnknownHostException, CycApiException {
-    if (cycFort == null)
-      throw new NullPointerException("cycFort must not be null");
-    if (predicate == null)
-      throw new NullPointerException("predicate must not be null");
-    if (mt == null)
-      throw new NullPointerException("mt must not be null");    
-    // TODO handle the case where the cycObject is a NAUT, 
-    //getGafsForNaut
-    
-    final CycList gafs = new CycList();
-    final String command = "(with-mt " + makeELMt(mt).stringApiValue() + "\n" + 
-                           "  (pred-values-in-relevant-mts " + cycFort.stringApiValue() + " " + 
-                           predicate.stringApiValue() + "))";
-    final CycList values = converseList(command);
+    CycList gafs = new CycList();
+    String command = "(with-mt " + makeELMt(mt).stringApiValue() + "\n" + 
+                     "  (pred-values-in-relevant-mts " + cycFort.stringApiValue() + " " + 
+                     predicate.stringApiValue() + "))";
+    CycList values = converseList(command);
 
     for (int i = 0; i < values.size(); i++) {
-      final CycList gaf = new CycList();
+      CycList gaf = new CycList();
       gaf.add(predicate);
       gaf.add(cycFort);
       gaf.add(values.get(i));
@@ -8710,20 +9510,15 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if the Cyc server returns an error
    */
-  public CycList getGafsForPredicates(final CycObject cycObject, 
-                                      final List predicates)
+  public CycList getGafs(CycObject cycObject, 
+                         CycList predicates)
                   throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    if (predicates == null)
-      throw new NullPointerException("predicates must not be null");
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
             
-    final CycList result = new CycList();
+    CycList result = new CycList();
     for (int i = 0; i < predicates.size(); i++) {
       result.addAllNew(getGafs(cycObject, (CycObject) predicates.get(i)));
     }
@@ -8745,29 +9540,23 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if the Cyc server returns an error
    */
-  public CycList getGafs(final CycObject cycObject, 
-                         final CycObject predicate)
+  public CycList getGafs(CycObject cycObject, 
+                         CycObject predicate)
                   throws IOException, UnknownHostException, CycApiException {
     //// Preconditions
-    if (cycObject == null)
-      throw new NullPointerException("cycObject must not be null");
-    if (! (cycObject instanceof CycConstant || 
+    assert cycObject instanceof CycConstant || 
            cycObject instanceof CycNart || 
-           cycObject instanceof CycList))
-      throw new IllegalArgumentException("cycObject must be a CycConstant, CycNart or CycList " + cycObject.cyclify());
-    
+           cycObject instanceof CycList : cycObject.cyclify() + " must be a CycConstant, CycNart or CycList";
     if (cycObject instanceof CycList)
       return getGafsForNaut((CycList) cycObject, predicate);
-    final CycList gafs = new CycList();
-    // TODO handle the case where the cycObject is a NAUT, 
-    //getGafsForNaut
-    final String command = "(with-all-mts \n" + "  (pred-values-in-relevant-mts (canonicalize-term " + 
-                           cycObject.stringApiValue() + ") " + "(canonicalize-term " + 
-                           predicate.stringApiValue() + ")))";
-    final CycList values = converseList(command);
+    CycList gafs = new CycList();
+    String command = "(with-all-mts \n" + "  (pred-values-in-relevant-mts (canonicalize-term " + 
+                     cycObject.stringApiValue() + ") " + "(canonicalize-term " + 
+                     predicate.stringApiValue() + ")))";
+    CycList values = converseList(command);
 
     for (int i = 0; i < values.size(); i++) {
-      final CycList gaf = new CycList();
+      CycList gaf = new CycList();
       gaf.add(predicate);
       gaf.add(cycObject);
       gaf.add(values.get(i));
@@ -8791,8 +9580,8 @@ public class CycAccess {
    * @throws UnknownHostException if the Cyc server cannot be found
    * @throws CycApiException if the Cyc server returns an error
    */
-  public CycList getGafsForNaut(final CycList naut, 
-                                final CycObject predicate)
+  public CycList getGafsForNaut(CycList naut, 
+                         CycObject predicate)
                   throws IOException, UnknownHostException, CycApiException {
     final String command = 
       "(clet (assertions) " +
@@ -9787,7 +10576,7 @@ public class CycAccess {
    */
   public Object getHLCycTerm(String string)
                       throws IOException, UnknownHostException, CycApiException {
-    return converseObject("(canonicalize-term  '" + string + ")");
+    return converseObject("(canonicalize-term '" + string + ")");
   }
 
   /**
@@ -9806,16 +10595,6 @@ public class CycAccess {
     return converseObject("(identity '" + string + ")");
   }
 
-  /** Returns the external ID for the given Cyc object.
-   *
-   * @param cycObject the Cyc object (Constant, NART or NAUT)
-   * @return the external ID string
-   */
-  public String getExternalIDString(final CycObject cycObject)
-                      throws IOException, UnknownHostException, CycApiException {
-    return converseString("(hl-external-id-string (canonicalize-term '" + cycObject.cyclify() + "))");
-  }
-  
   /**
    * Returns a random constant.
    * 
@@ -9944,7 +10723,7 @@ public class CycAccess {
    * @param dependentTerm the dependent term
    * @param mt the defining microtheory
    */
-  public void assertDefiningMt(final CycFort dependentTerm, final CycFort mt) throws IOException, CycApiException {
+  public void assertDefiningMt(final CycFort dependentTerm, final CycFort mt)  throws IOException, CycApiException {
     // assert (#$definingMt <dependentTerm> <mt>) in #$BaseKB
     assertGaf(baseKB, getKnownConstantByGuid("bde5ec9c-9c29-11b1-9dad-c379636f7270"), dependentTerm, mt);
   }
@@ -9970,16 +10749,8 @@ public class CycAccess {
       return xmlDateString;
   }
   
-  /**
-   * Returns whether or not we have a valid lease with the Cyc server.
-   * @return whether or not we have a valid lease with the Cyc server
-   */
-  public boolean hasValidLease() {
-    return (cycLeaseManager == null) ? true : cycLeaseManager.hasValidLease();
-  }
-  
   /** Initializes the query properties. */
-  public void initializeQueryProperties() {
+  public void initializeQueryProperties() throws IOException, CycApiException {
     queryProperties.put(CycObjectFactory.makeCycSymbol(":allowed-rules"), CycObjectFactory.makeCycSymbol(":all"));
     queryProperties.put(CycObjectFactory.makeCycSymbol(":result-uniqueness"), CycObjectFactory.makeCycSymbol(":bindings"));
     queryProperties.put(CycObjectFactory.makeCycSymbol(":allow-hl-predicate-transformation?"), CycObjectFactory.nil);
@@ -9996,22 +10767,21 @@ public class CycAccess {
     queryProperties.put(CycObjectFactory.makeCycSymbol(":equality-reasoning-method"), CycObjectFactory.makeCycSymbol(":czer-equal"));
     queryProperties.put(CycObjectFactory.makeCycSymbol(":equality-reasoning-domain"), CycObjectFactory.makeCycSymbol(":all"));
     queryProperties.put(CycObjectFactory.makeCycSymbol(":max-problem-count"), new Long(100000));
-    queryProperties.put(CycObjectFactory.makeCycSymbol(":transformation-allowed?"), CycObjectFactory.nil);
+    queryProperties.put(CycObjectFactory.makeCycSymbol(":transformation-allowed?"), CycObjectFactory.t);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":add-restriction-layer-of-indirection?"), CycObjectFactory.t);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":evaluate-subl-allowed?"), CycObjectFactory.t);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":rewrite-allowed?"), CycObjectFactory.nil);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":abduction-allowed?"), CycObjectFactory.nil);
-    queryProperties.put(CycObjectFactory.makeCycSymbol(":removal-backtracking-productivity-limit"), new Long(2000000));
     // dynamic query properties
     queryProperties.put(CycObjectFactory.makeCycSymbol(":max-number"), CycObjectFactory.nil);
-    queryProperties.put(CycObjectFactory.makeCycSymbol(":max-time"), new Integer(120));
+    queryProperties.put(CycObjectFactory.makeCycSymbol(":max-time"), new Integer(30));
     queryProperties.put(CycObjectFactory.makeCycSymbol(":max-transformation-depth"), new Integer(0));
     queryProperties.put(CycObjectFactory.makeCycSymbol(":block?"), CycObjectFactory.nil);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":max-proof-depth"), CycObjectFactory.nil);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":cache-inference-results?"), CycObjectFactory.nil);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":answer-language"), CycObjectFactory.makeCycSymbol(":el"));
-    queryProperties.put(CycObjectFactory.makeCycSymbol(":continuable?"), CycObjectFactory.nil);
-    queryProperties.put(CycObjectFactory.makeCycSymbol(":browsable?"), CycObjectFactory.nil);
+    queryProperties.put(CycObjectFactory.makeCycSymbol(":continuable?"), CycObjectFactory.t);
+    queryProperties.put(CycObjectFactory.makeCycSymbol(":browsable?"), CycObjectFactory.t);
     queryProperties.put(CycObjectFactory.makeCycSymbol(":productivity-limit"), new Long(2000000));
     
     final Object[] queryPropertySymbols = queryProperties.keySet().toArray();
@@ -10021,543 +10791,17 @@ public class CycAccess {
       final CycList command = new CycList();
       command.add(CycObjectFactory.makeCycSymbol("query-property-p"));
       command.addQuoted(queryPropertySymbol);
-      try {
-        if (! converseBoolean(command))
-          System.err.println(queryPropertySymbol.toString() + " is not a query-property-p");
-      } 
-      catch (Exception e) {
-        System.err.println(e.getMessage());
-      }
+      if (! converseBoolean(command))
+        throw new CycApiException(queryPropertySymbol.toString() + " is not a query-property-p");
     }
   }
   
-  /** Returns a clone of the default HL query propoerties.
+  /** Returns the default HL query propoerties.
    *
    * @return the default HL query propoerties
    */
   public HashMap getHLQueryProperties() {
-    return (HashMap) queryProperties.clone();
+    return queryProperties;
   }
   
-  /** Returns a query properties string for the given query properties if present, otherwise
-   * returns a query properties string for the default query properties.
-   *
-   * @param queryProperties the given query properties or null if the defaults are to be used
-   *
-   * @return a query properties string for the given query properties if present, otherwise
-   * returns a query properties string for the default query properties
-   */
-  public String queryPropertiesToString(final HashMap queryProperties) {
-    final HashMap tempQueryProperties = (queryProperties == null) ? (HashMap) this.queryProperties.clone() : queryProperties;
-    final CycList parameterList = new CycList();
-    final Iterator iter = tempQueryProperties.entrySet().iterator();
-    String queryPropertiesString = "nil";
-    if (iter.hasNext()) {
-      while (iter.hasNext()) {
-        Entry mapEntry = (Entry) iter.next();
-        CycSymbol queryParameterKeyword = (CycSymbol) mapEntry.getKey();
-        parameterList.add(queryParameterKeyword);
-
-        Object queryParameterValue = mapEntry.getValue();
-        parameterList.add(queryParameterValue);
-      }
-      queryPropertiesString = parameterList.stringApiValue();
-    }
-    return queryPropertiesString;
-  }
-  
-  /** Initializes a named inference problem store.
-   *
-   * @param name the unique problem store name
-   * @param queryProperties the given query properties or null if the defaults are to be used
-   */
-  public void initializeNamedInferenceProblemStore(final String name, final HashMap queryProperties) throws IOException, CycApiException {
-    //// Preconditions
-    if (name == null)
-      throw new NullPointerException("name must not be null");
-    if (name.length() == 0)
-      throw new IllegalArgumentException("name must not be an empty string");
-      
-    final HashMap tempQueryProperties = (queryProperties == null) ? getHLQueryProperties() : queryProperties;
-    final String command = 
-      "(progn " +
-      "  (find-or-create-problem-store-by-name \"" + name + "\" (filter-plist " + queryPropertiesToString(tempQueryProperties) + "'problem-store-property-p)) " +
-      "  nil)";
-    converseVoid(command);
-  }
-  
-  /** Destroys the named problem store.
-   *
-   * @param name the unique problem store name
-   */
-  public void destroyInferenceProblemStoreByName(final String name) throws IOException, CycApiException {
-    //// Preconditions
-    if (name == null)
-      throw new NullPointerException("name must not be null");
-    if (name.length() == 0)
-      throw new IllegalArgumentException("name must not be an empty string");
-    
-    final String command = 
-      "(destroy-problem-store-by-name \"" + name + "\")";
-    converseVoid(command);
-  }
-  
-  //// Protected Area
-  
-  /**
-   * Provides common local and remote CycAccess object initialization.
-   * 
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  protected void commonInitialization()
-                               throws IOException, CycApiException {
-    if (Log.current == null) {
-      Log.makeLog("cyc-api.log");
-    }
-
-    if (areAPIRequestsLoggedToFile) 
-      apiRequestLog = new FileWriter("api-requests.lisp");
-    
-    cycAccessInstances.put(Thread.currentThread(), this);
-
-    if (sharedCycAccessInstance == null) {
-      sharedCycAccessInstance = this;
-    }
-    cycImageID = getCycImageID();
-    cycLeaseManager = new CycLeaseManager(this);
-    try {
-      // wait for the sockets to initialize
-      Thread.sleep(500);
-    }
-    catch (java.lang.InterruptedException e) {
-    }
-    if (! isSOAPConnection)
-      // if the communication mode is SOAP, then there is a lease manager, but it is never started
-      cycLeaseManager.start();
-    initializeConstants();
-    initializeQueryProperties();
-    if (! isOpenCyc()) {
-      try {
-        DefaultInferenceParameterDescriptions.
-          loadInferenceParameterDescriptions(this, 0);
-      } catch (Exception e) {
-        Logger logger = Logger.getLogger("org.opencyc.api.CycAccess");
-        logger.warning("Could not load inference parameter descriptions.\n" + 
-          e.getMessage());
-      }
-    }
-  }
-
-  /**
-   * Converses with Cyc to perform an API command.  Creates a new connection for this command if
-   * the connection is not persistent.
-   * 
-   * @param command the command string or CycList
-   * 
-   * @return the result as an object array of two objects
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  protected Object[] converse(Object command)
-                       throws IOException, UnknownHostException, CycApiException {
-    Object[] response = { null, null };
-
-    if (trace > CycConnection.API_TRACE_NONE || areAPIRequestsLoggedToFile) {
-      final CycList commandCycList = (command instanceof CycList) ? (CycList) command : makeCycList((String) command);
-      final String prettyCommandCycList = commandCycList.toPrettyCyclifiedString("");
-      final String escapedCommandCycList = commandCycList.toPrettyEscapedCyclifiedString("");
-      if (areAPIRequestsLoggedToFile) {
-        apiRequestLog.write(escapedCommandCycList);
-        apiRequestLog.write('\n');
-      }
-      if (trace > CycConnection.API_TRACE_NONE)
-        Log.current.println(prettyCommandCycList + "\n--> cyc");
-    }
-    
-    if (! isSOAPConnection) {
-//      if ((previousAccessedMilliseconds + MAX_UNACCESSED_MILLIS) < System.currentTimeMillis()) {
-//        Log.current.println("Re-establishing a stale Cyc connection.");
-//        reEstablishCycConnection();
-//      }
-//      else 
-      if (! ((CycConnection) getCycConnection()).isValidBinaryConnection()) {
-        Log.current.println("Re-establishing an invalid Cyc connection.");
-        reEstablishCycConnection();
-      }
-    }
-    response = cycConnection.converse(command);
-    previousAccessedMilliseconds = System.currentTimeMillis();
-
-    if (trace > CycConnection.API_TRACE_NONE) {
-      String responseString;
-
-      if (response[1] instanceof CycList) {
-        responseString = ((CycList) response[1]).toPrettyString("");
-      }
-      else if (response[1] instanceof CycFort) {
-        responseString = ((CycFort) response[1]).cyclify();
-      }
-      else {
-        responseString = response[1].toString();
-      }
-      Log.current.println("cyc --> " + responseString);
-    }
-
-    return response;
-  }
-
- /** Re-estabishes a stale binary CycConnection. */
- protected void reEstablishCycConnection()  throws IOException, UnknownHostException, CycApiException {
-    previousAccessedMilliseconds = System.currentTimeMillis();   
-    cycConnection.close();
-    cycConnection = new CycConnection(hostName, 
-                                      port, 
-                                      this);      
-    if (! (cycImageID.equals(getCycImageID()))) {
-      Log.current.println("New Cyc image detected, resetting caches.");
-      CycObjectFactory.resetCaches();
-    }
- }
-  
-  /**
-   * Returns a with-bookkeeping-info macro expresssion.
-   * 
-   * @return a with-bookkeeping-info macro expresssion
-   */
-  protected String withBookkeepingInfo() {
-    String projectName = "nil";
-
-    if (project != null) {
-      projectName = project.stringApiValue();
-    }
-
-    String cyclistName = "nil";
-
-    if (cyclist != null) {
-      cyclistName = cyclist.stringApiValue();
-    }
-
-    return "(with-bookkeeping-info (new-bookkeeping-info " + cyclistName + " (the-date) " + 
-           projectName + "(the-second)) ";
-  }
-
-  //// Private Area
-  
-  private CycConstant makePrefetchedConstant(String guidStr, HashMap constantInfoDictionary) {
-    Guid guid = CycObjectFactory.makeGuid(guidStr);
-    CycConstant prefetchedConstant = makeConstantWithGuidName(guid, 
-      (String)constantInfoDictionary.get(guid));
-    CycObjectFactory.addCycConstantCache(prefetchedConstant);
-    return prefetchedConstant;
-  }
-
-  /**
-   * Initializes common cyc constants.
-   * 
-   * @throws UnknownHostException if cyc server host not found on the network
-   * @throws IOException if a data communication error occurs
-   * @throws CycApiException if the api request results in a cyc server error
-   */
-  private void initializeConstants()
-                            throws IOException, UnknownHostException, CycApiException {
-    CycList guidStrings = new CycList();
-    guidStrings.add("bd588111-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd588104-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd58810e-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880e5-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd588109-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880cc-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd588102-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("c0659a2b-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880f9-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880fa-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880fb-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd589d90-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880ae-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd63f343-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880f4-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd58915a-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("dff4a041-4da2-11d6-82c0-0002b34c7c9f");
-    guidStrings.add("beaed5bd-9c29-11b1-9dad-c379636f7270");
-    guidStrings.add("bd5880d9-9c29-11b1-9dad-c379636f7270"); // true
-    guidStrings.add("bd5880d8-9c29-11b1-9dad-c379636f7270"); // false
-    guidStrings.add("bde7f9f2-9c29-11b1-9dad-c379636f7270"); // xor
-    guidStrings.add("bda887b6-9c29-11b1-9dad-c379636f7270"); // equiv
-    guidStrings.add("bd5880f8-9c29-11b1-9dad-c379636f7270"); // implies
-    guidStrings.add("bd5880f7-9c29-11b1-9dad-c379636f7270"); // forAll
-    guidStrings.add("bd5880f6-9c29-11b1-9dad-c379636f7270"); // thereExists
-    guidStrings.add("c10ae7b8-9c29-11b1-9dad-c379636f7270"); // thereExistExactly
-    guidStrings.add("c10af932-9c29-11b1-9dad-c379636f7270"); // thereExistAtMost
-    guidStrings.add("c10af5e7-9c29-11b1-9dad-c379636f7270"); // thereExistAtLeast
-    guidStrings.add("94f07021-8b0d-11d7-8701-0002b3a8515d"); // SubLQuoteFn
-    guidStrings.add("c0b2bc13-9c29-11b1-9dad-c379636f7270"); // ExpandSubLFn
-
-    CycList command = new CycList();
-    command.add(CycObjectFactory.makeCycSymbol("constant-info-from-guid-strings"));
-    command.addQuoted(guidStrings);
-
-    CycList constantInfos = converseList(command);
-    Iterator iter = constantInfos.iterator();
-    HashMap constantInfoDictionary = new HashMap();
-
-    while (iter.hasNext()) {
-      Object constantInfoObject = iter.next();
-
-      if (constantInfoObject instanceof CycList) {
-        CycList constantInfo = (CycList) constantInfoObject;
-        Guid guid = CycObjectFactory.makeGuid((String) constantInfo.first());
-        String name = (String) constantInfo.second();
-        constantInfoDictionary.put(guid, name);
-      }
-    }
-
-    Guid guid = null;
-    
-    if (this.trueConst == null) { 
-      trueConst = makePrefetchedConstant("bd5880d9-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.falseConst == null) { 
-      falseConst = makePrefetchedConstant("bd5880d8-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.xorConst == null) { 
-      xorConst = makePrefetchedConstant("bde7f9f2-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.equivConst == null) { 
-      equivConst = makePrefetchedConstant("bda887b6-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.impliesConst == null) { 
-      impliesConst = makePrefetchedConstant("bd5880f8-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.forAllConst == null) { 
-      forAllConst = makePrefetchedConstant("bd5880f7-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.thereExistsConst == null) { 
-      thereExistsConst = makePrefetchedConstant("bd5880f6-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.thereExistExactlyConst == null) { 
-      thereExistExactlyConst = makePrefetchedConstant("c10ae7b8-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.thereExistAtMostConst == null) { 
-      thereExistAtMostConst = makePrefetchedConstant("c10af932-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.thereExistAtLeastConst == null) { 
-      thereExistAtLeastConst = makePrefetchedConstant("c10af5e7-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    if (this.sublQuoteFnConst == null) { 
-      sublQuoteFnConst = makePrefetchedConstant("94f07021-8b0d-11d7-8701-0002b3a8515d", constantInfoDictionary);
-    }
-    if (this.expandSubLFnConst == null) { 
-      expandSubLFnConst = makePrefetchedConstant("c0b2bc13-9c29-11b1-9dad-c379636f7270", constantInfoDictionary);
-    }
-    
-    if (baseKB == null) {
-      guid = CycObjectFactory.makeGuid("bd588111-9c29-11b1-9dad-c379636f7270");
-      baseKB = makeELMt(makeConstantWithGuidName(guid, 
-                                                 (String) constantInfoDictionary.get(guid)));
-      CycObjectFactory.addCycConstantCache((CycConstant) baseKB);
-    }
-
-    if (isa == null) {
-      guid = CycObjectFactory.makeGuid("bd588104-9c29-11b1-9dad-c379636f7270");
-      isa = makeConstantWithGuidName(guid, 
-                                     (String) constantInfoDictionary.get(
-                                           guid));
-      CycObjectFactory.addCycConstantCache(isa);
-    }
-
-    if (genls == null) {
-      guid = CycObjectFactory.makeGuid("bd58810e-9c29-11b1-9dad-c379636f7270");
-      genls = makeConstantWithGuidName(guid, 
-                                       (String) constantInfoDictionary.get(
-                                             guid));
-      CycObjectFactory.addCycConstantCache(genls);
-    }
-
-    if (genlMt == null) {
-      guid = CycObjectFactory.makeGuid("bd5880e5-9c29-11b1-9dad-c379636f7270");
-      genlMt = makeConstantWithGuidName(guid, 
-                                        (String) constantInfoDictionary.get(
-                                              guid));
-      CycObjectFactory.addCycConstantCache(genlMt);
-    }
-
-    if (comment == null) {
-      guid = CycObjectFactory.makeGuid("bd588109-9c29-11b1-9dad-c379636f7270");
-      comment = makeConstantWithGuidName(guid, 
-                                         (String) constantInfoDictionary.get(
-                                               guid));
-      CycObjectFactory.addCycConstantCache(comment);
-    }
-
-    if (collection == null) {
-      guid = CycObjectFactory.makeGuid("bd5880cc-9c29-11b1-9dad-c379636f7270");
-      collection = makeConstantWithGuidName(guid, 
-                                            (String) constantInfoDictionary.get(
-                                                  guid));
-      CycObjectFactory.addCycConstantCache(collection);
-    }
-
-    if (binaryPredicate == null) {
-      guid = CycObjectFactory.makeGuid("bd588102-9c29-11b1-9dad-c379636f7270");
-      binaryPredicate = makeConstantWithGuidName(guid, 
-                                                 (String) constantInfoDictionary.get(
-                                                       guid));
-      CycObjectFactory.addCycConstantCache(binaryPredicate);
-    }
-
-    if (elementOf == null) {
-      guid = CycObjectFactory.makeGuid("c0659a2b-9c29-11b1-9dad-c379636f7270");
-      elementOf = makeConstantWithGuidName(guid, 
-                                           (String) constantInfoDictionary.get(
-                                                 guid));
-      CycObjectFactory.addCycConstantCache(elementOf);
-    }
-
-    if (and == null) {
-      guid = CycObjectFactory.makeGuid("bd5880f9-9c29-11b1-9dad-c379636f7270");
-      and = makeConstantWithGuidName(guid, 
-                                     (String) constantInfoDictionary.get(
-                                           guid));
-      CycObjectFactory.addCycConstantCache(and);
-    }
-
-    if (or == null) {
-      guid = CycObjectFactory.makeGuid("bd5880fa-9c29-11b1-9dad-c379636f7270");
-      or = makeConstantWithGuidName(guid, 
-                                    (String) constantInfoDictionary.get(
-                                          guid));
-      CycObjectFactory.addCycConstantCache(or);
-    }
-
-    if (not == null) {
-      guid = CycObjectFactory.makeGuid("bd5880fb-9c29-11b1-9dad-c379636f7270");
-      not = makeConstantWithGuidName(guid, 
-                                     (String) constantInfoDictionary.get(
-                                           guid));
-      CycObjectFactory.addCycConstantCache(not);
-    }
-
-    if (numericallyEqual == null) {
-      guid = CycObjectFactory.makeGuid("bd589d90-9c29-11b1-9dad-c379636f7270");
-      numericallyEqual = makeConstantWithGuidName(guid, 
-                                                  (String) constantInfoDictionary.get(
-                                                        guid));
-      CycObjectFactory.addCycConstantCache(numericallyEqual);
-    }
-
-    if (plusFn == null) {
-      guid = CycObjectFactory.makeGuid("bd5880ae-9c29-11b1-9dad-c379636f7270");
-      plusFn = makeConstantWithGuidName(guid, 
-                                        (String) constantInfoDictionary.get(
-                                              guid));
-      CycObjectFactory.addCycConstantCache(plusFn);
-    }
-
-    if (different == null) {
-      guid = CycObjectFactory.makeGuid("bd63f343-9c29-11b1-9dad-c379636f7270");
-      different = makeConstantWithGuidName(guid, 
-                                           (String) constantInfoDictionary.get(
-                                                 guid));
-      CycObjectFactory.addCycConstantCache(different);
-     }
-
-    if (thing == null) {
-      guid = CycObjectFactory.makeGuid("bd5880f4-9c29-11b1-9dad-c379636f7270");
-      thing = makeConstantWithGuidName(guid, 
-                                       (String) constantInfoDictionary.get(
-                                             guid));
-      CycObjectFactory.addCycConstantCache(thing);
-    }
-
-    if (inferencePSC == null) {
-      guid = CycObjectFactory.makeGuid("bd58915a-9c29-11b1-9dad-c379636f7270");
-      inferencePSC = makeELMt(makeConstantWithGuidName(
-                                    guid, 
-                                    (String) constantInfoDictionary.get(
-                                          guid)));
-      CycObjectFactory.addCycConstantCache((CycConstant) inferencePSC);
-    }
-
-    if (universalVocabularyMt == null) {
-      guid = CycObjectFactory.makeGuid("dff4a041-4da2-11d6-82c0-0002b34c7c9f");
-      universalVocabularyMt = makeELMt(makeConstantWithGuidName(
-                                             guid, 
-                                             (String) constantInfoDictionary.get(
-                                                   guid)));
-      CycObjectFactory.addCycConstantCache((CycConstant) universalVocabularyMt);
-    }
-
-    if (bookkeepingMt == null) {
-      guid = CycObjectFactory.makeGuid("beaed5bd-9c29-11b1-9dad-c379636f7270");
-      bookkeepingMt = makeELMt(makeConstantWithGuidName(
-                                     guid, 
-                                     (String) constantInfoDictionary.get(
-                                           guid)));
-      CycObjectFactory.addCycConstantCache((CycConstant) bookkeepingMt);
-    }
-  }
-  
-  //// Internal Rep
-  
-  /** the Cyc server host name */
-  protected String hostName;
-
-  /** the Cyc server host tcp port number */
-  protected int port;
-
-  /** the Cyc server OK response code */
-  protected static final Integer OK_RESPONSE_CODE = new Integer(200);
-
-  /** the parameter that, when true, causes a trace of the messages to and from the server */
-  protected int trace = CycConnection.API_TRACE_NONE;
-  //protected int trace = CycConnection.API_TRACE_MESSAGES;
-  //protected int trace = CycConnection.API_TRACE_DETAILED;
-
-  /** the current Cyc Cyclist (user) */
-  private CycFort cyclist = null;
-
-  /** the current Cyc project */
-  private CycFort project = null;
-
-  /** Least Recently Used Cache of ask results. */
-  protected Cache askCache = new CacheLRU(500);
-
-  /** Least Recently Used Cache of countAllInstances results. */
-  protected Cache countAllInstancesCache = new CacheLRU(500);
-
-  /** Least Recently Used Cache of isCollection results. */
-  protected Cache isCollectionCache = new CacheLRU(500);
-
-  /** Least Recently Used Cache of isGenlOf results. */
-  protected Cache isGenlOfCache = new CacheLRU(500);
-
-  /**
-   * Reference to <tt>CycConnection</tt> object which manages the api connection to the OpenCyc
-   * server.
-   */
-  protected CycConnectionInterface cycConnection;
-  
-  /** the query properties */
-  private final HashMap queryProperties = new HashMap();
-  
-  /** the timestamp for the previous access to Cyc, used to re-establish too-long unused connections */
-  private long previousAccessedMilliseconds = System.currentTimeMillis();
-  
-  /** the maximum time that the CycAccess connection is allowed to be unused before
-   * estabishing a fresh connection (ten hours)
-   */
-  protected static final long MAX_UNACCESSED_MILLIS = 36000000;
-  
-  /** the Cyc image ID used for detecting new Cyc images that cause the constants cache to be reset */
-  private String cycImageID;
-  
-  /** the Cyc lease manager that acquires Cyc api service leases */
-  private CycLeaseManager cycLeaseManager;
-  
-  /** The indicator that this CycAccess object is using a SOAP connection to communicate with Cyc */
-  private boolean isSOAPConnection = false;
-    
 }

@@ -1,12 +1,18 @@
 package org.opencyc.constraintsolver;
 
-import org.apache.commons.collections.*;
-import java.util.*;
 import java.io.IOException;
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
-import org.opencyc.util.*;
-import org.opencyc.api.*;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.Binding;
+import org.opencyc.inferencesupport.ConstraintRule;
+import org.opencyc.inferencesupport.Solution;
+import org.opencyc.inferencesupport.UnitTest;
 
 /**
  * The <tt>ForwardCheckingSearcher</tt> object to perform forward checking search for one or
@@ -136,7 +142,7 @@ public class ForwardCheckingSearcher {
                                    solution.getCurrentSolution());
             if (variables.size() == 1) {
                 // Trivial case where the last variable is under consideration.
-                solution.setNbrSolutionsFound(solution.getNbrSolutionsFound() + 1);
+                solution.setNbrSolutionsFound(solution. getNbrSolutionsFound() + 1);
                 if (verbosity > 0) {
                     if (solution.getNbrSolutionsFound() == 1)
                         System.out.println("\nFound a solution\n");

@@ -1,6 +1,7 @@
 package org.opencyc.cycagent.coabs;
 
-import org.opencyc.cycagent.*;
+import org.opencyc.cycagent.AgentCommunityAdapter;
+import org.opencyc.cycagent.CycProxy;
 
 /**
  * Provides a proxy for a cyc agent on the CoABS grid agent community.<p>

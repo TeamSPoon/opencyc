@@ -1,10 +1,13 @@
 package  org.opencyc.cycobject;
 
-import  java.io.IOException;
-import  java.net.UnknownHostException;
-import  java.util.*;
-import  org.opencyc.api.*;
-import  org.opencyc.xml.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycObjectFactory;
+import org.opencyc.xml.XMLStringWriter;
+import org.opencyc.xml.XMLWriter;
 
 
 /**
@@ -37,88 +40,72 @@ import  org.opencyc.xml.*;
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class CycAssertion extends DefaultCycObject{
-  /**
-   * The name of the XML tag for this object.
-   */
-  public static final String cycAssertionXMLTag = "assertion";
-  
-  /**
-   * The default indentation for printing objects to XML
-   */
-  public static int indentLength = 2;
-  
-  /** the assertion in HL form */
-  private CycList hlFormula;
-  
-  /** the assertion mt */
-  private CycObject mt;
-  
-  /**
-   * When true, indicates that the assertion is invalid.
-   */
-  private boolean isInvalid = false;
-  
-  /** Constructs an assertion object. */
-  private CycAssertion() {
-  }
-  
-  /**
-   * Constructs an assertion object given its HL formula and assertion mt.
-   *
-   * @param hlFormula the assertion in HL form
-   * @param mt the assertion mt
-   */
-  public CycAssertion(CycList hlFormula, CycObject mt) {
-    //// Preconditions
-    assert hlFormula != null : "hlFormula cannot be null";
-    assert ! hlFormula.isEmpty() : "hlFormula cannot be empty";
-    assert mt != null : "mt cannot be null";
+    /**
+     * The name of the XML tag for this object.
+     */
+    public static final String cycAssertionXMLTag = "assertion";
+
+    /**
+     * The default indentation for printing objects to XML
+     */
+    public static int indentLength = 2;
+
+    /** the assertion in HL form */
+    private CycList hlFormula;
+
+    /** the assertion mt */
+    private CycObject mt;
     
-    this.hlFormula = hlFormula;
-    this.mt = mt;
-  }
-  
-  /** Constructs a the singleton invalid <tt>CycAssertion</tt> object. 
-   * This should only be called from CycObjectFactory.
-   *
-   * @return the invalid cyc assertion
-   */
-  public static CycAssertion makeInvalidAssertion() {
-    final CycAssertion cycAssertion = new CycAssertion();
-    cycAssertion.isInvalid = true;
-    return cycAssertion;
-  }
-  
-  /**
-   * Indicates whether the object is equal to this object.
-   *
-   * @return <tt>true</tt> if the object is equal to this object, otherwise
-   * returns <tt>false</tt>
-   */
-  public boolean equals(Object object) {
-    if (! (object instanceof CycAssertion))
-      return  false;
-    CycAssertion that  = (CycAssertion) object;
-    if (this.isInvalid && that.isInvalid)
-      return true;
-    else if (! this.mt.equals(that.mt))
-      return false;
-    else
-      return this.hlFormula.equals(that.hlFormula);
-  }
-  
-  /**
-   * Returns a <tt>String</tt> representation of the <tt>CycAssertion</tt>.
-   *
-   * @return a <tt>String</tt> representation of the <tt>CycAssertion</tt>
-   */
-  public String toString() {
-    if (isInvalid)
-      return "INVALID-ASSERTION";
-    else
-      return hlFormula.cyclify();
-  }
-  
+    /**
+     * Constructs an assertion object given its HL formula and assertion mt.
+     *
+     * @param hlFormula the assertion in HL form
+     * @param mt the assertion mt
+     */
+    public CycAssertion (CycList hlFormula, CycObject mt) {
+        //// Preconditions
+        assert hlFormula != null : "hlFormula cannot be null";
+        assert ! hlFormula.isEmpty() : "hlFormula cannot be empty";
+        assert mt != null : "mt cannot be null";
+        
+        this.hlFormula = hlFormula;
+        this.mt = mt;
+    }
+
+    /**
+     * Indicates whether the object is equal to this object.
+     *
+     * @return <tt>true</tt> if the object is equal to this object, otherwise
+     * returns <tt>false</tt>
+     */
+    public boolean equals (Object object) {
+        if (!(object instanceof CycAssertion))
+            return  false;
+        CycAssertion that  = (CycAssertion) object;
+        if (! this.mt.equals(that.mt))
+          return false;
+        else
+          return this.hlFormula.equals(that.hlFormula);
+    }
+
+    /**
+     * Returns a <tt>String</tt> representation of the <tt>CycAssertion</tt>.
+     *
+     * @return a <tt>String</tt> representation of the <tt>CycAssertion</tt>
+     */
+    public String toString () {
+        return hlFormula.cyclify();
+    }
+
+    /**
+     * Returns a string representation without causing additional api calls.
+     *
+     * @return a string representation without causing additional api calls
+     */
+    public String safeToString () {
+        return hlFormula.safeToString();
+    }
+
   /**
    * Returns a cyclified string representation of the CycL assertion.
    * A cyclified string representation with escape chars is one where
@@ -126,144 +113,100 @@ public class CycAssertion extends DefaultCycObject{
    * character inserted before each character that needs to be escaped in SubL.
    *
    * @return a cyclified <tt>String</tt> with escape characters.
-   */
-  public String cyclifyWithEscapeChars() {
-    if (isInvalid)
-      return "INVALID-ASSERTION";
-    else
+   */ 
+    public String cyclifyWithEscapeChars() {
       return hlFormula.cyclifyWithEscapeChars();
-  }
-  
-  /**
-   * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
-   *
-   * @return this object in a form suitable for use as an <tt>String</tt> api expression value
-   */
-  public String stringApiValue() {
-    if (isInvalid)
-      return "INVALID-ASSERTION";
-    else
-      return "(find-assertion " + hlFormula.stringApiValue() + " " + mt.stringApiValue() + ")";
-  }
-  
-  /**
-   * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
-   *
-   * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
-   */
-  public Object cycListApiValue() {
-    return this;
-  }
-  
-  /**
-   * Returns the HL formula for this assertion.
-   *
-   * @return the HL formula for this assertion
-   */
-  // BZG This currently actually returns the CNF, not the HL formula.  See bug #17047.
-  public CycList getFormula() {
-    return hlFormula;
-  }
-  
-  // @hack!!! We shouldn't have to hit Cyc to get the formula, but we do because getFormula() actually returns a CNF.
-  //          See bug #17047.
-  public CycList getFormulaFromCyc(CycAccess access) throws CycApiException, IOException, UnknownHostException {
-    CycList command = new CycList();
-    command.add(org.opencyc.api.CycObjectFactory.makeCycSymbol("assertion-el-formula"));
-    command.add(this);
-    return access.converseList(command);
-  }
-  
-  /**
-   * Returns the Ground Atomic Formula (gaf) for this assertion.
-   *
-   * @return the Ground Atomic Formula (gaf) for this assertion
-   * @deprecated
-   */
-  public CycList getGaf() {
-    //// Preconditions
-    assert ! hlFormula.isEmpty() : "hlFormula cannot be empty";
-    final Object negativeLiterals = ((CycList) hlFormula).first();
-    assert negativeLiterals.equals(CycObjectFactory.nil) : ((CycList) hlFormula).cyclify() + " negativeLiterals must be nil";
-    assert ((CycList) hlFormula).size() == 2 : ((CycList) hlFormula).cyclify() + " must be of the form (nil ( ... ))";
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>String</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>String</tt> api expression value
+     */
+    public String stringApiValue() {
+        return "(find-assertion " + hlFormula.stringApiValue() + " " + mt.stringApiValue() + ")";
+    }
+
+    /**
+     * Returns this object in a form suitable for use as an <tt>CycList</tt> api expression value.
+     *
+     * @return this object in a form suitable for use as an <tt>CycList</tt> api expression value
+     */
+    public Object cycListApiValue() {
+        return this;
+    }
+
+    /**
+     * Returns the HL formula for this assertion.
+     *
+     * @return the HL formula for this assertion
+     */
+    public CycList getFormula () {
+        return hlFormula;
+    }
+
+    /**
+     * Returns the Ground Atomic Formula (gaf) for this assertion.
+     *
+     * @return the Ground Atomic Formula (gaf) for this assertion
+     */
+    public CycList getGaf () {
+        //// Preconditions
+        assert ! hlFormula.isEmpty() : "hlFormula cannot be empty";
+        final Object negativeLiterals = ((CycList) hlFormula).first();
+        assert negativeLiterals.equals(CycObjectFactory.nil) : ((CycList) hlFormula).cyclify() + " negativeLiterals must be nil";
+        assert ((CycList) hlFormula).size() == 2 : ((CycList) hlFormula).cyclify() + " must be of the form (nil ( ... ))";
+        
+        final CycList positiveLiterals = (CycList) hlFormula.second();
+        if (positiveLiterals.size() == 1)
+            return (CycList) positiveLiterals.first();
+        final CycList gaf = new CycList();
+        gaf.add(CycAccess.current().and);
+        gaf.addAll(positiveLiterals);
+        
+        //// Postconditions
+        assert gaf != null : "gaf cannot be null";
+        assert ! gaf.isEmpty() : "gaf cannot be empty";
+        
+        return gaf;
+    }
+
+    /**
+     * Returns the microtheory for this assertion.
+     *
+     * @return the microtheory for this assertion
+     */
+    public CycObject getMt () {
+        return mt;
+    }
+
+    /**
+     * Returns the XML representation of this object.
+     *
+     * @return the XML representation of this object
+     */
+    public String toXMLString () throws IOException {
+        XMLStringWriter xmlStringWriter = new XMLStringWriter();
+        toXML(xmlStringWriter, 0, false);
+        return xmlStringWriter.toString();
+    }
+
+    /**
+     * Prints the XML representation of the CycAssertion to an <code>XMLWriter</code>
+     *
+     * @param xmlWriter an <tt>XMLWriter</tt>
+     * @param indent an int that specifies by how many spaces to indent
+     * @param relative a boolean; if true indentation is relative, otherwise absolute
+     */
+    public void toXML (XMLWriter xmlWriter, int indent, boolean relative)
+        throws IOException {
+        xmlWriter.printXMLStartTag(cycAssertionXMLTag, indent, relative, true);
+        hlFormula.toXML(xmlWriter, indent, relative);
+        mt.toXML(xmlWriter, indent, relative);
+        xmlWriter.printXMLEndTag(cycAssertionXMLTag, -indentLength, true);
+    }
     
-    final CycList positiveLiterals = (CycList) hlFormula.second();
-    if (positiveLiterals.size() == 1)
-      return (CycList) positiveLiterals.first();
-    final CycList gaf = new CycList();
-    gaf.add(CycAccess.current().and);
-    gaf.addAll(positiveLiterals);
-    
-    //// Postconditions
-    assert gaf != null : "gaf cannot be null";
-    assert ! gaf.isEmpty() : "gaf cannot be empty";
-    
-    return gaf;
-  }
-  
-  /**
-   * Returns the Ground Atomic Formula (gaf) for this assertion.
-   *
-   * @param cycAccess the Cyc communications object
-   * @return the Ground Atomic Formula (gaf) for this assertion
-   */
-  public CycList getGaf(final CycAccess cycAccess) {
-    //// Preconditions
-    assert ! hlFormula.isEmpty() : "hlFormula cannot be empty";
-    final Object negativeLiterals = ((CycList) hlFormula).first();
-    assert negativeLiterals.equals(CycObjectFactory.nil) : ((CycList) hlFormula).cyclify() + " negativeLiterals must be nil";
-    assert ((CycList) hlFormula).size() == 2 : ((CycList) hlFormula).cyclify() + " must be of the form (nil ( ... ))";
-    
-    final CycList positiveLiterals = (CycList) hlFormula.second();
-    if (positiveLiterals.size() == 1)
-      return (CycList) positiveLiterals.first();
-    final CycList gaf = new CycList();
-    gaf.add(cycAccess.and);
-    gaf.addAll(positiveLiterals);
-    
-    //// Postconditions
-    assert gaf != null : "gaf cannot be null";
-    assert ! gaf.isEmpty() : "gaf cannot be empty";
-    
-    return gaf;
-  }
-  
-  /**
-   * Returns the microtheory for this assertion.
-   *
-   * @return the microtheory for this assertion
-   */
-  public CycObject getMt() {
-    return mt;
-  }
-  
-  /**
-   * Returns the XML representation of this object.
-   *
-   * @return the XML representation of this object
-   */
-  public String toXMLString() throws IOException {
-    XMLStringWriter xmlStringWriter = new XMLStringWriter();
-    toXML(xmlStringWriter, 0, false);
-    return xmlStringWriter.toString();
-  }
-  
-  /**
-   * Prints the XML representation of the CycAssertion to an <code>XMLWriter</code>
-   *
-   * @param xmlWriter an <tt>XMLWriter</tt>
-   * @param indent an int that specifies by how many spaces to indent
-   * @param relative a boolean; if true indentation is relative, otherwise absolute
-   */
-  public void toXML(XMLWriter xmlWriter, int indent, boolean relative)
-  throws IOException {
-    xmlWriter.printXMLStartTag(cycAssertionXMLTag, indent, relative, true);
-    hlFormula.toXML(xmlWriter, indent, relative);
-    mt.toXML(xmlWriter, indent, relative);
-    xmlWriter.printXMLEndTag(cycAssertionXMLTag);
-  }
-  
-  /**
+   /**
    * Returns a list of all constants refered to by this CycObject.
    * For example, a CycConstant will return a List with itself as the
    * value, a nart will return a list of its functor and all the constants refered

@@ -1,6 +1,7 @@
 package org.opencyc.uml.interpreter;
 
 import org.opencyc.uml.statemachine.*;
+import org.opencyc.uml.statemachine.State;
 
 /**
  * Provides do-activity behavior for a state in the UML State_Machines package.
@@ -32,12 +33,12 @@ public class DoActivity extends Thread {
     /**
      * the state whose do-activity is performed
      */
-    protected State state;
+    protected org.opencyc.uml.statemachine.State state;
 
     /**
      * Constructs a new DoActivity object
      */
-    public DoActivity(State state) {
+    public DoActivity(org.opencyc.uml.statemachine.State state) {
         this.state = state;
         state.setDoActivityThread(this);
         this.start();

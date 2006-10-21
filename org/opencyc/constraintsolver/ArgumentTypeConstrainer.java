@@ -1,11 +1,16 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
-import org.opencyc.api.*;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycConstant;
+import org.opencyc.cycobject.CycFort;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.ConstraintRule;
 
 /**
  * Provides argument type consistency checking for candidate backchaining rules, and also

@@ -1,10 +1,14 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
 import java.io.IOException;
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
-import org.opencyc.api.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.ConstraintRule;
+import org.opencyc.inferencesupport.UnitTest;
 
 /**
  * <tt>ProblemParser</tt> object to model the attributes and behavior of

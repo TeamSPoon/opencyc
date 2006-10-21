@@ -1,7 +1,5 @@
 package org.opencyc.api;
 
-import java.net.*;
-import java.io.*;
 /**
  * Loads and executes the Cyclops (Cyc Logical Operations) benchmark.<p>
  *

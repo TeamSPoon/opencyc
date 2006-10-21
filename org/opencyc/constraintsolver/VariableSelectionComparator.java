@@ -1,6 +1,6 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
+import java.util.Comparator;
 
 /**
  * Implements a <tt>Comparator</tt> to sort variables for the <tt>selectVariable</tt>

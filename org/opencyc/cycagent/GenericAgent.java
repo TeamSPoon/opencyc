@@ -1,20 +1,19 @@
 package org.opencyc.cycagent;
 
-import java.io.*;
-import java.util.*;
-import javax.naming.TimeLimitExceededException;
-import fipaos.ont.fipa.*;
-import fipaos.ont.fipa.fipaman.*;
-import fipaos.util.*;
-import org.jdom.*;
-import ViolinStrings.*;
-import org.opencyc.util.Timer;
-import org.opencyc.api.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.cycagent.coabs.*;
-import org.opencyc.cycagent.fipaos.*;
-import org.opencyc.xml.*;
-import org.opencyc.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jdom.JDOMException;
+import org.opencyc.api.CycObjectFactory;
+import org.opencyc.cycagent.fipaos.FipaOsCommunityAdapter;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.util.Log;
+
+import fipaos.ont.fipa.ACL;
+import fipaos.ont.fipa.FIPACONSTANTS;
+import fipaos.ont.fipa.fipaman.AgentID;
+import fipaos.util.URL;
 
 /**
  * Provides generic agent capablilities for cyc agents participating in the CoABS and FIPA-OS

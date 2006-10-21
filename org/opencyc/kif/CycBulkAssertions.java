@@ -1,14 +1,16 @@
 package org.opencyc.kif;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import  ViolinStrings.*;
+import org.opencyc.cycobject.CycConstant;
+import org.opencyc.cycobject.CycFort;
+import org.opencyc.cycobject.CycList;
 
-import org.opencyc.api.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.util.*;
+import ViolinStrings.Strings;
 
 
 /**
@@ -212,7 +214,7 @@ public class CycBulkAssertions {
 	    pw = new PrintWriter(System.out);
 	else
 	    pw = new PrintWriter(feedbackMl);
-	commitArrayList(false, pw,cycAssertionsForBaseKB,cycAccess.baseKB);
+	commitArrayList(false, pw,cycAssertionsForBaseKB,(CycFort) cycAccess.baseKB);
 	commitArrayList(false, pw,cycOrderedAssertions, defaultMt);
     }
 
@@ -225,7 +227,7 @@ public class CycBulkAssertions {
 	    pw = new PrintWriter(System.out);
 	else
 	    pw = new PrintWriter(feedbackMl);
-	commitArrayList(b, pw,cycAssertionsForBaseKB,cycAccess.baseKB);
+	commitArrayList(b, pw,cycAssertionsForBaseKB,(CycFort) cycAccess.baseKB);
 	commitArrayList(b, pw,cycOrderedAssertions, defaultMt);
     }
 
@@ -310,7 +312,7 @@ public class CycBulkAssertions {
 	    cycAccess.assertGenlMt(hypMt,saveMt);
 	    setDefaultCyclist("CycAdministrator");
 	    setDefaultProject("OpenCycProject");
-	    testArrayList(pw,cycAssertionsForBaseKB, cycAccess.baseKB);
+	    testArrayList(pw,cycAssertionsForBaseKB, (CycFort) cycAccess.baseKB);
 	    testArrayList(pw,cycOrderedAssertions , hypMt);
 	    try {
 		// pw.println("Killing hypothetical Mt: " + hypMt.cyclify());

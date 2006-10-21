@@ -25,13 +25,13 @@ import org.opencyc.cycobject.CycNart;
 import org.opencyc.cycobject.CycObject;
 import org.opencyc.cycobject.CycVariable;
 import org.opencyc.cycobject.Guid;
+import org.opencyc.util.Log;
 import org.opencyc.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.html.HTMLAnchorElement;
 import org.w3c.dom.html.HTMLDocument;
 import org.w3c.dom.html.HTMLFontElement;
-
 
 /**
  * HTML ontology export for OpenCyc/ResearchCyc.
@@ -113,9 +113,6 @@ public class ExportHtml extends OntologyExport {
    */
   public ArrayList categories = new ArrayList();
   
-  /** the web page title */
-  public String title = null;
-  
   /**
    * Constructs a new ExportHtml object given the CycAccess object.
    *
@@ -131,12 +128,11 @@ public class ExportHtml extends OntologyExport {
   public void export(int exportCommand) throws UnknownHostException, IOException, CycApiException {
     this.exportCommand = exportCommand;
     setup();
-    logger.info("Getting terms from Cyc");
+    if (verbosity > 2)
+      Log.current.println("Getting terms from Cyc");
     if ((exportCommand == ExportHtml.EXPORT_KB_SUBSET) || (exportCommand == ExportHtml.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE)) {
       selectedCycForts = cycAccess.getAllQuotedInstances(cycKbSubsetCollection, cycAccess.inferencePSC);
     }
-    else if (exportCommand == ExportHtml.EXPORT_SELECTED_TERMS)
-      ;
     else {
       // EXPORT_KB_SUBSET_BELOW_TERM
       selectedCycForts = cycAccess.getAllSpecs(rootTerm);
@@ -146,45 +142,55 @@ public class ExportHtml extends OntologyExport {
     selectedCycForts.add(cycAccess.collection);
     selectedCycForts.add(cycAccess.getKnownConstantByName("Individual"));
     selectedCycForts.add(cycAccess.getKnownConstantByName("Predicate"));
-    logger.info("Selected " + selectedCycForts.size() + " CycFort terms");
-    ensureSelectedTermsAreReified();
+    if (verbosity > 2)
+      Log.current.println("Selected " + selectedCycForts.size() + " CycFort terms");
     if (includeUpwardClosure) {
       upwardClosureCycForts = gatherUpwardClosure(selectedCycForts);
-      logger.info("Upward closure added " + upwardClosureCycForts.size() + " CycFort terms");
+      if (verbosity > 2)
+        Log.current.println("Upward closure added " + upwardClosureCycForts.size() + " CycFort terms");
       selectedCycForts.addAll(upwardClosureCycForts);
-      logger.info("All selected " + selectedCycForts.size() + " CycFort terms");
+      if (verbosity > 2)
+        Log.current.println("All selected " + selectedCycForts.size() + " CycFort terms");
     }
-    if (includeNonAtomicTerms)
-      logger.info("Dropping quoted collection terms ");
-    else
-      logger.info("Dropping quoted collection terms and non-atomic terms");
+    if (verbosity > 2) {
+      if (includeNonAtomicTerms)
+        Log.current.println("Dropping quoted collection terms ");
+      else
+        Log.current.println("Dropping quoted collection terms and non-atomic terms");
+    }
     CycList tempList = new CycList();
     for (int i = 0; i < selectedCycForts.size(); i++) {
-      CycObject cycObject = (CycObject) cycAccess.getHLCycTerm(((CycObject) selectedCycForts.get(i)).cyclify());
-      if (cycObject instanceof CycList || 
-         cycAccess.isQuotedCollection((CycFort) cycObject) || 
-         (! includeNonAtomicTerms && ! (cycObject instanceof CycConstant))) {
-        logger.info("  ommitting " + cycObject.cyclify());
+      CycFort cycFort = (CycFort) selectedCycForts.get(i);
+      if (cycAccess.isQuotedCollection(cycFort) || 
+         (! includeNonAtomicTerms && ! (cycFort instanceof CycConstant))) {
+        if (verbosity > 2)
+          Log.current.println("  ommitting " + cycFort.cyclify());
       }
       else
-        tempList.add(cycObject);
+        tempList.add(cycFort);
     }
-    selectedCycForts = omitTermsWithoutComments(tempList);
-    logger.info("Sorting " + selectedCycForts.size() + " CycFort terms");
+    selectedCycForts = tempList;
+    if (verbosity > 2)
+      Log.current.println("Sorting " + selectedCycForts.size() + " CycFort terms");
     sortCycObjects(selectedCycForts);
     createVocabularyPage();
     if (categories.size() > 0)
       createCategorizedVocabularies();
-    if (rootTerm != null && produceHierarchyPages)
+    if (rootTerm != null &&
+    produceHierarchyPages)
       createHierarchyPage(rootTerm);
-    else if (includeUpwardClosure && produceHierarchyPages)
+    else if (includeUpwardClosure &&
+    produceHierarchyPages)
       createHierarchyPage(CycAccess.thing);
-    logger.info("Omitting ontology hierarchy export page");
+    else if (verbosity > 0)
+      Log.current.println("Ommiting ontology hierarchy export page");
     for (int i = 0; i < selectedCycForts.size(); i++) {
       final CycObject cycObject = (CycObject) selectedCycForts.get(i);
-      logger.info(cycObject.cyclify());
+      if (verbosity > 2)
+        Log.current.println(cycObject.cyclify());
     }
-    logger.info("HTML export completed");
+    if (verbosity > 0)
+      Log.current.println("HTML export completed");
     cycAccess.close();
   }
   
@@ -198,13 +204,15 @@ public class ExportHtml extends OntologyExport {
       assert cycKbSubsetCollectionGuid != null : "cycKbSubsetCollectionGuid cannot be null";
       cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
       includeUpwardClosure = false;
-      logger.info("Exporting KB subset " + cycKbSubsetCollection.cyclify());
+      if (verbosity > 1)
+        Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify());
     }
     else if (exportCommand == OntologyExport.EXPORT_KB_SUBSET_PLUS_UPWARD_CLOSURE) {
       cycKbSubsetCollection = cycAccess.getKnownConstantByGuid(cycKbSubsetCollectionGuid);
       cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
       includeUpwardClosure = true;
-      logger.info("Exporting KB subset " + cycKbSubsetCollection.cyclify() + "\n  plus upward closure to #$Thing filtered by "
+      if (verbosity > 1)
+        Log.current.println("Exporting KB subset " + cycKbSubsetCollection.cyclify() + "\n  plus upward closure to #$Thing filtered by "
         + cycKbSubsetFilter.cyclify());
     }
     else if (exportCommand == OntologyExport.EXPORT_KB_SUBSET_BELOW_TERM) {
@@ -212,16 +220,8 @@ public class ExportHtml extends OntologyExport {
       cycKbSubsetFilter = cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
       cycKbSubsetCollection = cycKbSubsetFilter;
       includeUpwardClosure = false;
-      logger.info("Exporting KB collections below root term " + rootTerm.cyclify() + "\n  filtered by " + cycKbSubsetFilter.cyclify());
-    }
-    else if (exportCommand == OntologyExport.EXPORT_SELECTED_TERMS) {
-      cycKbSubsetFilter = (cycKbSubsetFilterGuid == null) ? null : cycAccess.getKnownConstantByGuid(cycKbSubsetFilterGuid);
-      cycKbSubsetCollection = cycKbSubsetFilter;
-      includeUpwardClosure = false;
-      if (cycKbSubsetFilter == null)
-        logger.info("Exporting selected terms");
-      else
-        logger.info("Exporting selected terms filtered by " + cycKbSubsetFilter.cyclify());
+      if (verbosity > 1)
+        Log.current.println("Exporting KB collections below root term " + rootTerm.cyclify() + "\n  filtered by " + cycKbSubsetFilter.cyclify());
     }
     else {
       System.err.println("Invalid export comand " + exportCommand);
@@ -241,10 +241,10 @@ public class ExportHtml extends OntologyExport {
    * Creates vocabulary HTML page.
    */
   protected void createVocabularyPage() throws UnknownHostException, IOException, CycApiException {
-    logger.info("Building HTML model for vocabulary page");
+    if (verbosity > 2)
+      Log.current.println("Building HTML model for vocabulary page");
     htmlDocument = new HTMLDocumentImpl();
-    if (title == null)
-      title = "Cyc ontology vocabulary for " + cycKbSubsetCollection.cyclify();
+    String title = "Cyc ontology vocabulary for " + cycKbSubsetCollection.cyclify();
     htmlDocument.setTitle(title);
     Node htmlNode = htmlDocument.getChildNodes().item(0);
     htmlBodyElement = htmlDocument.createElement("body");
@@ -255,18 +255,23 @@ public class ExportHtml extends OntologyExport {
     headingElement.appendChild(headingTextNode);
     for (int i = 0; i < selectedCycForts.size(); i++) {
       CycFort cycFort = (CycFort)selectedCycForts.get(i);
-      logger.info(cycFort + "  ");
+      if (verbosity > 2)
+        Log.current.print(cycFort + "  ");
       if (cycAccess.isCollection(cycFort)) {
-        logger.info("Collection");
+        if (verbosity > 2)
+          Log.current.println("Collection");
       }
       else if (cycAccess.isPredicate(cycFort)) {
-        logger.info("Predicate");
+        if (verbosity > 2)
+          Log.current.println("Predicate");
       }
       else if (cycAccess.isIndividual(cycFort)) {
-        logger.info("Individual");
+        if (verbosity > 2)
+          Log.current.println("Individual");
       }
       else {
-        logger.info("other");
+        if (verbosity > 2)
+          Log.current.println("other");
         continue;
       }
       if (cycFort instanceof CycConstant)
@@ -357,8 +362,10 @@ public class ExportHtml extends OntologyExport {
       createFunctionNode(cycConstant, blockquoteElement);
     else if (cycAccess.isIndividual(cycConstant))
       createIndividualNode(cycConstant, blockquoteElement);
-    else
-      logger.info("Unhandled constant: " + cycConstant.toString());
+    else {
+      if (verbosity > 0)
+        Log.current.println("Unhandled constant: " + cycConstant.toString());
+    }
   }
   
   /**
@@ -398,16 +405,14 @@ public class ExportHtml extends OntologyExport {
     CycList cycForts = cycAccess.queryVariable(fortVariable, query, inferencePSC, (HashMap) null);
     if (cycForts.size() == 0)
       return false;
-    final CycObject cycObject = (CycObject) cycAccess.getHLCycTerm(((CycObject) cycForts.get(0)).cyclify());
-    
-    if (! (cycObject instanceof CycFort)) {
-      logger.severe("\nError, rewriteOf " + cycConstant.cyclify() +
+    if (! (cycForts.get(0) instanceof CycFort)) {
+      Log.current.errorPrintln("\nError, rewriteOf " + cycConstant.cyclify() +
       "\n " + cycForts.get(0) + "\nis not a CycFort\n");
       return false;
     }
-    if (! (cycObject instanceof CycNart))
+    if (! (cycForts.get(0) instanceof CycNart))
       return false;
-    CycNart cycNart = (CycNart) cycObject;
+    CycNart cycNart = (CycNart) cycForts.get(0);
     
     Node rewriteOfTextNode = htmlDocument.createTextNode("  is the atomic form of ");
     parentElement.appendChild(rewriteOfTextNode);
@@ -651,7 +656,8 @@ public class ExportHtml extends OntologyExport {
     //if (cycFort.toString().equals("BiochemicallyHarmfulSubstance"))
     //    verbosity = 9;
     CycList isas = cycAccess.getIsas(cycFort);
-    logger.info("  starting isas: " + isas.cyclify());
+    if (verbosity > 3)
+      Log.current.println("  starting isas: " + isas.cyclify());
     lineBreak(parentElement);
     Element bElement = htmlDocument.createElement("b");
     parentElement.appendChild(bElement);
@@ -660,9 +666,11 @@ public class ExportHtml extends OntologyExport {
     CycList createdIsas = new CycList();
     for (int i = 0; i < isas.size(); i++) {
       CycFort isa = (CycFort)isas.get(i);
-      logger.finest("  considering " + isa.cyclify());
-      logger.finest("    selectedCycForts.contains(" + isa.cyclify() + ") " + selectedCycForts.contains(isa));
-      logger.finest("    cycAccess.isQuotedCollection(" + isa.cyclify() + ") " + cycAccess.isQuotedCollection(isa));
+      if (verbosity > 7) {
+        Log.current.println("  considering " + isa.cyclify());
+        Log.current.println("    selectedCycForts.contains(" + isa.cyclify() + ") " + selectedCycForts.contains(isa));
+        Log.current.println("    cycAccess.isQuotedCollection(" + isa.cyclify() + ") " + cycAccess.isQuotedCollection(isa));
+      }
       if (! selectedCycForts.contains(isa)) {
         isa = findSelectedGenls(isa);
         if (isa == null)
@@ -671,10 +679,12 @@ public class ExportHtml extends OntologyExport {
       if (createdIsas.contains(isa))
         continue;
       else if (cycAccess.isQuotedCollection(isa)) {
-        logger.info("  omitting quoted direct-instance-of collection " + isa.cyclify());
+        if (verbosity > 2)
+          Log.current.println("  omitting quoted direct-instance-of collection " + isa.cyclify());
       }
       else {
-        logger.finest("  adding direct instance of " + isa.cyclify());
+        if (verbosity > 7)
+          Log.current.println("  adding direct instance of " + isa.cyclify());
         createdIsas.add(isa);
       }
     }
@@ -683,20 +693,13 @@ public class ExportHtml extends OntologyExport {
     createdIsas.removeAll(filterFromDirectInstances);
     for (int i = 0; i < createdIsas.size(); i++) {
       CycFort isa = (CycFort)createdIsas.get(i);
-      Node isaTextNode;
-      if (selectedCycForts.contains(isa)) {
-        HTMLAnchorElement isaAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-        isaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + isa.cyclify());
-        parentElement.appendChild(isaAnchorElement);
-        isaTextNode = htmlDocument.createTextNode(isa.cyclify());
-        isaAnchorElement.appendChild(isaTextNode);
-        Node spacesTextNode = htmlDocument.createTextNode("  ");
-        parentElement.appendChild(spacesTextNode);
-      }
-      else {
-        isaTextNode = htmlDocument.createTextNode(isa.cyclify() + "   ");
-        parentElement.appendChild(isaTextNode);
-      }
+      HTMLAnchorElement isaAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+      isaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + isa.cyclify());
+      parentElement.appendChild(isaAnchorElement);
+      Node isaTextNode = htmlDocument.createTextNode(isa.cyclify());
+      isaAnchorElement.appendChild(isaTextNode);
+      Node spacesTextNode = htmlDocument.createTextNode("  ");
+      parentElement.appendChild(spacesTextNode);
     }
   }
   
@@ -713,7 +716,8 @@ public class ExportHtml extends OntologyExport {
             verbosity = 9;
         }
          */
-    logger.fine("  starting genls: " + genls.cyclify());
+    if (verbosity > 3)
+      Log.current.println("  starting genls: " + genls.cyclify());
     genls = specificCollections(findAllowedTermsOrGenls(genls));
     lineBreak(parentElement);
     Element bElement = htmlDocument.createElement("b");
@@ -723,7 +727,8 @@ public class ExportHtml extends OntologyExport {
     for (int i = 0; i < genls.size(); i++) {
       CycFort genl = (CycFort)genls.get(i);
       if (cycAccess.isQuotedCollection(genl)) {
-        logger.info("  omitting quoted genl collection " + genl.cyclify());
+        if (verbosity > 2)
+          Log.current.println("  omitting quoted genl collection " + genl.cyclify());
       }
       else if (selectedCycForts.contains(genl)) {
         HTMLAnchorElement genlAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
@@ -792,15 +797,17 @@ public class ExportHtml extends OntologyExport {
    */
   protected void createGenlPredsNodes(CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
     CycList genlPreds = filterSelectedConstants(cycAccess.getGenlPreds(cycConstant));
-    logger.finer("  genlPreds " + genlPreds);
+    if (verbosity > 4)
+      Log.current.println("  genlPreds " + genlPreds);
     CycList tempList = new CycList();
     for (int i = 0; i < genlPreds.size(); i++) {
-      CycObject genlPred = (CycObject)genlPreds.get(i);
+      CycConstant genlPred = (CycConstant)genlPreds.get(i);
       if (selectedCycForts.contains(genlPred))
         tempList.add(genlPred);
     }
     genlPreds = tempList;
-    logger.finer("  after filtering, genlPreds " + genlPreds);
+    if (verbosity > 4)
+      Log.current.println("  after filtering, genlPreds " + genlPreds);
     if (genlPreds.size() == 0)
       return;
     lineBreak(parentElement);
@@ -809,22 +816,15 @@ public class ExportHtml extends OntologyExport {
     Node genlsPredsLabelTextNode = htmlDocument.createTextNode("direct specialization of: ");
     bElement.appendChild(genlsPredsLabelTextNode);
     for (int i = 0; i < genlPreds.size(); i++) {
-      CycFort genlPred = (CycFort)genlPreds.get(i);
-      Node genlPredTextNode;
-      if (selectedCycForts.contains(genlPred)) {
-        HTMLAnchorElement genlPredAnchorElement =
-        new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-        genlPredAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + genlPred.cyclify());
-        parentElement.appendChild(genlPredAnchorElement);
-        genlPredTextNode = htmlDocument.createTextNode(genlPred.cyclify());
-        genlPredAnchorElement.appendChild(genlPredTextNode);
-        Node spacesTextNode = htmlDocument.createTextNode("  ");
-        parentElement.appendChild(spacesTextNode);
-      }
-      else {
-        genlPredTextNode = htmlDocument.createTextNode(genlPred.cyclify() + "  ");
-        parentElement.appendChild(genlPredTextNode);    
-      }
+      CycConstant genlPred = (CycConstant)genlPreds.get(i);
+      HTMLAnchorElement genlPredAnchorElement =
+      new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+      genlPredAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + genlPred.cyclify());
+      parentElement.appendChild(genlPredAnchorElement);
+      Node genlPredTextNode = htmlDocument.createTextNode(genlPred.cyclify());
+      genlPredAnchorElement.appendChild(genlPredTextNode);
+      Node spacesTextNode = htmlDocument.createTextNode("  ");
+      parentElement.appendChild(spacesTextNode);
     }
   }
   
@@ -836,7 +836,8 @@ public class ExportHtml extends OntologyExport {
    */
   protected void createArg1IsaNodes(CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
     CycList arg1Isas = findAllowedTermsOrGenls(cycAccess.getArg1Isas(cycConstant));
-    logger.finer("  arg1Isas " + arg1Isas);
+    if (verbosity > 4)
+      Log.current.println("  arg1Isas " + arg1Isas);
     if (arg1Isas.size() == 0)
       return;
     lineBreak(parentElement);
@@ -845,21 +846,15 @@ public class ExportHtml extends OntologyExport {
     Node arg1IsasLabelTextNode = htmlDocument.createTextNode("argument one is an instance of: ");
     bElement.appendChild(arg1IsasLabelTextNode);
     for (int i = 0; i < arg1Isas.size(); i++) {
-      final CycFort arg1Isa = (CycFort)arg1Isas.get(i);
+      CycConstant arg1Isa = (CycConstant)arg1Isas.get(i);
+      HTMLAnchorElement arg1IsaAnchorElement =
+      new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+      arg1IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg1Isa.cyclify());
+      parentElement.appendChild(arg1IsaAnchorElement);
       Node arg1IsaTextNode = htmlDocument.createTextNode(arg1Isa.cyclify());
-      if (selectedCycForts.contains(arg1Isa)) {
-        HTMLAnchorElement arg1IsaAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-        arg1IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg1Isa.cyclify());
-        parentElement.appendChild(arg1IsaAnchorElement);
-        arg1IsaTextNode = htmlDocument.createTextNode(arg1Isa.cyclify());
-        arg1IsaAnchorElement.appendChild(arg1IsaTextNode);
-        Node spacesTextNode = htmlDocument.createTextNode("  ");
-        parentElement.appendChild(spacesTextNode);
-      }
-      else {
-        arg1IsaTextNode = htmlDocument.createTextNode(arg1Isa.cyclify() + "  ");
-        parentElement.appendChild(arg1IsaTextNode);
-      }
+      arg1IsaAnchorElement.appendChild(arg1IsaTextNode);
+      Node spacesTextNode = htmlDocument.createTextNode("  ");
+      parentElement.appendChild(spacesTextNode);
     }
   }
   
@@ -871,7 +866,8 @@ public class ExportHtml extends OntologyExport {
    */
   protected void createArg2IsaNodes(CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
     CycList arg2Isas = findAllowedTermsOrGenls(cycAccess.getArg2Isas(cycConstant));
-    logger.finer("  arg2Isas " + arg2Isas);
+    if (verbosity > 4)
+      Log.current.println("  arg2Isas " + arg2Isas);
     if (arg2Isas.size() == 0)
       return;
     lineBreak(parentElement);
@@ -880,22 +876,15 @@ public class ExportHtml extends OntologyExport {
     Node arg2IsasLabelTextNode = htmlDocument.createTextNode("argument two is an instance of: ");
     bElement.appendChild(arg2IsasLabelTextNode);
     for (int i = 0; i < arg2Isas.size(); i++) {
-      final CycFort  arg2Isa = (CycFort)arg2Isas.get(i);
-      Node arg2IsaTextNode;
-      if (selectedCycForts.contains(arg2Isa)) {
-        HTMLAnchorElement arg2IsaAnchorElement =
-        new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-        arg2IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg2Isa.cyclify());
-        parentElement.appendChild(arg2IsaAnchorElement);
-        arg2IsaTextNode = htmlDocument.createTextNode(arg2Isa.cyclify());
-        arg2IsaAnchorElement.appendChild(arg2IsaTextNode);
-        Node spacesTextNode = htmlDocument.createTextNode("  ");
-        parentElement.appendChild(spacesTextNode);
-      }
-      else {
-        arg2IsaTextNode = htmlDocument.createTextNode(arg2Isa.cyclify() + "  ");
-        parentElement.appendChild(arg2IsaTextNode);
-      }
+      CycConstant arg2Isa = (CycConstant)arg2Isas.get(i);
+      HTMLAnchorElement arg2IsaAnchorElement =
+      new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+      arg2IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg2Isa.cyclify());
+      parentElement.appendChild(arg2IsaAnchorElement);
+      Node arg2IsaTextNode = htmlDocument.createTextNode(arg2Isa.cyclify());
+      arg2IsaAnchorElement.appendChild(arg2IsaTextNode);
+      Node spacesTextNode = htmlDocument.createTextNode("  ");
+      parentElement.appendChild(spacesTextNode);
     }
   }
   
@@ -907,7 +896,8 @@ public class ExportHtml extends OntologyExport {
    */
   protected void createArg3IsaNodes(CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
     CycList arg3Isas = findAllowedTermsOrGenls(cycAccess.getArg3Isas(cycConstant));
-    logger.finer("  arg3Isas " + arg3Isas);
+    if (verbosity > 4)
+      Log.current.println("  arg3Isas " + arg3Isas);
     if (arg3Isas.size() == 0)
       return;
     lineBreak(parentElement);
@@ -916,22 +906,15 @@ public class ExportHtml extends OntologyExport {
     Node arg3IsasLabelTextNode = htmlDocument.createTextNode("argument three is an instance of: ");
     bElement.appendChild(arg3IsasLabelTextNode);
     for (int i = 0; i < arg3Isas.size(); i++) {
-      CycFort arg3Isa = (CycFort)arg3Isas.get(i);
-      Node arg3IsaTextNode;
-      if (selectedCycForts.contains(arg3Isa)) {
-        HTMLAnchorElement arg3IsaAnchorElement =
-        new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-        arg3IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg3Isa.cyclify());
-        parentElement.appendChild(arg3IsaAnchorElement);
-        arg3IsaTextNode = htmlDocument.createTextNode(arg3Isa.cyclify());
-        arg3IsaAnchorElement.appendChild(arg3IsaTextNode);
-        Node spacesTextNode = htmlDocument.createTextNode("  ");
-        parentElement.appendChild(spacesTextNode);
-      }
-      else {
-        arg3IsaTextNode = htmlDocument.createTextNode(arg3Isa.cyclify() + "  ");
-        parentElement.appendChild(arg3IsaTextNode);
-      }
+      CycConstant arg3Isa = (CycConstant)arg3Isas.get(i);
+      HTMLAnchorElement arg3IsaAnchorElement =
+      new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+      arg3IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg3Isa.cyclify());
+      parentElement.appendChild(arg3IsaAnchorElement);
+      Node arg3IsaTextNode = htmlDocument.createTextNode(arg3Isa.cyclify());
+      arg3IsaAnchorElement.appendChild(arg3IsaTextNode);
+      Node spacesTextNode = htmlDocument.createTextNode("  ");
+      parentElement.appendChild(spacesTextNode);
     }
   }
   
@@ -943,7 +926,8 @@ public class ExportHtml extends OntologyExport {
    */
   protected void createArg4IsaNodes(CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
     CycList arg4Isas = findAllowedTermsOrGenls(cycAccess.getArg4Isas(cycConstant));
-    logger.finer("  arg4Isas " + arg4Isas);
+    if (verbosity > 4)
+      Log.current.println("  arg4Isas " + arg4Isas);
     if (arg4Isas.size() == 0)
       return;
     lineBreak(parentElement);
@@ -952,22 +936,15 @@ public class ExportHtml extends OntologyExport {
     Node arg4IsasLabelTextNode = htmlDocument.createTextNode("argument four is an instance of: ");
     bElement.appendChild(arg4IsasLabelTextNode);
     for (int i = 0; i < arg4Isas.size(); i++) {
-      CycFort arg4Isa = (CycFort)arg4Isas.get(i);
-      Node arg4IsaTextNode;
-      if (selectedCycForts.contains(arg4Isa)) {
-        HTMLAnchorElement arg4IsaAnchorElement =
-        new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
-        arg4IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg4Isa.cyclify());
-        parentElement.appendChild(arg4IsaAnchorElement);
-        arg4IsaTextNode = htmlDocument.createTextNode(arg4Isa.cyclify());
-        arg4IsaAnchorElement.appendChild(arg4IsaTextNode);
-        Node spacesTextNode = htmlDocument.createTextNode("  ");
-        parentElement.appendChild(spacesTextNode);
-      }
-      else {
-        arg4IsaTextNode = htmlDocument.createTextNode(arg4Isa.cyclify() + "  ");
-        parentElement.appendChild(arg4IsaTextNode);
-      }
+      CycConstant arg4Isa = (CycConstant)arg4Isas.get(i);
+      HTMLAnchorElement arg4IsaAnchorElement =
+      new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
+      arg4IsaAnchorElement.setHref("./" + exportedVocabularyOutputPath + "#" + arg4Isa.cyclify());
+      parentElement.appendChild(arg4IsaAnchorElement);
+      Node arg4IsaTextNode = htmlDocument.createTextNode(arg4Isa.cyclify());
+      arg4IsaAnchorElement.appendChild(arg4IsaTextNode);
+      Node spacesTextNode = htmlDocument.createTextNode("  ");
+      parentElement.appendChild(spacesTextNode);
     }
   }
   
@@ -979,7 +956,8 @@ public class ExportHtml extends OntologyExport {
    */
   protected void createResultIsaNodes(CycConstant cycConstant, Element parentElement) throws IOException, CycApiException {
     CycList resultIsas = findAllowedTermsOrGenls(cycAccess.getResultIsas(cycConstant));
-    logger.finer("  resultIsas " + resultIsas);
+    if (verbosity > 4)
+      Log.current.println("  resultIsas " + resultIsas);
     if (resultIsas.size() == 0)
       return;
     lineBreak(parentElement);
@@ -1031,7 +1009,8 @@ public class ExportHtml extends OntologyExport {
    * @param rootTerm The root term of the hierarchy tree.
    */
   protected void createHierarchyPage(CycFort rootTerm) throws UnknownHostException, IOException, CycApiException {
-    logger.info("Building HTML model for hierarchy page");
+    if (verbosity > 2)
+      Log.current.println("Building HTML model for hierarchy page");
     htmlDocument = new HTMLDocumentImpl();
     String title = "Cyc ontology hierarchy for " + cycKbSubsetCollection.cyclify();
     htmlDocument.setTitle(title);
@@ -1063,10 +1042,12 @@ public class ExportHtml extends OntologyExport {
       }
       Node spacesText = htmlDocument.createTextNode(nonBreakingSpaces.toString());
       htmlBodyElement.appendChild(spacesText);
-      logger.info(spaces.toString() + cycFort);
+      if (verbosity > 2)
+        Log.current.println(spaces.toString() + cycFort);
     }
     else {
-      logger.info(cycFort.toString());
+      if (verbosity > 2)
+        Log.current.println(cycFort.toString());
     }
     HTMLAnchorElement vocabularyAnchorElement = new HTMLAnchorElementImpl((HTMLDocumentImpl)htmlDocument, "a");
     vocabularyAnchorElement.setHref("./" + exportedVocabularyOutputPath + "./" + exportedVocabularyOutputPath + "#" + cycFort.cyclify());
@@ -1105,7 +1086,8 @@ public class ExportHtml extends OntologyExport {
    * @param outputPath The file name of the serialized HTML document.
    */
   protected void serialize(HTMLDocument htmlDocument, String outputPath) throws IOException {
-    logger.info("Writing HTML output to " + outputPath);
+    if (verbosity > 2)
+      Log.current.println("Writing HTML output to " + outputPath);
     OutputFormat outputFormat = new OutputFormat(htmlDocument, "UTF-8", true);
     BufferedWriter htmlOut = new BufferedWriter(new FileWriter(outputPath));
     XHTMLSerializer xhtmlSerializer = new XHTMLSerializer(htmlOut, outputFormat);
@@ -1144,10 +1126,12 @@ public class ExportHtml extends OntologyExport {
   throws UnknownHostException, IOException, CycApiException {
     CycList categoryTerms = askQueryString(queryString, mt);
     if (categoryTerms.size() == 0) {
-      logger.info("No terms for query:\n" + queryString + "\n");
+      if (verbosity > 2)
+        Log.current.println("No terms for query:\n" + queryString + "\n");
       return;
     }
-    logger.info("Building HTML model for category: " + title);
+    if (verbosity > 2)
+      Log.current.println("Building HTML model for category: " + title);
     htmlDocument = new HTMLDocumentImpl();
     htmlDocument.setTitle(title);
     Node htmlNode = htmlDocument.getChildNodes().item(0);
@@ -1159,15 +1143,23 @@ public class ExportHtml extends OntologyExport {
     headingElement.appendChild(headingTextNode);
     for (int i = 0; i < categoryTerms.size(); i++) {
       CycFort cycFort = (CycFort) categoryTerms.get(i);
-      logger.info(cycFort + "  ");
-      if (cycAccess.isCollection(cycFort))
-        logger.info("Collection");
-      else if (cycAccess.isPredicate(cycFort))
-        logger.info("Predicate");
-      else if (cycAccess.isIndividual(cycFort))
-        logger.info("Individual");
+      if (verbosity > 2)
+        Log.current.print(cycFort + "  ");
+      if (cycAccess.isCollection(cycFort)) {
+        if (verbosity > 2)
+          Log.current.println("Collection");
+      }
+      else if (cycAccess.isPredicate(cycFort)) {
+        if (verbosity > 2)
+          Log.current.println("Predicate");
+      }
+      else if (cycAccess.isIndividual(cycFort)) {
+        if (verbosity > 2)
+          Log.current.println("Individual");
+      }
       else {
-        logger.info("other");
+        if (verbosity > 2)
+          Log.current.println("other");
         continue;
       }
       if (cycFort instanceof CycConstant)
@@ -1610,27 +1602,22 @@ public class ExportHtml extends OntologyExport {
     CycList query = cycAccess.makeCycList(queryString);
     CycVariable variable = CycObjectFactory.makeCycVariable("?TERM");
     CycList answer = cycAccess.queryVariable(variable, query, mt, (HashMap) null);
-    logger.info("query:\n" + queryString);
-    logger.info("number of terms " + answer.size());
+    if (verbosity > 2) {
+      Log.current.println("query:\n" + queryString);
+      Log.current.println("number of terms " + answer.size());
+    }
     // Remove nauts which are returned as CycLists.
     CycList answerTemp = new CycList();
     for (int i = 0; i < answer.size(); i++) {
       Object obj = answer.get(i);
       if (obj instanceof CycFort)
         answerTemp.add(obj);
-      logger.info("Dropping non fort from answer\n" + obj.toString());
+      else if (verbosity > 2)
+        Log.current.println("Dropping non fort from answer\n" + obj.toString());
     }
     answer = answerTemp;
     Collections.sort(answer);
     return answer;
-  }
-  
-  /** Reports export progress to each of the listeners.
-   *
-   * @param percentComplete the OWL export percent complete
-   */
-  protected void reportProgress(double percentComplete) {
-    //TODO implement for HTML export monitoring
   }
   
   /**
@@ -1670,20 +1657,23 @@ public class ExportHtml extends OntologyExport {
     CycAccess cycAccess = null;
     try {
       cycAccess = new CycAccess(CycConnection.DEFAULT_HOSTNAME,
-                                3600);
+                                3600,
+                                CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                CycAccess.DEFAULT_CONNECTION);
     }
     catch (Exception e) {
-      System.err.println(e.getMessage());
+      Log.current.errorPrintln(e.getMessage());
       System.exit(1);
     }
     ExportHtml exportHtml = new ExportHtml(cycAccess);
+    exportHtml.verbosity = 3;
     exportHtml.produceHierarchyPages = false;
     exportHtml.includeUpwardClosure = true;
     String choice = "terrorism-ontology-all";
     //        if (args.length > 0)
     //            choice = args[0];
     try {
-      exportHtml.logger.info("Choosing KB selection: " + choice);
+      Log.current.println("Choosing KB selection: " + choice);
       // These require the ResearchCyc or full KB to work as setup below.
       if (choice.equals("terrorism-ontology")) {
         //                exportHtml.verbosity = 9;

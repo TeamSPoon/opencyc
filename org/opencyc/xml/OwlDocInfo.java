@@ -1,6 +1,6 @@
 /* $Id$
  *
- * Copyright (c) 2003 - 2006 Cycorp, Inc.  All rights reserved.
+ * Copyright (c) 2003 - 2005 Cycorp, Inc.  All rights reserved.
  * This software is the proprietary information of Cycorp, Inc.
  * Use is subject to license terms.
  */
@@ -14,7 +14,7 @@ package org.opencyc.xml;
 /**
  * <P>OwlDocInfo is designed to contain the information about an OWL document to be imported into Cyc.
  *
- * <P>Copyright (c) 2004 - 2006 Cycorp, Inc.  All rights reserved.
+ * <P>Copyright (c) 2004 - 2005 Cycorp, Inc.  All rights reserved.
  * <BR>This software is the proprietary information of Cycorp, Inc.
  * <P>Use is subject to license terms.
  *

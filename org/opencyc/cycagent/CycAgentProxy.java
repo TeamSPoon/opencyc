@@ -1,14 +1,17 @@
 package org.opencyc.cycagent;
 
-import java.io.*;
-import java.util.*;
-import fipaos.ont.fipa.*;
-import fipaos.ont.fipa.fipaman.*;
-import fipaos.parser.*;
-import org.opencyc.api.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.util.*;
-import org.opencyc.xml.*;
+import java.io.IOException;
+
+import org.opencyc.api.CycConnection;
+import org.opencyc.api.CycObjectFactory;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycSymbol;
+import org.opencyc.util.Log;
+
+import fipaos.ont.fipa.ACL;
+import fipaos.ont.fipa.FIPACONSTANTS;
+import fipaos.ont.fipa.fipaman.AgentID;
+import fipaos.parser.ParserException;
 
 /**
  * Provides a proxy for a cyc agent on the CoABS grid or FIPA-OS agent community.<p>

@@ -1,10 +1,12 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
 import java.io.IOException;
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
-import org.opencyc.api.*;
+import java.util.ArrayList;
+
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.ConstraintRule;
+import org.opencyc.inferencesupport.UnitTest;
 
 /**
  * The <tt>NodeConsistencyAchiever</tt> object achieves node consistency

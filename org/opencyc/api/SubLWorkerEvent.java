@@ -4,14 +4,9 @@
 package org.opencyc.api;
 
 // INTERNAL IMPORTS
-import org.opencyc.cycobject.CycList;
-import org.opencyc.cycobject.CycFort;
-import org.opencyc.api.CycApiException;
-import org.opencyc.util.StringUtils;
+import java.util.EventObject;
 
-// EXTERNAL IMPORTS
-import java.io.IOException;
-import java.util.*;
+import org.opencyc.util.StringUtils;
 
 /**
  * <P>SubLWorkerEvent is designed to represent the state of an

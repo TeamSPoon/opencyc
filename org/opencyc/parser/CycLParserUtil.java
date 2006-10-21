@@ -173,77 +173,54 @@ public class CycLParserUtil {
   }
   
   public static Object completeConstants(Object obj, CycAccess access) 
-    throws IOException, 
-           CycApiException, 
-           CycApiServerSideException, 
-           InvalidConstantNameException, 
-           InvalidConstantGuidException, 
-           UnsupportedVocabularyException {
+  throws IOException, CycApiException, CycApiServerSideException, 
+  InvalidConstantNameException, InvalidConstantGuidException, 
+  UnsupportedVocabularyException {
     List allConstants = DefaultCycObject.getReferencedConstants(obj);
     if ((allConstants == null) || (allConstants.size() == 0)) { return obj; }
-    CycList incompleteConstantsWithNames = null;
-    CycList incompleteConstantsWithGuids = null;
-    //Find incomplete constants
+    List namelessConstants = null;
+    List guidlessConstants = null;
     for ( Iterator iter = allConstants.iterator(); iter.hasNext(); ) {
       CycConstant curConst = (CycConstant)iter.next();
       if ((curConst.name == null) && (curConst.guid == null)) {
         throw new IllegalArgumentException("Can't deal with completely bare constants.");
       }
-      if (curConst.name == null) {
-        if (incompleteConstantsWithGuids == null) { incompleteConstantsWithGuids = new CycList(); }
-        incompleteConstantsWithGuids.add(curConst);
+      if (curConst.name == null) { 
+        if (namelessConstants == null) { namelessConstants = new ArrayList(); }
+        namelessConstants.add(curConst);
       }
-      if (curConst.guid == null) {
-        if (incompleteConstantsWithNames == null) { incompleteConstantsWithNames = new CycList(); }
-        incompleteConstantsWithNames.add(curConst);
+      if (curConst.guid == null) { 
+        if (guidlessConstants == null) { guidlessConstants = new ArrayList(); }
+        guidlessConstants.add(curConst);
       }
     }
-    //Find invalid constant names from the list of incomplete constants
-    List cycConstants = access.findConstantsForNames(incompleteConstantsWithNames);
-    if (cycConstants != null) {
-      InvalidConstantNameException icne = null;
-      for (Iterator iter = cycConstants.iterator(), 
-          oldIter = incompleteConstantsWithNames.iterator(); iter.hasNext(); ) {
-        Object curConstant = iter.next();
-        CycConstant oldConstant = (CycConstant)oldIter.next();
-        if (!(curConstant instanceof CycConstant)) {
-          if (icne == null) { icne = new InvalidConstantNameException(); }
-          icne.addInvalidConstantName(oldConstant.getName());
-        } else {
-          oldConstant.setGuid(((CycConstant)curConstant).getGuid());
-          CycObjectFactory.addCycConstantCache(oldConstant);
-        }
-      }
-      if (icne != null) { throw icne; }
+    if (namelessConstants != null) {
+      access.obtainConstantNames(namelessConstants);
     }
-    //Find invlaid GUIDs from the list of incomplete constants
-    cycConstants = access.findConstantsForGuids(incompleteConstantsWithGuids);
-    if (cycConstants != null) {
-      InvalidConstantGuidException icge = null;
-      for (Iterator iter = cycConstants.iterator(), 
-          oldIter = incompleteConstantsWithNames.iterator(); iter.hasNext(); ) {
-        Object curConstant = iter.next();
-        CycConstant oldConstant = (CycConstant)oldIter.next();
-        if (!(curConstant instanceof CycConstant)) {
-          if (icge == null) { icge = new InvalidConstantGuidException(); }
-          icge.addInvalidConstantGuid(oldConstant.getGuid());
-        } else {
-          oldConstant.setGuid(((CycConstant)curConstant).getGuid());
-          CycObjectFactory.addCycConstantCache(oldConstant);
-        }
-      }
-      if (icge != null) { throw icge; }
+    if (guidlessConstants != null) {
+      access.obtainConstantGuids(guidlessConstants);
     }
-    //Find unsupported constants
+    InvalidConstantGuidException icge = null;
+    InvalidConstantNameException icne = null;
     for ( Iterator iter = allConstants.iterator(); iter.hasNext(); ){
       CycConstant curConst = (CycConstant)iter.next();
-      if (access.sublQuoteFnConst.guid.equals(curConst.getGuid())) {
+      if (curConst.safeGetName() == null) {
+        if (icge == null) { icge = new InvalidConstantGuidException(); }
+        icge.addInvalidConstantGuid(curConst.guid);
+      }
+      if (curConst.safeGetGuid() == null) {
+        if (icne == null) { icne = new InvalidConstantNameException(); }
+        icne.addInvalidConstantName(curConst.name);
+      }
+      if (access.sublQuoteFnConst.guid.equals(curConst.safeGetGuid())) {
         throw new UnsupportedVocabularyException(access.sublQuoteFnConst);
       }
-      if (access.expandSubLFnConst.guid.equals(curConst.getGuid())) {
+      if (access.expandSubLFnConst.guid.equals(curConst.safeGetGuid())) {
         throw new UnsupportedVocabularyException(access.expandSubLFnConst);
       }
     }
+    if (icne != null) { throw icne; }
+    if (icge != null) { throw icge; }
     return obj;
   }
   

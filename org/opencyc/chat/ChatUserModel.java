@@ -1,6 +1,6 @@
 package org.opencyc.chat;
 
-import java.util.*;
+import java.util.HashMap;
 
 /**
  * Provides a chat user model.<p>

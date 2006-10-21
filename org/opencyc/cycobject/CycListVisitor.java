@@ -1,7 +1,11 @@
 package org.opencyc.cycobject;
 
-import java.util.*;
-import org.opencyc.api.*;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Stack;
+
+import org.opencyc.api.CycObjectFactory;
 
 /**
  * Implements an <tt>Enumeration</tt> for <tt>CycList</tt> objects which traverses

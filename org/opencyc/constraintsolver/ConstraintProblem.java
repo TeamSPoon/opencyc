@@ -1,10 +1,17 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
 import java.io.IOException;
-import org.opencyc.cycobject.*;
-import org.opencyc.api.*;
-import org.opencyc.inferencesupport.*;
+import java.util.ArrayList;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycConstant;
+import org.opencyc.cycobject.CycFort;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.Binding;
+import org.opencyc.inferencesupport.ConstraintRule;
+import org.opencyc.inferencesupport.Solution;
 
 /**
  * <tt>ConstraintRule</tt> object to model the attributes and behavior of a constraint problem.<p>

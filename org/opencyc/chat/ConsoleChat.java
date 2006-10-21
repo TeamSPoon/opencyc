@@ -1,8 +1,11 @@
 package org.opencyc.chat;
 
-import java.io.*;
-import org.opencyc.api.*;
-import org.opencyc.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import org.opencyc.api.CycApiException;
+import org.opencyc.util.Log;
 
 /**
  * Provides a console chat application using the Cyc ChatterBot.<p>

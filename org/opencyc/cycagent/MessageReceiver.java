@@ -1,6 +1,6 @@
 package org.opencyc.cycagent;
 
-import fipaos.ont.fipa.*;
+import fipaos.ont.fipa.ACL;
 
 /**
  * Defines the message-receiver call-back interface for interacting with an agent community

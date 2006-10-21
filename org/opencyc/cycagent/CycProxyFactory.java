@@ -1,14 +1,11 @@
 package  org.opencyc.cycagent;
 
-import  java.net.Socket;
-import  java.io.PrintWriter;
-import  java.io.*;
-import  java.util.Collection;
-import  fipaos.ont.fipa.fipaman.*;
-import  fipaos.ont.fipa.*;
-import  org.opencyc.api.*;
-import  org.opencyc.cycobject.*;
-import  org.opencyc.util.*;
+import java.net.Socket;
+
+import org.opencyc.api.CycConnection;
+import org.opencyc.api.CycObjectFactory;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.util.Log;
 
 /**
  * Receives the communication initiation message from a Cyc server and creates the

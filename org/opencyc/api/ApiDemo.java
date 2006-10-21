@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+
 import org.opencyc.cycobject.CycFort;
 import org.opencyc.cycobject.CycList;
 import org.opencyc.cycobject.CycNart;

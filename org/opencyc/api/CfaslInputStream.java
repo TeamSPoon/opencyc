@@ -3,15 +3,20 @@ package org.opencyc.api;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.lang.reflect.Method;
-
 import java.math.BigInteger;
-
 import java.util.HashMap;
 
-import org.opencyc.cycobject.*;
-
+import org.opencyc.cycobject.ByteArray;
+import org.opencyc.cycobject.CycAssertion;
+import org.opencyc.cycobject.CycConstant;
+import org.opencyc.cycobject.CycFort;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycNart;
+import org.opencyc.cycobject.CycObject;
+import org.opencyc.cycobject.CycSymbol;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.cycobject.Guid;
 import org.opencyc.util.Log;
 
 
@@ -93,6 +98,9 @@ public class CfaslInputStream
   protected static final int CFASL_LIST = 13;
 
   /** CFASL code */
+  protected static final int CFASL_DOTTED = 17;
+
+  /** CFASL code */
   protected static final int CFASL_VECTOR = 14;
 
   /** CFASL code */
@@ -100,9 +108,6 @@ public class CfaslInputStream
 
   /** CFASL code */
   protected static final int CFASL_CHARACTER = 16;
-
-  /** CFASL code */
-  protected static final int CFASL_DOTTED = 17;
 
   /** CFASL code */
   protected static final int CFASL_HASHTABLE = 18;
@@ -138,9 +143,6 @@ public class CfaslInputStream
   protected static final int CFASL_NART = 31;
 
   /** CFASL code */
-  protected static final int CFASL_COMPLETE_CONSTANT = 32;
-
-  /** CFASL code */
   protected static final int CFASL_ASSERTION = 33;
 
   /** CFASL code */
@@ -168,9 +170,6 @@ public class CfaslInputStream
   protected static final int CFASL_INDEX = 41;
 
   /** CFASL code */
-  protected static final int CFASL_COMPLETE_VARIABLE = 42;
-
-  /** CFASL code */
   protected static final int CFASL_SPECIAL_OBJECT = 50;
 
   /** CFASL code */
@@ -191,10 +190,7 @@ public class CfaslInputStream
   /** CFASL code */
   protected static final int DEFAULT_READ_LIMIT = 8192;
   static HashMap cfaslOpcodeDescriptions = null;
-  
-  /** indicator that the input contains something invalid, for example an invalid constant */
-  protected boolean isInvalidObject = false;
-  
+
   /**
    * Initializes the opcode descriptions used in trace output.
    */
@@ -293,9 +289,6 @@ public class CfaslInputStream
     cfaslOpcodeDescriptions.put(new Integer(CFASL_NART), 
                                 "CFASL_NART");
     
-    cfaslOpcodeDescriptions.put(new Integer(CFASL_COMPLETE_CONSTANT), 
-                                "CFASL_COMPLETE_CONSTANT");
-    
     cfaslOpcodeDescriptions.put(new Integer(CFASL_ASSERTION), 
                                 "CFASL_ASSERTION");
     
@@ -323,9 +316,6 @@ public class CfaslInputStream
     cfaslOpcodeDescriptions.put(new Integer(CFASL_INDEX), 
                                 "CFASL_INDEX");
     
-    cfaslOpcodeDescriptions.put(new Integer(CFASL_COMPLETE_VARIABLE), 
-                                "CFASL_COMPLETE_VARIABLE");
-    
     cfaslOpcodeDescriptions.put(new Integer(CFASL_SPECIAL_OBJECT), 
                                 "CFASL_SPECIAL_OBJECT");
     
@@ -344,7 +334,7 @@ public class CfaslInputStream
     cfaslOpcodeDescriptions.put(new Integer(CFASL_SERVER_DEATH), 
                                 "CFASL_SERVER_DEATH");
   }
-  
+
   /**
    * Creates a new CfaslInputStream to read data from the specified underlying input stream.
    * 
@@ -359,19 +349,6 @@ public class CfaslInputStream
     }
   }
 
-  /** Gets the indicator that the input contains something invalid, for example an invalid constant.
-   *
-   * @return the indicator that the input contains something invalid, for example an invalid constant
-   */
-  public boolean isInvalidObject() {
-    return isInvalidObject;
-  }
-  
-  /** Resets the indicator that the input contains something invalid, for example an invalid constant.  */
-  public void resetIsInvalidObject() {
-    isInvalidObject = false;
-  }
-  
   /**
    * Reads an Object from this CfaslInputStream.  Basic Java types are wrapped as appropriate (e.g.
    * ints become Integer objects).  New constants are missing name and GUID values and will be
@@ -564,15 +541,12 @@ public class CfaslInputStream
       break;
 
       case CFASL_CONSTANT:
-        return reportUnhandledCfaslOpcode(cfaslOpcode);
-
-      case CFASL_NART:
-        o = readNart();
+        o = readConstant();
 
         break;
 
-      case CFASL_COMPLETE_CONSTANT:
-        o = readCompleteConstant();
+      case CFASL_NART:
+        o = readNart();
 
         break;
 
@@ -600,15 +574,12 @@ public class CfaslInputStream
         return reportUnhandledCfaslOpcode(cfaslOpcode);
 
       case CFASL_VARIABLE:
-        return reportUnhandledCfaslOpcode(cfaslOpcode);
-        
-      case CFASL_INDEX:
-        return reportUnhandledCfaslOpcode(cfaslOpcode);
-
-      case CFASL_COMPLETE_VARIABLE:
-        o = readCompleteVariable();
+        o = readVariable();
 
         break;
+
+      case CFASL_INDEX:
+        return reportUnhandledCfaslOpcode(cfaslOpcode);
 
       case CFASL_SPECIAL_OBJECT:
         return reportUnhandledCfaslOpcode(cfaslOpcode);
@@ -1075,7 +1046,7 @@ public class CfaslInputStream
     }
 
     if (trace == API_TRACE_DETAILED) {
-      Log.current.println("readCycList.readObject: " + cycList.toString());
+      Log.current.println("readCycList.readObject: " + cycList.safeToString());
     }
 
     return cycList;
@@ -1105,7 +1076,7 @@ public class CfaslInputStream
 
       if (trace == API_TRACE_DETAILED) {
         if (consObject instanceof CycFort)
-          Log.current.println("readCons.consObject: " + ((CycFort) consObject).toString());
+          Log.current.println("readCons.consObject: " + ((CycFort) consObject).safeToString());
         else
           Log.current.println("readCons.consObject: " + consObject);
       }
@@ -1127,45 +1098,56 @@ public class CfaslInputStream
     cycList.setDottedElement(cdrObject);
 
     if (trace == API_TRACE_DETAILED) {
-      Log.current.println("readCons.readCons: " + cycList.toString());
+      Log.current.println("readCons.readCons: " + cycList.safeToString());
     }
 
     return cycList;
   }
 
   /**
-   * Reads a complete constant from a CfaslInputStream.
+   * Reads a constant from a CfaslInputStream.
    * 
-   * @return an complete <tt>CycConstant</tt> having the input guid and name
+   * @return an incomplete <tt>CycConstant</tt> having the input id or guid
    * 
    * @throws IOException if a communications error occurs
    * @throws RuntimeException if an unexpected constant id type occurs
    */
-  public CycConstant readCompleteConstant()
+  public CycConstant readConstant()
                            throws IOException {
     CycConstant cycConstant = null;
+
+    //cycConstant = new CycConstant();
     Object idObject = readObject();
 
-    if (idObject instanceof Guid) {
-      final Guid guid = (Guid) idObject;
-      final String name = (String) readObject();
-      cycConstant = CycObjectFactory.getCycConstantCacheByGuid(guid);
-      if (cycConstant == null)
-        cycConstant = new CycConstant(name, guid);
+    if (idObject instanceof Integer) {
+      // deprecated legacy code support for SUIDs
+      cycConstant = CycObjectFactory.getCycConstantCacheById((Integer) idObject);
+      if (cycConstant == null) {
+        cycConstant = new CycConstant();
+        cycConstant.setId((Integer) idObject);
+        CycObjectFactory.addCycConstantCacheById(cycConstant);
+      }
+    }
+    else if (idObject instanceof Guid) {
+      cycConstant = CycObjectFactory.getCycConstantCacheByGuid((Guid) idObject);
+      if (cycConstant == null) {
+        cycConstant = new CycConstant();
+        cycConstant.setGuid((Guid) idObject);
+        CycObjectFactory.addCycConstantCacheByGuid(cycConstant);
+      }
     }
     else if ((idObject instanceof CycSymbol) && 
                  (idObject.equals(CycObjectFactory.makeCycSymbol(":FREE")))) {
-      cycConstant = CycObjectFactory.FREE_CONSTANT;
+      cycConstant = new CycConstant();
+      cycConstant.setFree();
     }
     else {
-      // ignore the name, which is expected to be blank
-      readObject();
-      cycConstant = CycObjectFactory.INVALID_CONSTANT;
-      isInvalidObject = true;
+      // Log.current.println("Unknown Constant ID type " + idObject + " (" + idObject.getClass() + ")");
+      cycConstant = null;
     }
 
     if (trace == API_TRACE_DETAILED) {
-      Log.current.println("readConstant: " + cycConstant.toString());
+      Log.current.println("readConstant: " + cycConstant.safeToString());
     }
 
     return cycConstant;
@@ -1174,17 +1156,18 @@ public class CfaslInputStream
   /**
    * Reads a variable from the CfaslInputStream.
    * 
-   * @return an complete <tt>CycVariable</tt> having the name
+   * @return an incomplete <tt>CycVariable</tt> having the input id
    * 
    * @throws IOException if a communications error occurs
    */
-  public CycVariable readCompleteVariable()
+  public CycVariable readVariable()
                            throws IOException {
-    final Integer hlVariableId = (Integer) readObject();
-    final String name = (String) readObject();
-    CycVariable cycVariable = new CycVariable(name, hlVariableId);
-    if (trace == API_TRACE_DETAILED) 
-      Log.current.println("readVariable: " + cycVariable.toString());
+    CycVariable cycVariable = new CycVariable();
+    cycVariable.hlVariableId = new Integer(readInt());
+
+    if (trace == API_TRACE_DETAILED) {
+      Log.current.println("readVariable: " + cycVariable.safeToString());
+    }
 
     return cycVariable;
   }
@@ -1199,24 +1182,37 @@ public class CfaslInputStream
   public CycObject readNart()
                    throws IOException {
     CycNart cycNart = null;
+    mark(10);
+
     int cfaslOpcode = read();
 
-    if (cfaslOpcode == CFASL_NIL) {
-        cycNart = CycObjectFactory.INVALID_NART;
-        isInvalidObject = true;
-    }
-    else if (cfaslOpcode != CFASL_LIST) {
-      if (cfaslOpcode == CFASL_SYMBOL) {
-        String name = (String) readObject();
-        System.err.println("readNart, symbol=" + name);
-      }
-      throw new RuntimeException("reading nart, expected a list, found " + cfaslOpcode);
-    }
-    else 
+    if (cfaslOpcode == CFASL_LIST) {
       cycNart = new CycNart(readCycList());
+    }
+    else {
+      if (trace == API_TRACE_DETAILED) {
+        Log.current.println("readNart using id, cfasl opcode?: " + cfaslOpcode);
+      }
+      reset();
+      cycNart = new CycNart();
+      try {
+        cycNart.setId(new Integer(readInt()));
+      }
+      catch (RuntimeException e) {
+        if (cfaslOpcode == CFASL_NIL) {
+          read();
+          if (trace == API_TRACE_DETAILED)
+            Log.current.println("readNart: invalid nart replaced with NIL");
+          return CycObjectFactory.nil;
+        }
+        else
+          throw new RuntimeException(e);
+      }
+    }
 
-    if (trace == API_TRACE_DETAILED)
-      Log.current.println("readNart: " + cycNart.toString());
+    if (trace == API_TRACE_DETAILED) {
+      Log.current.println("readNart: " + cycNart.safeToString());
+    }
 
     return cycNart;
   }
@@ -1230,28 +1226,11 @@ public class CfaslInputStream
    */
   public CycAssertion readAssertion()
                              throws IOException {
-    CycList formula = null;
-    Object formulaObject = null;
-    CycAssertion cycAssertion = null;
-      formulaObject = readObject();
-      if (formulaObject.toString().equals("NIL")) {
-        // bypass invalid assertion mt
-        readObject();
-        cycAssertion = CycObjectFactory.INVALID_ASSERTION;
-        isInvalidObject = true;
-      }
-      else {
-      try {
-        formula = (CycList) formulaObject;
-        CycObject mt = (CycObject) readObject();
-        cycAssertion = new CycAssertion(formula, mt);
-        }
-        catch (ClassCastException e) {
-          System.err.println("formulaObject " + formulaObject.toString() + "(" + formulaObject.getClass().getName() + ")");
-        }
-      }
+    CycList formula = (CycList) readObject();
+    CycObject mt = (CycObject) readObject();
+    CycAssertion cycAssertion = new CycAssertion(formula, mt);
     if (trace == API_TRACE_DETAILED) {
-      Log.current.println("readAssertion: " + cycAssertion.toString());
+      Log.current.println("readAssertion: " + cycAssertion.safeToString());
     }
 
     return cycAssertion;

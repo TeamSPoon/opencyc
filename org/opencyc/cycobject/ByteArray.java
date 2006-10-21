@@ -1,7 +1,12 @@
 package  org.opencyc.cycobject;
 
-import java.io.*;
-import org.opencyc.xml.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+import org.opencyc.xml.XMLStringWriter;
+import org.opencyc.xml.XMLWriter;
 
 /*****************************************************************************
  * Contains an array of bytes, as an object that directly represents a SubL
@@ -172,16 +177,7 @@ public class ByteArray extends DefaultCycObject implements Serializable {
     stream.defaultReadObject();
     int size = stream.readInt();
     this.bytes = new byte[size];
-    int index = 0, remainder = size;
-    while (index < size) {
-      int numOfBytes = stream.read(bytes, index, remainder);
-      if (numOfBytes == -1) 
-        throw new java.io.EOFException( "Unexpected EOF at index " + index + " of " + size);
-      else {
-        index += numOfBytes;
-        remainder -= numOfBytes;
-      }
-    }
+    stream.read(bytes);
   }
 
   public int compareTo(Object o){

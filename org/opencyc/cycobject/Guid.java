@@ -1,8 +1,10 @@
 package org.opencyc.cycobject;
 
-import java.io.*;
-import org.opencyc.api.*;
-import org.opencyc.xml.*;
+import java.io.IOException;
+import java.io.Serializable;
+
+import org.opencyc.xml.XMLStringWriter;
+import org.opencyc.xml.XMLWriter;
 
 /**
  * Provides the behavior and attributes of an OpenCyc GUID (Globally Unique
@@ -67,7 +69,7 @@ public class Guid implements Serializable {
      *
      * @return the hash code for this object
      */
-    public int hashCode () {
+    public int hashcode () {
         return guidString.hashCode();
     }
     

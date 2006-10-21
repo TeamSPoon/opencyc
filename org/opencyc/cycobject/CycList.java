@@ -1,17 +1,9 @@
 package  org.opencyc.cycobject;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-import org.opencyc.api.CycAccess;
-import org.opencyc.api.CycApiException;
-import org.opencyc.api.CycObjectFactory;
-import org.opencyc.util.StringUtils;
-import org.opencyc.xml.TextUtil;
-import org.opencyc.xml.XMLStringWriter;
-
-import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -22,6 +14,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Stack;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.api.CycObjectFactory;
+import org.opencyc.util.StringUtils;
+import org.opencyc.xml.TextUtil;
+import org.opencyc.xml.XMLStringWriter;
 import org.opencyc.xml.XMLWriter;
 
 
@@ -310,10 +309,6 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
     return isProperList;
   }
   
-  /** Returns the CycList size including the optional dotted element.  Note that this fools list iterators. 
-   *
-   * @return the CycList size including the optional dotted element
-   */
   public int size() {
     int result = super.size();
     if (!isProperList()) { result++; }
@@ -358,7 +353,6 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * @throws UnknownHostException if cyc server host not found on the network
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
-   * @deprecated use CycAccess.isFormulaWellFormed(this, mt);
    */
   public boolean isFormulaWellFormed(final ELMt mt)
   throws IOException, UnknownHostException, CycApiException {
@@ -373,7 +367,6 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * @throws UnknownHostException if cyc server host not found on the network
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
-   * @deprecated use CycAccess.isCycLNonAtomicReifableTerm();
    */
   public boolean isCycLNonAtomicReifableTerm() 
   throws IOException, UnknownHostException, CycApiException {
@@ -388,13 +381,13 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * @throws UnknownHostException if cyc server host not found on the network
    * @throws IOException if a data communication error occurs
    * @throws CycApiException if the api request results in a cyc server error
-   * @deprecated use CycAccess.isCycLNonAtomicUnreifableTerm();
    */
   public boolean isCycLNonAtomicUnreifableTerm() 
-  throws IOException, UnknownHostException, CycApiException {
+  throws IOException, UnknownHostException,
+  CycApiException {
     return CycAccess.current().isCycLNonAtomicUnreifableTerm(this);
   }
-    
+  
   /**
    * Creates a new <tt>CycList</tt> containing the given element.
    *
@@ -828,6 +821,14 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
   
   /**
    * Returns a <tt>String</tt> representation of this
+   * <tt>List</tt> without causing  additional api calls to complete the name field of constants.
+   */
+  public String safeToString() {
+    return toStringHelper(true);
+  }
+  
+  /**
+   * Returns a <tt>String</tt> representation of this
    * <tt>CycList</tt>.  When the parameter is true, the representation is created without causing
    * additional api calls to complete the name field of constants.
    *
@@ -889,19 +890,7 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * <tt>CycList</tt>.
    */
   public String toPrettyString(String indent) {
-    return  toPrettyStringInt(indent, "  ", "\n", false, false);
-  }
-  
-  /**
-   * Returns a `pretty-printed' <tt>String</tt> representation of this
-   * <tt>CycList</tt> with embedded strings escaped.
-   * @param indent, the indent string that is added before the
-   * <tt>String</tt> representation this <tt>CycList</tt>
-   * @return a `pretty-printed' <tt>String</tt> representation of this
-   * <tt>CycList</tt>.
-   */
-  public String toPrettyEscapedCyclifiedString(String indent) {
-    return  toPrettyStringInt(indent, "  ", "\n", true, true);
+    return  toPrettyStringInt(indent, "  ", "\n", false);
   }
   
   /**
@@ -913,7 +902,7 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * <tt>CycList</tt>.
    */
   public String toPrettyCyclifiedString(String indent) {
-    return  toPrettyStringInt(indent, "  ", "\n", true, false);
+    return  toPrettyStringInt(indent, "  ", "\n", true);
   }
   
   /**
@@ -926,7 +915,7 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    */
 
   public String toHTMLPrettyString (final String indent) {
-    return "<html><body>" + toPrettyStringInt(indent, "&nbsp&nbsp", "<br>", false, false) + "</body></html>";
+    return "<html><body>" + toPrettyStringInt(indent, "&nbsp&nbsp", "<br>", false) + "</body></html>";
   }
   
   /**
@@ -938,14 +927,12 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * representation this <tt>CycList</tt>is added at each level
    * of indenting
    * @param newLineString, the string added to indicate a new line
-   * @param shouldCyclify indicates that the output constants should have #$ prefix
-   * @param shouldEscape indicates that embedded strings should have appropriate escapes for the SubL reader
    * @return a `pretty-printed' <tt>String</tt> representation of this
    * <tt>CycList</tt>.
    */
   public String toPrettyStringInt(final String indent, 
       final String incrementIndent, final String newLineString,
-      final boolean shouldCyclify, final boolean shouldEscape) {
+      final boolean shouldCyclify) {
     final StringBuffer result = new StringBuffer(indent + "(");
     for(int i = 0; i < super.size(); i++) {
       Object element = this.get(i);
@@ -957,23 +944,15 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
       }
       if(element instanceof String) {
         if(i > 0) { result.append(" "); }
-        result.append('"');
-        if (shouldEscape)
-          result.append(StringUtils.escapeDoubleQuotes((String) element));
-        else
-          result.append(element);
-        result.append('"');
+        result.append("\"" + element + "\"");
       } else if (element instanceof CycList) {
         result.append(newLineString + ((CycList)element).
           toPrettyStringInt(indent + incrementIndent, incrementIndent, 
-          newLineString, shouldCyclify, shouldEscape));
+          newLineString, shouldCyclify));
       } else {
         if(i > 0) { result.append(" "); }
         if (shouldCyclify) {
-          if (shouldEscape)
-            result.append(DefaultCycObject.cyclify(element));
-          else
-            result.append(DefaultCycObject.cyclifyWithEscapeChars(element));
+          result.append(DefaultCycObject.cyclify(element));
         } else {
           result.append(element.toString());
         }
@@ -983,10 +962,7 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
       result.append(" . ");
       if(dottedElement instanceof String) {
         result.append("\"");
-        if (shouldEscape)
-          result.append(StringUtils.escapeDoubleQuotes((String) dottedElement));
-        else
-          result.append(dottedElement);
+        result.append(dottedElement);
         result.append("\"");
       } else {
         result.append(this.dottedElement.toString());
@@ -1028,12 +1004,6 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
     return !(e1.hasNext() || e2.hasNext());
   }
   
-  /** Returns true if the given object is equal to this object as EL CycL expressions
-   *
-   * @param o the given object
-   * @return true if the given object is equal to this object as EL CycL expressions, otherwise
-   * return false
-   */
   public boolean equalsAtEL(Object o) {
     if (o == this) { return true; }
     if (o == null) { return false; }
@@ -1066,10 +1036,6 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
           }
         }
         if (!(o1==null ? o2==null : ((CycList)o1).equalsAtEL(o2))) { return false; }
-      } else if ((o1 instanceof Integer && o2 instanceof Long) || (o1 instanceof Long && o2 instanceof Integer)) {
-        return ((Number) o1).longValue() == ((Number) o2).longValue();
-      } else if ((o1 instanceof Float && o2 instanceof Double) || (o1 instanceof Double && o2 instanceof Float)) {
-        return ((Number) o1).doubleValue() == ((Number) o2).doubleValue();
       } else {
         if (!(o1==null ? o2==null : o1.equals(o2))) { return false; }
       }
@@ -1162,6 +1128,15 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    *
    */
   public String cyclify() {
+    if (CycAccess.hasCurrent())
+      // efficiently get all the required constant names beforehand
+      try {
+        CycAccess.current().obtainConstantNames(treeConstants());
+      }
+      catch (Exception e) {
+        throw new CycApiException(e);
+      }
+    
     final StringBuffer result = new StringBuffer("(");
     String cyclifiedObject = null;
     for(int i = 0; i < super.size(); i++) {
@@ -1183,13 +1158,12 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
   public HashMap getPrettyStringDetails() {
     HashMap map = new HashMap();
     getPrettyStringDetails(this, "", 0, new CycList(), map);
-    int[] loc = { 0, toPrettyString("").length() };
+    int[] loc = { 0, toPrettyString("").length() - 1 };
     map.put(new CycList(), loc);
     return map;
   }
   
   private static int getPrettyStringDetails(final CycList list, final String indent, int currentPos, final CycList argPos, final HashMap map) {
-    // System.out.println( "list=" + list + " // indent= " + indent + " // currentPos= " + currentPos + "// argPos= " + argPos + "// map= " + map);
     String str;
     CycList newArgPos;
     String tab = "  ";
@@ -1197,8 +1171,8 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
     currentPos += str.length();
     String cyclifiedObject = null;
     int tempPos;
-    for (int i = 0, size = list.size(); i < size; i++) {
-      if (i > 0) {
+    for(int i = 0, size = list.size(); i < size; i++) {
+      if(i > 0) {
         str = " ";
         currentPos += str.length();
       }
@@ -1206,33 +1180,29 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
         currentPos += 2;
       }
       Object element = list.get(i);
-      if (element instanceof CycNart) {
+      if(element instanceof CycNart) {
         element = ((CycNart)element).toCycList();
       }
-      if (element instanceof String) {
+      if(element instanceof String) {
         str = "\"" + element + "\"";
         newArgPos = argPos.deepCopy();
         newArgPos.add(new Integer(i));
         int[] loc = {currentPos, currentPos + str.length()};
-        // System.out.println( "-- adding " + newArgPos + " referencing [" + loc[0] + "," + loc[1] + "] to the map " + map);
         map.put(newArgPos, loc);
         currentPos += str.length();
-      } else if (element instanceof CycList) {
+      } else if(element instanceof CycList) {
         argPos.add(new Integer(i));
         tempPos = currentPos + indent.length() + tab.length();
         currentPos = getPrettyStringDetails((CycList)element,
         indent + tab, currentPos, argPos, map);
-        int[] loc = {tempPos, currentPos};
-        CycList deepCopy = argPos.deepCopy();
-        map.put(deepCopy, loc);
-        // System.out.println( "-- adding " + deepCopy + " referencing [" + loc[0] + "," + loc[1] + "] to the map " + map);
+        int[] loc = {tempPos, currentPos-1};
+        map.put(argPos.deepCopy(), loc);
         argPos.remove(argPos.size() - 1);
       } else {
         str = element.toString();
         newArgPos = argPos.deepCopy();
         newArgPos.add(new Integer(i));
         int[] loc = {currentPos, currentPos + str.length()};
-        // System.out.println( "-- adding " + newArgPos + " referencing [" + loc[0] + "," + loc[1] + "] to the map " + map);
         map.put(newArgPos, loc);
         currentPos += str.length();
       }
@@ -1345,82 +1315,6 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
     }
   }
   
- /**
-  * Replaces the element at the specified position in this list with
-  * the specified element.
-  *
-  * @param index index of element to replace.
-  * @param element element to be stored at the specified position.
-  * @return the element previously at the specified position.
-  * @throws    IndexOutOfBoundsException if index out of range
-  *		  <tt>(index &lt; 0 || index &gt;= size())</tt>.
-  */
-  public Object set(int index, Object element) {
-    if ((index == (size() - 1)) && (!isProperList())) {
-      final Object oldValue = getDottedElement();
-      setDottedElement(element);
-      return oldValue;
-    } 
-    else
-      return super.set(index, element);
-  }
-  
-  /**
-   * This behaves like the SubL function GETF
-   */
-  public Object getf(CycSymbol indicator) {
-    int indicatorIndex = firstEvenIndexOf(indicator);
-    if (indicatorIndex == -1) { // the indicator is not present
-      return null;
-    }
-    else {
-      return get(indicatorIndex + 1);
-    }
-  }
-  
-  private int firstEvenIndexOf(Object elem) {
-    if (elem == null) {
-      for (int i = 0; i < size(); i = i + 2) {
-        if (get(i) == null) {
-          return i;
-        }
-      }
-    }
-    else {
-	    for (int i = 0; i < size(); i = i + 2) {
-        if (elem.equals(get(i))) {
-  		    return i;
-        }
-      }
-  	}
-  	return -1;
-  }
-  
-  /**
-   * Returns a <tt>CycList</tt> of all the indices of the given element within this CycList.
-   *
-   * @param elem The element to search for in the list
-   * @return a <tt>CycList</tt> of all the indices of the given element within this CycList.
-   */
-  public CycList allIndicesOf(Object elem) {
-    CycList result = new CycList();
-    if (elem == null) {
-	    for (int i = 0; i < size(); i++) {
-        if (get(i) == null) {
-          result.add(i);
-        }
-      }
-    }
-    else {
-	    for (int i = 0; i < size(); i++) {
-        if (elem.equals(get(i))) {
-          result.add(i);
-        }
-      }
-  	}
-    return result;
-  }
-  
   /**
    * Returns the list of objects of the specified type found in the tree.
    * 
@@ -1453,24 +1347,13 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * @param object the object to be found in the tree.
    * @return true if the proper list tree contains the given object anywhere in the tree
    */
-  public boolean treeContains(Object object) {
-    if (object instanceof CycNart) {
-      object = ((CycNart)object).toCycList();
-    }
-    if(this.contains(object)) {
+  public boolean treeContains(final Object object) {
+    if(this.contains(object))
       return true;
-    }
     for (int i = 0; i < this.size(); i++) {
-      Object element = this.get(i);
-      if (element instanceof CycNart) {
-        element = ((CycNart)element).toCycList();
-      }
-      if (element.equals(object)) {
+      final Object element = this.get(i);
+      if ((element instanceof CycList) && (((CycList)element).treeContains(object)))
         return true;
-      }
-      if ((element instanceof CycList) && (((CycList)element).treeContains(object))) {
-        return true;
-      }
     }
     return false;
   }
@@ -1626,14 +1509,12 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * @return the object from this CycList according to the
    * path specified by the given (n1 n2 ...) zero-indexed path expression
    */
-  public Object getSpecifiedObject(final CycList pathSpecification) {
-    if (pathSpecification.size() == 0) { return this; }
-    Object answer = (CycList) this.clone();
-    CycList tempPathSpecification = pathSpecification;
-    int index = 0;
+  public Object getSpecifiedObject(CycList pathSpecification) {
     try {
-      while (! tempPathSpecification.isEmpty()) {
-        index = ((Integer) tempPathSpecification.first()).intValue();
+      if (pathSpecification.size() == 0) { return this; }
+      Object answer = (CycList) this.clone();
+      while (! pathSpecification.isEmpty()) {
+        int index = ((Integer) pathSpecification.first()).intValue();
         if(answer instanceof CycNart) {
           if(index == 0) {
             answer = ((CycNart)answer).getFunctor();
@@ -1643,14 +1524,13 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
         } else {
           answer = ((CycList)answer).get(index);
         }
-        tempPathSpecification = (CycList) tempPathSpecification.rest();
+        pathSpecification = (CycList) pathSpecification.rest();
       }
       return answer;
     } catch (Exception e) {
       throw new RuntimeException("Can't get object specified by path expression: '" +
-                                 pathSpecification + "' in forumla: '" + this + "'.  answer: " + answer + 
-                                 " index: " + index + "\n" +
-                                 StringUtils.getStringForException(e));
+      pathSpecification + "' in forumla: '" + this + "'.\n" +
+      StringUtils.getStringForException(e));
     }
   }
   
@@ -1719,20 +1599,14 @@ public class CycList extends ArrayList implements CycObject, List, Serializable 
    * @param curPosPath The current arg position being explored
    * @param result Current store of arg positions found so far
    */
-  private static void internalGetArgPositionsForTerm(Object term, Object subTree, 
+  private static void internalGetArgPositionsForTerm(final Object term, final Object subTree, 
       final List curPosPath, final List result) {
-    if (term instanceof CycNart) {
-      term = ((CycNart)term).toCycList();
-    }
     if (term == subTree) {
       final List newArgPos = new ArrayList(curPosPath);
       result.add(newArgPos);
       return;
     }
     if (subTree == null) { return; }
-    if (subTree instanceof CycNart) {
-      subTree = ((CycNart)subTree).toCycList();
-    }
     if (subTree.equals(term)) {
       final List newArgPos = new ArrayList(curPosPath);
       result.add(newArgPos);

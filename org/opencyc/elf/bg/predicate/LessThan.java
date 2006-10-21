@@ -93,13 +93,13 @@ public class LessThan extends Operator implements Predicate {
    */
   protected Boolean evaluate(Number arg1, Number arg2) {
     if (arg1 instanceof Integer)
-      return new Boolean(((Integer) arg1).compareTo(arg2) < 0);
+      return new Boolean( arg1.intValue()< arg2.intValue());
     if (arg1 instanceof Long)
-      return new Boolean(((Long) arg1).compareTo(arg2) < 0);
+      return new Boolean(((Long) arg1).compareTo((Long)arg2) < 0);
     if (arg1 instanceof Float)
-      return new Boolean(((Float) arg1).compareTo(arg2) < 0);
+      return new Boolean(((Float) arg1).compareTo((Float) arg2) < 0);
     else
-      return new Boolean(((Double) arg1).compareTo(arg2) < 0);
+      return new Boolean(((Double) arg1).compareTo((Double) arg2) < 0);
   }
   
   //// Private Area

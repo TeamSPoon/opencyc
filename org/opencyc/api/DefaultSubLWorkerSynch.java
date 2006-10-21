@@ -1,6 +1,6 @@
 /* $Id$
  *
- * Copyright (c) 2004 - 2006 Cycorp, Inc.  All rights reserved.
+ * Copyright (c) 2004 - 2005 Cycorp, Inc.  All rights reserved.
  * This software is the proprietary information of Cycorp, Inc.
  * Use is subject to license terms.
  */
@@ -8,23 +8,22 @@
 package org.opencyc.api;
 
 //// Internal Imports
-import org.opencyc.cycobject.CycList;
-import org.opencyc.util.*;
+import java.io.IOException;
+import java.util.List;
 
-//// External Imports
-import java.io.*;
-import java.util.*;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.util.TimeOutException;
 
 /**
- * <P>SubLWorkerSynch is designed to provide a handle for a particular
- * communication event with a Cyc server in a synchronous manner.
+  * <P>SubLWorkerSynch is designed to provide a handle for a particular 
+ * communication event with a Cyc server in a synchronous manner. 
  * DefaultSubLWorkerSynch provides the default
  * implementation while SubLWorker and DefaultSubLWorker provide
  * asynchronous communications capabilities. Currently, SubLWorkerSynchs are one-shot,
  * i.e., a new SubLWorkerSynch needs to be created for every new communication.
  * SubLWorkerSynchs are cancelable, time-outable and provide means for incremental
  * return results.
- *
+ *  
  * <P>Example usage: <code>
  * try {
  *    CycAccess access = new CycAccess("localhost", 3640);
@@ -58,9 +57,9 @@ import java.util.*;
  * @date March 25, 2004, 2:01 PM
  * @version $Id$
  */
-public class DefaultSubLWorkerSynch
-    extends DefaultSubLWorker
-    implements SubLWorkerSynch, SubLWorkerListener {
+public class DefaultSubLWorkerSynch 
+extends DefaultSubLWorker 
+implements SubLWorkerSynch, SubLWorkerListener {
   
   //// Constructors
   
@@ -80,8 +79,8 @@ public class DefaultSubLWorkerSynch
    * values will cause an exception to be thrown). When communications time
    * out, an abort command is sent back to the Cyc server so processing will
    * stop there as well.
-   */
-  public DefaultSubLWorkerSynch(String subLCommand, CycAccess access,
+   */  
+  public DefaultSubLWorkerSynch(String subLCommand, CycAccess access, 
       long timeoutMsecs) {
     this(access.makeCycList(subLCommand), access, timeoutMsecs);
   }
@@ -91,8 +90,8 @@ public class DefaultSubLWorkerSynch
    * @param access the Cyc server that should process the SubL command
    * @param expectIncrementalResults boolean indicating wether to expect
    * incremental results
-   */
-  public DefaultSubLWorkerSynch(String subLCommand, CycAccess access,
+   */  
+  public DefaultSubLWorkerSynch(String subLCommand, CycAccess access, 
       boolean expectIncrementalResults) {
     this(access.makeCycList(subLCommand), access, expectIncrementalResults);
   }
@@ -107,20 +106,17 @@ public class DefaultSubLWorkerSynch
    * values will cause an exception to be thrown). When communications time
    * out, an abort command is sent back to the Cyc server so processing will
    * stop there as well.
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
-   */
-  public DefaultSubLWorkerSynch(String subLCommand, CycAccess access,
+   */  
+  public DefaultSubLWorkerSynch(String subLCommand, CycAccess access, 
       boolean expectIncrementalResults, long timeoutMsec) {
-    this(access.makeCycList(subLCommand), access,
-        expectIncrementalResults, timeoutMsec, CycConnection.NORMAL_PRIORITY);
+    this(access.makeCycList(subLCommand), access, 
+      expectIncrementalResults, timeoutMsec);
   }
   
   /** Creates a new instance of DefaultSubLWorkerSynch.
    * @param subLCommand the SubL command that does the work as a CycList
    * @param access the Cyc server that should process the SubL command
-   */
+   */  
   public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access) {
     this(subLCommand, access, false);
   }
@@ -133,10 +129,10 @@ public class DefaultSubLWorkerSynch
    * values will cause an exception to be thrown). When communications time
    * out, an abort command is sent back to the Cyc server so processing will
    * stop there as well.
-   */
-  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access,
+   */  
+  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access, 
       long timeoutMsecs) {
-    this( subLCommand, access, timeoutMsecs, CycConnection.NORMAL_PRIORITY);
+    this( subLCommand, access, false, timeoutMsecs);
   }
   
   /** Creates a new instance of DefaultSubLWorkerSynch.
@@ -144,41 +140,10 @@ public class DefaultSubLWorkerSynch
    * @param access the Cyc server that should process the SubL command
    * @param expectIncrementalResults boolean indicating wether to expect
    * incremental results
-   */
-  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access,
+   */  
+  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access, 
       boolean expectIncrementalResults) {
-    this( subLCommand, access, expectIncrementalResults, CycConnection.NORMAL_PRIORITY);
-  }
-  
-  /** Creates a new instance of DefaultSubLWorkerSynch.
-   * @param subLCommand the SubL command that does the work as a CycList
-   * @param access the Cyc server that should process the SubL command
-   * @param timeoutMsecs the max time to wait in msecs for the work to
-   * be completed before giving up (0 means to wait forever, and negative
-   * values will cause an exception to be thrown). When communications time
-   * out, an abort command is sent back to the Cyc server so processing will
-   * stop there as well.
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
-   */
-  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access,
-      long timeoutMsecs, Integer priority) {
-    this( subLCommand, access, false, timeoutMsecs, priority);
-  }
-  
-  /** Creates a new instance of DefaultSubLWorkerSynch.
-   * @param subLCommand the SubL command that does the work as a CycList
-   * @param access the Cyc server that should process the SubL command
-   * @param expectIncrementalResults boolean indicating wether to expect
-   * incremental results
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
-   */
-  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access,
-      boolean expectIncrementalResults, Integer priority) {
-    this( subLCommand, access, expectIncrementalResults, 0, priority);
+    this( subLCommand, access, expectIncrementalResults, 0);
   }
   
   /** Creates a new instance of DerfaultSubLWorker.
@@ -191,13 +156,10 @@ public class DefaultSubLWorkerSynch
    * values will cause an exception to be thrown). When communications time
    * out, an abort command is sent back to the Cyc server so processing will
    * stop there as well.
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
-   */
-  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access,
-      boolean expectIncrementalResults, long timeoutMsecs, Integer priority) {
-    super(subLCommand, access, expectIncrementalResults, timeoutMsecs, priority);
+   */  
+  public DefaultSubLWorkerSynch(CycList subLCommand, CycAccess access, 
+      boolean expectIncrementalResults, long timeoutMsecs) {
+    super(subLCommand, access, expectIncrementalResults, timeoutMsecs);
     addListener(this);
   }
   
@@ -211,15 +173,14 @@ public class DefaultSubLWorkerSynch
    * @throws CycApiException thrown if any other error occurs
    * @return The work produced by this SubLWorkerSynch
    */
-  public Object getWork()
-      throws IOException, TimeOutException, CycApiException, OpenCycTaskInterruptedException {
-    synchronized (lock) {
-      if (getStatus() == SubLWorkerStatus.NOT_STARTED_STATUS) {
-        start();
-      }
-      if (getStatus() == SubLWorkerStatus.WORKING_STATUS) {
-        try {
-          lock.currentOwner = Thread.currentThread();
+  public Object getWork() 
+  throws IOException, TimeOutException, CycApiException {
+    if (getStatus() == SubLWorkerStatus.NOT_STARTED_STATUS) {
+      start();
+    }
+    if (getStatus() == SubLWorkerStatus.WORKING_STATUS) {
+      try {
+        synchronized (lock) {
           lock.wait(getTimeoutMsecs());
           if (getStatus() == SubLWorkerStatus.WORKING_STATUS) {
             try {
@@ -228,56 +189,48 @@ public class DefaultSubLWorkerSynch
               throw xcpt;
             } finally {
               this.fireSubLWorkerTerminatedEvent(new SubLWorkerEvent(this,
-                SubLWorkerStatus.EXCEPTION_STATUS,
-                  new TimeOutException("Communications took more than: "
-                    + getTimeoutMsecs() + " msecs.\nWhile trying to execute: \n"
-                    + getSubLCommand().toPrettyCyclifiedString(""))));
+                SubLWorkerStatus.EXCEPTION_STATUS, 
+                new TimeOutException("Communications took more than: " 
+                + getTimeoutMsecs() + " msecs.\nWhile trying to execute: \n" 
+                + getSubLCommand().stringApiValue())));
             }
           }
-        } catch (Exception xcpt) {
-          setException(xcpt);
-        } finally {
-          lock.currentOwner = null;
         }
+      } catch (Exception xcpt) {
+        throw new RuntimeException(xcpt);
       }
-      if (getException() != null) {
-        try {
-          throw getException();
-        } catch (IOException ioe) {
-          throw ioe;
-        } catch (TimeOutException toe) {
-          throw toe;
-        } catch (CycApiException cae) {
-          throw cae;
-        } catch (InterruptedException ie) {
-          setException(new OpenCycTaskInterruptedException(ie));
-          throw (RuntimeException)getException();
-        } catch (RuntimeException re) {
-          return re;
-        } catch (Exception xcpt) {
-          setException(new RuntimeException(xcpt));
-          throw (RuntimeException)getException();
-        }
-      }
-      return work;
     }
+    if (getException() != null) { 
+      try {
+        throw getException(); 
+      } catch (IOException ioe) {
+        throw ioe; 
+      } catch (TimeOutException toe) {
+        throw toe;
+      } catch (CycApiException cae) {
+        throw cae;
+      } catch (Exception xcpt) {
+        throw new RuntimeException(xcpt);
+      }
+    }
+    return work;
   }
   
   /** Ignore.
    * @param event the event object with details about this event
-   */
+   */  
   public void notifySubLWorkerStarted(SubLWorkerEvent event) {}
   
   /** Saves any  available work.
    * @param event the event object with details about this event
-   */
+   */  
   public void notifySubLWorkerDataAvailable(SubLWorkerEvent event) {
     appendWork(event.getWork());
-  }
+  }  
   
-  /** Make sure to save any applicable exceptions,
+  /** Make sure to save any applicable exceptions, 
    * @param event the event object with details about this event
-   */
+   */  
   public void notifySubLWorkerTerminated(SubLWorkerEvent event) {
     setException(event.getException());
     synchronized (lock) {
@@ -288,14 +241,14 @@ public class DefaultSubLWorkerSynch
   /** Returns the exception thrown in the process of doing the work.
    * The value will be null if now exception has been thrown.
    * @return the exception thrown in the process of doing the work
-   */
+   */  
   public Exception getException() { return e; }
   
   //// Protected Area
   
   /** Sets the exception.
    * @param e The exception that was thrown while processing this worker
-   */
+   */  
   protected void setException(Exception e) {
     this.e = e;
   }
@@ -303,7 +256,7 @@ public class DefaultSubLWorkerSynch
   /** Make sure to keep track of the resulting work, especially in the
    * case if incremental return results.
    * @param newWork The lastest batch of work.
-   */
+   */  
   protected void appendWork(Object newWork) {
     if (expectIncrementalResults()) {
       if (work == null) {
@@ -312,24 +265,22 @@ public class DefaultSubLWorkerSynch
       if (newWork != CycObjectFactory.nil) {
         ((List)work).addAll((List)newWork);
       }
-    } else {
+    }
+    else {
       work = newWork;
     }
   }
   
   //// Private Area
-  static class Lock {
-    Thread currentOwner;
-  }
   
   //// Internal Rep
   
-  private Lock lock = new Lock();
+  private Object lock = new Object();
   private Object work = null;
   private Exception e = null;
   
   /** For tesing puposes only. */
-  static SubLWorkerSynch testWorker;
+  static SubLWorkerSynch testWorker; 
   
   //// Main
   
@@ -354,7 +305,7 @@ public class DefaultSubLWorkerSynch
             testWorker = new DefaultSubLWorkerSynch("(do-assertions (a))", access);
             Object obj = testWorker.getWork();
             System.out.println("Finished work with " + testWorker.getStatus().getName()
-            + ", received: " + obj);
+              + ", received: " + obj);
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -368,8 +319,8 @@ public class DefaultSubLWorkerSynch
       
       System.out.println("\nGiving chance to get ready ....\n");
       Thread.currentThread().sleep(1000);
-      
-      System.out.println( "\nOk, second round ....\n\n");
+
+      System.out.println( "\nOk, second round ....\n\n");      
       workerThread = new Thread() {
         public void run() {
           try {
@@ -377,7 +328,7 @@ public class DefaultSubLWorkerSynch
             testWorker = new DefaultSubLWorkerSynch("(do-assertions (a))", access);
             Object obj = testWorker.getWork();
             System.out.println("Finished work with " + testWorker.getStatus().getName()
-            + ", received: " + obj);
+              + ", received: " + obj);
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -388,10 +339,10 @@ public class DefaultSubLWorkerSynch
       System.out.println("About to abort work.");
       testWorker.abort();
       System.out.println("Aborted work.");
-      
+
       System.out.println("\nGiving chance to get ready ....\n");
       Thread.currentThread().sleep(1000);
-      
+
       System.out.println( "\nOk, third round ....\n\n");
       workerThread = new Thread() {
         public void run() {
@@ -403,13 +354,13 @@ public class DefaultSubLWorkerSynch
             Object obj = testWorker.getWork();
             timeAfter = System.currentTimeMillis();
             System.out.println("Finished work with " + testWorker.getStatus().getName()
-            + " after " + (timeAfter - timeBefore)
-            + " millisecs (should be about 500), received: " + obj);
+              + " after " + (timeAfter - timeBefore) 
+              + " millisecs (should be about 500), received: " + obj);
           } catch (Exception e) {
             timeAfter = System.currentTimeMillis();
-            System.out.println( "The current time is: " + (timeAfter - timeBefore)
-            + " millisecs (should be about 500)");
-            e.printStackTrace();
+            System.out.println( "The current time is: " + (timeAfter - timeBefore) 
+              + " millisecs (should be about 500)");
+            e.printStackTrace(); 
           }
         }
       };

@@ -1,6 +1,7 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.inferencesupport.UnitTest;
 
 /**
  * <tt>VariableSelectionAttributes</tt> object to model the attributes and sort behavior

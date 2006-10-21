@@ -1,11 +1,9 @@
 package org.opencyc.cyclobject;
 
-import org.opencyc.xml.XMLWriter;
-
-import java.io.Serializable;
 import java.io.IOException;
+import java.io.Serializable;
 
-import java.util.List;
+import org.opencyc.xml.XMLWriter;
 
 /*****************************************************************************
  * KB comment for #$CycLTerm as of 2002/05/07:<p>

@@ -1,6 +1,6 @@
 package org.opencyc.cycobject;
 
-import java.util.*;
+import java.util.Comparator;
 
 /**
  * Implements a <tt>Comparator</tt> for the <tt>sort</tt> method of the

@@ -51,7 +51,7 @@ public class ExportKif {
         if( args.length==2 ) {
         cm = new ExportKif(args[0], Integer.parseInt(args[1]),
                     CycConnection.DEFAULT_COMMUNICATION_MODE,
-                    CycAccess.DEFAULT_CONNECTION);
+                    CycAccess.DEFAULT_IS_LEGACY_MODE);
 
         } else {
         cm = new ExportKif();
@@ -68,22 +68,6 @@ public class ExportKif {
      */
     public ExportKif() throws IOException, CycApiException {
     if( cyc==null )	cyc =  new CycAccess();
-    primaryStart();
-    System.out.println("loaded ExportKif");
-    }
-
-    /**
-     * Constructs a new ExportKif object to the given CycProxyAgent in the given
-     * agent community.
-     *
-     * @param myAgentName the name of the local agent
-     * @param cycProxyAgentName the name of the cyc proxy agent
-     * @param agentCommunity the agent community to which the cyc proxy agent belongs
-     */
-    public ExportKif (String myAgentName,
-               String cycProxyAgentName,
-               int agentCommunity) throws IOException, CycApiException  {
-    if( cyc==null )	cyc = new CycAccess(myAgentName,cycProxyAgentName,agentCommunity);
     primaryStart();
     System.out.println("loaded ExportKif");
     }
@@ -193,7 +177,7 @@ public class ExportKif {
     if( term instanceof Float ) return(term.toString());
     if( term instanceof CycVariable ) {
         CycVariable cv = (CycVariable)term;
-        return "'$jCycVariable'('?"+cv.name +"','"+cv.id+"')";
+        return "'$jCycVariable'('?"+cv.name +"','"+cv.hlVariableId+"')";
     }
     if( term instanceof CycAssertion ) {
         CycAssertion ca = ((CycAssertion)term);

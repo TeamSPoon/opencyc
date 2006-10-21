@@ -3,13 +3,10 @@
 package org.opencyc.api;
 
 //// Internal Imports
-import org.opencyc.cycobject.*;
-import org.opencyc.api.*;
-import org.opencyc.util.*;
+import java.io.IOException;
 
-//// External Imports
-import java.util.*;
-import java.io.*;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.util.TimeOutException;
 
 /**
  * <P>SubLWorker is designed to provide a handle for a particular 
@@ -69,7 +66,7 @@ import java.io.*;
  * @date March 17, 2004, 11:26 AM
  * @version $Id$
  */
-public interface SubLWorker extends Cancelable {
+public interface SubLWorker {
   
   /**
    * Returns the SubL command that will be evaluated to execute the
@@ -92,18 +89,6 @@ public interface SubLWorker extends Cancelable {
    * be valid until the start event has been sent out.
    */  
   Integer getId();
-  
-  /**
-   * Return the task's priority. This is a value that meets the
-   * constraints of SL:SET-PROCESS-PRIORITY.
-   * @see CycConnection.MAX_PRIORITY
-   * @see CycConnection.CRITICAL_PRIORITY
-   * @see CycConnection.NORMAL_PRIORITY
-   * @see CycConnection.BACKGROUND_PRIORITY
-   * @see CycConnection.MIN_PRIORITY
-   * @return the priority of the process
-   */
-  Integer getPriority();
   
   /**
    * This call will start the Cyc server processing the worker's SubL command.
@@ -194,12 +179,6 @@ public interface SubLWorker extends Cancelable {
    * @return a string representation of the SubLWorker
    */  
   String toString(int indentLength);
-  
-  /**
-   * Indicates whether this communication should be attempted even if
-   * the current lease to the Cyc image has expired.
-   */  
-  boolean shouldIgnoreInvalidLeases();
   
   /** 
    * Public for implementation reasons only, this method should

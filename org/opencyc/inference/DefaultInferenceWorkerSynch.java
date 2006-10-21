@@ -108,28 +108,8 @@ public class DefaultInferenceWorkerSynch extends DefaultInferenceWorker implemen
       InferenceParameters queryProperties, Map nlGenerationProperties, 
       CycSymbol answerProcessingFunction, boolean optimizeVariables, 
       CycAccess access, long timeoutMsecs) {
-    this(query, mt, queryProperties, nlGenerationProperties, answerProcessingFunction,
-      optimizeVariables, access, timeoutMsecs, CycConnection.NORMAL_PRIORITY);
-  }
-
-  /**
-   * Creates a new instance of DefaultInferenceWorker.
-   * @param query the query sentence
-   * @param mt the inference microtheory
-   * @param queryProperties the query properties
-   * @param nlGenerationProperties the natural language generation properties
-   * @param answerProcessingFunction the answer processing function
-   * @param optimizeVariables the indicatior for whether variables are optimized
-   * @param access the Cyc communications object
-   * @param timeoutMsecs the timeout duration in milliseconds
-   * @param priority the SubL task priority
-   */
-  public DefaultInferenceWorkerSynch(CycList query, ELMt mt, 
-      InferenceParameters queryProperties, Map nlGenerationProperties, 
-      CycSymbol answerProcessingFunction, boolean optimizeVariables, 
-      CycAccess access, long timeoutMsecs, Integer priority) {
     super(query, mt, queryProperties, nlGenerationProperties, answerProcessingFunction,
-      optimizeVariables, access, timeoutMsecs, priority);
+      optimizeVariables, access, timeoutMsecs);
     init();
   }
   
@@ -236,7 +216,7 @@ public class DefaultInferenceWorkerSynch extends DefaultInferenceWorker implemen
   public static void main(String[] args) {
     System.out.println("Starting");
     try {
-      CycAccess access = new CycAccess("localhost", 3600);
+      CycAccess access = new CycAccess("CycServer", 3600);
       ELMt inferencePSC = access.makeELMt("#$InferencePSC");
       String query = "(#$isa ?X #$Dog)";
       InferenceWorkerSynch worker = new DefaultInferenceWorkerSynch(query, 

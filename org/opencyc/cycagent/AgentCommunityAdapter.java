@@ -1,10 +1,11 @@
 package org.opencyc.cycagent;
 
 import java.io.IOException;
+
 import javax.naming.TimeLimitExceededException;
-import fipaos.ont.fipa.*;
-import fipaos.ont.fipa.fipaman.*;
-import org.opencyc.util.Timer;
+
+import fipaos.ont.fipa.ACL;
+import fipaos.ont.fipa.fipaman.AgentID;
 
 /**
  * Defines the interface for interacting with an agent community such as CoABS or FIPA-OS.<p>

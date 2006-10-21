@@ -61,7 +61,7 @@ public class CycJavaClient extends Thread {
         st.wordChars( '*', '*' ); st.wordChars( '/', '/' ); st.wordChars( '.', '.' ); st.wordChars( '#', '#' ); st.wordChars( ':', ':' ); st.wordChars( '!', '!' );
         st.wordChars( '$', '$' ); st.wordChars( '?', '?' ); st.wordChars( '%', '%' ); st.wordChars( '&', '&' );
         try {
-        CycList todo = cyclp.read(st);
+        CycList todo = cyclp.read(st.toString());
         System.out.println(todo);
         if(todo.first().equals(QUIT_COMMAND)) {
         // Do client goodbyes

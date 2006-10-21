@@ -1,8 +1,10 @@
 package org.opencyc.cycagent.coabs;
 
-import junit.framework.*;
-import fipaos.ont.fipa.*;
-import fipaos.parser.ParserException;
+import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import fipaos.ont.fipa.ACL;
 
 /**
  * Provides a suite of JUnit test cases for the <tt>org.opencyc.cycagent.coabs</tt> package.<p>

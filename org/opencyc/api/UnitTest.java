@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -68,13 +67,14 @@ import org.opencyc.api.*;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE AND KNOWLEDGE
  * BASE CONTENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManagerListener {
+public class UnitTest extends TestCase {
   /** the test host */
-  public static String testHostName = CycConnection.DEFAULT_HOSTNAME;
+  public static final String testHostName = CycConnection.DEFAULT_HOSTNAME;
+  //public static final String testHostName = "aruba.cyc.com";
 
   /** the test base port */
-  public static int testBasePort = CycConnection.DEFAULT_BASE_PORT;
-//  public static int testBasePort = 3640;
+  public static final int testBasePort = CycConnection.DEFAULT_BASE_PORT;
+//  public static final int testBasePort = 3640;
 
   /** Indicates the use of a local CycConnection object to connect with a Cyc server. */
   public static final int LOCAL_CYC_CONNECTION = 1;
@@ -84,10 +84,9 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
   /** the connection mode */
   public static int connectionMode = LOCAL_CYC_CONNECTION;
-//  public static int connectionMode = SOAP_CYC_CONNECTION;
 
   /** the SOAP service url */
-  public static final String endpointURLString = "http://207.207.9.187/axis/services/CycSOAPService";
+  public static final String endpointURLString = "http://207.207.8.29/axis/services/CycSOAPService";
 
   /** the endpoint URL for the Cyc API web service */
   protected static URL endpointURL;
@@ -123,36 +122,57 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
     TestSuite testSuite = new TestSuite();
     testSuite.addTest(new UnitTest("testMakeValidConstantName"));
-    testSuite.addTest(new UnitTest("testCycAccessInitialization"));
+    testSuite.addTest(new UnitTest("testAsciiCycConnection"));
     testSuite.addTest(new UnitTest("testBinaryCycConnection1"));
     testSuite.addTest(new UnitTest("testBinaryCycConnection2"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess1"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess1"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess2"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess2"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess3"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess3"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess4"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess4"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess5"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess5"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess6"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess6"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess7"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess7"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess8"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess8"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess9"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess9"));
-    testSuite.addTest(new UnitTest("testBinaryCycAccess10")); 
-/*    testSuite.addTest(new UnitTest("testBinaryCycAccess11")); */
+    testSuite.addTest(new UnitTest("testAsciiCycAccess10"));
+    testSuite.addTest(new UnitTest("testBinaryCycAccess10"));
+    testSuite.addTest(new UnitTest("testBinaryCycAccess11"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess12"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess13"));
     testSuite.addTest(new UnitTest("testGetGafs"));
     testSuite.addTest(new UnitTest("testGetCycImage"));
     testSuite.addTest(new UnitTest("testGetELCycTerm"));
+    testSuite.addTest(new UnitTest("testAsciiCycAccess14"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess14"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess15"));
     testSuite.addTest(new UnitTest("testBinaryCycAccess16"));
     testSuite.addTest(new UnitTest("testAssertWithTranscriptAndBookkeeping")); 
     testSuite.addTest(new UnitTest("testGetArg2"));
     testSuite.addTest(new UnitTest("testUnicodeCFASL"));
-    testSuite.addTest(new UnitTest("testCycLeaseManager"));
-    testSuite.addTest(new UnitTest("testInferenceProblemStoreReuse"));
-    testSuite.addTest(new UnitTest("testInvalidTerms"));
 
     return testSuite;
+  }
+
+  /**
+   * Main method in case tracing is prefered over running the JUnit GUI.
+   * 
+   * @param args the list of command line args (unused)
+   */
+  public static void main(String[] args) {
+    TestRunner.run(suite());
+
+
+    // kill all threads in the event of an error
+    System.exit(0);
   }
 
   /**
@@ -202,185 +222,152 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
   }
 
   /**
-   * Tests CycAccess initialization.
+   * Tests the fundamental aspects of the ascii api connection to the OpenCyc server.
+   * @throws RuntimeException DOCUMENT ME!
    */
-  public void testCycAccessInitialization() {
-    System.out.println("\n**** testCycAccessInitialization ****");
+  public void testAsciiCycConnection() {
+    if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycConnection in XML SOAP usage ****");
 
-    CycAccess cycAccess = null;
+      return;
+    }
 
-    System.out.println("creating CycAccess 1");
-    try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
+    System.out.println("\n**** testAsciiCycConnection ****");
+
+    CycConnectionInterface cycConnection = null;
+
+    if (connectionMode == LOCAL_CYC_CONNECTION) {
+      try {
+        CycAccess cycAccess = null;
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+        cycConnection = cycAccess.cycConnection;
+
+        //cycConnection.trace = true;
       }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+       catch (ConnectException e) {
+        System.out.println("Could not connect to host " + testHostName + " port " + testBasePort);
+        Assert.fail(e.toString());
       }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
+       catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail(e.toString());
       }
     }
-     catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
-      Assert.fail(e.toString());
+    else {
+      throw new RuntimeException("Invalid connection Mode");
+    }
+
+    // Test return of atom.
+    String command = "(+ 2 3)";
+    Object[] response = { new Integer(0), "" };
+
+    try {
+      response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-    cycAccess.close();
-    
-    System.out.println("CycAccess 1 closed, creating CycAccess 2");
+
+    Assert.assertEquals(Boolean.TRUE, 
+                        response[0]);
+    Assert.assertEquals(new Integer(5), 
+                        response[1]);
+
+
+    // Test return of string.
+    command = "(quote " + '\"' + "abc" + '\"' + ")";
+
     try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
-      Assert.fail(e.toString());
+      //cycConnection.trace = 1;
+      response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-    cycAccess.close();
-    
-    System.out.println("CycAccess 2 closed, creating CycAccess 3");
+
+    Assert.assertEquals(Boolean.TRUE, 
+                        response[0]);
+    Assert.assertEquals("abc", 
+                        response[1]);
+
+
+    // Test return of symbolic expression.
+    command = "(quote (a b (c d (e) f)))";
+
     try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
-      Assert.fail(e.toString());
+      response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-    cycAccess.close();
-    
-    System.out.println("CycAccess 3 closed, creating CycAccess 4");
+
+    Assert.assertEquals(Boolean.TRUE, 
+                        response[0]);
+    Assert.assertEquals("(A B (C D (E) F))", 
+                        response[1].toString());
+
+
+    // Test return of improper list.
+    command = "(quote (a . b))";
+
     try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
-      Assert.fail(e.toString());
+      response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-    cycAccess.close();
-    
-    System.out.println("CycAccess 4 closed, creating CycAccess 5");
+
+    Assert.assertEquals(Boolean.TRUE, 
+                        response[0]);
+    Assert.assertEquals("(A . B)", 
+                        response[1].toString());
+
+
+    // Test function evaluation.
+    command = "(member? #$Dog '(#$DomesticPet #$Dog))";
+
     try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
-      Assert.fail(e.toString());
+      response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-    cycAccess.close();
-    
-    System.out.println("CycAccess 5 closed, creating CycAccess 6");
+
+    Assert.assertEquals(Boolean.TRUE, 
+                        response[0]);
+    Assert.assertEquals(CycObjectFactory.t, 
+                        response[1]);
+
+
+    // Test KB Ask.
+    command = "(removal-ask '(#$genls #$DomesticPet #$DomesticatedAnimal) #$HumanActivitiesMt)";
+
     try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
-      Assert.fail(e.toString());
+      response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-    cycAccess.close();
-    
-    System.out.println("CycAccess 6 closed, creating CycAccess 7");
-    try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        System.out.println(cycAccess.getCycConnection().connectionInfo());
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
-      Assert.fail(e.toString());
-    }
-     catch (Exception e) {
-      e.printStackTrace();
-      Assert.fail(e.toString());
-    }
-    cycAccess.close();
-    System.out.println("CycAccess 7 closed");
-    
-    System.out.println("**** testCycAccessInitialization OK ****");
+
+    Assert.assertEquals(Boolean.TRUE, 
+                        response[0]);
+    Assert.assertTrue(response[1] instanceof CycList);
+    Assert.assertEquals("((((T . T)) ((:GENLS (#$genls #$DomesticPet #$DomesticatedAnimal) #$HumanActivitiesMt :TRUE-DEF))))", 
+                        ((CycList) response[1]).cyclify());
+
+    cycConnection.close();
+    System.out.println("**** testAsciiCycConnection OK ****");
   }
-
+  
   /**
    * Tests the fundamental aspects of the binary (cfasl) api connection to the OpenCyc server.
    */
@@ -393,10 +380,15 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.SERIAL_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -407,7 +399,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       //cycConnection.trace = true;
     }
      catch (ConnectException e) {
-      System.out.println("Could not connect to host " + testHostName + " base port " + testBasePort);
+      System.out.println("Could not connect to host " + testHostName + " port " + testBasePort);
       Assert.fail(e.toString());
     }
      catch (Exception e) {
@@ -428,7 +420,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -447,7 +439,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -475,19 +467,18 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     cycList3.add(cycList4);
     cycList4.add(CycObjectFactory.makeCycSymbol("e"));
     cycList3.add(CycObjectFactory.makeCycSymbol("f"));
-    cycList3.add(CycObjectFactory.makeCycSymbol("?my-var"));
 
     try {
       response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     Assert.assertEquals(Boolean.TRUE, 
                         response[0]);
-    Assert.assertEquals("(A B (C D (E) F ?MY-VAR))", 
+    Assert.assertEquals("(A B (C D (E) F))", 
                         response[1].toString());
 
 
@@ -501,11 +492,13 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                     "B"));
 
     try {
-//      cycAccess.traceOn();
+      //cycConnection.trace = true;
       response = cycConnection.converse(command);
+
+      //cycConnection.trace = false;
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -523,12 +516,12 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       response = cycConnection.converse(command);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-    Assert.assertTrue(response[1].toString().indexOf("NIL") > -1);
+    Assert.assertTrue(response[1].toString().indexOf("NIL is not") > -1);
 
-    cycAccess.close();
+    cycConnection.close();
     System.out.println("**** testBinaryCycConnection1 OK ****");
   }
 
@@ -549,7 +542,10 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.SERIAL_MESSAGING_MODE);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode + "\n bailing on test.");
@@ -684,8 +680,44 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     // various error messages to effect that NIL is not defined in the API.
     Assert.assertTrue(response[1].toString().indexOf("NIL") > -1);
 
+    cycConnection.close();
     cycAccess.close();
     System.out.println("**** testBinaryCycConnection2 OK ****");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess1() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 1 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 1 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.TRANSIENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess1(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 1 OK ****");
   }
 
   /**
@@ -699,10 +731,15 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.TRANSIENT_CONNECTION, 
+                                  CycConnection.SERIAL_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -715,7 +752,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
 
 
-    //cycAccess.traceOn();
+    //cycAccess.traceOnDetailed();
     doTestCycAccess1(cycAccess);
 
     cycAccess.close();
@@ -736,12 +773,10 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     CycConstant cycConstant = null;
 
     try {
-      //cycAccess.traceOnDetailed();
       cycConstant = cycAccess.getConstantByName("#$Dog");
     }
      catch (Exception e) {
-      cycAccess.close();
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -755,7 +790,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                                       "bd58daa0-9c29-11b1-9dad-c379636f7270"));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -766,6 +801,27 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                         cycConstant.getName());
 
 
+    // getConstantById
+    cycConstant = null;
+
+    try {
+      cycConstant = cycAccess.getConstantByGuid(CycObjectFactory.makeGuid(
+                                                      "bd58daa0-9c29-11b1-9dad-c379636f7270"));
+      cycConstant = cycAccess.getConstantById(cycConstant.getId());
+    }
+     catch (Exception e) {
+      CycAccess.current().close();
+      Assert.fail(e.toString());
+    }
+
+    Assert.assertNotNull(cycConstant);
+    Assert.assertEquals("#$Dog", 
+                        cycConstant.cyclify());
+    Assert.assertEquals("Dog", 
+                        cycConstant.getName());
+    Assert.assertEquals(CycObjectFactory.makeGuid("bd58daa0-9c29-11b1-9dad-c379636f7270"), 
+                        cycConstant.getGuid());
+
     // getComment.
     String comment = null;
 
@@ -775,7 +831,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       comment = cycAccess.getComment(raindrop);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
@@ -794,7 +850,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -808,11 +864,13 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(isas.contains(biologicalSpecies));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
 
+    // getIsas with deferObjectCompletion=false
+    cycAccess.deferObjectCompletion = false;
     isas = null;
 
     try {
@@ -822,7 +880,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -836,12 +894,50 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(isas.contains(biologicalSpecies));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
+    cycAccess.deferObjectCompletion = true;
+
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess2() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 2 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 2 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      CycAccess.current().close();
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess2(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 2 OK ****");
   }
 
   /**
@@ -858,21 +954,22 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                   testBasePort);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
 
-//    cycAccess.traceOnDetailed();
-//    cycAccess.traceNamesOn();
+    //cycAccess.traceOnDetailed();
+    //cycAccess.traceOn();
     doTestCycAccess2(cycAccess);
 
     cycAccess.close();
@@ -898,7 +995,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       genls = cycAccess.getGenls(dog);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -917,7 +1014,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       genlPreds = cycAccess.getGenlPreds(target);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -934,7 +1031,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       allGenlPreds = cycAccess.getAllGenlPreds(target);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -950,7 +1047,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       arg1Formats = cycAccess.getArg1Formats(target);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -968,12 +1065,12 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       arg1Formats = cycAccess.getArg1Formats(constantName);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     Assert.assertNotNull(arg1Formats);
-    Assert.assertEquals("(singleEntryFormatInArgs)", 
+    Assert.assertEquals("(SingleEntry)", 
                         arg1Formats.toString());
 
     // getArg2Formats.
@@ -985,7 +1082,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       arg2Formats = cycAccess.getArg2Formats(internalParts);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1002,7 +1099,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       disjointWiths = cycAccess.getDisjointWiths(vegetableMatter);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1014,20 +1111,22 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     List coExtensionals = null;
 
     try {
+      //cycAccess.traceOn();
       CycConstant cycLTerm = cycAccess.getKnownConstantByGuid(
                                    "c107fffb-9c29-11b1-9dad-c379636f7270");
       coExtensionals = cycAccess.getCoExtensionals(cycLTerm);
-      if (! cycAccess.isOpenCyc()) {
-        Assert.assertNotNull(coExtensionals);
-        Assert.assertEquals("(CycLExpression)", 
-                            coExtensionals.toString());
-      }
+
+      //cycAccess.traceOff();
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
+
+    Assert.assertNotNull(coExtensionals);
+    Assert.assertEquals("(CycLExpression)", 
+                        coExtensionals.toString());
 
 
     // getCoExtensionals.
@@ -1039,7 +1138,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       coExtensionals = cycAccess.getCoExtensionals(dog);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1056,7 +1155,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       arg1Isas = cycAccess.getArg1Isas(doneBy);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1073,7 +1172,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       arg2Isas = cycAccess.getArg2Isas(doneBy);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1091,7 +1190,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                        1);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1109,7 +1208,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                         2);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1126,7 +1225,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isCollection(dog);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1142,7 +1241,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isCollection(doneBy);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1161,7 +1260,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isCollection(fruitFnAppleTreeNaut);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1180,7 +1279,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isCollection(cityNamedFnNaut);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1194,7 +1293,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isCollection(new Integer(7));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1210,7 +1309,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isBinaryPredicate(doneBy);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1226,7 +1325,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isBinaryPredicate(dog);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1248,7 +1347,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                             phrase);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1261,7 +1360,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       phrase = cycAccess.getSingularGeneratedPhrase(brazil);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1277,10 +1376,13 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                  "c0fd4798-9c29-11b1-9dad-c379636f7270");
       phrase = cycAccess.getGeneratedPhrase(doneBy);
       Assert.assertNotNull(phrase);
-      Assert.assertTrue(phrase.indexOf("doer") > -1);
+      if (cycAccess.isOpenCyc())
+        Assert.assertTrue(phrase.indexOf("done by") > -1);
+      else
+        Assert.assertTrue(phrase.indexOf("doer") > -1);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1294,13 +1396,48 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         Assert.assertTrue(denotations.contains(cycAccess.getKnownConstantByGuid("bd588f01-9c29-11b1-9dad-c379636f7270")));
     }
     catch (Exception e) {
-        cycAccess.close();
+        CycAccess.current().close();
         e.printStackTrace();
         Assert.fail(e.toString());
     }
      **/
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess3() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 3 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 3 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess3(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 3 OK ****");
   }
 
   /**
@@ -1314,37 +1451,31 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        assert cycAccess.getCycLeaseManager() != null : "CycLeaseManager must not be null";
-        cycAccess.getCycLeaseManager().addListener(this);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      e.printStackTrace();
       Assert.fail(e.toString());
     }
 
     doTestCycAccess3(cycAccess);
-    
-    cycAccess.getCycLeaseManager().removeListener(this);
+
     cycAccess.close();
     System.out.println("**** testBinaryCycAccess 3 OK ****");
   }
 
-  /** Notifies the listener of the given Cyc API services lease event.
-   *
-   * @param evt the the given Cyc API services lease event
-   */
-  public void notifyCycLeaseEvent(org.opencyc.api.CycLeaseManager.CycLeaseEventObject evt) {
-    System.out.println("Notified of: " + evt.toString());
-  }  
-  
   /**
    * Tests a portion of the CycAccess methods using the given api connection.
    * 
@@ -1363,7 +1494,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       comment = cycAccess.getComment(brazil);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1386,7 +1517,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       isas = cycAccess.getIsas(brazil);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
@@ -1407,7 +1538,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1426,7 +1557,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       minGenls = cycAccess.getMinGenls(lion);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1451,7 +1582,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                              "bdd51776-9c29-11b1-9dad-c379636f7270"));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1470,7 +1601,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       specs = cycAccess.getSpecs(canineAnimal);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1487,7 +1618,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       maxSpecs = cycAccess.getMaxSpecs(canineAnimal);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1504,18 +1635,18 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       CycConstant dog = cycAccess.getKnownConstantByGuid(
                               "bd58daa0-9c29-11b1-9dad-c379636f7270");
       genlSiblings = cycAccess.getGenlSiblings(dog);
-      Assert.assertNotNull(genlSiblings);
-      Assert.assertTrue(genlSiblings instanceof CycList);
-      genlSiblings = ((CycList) genlSiblings).sort();
-      if (! cycAccess.isOpenCyc())
-        Assert.assertTrue(genlSiblings.toString().indexOf("JuvenileAnimal") > -1);
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
+    Assert.assertNotNull(genlSiblings);
+    Assert.assertTrue(genlSiblings instanceof CycList);
+    genlSiblings = ((CycList) genlSiblings).sort();
+
+    Assert.assertTrue(genlSiblings.toString().indexOf("JuvenileAnimal") > -1);
 
     /* long running.
     // getSiblings.
@@ -1532,7 +1663,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
     catch (Exception e) {
         e.printStackTrace();
-        cycAccess.close();
+        CycAccess.current().close();
         Assert.fail(e.toString());
     }
     // getSpecSiblings.
@@ -1548,7 +1679,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         Assert.assertTrue(specSiblings.contains(goatDomestic));
     }
     catch (Exception e) {
-        cycAccess.close();
+        CycAccess.current().close();
         Assert.fail(e.toString());
     }
      */
@@ -1570,7 +1701,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(allGenls.contains(CycAccess.thing));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1593,7 +1724,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(allSpecs.contains(retrieverDog));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1619,7 +1750,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(allGenlsWrt.contains(airBreathingVertebrate));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1636,10 +1767,13 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       CycConstant fox = cycAccess.getKnownConstantByGuid(
                               "bd58be87-9c29-11b1-9dad-c379636f7270");
       Assert.assertTrue(allDependentSpecs instanceof CycList);
-      Assert.assertTrue(allDependentSpecs.contains(fox));
+      if (cycAccess.isOpenCyc())
+        Assert.assertTrue(allDependentSpecs.toString().indexOf("Jackal") > 1);
+      else
+        Assert.assertTrue(allDependentSpecs.contains(fox));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1653,7 +1787,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                                      3);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1676,7 +1810,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                   animal);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1695,7 +1829,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                   wolf);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1717,7 +1851,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                                physicalDevice);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1738,7 +1872,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         Assert.assertTrue(answer);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1755,7 +1889,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                          tameAnimal);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1775,7 +1909,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                          wolf);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1790,7 +1924,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                              "(#$isa #$Brazil #$Country)"));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1799,6 +1933,41 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess4() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 4 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 4 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess4(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 4 OK ****");
   }
 
   /**
@@ -1812,10 +1981,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -1855,7 +2030,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       //cycAccess.traceOff();
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1871,7 +2046,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                      animal);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1888,7 +2063,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         Assert.assertEquals(animal, whyGenlLast);
     }
     catch (Exception e) {
-        cycAccess.close();
+        CycAccess.current().close();
         Assert.fail(e.toString());
     }
      */
@@ -1919,7 +2094,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
        */
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1935,7 +2110,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                               "AnimalBLO") > 0);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1951,7 +2126,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                      plant);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1970,7 +2145,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(minIsas.contains(organismClassificationType));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -1978,16 +2153,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     List instances = null;
 
     try {
-      CycConstant maleHuman = cycAccess.getKnownConstantByGuid(
-                                 "bd58d6a1-9c29-11b1-9dad-c379636f7270");
-      instances = cycAccess.getInstances(maleHuman);
+      CycConstant animal = cycAccess.getKnownConstantByGuid(
+                                 "bd58b031-9c29-11b1-9dad-c379636f7270");
+      instances = cycAccess.getInstances(animal);
       Assert.assertTrue(instances instanceof CycList);
 
       CycConstant plato = cycAccess.getKnownConstantByGuid("bd58895f-9c29-11b1-9dad-c379636f7270");
       Assert.assertTrue(((CycList) instances).contains(plato));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2006,7 +2181,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(allIsas.contains(organismClassificationType));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2029,7 +2204,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2067,7 +2242,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2089,7 +2264,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
        */
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2117,7 +2292,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
        */
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2137,6 +2312,41 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
   }
 
   /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess5() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 5 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 5 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess5(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 5 OK ****");
+  }
+
+  /**
    * Tests a portion of the CycAccess methods using the binary api connection.
    */
   public void testBinaryCycAccess5() {
@@ -2147,7 +2357,11 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) {
         cycAccess = new CycAccess(endpointURL, 
@@ -2185,13 +2399,13 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     //cycAccess.traceNamesOn();
 
     try {
-      cycAccess.setCyclist("#$CycAdministrator");
-      cycAccess.setKePurpose("#$OpenCycProject");
+      cycAccess.setCyclist("CycAdministrator");
+      cycAccess.setKePurpose("OpenCycProject");
       cycConstant = cycAccess.createNewPermanent("CycAccessTestConstant");
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2204,7 +2418,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       cycAccess.kill(cycConstant);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
@@ -2217,7 +2431,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       cycConstant = cycAccess.createNewPermanent("CycAccessTestConstant");
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
@@ -2232,7 +2446,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       baseKb = cycAccess.getConstantByName("BaseKB");
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2248,7 +2462,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                               baseKb);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2258,7 +2472,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       comment = cycAccess.getComment(cycConstant);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2269,7 +2483,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       cycAccess.kill(cycConstant);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2277,7 +2491,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertNull(cycAccess.getConstantByName("CycAccessTestConstant"));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2288,7 +2502,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isValidConstantName("abc");
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2300,7 +2514,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isValidConstantName(" abc");
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2312,7 +2526,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isValidConstantName("[abc]");
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2326,7 +2540,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isConstantNameAvailable("Agent-PartiallyTangible");
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2338,7 +2552,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       answer = cycAccess.isConstantNameAvailable("myAgent");
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2360,7 +2574,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                        genlMts);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2370,7 +2584,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       cycAccess.kill(mt);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2378,7 +2592,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertNull(cycAccess.getConstantByName("CycAccessTestMt"));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2393,7 +2607,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                               genlMts);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2412,7 +2626,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       cycAccess.kill(mts);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2420,22 +2634,22 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertNull(cycAccess.getConstantByName("CycAccessTestMt"));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     // askCycQuery
     try {
       if (! cycAccess.isOpenCyc()) {
-        CycList query = cycAccess
+        CycList query = CycAccess.current()
                                  .makeCycList("(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)");
-        CycConstant everythingPSC = cycAccess
+        CycConstant everythingPSC = CycAccess.current()
                                              .getKnownConstantByGuid(
                                           "be7f041b-9c29-11b1-9dad-c379636f7270");
         mt = everythingPSC;
 
         HashMap queryProperties = new HashMap();
-        CycList response = cycAccess.askNewCycQuery(query, mt, queryProperties);
+        CycList response = CycAccess.current().askNewCycQuery(query, mt, queryProperties);
         Assert.assertNotNull(response);
 
 
@@ -2444,68 +2658,49 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         queryProperties.put(CycObjectFactory.makeCycSymbol(":max-time"), new Integer(30));
         queryProperties.put(CycObjectFactory.makeCycSymbol(":max-transformation-depth"), new Integer(1));
         queryProperties.put(CycObjectFactory.makeCycSymbol(":max-proof-depth"), new Integer(20));
-        response = cycAccess.askNewCycQuery(query, mt, queryProperties);
+        response = CycAccess.current().askNewCycQuery(query, mt, queryProperties);
         //System.out.println("query: " + query + "\n  response: " + response);  
         Assert.assertTrue(response.size() > 3);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
-      e.printStackTrace();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
-    // queryResultsToXMLString
-    try {
-      CycList query = cycAccess.makeCycList("(#$isa #$Person ?WHAT)");
-      HashMap queryProperties = new HashMap();
-      final CycList xmlSpec = null;
-      final String xml = cycAccess.queryResultsToXMLString(query, cycAccess.universalVocabularyMt, queryProperties, xmlSpec);
-      System.out.println("xml from queryResultsToXMLStream:\n" + xml);
-      Assert.assertNotNull(xml);
-      Assert.assertTrue(xml.indexOf("<what>") > -1);
-      Assert.assertTrue(xml.indexOf("</what>") > -1);
-    }
-     catch (Exception e) {
-      e.printStackTrace();
-      cycAccess.close();
-      Assert.fail(e.toString());
-    }
-    
-    
     // askWithVariable
     try {
       if (! cycAccess.isOpenCyc()) {
-        CycList query = cycAccess.makeCycList("(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)");
+        CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation ?WHAT #$CityOfAustinTX)");
         CycVariable variable = CycObjectFactory.makeCycVariable("?WHAT");
-        CycConstant everythingPSC = cycAccess.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        CycConstant everythingPSC = CycAccess.current().getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
         mt = everythingPSC;
         HashMap queryProperties = new HashMap();
-        CycList response = cycAccess.queryVariable(variable, query, mt, queryProperties);
+        CycList response = CycAccess.current().queryVariable(variable, query, mt, queryProperties);
         Assert.assertNotNull(response);
-        Assert.assertTrue(response.contains(cycAccess.getConstantByName("#$UniversityOfTexasAtAustin")));
+        Assert.assertTrue(response.contains(CycAccess.current().getConstantByName("#$UniversityOfTexasAtAustin")));
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     // askWithVariables
     try {
       if (! cycAccess.isOpenCyc()) {
-        CycList query = cycAccess.makeCycList("(#$objectFoundInLocation ?WHAT ?WHERE)");
+        CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation ?WHAT ?WHERE)");
         CycList variables = new CycList();
         variables.add(CycObjectFactory.makeCycVariable("?WHAT"));
         variables.add(CycObjectFactory.makeCycVariable("?WHERE"));
         HashMap queryProperties = new HashMap();
-        CycConstant universeDataMt = cycAccess.getKnownConstantByGuid("bd58d0f3-9c29-11b1-9dad-c379636f7270");
-        CycList response = cycAccess.queryVariables(variables, query, universeDataMt, queryProperties);
+        CycConstant universeDataMt = CycAccess.current().getKnownConstantByGuid("bd58d0f3-9c29-11b1-9dad-c379636f7270");
+        CycList response = CycAccess.current().queryVariables(variables, query, universeDataMt, queryProperties);
         Assert.assertNotNull(response);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2513,23 +2708,25 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (! cycAccess.isOpenCyc()) {
         //cycAccess.traceOn();
-        CycList query = cycAccess.makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfAustinTX)");
-        CycConstant everythingPSC = cycAccess.getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
+        CycList query = CycAccess.current().makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfAustinTX)");
+        CycConstant everythingPSC = CycAccess.current().getKnownConstantByGuid("be7f041b-9c29-11b1-9dad-c379636f7270");
         mt = everythingPSC;
         HashMap queryProperties = new HashMap();
-        Assert.assertTrue(cycAccess.isQueryTrue( query, mt, queryProperties));
-        query = cycAccess.makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfHoustonTX)");
-        Assert.assertTrue(! cycAccess.isQueryTrue(query, mt, queryProperties));
+        Assert.assertTrue(CycAccess.current().isQueryTrue( query, mt, queryProperties));
+        query = CycAccess.current().makeCycList("(#$objectFoundInLocation #$UniversityOfTexasAtAustin #$CityOfHoustonTX)");
+        Assert.assertTrue(!CycAccess.current().isQueryTrue(query, mt, queryProperties));
       }
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     // countAllInstances
     try {
+      cycAccess = CycAccess.current();
+
       CycConstant country = cycAccess.getKnownConstantByGuid(
                                   "bd588879-9c29-11b1-9dad-c379636f7270");
       CycConstant worldGeographyMt = cycAccess.getKnownConstantByGuid(
@@ -2538,12 +2735,47 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                                                     worldGeographyMt) > 0);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess6() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 6 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 6 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess6(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 6 OK ****");
   }
 
   /**
@@ -2557,10 +2789,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -2599,49 +2837,221 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                           CycAccess.collection);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     // Test isBackchainRequired, isBackchainEncouraged, isBackchainDiscouraged, isBackchainForbidden
     try {
-      if (! cycAccess.isOpenCyc()) {
-        CycConstant keRequirement = cycAccess.getKnownConstantByGuid(
-                                          "c1141606-9c29-11b1-9dad-c379636f7270");
-        Assert.assertTrue(cycAccess.isBackchainRequired(keRequirement, 
-                                                        cycAccess.baseKB));
-        Assert.assertTrue(!cycAccess.isBackchainEncouraged(
-                                 keRequirement, 
-                                 cycAccess.baseKB));
-        Assert.assertTrue(!cycAccess.isBackchainDiscouraged(
-                                 keRequirement, 
-                                 cycAccess.baseKB));
-        Assert.assertTrue(!cycAccess.isBackchainForbidden(
-                                 keRequirement, 
-                                 cycAccess.baseKB));
+      CycConstant keRequirement = cycAccess.getKnownConstantByGuid(
+                                        "c1141606-9c29-11b1-9dad-c379636f7270");
+      Assert.assertTrue(cycAccess.isBackchainRequired(keRequirement, 
+                                                      cycAccess.baseKB));
+      Assert.assertTrue(!cycAccess.isBackchainEncouraged(
+                               keRequirement, 
+                               cycAccess.baseKB));
+      Assert.assertTrue(!cycAccess.isBackchainDiscouraged(
+                               keRequirement, 
+                               cycAccess.baseKB));
+      Assert.assertTrue(!cycAccess.isBackchainForbidden(
+                               keRequirement, 
+                               cycAccess.baseKB));
 
-        CycConstant nearestIsa = cycAccess.getKnownConstantByGuid(
-                                       "bf411eed-9c29-11b1-9dad-c379636f7270");
-        Assert.assertTrue(!cycAccess.isBackchainRequired(
-                                 nearestIsa, 
-                                 cycAccess.baseKB));
-        Assert.assertTrue(!cycAccess.isBackchainEncouraged(
-                                 nearestIsa, 
-                                 cycAccess.baseKB));
-        Assert.assertTrue(!cycAccess.isBackchainDiscouraged(
-                                 nearestIsa, 
-                                 cycAccess.baseKB));
-        Assert.assertTrue(cycAccess.isBackchainForbidden(
-                                nearestIsa, 
-                                cycAccess.baseKB));
-      }
+      CycConstant nearestIsa = cycAccess.getKnownConstantByGuid(
+                                     "bf411eed-9c29-11b1-9dad-c379636f7270");
+      Assert.assertTrue(!cycAccess.isBackchainRequired(
+                               nearestIsa, 
+                               cycAccess.baseKB));
+      Assert.assertTrue(!cycAccess.isBackchainEncouraged(
+                               nearestIsa, 
+                               cycAccess.baseKB));
+      Assert.assertTrue(!cycAccess.isBackchainDiscouraged(
+                               nearestIsa, 
+                               cycAccess.baseKB));
+      Assert.assertTrue(cycAccess.isBackchainForbidden(
+                              nearestIsa, 
+                              cycAccess.baseKB));
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
+
+    /*
+            // Test getBackchainRules.
+            try {
+     
+                CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+                CycConstant humanActivitiesMt = cycAccess.getKnownConstantByGuid("bd58fe73-9c29-11b1-9dad-c379636f7270");
+                CycList backchainRules =
+                    cycAccess.getBackchainRules(doneBy, humanActivitiesMt);
+                Assert.assertNotNull(backchainRules);
+                //for (int i = 0; i < backchainRules.size(); i++)
+                //    System.out.println(((CycList) backchainRules.get(i)).cyclify());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                CycAccess.current().close();
+                Assert.fail(e.toString());
+            }
+     
+            // Test getForwardChainRules.
+            try {
+                //cycAccess.traceOn();
+                CycConstant doneBy = cycAccess.getKnownConstantByGuid("c0fd4798-9c29-11b1-9dad-c379636f7270");
+                CycConstant humanActivitiesMt = cycAccess.getKnownConstantByGuid("bd58fe73-9c29-11b1-9dad-c379636f7270");
+                CycList forwardChainRules =
+                    cycAccess.getForwardChainRules(doneBy,humanActivitiesMt);
+                Assert.assertNotNull(forwardChainRules);
+            }
+            catch (Exception e) {
+                CycAccess.current().close();
+                Assert.fail(e.toString());
+            }
+     */
     
+    /*  Concurrent processing makes this not work
+     
+    // setSymbolValue, getSymbolValue
+    if (connectionMode != SOAP_CYC_CONNECTION) {
+      try {
+        CycSymbol a = CycObjectFactory.makeCycSymbol("a");
+        cycAccess.setSymbolValue(a, 
+                                 new Integer(1));
+        Assert.assertEquals(new Integer(1), 
+                            cycAccess.getSymbolValue(a));
+        cycAccess.setSymbolValue(a, 
+                                 "abc");
+        Assert.assertEquals("abc", 
+                            cycAccess.getSymbolValue(a));
+        cycAccess.setSymbolValue(a, 
+                                 CycObjectFactory.t);
+        Assert.assertEquals(CycObjectFactory.t, 
+                            cycAccess.getSymbolValue(a));
+        cycAccess.setSymbolValue(a, 
+                                 CycObjectFactory.nil);
+        Assert.assertEquals(CycObjectFactory.nil, 
+                            cycAccess.getSymbolValue(a));
+
+        //cycAccess.traceOnDetailed();
+        CycConstant brazil = cycAccess.getConstantByName(
+                                   "#$Brazil");
+        cycAccess.setSymbolValue(a, 
+                                 brazil);
+        Assert.assertEquals(brazil, 
+                            cycAccess.getSymbolValue(a));
+
+        CycList valueList1 = cycAccess.makeCycList("(QUOTE (#$France #$Brazil))");
+        CycList valueList2 = cycAccess.makeCycList("(#$France #$Brazil)");
+        cycAccess.setSymbolValue(a, 
+                                 valueList1);
+        Assert.assertEquals(valueList2, 
+                            cycAccess.getSymbolValue(a));
+      }
+       catch (Exception e) {
+        e.printStackTrace();
+        CycAccess.current().close();
+        Assert.fail(e.toString());
+      }
+    }
+    */
+    
+    // Test getCycNartById
+    Integer nartId = new Integer(1);
+
+    try {
+      CycNart nart1 = cycAccess.getCycNartById(nartId);
+      Assert.assertNotNull(nart1);
+      Assert.assertNotNull(nart1.getFunctor());
+      Assert.assertTrue(nart1.getFunctor() instanceof CycFort);
+      Assert.assertNotNull(nart1.getArguments());
+      Assert.assertTrue(nart1.getArguments() instanceof CycList);
+
+      //System.out.println(nart1.cyclify());
+    }
+     catch (Exception e) {
+      CycAccess.current().close();
+      Assert.fail(e.toString());
+    }
+
+    // Narts in a list.
+    if (connectionMode != this.SOAP_CYC_CONNECTION) {
+      try {
+        //cycAccess.traceOn();
+        CycNart nart1 = cycAccess.getCycNartById(nartId);
+        CycNart nart2 = cycAccess.getCycNartById(nartId);
+        Assert.assertEquals(nart1, 
+                            nart2);
+
+        CycList valueList = new CycList();
+        valueList.add(CycObjectFactory.quote);
+
+        CycList nartList = new CycList();
+        valueList.add(nartList);
+        nartList.add(nart1);
+        nartList.add(nart2);
+
+        Object object = null;
+        if (! cycAccess.isOpenCyc()) {
+          CycSymbol a = CycObjectFactory.makeCycSymbol("a");
+          cycAccess.setSymbolValue(a, 
+                                   valueList);
+
+          object = cycAccess.getSymbolValue(a);
+          Assert.assertNotNull(object);
+          Assert.assertTrue(object instanceof CycList);
+        }
+        else
+          object = valueList.second();
+
+        CycList nartList1 = (CycList) object;
+        Object element1 = nartList1.first();
+        Assert.assertTrue((element1 instanceof CycNart) || (element1 instanceof CycList));
+
+        if (element1 instanceof CycList) {
+          element1 = CycNart.coerceToCycNart(element1);
+        }
+
+        CycNart nart3 = (CycNart) element1;
+        Assert.assertNotNull(nart3.getFunctor());
+        Assert.assertTrue(nart3.getFunctor() instanceof CycFort);
+        Assert.assertNotNull(nart3.getArguments());
+        Assert.assertTrue(nart3.getArguments() instanceof CycList);
+
+        Object element2 = nartList1.second();
+        Assert.assertTrue((element2 instanceof CycNart) || (element2 instanceof CycList));
+
+        if (element2 instanceof CycList) {
+          element2 = CycNart.coerceToCycNart(element2);
+        }
+
+        CycNart nart4 = (CycNart) element2;
+        Assert.assertNotNull(nart4.getFunctor());
+        Assert.assertTrue(nart4.getFunctor() instanceof CycFort);
+        Assert.assertNotNull(nart4.getArguments());
+        Assert.assertTrue(nart4.getArguments() instanceof CycList);
+
+        if (cycAccess.getCommunicationMode() == CycConnection.BINARY_MODE) {
+          Assert.assertEquals(nart1.cyclify(), 
+                              nart3.cyclify());
+          Assert.assertEquals(nart1.cyclify(), 
+                              nart4.cyclify());
+        }
+        else {
+          Assert.assertEquals(nart1.toString().toUpperCase(), 
+                              nart3.toString().toUpperCase());
+          Assert.assertEquals(nart1.toString().toUpperCase(), 
+                              nart4.toString().toUpperCase());
+        }
+      }
+       catch (Exception e) {
+        e.printStackTrace();
+        CycAccess.current().close();
+        Assert.fail(e.toString());
+      }
+    }
+
     // isWellFormedFormula
     try {
       Assert.assertTrue(cycAccess.isWellFormedFormula(cycAccess.makeCycList(
@@ -2660,7 +3070,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2675,7 +3085,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2711,7 +3121,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -2770,12 +3180,47 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                           CycAccess.plusFn);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess7() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 7 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 7 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess7(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 7 OK ****");
   }
 
   /**
@@ -2797,40 +3242,18 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
-    }
-     catch (Exception e) {
-      e.printStackTrace();
-      Assert.fail(e.toString());
-    }
-    doTestCycAccess7(cycAccess);
 
-    cycAccess.close();
-    System.out.println("**** testBinaryCycAccess 7 OK ****");
-  }
-
-  /**
-   * Tests a portion of the CycAccess methods using the given api connection.
-   *
-   * N O T E  be sure that the test system is clean of the special symbols 
-   * introduced in the test.  E.G. MY-MACRO, A, B, C
-   *
-   * 
-   * @param cycAccess the server connection handler
-   */
-  protected void doTestCycAccess7(CycAccess cycAccess) {
-    long startMilliseconds = System.currentTimeMillis();
-    CycObjectFactory.resetCycConstantCaches();
-
-    //cycAccess.traceOn();
-    // SubL scripts
-    try {
       if (! cycAccess.isOpenCyc()) {
-        //cycAccess.traceNamesOn();
+        //cycAccess.traceOnDetailed();
         String script = null;
         // Java ByteArray  and SubL byte-vector are used only in the binary api.
         script = "(csetq my-byte-vector (vector 0 1 2 3 4 255))";
@@ -2854,6 +3277,29 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         command1.add(myByteArray);
         Assert.assertTrue(cycAccess.converseBoolean(command));
       }
+    }
+     catch (Exception e) {
+      e.printStackTrace();
+      Assert.fail(e.toString());
+    }
+    doTestCycAccess7(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testBinaryCycAccess 7 OK ****");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the given api connection.
+   * 
+   * @param cycAccess the server connection handler
+   */
+  protected void doTestCycAccess7(CycAccess cycAccess) {
+    long startMilliseconds = System.currentTimeMillis();
+    CycObjectFactory.resetCycConstantCaches();
+
+    //cycAccess.traceOn();
+    // SubL scripts
+    try {
       String script;
       Object responseObject;
       CycList responseList;
@@ -2861,16 +3307,27 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       boolean responseBoolean;
 
       // definition
-      script = "(define my-copy-tree (tree) \n" + 
-               "  (ret \n" + "    (fif (atom tree) \n" + 
-               "         tree \n" + 
-               "         ;; else \n" + 
+      script = "(define my-copy-tree (tree) \n" + "  (ret \n" + "    (fif (atom tree) \n" + 
+               "         tree \n" + "         ;; else \n" + 
                "         (cons (my-copy-tree (first tree)) \n" + 
                "               (my-copy-tree (rest tree))))))";
       responseObject = cycAccess.converseObject(script);
       Assert.assertEquals(CycObjectFactory.makeCycSymbol(
                                 "my-copy-tree"), 
                           responseObject);
+      if (cycAccess.isOpenCyc()) {
+        script = "(clet() (put-api-user-variable 'a '(((#$Brazil #$Dog) #$Plant)))  (get-api-user-variable 'a))";
+        responseList = cycAccess.converseList(script);
+        Assert.assertEquals(cycAccess.makeCycList("(((#$Brazil #$Dog) #$Plant))"), 
+                            responseList);
+        script = "(clet () (put-api-user-variable 'b (my-copy-tree (get-api-user-variable 'a))) (get-api-user-variable 'b))";
+        responseList = cycAccess.converseList(script);
+        Assert.assertEquals(cycAccess.makeCycList("(((#$Brazil #$Dog) #$Plant))"), 
+                            responseList);
+        script = "(cand (equal (get-api-user-variable 'a) (get-api-user-variable 'b)) (cnot (eq (get-api-user-variable 'a) (get-api-user-variable 'b))))";
+        responseBoolean = cycAccess.converseBoolean(script);
+        Assert.assertTrue(responseBoolean);
+      }
       script = "(define my-floor (x y) \n" + "  (clet (results) \n" + 
                "    (csetq results (multiple-value-list (floor x y))) \n" + 
                "    (ret results)))";
@@ -2883,8 +3340,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
                           responseList);
 
-      script = "(defmacro my-macro (a b c) \n" + 
-               "  (ret `(list ,a ,b ,c)))";
+      script = "(defmacro my-macro (a b c) \n" + "  (ret `(list ,a ,b ,c)))";
       responseObject = cycAccess.converseObject(script);
       Assert.assertEquals(CycObjectFactory.makeCycSymbol(
                                 "my-macro"), 
@@ -2919,25 +3375,6 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                           responseList);
 
       // assignment
-      
-      /**
-       * TODO: Use of the task processor means that CSETQ statements appear inside of a
-       * CLET wrapper.  Need a way to set global variables.  Current method removes
-       * the effect of CSETQ if setting a new variable.
-       *
-       *
-       *
-       *
-       *
-       *
-       *
-       *
-       *
-       *
-       *
-       *
-       *
-       */
       if (! cycAccess.isOpenCyc()) {
         script = "(csetq a '(1 #$Dog #$Plant))";
         cycAccess.converseVoid(script);
@@ -3014,23 +3451,18 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       }
 
       // boundp
-      if (! cycAccess.isOpenCyc()) {
-        final Random random = new Random();
-        CycSymbol symbol = CycObjectFactory.makeCycSymbol("test-symbol-for-value-binding" + random.nextInt());
-        Assert.assertTrue(!cycAccess.converseBoolean("(boundp '" + symbol + ")"));
-        cycAccess.converseVoid("(csetq " + symbol + " nil)");
-        Assert.assertTrue(cycAccess.converseBoolean("(boundp '" + symbol + ")"));
-      }
+      CycSymbol symbol = (CycSymbol) cycAccess.converseObject("(intern (gensym))");
+      Assert.assertTrue(!cycAccess.converseBoolean("(boundp '" + symbol + ")"));
+      cycAccess.converseVoid("(csetq " + symbol + " nil)");
+      Assert.assertTrue(cycAccess.converseBoolean("(boundp '" + symbol + ")"));
 
       // fi-get-parameter
-      if (! cycAccess.isOpenCyc()) {
-        script = "(csetq my-parm '(2 #$Dog #$Plant))";
-        cycAccess.converseVoid(script);
-        script = "(fi-get-parameter 'my-parm)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("(2 #$Dog #$Plant)"), 
-                            responseList);
-      }
+      script = "(csetq my-parm '(2 #$Dog #$Plant))";
+      cycAccess.converseVoid(script);
+      script = "(fi-get-parameter 'my-parm)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("(2 #$Dog #$Plant)"), 
+                          responseList);
 
       // eval
       script = "(eval '(csetq a 4))";
@@ -3126,20 +3558,11 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertEquals(new Integer(6), 
                           responseObject);
 
-      if (cycAccess.isOpenCyc())
-        script = "(funcall #'first (1 (2 (3))))";
-      else
-        script = "(funcall #'first '(1 (2 (3))))";
-      responseObject = cycAccess.converseObject(script);
-      Assert.assertEquals("1", responseObject.toString());
-
-      if (cycAccess.isOpenCyc())
-        script = "(funcall #'my-copy-tree (1 (2 (3))))";
-      else
-        script = "(funcall #'my-copy-tree '(1 (2 (3))))";
+      script = "(funcall #'my-copy-tree '(1 (2 (3))))";
       responseList = cycAccess.converseList(script);
       Assert.assertEquals(cycAccess.makeCycList("(1 (2 (3)))"), 
                           responseList);
+
 
       // multiple values
       script = "(multiple-value-list (floor 5 3))";
@@ -3147,47 +3570,45 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
                           responseList);
 
-      if (! cycAccess.isOpenCyc()) {
-        script = "(csetq answer nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
+      script = "(csetq answer nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
 
-        script = "(cmultiple-value-bind (a b) \n" + "    (floor 5 3) \n" + 
-                 "  (csetq answer (list a b)))";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
-                            responseList);
-        script = "(symbol-value 'answer)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
-                            responseList);
+      script = "(cmultiple-value-bind (a b) \n" + "    (floor 5 3) \n" + 
+               "  (csetq answer (list a b)))";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
+                          responseList);
+      script = "(symbol-value 'answer)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
+                          responseList);
 
-        script = "(define my-multiple-value-fn (arg1 arg2) \n" + 
-                 "  (ret (values arg1 arg2 (list arg1 arg2) 0)))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.makeCycSymbol(
-                                  "my-multiple-value-fn"), 
-                            responseObject);
+      script = "(define my-multiple-value-fn (arg1 arg2) \n" + 
+               "  (ret (values arg1 arg2 (list arg1 arg2) 0)))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.makeCycSymbol(
+                                "my-multiple-value-fn"), 
+                          responseObject);
 
-        script = "(my-multiple-value-fn #$Brazil #$Dog)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(cycAccess.getKnownConstantByGuid(
-                                  "bd588f01-9c29-11b1-9dad-c379636f7270"), 
-                            responseObject);
+      script = "(my-multiple-value-fn #$Brazil #$Dog)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(cycAccess.getKnownConstantByGuid(
+                                "bd588f01-9c29-11b1-9dad-c379636f7270"), 
+                          responseObject);
 
-        script = "(cmultiple-value-bind (a b c d) \n" + 
-                 "    (my-multiple-value-fn #$Brazil #$Dog) \n" + 
-                 "  (csetq answer (list a b c d)))";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("(#$Brazil #$Dog (#$Brazil #$Dog) 0)"), 
-                            responseList);
-        script = "(symbol-value 'answer)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("(#$Brazil #$Dog (#$Brazil #$Dog) 0)"), 
-                            responseList);
-      }
-      
+      script = "(cmultiple-value-bind (a b c d) \n" + 
+               "    (my-multiple-value-fn #$Brazil #$Dog) \n" + 
+               "  (csetq answer (list a b c d)))";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("(#$Brazil #$Dog (#$Brazil #$Dog) 0)"), 
+                          responseList);
+      script = "(symbol-value 'answer)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("(#$Brazil #$Dog (#$Brazil #$Dog) 0)"), 
+                          responseList);
+
       // arithmetic
       script = "(add1 2)";
       responseObject = cycAccess.converseObject(script);
@@ -3218,6 +3639,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       responseList = cycAccess.converseList(script);
       Assert.assertEquals(cycAccess.makeCycList("((nil))"), 
                           responseList);
+
 
       // sequence with variable bindings
       script = "(clet (a b) " + "  (csetq a 1) " + "  (csetq b (+ a 3)) " + "  b)";
@@ -3301,189 +3723,182 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
 
       // conditional sequencing
-      if (! cycAccess.isOpenCyc()) {
-        script = "(csetq answer nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(pcond ((eq 0 0) \n" + "        (csetq answer \"clause 1 true\")) \n" + 
-                 "       ((> 1 4) \n" + "        (csetq answer \"clause 2 true\")) \n" + 
-                 "       (t \n" + "        (csetq answer \"clause 3 true\")))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
+     script = "(csetq answer nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
 
-        script = "(pcond ((eq 1 0) \n" + "        (csetq answer \"clause 1 true\")) \n" + 
-                 "       ((> 5 4) \n" + "        (csetq answer \"clause 2 true\")) \n" + 
-                 "       (t \n" + "        (csetq answer \"clause 3 true\")))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
+      script = "(pcond ((eq 0 0) \n" + "        (csetq answer \"clause 1 true\")) \n" + 
+               "       ((> 1 4) \n" + "        (csetq answer \"clause 2 true\")) \n" + 
+               "       (t \n" + "        (csetq answer \"clause 3 true\")))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
 
-        script = "(pcond ((eq 1 0) \n" + "        (csetq answer \"clause 1 true\")) \n" + 
-                 "       ((> 1 4) \n" + "        (csetq answer \"clause 2 true\")) \n" + 
-                 "       (t \n" + "        (csetq answer \"clause 3 true\")))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 3 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 3 true", 
-                            responseString);
+      script = "(pcond ((eq 1 0) \n" + "        (csetq answer \"clause 1 true\")) \n" + 
+               "       ((> 5 4) \n" + "        (csetq answer \"clause 2 true\")) \n" + 
+               "       (t \n" + "        (csetq answer \"clause 3 true\")))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
 
-        script = "(pif (string= \"abc\" \"abc\") \n" + "     (csetq answer \"clause 1 true\") \n" + 
-                 "     ;; else \n" + "     (csetq answer \"clause 2 true\"))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
+      script = "(pcond ((eq 1 0) \n" + "        (csetq answer \"clause 1 true\")) \n" + 
+               "       ((> 1 4) \n" + "        (csetq answer \"clause 2 true\")) \n" + 
+               "       (t \n" + "        (csetq answer \"clause 3 true\")))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 3 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 3 true", 
+                          responseString);
 
-        script = "(pif (string> \"abc\" \"abc\") \n" + "     (csetq answer \"clause 1 true\") \n" + 
-                 "     ;; else \n" + "     (csetq answer \"clause 2 true\"))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
+      script = "(pif (string= \"abc\" \"abc\") \n" + "     (csetq answer \"clause 1 true\") \n" + 
+               "     ;; else \n" + "     (csetq answer \"clause 2 true\"))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
 
-        script = "(csetq answer \n" + "       (fif (string= \"abc\" \"abc\") \n" + 
-                 "            \"clause 1 true\" \n" + "            ;; else \n" + 
-                 "            \"clause 2 true\"))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
+      script = "(pif (string> \"abc\" \"abc\") \n" + "     (csetq answer \"clause 1 true\") \n" + 
+               "     ;; else \n" + "     (csetq answer \"clause 2 true\"))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
 
-        script = "(csetq answer \n" + "       (fif (string> \"abc\" \"abc\") \n" + 
-                 "            \"clause 1 true\" \n" + "            ;; else \n" + 
-                 "            \"clause 2 true\"))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
+      script = "(csetq answer \n" + "       (fif (string= \"abc\" \"abc\") \n" + 
+               "            \"clause 1 true\" \n" + "            ;; else \n" + 
+               "            \"clause 2 true\"))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
 
-        script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
-                 "  (pwhen (string= \"abc\" \"abc\") \n" + 
-                 "         (csetq answer \"clause 2 true\")))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
+      script = "(csetq answer \n" + "       (fif (string> \"abc\" \"abc\") \n" + 
+               "            \"clause 1 true\" \n" + "            ;; else \n" + 
+               "            \"clause 2 true\"))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
 
-        script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
-                 "  (pwhen (string> \"abc\" \"abc\") \n" + 
-                 "         (csetq answer \"clause 2 true\")))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
+      script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
+               "  (pwhen (string= \"abc\" \"abc\") \n" + 
+               "         (csetq answer \"clause 2 true\")))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
 
-        script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
-                 "  (punless (string> \"abc\" \"abc\") \n" + 
-                 "           (csetq answer \"clause 2 true\")))";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 2 true", 
-                            responseString);
+      script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
+               "  (pwhen (string> \"abc\" \"abc\") \n" + 
+               "         (csetq answer \"clause 2 true\")))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
 
-        script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
-                 "  (punless (string= \"abc\" \"abc\") \n" + 
-                 "           (csetq answer \"clause 2 true\")))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(symbol-value 'answer)";
-        responseString = cycAccess.converseString(script);
-        Assert.assertEquals("clause 1 true", 
-                            responseString);
-      }
+      script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
+               "  (punless (string> \"abc\" \"abc\") \n" + 
+               "           (csetq answer \"clause 2 true\")))";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 2 true", 
+                          responseString);
+
+      script = "(progn \n" + "  (csetq answer \"clause 1 true\") \n" + 
+               "  (punless (string= \"abc\" \"abc\") \n" + 
+               "           (csetq answer \"clause 2 true\")))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(symbol-value 'answer)";
+      responseString = cycAccess.converseString(script);
+      Assert.assertEquals("clause 1 true", 
+                          responseString);
+
 
       // iteration
-      if (! cycAccess.isOpenCyc()) {
-        script = "(csetq answer nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
+      script = "(csetq answer nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
 
-        script = "(clet ((i 11)) \n" + 
-                 "  (csetq answer -10) \n" + 
-                 "  ;;(break \"environment\") \n" + 
-                 "  (while (> i 0) \n" + 
-                 "    (cdec i) \n" + 
-                 "    (cinc answer)))";
-        cycAccess.converseVoid(script);
-        script = "(symbol-value 'answer)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(new Integer(1), 
-                            responseObject);
+      script = "(clet ((i 11)) \n" + "  (csetq answer -10) \n" + 
+               "  ;;(break \"environment\") \n" + "  (while (> i 0) \n" + "    (cdec i) \n" + 
+               "    (cinc answer)))";
+      cycAccess.converseVoid(script);
+      script = "(symbol-value 'answer)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(new Integer(1), 
+                          responseObject);
 
-        script = "(csetq answer nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(progn \n" + 
-                 "  (cdo ((x 0 (add1 x)) \n" + 
-                 "        (y (+ 0 1) (+ y 2)) \n" + 
-                 "        (z -10 (- z 1))) \n" + 
-                 "       ((> x 3)) \n" + 
-                 "    (cpush (list 'x x 'y y 'z z) answer)) \n" + 
-                 "  (csetq answer (nreverse answer)))";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("((x 0 y 1 z -10) " + " (x 1 y 3 z -11) " + 
-                                                    " (x 2 y 5 z -12) " + " (x 3 y 7 z -13))"), 
-                            responseList);
+      script = "(csetq answer nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(progn \n" + "  (cdo ((x 0 (add1 x)) \n" + "        (y (+ 0 1) (+ y 2)) \n" + 
+               "        (z -10 (- z 1))) \n" + "       ((> x 3)) \n" + 
+               "    (cpush (list 'x x 'y y 'z z) answer)) \n" + 
+               "  (csetq answer (nreverse answer)))";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("((x 0 y 1 z -10) " + " (x 1 y 3 z -11) " + 
+                                                  " (x 2 y 5 z -12) " + " (x 3 y 7 z -13))"), 
+                          responseList);
 
-        script = "(csetq answer nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(progn \n" + "  (clet ((x '(1 2 3))) \n" + 
-                 "    (cdo nil ((null x) (csetq x 'y)) \n" + "      (cpush x answer) \n" + 
-                 "      (cpop x)) \n" + "    x) \n" + "  (csetq answer (reverse answer)))";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("((1 2 3) " + " (2 3) " + " (3))"), 
-                            responseList);
+      script = "(csetq answer nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(progn \n" + "  (clet ((x '(1 2 3))) \n" + 
+               "    (cdo nil ((null x) (csetq x 'y)) \n" + "      (cpush x answer) \n" + 
+               "      (cpop x)) \n" + "    x) \n" + "  (csetq answer (reverse answer)))";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("((1 2 3) " + " (2 3) " + " (3))"), 
+                          responseList);
 
-        script = "(csetq answer nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(cdolist (x '(1 2 3 4)) \n" + "  (cpush x answer))";
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            cycAccess.converseObject(script));
-        script = "(symbol-value 'answer)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertEquals(cycAccess.makeCycList("(4 3 2 1)"), 
-                            responseList);
-      }
+      script = "(csetq answer nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(cdolist (x '(1 2 3 4)) \n" + "  (cpush x answer))";
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          cycAccess.converseObject(script));
+      script = "(symbol-value 'answer)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertEquals(cycAccess.makeCycList("(4 3 2 1)"), 
+                          responseList);
+
 
       // mapping
       script = "(mapcar #'list '(a b c))";
@@ -3501,103 +3916,102 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertEquals(cycAccess.makeCycList("(nil t nil)"), 
                           responseList);
 
-      if (! cycAccess.isOpenCyc()) {
-        script = "(csetq answer nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
+      script = "(csetq answer nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
 
-        script = "(csetq my-small-dictionary nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
+      script = "(csetq my-small-dictionary nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
 
 
-        // Wrap the dictionary assignment in a progn that returns nil, to avoid sending the
-        // dictionary itself back to the client, where it is not supported.
-        script = "(progn (csetq my-small-dictionary (new-dictionary #'eq 3)) nil)";
-        responseObject = cycAccess.converseObject(script);
-        script = "(progn \n" + "  (dictionary-enter my-small-dictionary 'a 1) \n" + 
-                 "  (dictionary-enter my-small-dictionary 'b 2) \n" + 
-                 "  (dictionary-enter my-small-dictionary 'c 3))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.makeCycSymbol(
-                                  "c"), 
-                            responseObject);
-        script = "(define my-mapdictionary-fn (key value) \n" + 
-                 "  (cpush (list key value) answer) \n" + "  (ret nil))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.makeCycSymbol(
-                                  "my-mapdictionary-fn"), 
-                            responseObject);
+      // Wrap the dictionary assignment in a progn that returns nil, to avoid sending the
+      // dictionary itself back to the client, where it is not supported.
+      script = "(progn (csetq my-small-dictionary (new-dictionary #'eq 3)) nil)";
+      responseObject = cycAccess.converseObject(script);
+      script = "(progn \n" + "  (dictionary-enter my-small-dictionary 'a 1) \n" + 
+               "  (dictionary-enter my-small-dictionary 'b 2) \n" + 
+               "  (dictionary-enter my-small-dictionary 'c 3))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.makeCycSymbol(
+                                "c"), 
+                          responseObject);
+      script = "(define my-mapdictionary-fn (key value) \n" + 
+               "  (cpush (list key value) answer) \n" + "  (ret nil))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.makeCycSymbol(
+                                "my-mapdictionary-fn"), 
+                          responseObject);
 
-        script = "(mapdictionary my-small-dictionary #'my-mapdictionary-fn)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(symbol-value 'answer)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(a 1)")));
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(b 2)")));
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(c 3)")));
+      script = "(mapdictionary my-small-dictionary #'my-mapdictionary-fn)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(symbol-value 'answer)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(a 1)")));
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(b 2)")));
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(c 3)")));
 
-        script = "(csetq my-large-dictionary nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(progn (csetq my-large-dictionary (new-dictionary #'eq 200)) nil)";
-        responseObject = cycAccess.converseObject(script);
-        script = "(clet ((cities (remove-duplicates \n" + "                 (with-all-mts \n" + 
-                 "                   (instances #$IndependentCountry)))) \n" + 
-                 "        capital-city) \n" + "  (cdolist (city cities) \n" + 
-                 "    (csetq capital-city (pred-values-in-any-mt city #$capitalCity)) \n" + 
-                 "    (dictionary-enter my-large-dictionary \n" + "                      city \n" + 
-                 "                      (fif (consp capital-city) \n" + 
-                 "                           (first capital-city) \n" + 
-                 "                           ;; else \n" + "                           nil))))";
-        responseObject = cycAccess.converseObject(script);
+      script = "(csetq my-large-dictionary nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(progn (csetq my-large-dictionary (new-dictionary #'eq 200)) nil)";
+      responseObject = cycAccess.converseObject(script);
+      script = "(clet ((cities (remove-duplicates \n" + "                 (with-all-mts \n" + 
+               "                   (instances #$IndependentCountry)))) \n" + 
+               "        capital-city) \n" + "  (cdolist (city cities) \n" + 
+               "    (csetq capital-city (pred-values-in-any-mt city #$capitalCity)) \n" + 
+               "    (dictionary-enter my-large-dictionary \n" + "                      city \n" + 
+               "                      (fif (consp capital-city) \n" + 
+               "                           (first capital-city) \n" + 
+               "                           ;; else \n" + "                           nil))))";
+      responseObject = cycAccess.converseObject(script);
 
-        script = "(mapdictionary my-large-dictionary #'my-mapdictionary-fn)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(symbol-value 'answer)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(#$Brazil #$CityOfBrasiliaBrazil)")));
+      script = "(mapdictionary my-large-dictionary #'my-mapdictionary-fn)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(symbol-value 'answer)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(#$Brazil #$CityOfBrasiliaBrazil)")));
 
-        script = "(define my-parameterized-mapdictionary-fn (key value args) \n" + 
-                 "  (cpush (list key value args) answer) \n" + "  (ret nil))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.makeCycSymbol(
-                                  "my-parameterized-mapdictionary-fn"), 
-                            responseObject);
+      script = "(define my-parameterized-mapdictionary-fn (key value args) \n" + 
+               "  (cpush (list key value args) answer) \n" + "  (ret nil))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.makeCycSymbol(
+                                "my-parameterized-mapdictionary-fn"), 
+                          responseObject);
 
-        script = "(mapdictionary-parameterized my-small-dictionary #'my-parameterized-mapdictionary-fn '(\"x\"))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(symbol-value 'answer)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(a 1 (\"x\"))")));
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(b 2 (\"x\"))")));
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(c 3 (\"x\"))")));
+      script = "(mapdictionary-parameterized my-small-dictionary #'my-parameterized-mapdictionary-fn '(\"x\"))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(symbol-value 'answer)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(a 1 (\"x\"))")));
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(b 2 (\"x\"))")));
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(c 3 (\"x\"))")));
 
-        script = "(mapdictionary-parameterized my-large-dictionary #'my-parameterized-mapdictionary-fn '(1 2))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(symbol-value 'answer)";
-        responseList = cycAccess.converseList(script);
-        Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
-                                                      "(#$Brazil #$CityOfBrasiliaBrazil (1 2))")));
-      }
+      script = "(mapdictionary-parameterized my-large-dictionary #'my-parameterized-mapdictionary-fn '(1 2))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(symbol-value 'answer)";
+      responseList = cycAccess.converseList(script);
+      Assert.assertTrue(responseList.contains(cycAccess.makeCycList(
+                                                    "(#$Brazil #$CityOfBrasiliaBrazil (1 2))")));
+
 
       // ccatch and throw
       script = "(define my-super () \n" + "  (clet (result) \n" + "    (ccatch :abort \n" + 
@@ -3630,16 +4044,14 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
 
       // get-environment
-      if (! cycAccess.isOpenCyc()) {
-        script = "(csetq a nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(csetq b -1)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(new Integer(-1), 
-                            responseObject);
-      }
+      script = "(csetq a nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(csetq b -1)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(new Integer(-1), 
+                          responseObject);
 
 
       // cdestructuring-bind
@@ -3716,198 +4128,196 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                           cycAccess.makeCycList("((1 2 :D 4 :E 3) 1 2 (:D 4 :E 3) 3 NIL)"));
 
 
-      if (! cycAccess.isOpenCyc()) {
-        // type testing
-        script = "(csetq a 1)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(new Integer(1), 
-                            responseObject);
-        script = "(numberp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
+      // type testing
+      script = "(csetq a 1)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(new Integer(1), 
+                          responseObject);
+      script = "(numberp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
 
-        script = "(csetq a \"abc\")";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals("abc", 
-                            responseObject);
-        script = "(numberp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(csetq a \"abc\")";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals("abc", 
+                          responseObject);
+      script = "(numberp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
 
-        script = "(csetq a 2.14)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertTrue(responseObject instanceof Double);
-        Assert.assertTrue(((Double) responseObject).doubleValue() > 2.13999);
-        Assert.assertTrue(((Double) responseObject).doubleValue() < 2.14001);
-        script = "(numberp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(csetq a 2.14)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertTrue(responseObject instanceof Double);
+      Assert.assertTrue(((Double) responseObject).doubleValue() > 2.13999);
+      Assert.assertTrue(((Double) responseObject).doubleValue() < 2.14001);
+      script = "(numberp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
 
-        script = "(csetq a 'my-symbol)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.makeCycSymbol(
-                                  "my-symbol"), 
-                            responseObject);
-        script = "(numberp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(csetq a 'my-symbol)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.makeCycSymbol(
+                                "my-symbol"), 
+                          responseObject);
+      script = "(numberp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
 
-        script = "(csetq a '(1 . 2))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(cycAccess.makeCycList("(1 . 2)"), 
-                            responseObject);
-        script = "(numberp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(csetq a '(1 . 2))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(cycAccess.makeCycList("(1 . 2)"), 
+                          responseObject);
+      script = "(numberp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
 
-        script = "(csetq a '(1 2))";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
-                            responseObject);
-        script = "(numberp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(csetq a '(1 2))";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(cycAccess.makeCycList("(1 2)"), 
+                          responseObject);
+      script = "(numberp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
 
-        script = "(csetq a nil)";
-        responseObject = cycAccess.converseObject(script);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(numberp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(csetq a nil)";
+      responseObject = cycAccess.converseObject(script);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(numberp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
 
-        // empty list is treated the same as nil.
-        CycList command = new CycList();
-        command.add(CycObjectFactory.makeCycSymbol("csetq"));
-        command.add(CycObjectFactory.makeCycSymbol("a"));
-        command.add(new CycList());
-        responseObject = cycAccess.converseObject(command);
-        Assert.assertEquals(CycObjectFactory.nil, 
-                            responseObject);
-        script = "(numberp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(integerp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(stringp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(atom a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(floatp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(symbolp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(consp a)";
-        Assert.assertTrue(!cycAccess.converseBoolean(script));
-        script = "(listp a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-        script = "(null a)";
-        Assert.assertTrue(cycAccess.converseBoolean(script));
-      }
+      // empty list is treated the same as nil.
+      CycList command = new CycList();
+      command.add(CycObjectFactory.makeCycSymbol("csetq"));
+      command.add(CycObjectFactory.makeCycSymbol("a"));
+      command.add(new CycList());
+      responseObject = cycAccess.converseObject(command);
+      Assert.assertEquals(CycObjectFactory.nil, 
+                          responseObject);
+      script = "(numberp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(integerp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(stringp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(atom a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(floatp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(symbolp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(consp a)";
+      Assert.assertTrue(!cycAccess.converseBoolean(script));
+      script = "(listp a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
+      script = "(null a)";
+      Assert.assertTrue(cycAccess.converseBoolean(script));
 
 
       /*
@@ -3925,7 +4335,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       script = 
        "(clet (result) \n" + 
        "  (ignore-errors \n" + 
-       "    (/ 1 1) \n" + 
+       "    (check-type 1 numberp) \n" + 
        "    (csetq result t)) \n" + 
        "  result)";
       Assert.assertEquals((Object) CycObjectFactory.t, 
@@ -3933,7 +4343,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       script = 
         "(clet (result) \n" + 
         "  (ignore-errors \n" + 
-       "    (/ 1 0) \n" + 
+        "    (check-type 1 stringp) \n" + 
         "    (csetq result t)) \n" + 
         "  result)";
       Assert.assertEquals((Object) CycObjectFactory.nil, 
@@ -3943,12 +4353,47 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess8() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 8 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 8 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess8(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 8 OK ****");
   }
 
   /**
@@ -3962,10 +4407,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -3992,19 +4443,33 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     long startMilliseconds = System.currentTimeMillis();
 
     try {
+      if (! cycAccess.isOpenCyc()) {
+        // isQuotedCollection
+        CycConstant coreConstant = cycAccess.getKnownConstantByGuid(
+                                         "c0dd1b7c-9c29-11b1-9dad-c379636f7270");
+        Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant, 
+                                                       cycAccess.baseKB));
+        Assert.assertTrue(cycAccess.isQuotedCollection(coreConstant));
+
+        CycConstant animal = cycAccess.getKnownConstantByGuid(
+                                   "bd58b031-9c29-11b1-9dad-c379636f7270");
+        Assert.assertTrue(!cycAccess.isQuotedCollection(animal));
+      }
 
       // List containing null is coerced to list containing NIL.
-      String script = "(put-api-user-variable 'a '(nil 1))";
-      Object responseObject = cycAccess.converseObject(
-                                    script);
-      Assert.assertEquals(CycObjectFactory.nil, 
-                          responseObject);
+      if (cycAccess.communicationMode == CycConnection.BINARY_MODE) {
+        String script = "(put-api-user-variable 'a '(nil 1))";
+        Object responseObject = cycAccess.converseObject(
+                                      script);
+        Assert.assertEquals(CycObjectFactory.nil, 
+                            responseObject);
 
-      script = "(get-api-user-variable 'a)";
+        script = "(get-api-user-variable 'a)";
 
-      CycList responseList = cycAccess.converseList(script);
-      Assert.assertEquals(cycAccess.makeCycList("(nil 1)"), 
-                          responseList);
+        CycList responseList = cycAccess.converseList(script);
+        Assert.assertEquals(cycAccess.makeCycList("(nil 1)"), 
+                            responseList);
+      }
 
       if (! cycAccess.isOpenCyc()) {
         // rkfPhraseReader
@@ -4059,12 +4524,51 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess9() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 9 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 9 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    System.out.println(cycAccess.getCycConnection().connectionInfo());
+
+
+    //cycAccess.traceOn();
+    doTestCycAccess9(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 9 OK ****");
   }
 
   /**
@@ -4078,10 +4582,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -4169,12 +4679,10 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(cycAccess.isGenlInverseOf(siblings, 
                                                   siblings));
 
- 
+
       // isGenlMtOf
-      if (! cycAccess.isOpenCyc()) {
-        Assert.assertTrue(cycAccess.isGenlMtOf(cycAccess.baseKB, 
-                                               biologyVocabularyMt));
-      }
+      Assert.assertTrue(cycAccess.isGenlMtOf(cycAccess.baseKB, 
+                                             biologyVocabularyMt));
 
       // getAllInstancesHashSet
       HashSet allCountries = cycAccess.getAllInstancesHashSet(
@@ -4261,13 +4769,57 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
        */
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
 
     long endMilliseconds = System.currentTimeMillis();
     System.out.println("  " + (endMilliseconds - startMilliseconds) + " milliseconds");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess10() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 10 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 10 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      if (connectionMode == LOCAL_CYC_CONNECTION) {
+        cycAccess = new CycAccess(testHostName, 
+                                  testBasePort, 
+                                  CycConnection.ASCII_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
+      }
+      else if (connectionMode == SOAP_CYC_CONNECTION) { 
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
+      }
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    System.out.println(cycAccess.getCycConnection().connectionInfo());
+
+
+    //cycAccess.traceOn();
+    doTestCycAccess10(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 10 OK ****");
   }
 
   /**
@@ -4281,10 +4833,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -4404,17 +4962,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                           ((String) third).length());
 
       // isFormulaWellFormed
-      if (! cycAccess.isOpenCyc()) {
-        CycList formula1 = cycAccess.makeCycList("(#$isa #$Brazil #$IndependentCountry)");
-        CycConstant mt = cycAccess.getKnownConstantByName(
-                               "WorldPoliticalGeographyDataVocabularyMt");
-        Assert.assertTrue(cycAccess.isFormulaWellFormed(formula1, 
-                                                        mt));
-        CycList formula2 = cycAccess.makeCycList("(#$genls #$Brazil #$Collection)");
-        Assert.assertTrue(!cycAccess.isFormulaWellFormed(
-                                 formula2, 
-                                 mt));
-      }
+      CycList formula1 = cycAccess.makeCycList("(#$isa #$Brazil #$IndependentCountry)");
+      CycConstant mt = cycAccess.getKnownConstantByName(
+                             "WorldPoliticalGeographyDataVocabularyMt");
+      Assert.assertTrue(cycAccess.isFormulaWellFormed(formula1, 
+                                                      mt));
+
+      CycList formula2 = cycAccess.makeCycList("(#$genls #$Brazil #$Collection)");
+      Assert.assertTrue(!cycAccess.isFormulaWellFormed(
+                               formula2, 
+                               mt));
 
       // isCycLNonAtomicReifableTerm
       CycList formula3 = cycAccess.makeCycList("(#$TheCovering #$Watercraft-Surface #$Watercraft-Subsurface)");
@@ -4443,7 +5000,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                               formula8));
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
@@ -4464,11 +5021,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-      cycAccess.getCycLeaseManager().addListener(this);
-     }
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  //CycConnection.SERIAL_MESSAGING_MODE);
+                                  CycConnection.CONCURRENT_MESSAGING_MODE);
+      }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -4481,16 +5043,8 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
 
     //cycAccess.traceOnDetailed();
-    try {
-      if (! cycAccess.isOpenCyc())
-        doTestCycAccess11(cycAccess);
-    }
-     catch (Exception e) {
-      e.printStackTrace();
-      Assert.fail(e.toString());
-    }
+    doTestCycAccess11(cycAccess);
 
-    cycAccess.getCycLeaseManager().removeAllListeners();
     cycAccess.close();
     System.out.println("**** testBinaryCycAccess 11 OK ****");
   }
@@ -4506,85 +5060,84 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       String script = "(+ 1 2)";
       int answer = cycAccess.converseInt(script);
-      Assert.assertEquals(3, answer);
+      Assert.assertEquals(3, 
+                          answer);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
-//    cycAccess.getCycLeaseManager().setLeaseDurationMilliseconds(100000);
-//    cycAccess.getCycLeaseManager().immediatelyRenewLease();
-    
+
     System.out.println("Concurrent API requests.");
 
     ArrayList apiRequestors = new ArrayList();
 
     ApiRequestor apiRequestor = new ApiRequestor("Long", 
                                                  1, 
-                                                 "1", 
+                                                 "20000000", 
                                                  cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short1", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short2", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short3", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short4", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short5", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short6", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short7", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
     apiRequestor = new ApiRequestor("Short8", 
                                     4, 
-                                    "150000", 
+                                    "700000", 
                                     cycAccess);
     apiRequestor.start();
     apiRequestors.add(apiRequestor);
 
-    int iterationsUntilCancel = 10;
-    boolean isCancelled = false;
+    int iterationsUntilCancel = 20;
+
     while (true) {
       boolean apiRequestorTheadRunning = false;
 
@@ -4595,21 +5148,19 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         break;
       }
 
-      System.out.println("-----------------------");
       for (int i = 0; i < apiRequestors.size(); i++) {
         apiRequestor = (ApiRequestor) apiRequestors.get(i);
 
         if (! apiRequestor.done) {
           apiRequestorTheadRunning = true;
 
-          if ((iterationsUntilCancel-- < 0) && apiRequestor.name.equals("Long") && ! isCancelled) {
+          if ((iterationsUntilCancel-- < 0) && apiRequestor.name.equals("Long")) {
             System.out.println("Cancelling " + apiRequestor.name);
-            isCancelled = true;
+
             try {
               apiRequestor.cancel();
             }
-            catch (Exception e) {
-              e.printStackTrace();  
+             catch (Exception e) {
               Assert.fail(e.getMessage());
             }
           }
@@ -4633,19 +5184,22 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
    */
   protected class ApiRequestor extends Thread {
     /** the connection to Cyc */
-    final private CycAccess cycAccess;
+    private CycAccess cycAccess;
 
     /** the name of the api requestor process */
-    final public String name;
+    public String name;
 
     /** the api request repeat count */
-    final private int repeatCount;
+    private int repeatCount;
 
     /** the api request duration factor */
-    final private String durationFactor;
+    private String durationFactor;
 
     /** the process completion indicator */
     public boolean done = false;
+
+    /** the process cancellation indicator */
+    public boolean cancelled = false;
 
     public SubLWorkerSynch worker;
     
@@ -4657,10 +5211,10 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
      * @param durationFactor the api request duration factor
      * @param cycAccess the connection to Cyc
      */
-    public ApiRequestor(final String name, 
-                        final int repeatCount, 
-                        final String durationFactor, 
-                        final CycAccess cycAccess) {
+    public ApiRequestor(String name, 
+                        int repeatCount, 
+                        String durationFactor, 
+                        CycAccess cycAccess) {
       this.name = name;
       this.repeatCount = repeatCount;
       this.durationFactor = durationFactor;
@@ -4677,21 +5231,19 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
       try {
         for (int i = 0; i < repeatCount; i++) {
-          final String testPhrase = name + "-" + Integer.toString(i + 1);
-          final String script = (name.equals("Long")) ?
-             "(catch-task-processor-termination-quietly (progn (do-assertions (assertion))\n" + " \"" + testPhrase + "\"))" :
-             "(catch-task-processor-termination-quietly (progn (cdotimes (x " + durationFactor + "))\n" + " \"" + testPhrase + "\"))";
+          String testPhrase = name + "-" + Integer.toString(i + 1);
+          String script = "(progn (cdotimes (x " + durationFactor + "))\n" + " \"" + testPhrase + "\")";
           worker = new DefaultSubLWorkerSynch(script, cycAccess);
-          final Object answer = worker.getWork();
-          if (answer.toString().equals(":CANCEL")) {
-            System.out.println(name + " returned :CANCEL");
+          String answer = (String) worker.getWork();
+          if (cancelled) {
+            System.out.println(name + " cancelled.");
             done = true;
             return;
           }
-          else {
-            System.out.println(name + " iteration " + answer + " done.");
-            if (!answer.equals(testPhrase))
-              throw new RuntimeException(testPhrase + " not equal to " + answer);
+          System.out.println(name + " iteration " + answer + " done.");
+
+          if (!answer.equals(testPhrase)) {
+            throw new RuntimeException(testPhrase + " not equal to " + answer);
           }
         }
       }
@@ -4704,6 +5256,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
       System.out.println("ApiRequestor " + name + " done.");
       done = true;
+      cancelled = true;
     }
 
     /**
@@ -4713,7 +5266,8 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
      * @throws IOException when a communication error occurs
      */
     public void cancel() throws CycApiException, IOException {
-      cycAccess.getCycConnection().cancelCommunication(worker);
+      ((CycConnection) cycAccess.getCycConnection()).cancelCommunication(worker);
+      cancelled = true;
     }
   }
 
@@ -4728,17 +5282,22 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.DEFAULT_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -4757,7 +5316,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     long startMilliseconds = System.currentTimeMillis();
 
     try {
-      //cycAccess.traceOn();
+      cycAccess.traceOn();
 
       String utf8String = "ABCdef";
       Assert.assertEquals(utf8String, 
@@ -4831,7 +5390,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                               cycAccess.baseKB);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       e.printStackTrace();
       Assert.fail(e.toString());
     }
@@ -4848,21 +5407,26 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION, 
+                                  CycConnection.DEFAULT_MESSAGING_MODE);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
-//    cycAccess.traceOn();
+    //cycAccess.traceNamesOn();
 
     // canonicalizeHLMT
     try {
@@ -4880,7 +5444,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
 
         // NAUT case
-        elmtString = "(#$PlusFn 1 1)";
+        elmtString = "(#$MtSomeTimeDimFn #$TheYear2000 (#$isa #$Brazil #$IndependentCountry))";
         cycList = cycAccess.makeCycList(elmtString);
         elmtObject = cycAccess.canonicalizeHLMT(cycList);
         Assert.assertNotNull(elmtObject);
@@ -4891,7 +5455,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -4906,12 +5470,22 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
         Assert.assertTrue(elmt instanceof CycNart);
         Assert.assertEquals(elmtString, 
                             elmt.cyclify());
+        elmt = cycAccess.makeELMt(elmtString);
+        Assert.assertNotNull(elmt);
+        Assert.assertTrue(elmt instanceof CycNart);
+        Assert.assertEquals(elmtString, 
+                            elmt.cyclify());
 
 
         // NAUT case
-        elmtString = "(#$PlusFn 1 1)";
+        elmtString = "(#$MtSomeTimeDimFn #$TheYear2000 (#$isa #$Brazil #$IndependentCountry))";
         cycList = cycAccess.makeCycList(elmtString);
         elmt = cycAccess.makeELMt(cycList);
+        Assert.assertNotNull(elmt);
+        Assert.assertTrue(elmt instanceof CycList);
+        Assert.assertEquals(elmtString, 
+                            elmt.cyclify());
+        elmt = cycAccess.makeELMt(elmtString);
         Assert.assertNotNull(elmt);
         Assert.assertTrue(elmt instanceof CycList);
         Assert.assertEquals(elmtString, 
@@ -4932,7 +5506,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -4955,7 +5529,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -4978,7 +5552,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
     
@@ -5008,7 +5582,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5040,12 +5614,45 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     cycAccess.close();
     System.out.println("**** testBinaryCycAccess 13 OK ****");
+  }
+
+  /**
+   * Tests a portion of the CycAccess methods using the ascii api connection.
+   */
+  public void testAsciiCycAccess14() {
+    if (performOnlyBinaryApiModeTests) {
+      return;
+    }
+    else if (connectionMode == SOAP_CYC_CONNECTION) {
+      System.out.println("\n**** bypassing testAsciiCycAccess 14 in XML SOAP usage ****");
+
+      return;
+    }
+
+    System.out.println("\n**** testAsciiCycAccess 14 ****");
+
+    CycAccess cycAccess = null;
+
+    try {
+      cycAccess = new CycAccess(testHostName, 
+                                testBasePort, 
+                                CycConnection.ASCII_MODE, 
+                                CycAccess.PERSISTENT_CONNECTION);
+    }
+     catch (Exception e) {
+      Assert.fail(e.toString());
+    }
+
+    doTestCycAccess14(cycAccess);
+
+    cycAccess.close();
+    System.out.println("**** testAsciiCycAccess 14 OK ****");
   }
 
   /**
@@ -5059,10 +5666,14 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -5109,7 +5720,6 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       System.out.println("------------");
       organization = cycAccess.getConstantByGuid(organizationGuid);
       System.out.println("------------");
-      cycAccess.traceOff();
     }
      catch (Exception e) {
       e.printStackTrace();
@@ -5138,10 +5748,15 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
                 localDisjointWiths = cycAccess.getDisjointWiths(vegetableMatter);
             }
             catch (Exception e) {
-                cycAccess.close();
+                CycAccess.current().close();
                 Assert.fail(e.toString());
             }
      */
+
+    // complete received objects immediately
+    cycAccess.deferObjectCompletion = true;
+    System.out.println("deferObjectCompletion = true");
+
 
     // getLocalDisjointWith.
     localDisjointWiths = null;
@@ -5162,7 +5777,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       localDisjointWiths = cycAccess.getDisjointWiths(vegetableMatter);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
     
@@ -5183,7 +5798,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       Assert.assertTrue(! cycConstant3.getName().equals(cycConstant2.getName()));      
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5204,17 +5819,21 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5228,13 +5847,13 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       result = cycAccess.converseObject(command);
       Assert.assertNotNull(result);
       Assert.assertTrue(result instanceof CycList);
-    System.out.println("backquoted nart: " + ((CycList) result).cyclify());
-    System.out.println("embedded obj class: " + ((CycList) result).first().getClass().toString());
+      //System.out.println("backquoted nart: " + ((CycList) result).cyclify());
+      //System.out.println("embedded obj class: " + ((CycList) result).first().getClass().toString());
       Assert.assertTrue(((CycList) result).first() instanceof CycNart);
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
     
@@ -5242,19 +5861,18 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     CycNart nart = null;
     String comment = null;
     try {
-      if (! cycAccess.isOpenCyc()) {
-        nart = (CycNart) cycAccess.converseObject("(find-nart '(#$JuvenileFn #$Dog))");
-        comment = cycAccess.getComment(nart);
-        Assert.assertNotNull(comment);
-        Assert.assertEquals("", comment);
-      }
+      nart = (CycNart) cycAccess.converseObject("(find-nart '(#$JuvenileFn #$Dog))");
+      comment = cycAccess.getComment(nart);
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
+    Assert.assertNotNull(comment);
+    Assert.assertEquals("", comment);
+    
     // newlines in strings
     
     try {
@@ -5264,7 +5882,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5281,14 +5899,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
       //Assert.assertTrue(localDisjointWiths.toString().indexOf("AnimalBLO") > 0);
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
-    // ensure that constants have names
+    // obtainConstantNames && eagerlyObtainConstantNames
     try {
       String physicalDeviceGuidString = "bd58c72f-9c29-11b1-9dad-c379636f7270";
       CycConstant physicalDevice = cycAccess.getKnownConstantByGuid(physicalDeviceGuidString);
+      cycAccess.eagerlyObtainConstantNames = true;
+      cycAccess.eagerlyObtainConstantNamesThreshold = 1;
       final CycList constants = cycAccess.getAllInstances(physicalDevice);    
       if (constants.size() > 0 && constants.first() instanceof CycConstant)
         Assert.assertNotNull(((CycConstant) constants.first()).name);
@@ -5297,87 +5917,9 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
-
-    try {
-      CycNart nart1 = cycAccess.getRandomNart();
-      Assert.assertNotNull(nart1);
-      Assert.assertNotNull(nart1.getFunctor());
-      Assert.assertTrue(nart1.getFunctor() instanceof CycFort);
-      Assert.assertNotNull(nart1.getArguments());
-      Assert.assertTrue(nart1.getArguments() instanceof CycList);
-
-      //System.out.println(nart1.cyclify());
-    }
-     catch (Exception e) {
-      cycAccess.close();
-      e.printStackTrace();
-      Assert.fail(e.toString());
-    }
-
-    // Narts in a list.
-      try {
-        //cycAccess.traceOn();
-        CycNart nart1 = cycAccess.getRandomNart();
-        CycNart nart2 = new CycNart(nart1.toCycList());
-        Assert.assertEquals(nart1, 
-                            nart2);
-
-        CycList valueList = new CycList();
-        valueList.add(CycObjectFactory.quote);
-
-        CycList nartList = new CycList();
-        valueList.add(nartList);
-        nartList.add(nart1);
-        nartList.add(nart2);
-
-        Object object = null;
-        CycSymbol a = CycObjectFactory.makeCycSymbol("a");
-        cycAccess.setSymbolValue(a, valueList);
-
-        object = cycAccess.getSymbolValue(a);
-        Assert.assertNotNull(object);
-        Assert.assertTrue(object instanceof CycList);
-
-        CycList nartList1 = (CycList) object;
-        Object element1 = nartList1.first();
-        Assert.assertTrue((element1 instanceof CycNart) || (element1 instanceof CycList));
-
-        if (element1 instanceof CycList) {
-          element1 = CycNart.coerceToCycNart(element1);
-        }
-
-        CycNart nart3 = (CycNart) element1;
-        Assert.assertNotNull(nart3.getFunctor());
-        Assert.assertTrue(nart3.getFunctor() instanceof CycFort);
-        Assert.assertNotNull(nart3.getArguments());
-        Assert.assertTrue(nart3.getArguments() instanceof CycList);
-
-        Object element2 = nartList1.second();
-        Assert.assertTrue((element2 instanceof CycNart) || (element2 instanceof CycList));
-
-        if (element2 instanceof CycList) {
-          element2 = CycNart.coerceToCycNart(element2);
-        }
-
-        CycNart nart4 = (CycNart) element2;
-        Assert.assertNotNull(nart4.getFunctor());
-        Assert.assertTrue(nart4.getFunctor() instanceof CycFort);
-        Assert.assertNotNull(nart4.getArguments());
-        Assert.assertTrue(nart4.getArguments() instanceof CycList);
-
-        Assert.assertEquals(nart1.cyclify(), 
-                            nart3.cyclify());
-        Assert.assertEquals(nart1.cyclify(), 
-                            nart4.cyclify());
-      }
-       catch (Exception e) {
-        e.printStackTrace();
-        cycAccess.close();
-        Assert.fail(e.toString());
-      }
 
     cycAccess.close();
     System.out.println("**** testBinaryCycAccess 15 OK ****");
@@ -5395,17 +5937,16 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5441,7 +5982,7 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     }
      catch (Exception e) {
       e.printStackTrace();
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5461,23 +6002,27 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
     try {
       CycListParser parser = new CycListParser(cycAccess);
-      CycList nart = parser.read("(#$RemotelyExploitableFn #$VulnerableToDTMLMethodExecution)");
+      CycList nart = parser.read("(#$TemplateFromTestQueryFn (#$TestQueryFn #$AirportQuery-WhatCityIsServicedByCode))");
       System.out.println("Nart: " + nart);
 
       CycList gafs = cycAccess.getGafs(CycNart.coerceToCycNart(
@@ -5504,17 +6049,21 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      cycAccess.close();
+      CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5543,18 +6092,22 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
       }
     }
      catch (Exception e) {
-      if (cycAccess != null)
-        cycAccess.close();
+      if (CycAccess.current() != null)
+        CycAccess.current().close();
       Assert.fail(e.toString());
     }
 
@@ -5581,10 +6134,14 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -5620,10 +6177,14 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
     try {
       if (connectionMode == LOCAL_CYC_CONNECTION) {
         cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
+                                  testBasePort, 
+                                  CycConnection.BINARY_MODE, 
+                                  CycAccess.PERSISTENT_CONNECTION);
       }
       else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
+        CycConnectionInterface conn = new SOAPBinaryCycConnection(endpointURL, 
+          testHostName, testBasePort);
+        cycAccess = new CycAccess(conn);
       }
       else {
         Assert.fail("Invalid connection mode " + connectionMode);
@@ -5695,199 +6256,5 @@ public class UnitTest extends TestCase implements CycLeaseManager.CycLeaseManage
 
   }
 
-  /**
-   * Tests the CycLeaseManager.
-   */
-  public void testCycLeaseManager() {
-    System.out.println("\n**** testCycLeaseManager ****");
-
-    CycAccess cycAccess = null;
-
-    try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-        cycAccess.getCycLeaseManager().addListener(this);
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (Exception e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-
-    try {
-      Thread.sleep(6000);
-    }
-     catch (Exception e) {
-      e.printStackTrace();
-      Assert.fail(e.toString());
-    }
-    if (cycAccess.getCycLeaseManager() != null)
-      cycAccess.getCycLeaseManager().removeAllListeners();
-    cycAccess.close();
-    System.out.println("**** testCycLeaseManager OK ****");
-  }
-  
-  /**
-   * Tests inference problem store reuse.
-   */
-  public void testInferenceProblemStoreReuse() {
-    System.out.println("\n**** testInferenceProblemStoreReuse ****");
-
-    CycAccess cycAccess = null;
-
-    try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-     catch (Exception e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-
-    try {
-      if (! cycAccess.isOpenCyc()) {
-        final String inferenceProblemStoreName = "my-problem-store";
-        cycAccess.initializeNamedInferenceProblemStore(inferenceProblemStoreName, null);  
-        CycList query = cycAccess.makeCycList("(#$objectFoundInLocation ?WHAT ?WHERE)");
-        CycList variables = new CycList();
-        variables.add(CycObjectFactory.makeCycVariable("?WHAT"));
-        variables.add(CycObjectFactory.makeCycVariable("?WHERE"));
-        HashMap queryProperties = new HashMap();
-        CycConstant universeDataMt = cycAccess.getKnownConstantByGuid("bd58d0f3-9c29-11b1-9dad-c379636f7270");
-        CycList response = cycAccess.queryVariables(variables, query, universeDataMt, queryProperties, inferenceProblemStoreName);
-        Assert.assertNotNull(response);
-        response = cycAccess.queryVariables(variables, query, universeDataMt, queryProperties, inferenceProblemStoreName);
-        Assert.assertNotNull(response);
-        response = cycAccess.queryVariables(variables, query, universeDataMt, queryProperties, inferenceProblemStoreName);
-        Assert.assertNotNull(response);
-        cycAccess.destroyInferenceProblemStoreByName(inferenceProblemStoreName);
-      }
-    }
-     catch (Exception e) {
-      e.printStackTrace();
-      Assert.fail(e.toString());
-    }
-
-    cycAccess.close();
-    System.out.println("**** testInferenceProblemStoreReuse OK ****");
-  }
-  
-  /**
-   * Tests inference problem store reuse.
-   */
-  public void testInvalidTerms() {
-    System.out.println("\n**** testInvalidTerms ****");
-
-    CycAccess cycAccess = null;
-
-    try {
-      if (connectionMode == LOCAL_CYC_CONNECTION) {
-        cycAccess = new CycAccess(testHostName, 
-                                  testBasePort);
-      }
-      else if (connectionMode == SOAP_CYC_CONNECTION) { 
-        cycAccess = new CycAccess(endpointURL, testHostName, testBasePort);
-      }
-      else {
-        Assert.fail("Invalid connection mode " + connectionMode);
-      }
-    }
-    catch (Exception e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-
-    //cycAccess.traceOnDetailed();
-    // invalid constant
-    try {
-      final String command = "(list \"a\" 1 #$Brazil (cfasl-invalid-constant) \"z\")";
-      final CycList result = cycAccess.converseList(command);
-      Assert.fail("Expected CycApiException not thrown.");
-    }
-    catch (CycApiException e) {
-    }
-    catch (IOException e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-    try {
-      final String command = "(list \"a\" 1 #$Brazil \"z\")";
-      final CycList result = cycAccess.converseList(command);
-      Assert.assertEquals(result.toString(), "(\"a\" 1 Brazil \"z\")");
-    }
-    catch (Exception e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-    
-    // invalid nart
-    try {
-      final String command = "(list \"a\" 1 #$Brazil (cfasl-invalid-nart) \"z\")";
-      final CycList result = cycAccess.converseList(command);
-      Assert.fail("Expected CycApiException not thrown.");
-    }
-    catch (CycApiException e) {
-    }
-    catch (IOException e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-    try {
-      final String command = "(list \"a\" 1 #$Brazil \"z\")";
-      final CycList result = cycAccess.converseList(command);
-      Assert.assertEquals(result.toString(), "(\"a\" 1 Brazil \"z\")");
-    }
-    catch (Exception e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-    
-    // invalid assertion
-    try {
-      final String command = "(list \"a\" 1 #$Brazil (create-sample-invalid-assertion) \"z\")";
-      final CycList result = cycAccess.converseList(command);
-      Assert.fail("Expected CycApiException not thrown.");
-    }
-    catch (CycApiException e) {
-      //System.out.println(e.getMessage());
-    }
-    catch (IOException e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-    try {
-      final String command = "(list \"a\" 1 #$Brazil \"z\")";
-      final CycList result = cycAccess.converseList(command);
-      Assert.assertEquals(result.toString(), "(\"a\" 1 Brazil \"z\")");
-    }
-    catch (Exception e) {
-      Assert.fail(StringUtils.getStringForException(e));
-    }
-
-    cycAccess.close();
-    System.out.println("**** testInvalidTerms OK ****");
-  }
-  
-  /**
-   * Main method in case tracing is prefered over running the JUnit GUI.
-   * 
-   * @param args the list of command line args (unused)
-   */
-  public static void main(String[] args) {
-    if (args.length > 0 && args[0] != null)
-      testHostName = args[0];
-    if (args.length > 1 && args[1] != null)
-      testBasePort = Integer.parseInt(args[1]);
-    TestRunner.run(suite());
-    // kill all threads when exiting.
-    System.exit(0);
-  }
 
 }

@@ -1,14 +1,16 @@
 package org.opencyc.cycagent;
 
-import java.io.*;
+import java.io.IOException;
+
 import javax.naming.TimeLimitExceededException;
-import fipaos.ont.fipa.*;
-import fipaos.ont.fipa.fipaman.*;
+
+import org.opencyc.util.Log;
 import org.opencyc.util.Timer;
-import org.opencyc.cycagent.coabs.*;
-import org.opencyc.cycagent.fipaos.*;
-import org.opencyc.xml.*;
-import org.opencyc.util.*;
+import org.opencyc.xml.TextUtil;
+
+import fipaos.ont.fipa.ACL;
+import fipaos.ont.fipa.FIPACONSTANTS;
+import fipaos.ont.fipa.fipaman.AgentID;
 
 /**
  * Provides an example agent demonstrating the echo role.

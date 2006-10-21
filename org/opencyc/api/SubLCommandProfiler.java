@@ -8,14 +8,14 @@
 package org.opencyc.api;
 
 //// Internal Imports
-import org.opencyc.cycobject.CycList;
-
-//// External Imports
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.logging.Logger;
-import java.io.*;
+
+import org.opencyc.cycobject.CycList;
 
 /**
  * <P>SubLCommandProfiler profiles SubL commands.

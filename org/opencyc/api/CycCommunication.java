@@ -1,7 +1,5 @@
 package org.opencyc.api;
 
-import java.io.IOException;
-
 import org.opencyc.util.CycUtils;
 import org.opencyc.util.CycWorker;
 import org.opencyc.util.CycWorkerListener;
@@ -14,7 +12,6 @@ public class CycCommunication extends CycWorker {
   //need to make CycAccess TRUELY ASYNCHRONOUS!!!!!!!!
   CycAccess conn = null;
 
-  /** @deprecated use SubLWorker */
   public CycCommunication(CycAccess theConn, String subLExp, 
 			  int theTimeOutMS, CycWorkerListener cwl) {
     conn = theConn;
@@ -23,7 +20,6 @@ public class CycCommunication extends CycWorker {
     this.addListener(cwl);
   }
     
-  /** @deprecated use SubLWorker */
   public CycCommunication(CycAccess theConn, String subLExp, 
 			  int theTimeOutMS) {
     conn = theConn;
@@ -32,8 +28,8 @@ public class CycCommunication extends CycWorker {
   }
 
   //Need to modify this to handle timeouts!!!!!!!!!!!
-  public Object construct() throws IOException, CycApiException { 
-    return CycUtils.evalSubLWithWorker(conn, subL); 
+  public Object construct() { 
+    return CycUtils.evalSubL(conn, subL); 
   }
 
   /**Blocking call.*/

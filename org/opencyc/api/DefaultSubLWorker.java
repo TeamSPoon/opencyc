@@ -4,16 +4,15 @@
 package org.opencyc.api;
 
 //// Internal Imports
-import org.opencyc.util.*;
-
-//// External Imports
-import org.opencyc.cycobject.*;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.swing.event.EventListenerList;
-import java.util.EventObject;
+import java.io.IOException;
 import java.util.EventListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.swing.event.EventListenerList;
+
+import org.opencyc.cycobject.CycList;
+import org.opencyc.util.TimeOutException;
 
 /**
  * <P>DefaultSubLWorker is designed to provide a default implentation of 
@@ -32,7 +31,7 @@ import java.util.EventListener;
  *  
  * <P>Example usage: <code>
  * try {
- *   CycAccess access = new CycAccess("localhost", 3640);
+ *   CycAccess access = new CycAccess("CycServer", 3640);
  *   SubLWorker worker = new DefaultSubLWorker("(+ 1 1)", access);
  *   worker.addListener(new SubLWorkerListener() {
  *     public void notifySubLWorkerStarted(SubLWorkerEvent event) {
@@ -130,7 +129,7 @@ public class DefaultSubLWorker implements SubLWorker {
   public DefaultSubLWorker(String subLCommand, CycAccess access, 
       boolean expectIncrementalResults, long timeoutMsec) {
     this(access.makeCycList(subLCommand), access, 
-      expectIncrementalResults, timeoutMsec, CycConnection.NORMAL_PRIORITY);
+      expectIncrementalResults, timeoutMsec);
   }
   
   /** Creates a new instance of DerfaultSubLWorker.
@@ -152,7 +151,7 @@ public class DefaultSubLWorker implements SubLWorker {
    */  
   public DefaultSubLWorker(CycList subLCommand, CycAccess access, 
       long timeoutMsecs) {
-    this( subLCommand, access, false, timeoutMsecs, CycConnection.NORMAL_PRIORITY);
+    this( subLCommand, access, false, timeoutMsecs);
   }
   
   /** Creates a new instance of DerfaultSubLWorker.
@@ -163,36 +162,7 @@ public class DefaultSubLWorker implements SubLWorker {
    */  
   public DefaultSubLWorker(CycList subLCommand, CycAccess access, 
       boolean expectIncrementalResults) {
-    this( subLCommand, access, expectIncrementalResults, 0, CycConnection.NORMAL_PRIORITY);
-  }
-
-  /** Creates a new instance of DerfaultSubLWorker.
-   * @param subLCommand the SubL command that does the work as a CycList
-   * @param access the Cyc server that should process the SubL command
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
-   */  
-  public DefaultSubLWorker(CycList subLCommand, CycAccess access, 
-      Integer priority) {
-    this( subLCommand, access, false, 0, priority);
-  }
-
-  /** Creates a new instance of DerfaultSubLWorker.
-   * @param subLCommand the SubL command that does the work as a CycList
-   * @param access the Cyc server that should process the SubL command
-   * @param timeoutMsecs the max time to wait in msecs for the work to
-   * be completed before giving up (0 means to wait forever, and negative
-   * values will cause an exception to be thrown). When communications time
-   * out, an abort command is sent back to the Cyc server so processing will
-   * stop there as well.
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
-   */  
-  public DefaultSubLWorker(CycList subLCommand, CycAccess access, 
-      long timeoutMsecs, Integer priority) {
-    this( subLCommand, access, false, timeoutMsecs, priority);
+    this( subLCommand, access, expectIncrementalResults, 0);
   }
   
   /** Creates a new instance of DerfaultSubLWorker.
@@ -200,41 +170,18 @@ public class DefaultSubLWorker implements SubLWorker {
    * @param access the Cyc server that should process the SubL command
    * @param expectIncrementalResults boolean indicating wether to expect
    * incremental results
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
+   * @param timeoutMsecs the max time to wait in msecs for the work to
+   * be completed before giving up (0 means to wait forever, and negative
+   * values will cause an exception to be thrown). When communications time
+   * out, an abort command is sent back to the Cyc server so processing will
+   * stop there as well.
    */  
-  public DefaultSubLWorker(CycList subLCommand, CycAccess access, 
-      boolean expectIncrementalResults, Integer priority) {
-    this( subLCommand, access, expectIncrementalResults, 0, priority);
-  }
- 
   public DefaultSubLWorker(CycList subLCommand, CycAccess access, 
       boolean expectIncrementalResults, long timeoutMsecs) {
-    this(subLCommand, access, expectIncrementalResults, timeoutMsecs, CycConnection.NORMAL_PRIORITY);
-  }
-  
-  /** Creates a new instance of DerfaultSubLWorker.
-   * @param subLCommand the SubL command that does the work as a CycList
-   * @param access the Cyc server that should process the SubL command
-   * @param expectIncrementalResults boolean indicating wether to expect
-   * incremental results
-   * @param timeoutMsecs the max time to wait in msecs for the work to
-   * be completed before giving up (0 means to wait forever, and negative
-   * values will cause an exception to be thrown). When communications time
-   * out, an abort command is sent back to the Cyc server so processing will
-   * stop there as well.
-   * @param priority the priority at which the worker will be scheduled
-   * on the CYC server side; 
-   * @see getPriority()
-   */  
-  public DefaultSubLWorker(CycList subLCommand, CycAccess access, 
-      boolean expectIncrementalResults, long timeoutMsecs, Integer priority) {
     this.subLCommand = subLCommand;
     this.access = access;
     this.timeoutMsecs = timeoutMsecs;
     this.expectIncrementalResults = expectIncrementalResults;
-    this.priority = priority;
     
     if (subLCommandProfiler != null)
       this.addListener(subLCommandProfiler);
@@ -352,19 +299,6 @@ public class DefaultSubLWorker implements SubLWorker {
     }
   }
   
-  /**
-   * Return the task's priority. This is a value that meets the
-   * constraints of SL:SET-PROCESS-PRIORITY.
-   * @see CycConnection.MAX_PRIORITY
-   * @see CycConnection.CRITICAL_PRIORITY
-   * @see CycConnection.NORMAL_PRIORITY
-   * @see CycConnection.BACKGROUND_PRIORITY
-   * @see CycConnection.MIN_PRIORITY
-   * @return the priority of the process
-   */
-  public Integer getPriority() {
-    return priority;
-  }
   
   /**
    * Returns the current status of this SubLWorker.
@@ -586,12 +520,10 @@ public class DefaultSubLWorker implements SubLWorker {
   
   private Integer id;
   
-  private long timeoutMsecs = 0;
+  private long timeoutMsecs = 30000;
   
   private SubLWorkerStatus status = 
     SubLWorkerStatus.NOT_STARTED_STATUS;
-  
-  private Integer priority;
   
   /** This holds the list of registered SubLWorkerListener listeners. */
   private EventListenerList listeners = new EventListenerList();
@@ -611,7 +543,8 @@ public class DefaultSubLWorker implements SubLWorker {
    */
   public static void main(String[] args) {
     try {
-      CycAccess access = new CycAccess("localhost", 3640);
+//    	CycAccess access = daxclr.inference.CycAPI.current(); // was port 3640 ?
+    	CycAccess access = CycAccess.current(); // was port 3640 ?
       SubLWorker worker = new DefaultSubLWorker("(+ 1 1)", access);
       worker.addListener(new SubLWorkerListener() {
         public void notifySubLWorkerStarted(SubLWorkerEvent event) {

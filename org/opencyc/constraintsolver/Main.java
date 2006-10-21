@@ -1,9 +1,9 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
-import java.io.IOException;
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
+import java.util.ArrayList;
+
+import org.opencyc.cycobject.CycList;
+import org.opencyc.inferencesupport.ConstraintRule;
 
 /**
  * Main program for a finite domain constraint solver optimized to work with the

@@ -770,7 +770,7 @@ public class UnitTest extends TestCase {
             Assert.assertNotNull(stateMachine.getTop());
             Assert.assertTrue(stateMachine.getTop() instanceof CompositeState);
             Assert.assertNotNull(stateMachine.getTop().getStateInterpreter());
-            Assert.assertEquals(stateMachine.getTop(), stateMachine.getTop().getStateInterpreter().getState());
+            Assert.assertEquals(stateMachine.getTop(), stateMachine.getTop().getStateInterpreter().getActiveState());
             Assert.assertEquals(new Integer(1), interpreter.getStateVariableValue("TestStateMachine-X"));
             if (verbosity > 2)
                 System.out.print(interpreter.displayStateConfigurationTree());

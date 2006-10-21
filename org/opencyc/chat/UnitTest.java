@@ -1,15 +1,23 @@
 package org.opencyc.chat;
 
-import java.net.*;
-import java.io.*;
-import junit.framework.*;
-import java.util.*;
-import org.opencyc.api.*;
-import org.opencyc.util.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.uml.core.*;
-import org.opencyc.uml.statemachine.*;
-import org.opencyc.uml.interpreter.*;
+import java.net.InetAddress;
+
+import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.cycobject.CycFort;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.uml.core.Comment;
+import org.opencyc.uml.core.Namespace;
+import org.opencyc.uml.interpreter.ContextStackPool;
+import org.opencyc.uml.interpreter.CycExtractor;
+import org.opencyc.uml.interpreter.Interpreter;
+import org.opencyc.uml.statemachine.StateMachine;
+import org.opencyc.uml.statemachine.StateMachineReport;
+import org.opencyc.util.Log;
 
 /**
  * Provides a unit test suite for the <tt>org.opencyc.chat</tt> package<p>
@@ -75,16 +83,19 @@ public class UnitTest extends TestCase {
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
                 cycAccess = new CycAccess("localhost",
-                                          3620,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                                          3620//,
+                                          //CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          //true
+                                          );
+                                          
                 //cycAccess.traceNamesOn();
             }
             else if (localHostName.equals("thinker")) {
                 cycAccess = new CycAccess("localhost",
-                                          3600,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                                          3600 //,
+                                          //CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          //true
+                                          );
             }
             else
                 cycAccess = new CycAccess();
@@ -156,16 +167,16 @@ public class UnitTest extends TestCase {
             CycAccess cycAccess;
             if (localHostName.equals("crapgame.cyc.com")) {
                 cycAccess = new CycAccess("localhost",
-                                          3620,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                                          3620);//,
+                                          //CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          //true);
                 //cycAccess.traceNamesOn();
             }
             else if (localHostName.equals("thinker")) {
                 cycAccess = new CycAccess("localhost",
-                                          3600,
-                                          CycConnection.DEFAULT_COMMUNICATION_MODE,
-                                          true);
+                                          3600);//,
+                                          //CycConnection.DEFAULT_COMMUNICATION_MODE,
+                                          //true);
             }
             else
                 cycAccess = new CycAccess();

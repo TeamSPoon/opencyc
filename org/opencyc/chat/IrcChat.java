@@ -1,16 +1,32 @@
 package org.opencyc.chat;
 
-import java.lang.*;
-import java.lang.reflect.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import org.opencyc.api.*;
-import org.opencyc.chat.*;
-import org.opencyc.cycobject.*;
-import org.opencyc.kif.*;
-import org.opencyc.util.*;
-import ViolinStrings.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.lang.reflect.Method;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.cycobject.CycConstant;
+import org.opencyc.cycobject.CycFort;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.cycobject.CycNart;
+import org.opencyc.cycobject.CycSymbol;
+import org.opencyc.cycobject.CycVariable;
+import org.opencyc.cycobject.ELMt;
+import org.opencyc.kif.CycListKifParser;
+import org.opencyc.util.Log;
 
 public class IrcChat extends Thread  implements ChatSender {
 
@@ -298,7 +314,7 @@ public class IrcChat extends Thread  implements ChatSender {
         if ( post instanceof CycList && isParaphrased(destination) )
             return sendMessage(destination,attemptParaphrase((CycList)post) + " (" + ((CycList)post).toString() + ")");
         String message = post.toString().trim();
-        if ( ViolinStrings.Strings.contains(message,"\n") || ViolinStrings.Strings.contains(message,"\r") )
+        if ( message.contains("\n") || message.contains("\r") )
             return sendMessage(destination,new BufferedReader(new StringReader(message)));
         if ( message.length() > 200 ) {
             int justify = message.substring(190).indexOf(' ')+190;
@@ -706,11 +722,11 @@ public class IrcChat extends Thread  implements ChatSender {
      * Returns a Mt for a user
      */
     public CycFort mtForUser(String cyclist) {
-        CycConstant mt = (CycConstant) mtUser.get(cyclist);
+        ELMt mt = (ELMt) mtUser.get(cyclist);
         if ( mt==null ) {
             try {
-                mt = cyc.makeCycConstant("#$"+cyclist+"ChatMt");
-                cyc.assertIsa(mt,cyc.makeCycConstant("#$Microtheory"),cyc.baseKB);
+                mt = cyc.makeELMt(cyc.findOrCreate("#$"+cyclist+"ChatMt"));
+                cyc.assertIsa(mt.cyclify(),cyc.findOrCreate("#$Microtheory").cyclify(),CycAccess.baseKB.cyclify());
             } catch ( Exception e ) {
                 mt = cyc.baseKB;
             }

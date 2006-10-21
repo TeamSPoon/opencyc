@@ -1,10 +1,13 @@
 package org.opencyc.constraintsolver;
 
-import java.util.*;
 import java.io.IOException;
-import org.opencyc.cycobject.*;
-import org.opencyc.inferencesupport.*;
-import org.opencyc.api.*;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
+import org.opencyc.cycobject.CycConstant;
+import org.opencyc.cycobject.CycList;
+import org.opencyc.inferencesupport.ConstraintRule;
+import org.opencyc.inferencesupport.UnitTest;
 
 /**
  * <tt>RuleEvaluator</tt> object evaluates constraint rules

@@ -3,11 +3,10 @@ package org.opencyc.api;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.lang.reflect.Method;
-
 import java.math.BigInteger;
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.opencyc.cycobject.ByteArray;
@@ -18,12 +17,9 @@ import org.opencyc.cycobject.CycNart;
 import org.opencyc.cycobject.CycSymbol;
 import org.opencyc.cycobject.CycVariable;
 import org.opencyc.cycobject.Guid;
-import org.opencyc.util.ResultSetSlice;
 import org.opencyc.util.Log;
+import org.opencyc.util.ResultSetSlice;
 import org.opencyc.util.StringUtils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 
 

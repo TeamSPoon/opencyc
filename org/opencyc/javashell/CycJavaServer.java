@@ -37,12 +37,14 @@ import org.opencyc.api.CycConnection;
 public class CycJavaServer extends Thread {
     private ServerSocket serverSocket = null;
     private HashMap allShells = new HashMap();
-    public CycJavaServer(CycJavaShell jshell, int port) throws IOException {
+    @SuppressWarnings("unchecked")
+	public CycJavaServer(CycJavaShell jshell, int port) throws IOException {
 	allShells.put("localhost",jshell);
 	serverSocket = new ServerSocket(port);
     }
-    public void run() {
-	while( !this.interrupted() ) {
+    @SuppressWarnings("unchecked")
+	public void run() {
+	while( !Thread.interrupted() ) {
 	    try {
 		Socket clientSock = serverSocket.accept();
 		String clientKey = clientSock.getInetAddress().getHostAddress();

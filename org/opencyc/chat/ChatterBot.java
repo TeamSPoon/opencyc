@@ -1,11 +1,11 @@
 package org.opencyc.chat;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import org.opencyc.api.*;
-import org.opencyc.uml.statemachine.*;
-import org.opencyc.uml.interpreter.*;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+
+import org.opencyc.api.CycAccess;
+import org.opencyc.api.CycApiException;
 
 /**
  * Provides a chat conversation interface to Cyc.<p>

@@ -7,11 +7,13 @@
 package org.opencyc.cycobject;
 
 import java.io.IOException;
-import org.opencyc.xml.XMLWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.opencyc.api.CycAccess;
 import org.opencyc.util.StringUtils;
-import java.util.*;
-import java.math.BigInteger;
+import org.opencyc.xml.XMLWriter;
 
 /**
  * This is the default implementation of a CycL object.
@@ -90,19 +92,16 @@ public abstract class DefaultCycObject implements CycObject {
     return obj.toString(); 
   }
   
-  /**
-   * Returns a cyclified string representation of the given <tt>Object</tt>.
-   * Embedded constants are prefixed with "#$".
-   *
-   * @return a <tt>String</tt> representation in cyclified form.
-   *
-   */
+    /**
+     * Returns a cyclified string representation of the given <tt>Object</tt>.
+     * Embedded constants are prefixed with "#$".
+     *
+     * @return a <tt>String</tt> representation in cyclified form.
+     *
+     */
   public static String cyclify(Object obj) {    
-    if (obj == null) {      
-      throw new RuntimeException("Cannot cyclify null obj");
-    }
-    else if (!isCycLObject(obj)) {      
-      throw new RuntimeException("Cannot cyclify: '" + obj + "' (" + obj.getClass().getName() + ").");
+    if ((obj == null) || (!isCycLObject(obj))) {      
+      throw new RuntimeException("Cannot cyclify: '" + obj + "'.");
     }
     if (obj instanceof CycObject) {
       return ((CycObject)obj).cyclify();
@@ -116,7 +115,7 @@ public abstract class DefaultCycObject implements CycObject {
   public static List getReferencedConstants(Object obj) {
     if (obj == null) { return new ArrayList(); }
     if ((obj == null) || (!isCycLObject(obj))) {      
-      throw new RuntimeException("Got an object that is not a valid CycL term: '" + obj + "' (" + obj.getClass().getName() + ").");
+      throw new RuntimeException("Got an object that is not a valid CycL term: '" + obj + "'.");
     }
     if (!(obj instanceof CycObject)) { return new ArrayList(); }
     return ((CycObject)obj).getReferencedConstants();
@@ -154,11 +153,21 @@ public abstract class DefaultCycObject implements CycObject {
        obj instanceof String ||
        obj instanceof Integer ||
        obj instanceof Long ||
-       obj instanceof BigInteger ||
        obj instanceof Guid ||
        obj instanceof Float ||
        obj instanceof Double);
   }
+  
+  /**
+   * Returns a string representation without causing additional api calls to determine
+   * constant names.
+   *
+   * @return a string representation without causing additional api calls to determine
+   * constant names
+   */
+  public String safeToString() {
+    return toString();
+  } 
   
   /**
    * Returns a pretty CycL representation of this object.
@@ -227,7 +236,6 @@ public abstract class DefaultCycObject implements CycObject {
     else if(object instanceof Guid)        return CYCOBJECT_GUID;
     else if(object instanceof Integer)     return CYCOBJECT_INTEGER;
     else if(object instanceof Long)        return CYCOBJECT_LONG;
-    else if(object instanceof BigInteger)  return CYCOBJECT_BIGINTEGER;
     else if(object instanceof String)      return CYCOBJECT_STRING;
     else                                   return CYCOBJECT_UNKNOWN;
   }

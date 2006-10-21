@@ -1,7 +1,8 @@
 package org.opencyc.constraintsolver;
 
-import org.opencyc.cycobject.*;
-import java.util.*;
+import java.util.Comparator;
+
+import org.opencyc.cycobject.CycVariable;
 
 /**
  * Implements a <tt>Comparator</tt> to sort variables for the <tt>checkForwardNonEvaluatableRule</tt>

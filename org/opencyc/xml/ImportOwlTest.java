@@ -1,6 +1,6 @@
 /* $Id$
  *
- * Copyright (c) 2003 - 2006 Cycorp, Inc.  All rights reserved.
+ * Copyright (c) 2003 - 2005 Cycorp, Inc.  All rights reserved.
  * This software is the proprietary information of Cycorp, Inc.
  * Use is subject to license terms.
  */

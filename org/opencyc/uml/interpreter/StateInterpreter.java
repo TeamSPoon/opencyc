@@ -1,13 +1,21 @@
 package org.opencyc.uml.interpreter;
 
-import java.io.*;
-import java.util.*;
-import javax.swing.tree.*;
-import org.opencyc.api.*;
-import org.opencyc.util.*;
-import org.opencyc.uml.core.*;
-import org.opencyc.uml.commonbehavior.*;
-import org.opencyc.uml.statemachine.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Stack;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+
+import org.opencyc.api.CycApiException;
+import org.opencyc.uml.core.Procedure;
+import org.opencyc.uml.statemachine.CompletionEvent;
+import org.opencyc.uml.statemachine.CompositeState;
+import org.opencyc.uml.statemachine.FinalState;
+import org.opencyc.uml.statemachine.StateVertex;
+import org.opencyc.uml.statemachine.Transition;
+import org.opencyc.util.Log;
 
 /**
  * Interprets an active state of a UML StateMachine.
@@ -61,7 +69,7 @@ public class StateInterpreter extends Thread {
     /**
      * the interpreted active state
      */
-    protected State state;
+    protected org.opencyc.uml.statemachine.State state;
 
     /**
      * Constructs a new StateInterpreter object given the
@@ -72,7 +80,7 @@ public class StateInterpreter extends Thread {
      * @param state the state to interpret
      */
     public StateInterpreter(Interpreter interpreter,
-                            State state)
+                            org.opencyc.uml.statemachine.State state)
         throws IOException, CycApiException {
         this.interpreter = interpreter;
         verbosity = interpreter.getVerbosity();
@@ -123,17 +131,17 @@ public class StateInterpreter extends Thread {
         Object[] statesFromRootToTarget = interpreter.getStatesFromRootTo(state);
         //TODO think more about how to handle complex tranistions whose source is a vertex
         StateVertex sourceStateVertex = (StateVertex)transition.getSource();
-        if (sourceStateVertex instanceof State) {
-            State source = (State) sourceStateVertex;
+        if (sourceStateVertex instanceof org.opencyc.uml.statemachine.State) {
+            org.opencyc.uml.statemachine.State source = (org.opencyc.uml.statemachine.State) sourceStateVertex;
             Object[] statesFromRootToSource = interpreter.getStatesFromRootTo(source);
             for (int i = 0; i < statesFromRootToTarget.length; i++)
                 if ((i > statesFromRootToSource.length) ||
                     (! statesFromRootToSource[i].equals(statesFromRootToTarget[i])))
-                    enterState((State) statesFromRootToTarget[i]);
+                    enterState((org.opencyc.uml.statemachine.State) statesFromRootToTarget[i]);
         }
         else {
             for (int i = 0; i < statesFromRootToTarget.length; i++)
-                enterState((State) statesFromRootToTarget[i]);
+                enterState((org.opencyc.uml.statemachine.State) statesFromRootToTarget[i]);
         }
     }
 
@@ -185,7 +193,7 @@ public class StateInterpreter extends Thread {
      *
      * @param entryState the given state
      */
-    public void enterState (State entryState)
+    public void enterState (org.opencyc.uml.statemachine.State entryState)
         throws IOException, CycApiException, ExpressionEvaluationException {
         if (entryState.equals(state))
             enter();
@@ -248,7 +256,7 @@ public class StateInterpreter extends Thread {
                 treeNodeStack.push(children.nextElement());
         }
         for (int i = activeSubstateList.size() - 1; i > -1; i--)
-            ((State) activeSubstateList.get(i)).getStateInterpreter().exit();
+            ((org.opencyc.uml.statemachine.State) activeSubstateList.get(i)).getStateInterpreter().exit();
     }
 
     /**
@@ -281,7 +289,7 @@ public class StateInterpreter extends Thread {
      *
      * @return the interpreted active state
      */
-    public State getState () {
+    public org.opencyc.uml.statemachine.State getActiveState () { // Conflict with Thread.State java.lang.Thread.getState();
         return state;
     }
 
@@ -290,7 +298,7 @@ public class StateInterpreter extends Thread {
      *
      * @param state the interpreted active state
      */
-    public void setState (State state) {
+    public void setState (org.opencyc.uml.statemachine.State state) {
         this.state = state;
     }
 
@@ -341,7 +349,7 @@ public class StateInterpreter extends Thread {
      * @return the parent state of this state, or null if
      * given the top state
      */
-    public State getParentState() {
+    public org.opencyc.uml.statemachine.State getParentState() {
         if (isTopState())
             return null;
         return interpreter.getParentState(state);

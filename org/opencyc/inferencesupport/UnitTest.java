@@ -131,7 +131,7 @@ public class UnitTest extends TestCase {
             CycList cycList = queryLiteral1.getFormula();
             Assert.assertEquals(queryLiteralAsString, cycList.cyclify());
             Assert.assertEquals(queryLiteralAsString, queryLiteral1.cyclify());
-            mt = CycAccess.baseKB;
+            mt = (CycFort) CycAccess.baseKB;
             bindingSet1 = new BindingSet(queryLiteral1, mt);
             bindingSet2 = new BindingSet(queryLiteral1, mt);
         }

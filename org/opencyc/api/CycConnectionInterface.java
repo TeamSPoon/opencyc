@@ -1,6 +1,7 @@
 package org.opencyc.api;
 
 import java.io.IOException;
+
 import org.opencyc.cycobject.CycList;
 import org.opencyc.util.TimeOutException;
 import org.opencyc.util.Timer;

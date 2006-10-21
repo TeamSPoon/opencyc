@@ -3,11 +3,12 @@ package org.opencyc.cycobject;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+
 import org.opencyc.api.CycAccess;
 import org.opencyc.api.CycApiException;
 import org.opencyc.api.CycObjectFactory;
-import org.opencyc.util.StackWithPointer;
 import org.opencyc.util.MyStreamTokenizer;
+import org.opencyc.util.StackWithPointer;
 
 /**
  * Provides a parser that reads a <tt>String</tt> representation and constructs

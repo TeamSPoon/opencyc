@@ -39,7 +39,10 @@ public class ELMtNart extends CycNart implements ELMt {
    * factory method in the CycAccess to create these.
    */
   public static ELMtNart makeELMtNart(CycNart nart) {
-    return new ELMtNart(nart);
+    CycObjectFactory.removeCycNartCache(nart);
+    ELMtNart elmtNart = new ELMtNart(nart);
+    CycObjectFactory.addCycNartCache(nart);
+    return elmtNart;
   }
 
 }

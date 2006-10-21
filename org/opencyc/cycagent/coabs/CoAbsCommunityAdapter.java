@@ -2,18 +2,35 @@ package org.opencyc.cycagent.coabs;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.Date;
+import java.util.Hashtable;
+
 import javax.naming.TimeLimitExceededException;
-import net.jini.core.entry.Entry;
+
+import net.jini.core.lookup.ServiceID;
+import net.jini.core.lookup.ServiceItem;
+import net.jini.core.lookup.ServiceMatches;
+import net.jini.core.lookup.ServiceRegistrar;
+import net.jini.core.lookup.ServiceTemplate;
 import net.jini.lookup.ServiceIDListener;
-import net.jini.core.lookup.*;
-import fipaos.ont.fipa.*;
-import fipaos.ont.fipa.fipaman.*;
+
+import org.opencyc.cycagent.AgentCommunityAdapter;
+import org.opencyc.cycagent.MessageReceiver;
+import org.opencyc.util.Log;
+
+import com.globalinfotek.coabsgrid.AgentRegistrationHelper;
+import com.globalinfotek.coabsgrid.AgentRep;
+import com.globalinfotek.coabsgrid.BasicMessage;
+import com.globalinfotek.coabsgrid.Directory;
+import com.globalinfotek.coabsgrid.Message;
+import com.globalinfotek.coabsgrid.MessageListener;
+import com.globalinfotek.coabsgrid.ShutdownHandler;
+import com.globalinfotek.coabsgrid.ShutdownHook;
+
+import fipaos.ont.fipa.ACL;
+import fipaos.ont.fipa.FIPACONSTANTS;
+import fipaos.ont.fipa.fipaman.AgentID;
 import fipaos.parser.ParserException;
-import com.globalinfotek.coabsgrid.*;
-import com.globalinfotek.coabsgrid.entry.fipa98.AMSAgentDescription;
-import org.opencyc.cycagent.*;
-import org.opencyc.util.*;
 
 /**
  * Provides the interface for interacting with the CoABS agent community.<p>
